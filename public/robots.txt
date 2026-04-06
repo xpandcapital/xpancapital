@@ -1,0 +1,16 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://blis-corp.com/sitemap.xml
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /superadmin/
+Disallow: /api/
+Disallow: /miembros/
+
+# Allow blog
+Allow: /blog/
+Allow: /tienda/

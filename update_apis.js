@@ -1,0 +1,30 @@
+const fs = require('fs');
+const path = './app/superadmin/api-nube/page.tsx';
+let content = fs.readFileSync(path, 'utf8');
+
+// Update Yape / Plin
+content = content.replace(
+    'description: "APIs para pagos con Yape y Plin. Generalmente se accede a través de Izipay/Culqi/PlaceToPay.",\n                    website: "bancodepizacion.com.pe",\n                    fields: [\n                        { id: "yape_api", label: "Yape API Key", type: "password", description: "API directa de Yape (si está disponible). La mayoría usa integración vía pasarela.", getFrom: "Contactar Banco de la Nación o usar vía pasarela", accessType: "Privada", cost: "pagado" },\n                        { id: "plin_api", label: "Plin API Key", type: "password", description: "API directa de Plin (si está disponible). La mayoría usa integración vía pasarela.", getFrom: "Contactar BBVA o usar vía pasarela", accessType: "Privada", cost: "pagado" },\n                    ]',
+    'description: "Integración de cobros QR (ej. vía Mercado Pago) para evitar altas comisiones de procesadores de tarjetas.",\n                    website: "mercadopago.pe/qr",\n                    fields: [\n                        { id: "yape_api", label: "Token Mercado Pago QR", type: "password", description: "Token para generar QRs dinámicos.", getFrom: "Mercado Pago → Tu Negocio → Locales y Cajas", accessType: "Privada", cost: "pagado" },\n                        { id: "plin_api", label: "Webhook Secret (Plin/Yape)", type: "password", description: "Verifica notificaciones de pago exitoso.", getFrom: "Mercado Pago → Notificaciones → Webhooks", accessType: "Privada", cost: "pagado" },\n                    ]'
+);
+
+// We need peruapi
+content = content.replace(
+    'description: "API para consultar RUC, DNI, datos de SUNAT, RENIEC y Essalud.",\n                    website: "peruapis.dev",\n                    fields: [\n                        { id: "peru_api_token", label: "Bearer Token", type: "password", description: "Token de autenticación para consumir los endpoints.", getFrom: "peruapis.dev → Registrarse → Dashboard → API Token", accessType: "Privada", cost: "freemium" },\n                    ]',
+    'description: "Consultas exactas de identidad (DNI), empresas (RUC) y tipo de cambio para autollenado.",\n                    website: "peruapi.com",\n                    fields: [\n                        { id: "peru_api_token", label: "Bearer Token", type: "password", description: "Token de autenticación para consumir los endpoints de identidad.", getFrom: "peruapi.com → Dashboard → Token", accessType: "Privada", cost: "freemium" },\n                    ]'
+);
+
+// We need apiconsult
+content = content.replace(
+    'description: "Facturación electrónica para Ecuador. Emisión de comprobantes SRI.",\n                    website: "apiconsult.net",\n                    fields: [\n                        { id: "apiconsult_token", label: "Token API", type: "password", description: "Token de autenticación para firmar y enviar comprobantes.", getFrom: "apiconsult.net → Login → Configuración → API Keys", accessType: "Privada", cost: "pagado" },\n                        { id: "apiconsult_p12", label: "Contraseña .p12", type: "password", description: "Contraseña del certificado de firma electrónica (.p12).", getFrom: "Proporcionada por la autoridad certificadora al comprar la firma", accessType: "Privada", cost: "pagado" },\n                        { id: "apiconsult_p12_base64", label: "Archivo .p12", type: "file", description: "Certificado de firma electrónica en base64.", getFrom: "Certificado .p12 descargado desde la autoridad certificadora", accessType: "Privada", cost: "pagado" },\n                        { id: "apiconsult_env", label: "Entorno", type: "text", description: "Entorno de facturación: \'pruebas\' o \'produccion\'.", getFrom: "apiconsult.net → Entorno Configurado", accessType: "Pública", cost: "gratis" },\n                    ]',
+    'description: "Facturación electrónica y consultas de identidad/empresas para Ecuador.",\n                    website: "apiconsult.zampisoft.com",\n                    fields: [\n                        { id: "apiconsult_token", label: "Token API", type: "password", description: "Token de autenticación para firmar y enviar comprobantes.", getFrom: "apiconsult.zampisoft.com → API Keys", accessType: "Privada", cost: "pagado" },\n                        { id: "apiconsult_p12", label: "Contraseña .p12", type: "password", description: "Contraseña del certificado de firma electrónica (.p12).", getFrom: "Proporcionada por la autoridad certificadora", accessType: "Privada", cost: "pagado" },\n                        { id: "apiconsult_p12_base64", label: "Archivo .p12", type: "file", description: "Certificado de firma electrónica en base64.", getFrom: "Subir archivo .p12 válido", accessType: "Privada", cost: "pagado" },\n                        { id: "apiconsult_env", label: "Entorno", type: "text", description: "Entorno de facturación: \'pruebas\' o \'produccion\'.", getFrom: "Default: pruebas", accessType: "Pública", cost: "gratis" },\n                    ]'
+);
+
+// We need planifyx
+content = content.replace(
+    'id: "planifyx",\n                    name: "Planifyx Social Poster",\n                    icon: MessageSquare,\n                    color: "text-green-400",\n                    bg: "bg-green-500/10",\n                    description: "WhatsApp API completa con soporte para chatbots, flujos y atención al cliente. Escaneo QR de WhatsApp Web.",\n                    website: "socialposter.planifyx.com",',
+    'id: "planifyx",\n                    name: "Planifyx Social Poster",\n                    icon: MessageSquare,\n                    color: "text-green-400",\n                    bg: "bg-green-500/10",\n                    description: "Plataforma de WhatsApp Marketing vía código QR. Ideal para envíos masivos sin costos por mensaje de API oficial.",\n                    website: "socialposter.planifyx.com",'
+);
+
+fs.writeFileSync(path, content);
+console.log("Updated specific apps");

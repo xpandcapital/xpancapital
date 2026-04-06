@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)",
+      "Bash(grep -n \"$\\\\|USD\\\\|USDT\" \"C:\\\\Users\\\\kevin\\\\.gemini\\\\antigravity\\\\scratch\\\\blis-corp\\\\app\\\\superadmin\\\\trading\\\\TerminalLogic.tsx\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":3000\")",
+      "Bash(grep -E \"\\\\.\\(tsx|ts|js\\)$\")",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|js\\)$\")",
+      "Bash(find /c/Users/kevin/.gemini/antigravity/scratch/blis-corp -not -path */node_modules/* -not -path */.next/* -not -path */.git/* -type d)",
+      "Bash(wc -l /c/Users/kevin/.gemini/antigravity/scratch/blis-corp/app/superadmin/trading/*.tsx)",
+      "Bash(ls \"C:/Users/kevin/.gemini/antigravity/scratch/blis-corp/node_modules/.bin/next\"*)",
+      "Bash(node node_modules/next/dist/bin/next dev -p 3001)",
+      "Bash(node node_modules/next/dist/bin/next --version)"
+    ]
+  }
+}

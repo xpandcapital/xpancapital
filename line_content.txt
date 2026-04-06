@@ -1,0 +1,1 @@
+                                                                                return `${curr.symbol}${product.price.toFixed(2)}`;

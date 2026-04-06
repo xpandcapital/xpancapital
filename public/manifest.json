@@ -1,0 +1,26 @@
+{
+  "name": "Blis-Corp Trading",
+  "short_name": "BlisCorp",
+  "description": "Terminal de Trading de Alta Frecuencia e Interfaz Inmobiliaria de Lujo.",
+  "scope": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0e11",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/pwa-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pwa-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "portrait",
+  "categories": ["finance", "business"]
+}

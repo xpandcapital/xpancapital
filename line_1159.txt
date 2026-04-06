@@ -1,0 +1,1 @@
+﻿                                                                                <span className="text-sm text-white font-bold group-hover:text-blis-red transition-colors whitespace-nowrap overflow-hidden text-ellipsis block">{product.name}</span>
