@@ -43,7 +43,12 @@ const nextConfig: NextConfig = {
       }
     ],
     qualities: [75, 90, 100],
-  }
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
 };
 
 export default nextConfig;
