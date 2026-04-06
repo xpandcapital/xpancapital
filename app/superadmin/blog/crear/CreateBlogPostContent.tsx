@@ -1,8 +1,6 @@
 import { Suspense } from 'react';
 import CreateBlogPostContent from './CreateBlogPostContent';
 
-export const dynamic = 'force-dynamic';
-
 export default function CreateBlogPost() {
     return (
         <Suspense fallback={
