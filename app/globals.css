@@ -1,12 +1,146 @@
-/* Minimal CSS for build test */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@custom-variant dark (&:is(.dark *));
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #181818;
+  --color-foreground: #ffffff;
+  --color-blis-red: #be0b3c;
+  --color-blis-red-neon: #ff1e56;
+
+  --font-sans: var(--font-montserrat), sans-serif;
 }
 
-html, body {
-  min-height: 100vh;
-  background: #000;
-  color: #fff;
+@layer base {
+
+  /* OS-level SVG cursor — zero lag, rendered by the GPU compositor */
+  *,
+  *::before,
+  *::after {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='9' fill='rgba(190%2C11%2C60%2C0.15)'/%3E%3Ccircle cx='10' cy='10' r='6' fill='rgba(190%2C11%2C60%2C0.35)'/%3E%3Ccircle cx='10' cy='10' r='4' fill='%23be0b3c'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23ff3060'/%3E%3C/svg%3E") 10 10, none !important;
+  }
+
+  /* Larger crosshair-style cursor for interactive elements */
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  label {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ccircle cx='14' cy='14' r='13' fill='none' stroke='%23be0b3c' stroke-width='1.5' stroke-dasharray='3 2' stroke-opacity='0.8'/%3E%3Ccircle cx='14' cy='14' r='5' fill='white'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%23be0b3c' stroke-width='1.5'/%3E%3C/svg%3E") 14 14, pointer !important;
+  }
+
+  html {
+    overflow-x: clip;
+  }
+
+  body {
+    overflow-x: clip;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    @apply font-sans;
+  }
+
+  /* Custom Modern Scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(190, 11, 60, 0.2);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(190, 11, 60, 0.8);
+    box-shadow: 0 0 10px rgba(190, 11, 60, 0.5);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(190, 11, 60, 0.4) transparent;
+  }
+
+  /* Remove default arrows from number inputs */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 border border-white/10;
+    backdrop-filter: blur(4px);
+  }
+
+  .glass-card {
+    @apply bg-black/60 border border-white/5;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  .antigravity {
+    @apply transition-transform duration-700 ease-out;
+  }
+
+  .antigravity:hover {
+    @apply -translate-y-2;
+    box-shadow: 0 20px 40px -15px rgba(190, 11, 60, 0.3);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-500;
+  }
+
+  .blis-gradient {
+    @apply bg-gradient-to-br from-blis-red/80 to-blis-red/20;
+  }
+
+  /* Nuevas Utilidades Cyber-Luxe */
+  .cyber-texture {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
+
+  .neon-text {
+    @apply text-blis-red-neon;
+    text-shadow: 0 0 5px rgba(255, 30, 86, 0.5), 0 0 10px rgba(255, 30, 86, 0.4), 0 0 20px rgba(255, 30, 86, 0.2);
+  }
+
+  .neon-border {
+    @apply border-blis-red-neon;
+    box-shadow: 0 0 10px rgba(255, 30, 86, 0.3), inset 0 0 10px rgba(255, 30, 86, 0.2);
+  }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+  }
+}
+
+/* ─── LATIDO DE VELA EN TIEMPO REAL (Heartbeat) ─── */
+@keyframes ping {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  70%  { transform: scale(2.4); opacity: 0;   }
+  100% { transform: scale(2.4); opacity: 0;   }
 }
