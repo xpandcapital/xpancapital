@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
     const { item_slug, item_url } = await request.json();
     if (!item_slug && !item_url) return NextResponse.json({ success: false, error: 'Se requiere item_slug o item_url' }, { status: 400 });
 
-    let { email, password, session } = await getSessionAndCredentials();
+    const { email, password, session } = await getSessionAndCredentials();
 
     if (!email || !password) {
       return NextResponse.json({

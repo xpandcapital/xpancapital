@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     let processed = 0;
     let skipped = 0;
-    let errors: string[] = [];
+    const errors: string[] = [];
     const results = [];
 
     for (const lot of lots) {
