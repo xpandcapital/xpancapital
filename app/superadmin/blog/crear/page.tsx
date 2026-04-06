@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import {
@@ -28,6 +28,8 @@ interface Category {
     icono?: string;
     color?: string;
 }
+
+export const dynamic = 'force-dynamic';
 
 export default function CreateBlogPost() {
     const { createPost, updatePost, uploadImage, getCategories, loading: blogLoading } = useBlog();
