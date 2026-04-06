@@ -1,0 +1,459 @@
+"use client";
+
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+
+interface HeroData {
+    title1: string;
+    title2: string;
+    subtitle: string;
+    description: string;
+    primaryBtnText: string;
+    primaryBtnLink: string;
+    secondaryBtnText: string;
+    secondaryBtnLink: string;
+    videoBackground: string;
+}
+
+interface AboutData {
+    yearsExperience: string;
+    yearsLabel: string;
+    stat1Value: string;
+    stat1Label: string;
+    stat2Value: string;
+    stat2Label: string;
+    stat3Value: string;
+    stat3Label: string;
+    missionTitle: string;
+    missionText: string;
+    videoUrl: string;
+    videoThumbnail: string;
+}
+
+interface VideoData {
+    title: string;
+    subtitle: string;
+    embedUrl: string;
+    thumbnail: string;
+}
+
+interface BlogData {
+    title: string;
+    subtitle: string;
+    description: string;
+}
+
+interface ProcessStep {
+    title: string;
+    description: string;
+    icon: string;
+    image: string;
+}
+
+interface ProcessData {
+    title: string;
+    subtitle: string;
+    steps: ProcessStep[];
+}
+
+interface OperationsData {
+    title: string;
+    subtitle: string;
+    sliderImages: string[];
+    stats: { sales: string; urbanizations: string; clients: string; conferences: string };
+}
+
+interface MarketInsight {
+    type: string;
+    title: string;
+    text: string;
+}
+
+interface MarketStat {
+    title: string;
+    value: string;
+    desc: string;
+    icon: string;
+    color: string;
+}
+
+interface MarketData {
+    title: string;
+    subtitle1: string;
+    subtitle2: string;
+    description: string;
+    insights: MarketInsight[];
+    stats: MarketStat[];
+}
+
+interface CalculatorData {
+    title: string;
+    subtitle: string;
+    description: string;
+    planosRatio: string;
+    preventaRatio: string;
+    escrituraRatio: string;
+    tirValue: string;
+    planosLabel: string;
+    preventaLabel: string;
+    escrituraLabel: string;
+    planosDesc: string;
+    preventaDesc: string;
+    escrituraDesc: string;
+    primaryBtnText: string;
+    primaryBtnLink: string;
+    secondaryBtnText: string;
+    secondaryBtnLink: string;
+}
+
+interface MapLocation {
+    name: string;
+    fullName: string;
+    city: string;
+    province: string;
+    coordinates: { top: string; left: string };
+    status: string;
+    dotColor: string;
+}
+
+interface MapData {
+    title: string;
+    subtitle: string;
+    description: string;
+    backgroundImage: string;
+    locations: MapLocation[];
+}
+
+interface CatalogData {
+    title: string;
+    subtitle: string;
+    description?: string;
+    btnText?: string;
+    btnLink?: string;
+}
+
+interface ProjectsData {
+    title: string;
+    subtitle: string;
+    description: string;
+    btnText?: string;
+    btnLink?: string;
+}
+
+interface TeamMember {
+    name: string;
+    role: string;
+    image: string;
+    socials: Record<string, string>;
+}
+
+interface TeamData {
+    title: string;
+    ceoName: string;
+    ceoRole: string;
+    ceoQuote: string;
+    ceoDescription1: string;
+    ceoDescription2: string;
+    ceoImage: string;
+    members: TeamMember[];
+}
+
+interface TestimonialItem {
+    quote: string;
+    author: string;
+    role: string;
+    image: string;
+}
+
+interface TestimonialsData {
+    title: string;
+    subtitle: string;
+    items: TestimonialItem[];
+}
+
+interface FaqItem {
+    question: string;
+    answer: string;
+}
+
+interface FaqData {
+    title: string;
+    items: FaqItem[];
+}
+
+interface FooterData {
+    description: string;
+    copyright: string;
+    logoVertical: string;
+    logoHorizontal: string;
+    socials: Record<string, string>;
+}
+
+interface CommercialData {
+    country: string;
+    currency: string;
+    taxName: string;
+    taxRate: number;
+}
+
+export interface LandingCMSData {hero: HeroData;
+    about: AboutData;
+    video: VideoData;
+    process: ProcessData;
+    operations: OperationsData;
+    market: MarketData;
+    calculator: CalculatorData;
+    map: MapData;
+    projects: CatalogData;
+    catalog: CatalogData;
+    team: TeamData;
+    testimonials: TestimonialsData;
+    faq: FaqData;
+    blog: BlogData;
+    footer: FooterData;
+    commercial: CommercialData;
+}
+
+export interface TemplateData {
+    id: string;
+    nombre: string;
+    slug: string;
+    secciones: LandingCMSData;
+    sectionOrder?: string[];
+    sectionVisibility?: Record<string, boolean>;
+}
+
+interface LandingCMSContextType {
+    cmsData: LandingCMSData;
+    templateData: TemplateData | null;
+    sectionOrder: string[];
+    sectionVisibility: Record<string, boolean>;
+    updateCMSData: (newData: Partial<LandingCMSData>) => Promise<{ success: boolean; error?: string }>;
+    updateSection: <T extends keyof LandingCMSData>(section: T, data: Partial<LandingCMSData[T]>) => Promise<{ success: boolean; error?: string }>;
+    publishChanges: () => Promise<{ success: boolean; error?: string }>;
+    isSectionVisible: (sectionKey: string) => boolean;
+    loading: boolean;
+}
+
+const DEFAULT_CMS_DATA: LandingCMSData = {
+    hero: {
+        title1: "BLIS",
+        title2: "CORP",
+        subtitle: "Tu Próximo Gran Patrimonio",
+        description: "Desarrollamos Macro-Lotes y Terrenos con alta plusvalía.",
+        primaryBtnText: "Comprar Terrenos",
+        primaryBtnLink: "/tienda",
+        secondaryBtnText: "Trayectoria",
+        secondaryBtnLink: "#trayectoria",
+        videoBackground: "/videos/cyber-bg.mp4",
+    },
+    about: {
+        yearsExperience: "10+",
+        yearsLabel: "Años Exp.",
+        stat1Value: "100%",
+        stat1Label: "Certeza Legal",
+        stat2Value: "+350",
+        stat2Label: "Lotes Entregados",
+        stat3Value: "+2500",
+        stat3Label: "Entregas",
+        missionTitle: "Nuestra Misión",
+        missionText: "Transformar el horizonte inmobiliario.",
+        videoUrl: "",
+        videoThumbnail: "/images/miniatura-de-video.webp",
+    },
+    video: {
+        title: "Nuestra Visión",
+        subtitle: "en Movimiento",
+        embedUrl: "https://adilo.bigcommand.com/watch/LteCS2H5",
+        thumbnail: "/images/video-thumbnail.webp",
+    },
+    blog: {
+        title: "Conocimiento",
+        subtitle: "Blog Premium",
+        description: "Explora nuestros artículos y guías exclusivas.",
+    },
+    process: { title: "Metodología", subtitle: "Nuestra Ruta de Éxito", steps: [] },
+    operations: {
+        title: "Backstage",
+        subtitle: "Operaciones en Campo",
+        sliderImages: [],
+        stats: { sales: "5M", urbanizations: "12", clients: "850", conferences: "45" }
+    },
+    market: { title: "Mercado", subtitle1: "Inteligencia Inmobiliaria", subtitle2: "Datos", description: "", insights: [], stats: [] },
+    calculator: { 
+        title: "Plusvalía", 
+        subtitle: "Simulador", 
+        description: "Calcula la plusvalía proyectada de tu inversión.",
+        planosRatio: "50", 
+        preventaRatio: "75", 
+        escrituraRatio: "91", 
+        tirValue: "22",
+        planosLabel: "En Planos",
+        preventaLabel: "Preventa",
+        escrituraLabel: "Escritura en Mano",
+        planosDesc: "Máxima rentabilidad, mayor tiempo de espera hasta escritura.",
+        preventaDesc: "Trazado visible, inicio de obras, excelente relación costo-beneficio.",
+        escrituraDesc: "Saneamiento y permisos 100% listos. Entrega física inmediata.",
+        primaryBtnText: "Ver Proyectos",
+        primaryBtnLink: "/proyectos",
+        secondaryBtnText: "Contactar",
+        secondaryBtnLink: "#contacto"
+    },
+    map: { title: "Mapa", subtitle: "Dominio Territorial", description: "", locations: [], backgroundImage: "" },
+    projects: { title: "Proyectos", subtitle: "Nuestro Portafolio", description: "", btnText: "", btnLink: "" },
+    catalog: { title: "Tienda", subtitle: "Recursos de Élite", btnText: "", btnLink: "" },
+    team: { title: "Liderazgo", ceoName: "Kevin Valdez", ceoRole: "CEO", ceoQuote: "", ceoDescription1: "", ceoDescription2: "", ceoImage: "/images/kevin-valdez.webp", members: [] },
+    testimonials: { 
+        title: "Experiencias", 
+        subtitle: "Testimonios", 
+        items: [
+            { quote: "Blis Corp redefinió nuestra estrategia de inversión.", author: "Rafael S.", role: "Inversor", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=256&q=80" }
+        ] 
+    },
+    faq: { title: "Transparencia", items: [] },
+    footer: { description: "Liderando la transformación digital.", copyright: "© 2026 Blis Corp.", logoVertical: "/images/logo-blis-vertical.png", logoHorizontal: "/images/blis-logo.png", socials: {} },
+    commercial: { country: "EC", currency: "USD", taxName: "IVA", taxRate: 15 }
+};
+
+const LandingCMSContext = createContext<LandingCMSContextType | undefined>(undefined);
+
+const DEFAULT_SECTION_ORDER = [
+    'hero', 'about', 'video', 'process', 'operations', 'market',
+    'calculator', 'map', 'projects', 'catalog', 'team', 'testimonials',
+    'faq', 'blog', 'footer'
+];
+
+export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [cmsData, setCmsData] = useState<LandingCMSData>(DEFAULT_CMS_DATA);
+    const [templateData, setTemplateData] = useState<TemplateData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    useEffect(() => {
+        async function loadCMSData() {
+            try {
+                const response = await fetch('/api/cms/landing');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    setCmsData(prev => ({ ...prev, ...result.data }));
+                }
+                
+                const templateResponse = await fetch('/api/templates/landing');
+                const templateResult = await templateResponse.json();
+                
+                if (templateResult.success && templateResult.data) {
+                    setTemplateData(templateResult.data);
+                    if (templateResult.data.secciones) {
+                        setCmsData(prev => ({ ...prev, ...templateResult.data.secciones }));
+                    }
+                } else {
+                    const saved = localStorage.getItem("blis_cms_data");
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        setCmsData(prev => ({ ...prev, ...parsed }));
+                    }
+                }
+            } catch {
+                const saved = localStorage.getItem("blis_cms_data");
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        setCmsData(prev => ({ ...prev, ...parsed }));
+                    } catch {
+                        console.warn("Could not parse saved CMS data");
+                    }
+                }
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        loadCMSData();
+    }, []);
+
+    const isSectionVisible = useCallback((sectionKey: string): boolean => {
+        if (!templateData?.sectionVisibility) return true;
+        return templateData.sectionVisibility[sectionKey] !== false;
+    }, [templateData]);
+
+    const sectionOrder = templateData?.sectionOrder || DEFAULT_SECTION_ORDER;
+    const sectionVisibility = templateData?.sectionVisibility || {};
+
+    const updateCMSData = useCallback(async (newData: Partial<LandingCMSData>) => {
+        setCmsData(prev => {
+            const updated = { ...prev, ...newData };
+            localStorage.setItem("blis_cms_data", JSON.stringify(updated));
+            return updated;
+        });
+        setHasUnsavedChanges(true);
+        return { success: true };
+    }, []);
+
+    const updateSection = useCallback(async <T extends keyof LandingCMSData>(section: T, sectionData: Partial<LandingCMSData[T]>) => {
+        setCmsData(prev => {
+            const updated = {
+                ...prev,
+                [section]: { ...prev[section], ...sectionData }
+            };
+            localStorage.setItem("blis_cms_data", JSON.stringify(updated));
+            return updated;
+        });
+        setHasUnsavedChanges(true);
+        return { success: true };
+    }, []);
+
+    const publishChanges = useCallback(async () => {
+        try {
+            const response = await fetch('/api/cms/landing', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ secciones: cmsData })
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                return { success: false, error: result.error || 'Error al guardar' };
+            }
+
+            localStorage.setItem("blis_landing_cms", JSON.stringify(cmsData));
+            localStorage.setItem("blis_store_country", cmsData.commercial.country);
+            localStorage.setItem("blis_store_currency", cmsData.commercial.currency);
+            localStorage.setItem("blis_store_tax_name", cmsData.commercial.taxName);
+            localStorage.setItem("blis_store_tax_rate", cmsData.commercial.taxRate.toString());
+            
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event("cms_updated"));
+            }
+
+            setHasUnsavedChanges(false);
+            return { success: true };
+        } catch {
+            return { success: false, error: 'Error de conexión' };
+        }
+    }, [cmsData]);
+
+    return (
+        <LandingCMSContext.Provider value={{ 
+            cmsData, 
+            templateData,
+            sectionOrder,
+            sectionVisibility,
+            updateCMSData, 
+            updateSection, 
+            publishChanges, 
+            isSectionVisible,
+            loading 
+        }}>
+            {children}
+        </LandingCMSContext.Provider>
+    );
+};
+
+export const useLandingCMS = () => {
+    const context = useContext(LandingCMSContext);
+    if (!context) {
+        throw new Error("useLandingCMS must be used within a LandingCMSProvider");
+    }
+    return context;
+};
