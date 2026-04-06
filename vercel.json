@@ -1,12 +1,3 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
-  "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "regions": ["iad1"],
-  "functions": {
-    "app/**": {
-      "maxDuration": 60
-    }
-  }
+  "framework": "nextjs"
 }

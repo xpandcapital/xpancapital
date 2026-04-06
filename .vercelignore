@@ -1,0 +1,28 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+out
+build
+
+# Development files
+*.log
+.env*.local
+
+# Test files
+**/__tests__/**
+**/*.test.*
+**/*.spec.*
+
+# Large files
+public/images/**/*.*
+public/videos/**/*.*
+
+# Scripts and configs
+scripts/
+*.md
+*.sql
+*.py
+*.bat
+*.ps1
