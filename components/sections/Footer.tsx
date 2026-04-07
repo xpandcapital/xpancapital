@@ -29,24 +29,24 @@ export function FooterSections() {
         twitter: siteConfig?.socialTwitter || cmsData?.footer?.socials?.twitter || "",
     };
     
-    // Footer content from cmsData
+    // Footer content from siteConfig with cmsData fallbacks
     const footer = cmsData?.footer || {};
-    const description = siteConfig?.footerDescription || footer.description || "Somos la firma élite en desarrollo de software y tecnología real estate.";
+    const description = siteConfig?.footerDescription || footer.description || "Liderando la transformación digital.";
     const copyright = siteConfig?.footerCopyright || footer.copyright || "© 2026 BLIS Corp. Todos los derechos reservados.";
-    const vipTitle = footer.vipTitle || "Acceso VIP";
-    const vipDescription = footer.vipDescription || "Únete a la lista de inversores selectos para recibir análisis de mercado y oportunidades antes del lanzamiento público.";
-    const vipPlaceholder = footer.vipPlaceholder || "Tu correo corporativo";
-    const vipButtonText = footer.vipButtonText || "Suscribirme";
-    const projectsTitle = footer.projectsTitle || "Proyectos";
-    const legalTitle = footer.legalTitle || "Legal";
+    const vipTitle = siteConfig?.footerVipTitle || footer.vipTitle || "Acceso VIP";
+    const vipDescription = siteConfig?.footerVipDescription || footer.vipDescription || "Únete a la lista de inversores selectos para recibir análisis de mercado y oportunidades antes del lanzamiento público.";
+    const vipPlaceholder = siteConfig?.footerVipPlaceholder || footer.vipPlaceholder || "Tu correo corporativo";
+    const vipButtonText = siteConfig?.footerVipButton || footer.vipButtonText || "Suscribirme";
+    const projectsTitle = siteConfig?.footerProjectsTitle || footer.projectsTitle || "Proyectos";
+    const legalTitle = siteConfig?.footerLegalTitle || footer.legalTitle || "Legal";
     const legalLinks = footer.legalLinks || [
         { text: "Privacidad", href: "/privacidad" },
         { text: "Términos", href: "/terminos" },
         { text: "Transparencia", href: "/transparencia" },
         { text: "Reclamaciones", href: "/reclamaciones" }
     ];
-    const locationText = footer.locationText || "Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú";
-    const showProjects = footer.showProjects !== false;
+    const locationText = siteConfig?.footerLocationText || footer.locationText || "Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú";
+    const showProjects = siteConfig?.footerShowProjects !== undefined ? siteConfig.footerShowProjects : (footer.showProjects !== false);
     
     const logoVertical = siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || footer.logoVertical || "/images/logo-blis-vertical.png";
     const logoHorizontal = siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || footer.logoHorizontal || "/images/blis-logo.png";

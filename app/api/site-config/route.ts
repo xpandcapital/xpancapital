@@ -60,6 +60,14 @@ export async function PUT(request: NextRequest) {
       social_whatsapp,
       footer_description,
       footer_copyright,
+      footer_vip_title,
+      footer_vip_description,
+      footer_vip_placeholder,
+      footer_vip_button,
+      footer_projects_title,
+      footer_legal_title,
+      footer_location_text,
+      footer_show_projects,
       contact_email,
       contact_phone,
       contact_address
@@ -94,6 +102,14 @@ export async function PUT(request: NextRequest) {
     if (social_whatsapp !== undefined) updateData.social_whatsapp = social_whatsapp
     if (footer_description !== undefined) updateData.footer_description = footer_description
     if (footer_copyright !== undefined) updateData.footer_copyright = footer_copyright
+    if (footer_vip_title !== undefined) updateData.footer_vip_title = footer_vip_title
+    if (footer_vip_description !== undefined) updateData.footer_vip_description = footer_vip_description
+    if (footer_vip_placeholder !== undefined) updateData.footer_vip_placeholder = footer_vip_placeholder
+    if (footer_vip_button !== undefined) updateData.footer_vip_button = footer_vip_button
+    if (footer_projects_title !== undefined) updateData.footer_projects_title = footer_projects_title
+    if (footer_legal_title !== undefined) updateData.footer_legal_title = footer_legal_title
+    if (footer_location_text !== undefined) updateData.footer_location_text = footer_location_text
+    if (footer_show_projects !== undefined) updateData.footer_show_projects = footer_show_projects
     if (contact_email !== undefined) updateData.contact_email = contact_email
     if (contact_phone !== undefined) updateData.contact_phone = contact_phone
     if (contact_address !== undefined) updateData.contact_address = contact_address

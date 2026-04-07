@@ -304,6 +304,14 @@ interface LandingCMSContextType {
         socialTwitter: string;
         footerDescription: string;
         footerCopyright: string;
+        footerVipTitle: string;
+        footerVipDescription: string;
+        footerVipPlaceholder: string;
+        footerVipButton: string;
+        footerProjectsTitle: string;
+        footerLegalTitle: string;
+        footerLocationText: string;
+        footerShowProjects: boolean;
         contactEmail: string;
         contactPhone: string;
         contactAddress: string;
@@ -455,8 +463,16 @@ const DEFAULT_SITE_CONFIG = {
     socialLinkedin: '',
     socialWhatsapp: '',
     socialTwitter: '',
-    footerDescription: '',
+    footerDescription: 'Liderando la transformación digital.',
     footerCopyright: '© 2026 BLIS Corp. Todos los derechos reservados.',
+    footerVipTitle: 'Acceso VIP',
+    footerVipDescription: 'Únete a la lista de inversores selectos para recibir análisis de mercado y oportunidades antes del lanzamiento público.',
+    footerVipPlaceholder: 'Tu correo corporativo',
+    footerVipButton: 'Suscribirme',
+    footerProjectsTitle: 'Proyectos',
+    footerLegalTitle: 'Legal',
+    footerLocationText: 'Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú',
+    footerShowProjects: true,
     contactEmail: '',
     contactPhone: '',
     contactAddress: ''
@@ -499,8 +515,20 @@ export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                         socialTiktok: siteConfigData.data.social_tiktok || '',
                         socialLinkedin: siteConfigData.data.social_linkedin || '',
                         socialWhatsapp: siteConfigData.data.social_whatsapp || '',
-                        footerDescription: siteConfigData.data.footer_description || '',
-                        footerCopyright: siteConfigData.data.footer_copyright || prev.footerCopyright
+                        socialTwitter: siteConfigData.data.social_twitter || '',
+                        footerDescription: siteConfigData.data.footer_description || prev.footerDescription,
+                        footerCopyright: siteConfigData.data.footer_copyright || prev.footerCopyright,
+                        footerVipTitle: siteConfigData.data.footer_vip_title || prev.footerVipTitle,
+                        footerVipDescription: siteConfigData.data.footer_vip_description || prev.footerVipDescription,
+                        footerVipPlaceholder: siteConfigData.data.footer_vip_placeholder || prev.footerVipPlaceholder,
+                        footerVipButton: siteConfigData.data.footer_vip_button || prev.footerVipButton,
+                        footerProjectsTitle: siteConfigData.data.footer_projects_title || prev.footerProjectsTitle,
+                        footerLegalTitle: siteConfigData.data.footer_legal_title || prev.footerLegalTitle,
+                        footerLocationText: siteConfigData.data.footer_location_text || prev.footerLocationText,
+                        footerShowProjects: siteConfigData.data.footer_show_projects !== undefined ? siteConfigData.data.footer_show_projects : prev.footerShowProjects,
+                        contactEmail: siteConfigData.data.contact_email || '',
+                        contactPhone: siteConfigData.data.contact_phone || '',
+                        contactAddress: siteConfigData.data.contact_address || ''
                     }));
                 }
 
