@@ -331,7 +331,21 @@ const DEFAULT_CMS_DATA: LandingCMSData = {
         sliderImages: [],
         stats: { sales: "5M", urbanizations: "12", clients: "850", conferences: "45" }
     },
-    market: { title: "Mercado", subtitle1: "Inteligencia Inmobiliaria", subtitle2: "Datos", description: "", insights: [], stats: [] },
+    market: { 
+        title: "Por Qué Blis Corp", 
+        subtitle1: "Inteligencia Inmobiliaria", 
+        subtitle2: "Tiene Sentido", 
+        description: "Comprar tierra es inteligente, pero comprar en un desarrollo de Blis Corp es superior.", 
+        insights: [
+            { type: "mercado", title: "Plusvalía Garantizada", text: "Nuestros desarrollos incrementan el valor de tu inversión año tras año." },
+            { type: "estrategia", title: "Ubicación Estratégica", text: "Seleccionamos terrenos con alto potencial de crecimiento." }
+        ], 
+        stats: [
+            { title: "Plusvalía", value: "+25%", desc: "Anual", icon: "TrendingUp", color: "#10b981" },
+            { title: "Demanda", value: "85%", desc: "Regional", icon: "BarChart3", color: "#3b82f6" },
+            { title: "Crecimiento", value: "12%", desc: "Mensual", icon: "Zap", color: "#f59e0b" }
+        ]
+    },
     calculator: { 
         title: "Plusvalía", 
         subtitle: "Simulador", 
@@ -397,7 +411,17 @@ export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 const result = await response.json();
                 
                 if (result.success && result.data) {
-                    setCmsData(prev => ({ ...prev, ...result.data }));
+                    setCmsData(prev => {
+                        const merged = { ...prev };
+                        for (const key in result.data) {
+                            if (result.data[key] && typeof result.data[key] === 'object' && !Array.isArray(result.data[key])) {
+                                merged[key] = { ...prev[key], ...result.data[key] };
+                            } else {
+                                merged[key] = result.data[key];
+                            }
+                        }
+                        return merged;
+                    });
                 }
                 
                 const templateResponse = await fetch('/api/templates/landing');
@@ -406,7 +430,17 @@ export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 if (templateResult.success && templateResult.data) {
                     setTemplateData(templateResult.data);
                     if (templateResult.data.secciones) {
-                        setCmsData(prev => ({ ...prev, ...templateResult.data.secciones }));
+                        setCmsData(prev => {
+                            const merged = { ...prev };
+                            for (const key in templateResult.data.secciones) {
+                                if (templateResult.data.secciones[key] && typeof templateResult.data.secciones[key] === 'object' && !Array.isArray(templateResult.data.secciones[key])) {
+                                    merged[key] = { ...prev[key], ...templateResult.data.secciones[key] };
+                                } else {
+                                    merged[key] = templateResult.data.secciones[key];
+                                }
+                            }
+                            return merged;
+                        });
                     }
                 } else {
                     const saved = localStorage.getItem("blis_cms_data");
