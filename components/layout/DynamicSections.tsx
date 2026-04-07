@@ -138,8 +138,13 @@ export function DynamicSections({
 }: DynamicSectionsProps) {
   const { loading, isSectionVisible: isLandingSectionVisible, getSectionOrder, getSectionData } = useLandingTemplate();
 
+  // Loading screen disabled - page loads fast enough
+  // if (loading && !externalOrder && !externalSections) {
+  //   return <ConstructionLoader />;
+  // }
+
   if (loading && !externalOrder && !externalSections) {
-    return <ConstructionLoader />;
+    // Return empty to avoid flash
   }
 
   // Validate that the external order contains sections valid for this templateType

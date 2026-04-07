@@ -137,7 +137,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                         animate={{ opacity: 1, y: 0 }}
                                         className="text-[10px] text-blis-red font-black uppercase tracking-widest text-center"
                                     >
-                                        Datos incorrectos. Prueba con user/user
+                                        Datos incorrectos. Verifica tus credenciales.
                                     </motion.p>
                                 )}
 
@@ -150,8 +150,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                 </button>
                             </form>
 
-                            {/* Footer */}
-                            <div className="mt-8 text-center">
+                            {/* Footer - Registration disabled */}
+                            {/* <div className="mt-8 text-center">
                                 <button
                                     onClick={() => setMode(mode === "login" ? "register" : "login")}
                                     className="text-[10px] text-gray-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
@@ -160,14 +160,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                         ? "¿No tienes cuenta? Regístrate gratis"
                                         : "¿Ya tienes cuenta? Inicia sesión"}
                                 </button>
-                            </div>
-                        </div>
-
-                        {/* Credentials Hint */}
-                        <div className="bg-white/[0.02] border-t border-white/5 p-4 text-center">
-                            <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.15em]">
-                                Hint: <span className="text-gray-400">user / user</span> | <span className="text-gray-400">admin / admin</span>
-                            </p>
+                            </div> */}
                         </div>
                     </motion.div>
                 </div>

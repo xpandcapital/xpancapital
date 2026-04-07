@@ -119,29 +119,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = (id: string, pass: string) => {
-        if (id === "admin" && pass === "admin") {
-            const adminUser: User = {
-                id: "admin",
-                role: "admin",
-                email: "admin@bliscorp.com",
-                name: "Admin BlisCorp",
-                blis_coins: 1000,
-            };
-            setUser(adminUser);
-            localStorage.setItem("blis_auth", JSON.stringify(adminUser));
-            return "admin";
-        } else if (id === "user" && pass === "user") {
-            const normalUser: User = {
-                id: "user",
-                role: "user",
-                email: "kevin.inv@bliscorp.com",
-                name: "Kevin Valdez",
-                blis_coins: 500,
-            };
-            setUser(normalUser);
-            localStorage.setItem("blis_auth", JSON.stringify(normalUser));
-            return "user";
-        }
+        // Demo credentials disabled - use real authentication only
+        // if (id === "admin" && pass === "admin") {
+        //     const adminUser: User = {
+        //         id: "admin",
+        //         role: "admin",
+        //         email: "admin@bliscorp.com",
+        //         name: "Admin BlisCorp",
+        //         blis_coins: 1000,
+        //     };
+        //     setUser(adminUser);
+        //     localStorage.setItem("blis_auth", JSON.stringify(adminUser));
+        //     return "admin";
+        // } else if (id === "user" && pass === "user") {
+        //     const normalUser: User = {
+        //         id: "user",
+        //         role: "user",
+        //         email: "kevin.inv@bliscorp.com",
+        //         name: "Kevin Valdez",
+        //         blis_coins: 500,
+        //     };
+        //     setUser(normalUser);
+        //     localStorage.setItem("blis_auth", JSON.stringify(normalUser));
+        //     return "user";
+        // }
         return null;
     };
 
@@ -181,31 +182,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const signUp = async (email: string, password: string, nombre?: string, apellido?: string): Promise<{ success: boolean; error?: string }> => {
-        const supabase = getSupabase();
-        if (!supabase) {
-            return { success: false, error: "Supabase no está configurado" };
-        }
+        // Registration disabled
+        return { success: false, error: "El registro está deshabilitado. Contacta al administrador." };
         
-        try {
-            const { error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: {
-                        nombre,
-                        apellido,
-                    },
-                },
-            });
+        // const supabase = getSupabase();
+        // if (!supabase) {
+        //     return { success: false, error: "Supabase no está configurado" };
+        // }
+        
+        // try {
+        //     const { error } = await supabase.auth.signUp({
+        //         email,
+        //         password,
+        //         options: {
+        //             data: {
+        //                 nombre,
+        //                 apellido,
+        //             },
+        //         },
+        //     });
 
-            if (error) {
-                return { success: false, error: error.message };
-            }
+        //     if (error) {
+        //         return { success: false, error: error.message };
+        //     }
 
-            return { success: true };
-        } catch (err) {
-            return { success: false, error: err instanceof Error ? err.message : "Error desconocido" };
-        }
+        //     return { success: true };
+        // } catch (err) {
+        //     return { success: false, error: err instanceof Error ? err.message : "Error desconocido" };
+        // }
     };
 
     const logout = async () => {
