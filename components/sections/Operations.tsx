@@ -113,7 +113,7 @@ export function Operations() {
                             >
                                 <div
                                     className="w-full h-full bg-cover bg-center"
-                                    style={{ backgroundImage: `url(${images[currentIndex]})` }}
+                                    style={{ backgroundImage: images[currentIndex] ? `url(${images[currentIndex]})` : 'none' }}
                                 />
                                 {/* Scanning Lines Aesthetic Overlay */}
                                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] pointer-events-none" />

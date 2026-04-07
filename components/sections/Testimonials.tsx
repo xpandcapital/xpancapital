@@ -167,11 +167,17 @@ export function Testimonials() {
 
                             <div className="flex flex-col items-center">
                                 <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white/15 mb-3">
-                                    <img
-                                        src={mobileTestimonial.image}
-                                        alt={mobileTestimonial.author}
-                                        className="w-full h-full object-cover"
-                                    />
+                                    {mobileTestimonial.image ? (
+                                        <img
+                                            src={mobileTestimonial.image}
+                                            alt={mobileTestimonial.author}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-blis-red/20 flex items-center justify-center">
+                                            <span className="text-2xl font-bold text-white/50">{mobileTestimonial.author?.charAt(0) || '?'}</span>
+                                        </div>
+                                    )}
                                 </div>
                                 <h5 className="text-white font-bold uppercase tracking-wide text-sm">{mobileTestimonial.author}</h5>
                                 <span className="text-blis-red/80 font-mono text-xs uppercase tracking-widest mt-0.5">{mobileTestimonial.role}</span>
