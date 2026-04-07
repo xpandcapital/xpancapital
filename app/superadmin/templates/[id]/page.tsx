@@ -129,6 +129,7 @@ interface TemplateData {
   slug: string;
   tipo_contenido: string;
   estado: string;
+  es_principal: boolean;
   secciones: Record<string, any>;
   sectionOrder?: string[];
   sectionVisibility?: Record<string, boolean>;
