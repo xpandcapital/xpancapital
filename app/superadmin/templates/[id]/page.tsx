@@ -548,6 +548,57 @@ export default function TemplateEditorPage() {
           {/* CONFIG PANEL */}
           {activeSection === 'config' && (
             <div className="space-y-6">
+              {/* STATUS CARD - Importante para saber si es el template principal */}
+              <SectionCard title="Estado del Template">
+                <div className="flex flex-wrap gap-3">
+                  <div className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 ${
+                    template?.estado === 'activo' 
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                      : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                  }`}>
+                    {template?.estado === 'activo' ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    {template?.estado === 'activo' ? 'Activo' : template?.estado || 'Borrador'}
+                  </div>
+                  <div className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 ${
+                    template?.es_principal 
+                      ? 'bg-blis-red/20 text-blis-red border border-blis-red/30' 
+                      : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                  }`}>
+                    <Star className="w-3 h-3" />
+                    {template?.es_principal ? 'Principal' : 'No es Principal'}
+                  </div>
+                </div>
+                {!template?.es_principal && (
+                  <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-xl">
+                    <p className="text-yellow-400 text-xs font-medium mb-2">⚠️ Este template NO es el principal</p>
+                    <p className="text-gray-400 text-xs mb-3">Los cambios que hagas aquí NO se verán en la landing page pública. Solo el template marcado como "Principal" se muestra en el sitio.</p>
+                    <button 
+                      onClick={async () => {
+                        if (!template) return;
+                        try {
+                          const res = await fetch(`/api/templates/${template.id}/principal`, { method: 'POST' });
+                          const data = await res.json();
+                          if (data.success) {
+                            setTemplate(prev => prev ? { ...prev, es_principal: true } : prev);
+                            showToast('Template establecido como Principal. Ahora los cambios se verán en la landing.', 'success');
+                          } else {
+                            showToast(data.error || 'Error al establecer como principal', 'error');
+                          }
+                        } catch {
+                          showToast('Error al establecer como principal', 'error');
+                        }
+                      }}
+                      className="px-4 py-2 bg-blis-red text-white text-xs font-bold rounded-lg hover:bg-blis-red/80 transition-colors"
+                    >
+                      🌟 Establecer como Principal
+                    </button>
+                  </div>
+                )}
+                {template?.es_principal && (
+                  <p className="mt-3 text-emerald-400 text-xs">✓ Los cambios que hagas aquí se verán en la landing page pública.</p>
+                )}
+              </SectionCard>
+
               <SectionCard title="Configuración General">
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Marca / Branding</h4>
