@@ -79,7 +79,7 @@ export function Hero() {
                     <BarChart3 className="text-[#209f89] w-4 h-4 sm:w-4 sm:h-4" />
                 </div>
                 <div className="flex items-end gap-2">
-                    <span className="text-2xl sm:text-2xl font-black text-white leading-none">+{cmsData.operations.stats.sales}</span>
+                    <span className="text-2xl sm:text-2xl font-black text-white leading-none">+{(cmsData.operations?.stats?.sales || '0')}</span>
                     <span className="text-xs sm:text-[10px] text-[#209f89] font-bold mb-0.5">+12%</span>
                 </div>
                 <div className="flex items-end gap-1 sm:gap-1 h-8 sm:h-8 mt-2 opacity-80">
@@ -111,7 +111,7 @@ export function Hero() {
                 </div>
                 <div>
                     <span className="text-xs sm:text-[10px] font-mono text-gray-400 uppercase tracking-widest block mb-0.5">Proyectos</span>
-                    <span className="text-white font-bold text-sm sm:text-sm">{cmsData.map.locations.length} Activos</span>
+                    <span className="text-white font-bold text-sm sm:text-sm">{(cmsData.map?.locations || []).length} Activos</span>
                 </div>
             </motion.div>
 

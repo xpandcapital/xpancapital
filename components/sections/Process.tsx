@@ -98,7 +98,10 @@ function TimelineStep({ step, index, totalSteps }: { step: any; index: number; t
 
 export function Process() {
     const { cmsData } = useLandingCMS();
-    const steps = cmsData.process.steps;
+    const steps = cmsData.process.steps || [];
+
+    // Return null if no steps
+    if (steps.length === 0) return null;
 
     return (
         <section className="py-24 bg-black relative">

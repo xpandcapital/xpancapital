@@ -7,7 +7,8 @@ import { useLandingCMS } from "@/context/LandingCMSContext";
 
 export function Operations() {
     const { cmsData } = useLandingCMS();
-    const images = cmsData.operations.sliderImages;
+    const images = cmsData.operations?.sliderImages || [];
+    const stats = cmsData.operations?.stats || { sales: '', urbanizations: '', clients: '', conferences: '' };
     
     const [currentIndex, setCurrentIndex] = useState(0);
     const [progress, setProgress] = useState(0);
@@ -151,10 +152,10 @@ export function Operations() {
 
                 {/* Stats Sidebar */}
                 <div className="lg:col-span-4 grid grid-cols-2 gap-4 h-full md:min-h-[600px]">
-                    <StatCard label="En Ventas" value={cmsData.operations.stats.sales} delay={0} />
-                    <StatCard label="Urbanizaciones" value={cmsData.operations.stats.urbanizations} delay={0.1} />
-                    <StatCard label="Clientes" value={cmsData.operations.stats.clients} prefix="+" delay={0.2} />
-                    <StatCard label="Conferencias" value={cmsData.operations.stats.conferences} delay={0.3} />
+                    <StatCard label="En Ventas" value={stats.sales} delay={0} />
+                    <StatCard label="Urbanizaciones" value={stats.urbanizations} delay={0.1} />
+                    <StatCard label="Clientes" value={stats.clients} prefix="+" delay={0.2} />
+                    <StatCard label="Conferencias" value={stats.conferences} delay={0.3} />
                 </div>
             </div>
         </section>

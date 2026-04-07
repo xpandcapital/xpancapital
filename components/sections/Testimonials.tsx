@@ -28,9 +28,12 @@ export function Testimonials() {
     const { cmsData } = useLandingCMS();
     const { title, subtitle, items: testimonials } = cmsData.testimonials;
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [isPaused, setIsPaused] = useState(false);       // Mobile: paused on tap
+    const [isPaused, setIsPaused] = useState(false);
     const [isCooldown, setIsCooldown] = useState(false);
     const timerRef = useRef<ReturnType<typeof setInterval> | NodeJS.Timeout | null>(null);
+
+    // Return null if no testimonials
+    if (!testimonials || testimonials.length === 0) return null;
 
     const handleManualNavigation = (direction: 'next' | 'prev') => {
         setIsCooldown(true);
