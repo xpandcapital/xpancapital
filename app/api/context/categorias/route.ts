@@ -40,11 +40,11 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('❌ Error fetching categories:', error)
-      return NextResponse.json({ success: false, error: error.message, details: error }, { status: 500 })
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
     console.log('✅ Categories fetched:', data?.length || 0)
-    return NextResponse.json({ success: true, data })
+    return NextResponse.json({ success: true, data: data || [] })
   } catch (err) {
     console.error('❌ Unexpected error in GET:', err)
     return NextResponse.json({ success: false, error: 'Error del servidor', details: String(err) }, { status: 500 })
@@ -64,28 +64,38 @@ export async function POST(request: NextRequest) {
 
     const generatedSlug = slug || nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
 
-    // Check if category with same slug exists
-    const { data: existing } = await supabase
+    // Check if category with same slug exists (using maybeSingle to avoid errors)
+    const { data: existing, error: checkError } = await supabase
       .from('producto_categorias')
       .select('id')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .eq('slug', generatedSlug)
-      .single()
+      .maybeSingle()
+
+    if (checkError) {
+      console.error('❌ Error checking existing category:', checkError)
+    }
 
     if (existing) {
       return NextResponse.json({ success: false, error: 'Ya existe una categoría con ese nombre' }, { status: 400 })
     }
 
-    // Get max orden
-    const { data: maxOrden } = await supabase
+    // Get max orden (using maybeSingle to avoid errors when no records)
+    const { data: maxOrdenData, error: maxError } = await supabase
       .from('producto_categorias')
       .select('orden')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .order('orden', { ascending: false })
       .limit(1)
-      .single()
+      .maybeSingle()
 
-    const nextOrden = orden ?? ((maxOrden?.orden ?? -1) + 1)
+    if (maxError) {
+      console.error('❌ Error getting max orden:', maxError)
+    }
+
+    const nextOrden = orden ?? ((maxOrdenData?.orden ?? -1) + 1)
+
+    console.log('📝 Creating category:', { nombre, slug: generatedSlug, orden: nextOrden })
 
     const { data, error } = await supabase
       .from('producto_categorias')
@@ -108,10 +118,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
+    console.log('✅ Category created:', data)
     return NextResponse.json({ success: true, data })
   } catch (err) {
-    console.error('❌ Unexpected error:', err)
-    return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
+    console.error('❌ Unexpected error in POST:', err)
+    return NextResponse.json({ success: false, error: 'Error del servidor', details: String(err) }, { status: 500 })
   }
 }
 
@@ -134,11 +145,13 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
+      console.error('❌ Error updating category:', error)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, data })
-  } catch {
+  } catch (err) {
+    console.error('❌ Unexpected error in PUT:', err)
     return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
   }
 }
@@ -160,11 +173,13 @@ export async function DELETE(request: NextRequest) {
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
 
     if (error) {
+      console.error('❌ Error deleting category:', error)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (err) {
+    console.error('❌ Unexpected error in DELETE:', err)
     return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
   }
 }
