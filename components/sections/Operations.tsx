@@ -15,7 +15,6 @@ export function Operations() {
     const [isMounted, setIsMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     
-    // Usar ref para isVisible para evitar problemas de closure
     const isVisibleRef = useRef(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
@@ -28,7 +27,7 @@ export function Operations() {
         return () => window.removeEventListener('resize', check);
     }, []);
 
-    // Intersection Observer - actualiza ref directamente
+    // Intersection Observer
     useEffect(() => {
         const section = sectionRef.current;
         if (!section) return;
@@ -40,7 +39,7 @@ export function Operations() {
                     setProgress(0);
                 }
             },
-            { threshold: 0.1 }
+            { threshold: 0.1, rootMargin: "0px 0px -100px 0px" }
         );
 
         observer.observe(section);
@@ -59,31 +58,26 @@ export function Operations() {
         setProgress(0);
     }, [images.length]);
 
-    // Auto-play timer - siempre corre, pero solo avanza si es visible
+    // Auto-play timer
     useEffect(() => {
-        if (isPaused || images.length === 0) return;
-
-        const interval_ms = 4000;
-        const frame_rate = 50;
-        const step = (frame_rate / interval_ms) * 100;
+        if (images.length === 0) return;
 
         timerRef.current = setInterval(() => {
-            // Usar ref para obtener valor actual
-            if (!isVisibleRef.current) return;
+            if (isPaused || !isVisibleRef.current) return;
             
             setProgress((prev) => {
                 if (prev >= 100) {
-                    nextSlide();
+                    setCurrentIndex((i) => (i + 1) % images.length);
                     return 0;
                 }
-                return prev + step;
+                return prev + 1.25;
             });
-        }, frame_rate);
+        }, 50);
 
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, [isPaused, nextSlide, images.length]);
+    }, [isPaused, images.length]);
 
     if (!isMounted) return null;
 
