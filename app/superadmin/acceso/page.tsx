@@ -8,9 +8,9 @@ export default function AdminLogin() {
 
             <div className="w-full max-w-md p-8 relative z-10">
                 <div className="text-center mb-10">
-                    <img src="/images/blis-logo.png" alt="Blis Corp Admin" className="h-20 w-auto mx-auto mb-6 drop-shadow-[0_0_15px_rgba(190,11,60,0.5)]" />
-                    <h1 className="text-3xl font-black text-white uppercase tracking-widest">HQ Login</h1>
-                    <p className="text-gray-500 mt-2 text-sm uppercase tracking-widest">Acceso Restringido</p>
+                    <h1 className="text-4xl font-black text-white uppercase tracking-widest mb-2 drop-shadow-[0_0_15px_rgba(190,11,60,0.5)]">BLIS CORP</h1>
+                    <p className="text-blis-red text-sm font-bold tracking-widest">HQ</p>
+                    <p className="text-gray-500 mt-2 text-xs uppercase tracking-widest">Acceso Restringido</p>
                 </div>
 
                 <form className="space-y-6 bg-zinc-950/80 backdrop-blur-xl p-8 rounded-2xl border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative">

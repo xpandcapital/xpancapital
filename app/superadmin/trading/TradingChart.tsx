@@ -96,14 +96,19 @@ export const TradingChart = ({
 
       {/* ─── BLIS CORP WATERMARK ─── */}
       <g style={{ pointerEvents: 'none', userSelect: 'none' }}>
-        <image
-          href="/images/blis-logo.png"
-          x={dims.width / 2 - (dims.width > 800 ? 600 : 280) / 2 - (padding?.right ?? 80) / 2}
-          y={dims.height / 2 - (dims.width > 800 ? 200 : 100) / 2}
-          width={dims.width > 800 ? 600 : 280}
-          height={dims.width > 800 ? 200 : 100}
-          preserveAspectRatio="xMidYMid meet"
-        />
+        <text
+          x={dims.width / 2}
+          y={dims.height / 2}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fill="rgba(255,255,255,0.04)"
+          fontSize={dims.width > 800 ? 72 : 32}
+          fontFamily="Arial Black, sans-serif"
+          fontWeight="bold"
+          letterSpacing="0.2em"
+        >
+          BLIS CORP
+        </text>
       </g>
 
       {/* ─── TIEMPO: Regla superior ─── */}

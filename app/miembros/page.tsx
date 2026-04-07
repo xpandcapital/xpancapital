@@ -11,40 +11,81 @@ import {
     Trophy,
     TrendingUp,
     Zap,
-    DownloadCloud
+    DownloadCloud,
+    Package,
+    BookOpen,
+    Loader2
 } from "lucide-react";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserStats } from "@/lib/hooks/useUserStats";
+import { useCursos, useUserCursos } from "@/lib/hooks/useCursos";
+import { useCompras } from "@/lib/hooks/useCompras";
 
 export default function UserDashboard() {
-    const stats = [
-        { title: "Cursos Completados", value: "3/8", icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
-        { title: "Documentos Listos", value: "12", icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10" },
-        { title: "Tiempo de Estudio", value: "24h", icon: Clock, color: "text-purple-500", bg: "bg-purple-500/10" },
+    const { user } = useAuth();
+    const { stats, loading: statsLoading, fetchUserStats } = useUserStats();
+    const { cursos, loading: cursosLoading } = useCursos();
+    const { userCursos, loading: userCursosLoading, refetch: refetchUserCursos } = useUserCursos(user?.id || null);
+    const { compras, loading: comprasLoading, fetchUserPurchases } = useCompras();
+
+    const staticStats = [
+        { title: "Cursos Completados", value: "0", icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
+        { title: "Documentos Listos", value: "0", icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10" },
+        { title: "Tiempo de Estudio", value: "0h", icon: Clock, color: "text-purple-500", bg: "bg-purple-500/10" },
+        { title: "Plusvalía Estimada", value: "+0%", icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+        { title: "BLISCOINS", value: "0", icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
+        { title: "Nivel de Inversor", value: "Bronze", icon: Zap, color: "text-blis-red", bg: "bg-blis-red/10" },
+    ];
+
+    const displayStats = stats ? [
+        { title: "Cursos Completados", value: `${stats.cursosCompletados}/${stats.cursosInscritos || 8}`, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
+        { title: "Documentos Listos", value: stats.documentosDescargados.toString(), icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10" },
+        { title: "Tiempo de Estudio", value: `${stats.tiempoEstudio}h`, icon: Clock, color: "text-purple-500", bg: "bg-purple-500/10" },
         { title: "Plusvalía Estimada", value: "+18%", icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-        { title: "BLISCOINS", value: "2,450", icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
-        { title: "Nivel de Inversor", value: "Gold", icon: Zap, color: "text-blis-red", bg: "bg-blis-red/10" },
-    ];
+        { title: "BLISCOINS", value: stats.blisCoins.toLocaleString(), icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
+        { title: "Nivel de Inversor", value: stats.nivelInversor, icon: Zap, color: "text-blis-red", bg: "bg-blis-red/10" },
+    ] : staticStats;
 
-    const myCourses = [
-        {
-            title: "Captación Inmobiliaria Desde Cero",
-            progress: 75,
-            image: "/images/CURSO-CAPTACIÓN INMOBILIARIA DESDE CERO.webp",
-            lastAccessed: "Hace 2 horas"
-        },
-        {
-            title: "Cero Fallos: Vende Rápido y al Mejor Precio",
-            progress: 30,
-            image: "/images/CURSO-Como vender inmuebles sin errores.webp",
-            lastAccessed: "Ayer"
-        }
-    ];
+    const myCourses = userCursos.slice(0, 3).map(curso => ({
+        id: curso.id,
+        title: curso.nombre,
+        progress: curso.progreso?.progreso || 0,
+        image: curso.imagen_principal || '',
+        lastAccessed: curso.progreso?.actualizado_en 
+            ? new Date(curso.progreso.actualizado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+            : 'N/A'
+    }));
 
-    const recentDownloads = [
-        { name: "Contrato Arrendamiento_V1.pdf", size: "2.4 MB", date: "Hoy" },
-        { name: "Ebook_Vendedor_PRO.pdf", size: "15.8 MB", date: "24 Feb" },
-        { name: "Checklist_Inversionista.xlsx", size: "1.1 MB", date: "20 Feb" },
-    ];
+    const recentDownloads = compras
+        .filter(c => c.estado === 'completado')
+        .slice(0, 3)
+        .flatMap(c => (c.items || []).map(item => ({
+            name: item.producto?.nombre || 'Producto',
+            size: 'N/A',
+            date: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+        })));
+
+    if (statsLoading || cursosLoading) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8">
+                <Package className="w-16 h-16 text-gray-600 mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Inicia sesión para ver tu dashboard</h2>
+                <p className="text-gray-500 mb-6">Accede a tu cuenta para ver cursos, productos y estadísticas.</p>
+                <a href="/acceso" className="px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
+                    Iniciar Sesión
+                </a>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-10 pb-20 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto">
@@ -57,24 +98,28 @@ export default function UserDashboard() {
                     className="w-full sm:w-auto"
                 >
                     <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white uppercase tracking-tighter mb-2 leading-none sm:leading-tight">
-                        Bienvenido, <span className="text-blis-red">Kevin Valdez</span>
+                        Bienvenido, <span className="text-blis-red">{user.name || 'Usuario'}</span>
                     </h1>
-                    <p className="text-gray-400 font-medium text-xs sm:text-sm max-w-xl">Tienes 2 cursos pendientes por terminar y 3 nuevos recursos VIP disponibles.</p>
+                    <p className="text-gray-400 font-medium text-xs sm:text-sm max-w-xl">
+                        {myCourses.length > 0 
+                            ? `Tienes ${myCourses.filter(c => c.progress < 100).length} cursos pendientes por terminar.`
+                            : 'Explora nuestros cursos y productos disponibles.'}
+                    </p>
                 </motion.div>
 
                 <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
-                    <button className="w-full sm:w-auto bg-white text-black font-black uppercase tracking-widest px-6 py-4 sm:py-3 rounded-2xl hover:bg-blis-red hover:text-white transition-all text-xs flex justify-center items-center shadow-xl">
+                    <a href="/miembros/academia" className="w-full sm:w-auto bg-white text-black font-black uppercase tracking-widest px-6 py-4 sm:py-3 rounded-2xl hover:bg-blis-red hover:text-white transition-all text-xs flex justify-center items-center shadow-xl">
                         Ir a la Academia
-                    </button>
-                    <button className="w-full sm:w-auto bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest px-6 py-4 sm:py-3 rounded-2xl hover:bg-white/10 transition-all text-xs flex justify-center items-center">
-                        Nuevo Contrato
-                    </button>
+                    </a>
+                    <a href="/miembros/productos" className="w-full sm:w-auto bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest px-6 py-4 sm:py-3 rounded-2xl hover:bg-white/10 transition-all text-xs flex justify-center items-center">
+                        Ver Productos
+                    </a>
                 </div>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-6">
-                {stats.map((stat, i) => (
+                {displayStats.map((stat, i) => (
                     <motion.div
                         key={i}
                         initial={{ opacity: 0, y: 20 }}
@@ -106,49 +151,66 @@ export default function UserDashboard() {
                             Continuar Aprendiendo
                             <span className="h-px bg-white/10 flex-1 hidden md:block w-32" />
                         </h2>
-                        <button className="text-xs text-blis-red font-black uppercase tracking-widest hover:text-white transition-colors">Ver Todo</button>
+                        <a href="/miembros/academia" className="text-xs text-blis-red font-black uppercase tracking-widest hover:text-white transition-colors">Ver Todo</a>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {myCourses.map((course, i) => (
-                            <div key={i} className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
-                                <div className="aspect-square relative overflow-hidden">
-                                    <Image
-                                        src={course.image}
-                                        alt={course.title}
-                                        fill
-                                        className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
-                                            <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                                        </div>
-                                    </div>
-                                    <div className="absolute bottom-4 left-4 right-4">
-                                        <div className="flex justify-between items-center text-[8px] font-black text-white uppercase tracking-widest mb-1.5">
-                                            <span>Progreso</span>
-                                            <span>{course.progress}%</span>
-                                        </div>
-                                        <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${course.progress}%` }}
-                                                className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]"
+                    {myCourses.length === 0 ? (
+                        <div className="bg-black/40 border border-white/5 rounded-[2rem] p-8 text-center">
+                            <BookOpen className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                            <h3 className="text-lg font-bold text-white mb-2">No tienes cursos inscritos</h3>
+                            <p className="text-gray-500 mb-6">Explora nuestra academia y comienza tu aprendizaje.</p>
+                            <a href="/miembros/academia" className="inline-block px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
+                                Explorar Academia
+                            </a>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                            {myCourses.map((course, i) => (
+                                <div key={course.id || i} className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                                    <div className="aspect-square relative overflow-hidden bg-zinc-900">
+                                        {course.image ? (
+                                            <Image
+                                                src={course.image}
+                                                alt={course.title}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
                                             />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <BookOpen className="w-16 h-16 text-gray-700" />
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
+                                                <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                            </div>
+                                        </div>
+                                        <div className="absolute bottom-4 left-4 right-4">
+                                            <div className="flex justify-between items-center text-[8px] font-black text-white uppercase tracking-widest mb-1.5">
+                                                <span>Progreso</span>
+                                                <span>{course.progress}%</span>
+                                            </div>
+                                            <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${course.progress}%` }}
+                                                    className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 flex-1 flex flex-col justify-between">
+                                        <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{course.title}</h4>
+                                        <div className="flex items-center gap-2 text-[8px] text-gray-500 font-bold uppercase tracking-widest">
+                                            <Clock className="w-2.5 h-2.5" />
+                                            <span>{course.lastAccessed}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="p-4 flex-1 flex flex-col justify-between">
-                                    <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{course.title}</h4>
-                                    <div className="flex items-center gap-2 text-[8px] text-gray-500 font-bold uppercase tracking-widest">
-                                        <Clock className="w-2.5 h-2.5" />
-                                        <span>{course.lastAccessed}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Sidebar Column: Downloads & Perks */}
@@ -159,28 +221,35 @@ export default function UserDashboard() {
                             <h2 className="text-sm font-black text-white uppercase tracking-widest">Descargas Recientes</h2>
                             <DownloadCloud className="w-4 h-4 text-blis-red" />
                         </div>
-                        <div className="p-4 space-y-2">
-                            {recentDownloads.map((doc, i) => (
-                                <div key={i} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer">
-                                    <div className="flex items-center gap-4 min-w-0">
-                                        <div className="p-2 bg-black rounded-lg text-white group-hover:text-blis-red transition-colors">
-                                            <FileText className="w-4 h-4" />
+                        {recentDownloads.length === 0 ? (
+                            <div className="p-8 text-center">
+                                <FileText className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                                <p className="text-gray-500 text-sm">Sin descargas recientes</p>
+                            </div>
+                        ) : (
+                            <div className="p-4 space-y-2">
+                                {recentDownloads.map((doc, i) => (
+                                    <div key={i} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer">
+                                        <div className="flex items-center gap-4 min-w-0">
+                                            <div className="p-2 bg-black rounded-lg text-white group-hover:text-blis-red transition-colors">
+                                                <FileText className="w-4 h-4" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h5 className="text-xs font-bold text-white truncate">{doc.name}</h5>
+                                                <span className="text-[10px] text-gray-500 uppercase font-black">{doc.date}</span>
+                                            </div>
                                         </div>
-                                        <div className="min-w-0">
-                                            <h5 className="text-xs font-bold text-white truncate">{doc.name}</h5>
-                                            <span className="text-[10px] text-gray-500 uppercase font-black">{doc.size}</span>
-                                        </div>
+                                        <button className="p-2 hover:text-blis-red transition-colors">
+                                            <Download className="w-4 h-4" />
+                                        </button>
                                     </div>
-                                    <button className="p-2 hover:text-blis-red transition-colors">
-                                        <Download className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                         <div className="p-4 border-t border-white/5 bg-black">
-                            <button className="w-full py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                            <a href="/miembros/productos" className="w-full py-3 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
                                 Gestionar Recursos <ChevronRight className="w-4 h-4" />
-                            </button>
+                            </a>
                         </div>
                     </div>
 
@@ -193,9 +262,9 @@ export default function UserDashboard() {
                         <p className="text-white/80 text-sm font-medium mb-8 leading-relaxed relative z-10">
                             Los inversores que utilizan el <b>Arsenal de Licitaciones</b> junto con el curso de <b>Captación</b> han reportado una tasa de cierre un 40% mayor este trimestre.
                         </p>
-                        <button className="w-full bg-white text-black font-black uppercase tracking-widest text-[10px] py-4 rounded-xl shadow-xl hover:scale-105 transition-transform relative z-10">
+                        <a href="/miembros/productos" className="w-full bg-white text-black font-black uppercase tracking-widest text-[10px] py-4 rounded-xl shadow-xl hover:scale-105 transition-transform relative z-10 inline-block text-center">
                             Explorar Licitaciones
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

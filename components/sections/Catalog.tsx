@@ -1,33 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ShoppingCart, BookOpen, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowRight, ShoppingCart, BookOpen, ChevronLeft, ChevronRight, Loader2, Package } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { useProducts } from "@/lib/hooks/useProducts";
 import Link from "next/link";
-
-const coursesDataFallback = [
-    { id: "cu1", slug: "captacion-inmobiliaria", type: "Curso Pro", name: "Captación Inmobiliaria", price: "$97", image: "/images/CURSO-CAPTACIÓN INMOBILIARIA DESDE CERO.webp" },
-    { id: "cu2", slug: "cero-fallos", type: "Curso Pro", name: "Cero Fallos", price: "$79", image: "/images/CURSO-Como vender inmuebles sin errores.webp" },
-    { id: "cu3", slug: "experto-captador", type: "Curso Pro", name: "Experto Captador", price: "$69", image: "/images/CURSO-EXPERTO CAPTADOR DE LLAMADAS EN FRIO.webp" },
-    { id: "cu4", slug: "domina-instagram", type: "Curso Pro", name: "Domina Instagram", price: "$69", image: "/images/CURSO-como crear contenido en redes sociales.webp" },
-    { id: "cu5", slug: "fotografia-inmobiliaria", type: "Curso Pro", name: "Fotografía Inmobiliaria", price: "$49", image: "/images/CURSO-Fotografia inmobiliaria con smartphone.webp" },
-    { id: "cu6", slug: "marketing-real-estate", type: "Curso Pro", name: "Marketing Real Estate", price: "$79", image: "/images/CURSO-TE AYUDAMOS A CREAR TU PLAN DE COMERCIALIZACION.webp" },
-    { id: "cu7", slug: "productividad-agente", type: "Curso Pro", name: "Productividad Agente", price: "$59", image: "/images/CURSO-VUELVE TU DÍA PRODUCTIVO COMO AGENTE INMOBILIARIO.webp" },
-    { id: "cu8", slug: "inversion-inteligente", type: "Curso Pro", name: "Inversión Inteligente", price: "$89", image: "/images/CURSO-Deja de cometer errores al comprar inmuebles.webp" }
-];
-
-const shopProductsDataFallback = [
-    { id: "k1", slug: "pack-vip-contratos", type: "Kit Agentes", name: "Pack VIP Contratos", price: "$85", image: "https://images.unsplash.com/photo-1589211062033-f117094ba490?w=800&q=80" },
-    { id: "d1", slug: "estudio-mercado", type: "Kit Desarrolladores", name: "Estudio de Mercado", price: "$150", image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=800&q=80" },
-    { id: "e1", slug: "guia-pro-sin-agentes", type: "Ebook Pro", name: "Guía Pro: Sin Agentes", price: "$29", image: "https://images.unsplash.com/photo-1450101499163-c8848c66cb85?w=800&q=80" },
-    { id: "c1", slug: "blindaje-arrendamiento", type: "Kit Legal", name: "Blindaje Arrendamiento", price: "$95", image: "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=800&q=80" },
-    { id: "c2", slug: "promesa-compraventa", type: "Contrato Pro", name: "Promesa Compraventa", price: "$120", image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=800&q=80" },
-    { id: "d2", slug: "evaluacion-financiera", type: "Masterclass", name: "Evaluación Financiera", price: "$199", image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80" },
-    { id: "d4", slug: "negociacion-letal", type: "Kit Pro", name: "Negociación Letal", price: "$120", image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&q=80" },
-    { id: "k2", slug: "anticresis-mutuos", type: "Pack Legal", name: "Anticresis y Mutuos", price: "$65", image: "https://images.unsplash.com/photo-1521791136064-7986c2959213?w=800&q=80" }
-];
 
 export function Catalog() {
     const { cmsData } = useLandingCMS();
@@ -53,7 +31,7 @@ export function Catalog() {
             type: p.categoria?.nombre || 'Curso Pro',
             name: p.nombre,
             price: `$${p.precio_usd || 0}`,
-            image: p.imagen_principal || '/images/placeholder-product.jpg'
+            image: p.imagen_principal || ''
         }));
 
     const shopFromDb = dbProducts
@@ -65,11 +43,11 @@ export function Catalog() {
             type: p.categoria?.nombre || 'Kit',
             name: p.nombre,
             price: `$${p.precio_usd || 0}`,
-            image: p.imagen_principal || 'https://images.unsplash.com/photo-1589211062033-f117094ba490?w=800&q=80'
+            image: p.imagen_principal || ''
         }));
 
-    const coursesData = coursesFromDb.length > 0 ? coursesFromDb : coursesDataFallback;
-    const shopProductsData = shopFromDb.length > 0 ? shopFromDb : shopProductsDataFallback;
+    const coursesData = coursesFromDb;
+    const shopProductsData = shopFromDb;
 
     const displayProducts = activeTab === "courses" ? coursesData : shopProductsData;
     const baseItems = [...displayProducts, { id: "cta", isCTA: true }];
@@ -239,6 +217,29 @@ export function Catalog() {
             return () => clearTimeout(timer);
         }
     }, [activeTab]);
+
+    // Show empty state if no products
+    if (loading) {
+        return (
+            <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-zinc-950 relative">
+                <div className="container mx-auto px-6 text-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-blis-red mx-auto" />
+                </div>
+            </section>
+        );
+    }
+
+    if (coursesData.length === 0 && shopProductsData.length === 0) {
+        return (
+            <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-zinc-950 relative">
+                <div className="container mx-auto px-6 flex flex-col items-center justify-center h-[400px]">
+                    <Package className="w-16 h-16 text-gray-600 mb-4" />
+                    <h3 className="text-xl font-bold text-white mb-2">No hay productos disponibles</h3>
+                    <p className="text-gray-500 text-center">Los productos se cargarán próximamente.</p>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-zinc-950 relative">

@@ -24,7 +24,7 @@ export function FooterSections() {
         title: cmsData?.footer?.videoTitle || "Dentro de la Fábrica",
         subtitle: cmsData?.footer?.videoSubtitle || "Conoce nuestro rigor metodológico",
         url: cmsData?.footer?.videoUrl || "",
-        thumbnail: cmsData?.footer?.videoThumbnail || "/images/edificio-blis.webp"
+        thumbnail: cmsData?.footer?.videoThumbnail || undefined
     };
     
     // Use siteConfig for socials, with fallbacks
@@ -57,8 +57,8 @@ export function FooterSections() {
     const locationText = siteConfig?.footerLocationText || footer.locationText || "Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú";
     const showProjects = siteConfig?.footerShowProjects ?? (footer.showProjects !== false);
     
-    const logoVertical = siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || footer.logoVertical || "/images/logo-blis-vertical.png";
-    const logoHorizontal = siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || footer.logoHorizontal || "/images/blis-logo.png";
+    const logoVertical = siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || footer.logoVertical;
+    const logoHorizontal = siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || footer.logoHorizontal;
 
     // Fetch projects from database
     useEffect(() => {
@@ -122,10 +122,12 @@ export function FooterSections() {
                             />
                         ) : (
                             <>
-                                <div 
-                                    className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-20 transition-opacity duration-700"
-                                    style={{ backgroundImage: `url('${footerVideo.thumbnail}')` }}
-                                />
+                                {footerVideo.thumbnail && (
+                                    <div 
+                                        className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-20 transition-opacity duration-700"
+                                        style={{ backgroundImage: `url('${footerVideo.thumbnail}')` }}
+                                    />
+                                )}
                                 <div className="relative z-10 flex flex-col items-center justify-center h-full p-8">
                                     <button 
                                         onClick={() => extractVideoUrl(footerVideo.url) && setIsVideoPlaying(true)}
@@ -153,11 +155,15 @@ export function FooterSections() {
                     {/* ---- MOBILE LAYOUT ---- */}
                     <div className="block lg:hidden">
                         <div className="flex flex-col items-center text-center mb-10">
-                            <img
-                                src={logoVertical}
-                                alt="Logo"
-                                className="h-36 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-4"
-                            />
+                            {logoVertical ? (
+                                <img
+                                    src={logoVertical}
+                                    alt="Logo"
+                                    className="h-36 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-4"
+                                />
+                            ) : (
+                                <span className="text-2xl font-black text-white tracking-wider mb-4">BLIS CORP</span>
+                            )}
                             <p className="text-gray-500 font-light text-sm max-w-xs mb-6">{description}</p>
                             <div className="flex flex-wrap gap-3 justify-center mb-8">
                                 {activeLinks.map((link, i) => (
@@ -214,7 +220,11 @@ export function FooterSections() {
                     {/* ---- DESKTOP LAYOUT ---- */}
                     <div className="hidden lg:grid lg:grid-cols-12 gap-12 mb-16">
                         <div className="lg:col-span-4 flex flex-col items-start pr-4">
-                            <img src={logoHorizontal} alt="Logo" className="h-32 sm:h-40 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-6" />
+                            {logoHorizontal ? (
+                                <img src={logoHorizontal} alt="Logo" className="h-32 sm:h-40 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-6" />
+                            ) : (
+                                <span className="text-2xl font-black text-white tracking-wider mb-6">BLIS CORP</span>
+                            )}
                             <p className="text-gray-500 font-light mb-8 max-w-sm">{description}</p>
                             <div className="flex flex-wrap gap-3">
                                 {activeLinks.map((link, i) => (

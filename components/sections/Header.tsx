@@ -132,11 +132,15 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                               className={`absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 ${!user ? 'w-[120px] xl:w-[200px]' : 'w-auto'} flex-shrink-0 cursor-pointer z-20`}
                               onClick={() => handleNavigation('/#hero')}
                           >
-<img
-                                   src={logoHorizontal || siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || cmsData?.footer?.logoHorizontal || "/images/blis-logo.png"}
-                                   alt="Blis Corp Logo"
-                                   className="h-14 sm:h-14 lg:h-12 xl:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(190,11,60,0.5)] mx-auto lg:ml-0"
-                               />
+                              {(logoHorizontal || siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || cmsData?.footer?.logoHorizontal) ? (
+                                  <img
+                                      src={logoHorizontal || siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || cmsData?.footer?.logoHorizontal}
+                                      alt="Blis Corp Logo"
+                                      className="h-14 sm:h-14 lg:h-12 xl:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(190,11,60,0.5)] mx-auto lg:ml-0"
+                                  />
+                              ) : (
+                                  <span className="text-xl font-black text-white tracking-wider">BLIS CORP</span>
+                              )}
                           </div>
 
 
@@ -576,11 +580,15 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
 
 {/* Logo */}
                              <div className={`flex flex-col items-center border-b border-white/8 transition-all duration-300 ${user ? 'pt-8 pb-3' : 'pt-14 pb-6'}`}>
-                                 <img
-                                     src={logoVertical || siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || cmsData?.footer?.logoVertical || "/images/logo-blis-vertical.png"}
-                                     alt="Blis Corporation"
-                                     className={`w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.4)] transition-all duration-300 ${user ? 'h-20 mb-2' : 'h-28 mb-4'}`}
-                                 />
+                                 {(logoVertical || siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || cmsData?.footer?.logoVertical) ? (
+                                     <img
+                                         src={logoVertical || siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || cmsData?.footer?.logoVertical}
+                                         alt="Blis Corporation"
+                                         className={`w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.4)] transition-all duration-300 ${user ? 'h-20 mb-2' : 'h-28 mb-4'}`}
+                                     />
+                                 ) : (
+                                     <span className={`font-black text-white tracking-wider ${user ? 'text-2xl mb-2' : 'text-3xl mb-4'}`}>BLIS CORP</span>
+                                 )}
                              </div>
 
                             {/* User Profile Mobile */}

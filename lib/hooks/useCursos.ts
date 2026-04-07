@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 interface Lesson {
   id: string
@@ -16,12 +16,13 @@ interface Module {
   lessons: Lesson[]
 }
 
-interface Curso {
+export interface Curso {
   id: string
   nombre: string
   slug: string
   descripcion?: string
-  modulos: Module[]
+  modulos?: Module[]
+  imagen_principal?: string
   precio_coins: number
   precio_usd: number
   max_intentos: number
@@ -34,6 +35,18 @@ interface Curso {
     nota_final?: number
     intentos: number
     examen_estado: string
+  }
+}
+
+export interface CursoWithProgress extends Curso {
+  progreso?: {
+    id: string
+    progreso: number
+    nota_final?: number
+    intentos: number
+    examen_estado: string
+    creado_en: string
+    actualizado_en: string
   }
 }
 
@@ -131,3 +144,38 @@ export function useCurso(slug: string | null, userId?: string | null) {
 
   return { curso, loading, error, updateProgress }
 }
+
+export function useUserCursos(userId: string | null) {
+  const [userCursos, setUserCursos] = useState<CursoWithProgress[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchUserProgress = useCallback(async () => {
+    if (!userId) return
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/cursos?user_id=${userId}`)
+      const data = await response.json()
+      if (data.success) {
+        setUserCursos(data.data || [])
+      } else {
+        setError(data.error || 'Error al cargar cursos')
+      }
+    } catch {
+      setError('Error de conexión')
+    } finally {
+      setLoading(false)
+    }
+  }, [userId])
+
+  useEffect(() => {
+    if (userId) {
+      fetchUserProgress()
+    }
+  }, [userId, fetchUserProgress])
+
+  return { userCursos, loading, error, refetch: fetchUserProgress }
+}
+
+export default useCursos
