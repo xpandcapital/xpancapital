@@ -15,8 +15,9 @@ export interface ExchangeRates {
 
 interface CurrencyContextType {
     currencies: Currency[];
-    selectedCurrency: Currency;
-    taxCurrency: Currency;
+    selectedCurrency: Currency; // Moneda para visualización
+    taxCurrency: Currency; // Moneda fiscal para impuestos
+    fiscalCurrency: Currency; // Moneda en la que se cobra (siempre PEN para Perú)
     activeCurrencyCodes: string[];
     isMultiCurrencyEnabled: boolean;
     isBlisCoinsEnabled: boolean;
@@ -25,12 +26,15 @@ interface CurrencyContextType {
     lastUpdated: Date | null;
     setSelectedCurrency: (code: string) => void;
     setTaxCurrency: (code: string) => void;
+    setFiscalCurrency: (code: string) => void;
     toggleActiveCurrency: (code: string) => void;
     setActiveCurrencyCodes: (codes: string[]) => void;
     setIsMultiCurrencyEnabled: (enabled: boolean) => void;
     setIsBlisCoinsEnabled: (enabled: boolean) => void;
     setSafetyMarkup: (markup: number) => void;
     convertAmount: (amount: number, from: string, to: string) => number;
+    convertToFiscal: (amount: number, fromCurrency: string) => number; // Convertir a moneda fiscal
+    convertFromFiscal: (amount: number, toCurrency: string) => number; // Convertir desde moneda fiscal
     refreshRates: () => Promise<void>;
     loading: boolean;
 }
@@ -64,6 +68,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     
     const [selectedCurrency, setCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "USD") || INITIAL_CURRENCIES[0]);
     const [taxCurrency, setTaxCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "PEN") || INITIAL_CURRENCIES[0]);
+    const [fiscalCurrency, setFiscalCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "PEN") || INITIAL_CURRENCIES[0]);
     const [isMultiCurrencyEnabled, setIsMultiCurrencyEnabled] = useState<boolean>(false);
     const [isBlisCoinsEnabled, setIsBlisCoinsEnabled] = useState<boolean>(true);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -111,6 +116,21 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (found) setTaxCurrencyState(found);
     }, []);
 
+    const setFiscalCurrency = useCallback((code: string) => {
+        const found = INITIAL_CURRENCIES.find(c => c.code === code);
+        if (found) setFiscalCurrencyState(found);
+    }, []);
+
+    // Convertir cualquier moneda a moneda fiscal (para checkout/pagos)
+    const convertToFiscal = useCallback((amount: number, fromCurrency: string) => {
+        return convertAmount(amount, fromCurrency, fiscalCurrency.code);
+    }, [convertAmount, fiscalCurrency]);
+
+    // Convertir desde moneda fiscal a moneda de visualización
+    const convertFromFiscal = useCallback((amount: number, toCurrency: string) => {
+        return convertAmount(amount, fiscalCurrency.code, toCurrency);
+    }, [convertAmount, fiscalCurrency]);
+
     const toggleActiveCurrency = useCallback((code: string) => {
         const newCodes = activeCurrencyCodes.includes(code)
             ? activeCurrencyCodes.filter(c => c !== code)
@@ -132,6 +152,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 currencies: INITIAL_CURRENCIES,
                 selectedCurrency,
                 taxCurrency,
+                fiscalCurrency,
                 activeCurrencyCodes,
                 isMultiCurrencyEnabled,
                 isBlisCoinsEnabled,
@@ -140,12 +161,15 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 lastUpdated,
                 setSelectedCurrency,
                 setTaxCurrency,
+                setFiscalCurrency,
                 toggleActiveCurrency,
                 setActiveCurrencyCodes: handleSetActiveCurrencyCodes,
                 setIsMultiCurrencyEnabled,
                 setIsBlisCoinsEnabled,
                 setSafetyMarkup: handleSetSafetyMarkup,
                 convertAmount,
+                convertToFiscal,
+                convertFromFiscal,
                 refreshRates,
                 loading,
             }}
