@@ -300,8 +300,8 @@ export default function RichTextEditor({
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 2024 * 1024) {
-                setModal({ type: 'error', message: 'La imagen excede el límite de 2MB.' });
+            if (file.size > 10 * 1024 * 1024) {
+                setModal({ type: 'error', message: 'La imagen excede el límite de 10MB.' });
                 return;
             }
             const reader = new FileReader();
