@@ -1,70 +1,54 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Clock, Star, Trophy, ChevronRight, Lock, CheckCircle2, Search, ArrowLeft } from "lucide-react";
+import { Play, Clock, Star, Trophy, ChevronRight, Lock, CheckCircle2, Search, ArrowLeft, BookOpen, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-
-const PURCHASED_COURSES = [
-    {
-        id: "c1",
-        title: "Captación Inmobiliaria Desde Cero",
-        instructor: "Blis Expert Team",
-        progress: 75,
-        image: "/images/CURSO-CAPTACIÓN INMOBILIARIA DESDE CERO.webp",
-        category: "Capacitaciones",
-        modules: [
-            {
-                id: "m1",
-                title: "Módulo 1: Fundamentos del Mercado Inmobiliario",
-                lessons: [
-                    { id: "l1", title: "Introducción a la Inversión Moderna", duration: "12:45", completed: true },
-                    { id: "l2", title: "Psicología del Vendedor", duration: "18:20", completed: true },
-                    { id: "l3", title: "Análisis de Micro-Mercados", duration: "25:10", completed: false },
-                ],
-                isOpen: true
-            },
-            {
-                id: "m2",
-                title: "Módulo 2: Estrategias de Captación Letales",
-                lessons: [
-                    { id: "l4", title: "El Guion Perfecto de Llamada en Frío", duration: "15:30", completed: false },
-                    { id: "l5", title: "Manejo de Objeciones Nivel Pro", duration: "22:15", completed: false },
-                ],
-                isOpen: false
-            }
-        ]
-    },
-    {
-        id: "c2",
-        title: "Cero Fallos: Vende Rápido y al Mejor Precio",
-        instructor: "Legal & Sales Team",
-        progress: 30,
-        image: "/images/CURSO-Como vender inmuebles sin errores.webp",
-        category: "Capacitaciones",
-        modules: [
-            {
-                id: "m1",
-                title: "Módulo 1: Preparación del Inmueble",
-                lessons: [
-                    { id: "l1", title: "Valoración Realista", duration: "10:15", completed: true },
-                    { id: "l2", title: "Home Staging que Vende", duration: "14:50", completed: false },
-                ],
-                isOpen: true
-            }
-        ]
-    }
-];
+import { useAuth } from "@/hooks/useAuth";
+import { useCursos } from "@/lib/hooks/useCursos";
 
 export default function AcademyPage() {
-    const [selectedCourse, setSelectedCourse] = useState<typeof PURCHASED_COURSES[0] | null>(null);
+    const { user } = useAuth();
+    const { cursos, loading } = useCursos();
+    const [selectedCourse, setSelectedCourse] = useState<any>(null);
     const [activeLesson, setActiveLesson] = useState<any>(null);
 
-    const handleSelectCourse = (course: typeof PURCHASED_COURSES[0]) => {
+    const handleSelectCourse = (course: any) => {
         setSelectedCourse(course);
-        // Default to first incomplete lesson or just the first one
-        setActiveLesson(course.modules[0].lessons[0]);
+        const firstModule = course.modulos?.[0];
+        const firstLesson = firstModule?.lessons?.[0];
+        if (firstLesson) {
+            setActiveLesson(firstLesson);
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8">
+                <BookOpen className="w-16 h-16 text-gray-600 mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Inicia sesión para ver tus cursos</h2>
+                <p className="text-gray-500 mb-6">Accede a tu cuenta para continuar tu formación.</p>
+                <a href="/acceso" className="px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
+                    Iniciar Sesión
+                </a>
+            </div>
+        );
+    }
+
+    const coursesWithProgress = cursos.map((curso: any) => ({
+        ...curso,
+        modulos: curso.modulos || [{ id: 'm1', title: 'Módulo 1', lessons: [] }],
+        progreso: curso.progreso || { progreso: 0 }
+    }));
+
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
             <AnimatePresence mode="wait">
@@ -91,54 +75,71 @@ export default function AcademyPage() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {PURCHASED_COURSES.map((course, i) => (
-                                <motion.div
-                                    key={course.id}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: i * 0.1 }}
-                                    onClick={() => handleSelectCourse(course)}
-                                    className="group cursor-pointer bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col h-full shadow-xl"
-                                >
-                                    <div className="relative w-full pb-[100%] overflow-hidden bg-black">
-                                        <div className="absolute inset-0">
-                                            <Image
-                                                src={course.image}
-                                                alt={course.title}
-                                                fill
-                                                className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-700"
-                                            />
-                                        </div>
-                                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
-                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(190,11,60,0.6)]">
-                                                <Play className="w-6 h-6 text-white fill-white ml-1" />
+                        {coursesWithProgress.length === 0 ? (
+                            <div className="bg-black/40 border border-white/5 rounded-[2rem] p-12 text-center">
+                                <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                                <h2 className="text-xl font-bold text-white mb-2">No tienes cursos inscritos</h2>
+                                <p className="text-gray-500 mb-6">Explora nuestra academia y comienza tu aprendizaje.</p>
+                                <a href="/tienda" className="inline-block px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
+                                    Explorar Academia
+                                </a>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {coursesWithProgress.map((course, i) => (
+                                    <motion.div
+                                        key={course.id}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: i * 0.1 }}
+                                        onClick={() => handleSelectCourse(course)}
+                                        className="group cursor-pointer bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col h-full shadow-xl"
+                                    >
+                                        <div className="relative w-full pb-[100%] overflow-hidden bg-black">
+                                            {course.imagen_principal ? (
+                                                <div className="absolute inset-0">
+                                                    <Image
+                                                        src={course.imagen_principal}
+                                                        alt={course.nombre}
+                                                        fill
+                                                        className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-700"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <BookOpen className="w-16 h-16 text-gray-700" />
+                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(190,11,60,0.6)]">
+                                                    <Play className="w-6 h-6 text-white fill-white ml-1" />
+                                                </div>
+                                            </div>
+                                            <div className="absolute bottom-4 left-6 right-6">
+                                                <div className="flex justify-between items-center text-[10px] font-black text-white uppercase tracking-widest mb-2">
+                                                    <span>Progreso</span>
+                                                    <span>{course.progreso?.progreso || 0}%</span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]" style={{ width: `${course.progreso?.progreso || 0}%` }} />
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="absolute bottom-4 left-6 right-6">
-                                            <div className="flex justify-between items-center text-[10px] font-black text-white uppercase tracking-widest mb-2">
-                                                <span>Progreso</span>
-                                                <span>{course.progress}%</span>
-                                            </div>
-                                            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                                                <div className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]" style={{ width: `${course.progress}%` }} />
+                                        <div className="p-6 flex-1 flex flex-col">
+                                            <p className="text-blis-red font-black uppercase tracking-widest text-[9px] mb-2">Curso</p>
+                                            <h3 className="text-white font-black uppercase tracking-tight text-lg mb-4 leading-tight group-hover:text-blis-red transition-colors line-clamp-2">
+                                                {course.nombre}
+                                            </h3>
+                                            <div className="mt-auto flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                                                <Trophy className="w-3.5 h-3.5" />
+                                                <span>Blis Expert Team</span>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="p-6 flex-1 flex flex-col">
-                                        <p className="text-blis-red font-black uppercase tracking-widest text-[9px] mb-2">{course.category}</p>
-                                        <h3 className="text-white font-black uppercase tracking-tight text-lg mb-4 leading-tight group-hover:text-blis-red transition-colors line-clamp-2">
-                                            {course.title}
-                                        </h3>
-                                        <div className="mt-auto flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                                            <Trophy className="w-3.5 h-3.5" />
-                                            <span>{course.instructor}</span>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
                 ) : (
                     <motion.div
@@ -160,12 +161,18 @@ export default function AcademyPage() {
                             {/* Video Player Area */}
                             <div className="flex-1 space-y-6">
                                 <div className="aspect-video bg-zinc-900 rounded-[2.5rem] overflow-hidden border border-white/5 relative group cursor-pointer shadow-2xl">
-                                    <Image
-                                        src={selectedCourse.image}
-                                        alt="Video Thumbnail"
-                                        fill
-                                        className="object-cover opacity-40 group-hover:scale-105 transition-transform duration-1000"
-                                    />
+                                    {selectedCourse.imagen_principal ? (
+                                        <Image
+                                            src={selectedCourse.imagen_principal}
+                                            alt="Video Thumbnail"
+                                            fill
+                                            className="object-cover opacity-40 group-hover:scale-105 transition-transform duration-1000"
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <BookOpen className="w-24 h-24 text-gray-700" />
+                                        </div>
+                                    )}
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <motion.div
                                             whileHover={{ scale: 1.1 }}
@@ -181,7 +188,7 @@ export default function AcademyPage() {
                                             <div className="h-1.5 w-64 bg-white/20 rounded-full overflow-hidden">
                                                 <div className="h-full w-1/3 bg-blis-red" />
                                             </div>
-                                            <span className="text-[10px] font-mono opacity-60">04:20 / {activeLesson?.duration}</span>
+                                            <span className="text-[10px] font-mono opacity-60">00:00 / {activeLesson?.duration || 'N/A'}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -190,16 +197,16 @@ export default function AcademyPage() {
                                     <div className="flex justify-between items-start mb-6">
                                         <div>
                                             <span className="text-blis-red font-black uppercase tracking-[0.2em] text-[10px] mb-2 block">Viendo Ahora</span>
-                                            <h1 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4">{activeLesson?.title}</h1>
+                                            <h1 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4">{activeLesson?.title || 'Selecciona una lección'}</h1>
                                             <div className="flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {activeLesson?.duration}</span>
+                                                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {activeLesson?.duration || 'N/A'}</span>
                                                 <span className="flex items-center gap-1.5 text-emerald-500"><Star className="w-4 h-4 fill-emerald-500" /> Premium</span>
                                             </div>
                                         </div>
                                         <button className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-blis-red hover:text-white transition-all">Siguiente Lección</button>
                                     </div>
                                     <p className="text-gray-400 font-medium leading-relaxed max-w-3xl">
-                                        Explora los detalles de {activeLesson?.title}. En esta sección profundizamos en las técnicas avanzadas que te permitirán destacar en el mercado actual.
+                                        {selectedCourse.descripcion || 'Explora los detalles de este curso. Contenido premium para avanzar en tu carrera.'}
                                     </p>
                                 </div>
                             </div>
@@ -209,19 +216,19 @@ export default function AcademyPage() {
                                 <div className="bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden flex flex-col h-full shadow-xl">
                                     <div className="p-6 border-b border-white/5 bg-black/40">
                                         <div className="flex items-center justify-between mb-4">
-                                            <h2 className="text-sm font-black text-white uppercase tracking-widest">Temario: {selectedCourse.title}</h2>
+                                            <h2 className="text-sm font-black text-white uppercase tracking-widest">Temario: {selectedCourse.nombre}</h2>
                                             <Trophy className="w-4 h-4 text-amber-500" />
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="flex-1 h-2 bg-white/5 rounded-full border border-white/5">
-                                                <div className="h-full bg-blis-red" style={{ width: `${selectedCourse.progress}%` }} />
+                                                <div className="h-full bg-blis-red" style={{ width: `${selectedCourse.progreso?.progreso || 0}%` }} />
                                             </div>
-                                            <span className="text-[10px] font-black text-white">{selectedCourse.progress}%</span>
+                                            <span className="text-[10px] font-black text-white">{selectedCourse.progreso?.progreso || 0}%</span>
                                         </div>
                                     </div>
 
                                     <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                        {selectedCourse.modules.map((module) => (
+                                        {(selectedCourse.modulos || []).map((module: any) => (
                                             <div key={module.id} className="space-y-2">
                                                 <div className="w-full flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
                                                     <span className="text-[11px] font-black uppercase tracking-tight text-white">{module.title}</span>
@@ -229,7 +236,7 @@ export default function AcademyPage() {
                                                 </div>
 
                                                 <div className="space-y-1 pl-2">
-                                                    {module.lessons.map((lesson) => (
+                                                    {(module.lessons || []).map((lesson: any) => (
                                                         <button
                                                             key={lesson.id}
                                                             onClick={() => setActiveLesson(lesson)}

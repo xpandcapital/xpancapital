@@ -1,44 +1,60 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ShoppingBag, Play, Download, ExternalLink, Zap } from "lucide-react";
+import { ShoppingBag, Play, Download, ExternalLink, Zap, Package, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
-const MY_PRODUCTS = [
-    {
-        id: "cu1",
-        title: "Captación Inmobiliaria Desde Cero: De Tocar Puertas a Cerrar Exclusivas",
-        category: "Capacitaciones",
-        type: "Curso",
-        image: "/images/CURSO-CAPTACIÓN INMOBILIARIA DESDE CERO.webp",
-        purchaseDate: "12 Feb 2026",
-        status: "En Progreso (75%)",
-        accent: "sky"
-    },
-    {
-        id: "cu2",
-        title: "Cero Fallos: Vende Rápido y al Mejor Precio",
-        category: "Capacitaciones",
-        type: "Curso",
-        image: "/images/CURSO-Como vender inmuebles sin errores.webp",
-        purchaseDate: "15 Feb 2026",
-        status: "Iniciado (30%)",
-        accent: "sky"
-    },
-    {
-        id: "k1",
-        title: "Pack VIP: Contratos de Corretaje (Venta y Alquiler)",
-        category: "Kits de Agentes",
-        type: "Kit",
-        image: "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=500&aspect=1",
-        purchaseDate: "20 Feb 2026",
-        status: "Disponible",
-        accent: "orange"
-    }
-];
+import { useAuth } from "@/hooks/useAuth";
+import { useCompras } from "@/lib/hooks/useCompras";
+import { useProducts } from "@/lib/hooks/useProducts";
+import { useEffect } from "react";
 
 export default function ProductsPage() {
+    const { user } = useAuth();
+    const { compras, loading: comprasLoading, fetchUserPurchases } = useCompras();
+    const { products, loading: productsLoading, fetchProducts } = useProducts();
+
+    useEffect(() => {
+        if (user?.id) {
+            fetchUserPurchases(user.id);
+        }
+        fetchProducts();
+    }, [user?.id, fetchUserPurchases, fetchProducts]);
+
+    const purchasedProducts = compras
+        .filter(c => c.estado === 'completado')
+        .flatMap(c => (c.items || []).map(item => ({
+            id: item.producto?.id || c.id,
+            title: item.producto?.nombre || 'Producto',
+            category: 'Producto',
+            type: 'Kit',
+            image: item.producto?.imagen_principal || '',
+            purchaseDate: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
+            status: 'Disponible',
+            accent: 'orange'
+        })));
+
+    if (comprasLoading || productsLoading) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8">
+                <Package className="w-16 h-16 text-gray-600 mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Inicia sesión para ver tus productos</h2>
+                <p className="text-gray-500 mb-6">Accede a tu cuenta para ver las herramientas y kits adquiridos.</p>
+                <a href="/acceso" className="px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
+                    Iniciar Sesión
+                </a>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
@@ -53,70 +69,86 @@ export default function ProductsPage() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {MY_PRODUCTS.map((product, i) => (
-                    <motion.div
-                        key={product.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="group bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col"
-                    >
-                        <div className="relative w-full pb-[100%] overflow-hidden bg-black">
-                            <div className="absolute inset-0">
-                                <Image
-                                    src={product.image}
-                                    alt={product.title}
-                                    fill
-                                    className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
-                                />
-                            </div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+            {purchasedProducts.length === 0 ? (
+                <div className="bg-black/40 border border-white/5 rounded-[2rem] p-12 text-center">
+                    <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-white mb-2">No tienes productos adquiridos</h2>
+                    <p className="text-gray-500 mb-6">Explora nuestra tienda y adquiere las herramientas que necesitas.</p>
+                    <Link href="/tienda" className="inline-block px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
+                        Ir a la Tienda
+                    </Link>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {purchasedProducts.map((product, i) => (
+                        <motion.div
+                            key={product.id || i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="group bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col"
+                        >
+                            <div className="relative w-full pb-[100%] overflow-hidden bg-black">
+                                {product.image ? (
+                                    <div className="absolute inset-0">
+                                        <Image
+                                            src={product.image}
+                                            alt={product.title}
+                                            fill
+                                            className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <Package className="w-16 h-16 text-gray-700" />
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
 
-                            <div className="absolute top-4 left-4">
-                                <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/10">
-                                    {product.type}
-                                </span>
-                            </div>
-
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="w-14 h-14 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
-                                    {product.type === "Curso" ? <Play className="w-5 h-5 text-white fill-white ml-1" /> : <Download className="w-5 h-5 text-white" />}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="p-6 flex-1 flex flex-col">
-                            <p className="text-blis-red font-black uppercase tracking-widest text-[10px] mb-2">{product.category}</p>
-                            <h3 className="text-lg font-black text-white uppercase tracking-tight mb-4 leading-tight group-hover:text-blis-red transition-colors min-h-[50px]">
-                                {product.title}
-                            </h3>
-
-                            <div className="mt-auto space-y-4">
-                                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                    <span>Adquirido: {product.purchaseDate}</span>
-                                    <span className="text-white">{product.status}</span>
+                                <div className="absolute top-4 left-4">
+                                    <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/10">
+                                        {product.type}
+                                    </span>
                                 </div>
 
-                                <button className="w-full py-4 bg-white/5 hover:bg-white/10 border border-white/5 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2">
-                                    {product.type === "Curso" ? "Continuar Lección" : "Descargar Archivos"}
-                                    <ExternalLink className="w-4 h-4" />
-                                </button>
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button className="w-14 h-14 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
+                                        {product.type === "Curso" ? <Play className="w-5 h-5 text-white fill-white ml-1" /> : <Download className="w-5 h-5 text-white" />}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </motion.div>
-                ))}
 
-                {/* Placeholder for "Add More" */}
-                <Link href="/tienda" className="border-2 border-dashed border-white/5 rounded-[2rem] flex flex-col items-center justify-center p-8 text-center group hover:border-blis-red/20 transition-all hover:bg-blis-red/5">
-                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blis-red transition-colors">
-                        <ShoppingBag className="w-6 h-6 text-gray-500 group-hover:text-white" />
-                    </div>
-                    <h3 className="text-white font-black uppercase tracking-tight">Adquirir Más Herramientas</h3>
-                    <p className="text-gray-500 text-xs mt-2 font-medium">Explora el catálogo completo de BlisTienda.</p>
-                </Link>
-            </div>
+                            <div className="p-6 flex-1 flex flex-col">
+                                <p className="text-blis-red font-black uppercase tracking-widest text-[10px] mb-2">{product.category}</p>
+                                <h3 className="text-lg font-black text-white uppercase tracking-tight mb-4 leading-tight group-hover:text-blis-red transition-colors min-h-[50px]">
+                                    {product.title}
+                                </h3>
+
+                                <div className="mt-auto space-y-4">
+                                    <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                        <span>Adquirido: {product.purchaseDate}</span>
+                                        <span className="text-white">{product.status}</span>
+                                    </div>
+
+                                    <button className="w-full py-4 bg-white/5 hover:bg-white/10 border border-white/5 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2">
+                                        {product.type === "Curso" ? "Continuar Lección" : "Descargar Archivos"}
+                                        <ExternalLink className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+
+                    {/* Placeholder for "Add More" */}
+                    <Link href="/tienda" className="border-2 border-dashed border-white/5 rounded-[2rem] flex flex-col items-center justify-center p-8 text-center group hover:border-blis-red/20 transition-all hover:bg-blis-red/5">
+                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:bg-blis-red transition-colors">
+                            <ShoppingBag className="w-6 h-6 text-gray-500 group-hover:text-white" />
+                        </div>
+                        <h3 className="text-white font-black uppercase tracking-tight">Adquirir Más Herramientas</h3>
+                        <p className="text-gray-500 text-xs mt-2 font-medium">Explora el catálogo completo de BlisTienda.</p>
+                    </Link>
+                </div>
+            )}
         </div>
     );
 }
-
