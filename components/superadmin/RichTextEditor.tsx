@@ -141,7 +141,7 @@ export default function RichTextEditor({
     const editorRef = useRef<HTMLDivElement>(null);
     const [showEmoji, setShowEmoji] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState(false);
-    const [modal, setModal] = useState<{ type: 'link' | 'embed' | 'error', message?: string } | null>(null);
+    const [modal, setModal] = useState<{ type: 'link' | 'embed' | 'error' | 'loading', message?: string } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [localValue, setLocalValue] = useState(value);
     const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
@@ -297,27 +297,41 @@ export default function RichTextEditor({
         execCommand('foreColor', hex);
     };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 10 * 1024 * 1024) {
-                setModal({ type: 'error', message: 'La imagen excede el límite de 10MB.' });
-                // Reset input to allow re-selecting same file
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = '';
-                }
-                return;
+        if (!file) return;
+
+        if (file.size > 10 * 1024 * 1024) {
+            setModal({ type: 'error', message: 'La imagen excede el límite de 10MB.' });
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+        }
+
+        // Upload to Supabase instead of base64
+        try {
+            setModal({ type: 'loading', message: 'Subiendo imagen...' });
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'productos-descripcion');
+            
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                execCommand('insertImage', data.url);
+                setModal(null);
+            } else {
+                setModal({ type: 'error', message: data.error || 'Error al subir imagen' });
             }
-            const reader = new FileReader();
-            reader.onload = (prev) => {
-                const base64 = prev.target?.result as string;
-                execCommand('insertImage', base64);
-                // Reset input to allow re-selecting same file
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = '';
-                }
-            };
-            reader.readAsDataURL(file);
+        } catch (err) {
+            setModal({ type: 'error', message: 'Error al subir imagen' });
+        } finally {
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
@@ -485,24 +499,24 @@ export default function RichTextEditor({
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
                             <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-zinc-900 border border-white/10 p-8 rounded-[2.5rem] w-full max-w-md space-y-6 shadow-2xl ring-1 ring-white/10">
                                 <div className="flex items-center gap-3 text-white font-black uppercase text-[10px] tracking-widest">
-                                    <div className="p-2 bg-gradient-to-tr from-blis-red to-orange-500 rounded-lg shadow-lg">
-                                        {modal.type === 'error' ? <AlertCircle className="w-4 h-4 text-white" /> : modal.type === 'embed' ? <FileCode className="w-4 h-4 text-white" /> : <LinkBtn className="w-4 h-4 text-white" />}
+                                    <div className={`p-2 rounded-lg shadow-lg ${modal.type === 'error' ? 'bg-gradient-to-tr from-blis-red to-orange-500' : modal.type === 'loading' ? 'bg-gradient-to-tr from-blue-500 to-cyan-500' : 'bg-gradient-to-tr from-blis-red to-orange-500'}`}>
+                                        {modal.type === 'error' ? <AlertCircle className="w-4 h-4 text-white" /> : modal.type === 'loading' ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : modal.type === 'embed' ? <FileCode className="w-4 h-4 text-white" /> : <LinkBtn className="w-4 h-4 text-white" />}
                                     </div>
-                                    {modal.type === 'error' ? 'Aviso del Sistema' : modal.type === 'embed' ? 'Incrustar Contenido' : 'Añadir Enlace'}
+                                    {modal.type === 'error' ? 'Aviso del Sistema' : modal.type === 'loading' ? 'Cargando...' : modal.type === 'embed' ? 'Incrustar Contenido' : 'Añadir Enlace'}
                                 </div>
 
                                 <div className="space-y-4">
                                     <p className="text-gray-400 text-[11px] font-bold uppercase tracking-widest leading-relaxed">
                                         {modal.message || (modal.type === 'embed' ? 'Pega el código iframe o script profesional aquí. Se cargará instantáneamente en el editor.' : 'Introduce la URL de destino completa para el enlace seleccionado.')}
                                     </p>
-                                    {modal.type !== 'error' && (
+                                    {modal.type !== 'error' && modal.type !== 'loading' && (
                                         <textarea id="modal-input" className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-xs focus:outline-none focus:border-blis-red min-h-[120px] transition-all resize-none" placeholder={modal.type === 'embed' ? '<iframe src="..." />' : 'https://bliscorp.com/...'} />
                                     )}
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <button onClick={() => setModal(null)} className="flex-1 py-4 bg-white/5 text-gray-500 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all">Cancelar</button>
-                                    {modal.type !== 'error' && (
+                                    <button onClick={() => setModal(null)} className="flex-1 py-4 bg-white/5 text-gray-500 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all">{modal.type === 'loading' ? 'Espere...' : 'Cancelar'}</button>
+                                    {modal.type !== 'error' && modal.type !== 'loading' && (
                                         <button onClick={() => {
                                             const input = document.getElementById('modal-input') as HTMLTextAreaElement;
                                             if (modal.type === 'embed') execCommand('insertHTML', input.value);

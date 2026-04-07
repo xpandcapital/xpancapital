@@ -64,19 +64,41 @@ export function useMonedas() {
 
   const updateConfig = useCallback(async (updates: Partial<MonedasConfig>) => {
     try {
-      const { data, error: updateError } = await supabase
+      // Check if config exists
+      const { data: existingConfig } = await supabase
         .from('monedas_config')
-        .upsert({
-          empresa_id: DEFAULT_EMPRESA_ID,
-          ...updates,
-          ultima_actualizacion: new Date().toISOString()
-        })
-        .select()
-        .single()
+        .select('id')
+        .eq('empresa_id', DEFAULT_EMPRESA_ID)
+        .maybeSingle()
 
-      if (updateError) throw updateError
-      setConfig(data)
-      return { success: true, data }
+      let result
+      if (existingConfig) {
+        // Update existing
+        result = await supabase
+          .from('monedas_config')
+          .update({
+            ...updates,
+            ultima_actualizacion: new Date().toISOString()
+          })
+          .eq('empresa_id', DEFAULT_EMPRESA_ID)
+          .select()
+          .single()
+      } else {
+        // Insert new
+        result = await supabase
+          .from('monedas_config')
+          .insert({
+            empresa_id: DEFAULT_EMPRESA_ID,
+            ...updates,
+            ultima_actualizacion: new Date().toISOString()
+          })
+          .select()
+          .single()
+      }
+
+      if (result.error) throw result.error
+      setConfig(result.data)
+      return { success: true, data: result.data }
     } catch (e) {
       console.error('[useMonedas] Error updating config:', e)
       return { success: false, error: e instanceof Error ? e.message : 'Error al actualizar' }
