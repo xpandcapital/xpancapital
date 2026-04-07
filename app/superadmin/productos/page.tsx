@@ -1500,7 +1500,7 @@ function AdminProductsContent() {
                                                                 {!isBulkEditing && (
                                                                     <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 overflow-hidden relative flex-shrink-0 group-hover:scale-110 transition-transform">
                                                                         <img
-                                                                            src={`/images/${product.image}`}
+                                                                            src={product.image?.startsWith('http') ? product.image : `/images/${product.image}`}
                                                                             alt={product.name}
                                                                             className="w-full h-full object-cover"
                                                                             onError={(e) => {
@@ -1903,7 +1903,7 @@ function AdminProductsContent() {
 
                                                     <div className="aspect-square relative overflow-hidden">
                                                         <img
-                                                            src={`/images/${product.image}`}
+                                                            src={product.image?.startsWith('http') ? product.image : `/images/${product.image}`}
                                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                             onError={(e) => {
                                                                 (e.target as HTMLImageElement).src = 'https://placehold.co/400x200/111111/FFFFFF?text=' + product.name;
