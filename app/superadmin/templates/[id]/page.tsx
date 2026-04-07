@@ -1681,6 +1681,302 @@ export default function TemplateEditorPage() {
             </SectionCard>
           )}
 
+          {/* HERO - Landing Principal */}
+          {activeSection === 'hero' && (
+            <SectionCard title="Inicio / Hero">
+              <VisibilityToggle section="hero" isVisible={isSectionVisible('hero')} onToggle={() => toggleSectionVisibility('hero')} />
+              <div className="grid grid-cols-2 gap-4">
+                <InputField label="Título 1" value={sections.hero?.title1 || ''} onChange={(v) => updateSection('hero', { title1: v })} placeholder="BLIS" />
+                <InputField label="Título 2" value={sections.hero?.title2 || ''} onChange={(v) => updateSection('hero', { title2: v })} placeholder="CORP" />
+              </div>
+              <InputField label="Subtítulo" value={sections.hero?.subtitle || ''} onChange={(v) => updateSection('hero', { subtitle: v })} placeholder="Tu Próximo Gran Patrimonio" />
+              <TextAreaField label="Descripción" value={sections.hero?.description || ''} onChange={(v) => updateSection('hero', { description: v })} rows={2} placeholder="Desarrollamos Macro-Lotes y Terrenos con alta plusvalía." />
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                <InputField label="Texto Botón Principal" value={sections.hero?.primaryBtnText || ''} onChange={(v) => updateSection('hero', { primaryBtnText: v })} placeholder="Comprar Terrenos" />
+                <LinkField label="Enlace Botón Principal" value={sections.hero?.primaryBtnLink || ''} onChange={(v) => updateSection('hero', { primaryBtnLink: v })} />
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                <InputField label="Texto Botón Secundario" value={sections.hero?.secondaryBtnText || ''} onChange={(v) => updateSection('hero', { secondaryBtnText: v })} placeholder="Trayectoria" />
+                <LinkField label="Enlace Botón Secundario" value={sections.hero?.secondaryBtnLink || ''} onChange={(v) => updateSection('hero', { secondaryBtnLink: v })} />
+              </div>
+              <div className="pt-4 border-t border-white/10">
+                <ImageUpload value={sections.hero?.videoBackground || ''} onChange={(v) => updateSection('hero', { videoBackground: v })} folder="cms/hero" />
+              </div>
+            </SectionCard>
+          )}
+
+          {/* ABOUT - Trayectoria */}
+          {activeSection === 'about' && (
+            <SectionCard title="Trayectoria / About">
+              <VisibilityToggle section="about" isVisible={isSectionVisible('about')} onToggle={() => toggleSectionVisibility('about')} />
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <InputField label="Años de Experiencia" value={sections.about?.yearsExperience || ''} onChange={(v) => updateSection('about', { yearsExperience: v })} placeholder="10+" />
+                <InputField label="Label Años" value={sections.about?.yearsLabel || ''} onChange={(v) => updateSection('about', { yearsLabel: v })} placeholder="Años Exp." />
+                <div></div>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <InputField label="Stat 1 Valor" value={sections.about?.stat1Value || ''} onChange={(v) => updateSection('about', { stat1Value: v })} placeholder="100%" />
+                <InputField label="Stat 1 Label" value={sections.about?.stat1Label || ''} onChange={(v) => updateSection('about', { stat1Label: v })} placeholder="Certeza Legal" />
+                <div></div>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <InputField label="Stat 2 Valor" value={sections.about?.stat2Value || ''} onChange={(v) => updateSection('about', { stat2Value: v })} placeholder="+350" />
+                <InputField label="Stat 2 Label" value={sections.about?.stat2Label || ''} onChange={(v) => updateSection('about', { stat2Label: v })} placeholder="Lotes Entregados" />
+                <div></div>
+              </div>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <InputField label="Stat 3 Valor" value={sections.about?.stat3Value || ''} onChange={(v) => updateSection('about', { stat3Value: v })} placeholder="+2500" />
+                <InputField label="Stat 3 Label" value={sections.about?.stat3Label || ''} onChange={(v) => updateSection('about', { stat3Label: v })} placeholder="Entregas" />
+                <div></div>
+              </div>
+              <InputField label="Título Misión" value={sections.about?.missionTitle || ''} onChange={(v) => updateSection('about', { missionTitle: v })} placeholder="Nuestra Misión" />
+              <TextAreaField label="Texto Misión" value={sections.about?.missionText || ''} onChange={(v) => updateSection('about', { missionText: v })} rows={2} placeholder="Transformar el horizonte inmobiliario." />
+              <InputField label="URL Video" value={sections.about?.videoUrl || ''} onChange={(v) => updateSection('about', { videoUrl: v })} placeholder="https://..." />
+              <ImageUpload value={sections.about?.videoThumbnail || ''} onChange={(v) => updateSection('about', { videoThumbnail: v })} folder="cms/about" />
+            </SectionCard>
+          )}
+
+          {/* VIDEO - Nuestra Visión */}
+          {activeSection === 'video' && (
+            <SectionCard title="Nuestra Visión / Video">
+              <VisibilityToggle section="video" isVisible={isSectionVisible('video')} onToggle={() => toggleSectionVisibility('video')} />
+              <InputField label="Título" value={sections.video?.title || ''} onChange={(v) => updateSection('video', { title: v })} placeholder="Nuestra Visión" />
+              <InputField label="Subtítulo" value={sections.video?.subtitle || ''} onChange={(v) => updateSection('video', { subtitle: v })} placeholder="en Movimiento" />
+              <InputField label="URL Video (Embed)" value={sections.video?.embedUrl || ''} onChange={(v) => updateSection('video', { embedUrl: v })} placeholder="https://youtube.com/embed/..." />
+              <ImageUpload value={sections.video?.thumbnail || ''} onChange={(v) => updateSection('video', { thumbnail: v })} folder="cms/video" />
+            </SectionCard>
+          )}
+
+          {/* PROCESS - Metodología */}
+          {activeSection === 'process' && (
+            <SectionCard title="Metodología / Proceso">
+              <VisibilityToggle section="process" isVisible={isSectionVisible('process')} onToggle={() => toggleSectionVisibility('process')} />
+              <InputField label="Título" value={sections.process?.title || ''} onChange={(v) => updateSection('process', { title: v })} placeholder="Metodología" />
+              <InputField label="Subtítulo" value={sections.process?.subtitle || ''} onChange={(v) => updateSection('process', { subtitle: v })} placeholder="Nuestra Ruta de Éxito" />
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Pasos ({(sections.process?.steps || []).length})</h4>
+              <div className="space-y-3">
+                {(sections.process?.steps || []).map((step: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-blis-red font-bold text-xs">Paso {idx + 1}</span>
+                      <button onClick={() => removeArrayItem('process', 'steps', idx)} className="text-red-400 hover:text-red-300 text-xs">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <InputField label="Título" value={step.title || ''} onChange={(v) => updateArrayItem('process', 'steps', idx, { title: v })} />
+                    <TextAreaField label="Descripción" value={step.description || ''} onChange={(v) => updateArrayItem('process', 'steps', idx, { description: v })} rows={1} />
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                      <div>
+                        <label className="text-[10px] text-gray-400 uppercase mb-1 block">Ícono</label>
+                        <select value={step.icon || 'Check'} onChange={(e) => updateArrayItem('process', 'steps', idx, { icon: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-2 text-xs text-white">
+                          {ICON_OPTIONS.map(icon => <option key={icon} value={icon}>{ICON_OPTIONS_SPANISH[icon]}</option>)}
+                        </select>
+                      </div>
+                      <ImageUpload value={step.image || ''} onChange={(v) => updateArrayItem('process', 'steps', idx, { image: v })} folder="cms/process" />
+                    </div>
+                  </div>
+                ))}
+                <button onClick={() => addArrayItem('process', 'steps', { icon: 'Check', title: '', description: '', image: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                  <Plus className="w-3 h-3" /> Agregar Paso
+                </button>
+              </div>
+            </SectionCard>
+          )}
+
+          {/* OPERATIONS - Backstage */}
+          {activeSection === 'operations' && (
+            <SectionCard title="Backstage / Operaciones">
+              <VisibilityToggle section="operations" isVisible={isSectionVisible('operations')} onToggle={() => toggleSectionVisibility('operations')} />
+              <InputField label="Título" value={sections.operations?.title || ''} onChange={(v) => updateSection('operations', { title: v })} placeholder="Backstage" />
+              <InputField label="Subtítulo" value={sections.operations?.subtitle || ''} onChange={(v) => updateSection('operations', { subtitle: v })} placeholder="Operaciones en Campo" />
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Imágenes del Slider</h4>
+              <div className="space-y-3">
+                {(sections.operations?.sliderImages || []).map((img: string, idx: number) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <ImageUpload value={img} onChange={(v) => updateArrayItem('operations', 'sliderImages', idx, v)} folder="cms/operations" />
+                    <button onClick={() => removeArrayItem('operations', 'sliderImages', idx)} className="text-red-400 hover:text-red-300">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                <button onClick={() => addArrayItem('operations', 'sliderImages', '')} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                  <Plus className="w-3 h-3" /> Agregar Imagen
+                </button>
+              </div>
+              <div className="grid grid-cols-4 gap-4 mt-4">
+                <InputField label="Ventas" value={sections.operations?.stats?.sales || ''} onChange={(v) => updateSection('operations', { stats: { ...(sections.operations?.stats || {}), sales: v } })} placeholder="5M" />
+                <InputField label="Urbanizaciones" value={sections.operations?.stats?.urbanizations || ''} onChange={(v) => updateSection('operations', { stats: { ...(sections.operations?.stats || {}), urbanizations: v } })} placeholder="12" />
+                <InputField label="Clientes" value={sections.operations?.stats?.clients || ''} onChange={(v) => updateSection('operations', { stats: { ...(sections.operations?.stats || {}), clients: v } })} placeholder="850" />
+                <InputField label="Conferencias" value={sections.operations?.stats?.conferences || ''} onChange={(v) => updateSection('operations', { stats: { ...(sections.operations?.stats || {}), conferences: v } })} placeholder="45" />
+              </div>
+            </SectionCard>
+          )}
+
+          {/* MARKET - Inteligencia Inmobiliaria */}
+          {activeSection === 'market' && (
+            <SectionCard title="Mercado / Inteligencia">
+              <VisibilityToggle section="market" isVisible={isSectionVisible('market')} onToggle={() => toggleSectionVisibility('market')} />
+              <InputField label="Título" value={sections.market?.title || ''} onChange={(v) => updateSection('market', { title: v })} placeholder="Mercado" />
+              <div className="grid grid-cols-2 gap-4">
+                <InputField label="Subtítulo 1" value={sections.market?.subtitle1 || ''} onChange={(v) => updateSection('market', { subtitle1: v })} placeholder="Inteligencia Inmobiliaria" />
+                <InputField label="Subtítulo 2" value={sections.market?.subtitle2 || ''} onChange={(v) => updateSection('market', { subtitle2: v })} placeholder="Datos" />
+              </div>
+              <TextAreaField label="Descripción" value={sections.market?.description || ''} onChange={(v) => updateSection('market', { description: v })} rows={2} />
+            </SectionCard>
+          )}
+
+          {/* CALCULATOR - Simulador de Plusvalía */}
+          {activeSection === 'calculator' && (
+            <SectionCard title="Calculadora de Plusvalía">
+              <VisibilityToggle section="calculator" isVisible={isSectionVisible('calculator')} onToggle={() => toggleSectionVisibility('calculator')} />
+              <InputField label="Título" value={sections.calculator?.title || ''} onChange={(v) => updateSection('calculator', { title: v })} placeholder="Plusvalía" />
+              <InputField label="Subtítulo" value={sections.calculator?.subtitle || ''} onChange={(v) => updateSection('calculator', { subtitle: v })} placeholder="Simulador" />
+              <TextAreaField label="Descripción" value={sections.calculator?.description || ''} onChange={(v) => updateSection('calculator', { description: v })} rows={2} placeholder="Calcula la plusvalía proyectada de tu inversión." />
+              <div className="grid grid-cols-3 gap-4 mt-4">
+                <InputField label="Ratio Planos" value={sections.calculator?.planosRatio || ''} onChange={(v) => updateSection('calculator', { planosRatio: v })} placeholder="50" />
+                <InputField label="Ratio Preventa" value={sections.calculator?.preventaRatio || ''} onChange={(v) => updateSection('calculator', { preventaRatio: v })} placeholder="75" />
+                <InputField label="Ratio Escritura" value={sections.calculator?.escrituraRatio || ''} onChange={(v) => updateSection('calculator', { escrituraRatio: v })} placeholder="91" />
+              </div>
+              <InputField label="TIR" value={sections.calculator?.tirValue || ''} onChange={(v) => updateSection('calculator', { tirValue: v })} placeholder="22" />
+              <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-white/10">
+                <InputField label="Texto Botón Principal" value={sections.calculator?.primaryBtnText || ''} onChange={(v) => updateSection('calculator', { primaryBtnText: v })} placeholder="Ver Proyectos" />
+                <LinkField label="Enlace Botón Principal" value={sections.calculator?.primaryBtnLink || ''} onChange={(v) => updateSection('calculator', { primaryBtnLink: v })} />
+              </div>
+            </SectionCard>
+          )}
+
+          {/* MAP - Dominio Territorial */}
+          {activeSection === 'map' && (
+            <SectionCard title="Dominio Territorial / Mapa">
+              <VisibilityToggle section="map" isVisible={isSectionVisible('map')} onToggle={() => toggleSectionVisibility('map')} />
+              <InputField label="Título" value={sections.map?.title || ''} onChange={(v) => updateSection('map', { title: v })} placeholder="Dominio Territorial" />
+              <TextAreaField label="Descripción" value={sections.map?.description || ''} onChange={(v) => updateSection('map', { description: v })} rows={2} />
+            </SectionCard>
+          )}
+
+          {/* PROJECTS - Portafolio */}
+          {activeSection === 'projects' && (
+            <SectionCard title="Portafolio / Proyectos">
+              <VisibilityToggle section="projects" isVisible={isSectionVisible('projects')} onToggle={() => toggleSectionVisibility('projects')} />
+              <InputField label="Título" value={sections.projects?.title || ''} onChange={(v) => updateSection('projects', { title: v })} placeholder="Portafolio" />
+              <InputField label="Subtítulo" value={sections.projects?.subtitle || ''} onChange={(v) => updateSection('projects', { subtitle: v })} placeholder="Nuestros Proyectos" />
+              <div className="mt-4 p-4 border border-dashed border-white/10 rounded-xl">
+                <p className="text-xs text-gray-500">Los proyectos se muestran automáticamente desde la base de datos.</p>
+              </div>
+            </SectionCard>
+          )}
+
+          {/* CATALOG - Tienda */}
+          {activeSection === 'catalog' && (
+            <SectionCard title="Catálogo / Tienda">
+              <VisibilityToggle section="catalog" isVisible={isSectionVisible('catalog')} onToggle={() => toggleSectionVisibility('catalog')} />
+              <InputField label="Título" value={sections.catalog?.title || ''} onChange={(v) => updateSection('catalog', { title: v })} placeholder="Tienda" />
+              <InputField label="Subtítulo" value={sections.catalog?.subtitle || ''} onChange={(v) => updateSection('catalog', { subtitle: v })} placeholder="Productos" />
+              <div className="mt-4 p-4 border border-dashed border-white/10 rounded-xl">
+                <p className="text-xs text-gray-500">Los productos se muestran automáticamente desde la base de datos.</p>
+              </div>
+            </SectionCard>
+          )}
+
+          {/* TEAM - Equipo */}
+          {activeSection === 'team' && (
+            <SectionCard title="Equipo">
+              <VisibilityToggle section="team" isVisible={isSectionVisible('team')} onToggle={() => toggleSectionVisibility('team')} />
+              <InputField label="Título" value={sections.team?.title || ''} onChange={(v) => updateSection('team', { title: v })} placeholder="Equipo" />
+              <InputField label="Nombre CEO" value={sections.team?.ceoName || ''} onChange={(v) => updateSection('team', { ceoName: v })} placeholder="Kevin Valdez" />
+              <InputField label="Rol CEO" value={sections.team?.ceoRole || ''} onChange={(v) => updateSection('team', { ceoRole: v })} placeholder="CEO" />
+              <TextAreaField label="Descripción CEO 1" value={sections.team?.ceoDescription1 || ''} onChange={(v) => updateSection('team', { ceoDescription1: v })} rows={2} />
+              <TextAreaField label="Descripción CEO 2" value={sections.team?.ceoDescription2 || ''} onChange={(v) => updateSection('team', { ceoDescription2: v })} rows={2} />
+              <ImageUpload value={sections.team?.ceoImage || ''} onChange={(v) => updateSection('team', { ceoImage: v })} folder="cms/team" />
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Miembros ({(sections.team?.members || []).length})</h4>
+              <div className="space-y-3">
+                {(sections.team?.members || []).map((member: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-blis-red font-bold text-xs">Miembro {idx + 1}</span>
+                      <button onClick={() => removeArrayItem('team', 'members', idx)} className="text-red-400 hover:text-red-300 text-xs">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <InputField label="Nombre" value={member.name || ''} onChange={(v) => updateArrayItem('team', 'members', idx, { name: v })} />
+                    <InputField label="Rol" value={member.role || ''} onChange={(v) => updateArrayItem('team', 'members', idx, { role: v })} />
+                    <ImageUpload value={member.image || ''} onChange={(v) => updateArrayItem('team', 'members', idx, { image: v })} folder="cms/team" />
+                  </div>
+                ))}
+                <button onClick={() => addArrayItem('team', 'members', { name: '', role: '', image: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                  <Plus className="w-3 h-3" /> Agregar Miembro
+                </button>
+              </div>
+            </SectionCard>
+          )}
+
+          {/* TESTIMONIALS */}
+          {activeSection === 'testimonials' && (
+            <SectionCard title="Testimonios">
+              <VisibilityToggle section="testimonials" isVisible={isSectionVisible('testimonials')} onToggle={() => toggleSectionVisibility('testimonials')} />
+              <InputField label="Título" value={sections.testimonials?.title || ''} onChange={(v) => updateSection('testimonials', { title: v })} placeholder="Testimonios" />
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Testimonios ({(sections.testimonials?.testimonials || []).length})</h4>
+              <div className="space-y-3">
+                {(sections.testimonials?.testimonials || []).map((testimonial: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-blis-red font-bold text-xs">Testimonio {idx + 1}</span>
+                      <button onClick={() => removeArrayItem('testimonials', 'testimonials', idx)} className="text-red-400 hover:text-red-300 text-xs">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <InputField label="Nombre" value={testimonial.name || ''} onChange={(v) => updateArrayItem('testimonials', 'testimonials', idx, { name: v })} />
+                    <InputField label="Rol" value={testimonial.role || ''} onChange={(v) => updateArrayItem('testimonials', 'testimonials', idx, { role: v })} />
+                    <TextAreaField label="Texto" value={testimonial.text || ''} onChange={(v) => updateArrayItem('testimonials', 'testimonials', idx, { text: v })} rows={2} />
+                    <ImageUpload value={testimonial.image || ''} onChange={(v) => updateArrayItem('testimonials', 'testimonials', idx, { image: v })} folder="cms/testimonials" />
+                  </div>
+                ))}
+                <button onClick={() => addArrayItem('testimonials', 'testimonials', { name: '', role: '', text: '', image: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                  <Plus className="w-3 h-3" /> Agregar Testimonio
+                </button>
+              </div>
+            </SectionCard>
+          )}
+
+          {/* FAQ */}
+          {activeSection === 'faq' && (
+            <SectionCard title="Preguntas Frecuentes">
+              <VisibilityToggle section="faq" isVisible={isSectionVisible('faq')} onToggle={() => toggleSectionVisibility('faq')} />
+              <InputField label="Título" value={sections.faq?.title || ''} onChange={(v) => updateSection('faq', { title: v })} placeholder="Preguntas Frecuentes" />
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Preguntas ({(sections.faq?.questions || []).length})</h4>
+              <div className="space-y-3">
+                {(sections.faq?.questions || []).map((q: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-blis-red font-bold text-xs">Pregunta {idx + 1}</span>
+                      <button onClick={() => removeArrayItem('faq', 'questions', idx)} className="text-red-400 hover:text-red-300 text-xs">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <InputField label="Pregunta" value={q.question || ''} onChange={(v) => updateArrayItem('faq', 'questions', idx, { question: v })} />
+                    <TextAreaField label="Respuesta" value={q.answer || ''} onChange={(v) => updateArrayItem('faq', 'questions', idx, { answer: v })} rows={2} />
+                  </div>
+                ))}
+                <button onClick={() => addArrayItem('faq', 'questions', { question: '', answer: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                  <Plus className="w-3 h-3" /> Agregar Pregunta
+                </button>
+              </div>
+            </SectionCard>
+          )}
+
+          {/* BLOG */}
+          {activeSection === 'blog' && (
+            <SectionCard title="Blog">
+              <VisibilityToggle section="blog" isVisible={isSectionVisible('blog')} onToggle={() => toggleSectionVisibility('blog')} />
+              <InputField label="Título" value={sections.blog?.title || ''} onChange={(v) => updateSection('blog', { title: v })} placeholder="Blog" />
+              <InputField label="Subtítulo" value={sections.blog?.subtitle || ''} onChange={(v) => updateSection('blog', { subtitle: v })} placeholder="Artículos" />
+              <TextAreaField label="Descripción" value={sections.blog?.description || ''} onChange={(v) => updateSection('blog', { description: v })} rows={2} />
+              <div className="mt-4 p-4 border border-dashed border-white/10 rounded-xl">
+                <p className="text-xs text-gray-500">Los artículos se muestran automáticamente desde la base de datos.</p>
+              </div>
+            </SectionCard>
+          )}
+
           {/* FOOTER */}
           {activeSection === 'footer' && (
             <SectionCard title="Footer">
