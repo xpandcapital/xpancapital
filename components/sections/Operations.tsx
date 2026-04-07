@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
@@ -13,9 +13,9 @@ export function Operations() {
     const [progress, setProgress] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
     
     const sectionRef = useRef<HTMLElement>(null);
+    const isInView = useInView(sectionRef, { once: false, margin: "-100px" });
 
     useEffect(() => {
         setIsMounted(true);
@@ -23,25 +23,6 @@ export function Operations() {
         check();
         window.addEventListener('resize', check);
         return () => window.removeEventListener('resize', check);
-    }, []);
-
-// Intersection Observer
-    useEffect(() => {
-        const section = sectionRef.current;
-        if (!section) return;
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                setIsVisible(entry.isIntersecting);
-                if (entry.isIntersecting) {
-                    setProgress(0);
-                }
-            },
-            { threshold: 0.1 }
-        );
-
-        observer.observe(section);
-return () => observer.disconnect();
     }, []);
 
     const nextSlide = useCallback(() => {
@@ -56,9 +37,9 @@ return () => observer.disconnect();
         setProgress(0);
     }, [images.length]);
 
-    // Auto-play timer - solo cuando es visible
+    // Auto-play timer - solo cuando está en vista
     useEffect(() => {
-        if (images.length === 0 || !isVisible) return;
+        if (images.length === 0 || !isInView) return;
         
         const timer = setInterval(() => {
             setProgress((prev) => {
@@ -71,7 +52,7 @@ return () => observer.disconnect();
         }, 50);
 
         return () => clearInterval(timer);
-    }, [images.length, isVisible]);
+    }, [images.length, isInView]);
 
     if (!isMounted) return null;
 
