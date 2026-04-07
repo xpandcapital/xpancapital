@@ -10,7 +10,6 @@ import { supabase } from "@/lib/supabaseClient";
 interface Project {
     id: string;
     name: string;
-    slug?: string;
 }
 
 export function FooterSections() {
@@ -58,7 +57,7 @@ export function FooterSections() {
                 try {
                     const { data, error } = await supabase
                         .from('projects')
-                        .select('id, name, slug')
+                        .select('id, name')
                         .eq('is_active', true)
                         .order('order_index', { ascending: true, nullsFirst: false });
                     
@@ -148,7 +147,7 @@ export function FooterSections() {
                                     <ul className="space-y-3 text-gray-500 font-light text-sm">
                                         {projects.slice(0, 6).map((project) => (
                                             <li key={project.id}>
-                                                <a href={`/proyectos/${project.slug || project.id}`} className="hover:text-blis-red transition-colors">
+                                                <a href={`/proyectos/${project.id}`} className="hover:text-blis-red transition-colors">
                                                     {project.name}
                                                 </a>
                                             </li>
@@ -204,7 +203,7 @@ export function FooterSections() {
                                 <ul className="space-y-4 text-gray-500 font-light">
                                     {projects.slice(0, 8).map((project) => (
                                         <li key={project.id}>
-                                            <a href={`/proyectos/${project.slug || project.id}`} className="hover:text-blis-red transition-colors">
+                                            <a href={`/proyectos/${project.id}`} className="hover:text-blis-red transition-colors">
                                                 {project.name}
                                             </a>
                                         </li>
