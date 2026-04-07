@@ -389,7 +389,12 @@ export default function TemplateEditorPage() {
       if (!prev) return prev;
       const sectionData = prev.secciones?.[section] || {};
       const array = [...(sectionData[arrayKey] || [])];
-      array[index] = { ...array[index], ...data };
+      // Si data es string, reemplazar directamente. Si es objeto, hacer merge.
+      if (typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean') {
+        array[index] = data;
+      } else {
+        array[index] = { ...array[index], ...data };
+      }
       return {
         ...prev,
         secciones: { ...prev.secciones, [section]: { ...sectionData, [arrayKey]: array } }
