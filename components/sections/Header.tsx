@@ -8,15 +8,18 @@ import Image from "next/image"
 import { useAuth } from "@/hooks/useAuth"
 import { AuthModal } from "@/components/auth/AuthModal"
 import { useShop } from "@/context/ShopContext"
+import { useLandingCMS } from "@/context/LandingCMSContext"
 
 interface HeaderProps {
     searchProps?: {
         value: string;
         onChange: (val: string) => void;
     };
+    logoHorizontal?: string;
+    logoVertical?: string;
 }
 
-export function Header({ searchProps }: HeaderProps = {}) {
+export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProps = {}) {
     const pathname = usePathname()
     const [isScrolled, setIsScrolled] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -24,6 +27,7 @@ export function Header({ searchProps }: HeaderProps = {}) {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
     const { user, logout } = useAuth()
     const { cart, favorites, blisCoins } = useShop()
+    const { cmsData, templateData } = useLandingCMS()
     const [isMounted, setIsMounted] = useState(false)
     const isDashboard = pathname?.startsWith('/superadmin') || pathname?.startsWith('/miembros')
 
@@ -131,17 +135,17 @@ export function Header({ searchProps }: HeaderProps = {}) {
                             <SearchIcon className={`w-5 h-5 transition-colors ${mobileSearchOpen ? 'text-blis-red' : 'text-white'}`} />
                         </button>
 
-                         {/* Logo */}
-                        <div
-                            className={`absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 ${!user ? 'w-[120px] xl:w-[200px]' : 'w-auto'} flex-shrink-0 cursor-pointer z-20`}
-                            onClick={() => handleNavigation('/#hero')}
-                        >
-                            <img
-                                src="/images/blis-logo.png"
-                                alt="Blis Corp Logo"
-                                className="h-11 sm:h-12 lg:h-12 xl:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(190,11,60,0.5)] mx-auto lg:ml-0"
-                            />
-                        </div>
+{/* Logo */}
+<div
+                              className={`absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 ${!user ? 'w-[120px] xl:w-[200px]' : 'w-auto'} flex-shrink-0 cursor-pointer z-20`}
+                              onClick={() => handleNavigation('/#hero')}
+                          >
+                              <img
+                                  src={logoHorizontal || templateData?.config?.branding?.logoHorizontal || cmsData?.footer?.logoHorizontal || "/images/blis-logo.png"}
+                                  alt="Blis Corp Logo"
+                                  className="h-11 sm:h-12 lg:h-12 xl:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(190,11,60,0.5)] mx-auto lg:ml-0"
+                              />
+                          </div>
 
 
 
@@ -578,14 +582,14 @@ export function Header({ searchProps }: HeaderProps = {}) {
                                 <X className="w-4 h-4" />
                             </button>
 
-                            {/* Logo */}
-                            <div className={`flex flex-col items-center border-b border-white/8 transition-all duration-300 ${user ? 'pt-8 pb-3' : 'pt-14 pb-6'}`}>
-                                <img
-                                    src="/images/logo-blis-vertical.png"
-                                    alt="Blis Corporation"
-                                    className={`w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.4)] transition-all duration-300 ${user ? 'h-20 mb-2' : 'h-28 mb-4'}`}
-                                />
-                            </div>
+{/* Logo */}
+                             <div className={`flex flex-col items-center border-b border-white/8 transition-all duration-300 ${user ? 'pt-8 pb-3' : 'pt-14 pb-6'}`}>
+                                 <img
+                                     src={logoVertical || templateData?.config?.branding?.logoVertical || cmsData?.footer?.logoVertical || "/images/logo-blis-vertical.png"}
+                                     alt="Blis Corporation"
+                                     className={`w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.4)] transition-all duration-300 ${user ? 'h-20 mb-2' : 'h-28 mb-4'}`}
+                                 />
+                             </div>
 
                             {/* User Profile Mobile */}
                             {user && (

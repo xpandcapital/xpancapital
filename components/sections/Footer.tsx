@@ -7,14 +7,15 @@ import { useToast } from "@/components/ui/Toast";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 
 export function FooterSections() {
-    const { cmsData } = useLandingCMS();
+    const { cmsData, templateData } = useLandingCMS();
     const { showToast } = useToast();
     const { 
         description = "Somos la firma élite en desarrollo de software y tecnología real estate.", 
-        socials = {}, 
-        logoVertical = "/images/logo-blis-vertical.png", 
-        logoHorizontal = "/images/blis-logo.png" 
+        socials = {}
     } = cmsData?.footer || {};
+    
+    const logoVertical = templateData?.config?.branding?.logoVertical || cmsData?.footer?.logoVertical || "/images/logo-blis-vertical.png";
+    const logoHorizontal = templateData?.config?.branding?.logoHorizontal || cmsData?.footer?.logoHorizontal || "/images/blis-logo.png";
 
     const globalLinks = [
         { icon: MessageCircle, url: socials.whatsapp || "", name: "WhatsApp" },

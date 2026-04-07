@@ -27,7 +27,7 @@ export function VideoShowcase() {
                         {videoData.title} <span className="text-blis-red">{videoData.subtitle}</span>
                     </h2>
                     <p className="text-gray-400 font-medium tracking-[0.2em] text-[10px] md:text-sm uppercase opacity-80 max-w-xl mx-auto border-y border-white/5 py-3 italic">
-                        Explora nuestros proyectos a través de un lente cinematográfico
+                        {videoData.description || 'Explora nuestros proyectos a través de un lente cinematográfico'}
                     </p>
                 </motion.div>
 
@@ -85,7 +85,7 @@ export function VideoShowcase() {
                                     <span className="text-[10px] font-mono text-gray-500 uppercase tracking-[0.2em] font-bold">Vistas Únicas</span>
                                 </div>
                                 <h4 className="text-2xl md:text-3xl font-black text-white">
-                                    <AnimatedCounter target={12450} duration={2500} />
+                                    <AnimatedCounter target={parseInt(videoData.viewsCount || '12450')} duration={2500} />
                                 </h4>
                             </div>
                             <div className="w-12 h-12 rounded-2xl bg-blis-red/10 flex items-center justify-center shrink-0">

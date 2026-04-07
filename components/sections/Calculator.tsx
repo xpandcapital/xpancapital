@@ -264,6 +264,38 @@ export function Calculator() {
                 </motion.div>
 
             </div>
+
+            {/* CTA Buttons */}
+            {(cmsData.calculator.primaryBtnText || cmsData.calculator.secondaryBtnText) && (
+                <div className="container mx-auto px-6 relative z-10 mt-8">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        {cmsData.calculator.primaryBtnText && (
+                            <motion.a
+                                href={cmsData.calculator.primaryBtnLink || '/proyectos'}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5 }}
+                                className="px-8 py-4 bg-blis-red text-white font-bold uppercase tracking-widest rounded-xl hover:bg-red-700 transition-all shadow-[0_0_30px_rgba(190,11,60,0.4)] text-center"
+                            >
+                                {cmsData.calculator.primaryBtnText}
+                            </motion.a>
+                        )}
+                        {cmsData.calculator.secondaryBtnText && (
+                            <motion.a
+                                href={cmsData.calculator.secondaryBtnLink || '#contacto'}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5, delay: 0.1 }}
+                                className="px-8 py-4 bg-white/5 border border-white/20 text-white font-bold uppercase tracking-widest rounded-xl hover:bg-white/10 transition-all text-center"
+                            >
+                                {cmsData.calculator.secondaryBtnText}
+                            </motion.a>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

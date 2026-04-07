@@ -165,6 +165,10 @@ interface TemplateData {
       backgroundColor?: string;
       textColor?: string;
       accentColor?: string;
+      logoHorizontal?: string;
+      logoVertical?: string;
+      logoHorizontalLight?: string;
+      logoVerticalLight?: string;
     };
   };
 }
@@ -535,7 +539,64 @@ export default function TemplateEditorPage() {
                     placeholder="BLIS Corp" 
                   />
                   
-                  <div className="grid grid-cols-3 gap-4">
+                  <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">Logos</h5>
+                  <p className="text-[10px] text-gray-600 mb-3">Sube los logos para diferentes fondos y orientaciones</p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] text-gray-400 uppercase mb-2 block">Logo Horizontal (Fondo Oscuro)</label>
+                      <ImageUpload 
+                        value={templateConfig?.branding?.logoHorizontal || ''} 
+                        onChange={(v) => setTemplateConfig(prev => ({
+                          ...prev,
+                          branding: { ...prev?.branding, logoHorizontal: v }
+                        }))} 
+                        folder="cms/branding" 
+                      />
+                      <p className="text-[9px] text-gray-600 mt-1">Para header y fondo negro</p>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-gray-400 uppercase mb-2 block">Logo Horizontal Claro</label>
+                      <ImageUpload 
+                        value={templateConfig?.branding?.logoHorizontalLight || ''} 
+                        onChange={(v) => setTemplateConfig(prev => ({
+                          ...prev,
+                          branding: { ...prev?.branding, logoHorizontalLight: v }
+                        }))} 
+                        folder="cms/branding" 
+                      />
+                      <p className="text-[9px] text-gray-600 mt-1">Para footer y fondo claro</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="text-[10px] text-gray-400 uppercase mb-2 block">Logo Vertical (Fondo Oscuro)</label>
+                      <ImageUpload 
+                        value={templateConfig?.branding?.logoVertical || ''} 
+                        onChange={(v) => setTemplateConfig(prev => ({
+                          ...prev,
+                          branding: { ...prev?.branding, logoVertical: v }
+                        }))} 
+                        folder="cms/branding" 
+                      />
+                      <p className="text-[9px] text-gray-600 mt-1">Para menú móvil y modal</p>
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-gray-400 uppercase mb-2 block">Logo Vertical Claro</label>
+                      <ImageUpload 
+                        value={templateConfig?.branding?.logoVerticalLight || ''} 
+                        onChange={(v) => setTemplateConfig(prev => ({
+                          ...prev,
+                          branding: { ...prev?.branding, logoVerticalLight: v }
+                        }))} 
+                        folder="cms/branding" 
+                      />
+                      <p className="text-[9px] text-gray-600 mt-1">Para fondos claros</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/10">
                     <ColorPicker 
                       label="Color Primario" 
                       value={templateConfig?.branding?.primaryColor || '#B10D24'} 
@@ -1729,9 +1790,13 @@ export default function TemplateEditorPage() {
                 <InputField label="Stat 3 Label" value={sections.about?.stat3Label || ''} onChange={(v) => updateSection('about', { stat3Label: v })} placeholder="Entregas" />
                 <div></div>
               </div>
-              <InputField label="Título Misión" value={sections.about?.missionTitle || ''} onChange={(v) => updateSection('about', { missionTitle: v })} placeholder="Nuestra Misión" />
-              <TextAreaField label="Texto Misión" value={sections.about?.missionText || ''} onChange={(v) => updateSection('about', { missionText: v })} rows={2} placeholder="Transformar el horizonte inmobiliario." />
-              <InputField label="URL Video" value={sections.about?.videoUrl || ''} onChange={(v) => updateSection('about', { videoUrl: v })} placeholder="https://..." />
+<InputField label="Título Sección" value={sections.about?.missionTitle || ''} onChange={(v) => updateSection('about', { missionTitle: v })} placeholder="Trayectoria y Solidez" />
+               <div className="grid grid-cols-2 gap-4">
+                 <InputField label="Título 1 (Línea 1)" value={sections.about?.title1 || ''} onChange={(v) => updateSection('about', { title1: v })} placeholder="Varios Años Creando" />
+                 <InputField label="Título 2 (Línea 2)" value={sections.about?.title2 || ''} onChange={(v) => updateSection('about', { title2: v })} placeholder="Valor Patrimonial" />
+               </div>
+               <TextAreaField label="Texto Misión" value={sections.about?.missionText || ''} onChange={(v) => updateSection('about', { missionText: v })} rows={2} placeholder="Transformar el horizonte inmobiliario." />
+               <InputField label="URL Video (Embed)" value={sections.about?.videoUrl || ''} onChange={(v) => updateSection('about', { videoUrl: v })} placeholder="https://youtube.com/embed/..." />
               <ImageUpload value={sections.about?.videoThumbnail || ''} onChange={(v) => updateSection('about', { videoThumbnail: v })} folder="cms/about" />
             </SectionCard>
           )}
@@ -1742,8 +1807,10 @@ export default function TemplateEditorPage() {
               <VisibilityToggle section="video" isVisible={isSectionVisible('video')} onToggle={() => toggleSectionVisibility('video')} />
               <InputField label="Título" value={sections.video?.title || ''} onChange={(v) => updateSection('video', { title: v })} placeholder="Nuestra Visión" />
               <InputField label="Subtítulo" value={sections.video?.subtitle || ''} onChange={(v) => updateSection('video', { subtitle: v })} placeholder="en Movimiento" />
+              <TextAreaField label="Descripción" value={sections.video?.description || ''} onChange={(v) => updateSection('video', { description: v })} rows={2} placeholder="Explora nuestros proyectos a través de un lente cinematográfico" />
               <InputField label="URL Video (Embed)" value={sections.video?.embedUrl || ''} onChange={(v) => updateSection('video', { embedUrl: v })} placeholder="https://youtube.com/embed/..." />
               <ImageUpload value={sections.video?.thumbnail || ''} onChange={(v) => updateSection('video', { thumbnail: v })} folder="cms/video" />
+              <InputField label="Contador de Vistas" value={sections.video?.viewsCount || ''} onChange={(v) => updateSection('video', { viewsCount: v })} placeholder="12450" />
             </SectionCard>
           )}
 
@@ -1885,9 +1952,17 @@ export default function TemplateEditorPage() {
               <InputField label="Título" value={sections.team?.title || ''} onChange={(v) => updateSection('team', { title: v })} placeholder="Equipo" />
               <InputField label="Nombre CEO" value={sections.team?.ceoName || ''} onChange={(v) => updateSection('team', { ceoName: v })} placeholder="Kevin Valdez" />
               <InputField label="Rol CEO" value={sections.team?.ceoRole || ''} onChange={(v) => updateSection('team', { ceoRole: v })} placeholder="CEO" />
+              <InputField label="Frase CEO" value={sections.team?.ceoQuote || ''} onChange={(v) => updateSection('team', { ceoQuote: v })} placeholder="El éxito se construye con visión y perseverancia." />
               <TextAreaField label="Descripción CEO 1" value={sections.team?.ceoDescription1 || ''} onChange={(v) => updateSection('team', { ceoDescription1: v })} rows={2} />
               <TextAreaField label="Descripción CEO 2" value={sections.team?.ceoDescription2 || ''} onChange={(v) => updateSection('team', { ceoDescription2: v })} rows={2} />
               <ImageUpload value={sections.team?.ceoImage || ''} onChange={(v) => updateSection('team', { ceoImage: v })} folder="cms/team" />
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Widgets</h4>
+              <div className="grid grid-cols-2 gap-4">
+                <InputField label="Label Widget 1" value={sections.team?.widget1Label || ''} onChange={(v) => updateSection('team', { widget1Label: v })} placeholder="Cap. Administrado" />
+                <InputField label="Valor Widget 1" value={sections.team?.widget1Value || ''} onChange={(v) => updateSection('team', { widget1Value: v })} placeholder="+$10M" />
+                <InputField label="Label Widget 2" value={sections.team?.widget2Label || ''} onChange={(v) => updateSection('team', { widget2Label: v })} placeholder="Garantía Fiduciaria" />
+                <InputField label="Valor Widget 2" value={sections.team?.widget2Value || ''} onChange={(v) => updateSection('team', { widget2Value: v })} placeholder="Cero Litigios" />
+              </div>
               <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Miembros ({(sections.team?.members || []).length})</h4>
               <div className="space-y-3">
                 {(sections.team?.members || []).map((member: any, idx: number) => (
@@ -1915,23 +1990,26 @@ export default function TemplateEditorPage() {
             <SectionCard title="Testimonios">
               <VisibilityToggle section="testimonials" isVisible={isSectionVisible('testimonials')} onToggle={() => toggleSectionVisibility('testimonials')} />
               <InputField label="Título" value={sections.testimonials?.title || ''} onChange={(v) => updateSection('testimonials', { title: v })} placeholder="Testimonios" />
-              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Testimonios ({(sections.testimonials?.testimonials || []).length})</h4>
+              <InputField label="Subtítulo" value={sections.testimonials?.subtitle || ''} onChange={(v) => updateSection('testimonials', { subtitle: v })} placeholder="Experiencias" />
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Testimonios ({(sections.testimonials?.items || []).length})</h4>
               <div className="space-y-3">
-                {(sections.testimonials?.testimonials || []).map((testimonial: any, idx: number) => (
+                {(sections.testimonials?.items || []).map((testimonial: any, idx: number) => (
                   <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-blis-red font-bold text-xs">Testimonio {idx + 1}</span>
-                      <button onClick={() => removeArrayItem('testimonials', 'testimonials', idx)} className="text-red-400 hover:text-red-300 text-xs">
+                      <button onClick={() => removeArrayItem('testimonials', 'items', idx)} className="text-red-400 hover:text-red-300 text-xs">
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
-                    <InputField label="Nombre" value={testimonial.name || ''} onChange={(v) => updateArrayItem('testimonials', 'testimonials', idx, { name: v })} />
-                    <InputField label="Rol" value={testimonial.role || ''} onChange={(v) => updateArrayItem('testimonials', 'testimonials', idx, { role: v })} />
-                    <TextAreaField label="Texto" value={testimonial.text || ''} onChange={(v) => updateArrayItem('testimonials', 'testimonials', idx, { text: v })} rows={2} />
-                    <ImageUpload value={testimonial.image || ''} onChange={(v) => updateArrayItem('testimonials', 'testimonials', idx, { image: v })} folder="cms/testimonials" />
+                    <TextAreaField label="Cita" value={testimonial.quote || ''} onChange={(v) => updateArrayItem('testimonials', 'items', idx, { quote: v })} rows={2} />
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                      <InputField label="Autor" value={testimonial.author || ''} onChange={(v) => updateArrayItem('testimonials', 'items', idx, { author: v })} />
+                      <InputField label="Rol" value={testimonial.role || ''} onChange={(v) => updateArrayItem('testimonials', 'items', idx, { role: v })} />
+                    </div>
+                    <ImageUpload label="Foto" value={testimonial.image || ''} onChange={(v) => updateArrayItem('testimonials', 'items', idx, { image: v })} folder="cms/testimonials" />
                   </div>
                 ))}
-                <button onClick={() => addArrayItem('testimonials', 'testimonials', { name: '', role: '', text: '', image: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                <button onClick={() => addArrayItem('testimonials', 'items', { quote: '', author: '', role: '', image: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
                   <Plus className="w-3 h-3" /> Agregar Testimonio
                 </button>
               </div>
@@ -1943,21 +2021,21 @@ export default function TemplateEditorPage() {
             <SectionCard title="Preguntas Frecuentes">
               <VisibilityToggle section="faq" isVisible={isSectionVisible('faq')} onToggle={() => toggleSectionVisibility('faq')} />
               <InputField label="Título" value={sections.faq?.title || ''} onChange={(v) => updateSection('faq', { title: v })} placeholder="Preguntas Frecuentes" />
-              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Preguntas ({(sections.faq?.questions || []).length})</h4>
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Preguntas ({(sections.faq?.items || []).length})</h4>
               <div className="space-y-3">
-                {(sections.faq?.questions || []).map((q: any, idx: number) => (
+                {(sections.faq?.items || []).map((q: any, idx: number) => (
                   <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-blis-red font-bold text-xs">Pregunta {idx + 1}</span>
-                      <button onClick={() => removeArrayItem('faq', 'questions', idx)} className="text-red-400 hover:text-red-300 text-xs">
+                      <button onClick={() => removeArrayItem('faq', 'items', idx)} className="text-red-400 hover:text-red-300 text-xs">
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
-                    <InputField label="Pregunta" value={q.question || ''} onChange={(v) => updateArrayItem('faq', 'questions', idx, { question: v })} />
-                    <TextAreaField label="Respuesta" value={q.answer || ''} onChange={(v) => updateArrayItem('faq', 'questions', idx, { answer: v })} rows={2} />
+                    <InputField label="Pregunta" value={q.question || ''} onChange={(v) => updateArrayItem('faq', 'items', idx, { question: v })} />
+                    <TextAreaField label="Respuesta" value={q.answer || ''} onChange={(v) => updateArrayItem('faq', 'items', idx, { answer: v })} rows={2} />
                   </div>
                 ))}
-                <button onClick={() => addArrayItem('faq', 'questions', { question: '', answer: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                <button onClick={() => addArrayItem('faq', 'items', { question: '', answer: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
                   <Plus className="w-3 h-3" /> Agregar Pregunta
                 </button>
               </div>

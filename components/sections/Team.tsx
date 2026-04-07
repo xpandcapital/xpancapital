@@ -7,7 +7,7 @@ import { useLandingCMS } from "@/context/LandingCMSContext";
 
 export function Team() {
     const { cmsData } = useLandingCMS();
-    const { ceoName, ceoRole, ceoQuote, ceoDescription1, ceoDescription2, ceoImage, title, members } = cmsData.team;
+    const { ceoName, ceoRole, ceoQuote, ceoDescription1, ceoDescription2, ceoImage, title, members, widget1Label, widget1Value, widget2Label, widget2Value } = cmsData.team;
 
     // Use socials from the first member if available
     const socials = members[0]?.socials || {};
@@ -22,6 +22,10 @@ export function Team() {
     ];
 
     const activeCeoLinks = ceoLinks.filter(link => link.url !== "");
+
+    // Widget values with defaults
+    const widgetLeft = { label: widget1Label || 'Cap. Administrado', value: widget1Value || '+$10M' };
+    const widgetRight = { label: widget2Label || 'Garantía Fiduciaria', value: widget2Value || 'Cero Litigios' };
 
     return (
         <section className="pt-10 md:pt-20 pb-24 bg-gradient-to-t from-black via-zinc-950 to-black relative overflow-hidden">
@@ -81,10 +85,10 @@ export function Team() {
                         >
                             <div className="flex items-center gap-2 mb-1">
                                 <Activity className="text-emerald-400 w-4 h-4" />
-                                <span className="text-[9px] xl:text-[10px] font-mono text-gray-300 uppercase tracking-widest">Cap. Administrado</span>
+                                <span className="text-[9px] xl:text-[10px] font-mono text-gray-300 uppercase tracking-widest">{widgetLeft.label}</span>
                             </div>
                             <div className="text-xl xl:text-3xl font-black text-white tracking-tighter drop-shadow-md">
-                                +$10<span className="text-emerald-400 text-base xl:text-xl">M</span>
+                                {widgetLeft.value}
                             </div>
                             <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-1">
                                 <motion.div
@@ -103,10 +107,10 @@ export function Team() {
                         >
                             <div className="flex items-center gap-2 mb-1">
                                 <ShieldCheck className="text-blis-red w-4 h-4" />
-                                <span className="text-[9px] xl:text-[10px] font-mono text-gray-300 uppercase tracking-widest">Garantía Fiduciaria</span>
+                                <span className="text-[9px] xl:text-[10px] font-mono text-gray-300 uppercase tracking-widest">{widgetRight.label}</span>
                             </div>
                             <div className="text-lg xl:text-2xl font-black text-white tracking-tighter drop-shadow-md">
-                                Cero<span className="text-gray-400 text-sm xl:text-lg font-light ml-1">Litigios</span>
+                                {widgetRight.value}
                             </div>
                             <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-1">
                                 <motion.div

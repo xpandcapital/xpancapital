@@ -63,7 +63,12 @@ export function Operations() {
         };
     }, [isPaused, nextSlide, images.length]);
 
-    if (images.length === 0 || !isMounted) return null;
+    if (!isMounted) return null;
+
+    // If no images but we have stats, still show the section with a placeholder
+    const hasContent = images.length > 0 || cmsData.operations.stats;
+
+    if (!hasContent) return null;
 
 
     return (

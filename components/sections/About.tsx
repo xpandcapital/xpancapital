@@ -56,12 +56,12 @@ export function About() {
                     >
                         <div>
                             <h2 className="text-sm font-bold tracking-[0.2em] text-[#209f89] uppercase mb-4 flex items-center gap-2">
-                                <span className="w-8 h-[1px] bg-[#209f89]"></span> Trayectoria y Solidez
+                                <span className="w-8 h-[1px] bg-[#209f89]"></span> {cmsData.about.missionTitle || 'Trayectoria y Solidez'}
                             </h2>
                             <h3 className="text-2xl sm:text-3xl md:text-5xl font-black text-white leading-tight uppercase tracking-wide">
-                                Varios Años Creando <br />
+                                {cmsData.about.title1 || 'Varios Años Creando'} <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-600">
-                                    Valor Patrimonial
+                                    {cmsData.about.title2 || 'Valor Patrimonial'}
                                 </span>
                             </h3>
                         </div>

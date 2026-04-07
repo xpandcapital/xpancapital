@@ -23,6 +23,8 @@ interface AboutData {
     stat2Label: string;
     stat3Value: string;
     stat3Label: string;
+    title1?: string;
+    title2?: string;
     missionTitle: string;
     missionText: string;
     videoUrl: string;
@@ -32,8 +34,10 @@ interface AboutData {
 interface VideoData {
     title: string;
     subtitle: string;
+    description?: string;
     embedUrl: string;
     thumbnail: string;
+    viewsCount?: string;
 }
 
 interface BlogData {
@@ -154,6 +158,10 @@ interface TeamData {
     ceoDescription1: string;
     ceoDescription2: string;
     ceoImage: string;
+    widget1Label?: string;
+    widget1Value?: string;
+    widget2Label?: string;
+    widget2Value?: string;
     members: TeamMember[];
 }
 
@@ -220,6 +228,47 @@ export interface TemplateData {
     secciones: LandingCMSData;
     sectionOrder?: string[];
     sectionVisibility?: Record<string, boolean>;
+    config?: {
+        showHeader?: boolean;
+        showFooter?: boolean;
+        branding?: {
+            name?: string;
+            primaryColor?: string;
+            secondaryColor?: string;
+            backgroundColor?: string;
+            textColor?: string;
+            accentColor?: string;
+            logoHorizontal?: string;
+            logoVertical?: string;
+            logoHorizontalLight?: string;
+            logoVerticalLight?: string;
+        };
+        customHeader?: {
+            enabled?: boolean;
+            logo?: string;
+            logoLink?: string;
+            backgroundColor?: string;
+            textColor?: string;
+            links?: Array<{ text: string; href: string; external?: boolean }>;
+            cta?: { text: string; href: string; style: 'primary' | 'secondary' };
+        };
+        customFooter?: {
+            enabled?: boolean;
+            logo?: string;
+            description?: string;
+            backgroundColor?: string;
+            textColor?: string;
+            links?: Array<{ label: string; href: string }>;
+            socials?: {
+                facebook?: string;
+                instagram?: string;
+                linkedin?: string;
+                youtube?: string;
+                tiktok?: string;
+            };
+            copyright?: string;
+        };
+    };
 }
 
 interface LandingCMSContextType {
