@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence, useInView } from "framer-motion";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 
@@ -13,9 +13,6 @@ export function Operations() {
     const [progress, setProgress] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    
-    const sectionRef = useRef<HTMLElement>(null);
-    const isInView = useInView(sectionRef, { once: false, margin: "-100px" });
 
     useEffect(() => {
         setIsMounted(true);
@@ -37,9 +34,9 @@ export function Operations() {
         setProgress(0);
     }, [images.length]);
 
-    // Auto-play timer - solo cuando está en vista
+    // Auto-play timer - siempre corriendo
     useEffect(() => {
-        if (images.length === 0 || !isInView) return;
+        if (images.length === 0) return;
         
         const timer = setInterval(() => {
             setProgress((prev) => {
@@ -52,7 +49,7 @@ export function Operations() {
         }, 50);
 
         return () => clearInterval(timer);
-    }, [images.length, isInView]);
+    }, [images.length]);
 
     if (!isMounted) return null;
 
@@ -63,7 +60,7 @@ export function Operations() {
 
 
     return (
-        <section ref={sectionRef} id="operaciones" className="pt-10 md:pt-20 pb-24 bg-black overflow-hidden relative">
+        <section id="operaciones" className="pt-10 md:pt-20 pb-24 bg-black overflow-hidden relative">
             {/* Header Content */}
             <div className="container mx-auto px-6 mb-12 flex justify-between items-end">
                 <motion.div

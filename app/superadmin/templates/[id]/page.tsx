@@ -1936,12 +1936,43 @@ export default function TemplateEditorPage() {
               <VisibilityToggle section="operations" isVisible={isSectionVisible('operations')} onToggle={() => toggleSectionVisibility('operations')} />
               <InputField label="Título" value={sections.operations?.title || ''} onChange={(v) => updateSection('operations', { title: v })} placeholder="Backstage" />
               <InputField label="Subtítulo" value={sections.operations?.subtitle || ''} onChange={(v) => updateSection('operations', { subtitle: v })} placeholder="Operaciones en Campo" />
-              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Imágenes del Slider</h4>
-              <div className="space-y-3">
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Imágenes del Slider (arrastra para reordenar)</h4>
+              <div className="space-y-2">
                 {(sections.operations?.sliderImages || []).map((img: string, idx: number) => (
-                  <div key={idx} className="flex items-center gap-3">
+                  <div 
+                    key={idx} 
+                    className="flex items-center gap-3 p-2 bg-white/5 rounded-xl border border-white/10 cursor-move"
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('text/plain', idx.toString());
+                      (e.target as HTMLElement).classList.add('opacity-50');
+                    }}
+                    onDragEnd={(e) => {
+                      (e.target as HTMLElement).classList.remove('opacity-50');
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      (e.target as HTMLElement).closest('[draggable]')?.classList.add('border-blis-red');
+                    }}
+                    onDragLeave={(e) => {
+                      (e.target as HTMLElement).closest('[draggable]')?.classList.remove('border-blis-red');
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+                      const toIdx = idx;
+                      if (fromIdx !== toIdx) {
+                        const newImages = [...(sections.operations?.sliderImages || [])];
+                        const [moved] = newImages.splice(fromIdx, 1);
+                        newImages.splice(toIdx, 0, moved);
+                        updateSection('operations', { sliderImages: newImages });
+                      }
+                      (e.target as HTMLElement).closest('[draggable]')?.classList.remove('border-blis-red');
+                    }}
+                  >
+                    <span className="text-gray-500 text-xs w-6">{idx + 1}</span>
                     <ImageUpload value={img} onChange={(v) => updateArrayItem('operations', 'sliderImages', idx, v)} folder="cms/operations" />
-                    <button onClick={() => removeArrayItem('operations', 'sliderImages', idx)} className="text-red-400 hover:text-red-300">
+                    <button onClick={() => removeArrayItem('operations', 'sliderImages', idx)} className="text-red-400 hover:text-red-300 p-1">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
