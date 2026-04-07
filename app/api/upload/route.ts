@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
+// Configuración para aumentar el límite de tamaño en Vercel
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const maxDuration = 30
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
@@ -11,6 +16,13 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get('file') as File
     const folder = formData.get('folder') as string || 'cms'
+    
+    console.log('📁 File received:', { 
+      name: file?.name, 
+      size: file?.size, 
+      type: file?.type,
+      sizeInMB: file ? (file.size / (1024 * 1024)).toFixed(2) + 'MB' : 'N/A'
+    })
     
     if (!file) {
       return NextResponse.json({ 
