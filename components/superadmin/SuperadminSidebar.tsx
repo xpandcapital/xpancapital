@@ -161,6 +161,7 @@ export function SuperadminSidebar() {
                     icon: Settings, 
                     label: "Configuración", 
                     subItems: [
+                        { icon: ImageIcon, label: "Sitio y Branding", href: "/superadmin/configuracion" },
                         { icon: Cloud, label: "APIs y Nube", href: "/superadmin/api-nube" },
                         { icon: Activity, label: "Métricas y SEO", href: "/superadmin/analiticas" },
                         { icon: ShoppingCart, label: "Comercio", href: "/superadmin/ajustes/comercio" },
