@@ -22,10 +22,15 @@ export function InteractiveData() {
     const yLeft = useTransform(scrollYProgress, [0, 1], [50, -50]);
     const yRight = useTransform(scrollYProgress, [0, 1], [-50, 50]);
 
-    const stats = cmsData.market.stats.map(s => ({
+    const stats = (cmsData.market?.stats || []).map(s => ({
         ...s,
         icon: iconMap[s.icon] || BarChart3
     }));
+
+    const insights = cmsData.market?.insights || [];
+
+    // Return null if no data
+    if (stats.length === 0 && insights.length === 0) return null;
 
     return (
         <section ref={ref} className="pt-10 md:pt-24 pb-24 bg-gradient-to-b from-black via-zinc-950 to-black relative overflow-hidden">
@@ -57,7 +62,7 @@ export function InteractiveData() {
                         </p>
 
                         <div className="space-y-4">
-                            {cmsData.market.insights.map((insight, idx) => (
+                            {insights.map((insight, idx) => (
                                 <div 
                                     key={idx} 
                                     className="p-6 rounded-2xl bg-white/[0.03] border-l-4 backdrop-blur-sm"
