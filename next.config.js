@@ -7,7 +7,25 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['localhost', 'blis-corp.com', '*.supabase.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'srjhrhiesienkofisvnv.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'blis-corp.com',
+      },
+    ],
     unoptimized: true,
   },
 }
