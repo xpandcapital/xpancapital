@@ -15,8 +15,10 @@ export function Operations() {
     const [isPaused, setIsPaused] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const sectionRef = useRef<HTMLElement | null>(null);
 
     // Initial Setup
     useEffect(() => {
@@ -25,6 +27,22 @@ export function Operations() {
         check();
         window.addEventListener('resize', check);
         return () => window.removeEventListener('resize', check);
+    }, []);
+
+    // Intersection Observer - Solo reproducir cuando es visible
+    useEffect(() => {
+        const section = sectionRef.current;
+        if (!section) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsVisible(entry.isIntersecting);
+            },
+            { threshold: 0.3 } // 30% visible para activar
+        );
+
+        observer.observe(section);
+        return () => observer.disconnect();
     }, []);
 
 
@@ -40,9 +58,9 @@ export function Operations() {
         setProgress(0);
     }, [images.length]);
 
-    // 4s Progress Timer Logic (Solid Sync)
+    // 4s Progress Timer Logic - Solo cuando es visible
     useEffect(() => {
-        if (isPaused || images.length === 0) return;
+        if (isPaused || images.length === 0 || !isVisible) return;
 
         const interval_ms = 4000;
         const frame_rate = 50;
@@ -61,7 +79,7 @@ export function Operations() {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, [isPaused, nextSlide, images.length]);
+    }, [isPaused, nextSlide, images.length, isVisible]);
 
     if (!isMounted) return null;
 
@@ -72,7 +90,7 @@ export function Operations() {
 
 
     return (
-        <section id="operaciones" className="pt-10 md:pt-20 pb-24 bg-black overflow-hidden relative">
+        <section ref={sectionRef} id="operaciones" className="pt-10 md:pt-20 pb-24 bg-black overflow-hidden relative">
             {/* Header Content */}
             <div className="container mx-auto px-6 mb-12 flex justify-between items-end">
                 <motion.div
