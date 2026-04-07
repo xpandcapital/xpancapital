@@ -22,6 +22,33 @@ const DEFAULT_ORDER_BY_TIPO: Record<string, string[]> = {
   tienda: ["shopHero", "shopSidebar", "shopProducts", "shopNotifications", "footer"],
 };
 
+const DEFAULT_SECTIONS: TemplateSection = {
+  hero: {
+    title1: "BLIS",
+    title2: "CORP",
+    subtitle: "Tu Próximo Gran Patrimonio",
+    description: "Desarrollamos Macro-Lotes y Terrenos con alta plusvalía.",
+    primaryBtnText: "Comprar Terrenos",
+    primaryBtnLink: "/tienda",
+    secondaryBtnText: "Trayectoria",
+    secondaryBtnLink: "#trayectoria",
+    videoBackground: "/videos/cyber-bg.mp4",
+  },
+  about: {
+    yearsExperience: "10+",
+    yearsLabel: "Años Exp.",
+    stat1Value: "100%",
+    stat1Label: "Certeza Legal",
+    stat2Value: "+350",
+    stat2Label: "Lotes Entregados",
+    stat3Value: "+2500",
+    stat3Label: "Entregas",
+    missionTitle: "Nuestra Misión",
+    missionText: "Transformar el horizonte inmobiliario.",
+    videoThumbnail: "/images/miniatura-de-video.webp",
+  },
+};
+
 export function useLandingTemplate(_templateId?: string) {
   const [template, setTemplate] = useState<LandingTemplate | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,12 +62,18 @@ export function useLandingTemplate(_templateId?: string) {
       const response = await fetch('/api/templates/landing');
       const data = await response.json();
       
+      console.log('[useLandingTemplate] API response:', data);
+      
       if (data.success && data.data) {
         setTemplate(data.data);
+        console.log('[useLandingTemplate] Template loaded:', data.data.nombre, 'secciones:', Object.keys(data.data.secciones || {}));
       } else {
+        console.log('[useLandingTemplate] No template found, using defaults');
         setError(data.error || 'No se encontró template activo');
+        setTemplate(null);
       }
     } catch (err) {
+      console.error('[useLandingTemplate] Error:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
@@ -66,9 +99,13 @@ export function useLandingTemplate(_templateId?: string) {
   }, [template]);
 
   const getSectionData = useCallback((sectionKey: string): TemplateSection | null => {
-    if (!template?.secciones) return null;
+    if (!template?.secciones) {
+      return DEFAULT_SECTIONS[sectionKey] || null;
+    }
     const section = template.secciones[sectionKey];
-    if (!section || Object.keys(section).length === 0) return null;
+    if (!section || Object.keys(section).length === 0) {
+      return DEFAULT_SECTIONS[sectionKey] || null;
+    }
     return section as TemplateSection;
   }, [template]);
 
