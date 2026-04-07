@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { MapPin, Trash2, Plus, Move, Image as ImageIcon, X, ChevronDown, ChevronUp, GripVertical } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase";
 
 interface MapLocation {
   name: string;

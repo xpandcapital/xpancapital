@@ -5,7 +5,7 @@ import { Facebook, Instagram, Linkedin, Twitter, PlayCircle, Youtube, MessageCir
 import { useToast } from "@/components/ui/Toast";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase";
 import { extractVideoUrl } from "@/lib/utils/video";
 
 interface Project {

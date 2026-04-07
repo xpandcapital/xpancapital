@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, X, MapPin, Ruler, CheckCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabase";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 
 interface ProjectData {
