@@ -736,6 +736,7 @@ function AdminProductsContent() {
                                         const input = document.createElement('input');
                                         input.type = 'file';
                                         input.accept = 'image/*';
+                                        input.value = ''; // Reset input value
                                         input.onchange = async (e) => {
                                             const file = (e.target as HTMLInputElement).files?.[0];
                                             if (file) {
@@ -743,6 +744,8 @@ function AdminProductsContent() {
                                                 const maxSize = 10 * 1024 * 1024;
                                                 if (file.size > maxSize) {
                                                     alert('La imagen excede el límite de 10MB. Por favor, comprime la imagen o usa una más pequeña.');
+                                                    // Reset input to allow re-selecting same file
+                                                    input.value = '';
                                                     return;
                                                 }
                                                 
@@ -766,6 +769,9 @@ function AdminProductsContent() {
                                                     }
                                                 } catch (err) {
                                                     alert('Error al subir imagen');
+                                                } finally {
+                                                    // Reset input to allow re-selecting same file
+                                                    input.value = '';
                                                 }
                                             }
                                         };

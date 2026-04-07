@@ -302,12 +302,20 @@ export default function RichTextEditor({
         if (file) {
             if (file.size > 10 * 1024 * 1024) {
                 setModal({ type: 'error', message: 'La imagen excede el límite de 10MB.' });
+                // Reset input to allow re-selecting same file
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
                 return;
             }
             const reader = new FileReader();
             reader.onload = (prev) => {
                 const base64 = prev.target?.result as string;
                 execCommand('insertImage', base64);
+                // Reset input to allow re-selecting same file
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
             };
             reader.readAsDataURL(file);
         }
