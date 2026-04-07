@@ -278,6 +278,23 @@ export interface TemplateData {
 interface LandingCMSContextType {
     cmsData: LandingCMSData;
     templateData: TemplateData | null;
+    siteConfig: {
+        siteName: string;
+        siteTagline: string;
+        logoHorizontal: string;
+        logoVertical: string;
+        favicon: string;
+        primaryColor: string;
+        secondaryColor: string;
+        socialInstagram: string;
+        socialFacebook: string;
+        socialYoutube: string;
+        socialTiktok: string;
+        socialLinkedin: string;
+        socialWhatsapp: string;
+        footerDescription: string;
+        footerCopyright: string;
+    };
     sectionOrder: string[];
     sectionVisibility: Record<string, boolean>;
     updateCMSData: (newData: Partial<LandingCMSData>) => Promise<{ success: boolean; error?: string }>;
@@ -390,6 +407,24 @@ const DEFAULT_CMS_DATA: LandingCMSData = {
     commercial: { country: "EC", currency: "USD", taxName: "IVA", taxRate: 15 }
 };
 
+const DEFAULT_SITE_CONFIG = {
+    siteName: 'BLIS Corp',
+    siteTagline: 'Luxury Tech Real Estate',
+    logoHorizontal: '/images/blis-logo.png',
+    logoVertical: '/images/logo-blis-vertical.png',
+    favicon: '/favicon.ico',
+    primaryColor: '#B10D24',
+    secondaryColor: '#10B981',
+    socialInstagram: '',
+    socialFacebook: '',
+    socialYoutube: '',
+    socialTiktok: '',
+    socialLinkedin: '',
+    socialWhatsapp: '',
+    footerDescription: '',
+    footerCopyright: '© 2026 BLIS Corp. Todos los derechos reservados.'
+};
+
 const LandingCMSContext = createContext<LandingCMSContextType | undefined>(undefined);
 
 const DEFAULT_SECTION_ORDER = [
@@ -401,12 +436,37 @@ const DEFAULT_SECTION_ORDER = [
 export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [cmsData, setCmsData] = useState<LandingCMSData>(DEFAULT_CMS_DATA);
     const [templateData, setTemplateData] = useState<TemplateData | null>(null);
+    const [siteConfig, setSiteConfig] = useState(DEFAULT_SITE_CONFIG);
     const [loading, setLoading] = useState(true);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     useEffect(() => {
         async function loadCMSData() {
             try {
+                // Load site config
+                const siteConfigRes = await fetch('/api/site-config');
+                const siteConfigData = await siteConfigRes.json();
+                if (siteConfigData.success && siteConfigData.data) {
+                    setSiteConfig(prev => ({
+                        ...prev,
+                        siteName: siteConfigData.data.site_name || prev.siteName,
+                        siteTagline: siteConfigData.data.site_tagline || prev.siteTagline,
+                        logoHorizontal: siteConfigData.data.logo_horizontal || prev.logoHorizontal,
+                        logoVertical: siteConfigData.data.logo_vertical || prev.logoVertical,
+                        favicon: siteConfigData.data.favicon || prev.favicon,
+                        primaryColor: siteConfigData.data.primary_color || prev.primaryColor,
+                        secondaryColor: siteConfigData.data.secondary_color || prev.secondaryColor,
+                        socialInstagram: siteConfigData.data.social_instagram || '',
+                        socialFacebook: siteConfigData.data.social_facebook || '',
+                        socialYoutube: siteConfigData.data.social_youtube || '',
+                        socialTiktok: siteConfigData.data.social_tiktok || '',
+                        socialLinkedin: siteConfigData.data.social_linkedin || '',
+                        socialWhatsapp: siteConfigData.data.social_whatsapp || '',
+                        footerDescription: siteConfigData.data.footer_description || '',
+                        footerCopyright: siteConfigData.data.footer_copyright || prev.footerCopyright
+                    }));
+                }
+
                 const response = await fetch('/api/cms/landing');
                 const result = await response.json();
                 
@@ -533,6 +593,7 @@ export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         <LandingCMSContext.Provider value={{ 
             cmsData, 
             templateData,
+            siteConfig,
             sectionOrder,
             sectionVisibility,
             updateCMSData, 
