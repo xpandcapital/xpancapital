@@ -58,11 +58,9 @@ return () => observer.disconnect();
 
     // Auto-play timer - solo cuando es visible
     useEffect(() => {
-        if (images.length === 0) return;
+        if (images.length === 0 || !isVisible) return;
         
         const timer = setInterval(() => {
-            if (!isVisible) return;
-            
             setProgress((prev) => {
                 if (prev >= 100) {
                     setCurrentIndex((i) => (i + 1) % images.length);
