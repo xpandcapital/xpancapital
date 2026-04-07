@@ -9,13 +9,7 @@ import { useLandingCMS } from "@/context/LandingCMSContext";
 
 export function Hero() {
     const { cmsData } = useLandingCMS();
-    const [mounted, setMounted] = useState(false);
     const ref = useRef<HTMLElement>(null);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
 
     const { scrollYProgress } = useScroll({
         target: ref,
@@ -66,10 +60,9 @@ export function Hero() {
                 }
             `}</style>
 
-            {/* --- FLOATING UI WIDGETS --- */}
-            {mounted && (
-                <>
-{/* Widget 1: Ventas (Top Left) */}
+{/* --- FLOATING UI WIDGETS --- */}
+            <>
+            {/* Widget 1: Ventas (Top Left) */}
             <motion.div
 
                 initial={{ opacity: 0, x: -20 }}
@@ -177,8 +170,7 @@ export function Hero() {
                     </defs>
                 </svg>
             </motion.div>
-        </>
-    )}
+            </>
 
     {/* --- MAIN HERO CONTENT --- */}
 

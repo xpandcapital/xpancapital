@@ -28,23 +28,18 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     const { user, logout } = useAuth()
     const { cart, favorites, blisCoins } = useShop()
     const { cmsData, templateData, siteConfig } = useLandingCMS()
-    const [isMounted, setIsMounted] = useState(false)
     const isDashboard = pathname?.startsWith('/superadmin') || pathname?.startsWith('/miembros')
 
     const [searchQuery, setSearchQuery] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
 
     useEffect(() => {
-        setIsMounted(true)
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50)
         }
         window.addEventListener("scroll", handleScroll)
         return () => window.removeEventListener("scroll", handleScroll)
     }, [])
-
-    // To prevent hydration mismatch
-    if (!isMounted) return null;
 
     const navLinks = [
         { name: "Inicio", href: "/" },
