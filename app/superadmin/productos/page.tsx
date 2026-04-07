@@ -634,7 +634,7 @@ function AdminProductsContent() {
                             precio_coins: parseInt(formData.get('bliscoins') as string) || 0,
                             tipo: 'digital',
                             categoria_id: categoryId,
-                            imagen_principal: editingProduct?.image || '/images/blog-1.jpg',
+                            imagen_principal: editingProduct?.image || null,
                             stock: finalStock === -1 ? 0 : finalStock,
                             stock_ilimitado: finalStock === -1,
                             sku,
@@ -701,7 +701,7 @@ function AdminProductsContent() {
                                     stock: p.stock_ilimitado ? -1 : p.stock,
                                     lowStockThreshold: p.stock_bajo_nivel || 10,
                                     status: p.stock_ilimitado ? "Ilimitado" : (p.stock === 0 ? "Agotado" : (p.stock <= (p.stock_bajo_nivel || 10) ? "Bajo Stock" : "Disponible")),
-                                    image: p.imagen_principal || '/images/blog-1.jpg',
+                                    image: p.imagen_principal || null,
                                     description: p.descripcion || '',
                                     currencyCode: "USD",
                                     isPerishable: p.es_perecedero || false,
@@ -728,17 +728,65 @@ function AdminProductsContent() {
                 }}>
                     <div className="bg-zinc-950 border border-white/5 rounded-[2.5rem] p-8 md:p-12 space-y-10 shadow-2xl">
                         <div className="space-y-4">
-                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">GalerÃ­a de ImÃ¡genes</label>
+                            <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Imagen del Producto</label>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <div className="aspect-square rounded-[2rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 group hover:border-blis-red/30 transition-all cursor-pointer bg-white/[0.02]">
+                                <div 
+                                    className="aspect-square rounded-[2rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-3 group hover:border-blis-red/30 transition-all cursor-pointer bg-white/[0.02]"
+                                    onClick={() => {
+                                        const input = document.createElement('input');
+                                        input.type = 'file';
+                                        input.accept = 'image/*';
+                                        input.onchange = async (e) => {
+                                            const file = (e.target as HTMLInputElement).files?.[0];
+                                            if (file) {
+                                                const formData = new FormData();
+                                                formData.append('file', file);
+                                                formData.append('folder', 'productos');
+                                                try {
+                                                    const res = await fetch('/api/upload', {
+                                                        method: 'POST',
+                                                        body: formData
+                                                    });
+                                                    const data = await res.json();
+                                                    if (data.success) {
+                                                        setEditingProduct((prev: any) => ({ 
+                                                            ...prev, 
+                                                            image: data.url,
+                                                            tempImageUrl: data.url 
+                                                        }));
+                                                    }
+                                                } catch (err) {
+                                                    alert('Error al subir imagen');
+                                                }
+                                            }
+                                        };
+                                        input.click();
+                                    }}
+                                >
                                     <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <Plus className="w-5 h-5 text-gray-600 group-hover:text-blis-red" />
                                     </div>
                                     <span className="text-[8px] font-black uppercase text-gray-600 tracking-widest">AÃ±adir Imagen</span>
                                 </div>
-                                <div className="aspect-square rounded-[2rem] bg-zinc-900 border border-white/5 overflow-hidden">
-                                    <img src="/images/blog-1.jpg" className="w-full h-full object-cover" />
-                                </div>
+                                {editingProduct?.image && (
+                                    <div className="aspect-square rounded-[2rem] bg-zinc-900 border border-white/5 overflow-hidden relative group">
+                                        <img 
+                                            src={editingProduct.image} 
+                                            className="w-full h-full object-cover" 
+                                            alt="Producto"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = 'https://placehold.co/400x400/1a1a1a/666?text=Sin+Imagen';
+                                            }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setEditingProduct((prev: any) => ({ ...prev, image: null }))}
+                                            className="absolute top-2 right-2 p-2 bg-red-500/80 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
