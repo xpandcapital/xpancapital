@@ -105,7 +105,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     return (
         <>
             <header
-                className={`fixed top-0 left-0 right-0 z-[150] transition-all duration-300 ${(isScrolled || isDashboard)
+                className={`fixed top-0 left-0 right-0 z-[150] ${(isScrolled || isDashboard)
                     ? "bg-black/80 backdrop-blur-lg border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
                     : "bg-transparent"
                     }`}
@@ -579,12 +579,12 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                             </button>
 
 {/* Logo */}
-                             <div className={`flex flex-col items-center border-b border-white/8 transition-all duration-300 ${user ? 'pt-8 pb-3' : 'pt-14 pb-6'}`}>
+                             <div className={`flex flex-col items-center border-b border-white/8 ${user ? 'pt-8 pb-3' : 'pt-14 pb-6'}`}>
                                  {(logoVertical || siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || cmsData?.footer?.logoVertical) ? (
                                      <img
                                          src={logoVertical || siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || cmsData?.footer?.logoVertical}
                                          alt="Blis Corporation"
-                                         className={`w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.4)] transition-all duration-300 ${user ? 'h-20 mb-2' : 'h-28 mb-4'}`}
+                                         className={`w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.4)] ${user ? 'h-20 mb-2' : 'h-28 mb-4'}`}
                                      />
                                  ) : (
                                      <span className={`font-black text-white tracking-wider ${user ? 'text-2xl mb-2' : 'text-3xl mb-4'}`}>BLIS CORP</span>
