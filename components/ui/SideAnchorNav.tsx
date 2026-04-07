@@ -6,22 +6,23 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ChevronUp, ChevronDown } from "lucide-react"
 import { useLandingCMS } from "@/context/LandingCMSContext"
 
-const SECTION_LABELS: Record<string, string> = {
-    hero: "Inicio",
-    about: "Trayectoria",
-    process: "Proceso",
-    operations: "Backstage",
-    market: "Mercado",
-    calculator: "Plusvalía",
-    map: "Mapa",
-    projects: "Portafolio",
-    video: "Video",
-    catalog: "Tienda",
-    team: "Alianza/Team",
-    testimonials: "Testimonios",
-    faq: "FAQ",
-    blog: "Blog",
-    footer: "Contacto",
+// Map from section key to DOM id and label
+const SECTION_MAP: Record<string, { id: string; label: string }> = {
+    hero: { id: "hero", label: "Inicio" },
+    about: { id: "trayectoria", label: "Trayectoria" },
+    process: { id: "process", label: "Proceso" },
+    operations: { id: "operaciones", label: "Backstage" },
+    market: { id: "insights", label: "Mercado" },
+    calculator: { id: "calculadora", label: "Plusvalía" },
+    map: { id: "mapa", label: "Mapa" },
+    projects: { id: "projects", label: "Portafolio" },
+    video: { id: "vision", label: "Video" },
+    catalog: { id: "catalog", label: "Tienda" },
+    team: { id: "equipo", label: "Alianza/Team" },
+    testimonials: { id: "testimonials", label: "Testimonios" },
+    faq: { id: "faq", label: "FAQ" },
+    blog: { id: "blog", label: "Blog" },
+    footer: { id: "footer", label: "Contacto" },
 }
 
 const BLOG_SECTIONS = [
@@ -47,8 +48,11 @@ export function SideAnchorNav() {
             "calculator", "map", "projects", "catalog", "team", "testimonials", "faq", "blog", "footer"
         ]
         return sectionOrder
-            .filter((id: string) => SECTION_LABELS[id])
-            .map((id: string) => ({ id, label: SECTION_LABELS[id] }))
+            .filter((key: string) => SECTION_MAP[key])
+            .map((key: string) => ({ 
+                id: SECTION_MAP[key].id, 
+                label: SECTION_MAP[key].label 
+            }))
     })()
 
     useEffect(() => {
@@ -65,8 +69,8 @@ export function SideAnchorNav() {
             { rootMargin: "-20% 0px -70% 0px" }
         )
 
-        sections.forEach(({ id }: { id: string }) => {
-            const el = document.getElementById(id)
+        sections.forEach((section: { id: string }) => {
+            const el = document.getElementById(section.id)
             if (el) observer.observe(el)
         })
 
@@ -124,18 +128,18 @@ export function SideAnchorNav() {
                     </button>
                 </div>
 
-                {sections.map(({ id, label }: { id: string; label: string }) => {
-                    const isActive = activeId === id
+                {sections.map((section: { id: string; label: string }) => {
+                    const isActive = activeId === section.id
                     return (
-                        <div key={id} className="relative flex items-center justify-end w-full">
+                        <div key={section.id} className="relative flex items-center justify-end w-full">
                             <span className={`absolute right-10 px-3 py-1.5 bg-[#0A0D11]/90 backdrop-blur-md text-[9px] font-bold tracking-widest uppercase rounded border opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none translate-x-4 group-hover/nav:translate-x-0 duration-300 w-28 text-right ${isActive ? 'text-blis-red border-blis-red shadow-[0_4px_15px_rgba(190,11,60,0.5)]' : 'border-white/10 text-white'}`}>
-                                {label}
+                                {section.label}
                             </span>
                             <div className="w-6 flex justify-center">
                                 <button
-                                    onClick={() => handleScroll(id)}
+                                    onClick={() => handleScroll(section.id)}
                                     className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${isActive ? 'bg-blis-red border-blis-red scale-[1.3] shadow-[0_0_12px_rgba(190,11,60,0.8)]' : 'bg-transparent border-blis-red/50 hover:border-blis-red hover:bg-blis-red/20'}`}
-                                    aria-label={`Ir a ${label}`}
+                                    aria-label={`Ir a ${section.label}`}
                                 />
                             </div>
                         </div>
@@ -172,7 +176,7 @@ export function SideAnchorNav() {
                             <div className="px-4 flex flex-col min-w-[100px] items-center">
                                 <span className="text-[8px] font-mono text-blis-red uppercase tracking-[0.2em] font-black opacity-60">Sección:</span>
                                 <span className="text-[11px] font-bold text-white uppercase tracking-wider whitespace-nowrap">
-                                    {sections.find((s: { id: string }) => s.id === activeId)?.label || "Explorar"}
+                                    {(sections.find((s: { id: string }) => s.id === activeId) as { label?: string })?.label || "Explorar"}
                                 </span>
                             </div>
 
