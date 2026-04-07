@@ -41,7 +41,7 @@ export function mapProductoToProductDef(producto: Producto): ProductDef {
     originalPrice: producto.precio_usd ? producto.precio_usd * 1.3 : undefined,
     rating: 4.8,
     sales: '+100',
-    image: producto.imagen_principal || '/images/placeholder-product.jpg',
+    image: producto.imagen_principal || '/images/blog-1.jpg',
     description: producto.descripcion,
     stock: producto.stock_ilimitado ? 999 : producto.stock,
     isCourse: producto.tipo === 'servicio' || producto.tipo === 'digital'

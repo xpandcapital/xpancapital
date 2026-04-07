@@ -12,8 +12,8 @@ export function FooterSections() {
     const { 
         description = "Somos la firma élite en desarrollo de software y tecnología real estate.", 
         socials = {}, 
-        logoVertical = "/images/logo-vertical.png", 
-        logoHorizontal = "/images/blis_logo_rojo.png" 
+        logoVertical = "/images/logo-blis-vertical.png", 
+        logoHorizontal = "/images/blis-logo.png" 
     } = cmsData?.footer || {};
 
     const globalLinks = [

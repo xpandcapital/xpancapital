@@ -97,7 +97,7 @@ export const TradingChart = ({
       {/* ─── BLIS CORP WATERMARK ─── */}
       <g style={{ pointerEvents: 'none', userSelect: 'none' }}>
         <image
-          href="/images/logo blanco transparente horizontal.webp"
+          href="/images/blis-logo.png"
           x={dims.width / 2 - (dims.width > 800 ? 600 : 280) / 2 - (padding?.right ?? 80) / 2}
           y={dims.height / 2 - (dims.width > 800 ? 200 : 100) / 2}
           width={dims.width > 800 ? 600 : 280}

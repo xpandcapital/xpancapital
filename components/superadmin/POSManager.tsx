@@ -29,7 +29,7 @@ function mapSupabaseToPosProduct(p: Producto) {
         isBlisCoinsOnly: p.metodo_pago === 'coins',
         stock: p.stock_ilimitado ? 999 : p.stock,
         status: p.stock_ilimitado || p.stock > 0 ? 'Disponible' : 'Agotado',
-        image: p.imagen_principal || '/images/placeholder-product.jpg',
+        image: p.imagen_principal || '/images/blog-1.jpg',
         description: p.descripcion || '',
         currencyCode: 'USD',
         isPerishable: false

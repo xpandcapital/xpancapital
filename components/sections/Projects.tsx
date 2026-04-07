@@ -94,7 +94,7 @@ export function Projects() {
               ? galleryImages 
               : project.cover_image 
                 ? [project.cover_image] 
-                : ["/images/placeholder-project.webp"],
+                : ["/images/arkadia-1.webp"],
             fullDescription: project.description || "Proyecto inmobiliario de alta calidad.",
             webLink: project.website || "#",
           };

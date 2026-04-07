@@ -138,7 +138,7 @@ export default function ProjectDetailPage() {
     ? project.gallery_images 
     : project.cover_image 
       ? [project.cover_image] 
-      : ["/images/placeholder-project.webp"];
+      : ["/images/arkadia-1.webp"];
 
   return (
     <main className="bg-black min-h-screen text-white">
