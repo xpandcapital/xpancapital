@@ -6,7 +6,16 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 function getSupabase() {
-  return createClient(supabaseUrl, supabaseServiceKey)
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('❌ Missing Supabase environment variables')
+    throw new Error('Missing Supabase configuration')
+  }
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
 }
 
 export async function GET(request: NextRequest) {
@@ -37,7 +46,7 @@ export async function GET(request: NextRequest) {
     console.log('✅ Categories fetched:', data?.length || 0)
     return NextResponse.json({ success: true, data })
   } catch (err) {
-    console.error('❌ Unexpected error:', err)
+    console.error('❌ Unexpected error in GET:', err)
     return NextResponse.json({ success: false, error: 'Error del servidor', details: String(err) }, { status: 500 })
   }
 }
