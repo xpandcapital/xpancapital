@@ -653,7 +653,7 @@ function AdminProductsContent() {
 
                         console.log('📊 Enviando producto:', apiData);
 
-                        if (editingProduct) {
+                        if (editingProduct?.id) {
                             // Update existing product
                             const res = await fetch('/api/productos', {
                                 method: 'PUT',
@@ -881,8 +881,8 @@ function AdminProductsContent() {
                                     </div>
                                 </div>
 
-                                {/* Grid de Precios - 2 columnas en móvil, 4 en desktop */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {/* Grid de Precios - 2 columnas en móvil, 3 en desktop */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     {/* Precio Base */}
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Precio Base</label>
@@ -892,46 +892,60 @@ function AdminProductsContent() {
                                         </div>
                                     </div>
 
+                                    {/* Descuento */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Descuento (% o $)</label>
+                                        <div className="relative">
+                                            <input name="discountPercentage" type="number" defaultValue={editingProduct?.discountPercentage || ''} placeholder="0" className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all pr-16" />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs">%/$</span>
+                                        </div>
+                                    </div>
+
                                     {/* Precio de Venta */}
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Precio Final</label>
-                                        <div className="relative flex gap-2">
-                                            {isMultiCurrencyEnabled ? (
-                                                <select 
-                                                    name="currencyCode" 
-                                                    defaultValue={editingProduct?.currencyCode || selectedCurrency.code} 
-                                                    className="bg-white/10 border border-white/10 rounded-xl px-3 py-3 text-[11px] font-black text-emerald-500 focus:outline-none focus:border-emerald-500 min-w-[80px]"
-                                                >
-                                                    {activeCurrencies.map(c => (
-                                                        <option key={c.code} value={c.code}>{c.code}</option>
-                                                    ))}
-                                                </select>
-                                            ) : (
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">{selectedCurrency.symbol}</span>
-                                            )}
-                                            <input 
-                                                name="price" 
-                                                step="0.01" 
-                                                defaultValue={editingProduct?.price || ''} 
-                                                type="number" 
-                                                placeholder="0.00" 
-                                                className={`flex-1 bg-emerald-500/10 border border-emerald-500/20 rounded-xl ${isMultiCurrencyEnabled ? 'px-4' : 'pl-10 pr-4'} py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all`} 
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Descuento % */}
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Descuento %</label>
                                         <div className="relative">
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-sm">%</span>
-                                            <input name="discountPercentage" type="number" defaultValue={editingProduct?.discountPercentage || ''} placeholder="0" className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all pr-10" />
+                                            {isMultiCurrencyEnabled ? (
+                                                <div className="flex gap-2">
+                                                    <select 
+                                                        name="currencyCode" 
+                                                        defaultValue={editingProduct?.currencyCode || selectedCurrency.code} 
+                                                        className="bg-white/10 border border-white/10 rounded-xl px-3 py-3 text-[10px] font-black text-emerald-500 focus:outline-none focus:border-emerald-500 w-20"
+                                                    >
+                                                        {activeCurrencies.map(c => (
+                                                            <option key={c.code} value={c.code}>{c.code}</option>
+                                                        ))}
+                                                    </select>
+                                                    <input 
+                                                        name="price" 
+                                                        step="0.01" 
+                                                        defaultValue={editingProduct?.price || ''} 
+                                                        type="number" 
+                                                        placeholder="0.00" 
+                                                        className="flex-1 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all" 
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">{selectedCurrency.symbol}</span>
+                                                    <input 
+                                                        name="price" 
+                                                        step="0.01" 
+                                                        defaultValue={editingProduct?.price || ''} 
+                                                        type="number" 
+                                                        placeholder="0.00" 
+                                                        className="w-full bg-emerald-500/10 border border-emerald-500/20 rounded-xl pl-10 pr-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all" 
+                                                    />
+                                                </>
+                                            )}
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Válido Hasta */}
+                                {/* Fecha de descuento */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Válido Hasta</label>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Descuento Válido Hasta</label>
                                         <input name="discountUntil" type="date" defaultValue={editingProduct?.discountUntil || ''} className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500 transition-all" />
                                     </div>
                                 </div>
@@ -961,10 +975,20 @@ function AdminProductsContent() {
                                         <input name="stock" disabled={isUnlimitedSettings} required={!isUnlimitedSettings} defaultValue={editingProduct?.stock === -1 ? '' : editingProduct?.stock} type="number" placeholder={isUnlimitedSettings ? "∞" : "Cantidad"} className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-blis-red transition-all disabled:opacity-30" />
                                     </div>
 
-                                    {/* Alerta Stock */}
+                                    {/* Alerta Stock - Deshabilitado cuando es ilimitado */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Alerta Bajo Stock</label>
-                                        <input name="lowStockThreshold" defaultValue={editingProduct?.lowStockThreshold || 15} type="number" placeholder="15" className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-amber-500 transition-all" />
+                                        <label className={`text-[10px] font-black uppercase tracking-widest ${isUnlimitedSettings ? 'text-gray-600' : 'text-gray-400'}`}>Alerta Bajo Stock</label>
+                                        <input 
+                                            name="lowStockThreshold" 
+                                            defaultValue={editingProduct?.lowStockThreshold || 15} 
+                                            type="number" 
+                                            placeholder="15" 
+                                            disabled={isUnlimitedSettings}
+                                            className={`w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-amber-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed`} 
+                                        />
+                                        {isUnlimitedSettings && (
+                                            <p className="text-[9px] text-gray-600">No aplica para stock ilimitado</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -1170,7 +1194,7 @@ function AdminProductsContent() {
                                 Descartar
                             </button>
                             <button type="submit" className="bg-blis-red text-white px-10 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:scale-105 transition-all shadow-xl shadow-blis-red/20 active:scale-95">
-                                {editingProduct ? 'Actualizar Producto' : 'Publicar Producto'}
+                                {editingProduct?.id ? 'Actualizar Producto' : 'Guardar Producto'}
                             </button>
                         </div>
                     </div>
