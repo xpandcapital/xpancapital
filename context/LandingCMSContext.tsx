@@ -207,6 +207,10 @@ interface FooterData {
     legalLinks: Array<{ text: string; href: string }>;
     locationText: string;
     showProjects: boolean;
+    videoTitle: string;
+    videoSubtitle: string;
+    videoUrl: string;
+    videoThumbnail: string;
 }
 
 interface CommercialData {
@@ -443,7 +447,11 @@ const DEFAULT_CMS_DATA: LandingCMSData = {
             { text: "Reclamaciones", href: "/reclamaciones" }
         ],
         locationText: "Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú",
-        showProjects: true
+        showProjects: true,
+        videoTitle: "Dentro de la Fábrica",
+        videoSubtitle: "Conoce nuestro rigor metodológico",
+        videoUrl: "",
+        videoThumbnail: "/images/edificio-blis.webp"
     },
     commercial: { country: "EC", currency: "USD", taxName: "IVA", taxRate: 15 }
 };

@@ -16,6 +16,15 @@ export function FooterSections() {
     const { cmsData, templateData, siteConfig } = useLandingCMS();
     const { showToast } = useToast();
     const [projects, setProjects] = useState<Project[]>([]);
+    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+    
+    // Footer video content
+    const footerVideo = {
+        title: cmsData?.footer?.videoTitle || "Dentro de la Fábrica",
+        subtitle: cmsData?.footer?.videoSubtitle || "Conoce nuestro rigor metodológico",
+        url: cmsData?.footer?.videoUrl || "",
+        thumbnail: cmsData?.footer?.videoThumbnail || "/images/edificio-blis.webp"
+    };
     
     // Use siteConfig for socials, with fallbacks
     const socials = {
@@ -100,17 +109,36 @@ export function FooterSections() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="relative rounded-2xl overflow-hidden glass-card max-w-4xl mx-auto border border-white/10 group flex flex-col items-center justify-center"
+                        className="relative rounded-2xl overflow-hidden glass-card max-w-4xl mx-auto border border-white/10 group"
                         style={{ aspectRatio: '4/3' }}
                     >
-                        <div className="absolute inset-0 bg-[url('/images/edificio-blis.webp')] bg-cover bg-center opacity-30 group-hover:opacity-20 transition-opacity duration-700" />
-                        <div className="relative z-10 flex flex-col items-center p-8">
-                            <button className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blis-red/20 border border-blis-red text-blis-red flex items-center justify-center mb-6 hover:scale-110 transition-transform backdrop-blur-md">
-                                <PlayCircle className="w-8 h-8 sm:w-10 sm:h-10" />
-                            </button>
-                            <h3 className="text-2xl sm:text-4xl font-black uppercase tracking-widest text-white mb-2">Dentro de la <span className="text-blis-red">Fábrica</span></h3>
-                            <p className="text-sm text-gray-400 tracking-wider">Conoce nuestro rigor metodológico</p>
-                        </div>
+                        {isVideoPlaying && footerVideo.url ? (
+                            <iframe
+                                src={footerVideo.url}
+                                className="absolute inset-0 w-full h-full"
+                                allowFullScreen
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            />
+                        ) : (
+                            <>
+                                <div 
+                                    className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-20 transition-opacity duration-700"
+                                    style={{ backgroundImage: `url('${footerVideo.thumbnail}')` }}
+                                />
+                                <div className="relative z-10 flex flex-col items-center justify-center h-full p-8">
+                                    <button 
+                                        onClick={() => footerVideo.url && setIsVideoPlaying(true)}
+                                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blis-red/20 border border-blis-red text-blis-red flex items-center justify-center mb-6 hover:scale-110 transition-transform backdrop-blur-md cursor-pointer"
+                                    >
+                                        <PlayCircle className="w-8 h-8 sm:w-10 sm:h-10" />
+                                    </button>
+                                    <h3 className="text-2xl sm:text-4xl font-black uppercase tracking-widest text-white mb-2">
+                                        Dentro de la <span className="text-blis-red">{footerVideo.title.replace('Dentro de la ', '')}</span>
+                                    </h3>
+                                    <p className="text-sm text-gray-400 tracking-wider">{footerVideo.subtitle}</p>
+                                </div>
+                            </>
+                        )}
                     </motion.div>
                 </div>
             </section>

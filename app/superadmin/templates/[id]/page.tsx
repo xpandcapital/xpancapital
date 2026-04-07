@@ -2295,6 +2295,13 @@ export default function TemplateEditorPage() {
                   <Plus className="w-3 h-3" /> Agregar Link Legal
                 </button>
               </div>
+              
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Video (Dentro de la Fábrica)</h4>
+              <InputField label="Título del Video" value={sections.footer?.videoTitle || ''} onChange={(v) => updateSection('footer', { videoTitle: v })} placeholder="Dentro de la Fábrica" />
+              <InputField label="Subtítulo" value={sections.footer?.videoSubtitle || ''} onChange={(v) => updateSection('footer', { videoSubtitle: v })} placeholder="Conoce nuestro rigor metodológico" />
+              <InputField label="URL del Video (Embed)" value={sections.footer?.videoUrl || ''} onChange={(v) => updateSection('footer', { videoUrl: v })} placeholder="https://youtube.com/embed/..." />
+              <p className="text-[10px] text-gray-500 mb-2">Usa URL de embed: YouTube embed, Vimeo player, etc.</p>
+              <ImageUpload value={sections.footer?.videoThumbnail || ''} onChange={(v) => updateSection('footer', { videoThumbnail: v })} folder="cms/footer" />
             </SectionCard>
           )}
         </div>
