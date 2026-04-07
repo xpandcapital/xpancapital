@@ -46,7 +46,7 @@ export function FooterSections() {
         { text: "Reclamaciones", href: "/reclamaciones" }
     ];
     const locationText = siteConfig?.footerLocationText || footer.locationText || "Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú";
-    const showProjects = siteConfig?.footerShowProjects !== undefined ? siteConfig.footerShowProjects : (footer.showProjects !== false);
+    const showProjects = siteConfig?.footerShowProjects ?? (footer.showProjects !== false);
     
     const logoVertical = siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || footer.logoVertical || "/images/logo-blis-vertical.png";
     const logoHorizontal = siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || footer.logoHorizontal || "/images/blis-logo.png";

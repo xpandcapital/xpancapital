@@ -525,7 +525,7 @@ export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                         footerProjectsTitle: siteConfigData.data.footer_projects_title || prev.footerProjectsTitle,
                         footerLegalTitle: siteConfigData.data.footer_legal_title || prev.footerLegalTitle,
                         footerLocationText: siteConfigData.data.footer_location_text || prev.footerLocationText,
-                        footerShowProjects: siteConfigData.data.footer_show_projects !== undefined ? siteConfigData.data.footer_show_projects : prev.footerShowProjects,
+                        footerShowProjects: siteConfigData.data.footer_show_projects ?? prev.footerShowProjects,
                         contactEmail: siteConfigData.data.contact_email || '',
                         contactPhone: siteConfigData.data.contact_phone || '',
                         contactAddress: siteConfigData.data.contact_address || ''
