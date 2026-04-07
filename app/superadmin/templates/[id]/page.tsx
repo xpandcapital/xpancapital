@@ -14,6 +14,8 @@ import { useTemplates, TipoContenido } from "@/lib/hooks/useTemplates";
 import { useCampanas, useAsesores } from "@/lib/hooks/useCampanas";
 import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/editor/ImageUpload";
+import { MapEditor } from "@/components/editor/MapEditor";
+import { supabase } from "@/lib/supabaseClient";
 
 interface SectionConfig {
   key: string;
@@ -285,6 +287,7 @@ export default function TemplateEditorPage() {
   const [activeSection, setActiveSection] = useState('config');
   const [sectionOrder, setSectionOrder] = useState<string[]>([]);
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({});
+  const [projects, setProjects] = useState<Array<{ id: string; name: string; primary_color?: string }>>([]);
   const [templateConfig, setTemplateConfig] = useState<TemplateData['config']>({
     showHeader: true,
     showFooter: true,
@@ -301,6 +304,26 @@ export default function TemplateEditorPage() {
   useEffect(() => {
     loadTemplate();
   }, [params.id]);
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, name, primary_color')
+        .eq('is_active', true)
+        .order('order_index', { ascending: true, nullsFirst: false });
+      
+      if (!error && data) {
+        setProjects(data);
+      }
+    } catch (err) {
+      console.error('Error loading projects:', err);
+    }
+  };
 
   const loadTemplate = useCallback(async () => {
     setLoading(true);
@@ -1914,11 +1937,35 @@ export default function TemplateEditorPage() {
 
           {/* MAP - Dominio Territorial */}
           {activeSection === 'map' && (
-            <SectionCard title="Dominio Territorial / Mapa">
-              <VisibilityToggle section="map" isVisible={isSectionVisible('map')} onToggle={() => toggleSectionVisibility('map')} />
-              <InputField label="Título" value={sections.map?.title || ''} onChange={(v) => updateSection('map', { title: v })} placeholder="Dominio Territorial" />
-              <TextAreaField label="Descripción" value={sections.map?.description || ''} onChange={(v) => updateSection('map', { description: v })} rows={2} />
-            </SectionCard>
+            <div className="space-y-6">
+              <SectionCard title="Configuración del Mapa">
+                <VisibilityToggle section="map" isVisible={isSectionVisible('map')} onToggle={() => toggleSectionVisibility('map')} />
+                <InputField label="Título" value={sections.map?.title || ''} onChange={(v) => updateSection('map', { title: v })} placeholder="Dominio Territorial" />
+                <InputField label="Subtítulo" value={sections.map?.subtitle || ''} onChange={(v) => updateSection('map', { subtitle: v })} placeholder="Mapa Interactivo" />
+                <TextAreaField label="Descripción" value={sections.map?.description || ''} onChange={(v) => updateSection('map', { description: v })} rows={2} />
+              </SectionCard>
+              
+              <SectionCard title="Editor de Ubicaciones">
+                <p className="text-xs text-gray-400 mb-4">
+                  Sube una imagen de fondo del mapa y arrastra los puntos para posicionar cada proyecto. 
+                  Haz clic en "Agregar en Mapa" para añadir ubicaciones haciendo clic en el mapa, 
+                  o selecciona un proyecto existente.
+                </p>
+                <MapEditor
+                  backgroundImage={sections.map?.backgroundImage || ''}
+                  locations={sections.map?.locations || []}
+                  onChange={(data) => {
+                    if (data.backgroundImage !== undefined) {
+                      updateSection('map', { backgroundImage: data.backgroundImage });
+                    }
+                    if (data.locations) {
+                      updateSection('map', { locations: data.locations });
+                    }
+                  }}
+                  projects={projects}
+                />
+              </SectionCard>
+            </div>
           )}
 
           {/* PROJECTS - Portafolio */}
