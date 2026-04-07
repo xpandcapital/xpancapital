@@ -14,8 +14,9 @@ export function Operations() {
     const [isPaused, setIsPaused] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
-
+    
+    // Usar ref para isVisible para evitar problemas de closure
+    const isVisibleRef = useRef(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
 
@@ -27,14 +28,14 @@ export function Operations() {
         return () => window.removeEventListener('resize', check);
     }, []);
 
-    // Intersection Observer
+    // Intersection Observer - actualiza ref directamente
     useEffect(() => {
         const section = sectionRef.current;
         if (!section) return;
 
         const observer = new IntersectionObserver(
             ([entry]) => {
-                setIsVisible(entry.isIntersecting);
+                isVisibleRef.current = entry.isIntersecting;
                 if (entry.isIntersecting) {
                     setProgress(0);
                 }
@@ -58,7 +59,7 @@ export function Operations() {
         setProgress(0);
     }, [images.length]);
 
-    // Auto-play timer - solo cuando es visible y no está pausado
+    // Auto-play timer - siempre corre, pero solo avanza si es visible
     useEffect(() => {
         if (isPaused || images.length === 0) return;
 
@@ -67,7 +68,9 @@ export function Operations() {
         const step = (frame_rate / interval_ms) * 100;
 
         timerRef.current = setInterval(() => {
-            if (!isVisible) return;
+            // Usar ref para obtener valor actual
+            if (!isVisibleRef.current) return;
+            
             setProgress((prev) => {
                 if (prev >= 100) {
                     nextSlide();
@@ -80,7 +83,7 @@ export function Operations() {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
         };
-    }, [isPaused, nextSlide, images.length, isVisible]);
+    }, [isPaused, nextSlide, images.length]);
 
     if (!isMounted) return null;
 
