@@ -11,12 +11,9 @@ export function Operations() {
     
     const [currentIndex, setCurrentIndex] = useState(0);
     const [progress, setProgress] = useState(0);
-    const [isPaused, setIsPaused] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     
-    const isVisibleRef = useRef(false);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
     const sectionRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
@@ -34,12 +31,11 @@ export function Operations() {
 
         const observer = new IntersectionObserver(
             ([entry]) => {
-                isVisibleRef.current = entry.isIntersecting;
                 if (entry.isIntersecting) {
                     setProgress(0);
                 }
             },
-            { threshold: 0.1, rootMargin: "0px 0px -100px 0px" }
+            { threshold: 0.1 }
         );
 
         observer.observe(section);
@@ -58,13 +54,11 @@ export function Operations() {
         setProgress(0);
     }, [images.length]);
 
-    // Auto-play timer
+    // Auto-play timer - simplified
     useEffect(() => {
         if (images.length === 0) return;
-
-        timerRef.current = setInterval(() => {
-            if (isPaused || !isVisibleRef.current) return;
-            
+        
+        const timer = setInterval(() => {
             setProgress((prev) => {
                 if (prev >= 100) {
                     setCurrentIndex((i) => (i + 1) % images.length);
@@ -74,10 +68,8 @@ export function Operations() {
             });
         }, 50);
 
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-        };
-    }, [isPaused, images.length]);
+        return () => clearInterval(timer);
+    }, [images.length]);
 
     if (!isMounted) return null;
 
@@ -119,13 +111,7 @@ export function Operations() {
             <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
 
                 {/* Main Slider Area */}
-                <div
-                    className="relative w-full lg:col-span-8 group/slider"
-                    onMouseEnter={() => setIsPaused(true)}
-                    onMouseLeave={() => setIsPaused(false)}
-                    onTouchStart={() => setIsPaused(true)}
-                    onTouchEnd={() => setIsPaused(false)}
-                >
+                <div className="relative w-full lg:col-span-8">
                     <div className="relative h-[400px] md:h-[600px] w-full rounded-2xl overflow-hidden glass-card p-1 cursor-grab active:cursor-grabbing">
                         <AnimatePresence mode="wait">
                             <motion.div
