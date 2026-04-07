@@ -66,7 +66,8 @@ export async function PUT(
       og_imagen,
       thumbnail_url,
       sectionOrder,
-      sectionVisibility
+      sectionVisibility,
+      config
     } = body
 
     if (slug !== undefined && slug !== '') {
@@ -103,6 +104,7 @@ export async function PUT(
     if (thumbnail_url !== undefined) updateData.thumbnail_url = thumbnail_url
     if (sectionOrder !== undefined) updateData.sectionOrder = sectionOrder
     if (sectionVisibility !== undefined) updateData.sectionVisibility = sectionVisibility
+    if (config !== undefined) updateData.config = config
 
     const { data, error } = await supabase
       .from('templates')
