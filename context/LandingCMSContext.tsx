@@ -198,6 +198,15 @@ interface FooterData {
     logoVertical: string;
     logoHorizontal: string;
     socials: Record<string, string>;
+    vipTitle: string;
+    vipDescription: string;
+    vipPlaceholder: string;
+    vipButtonText: string;
+    projectsTitle: string;
+    legalTitle: string;
+    legalLinks: Array<{ text: string; href: string }>;
+    locationText: string;
+    showProjects: boolean;
 }
 
 interface CommercialData {
@@ -407,7 +416,27 @@ const DEFAULT_CMS_DATA: LandingCMSData = {
             { question: "¿Cuál es la diferencia entre comprar en planos y con escritura?", answer: "En planos obtienes mayor rentabilidad pero esperas más tiempo. Con escritura, el terreno está listo para escritura inmediata." }
         ] 
     },
-    footer: { description: "Liderando la transformación digital.", copyright: "© 2026 Blis Corp.", logoVertical: "/images/logo-blis-vertical.png", logoHorizontal: "/images/blis-logo.png", socials: {} },
+    footer: { 
+        description: "Liderando la transformación digital.", 
+        copyright: "© 2026 Blis Corp.", 
+        logoVertical: "/images/logo-blis-vertical.png", 
+        logoHorizontal: "/images/blis-logo.png", 
+        socials: {},
+        vipTitle: "Acceso VIP",
+        vipDescription: "Únete a la lista de inversores selectos para recibir análisis de mercado y oportunidades antes del lanzamiento público.",
+        vipPlaceholder: "Tu correo corporativo",
+        vipButtonText: "Suscribirme",
+        projectsTitle: "Proyectos",
+        legalTitle: "Legal",
+        legalLinks: [
+            { text: "Privacidad", href: "/privacidad" },
+            { text: "Términos", href: "/terminos" },
+            { text: "Transparencia", href: "/transparencia" },
+            { text: "Reclamaciones", href: "/reclamaciones" }
+        ],
+        locationText: "Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú",
+        showProjects: true
+    },
     commercial: { country: "EC", currency: "USD", taxName: "IVA", taxRate: 15 }
 };
 

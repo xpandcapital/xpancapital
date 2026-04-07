@@ -2241,8 +2241,60 @@ export default function TemplateEditorPage() {
           {activeSection === 'footer' && (
             <SectionCard title="Footer">
               <VisibilityToggle section="footer" isVisible={isSectionVisible('footer')} onToggle={() => toggleSectionVisibility('footer')} />
-              <TextAreaField label="Descripción" value={sections.footer?.description || ''} onChange={(v) => updateSection('footer', { description: v })} rows={2} />
+              
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-4 mb-3">Contenido</h4>
+              <TextAreaField label="Descripción" value={sections.footer?.description || ''} onChange={(v) => updateSection('footer', { description: v })} rows={2} placeholder="Descripción de la empresa..." />
               <InputField label="Copyright" value={sections.footer?.copyright || ''} onChange={(v) => updateSection('footer', { copyright: v })} placeholder="© 2026 Blis Corp." />
+              <InputField label="Texto de Ubicación" value={sections.footer?.locationText || ''} onChange={(v) => updateSection('footer', { locationText: v })} placeholder="Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú" />
+              
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Acceso VIP</h4>
+              <InputField label="Título VIP" value={sections.footer?.vipTitle || ''} onChange={(v) => updateSection('footer', { vipTitle: v })} placeholder="Acceso VIP" />
+              <TextAreaField label="Descripción VIP" value={sections.footer?.vipDescription || ''} onChange={(v) => updateSection('footer', { vipDescription: v })} rows={2} placeholder="Únete a la lista de inversores..." />
+              <InputField label="Placeholder Email" value={sections.footer?.vipPlaceholder || ''} onChange={(v) => updateSection('footer', { vipPlaceholder: v })} placeholder="Tu correo corporativo" />
+              <InputField label="Texto Botón" value={sections.footer?.vipButtonText || ''} onChange={(v) => updateSection('footer', { vipButtonText: v })} placeholder="Suscribirme" />
+              
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Proyectos</h4>
+              <InputField label="Título Sección" value={sections.footer?.projectsTitle || ''} onChange={(v) => updateSection('footer', { projectsTitle: v })} placeholder="Proyectos" />
+              <div className="flex items-center gap-3 mb-4">
+                <input type="checkbox" id="showProjects" checked={sections.footer?.showProjects !== false} onChange={(e) => updateSection('footer', { showProjects: e.target.checked })} className="w-4 h-4 accent-blis-red" />
+                <label htmlFor="showProjects" className="text-sm text-gray-300">Mostrar proyectos dinámicamente</label>
+              </div>
+              <p className="text-[10px] text-gray-500">Los proyectos se cargan automáticamente desde la base de datos.</p>
+              
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Legal</h4>
+              <InputField label="Título Sección" value={sections.footer?.legalTitle || ''} onChange={(v) => updateSection('footer', { legalTitle: v })} placeholder="Legal" />
+              <div className="space-y-3">
+                <p className="text-[10px] text-gray-500 mb-2">Links legales ({(sections.footer?.legalLinks || []).length})</p>
+                {(sections.footer?.legalLinks || []).map((link: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-blis-red font-bold text-xs">Link {idx + 1}</span>
+                      <button onClick={() => {
+                        const links = [...(sections.footer?.legalLinks || [])];
+                        links.splice(idx, 1);
+                        updateSection('footer', { legalLinks: links });
+                      }} className="text-red-400 hover:text-red-300 text-xs">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <InputField label="Texto" value={link.text || ''} onChange={(v) => {
+                        const links = [...(sections.footer?.legalLinks || [])];
+                        links[idx] = { ...links[idx], text: v };
+                        updateSection('footer', { legalLinks: links });
+                      }} placeholder="Privacidad" />
+                      <InputField label="URL" value={link.href || ''} onChange={(v) => {
+                        const links = [...(sections.footer?.legalLinks || [])];
+                        links[idx] = { ...links[idx], href: v };
+                        updateSection('footer', { legalLinks: links });
+                      }} placeholder="/privacidad" />
+                    </div>
+                  </div>
+                ))}
+                <button onClick={() => updateSection('footer', { legalLinks: [...(sections.footer?.legalLinks || []), { text: '', href: '' }] })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                  <Plus className="w-3 h-3" /> Agregar Link Legal
+                </button>
+              </div>
             </SectionCard>
           )}
         </div>

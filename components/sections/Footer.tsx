@@ -3,12 +3,20 @@
 import { motion } from "framer-motion";
 import { Facebook, Instagram, Linkedin, Twitter, PlayCircle, Youtube, MessageCircle, Mail, Phone, MapPin, Video as VideoIcon } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
-
 import { useLandingCMS } from "@/context/LandingCMSContext";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
+
+interface Project {
+    id: string;
+    name: string;
+    slug?: string;
+}
 
 export function FooterSections() {
     const { cmsData, templateData, siteConfig } = useLandingCMS();
     const { showToast } = useToast();
+    const [projects, setProjects] = useState<Project[]>([]);
     
     // Use siteConfig for socials, with fallbacks
     const socials = {
@@ -21,11 +29,49 @@ export function FooterSections() {
         twitter: siteConfig?.socialTwitter || cmsData?.footer?.socials?.twitter || "",
     };
     
-    const description = siteConfig?.footerDescription || cmsData?.footer?.description || "Somos la firma élite en desarrollo de software y tecnología real estate.";
-    const copyright = siteConfig?.footerCopyright || cmsData?.footer?.copyright || "© 2026 BLIS Corp. Todos los derechos reservados.";
+    // Footer content from cmsData
+    const footer = cmsData?.footer || {};
+    const description = siteConfig?.footerDescription || footer.description || "Somos la firma élite en desarrollo de software y tecnología real estate.";
+    const copyright = siteConfig?.footerCopyright || footer.copyright || "© 2026 BLIS Corp. Todos los derechos reservados.";
+    const vipTitle = footer.vipTitle || "Acceso VIP";
+    const vipDescription = footer.vipDescription || "Únete a la lista de inversores selectos para recibir análisis de mercado y oportunidades antes del lanzamiento público.";
+    const vipPlaceholder = footer.vipPlaceholder || "Tu correo corporativo";
+    const vipButtonText = footer.vipButtonText || "Suscribirme";
+    const projectsTitle = footer.projectsTitle || "Proyectos";
+    const legalTitle = footer.legalTitle || "Legal";
+    const legalLinks = footer.legalLinks || [
+        { text: "Privacidad", href: "/privacidad" },
+        { text: "Términos", href: "/terminos" },
+        { text: "Transparencia", href: "/transparencia" },
+        { text: "Reclamaciones", href: "/reclamaciones" }
+    ];
+    const locationText = footer.locationText || "Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú";
+    const showProjects = footer.showProjects !== false;
     
-    const logoVertical = siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || cmsData?.footer?.logoVertical || "/images/logo-blis-vertical.png";
-    const logoHorizontal = siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || cmsData?.footer?.logoHorizontal || "/images/blis-logo.png";
+    const logoVertical = siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || footer.logoVertical || "/images/logo-blis-vertical.png";
+    const logoHorizontal = siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || footer.logoHorizontal || "/images/blis-logo.png";
+
+    // Fetch projects from database
+    useEffect(() => {
+        if (showProjects) {
+            async function fetchProjects() {
+                try {
+                    const { data, error } = await supabase
+                        .from('projects')
+                        .select('id, name, slug')
+                        .eq('is_active', true)
+                        .order('order_index', { ascending: true, nullsFirst: false });
+                    
+                    if (!error && data) {
+                        setProjects(data);
+                    }
+                } catch (err) {
+                    console.error('Error loading projects:', err);
+                }
+            }
+            fetchProjects();
+        }
+    }, [showProjects]);
 
     const globalLinks = [
         { icon: MessageCircle, url: socials.whatsapp, name: "WhatsApp" },
@@ -45,9 +91,6 @@ export function FooterSections() {
         phone: siteConfig?.contactPhone || "",
         address: siteConfig?.contactAddress || ""
     };
-
-    const proyectos = ["Residencial Montana", "Residencial Ventura", "Arkadia Club", "Montebello"];
-    const legal = ["Privacidad", "Términos", "Transparencia", "Reclamaciones"];
 
     return (
         <>
@@ -75,24 +118,19 @@ export function FooterSections() {
 
             {/* Footer */}
             <footer className="bg-zinc-950 pt-16 pb-10 border-t border-white/10 relative overflow-hidden" id="footer">
-                {/* Neon Red Background Glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-4xl bg-blis-red/15 rounded-full blur-[150px] pointer-events-none" />
 
                 <div className="container mx-auto px-6 relative z-10">
 
                     {/* ---- MOBILE LAYOUT ---- */}
                     <div className="block lg:hidden">
-                        {/* Logo + Text centered */}
                         <div className="flex flex-col items-center text-center mb-10">
                             <img
                                 src={logoVertical}
-                                alt="Blis Corp"
+                                alt="Logo"
                                 className="h-36 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-4"
                             />
-                            <p className="text-gray-500 font-light text-sm max-w-xs mb-6">
-                                {description}
-                            </p>
-                            {/* Social icons centered */}
+                            <p className="text-gray-500 font-light text-sm max-w-xs mb-6">{description}</p>
                             <div className="flex flex-wrap gap-3 justify-center mb-8">
                                 {activeLinks.map((link, i) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" title={link.name}
@@ -103,41 +141,43 @@ export function FooterSections() {
                             </div>
                         </div>
 
-                        {/* Proyectos + Legal: 2 columns */}
                         <div className="grid grid-cols-2 gap-6 mb-10">
+                            {showProjects && projects.length > 0 && (
+                                <div className="text-center">
+                                    <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-4">{projectsTitle}</h4>
+                                    <ul className="space-y-3 text-gray-500 font-light text-sm">
+                                        {projects.slice(0, 6).map((project) => (
+                                            <li key={project.id}>
+                                                <a href={`/proyectos/${project.slug || project.id}`} className="hover:text-blis-red transition-colors">
+                                                    {project.name}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                             <div className="text-center">
-                                <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-4">Proyectos</h4>
+                                <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-4">{legalTitle}</h4>
                                 <ul className="space-y-3 text-gray-500 font-light text-sm">
-                                    {proyectos.map((item, i) => (
-                                        <li key={i}><a href="#" className="hover:text-blis-red transition-colors">{item}</a></li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="text-center">
-                                <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-4">Legal</h4>
-                                <ul className="space-y-3 text-gray-500 font-light text-sm">
-                                    {legal.map((item, i) => (
-                                        <li key={i}><a href="#" className="hover:text-blis-red transition-colors">{item}</a></li>
+                                    {legalLinks.map((link, i) => (
+                                        <li key={i}><a href={link.href} className="hover:text-blis-red transition-colors">{link.text}</a></li>
                                     ))}
                                 </ul>
                             </div>
                         </div>
 
-                        {/* Acceso VIP — centered */}
                         <div className="flex flex-col items-center text-center mb-10">
-                            <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-3">Acceso VIP</h4>
-                            <p className="text-gray-500 font-light text-sm mb-4 max-w-xs">
-                                Únete a la lista de inversores selectos para recibir análisis de mercado y oportunidades antes del lanzamiento público.
-                            </p>
+                            <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-3">{vipTitle}</h4>
+                            <p className="text-gray-500 font-light text-sm mb-4 max-w-xs">{vipDescription}</p>
                             <form className="flex flex-col gap-3 w-full max-w-xs" onSubmit={(e) => { e.preventDefault(); showToast("Suscripción exitosa.", "success"); }}>
                                 <input
                                     type="email"
-                                    placeholder="Tu correo corporativo"
+                                    placeholder={vipPlaceholder}
                                     className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-blis-red text-white transition-colors text-sm text-center"
                                     required
                                 />
                                 <button type="submit" className="px-4 py-3 bg-blis-red text-white uppercase text-xs font-bold tracking-widest rounded-lg hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)]">
-                                    Suscribirme
+                                    {vipButtonText}
                                 </button>
                             </form>
                         </div>
@@ -146,10 +186,8 @@ export function FooterSections() {
                     {/* ---- DESKTOP LAYOUT ---- */}
                     <div className="hidden lg:grid lg:grid-cols-12 gap-12 mb-16">
                         <div className="lg:col-span-4 flex flex-col items-start pr-4">
-                            <img src={logoHorizontal} alt="Blis Corp Logo" className="h-32 sm:h-40 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-6" />
-                            <p className="text-gray-500 font-light mb-8 max-w-sm">
-                                {description}
-                            </p>
+                            <img src={logoHorizontal} alt="Logo" className="h-32 sm:h-40 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-6" />
+                            <p className="text-gray-500 font-light mb-8 max-w-sm">{description}</p>
                             <div className="flex flex-wrap gap-3">
                                 {activeLinks.map((link, i) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" title={link.name}
@@ -159,30 +197,37 @@ export function FooterSections() {
                                 ))}
                             </div>
                         </div>
+                        
+                        {showProjects && projects.length > 0 && (
+                            <div className="lg:col-span-2">
+                                <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">{projectsTitle}</h4>
+                                <ul className="space-y-4 text-gray-500 font-light">
+                                    {projects.slice(0, 8).map((project) => (
+                                        <li key={project.id}>
+                                            <a href={`/proyectos/${project.slug || project.id}`} className="hover:text-blis-red transition-colors">
+                                                {project.name}
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                        
                         <div className="lg:col-span-2">
-                            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">Proyectos</h4>
+                            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">{legalTitle}</h4>
                             <ul className="space-y-4 text-gray-500 font-light">
-                                {proyectos.map((item, i) => (
-                                    <li key={i}><a href="#" className="hover:text-blis-red transition-colors">{item}</a></li>
+                                {legalLinks.map((link, i) => (
+                                    <li key={i}><a href={link.href} className="hover:text-blis-red transition-colors">{link.text}</a></li>
                                 ))}
                             </ul>
                         </div>
-                        <div className="lg:col-span-2">
-                            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">Legal</h4>
-                            <ul className="space-y-4 text-gray-500 font-light">
-                                {legal.map((item, i) => (
-                                    <li key={i}><a href="#" className="hover:text-blis-red transition-colors">{item}</a></li>
-                                ))}
-                            </ul>
-                        </div>
+                        
                         <div className="lg:col-span-4">
-                            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">Acceso VIP</h4>
-                            <p className="text-gray-500 font-light mb-4">
-                                Únete a la lista de inversores selectos para recibir análisis de mercado y oportunidades antes del lanzamiento público.
-                            </p>
+                            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">{vipTitle}</h4>
+                            <p className="text-gray-500 font-light mb-4">{vipDescription}</p>
                             <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); showToast("Suscripción exitosa.", "success"); }}>
-                                <input type="email" placeholder="Tu correo corporativo" className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-blis-red text-white transition-colors" required />
-                                <button type="submit" className="px-4 py-3 bg-blis-red text-white uppercase text-sm font-bold tracking-widest rounded-lg hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)]">Suscribirme</button>
+                                <input type="email" placeholder={vipPlaceholder} className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-blis-red text-white transition-colors" required />
+                                <button type="submit" className="px-4 py-3 bg-blis-red text-white uppercase text-sm font-bold tracking-widest rounded-lg hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)]">{vipButtonText}</button>
                             </form>
                         </div>
                     </div>
@@ -190,12 +235,7 @@ export function FooterSections() {
                     {/* Bottom bar */}
                     <div className="border-t border-white/10 pt-8 flex flex-col items-center md:flex-row justify-between md:items-center gap-3 text-xs font-mono text-gray-600 uppercase tracking-widest">
                         <p className="text-center md:text-left">{copyright}</p>
-                        <p className="text-center md:text-right flex items-center gap-2">
-                            Diseñado con visión en
-                            <span className="inline-flex items-center gap-1">🇪🇨 Ecuador</span>
-                            <span className="text-white/20">·</span>
-                            <span className="inline-flex items-center gap-1">🇵🇪 Perú</span>
-                        </p>
+                        <p className="text-center md:text-right" dangerouslySetInnerHTML={{ __html: locationText }} />
                     </div>
                     
                     {/* Contact Info */}
