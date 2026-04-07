@@ -865,81 +865,91 @@ function AdminProductsContent() {
                                 </div>
                             </div>
 
-                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Precio Real (Base)</label>
-                                            <div className="relative">
-                                                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500">{selectedCurrency.symbol}</span>
-                                                <input name="originalPrice" step="0.01" defaultValue={editingProduct?.originalPrice || ''} type="number" placeholder="0.00" className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-emerald-500 transition-all" />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between items-center pb-1">
-                                                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Precio con Descuento</label>
-                                            </div>
-                                            <div className="relative flex items-center gap-2">
-                                                {isMultiCurrencyEnabled && (
-                                                    <select name="currencyCode" defaultValue={editingProduct?.currencyCode || selectedCurrency.code} className="bg-white/5 border border-white/10 rounded-2xl px-3 py-4 text-[10px] font-black text-emerald-500 focus:outline-none focus:border-emerald-500 transition-all appearance-none uppercase tracking-widest min-w-[90px] text-center">
-                                                        {activeCurrencies.map(c => <option key={c.code} value={c.code} className="bg-zinc-900">{c.code} {c.symbol}</option>)}
-                                                    </select>
-                                                )}
-                                                <div className="relative flex-1">
-                                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-emerald-500">
-                                                        {isMultiCurrencyEnabled
-                                                            ? ''
-                                                            : selectedCurrency.symbol}
-                                                    </span>
-                                                    <input name="price" required step="0.01" defaultValue={editingProduct?.price || ''} type="number" placeholder="0.00" className={`w-full bg-white/5 border border-white/10 rounded-2xl ${isMultiCurrencyEnabled ? 'px-6' : 'pl-12 pr-6'} py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-emerald-500 transition-all`} />
-                                                </div>
-                                            </div>
-                                        </div>
+                            {/* Sección de Precios y Stock - Mejorada */}
+                            <div className="md:col-span-2 bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 md:p-8 space-y-6">
+                                {/* Header de Precios */}
+                                <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                                        <span className="text-emerald-500 font-black text-lg">$</span>
                                     </div>
-
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Porcentaje Descuento (%)</label>
-                                            <div className="relative">
-                                                <span className="absolute right-6 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">%</span>
-                                                <input name="discountPercentage" type="number" defaultValue={editingProduct?.discountPercentage || ''} placeholder="0" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-emerald-500 transition-all" />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Válido Hasta</label>
-                                            <input name="discountUntil" type="date" defaultValue={editingProduct?.discountUntil || ''} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-emerald-500 transition-all" />
-                                        </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-white uppercase tracking-widest">Precios y Stock</h4>
+                                        <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Configuración de precios y disponibilidad</p>
                                     </div>
                                 </div>
 
-                                {isBlisCoinsEnabled && (
+                                {/* Grid de Precios - 2 columnas en móvil, 4 en desktop */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {/* Precio Base */}
                                     <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Costo en BlisCoins</label>
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Precio Base</label>
                                         <div className="relative">
-                                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-amber-500 font-black">B</span>
-                                            <input name="bliscoins" defaultValue={editingProduct?.bliscoins || '0'} type="number" placeholder="0" className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-amber-500 transition-all" />
+                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">{selectedCurrency.symbol}</span>
+                                            <input name="originalPrice" step="0.01" defaultValue={editingProduct?.originalPrice || ''} type="number" placeholder="0.00" className="w-full bg-black/30 border border-white/10 rounded-2xl pl-10 pr-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all" />
                                         </div>
                                     </div>
-                                )}
 
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center pb-1">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Stock</label>
-                                        <label className="text-[9px] font-black text-blis-red uppercase tracking-widest flex items-center gap-1.5 cursor-pointer leading-none">
-                                            <input type="checkbox" checked={isUnlimitedSettings} onChange={(e) => setIsUnlimitedSettings(e.target.checked)} className="accent-blis-red w-3 h-3" />
-                                            Ilimitado
-                                        </label>
+                                    {/* Precio de Venta */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Precio Final</label>
+                                        <div className="relative">
+                                            {isMultiCurrencyEnabled ? (
+                                                <select name="currencyCode" defaultValue={editingProduct?.currencyCode || selectedCurrency.code} className="absolute left-1 top-1 bottom-1 bg-white/10 border border-white/10 rounded-lg px-2 text-[10px] font-black text-emerald-500 focus:outline-none z-10">
+                                                    {activeCurrencies.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
+                                                </select>
+                                            ) : (
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">{selectedCurrency.symbol}</span>
+                                            )}
+                                            <input name="price" step="0.01" defaultValue={editingProduct?.price || ''} type="number" placeholder="0.00" className={`w-full bg-emerald-500/10 border border-emerald-500/20 rounded-2xl ${isMultiCurrencyEnabled ? 'pl-20' : 'pl-10'} pr-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all`} />
+                                        </div>
                                     </div>
-                                    <input name="stock" disabled={isUnlimitedSettings} required={!isUnlimitedSettings} defaultValue={editingProduct?.stock === -1 ? '' : editingProduct?.stock} type="number" placeholder={isUnlimitedSettings ? "∞" : "Cant."} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-blis-red transition-all disabled:opacity-20" />
+
+                                    {/* Descuento % */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Descuento %</label>
+                                        <div className="relative">
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-sm">%</span>
+                                            <input name="discountPercentage" type="number" defaultValue={editingProduct?.discountPercentage || ''} placeholder="0" className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all pr-10" />
+                                        </div>
+                                    </div>
+
+                                    {/* Válido Hasta */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Válido Hasta</label>
+                                        <input name="discountUntil" type="date" defaultValue={editingProduct?.discountUntil || ''} className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500 transition-all" />
+                                    </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center pb-1">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Alerta Bajo Stock</label>
+                                {/* Segunda fila: BlisCoins, Stock, Alerta */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-white/5">
+                                    {/* BlisCoins */}
+                                    {isBlisCoinsEnabled && (
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-amber-400 uppercase tracking-widest">BlisCoins</label>
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 font-black">B</span>
+                                                <input name="bliscoins" defaultValue={editingProduct?.bliscoins || '0'} type="number" placeholder="0" className="w-full bg-amber-500/10 border border-amber-500/20 rounded-2xl pl-10 pr-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-amber-500 transition-all" />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Stock */}
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Stock</label>
+                                            <label className="flex items-center gap-1.5 cursor-pointer">
+                                                <input type="checkbox" checked={isUnlimitedSettings} onChange={(e) => setIsUnlimitedSettings(e.target.checked)} className="w-3 h-3 accent-blis-red rounded" />
+                                                <span className="text-[9px] font-bold text-blis-red uppercase">Ilimitado</span>
+                                            </label>
+                                        </div>
+                                        <input name="stock" disabled={isUnlimitedSettings} required={!isUnlimitedSettings} defaultValue={editingProduct?.stock === -1 ? '' : editingProduct?.stock} type="number" placeholder={isUnlimitedSettings ? "∞" : "Cantidad"} className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-blis-red transition-all disabled:opacity-30" />
                                     </div>
-                                    <input name="lowStockThreshold" defaultValue={editingProduct?.lowStockThreshold || 15} type="number" placeholder="Ej. 15" className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-amber-500 transition-all" />
+
+                                    {/* Alerta Stock */}
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Alerta Bajo Stock</label>
+                                        <input name="lowStockThreshold" defaultValue={editingProduct?.lowStockThreshold || 15} type="number" placeholder="15" className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-amber-500 transition-all" />
+                                    </div>
                                 </div>
                             </div>
 
