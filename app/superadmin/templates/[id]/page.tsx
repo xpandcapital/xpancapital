@@ -1941,7 +1941,7 @@ export default function TemplateEditorPage() {
                 {(sections.operations?.sliderImages || []).map((img: string, idx: number) => (
                   <div 
                     key={idx} 
-                    className="flex items-center gap-3 p-2 bg-white/5 rounded-xl border border-white/10 cursor-move"
+                    className="flex items-center gap-3 p-2 bg-white/5 rounded-xl border border-white/10"
                     draggable
                     onDragStart={(e) => {
                       e.dataTransfer.setData('text/plain', idx.toString());
@@ -1970,8 +1970,8 @@ export default function TemplateEditorPage() {
                       (e.target as HTMLElement).closest('[draggable]')?.classList.remove('border-blis-red');
                     }}
                   >
-                    <span className="text-gray-500 text-xs w-6">{idx + 1}</span>
-                    <ImageUpload value={img} onChange={(v) => updateArrayItem('operations', 'sliderImages', idx, v)} folder="cms/operations" />
+                    <span className="text-gray-500 text-xs w-6 cursor-move">⠿</span>
+                    <ImageUpload value={img} onChange={(v) => updateArrayItem('operations', 'sliderImages', idx, v)} folder="cms/operations" enableCrop aspectRatio={4/3} />
                     <button onClick={() => removeArrayItem('operations', 'sliderImages', idx)} className="text-red-400 hover:text-red-300 p-1">
                       <Trash2 className="w-4 h-4" />
                     </button>
