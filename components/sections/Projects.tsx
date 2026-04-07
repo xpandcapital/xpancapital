@@ -101,6 +101,9 @@ export function Projects() {
         });
 
         console.log("Loaded projects:", formattedProjects.length);
+        formattedProjects.forEach(p => {
+          console.log(`Project ${p.name}: cover_image=${p.cover_image}, gallery=${p.carouselImages?.slice(0, 2)}`);
+        });
         setProjects(formattedProjects);
       } catch (err) {
         console.error("Error loading projects:", err);

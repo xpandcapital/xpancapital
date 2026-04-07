@@ -55,6 +55,11 @@ export default function ProjectDetailPage() {
 
         if (error) throw error;
         
+        console.log(`Project ${projectId}:`, {
+          cover_image: data.cover_image,
+          gallery_images: data.gallery_images,
+          name: data.name
+        });
         setProject(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Error al cargar proyecto");
