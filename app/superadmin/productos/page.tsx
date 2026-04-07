@@ -155,8 +155,11 @@ function AdminProductsContent() {
     const categories = ["Todas", ...contextCategories.map(c => c.name)];
     const statusOptions = contextStatuses.map(s => s.name);
 
-    // Active currencies for selectors
-    const activeCurrencies = currencies.filter(c => activeCurrencyCodes.includes(c.code));
+    // Active currencies for selectors - memoized for performance
+    const activeCurrencies = useMemo(() => 
+        currencies.filter(c => activeCurrencyCodes.includes(c.code)),
+        [currencies, activeCurrencyCodes]
+    );
 
     const updateProductBulk = async (id: string, field: string, value: any) => {
         setProducts(products.map(p => {
@@ -892,15 +895,28 @@ function AdminProductsContent() {
                                     {/* Precio de Venta */}
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Precio Final</label>
-                                        <div className="relative">
+                                        <div className="relative flex gap-2">
                                             {isMultiCurrencyEnabled ? (
-                                                <select name="currencyCode" defaultValue={editingProduct?.currencyCode || selectedCurrency.code} className="absolute left-1 top-1 bottom-1 bg-white/10 border border-white/10 rounded-lg px-2 text-[10px] font-black text-emerald-500 focus:outline-none z-10">
-                                                    {activeCurrencies.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
+                                                <select 
+                                                    name="currencyCode" 
+                                                    defaultValue={editingProduct?.currencyCode || selectedCurrency.code} 
+                                                    className="bg-white/10 border border-white/10 rounded-xl px-3 py-3 text-[11px] font-black text-emerald-500 focus:outline-none focus:border-emerald-500 min-w-[80px]"
+                                                >
+                                                    {activeCurrencies.map(c => (
+                                                        <option key={c.code} value={c.code}>{c.code}</option>
+                                                    ))}
                                                 </select>
                                             ) : (
                                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">{selectedCurrency.symbol}</span>
                                             )}
-                                            <input name="price" step="0.01" defaultValue={editingProduct?.price || ''} type="number" placeholder="0.00" className={`w-full bg-emerald-500/10 border border-emerald-500/20 rounded-2xl ${isMultiCurrencyEnabled ? 'pl-20' : 'pl-10'} pr-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all`} />
+                                            <input 
+                                                name="price" 
+                                                step="0.01" 
+                                                defaultValue={editingProduct?.price || ''} 
+                                                type="number" 
+                                                placeholder="0.00" 
+                                                className={`flex-1 bg-emerald-500/10 border border-emerald-500/20 rounded-xl ${isMultiCurrencyEnabled ? 'px-4' : 'pl-10 pr-4'} py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all`} 
+                                            />
                                         </div>
                                     </div>
 
