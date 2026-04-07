@@ -13,6 +13,7 @@ export function Operations() {
     const [progress, setProgress] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     
     const sectionRef = useRef<HTMLElement>(null);
 
@@ -24,13 +25,14 @@ export function Operations() {
         return () => window.removeEventListener('resize', check);
     }, []);
 
-    // Intersection Observer
+// Intersection Observer
     useEffect(() => {
         const section = sectionRef.current;
         if (!section) return;
 
         const observer = new IntersectionObserver(
             ([entry]) => {
+                setIsVisible(entry.isIntersecting);
                 if (entry.isIntersecting) {
                     setProgress(0);
                 }
@@ -39,7 +41,7 @@ export function Operations() {
         );
 
         observer.observe(section);
-        return () => observer.disconnect();
+return () => observer.disconnect();
     }, []);
 
     const nextSlide = useCallback(() => {
@@ -54,11 +56,13 @@ export function Operations() {
         setProgress(0);
     }, [images.length]);
 
-    // Auto-play timer - simplified
+    // Auto-play timer - solo cuando es visible
     useEffect(() => {
         if (images.length === 0) return;
         
         const timer = setInterval(() => {
+            if (!isVisible) return;
+            
             setProgress((prev) => {
                 if (prev >= 100) {
                     setCurrentIndex((i) => (i + 1) % images.length);
@@ -69,7 +73,7 @@ export function Operations() {
         }, 50);
 
         return () => clearInterval(timer);
-    }, [images.length]);
+    }, [images.length, isVisible]);
 
     if (!isMounted) return null;
 
