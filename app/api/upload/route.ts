@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const maxSize = 5 * 1024 * 1024
+    const maxSize = 10 * 1024 * 1024 // 10MB
     if (file.size > maxSize) {
       return NextResponse.json({ 
         success: false, 
-        error: 'File too large. Maximum size is 5MB.' 
+        error: 'La imagen excede el límite de 10MB.' 
       }, { status: 400 })
     }
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       
       const { error: bucketError } = await supabase.storage.createBucket('cms-images', {
         public: true,
-        fileSizeLimit: 5242880
+        fileSizeLimit: 10485760 // 10MB
       })
       
       if (bucketError) {

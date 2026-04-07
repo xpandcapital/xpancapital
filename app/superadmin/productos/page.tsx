@@ -739,6 +739,13 @@ function AdminProductsContent() {
                                         input.onchange = async (e) => {
                                             const file = (e.target as HTMLInputElement).files?.[0];
                                             if (file) {
+                                                // Check file size (10MB limit)
+                                                const maxSize = 10 * 1024 * 1024;
+                                                if (file.size > maxSize) {
+                                                    alert('La imagen excede el límite de 10MB. Por favor, comprime la imagen o usa una más pequeña.');
+                                                    return;
+                                                }
+                                                
                                                 const formData = new FormData();
                                                 formData.append('file', file);
                                                 formData.append('folder', 'productos');
@@ -754,6 +761,8 @@ function AdminProductsContent() {
                                                             image: data.url,
                                                             tempImageUrl: data.url 
                                                         }));
+                                                    } else {
+                                                        alert(data.error || 'Error al subir imagen');
                                                     }
                                                 } catch (err) {
                                                     alert('Error al subir imagen');
