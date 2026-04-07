@@ -331,8 +331,8 @@ interface LandingCMSContextType {
 
 const DEFAULT_CMS_DATA: LandingCMSData = {
     hero: {
-        title1: "",
-        title2: "",
+        title1: "BLIS",
+        title2: "CORP",
         subtitle: "",
         description: "",
         primaryBtnText: "",

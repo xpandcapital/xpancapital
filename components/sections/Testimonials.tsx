@@ -32,12 +32,10 @@ export function Testimonials() {
     const [isCooldown, setIsCooldown] = useState(false);
     const timerRef = useRef<ReturnType<typeof setInterval> | NodeJS.Timeout | null>(null);
 
-    // Return null if no testimonials
-    if (!testimonials || testimonials.length === 0) return null;
-
     const handleManualNavigation = (direction: 'next' | 'prev') => {
         setIsCooldown(true);
-        setIsPaused(false); // Arrow navigation resumes auto-slide after cooldown
+        setIsPaused(false);
+        if (!testimonials || testimonials.length === 0) return;
         if (direction === 'next') {
             setCurrentIndex((prev) => (prev + 1 >= testimonials.length ? 0 : prev + 1));
         } else {
@@ -48,13 +46,13 @@ export function Testimonials() {
     const next = () => handleManualNavigation('next');
     const prev = () => handleManualNavigation('prev');
 
-    // Mobile tap: toggle paused state
     const handleMobileTap = () => {
         setIsPaused(p => !p);
     };
 
-    // Auto-slide: paused if isPaused===true, 5s cooldown after arrow
     useEffect(() => {
+        if (!testimonials || testimonials.length === 0) return;
+        
         if (isPaused) {
             if (timerRef.current) clearInterval(timerRef.current as any);
             return;
@@ -78,11 +76,11 @@ export function Testimonials() {
                     : clearInterval(timerRef.current as ReturnType<typeof setInterval>);
             }
         };
-    }, [isPaused, isCooldown, currentIndex]);
+    }, [isPaused, isCooldown, currentIndex, testimonials?.length]);
 
-    // Desktop: 3 visible cards
+    if (!testimonials || testimonials.length === 0) return null;
+
     const visibleTestimonials = [...testimonials, ...testimonials].slice(currentIndex, currentIndex + 3);
-    // Mobile: single card
     const mobileTestimonial = testimonials[currentIndex];
 
     return (
