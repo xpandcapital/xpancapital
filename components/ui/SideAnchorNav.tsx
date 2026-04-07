@@ -4,26 +4,27 @@ import { useEffect, useState, useRef } from "react"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronUp, ChevronDown } from "lucide-react"
+import { useLandingCMS } from "@/context/LandingCMSContext"
 
-const homeSections = [
-    { id: "hero", label: "Inicio" },
-    { id: "trayectoria", label: "Trayectoria" },
-    { id: "process", label: "Proceso" },
-    { id: "operaciones", label: "Backstage" },
-    { id: "insights", label: "Mercado" },
-    { id: "projects", label: "Portafolio" },
-    { id: "vision", label: "Video" },
-    { id: "calculadora", label: "Plusvalía" },
-    { id: "mapa", label: "Mapa" },
-    { id: "catalog", label: "Tienda" },
-    { id: "equipo", label: "Alianza/Team" },
-    { id: "testimonials", label: "Testimonios" },
-    { id: "faq", label: "FAQ" },
-    { id: "blog", label: "Blog" },
-    { id: "footer", label: "Contacto" },
-]
+const SECTION_LABELS: Record<string, string> = {
+    hero: "Inicio",
+    about: "Trayectoria",
+    process: "Proceso",
+    operations: "Backstage",
+    market: "Mercado",
+    calculator: "Plusvalía",
+    map: "Mapa",
+    projects: "Portafolio",
+    video: "Video",
+    catalog: "Tienda",
+    team: "Alianza/Team",
+    testimonials: "Testimonios",
+    faq: "FAQ",
+    blog: "Blog",
+    footer: "Contacto",
+}
 
-const blogSections = [
+const BLOG_SECTIONS = [
     { id: "blog-hero", label: "Portada" },
     { id: "deck-inversiones", label: "Inversiones" },
     { id: "deck-arquitectura", label: "Arquitectura" },
@@ -33,11 +34,22 @@ const blogSections = [
 export function SideAnchorNav() {
     const pathname = usePathname()
     const isBlog = pathname === "/blog"
-    const sections = isBlog ? blogSections : homeSections
+    const { cmsData, templateData } = useLandingCMS()
     const [activeId, setActiveId] = useState("")
     const [isVisibleMobile, setIsVisibleMobile] = useState(false)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const lastScrollY = useRef(0)
+
+    // Get sections from CMS/template order for landing page
+    const sections = isBlog ? BLOG_SECTIONS : (() => {
+        const sectionOrder = (templateData as { sectionOrder?: string[] })?.sectionOrder || (cmsData as { sectionOrder?: string[] })?.sectionOrder || [
+            "hero", "about", "video", "process", "operations", "market", 
+            "calculator", "map", "projects", "catalog", "team", "testimonials", "faq", "blog", "footer"
+        ]
+        return sectionOrder
+            .filter((id: string) => SECTION_LABELS[id])
+            .map((id: string) => ({ id, label: SECTION_LABELS[id] }))
+    })()
 
     useEffect(() => {
         if (pathname !== "/" && pathname !== "/blog") return
@@ -50,15 +62,14 @@ export function SideAnchorNav() {
                     }
                 })
             },
-            { rootMargin: "-20% 0px -70% 0px" } // Triggers closer to top
+            { rootMargin: "-20% 0px -70% 0px" }
         )
 
-        sections.forEach(({ id }) => {
+        sections.forEach(({ id }: { id: string }) => {
             const el = document.getElementById(id)
             if (el) observer.observe(el)
         })
 
-        // Mobile visibility timer
         const handleScrollActivity = () => {
             const currentY = window.scrollY
             if (Math.abs(currentY - lastScrollY.current) > 10) {
@@ -82,7 +93,6 @@ export function SideAnchorNav() {
 
     const handleScroll = (id: string) => {
         const el = document.getElementById(id)
-        // Reducimos el offset para que el título quede más alto (cerca del borde superior)
         const scrollOffset = isBlog ? 10 : 70
         if (el) {
             const top = el.getBoundingClientRect().top + window.scrollY - scrollOffset
@@ -91,14 +101,14 @@ export function SideAnchorNav() {
     }
 
     const navigateTo = (direction: 'up' | 'down') => {
-        const currentIndex = sections.findIndex(s => s.id === activeId)
+        const currentIndex = sections.findIndex((s: { id: string }) => s.id === activeId)
         if (currentIndex === -1) return
 
         let nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
         if (nextIndex < 0) nextIndex = 0
         if (nextIndex >= sections.length) nextIndex = sections.length - 1
 
-        handleScroll(sections[nextIndex].id)
+        handleScroll((sections[nextIndex] as { id: string }).id)
     }
 
     return (
@@ -114,7 +124,7 @@ export function SideAnchorNav() {
                     </button>
                 </div>
 
-                {sections.map(({ id, label }) => {
+                {sections.map(({ id, label }: { id: string; label: string }) => {
                     const isActive = activeId === id
                     return (
                         <div key={id} className="relative flex items-center justify-end w-full">
@@ -162,7 +172,7 @@ export function SideAnchorNav() {
                             <div className="px-4 flex flex-col min-w-[100px] items-center">
                                 <span className="text-[8px] font-mono text-blis-red uppercase tracking-[0.2em] font-black opacity-60">Sección:</span>
                                 <span className="text-[11px] font-bold text-white uppercase tracking-wider whitespace-nowrap">
-                                    {sections.find(s => s.id === activeId)?.label || "Explorar"}
+                                    {sections.find((s: { id: string }) => s.id === activeId)?.label || "Explorar"}
                                 </span>
                             </div>
 

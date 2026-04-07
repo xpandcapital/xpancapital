@@ -197,7 +197,7 @@ export function Hero() {
                         {cmsData.hero.subtitle}
                     </span>
 
-                    <h1 className="text-5xl sm:text-4xl md:text-[2.7rem] lg:text-[3.9rem] xl:text-[10rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[9rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!gap-[2rem] font-black tracking-tighter text-white mb-4 md:mb-5 uppercase flex flex-row items-center gap-3 md:gap-4 xl:gap-6 leading-none">
+                    <h1 className="text-7xl sm:text-4xl md:text-[2.7rem] lg:text-[3.9rem] xl:text-[10rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[9rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!gap-[2rem] font-black tracking-tighter text-white mb-4 md:mb-5 uppercase flex flex-row items-center gap-3 md:gap-4 xl:gap-6 leading-none">
                         <span className="neon-trace-blis">{cmsData.hero.title1}</span>
                         <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-300 to-gray-600 neon-trace-corp">{cmsData.hero.title2}</span>
                     </h1>
