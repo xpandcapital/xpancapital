@@ -9,26 +9,42 @@ import { useLandingCMS } from "@/context/LandingCMSContext";
 export function FooterSections() {
     const { cmsData, templateData, siteConfig } = useLandingCMS();
     const { showToast } = useToast();
-    const { 
-        description = siteConfig?.footerDescription || "Somos la firma élite en desarrollo de software y tecnología real estate.", 
-        socials = {}
-    } = cmsData?.footer || {};
+    
+    // Use siteConfig for socials, with fallbacks
+    const socials = {
+        whatsapp: siteConfig?.socialWhatsapp || cmsData?.footer?.socials?.whatsapp || "",
+        instagram: siteConfig?.socialInstagram || cmsData?.footer?.socials?.instagram || "",
+        facebook: siteConfig?.socialFacebook || cmsData?.footer?.socials?.facebook || "",
+        youtube: siteConfig?.socialYoutube || cmsData?.footer?.socials?.youtube || "",
+        tiktok: siteConfig?.socialTiktok || cmsData?.footer?.socials?.tiktok || "",
+        linkedin: siteConfig?.socialLinkedin || cmsData?.footer?.socials?.linkedin || "",
+        twitter: siteConfig?.socialTwitter || cmsData?.footer?.socials?.twitter || "",
+    };
+    
+    const description = siteConfig?.footerDescription || cmsData?.footer?.description || "Somos la firma élite en desarrollo de software y tecnología real estate.";
+    const copyright = siteConfig?.footerCopyright || cmsData?.footer?.copyright || "© 2026 BLIS Corp. Todos los derechos reservados.";
     
     const logoVertical = siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || cmsData?.footer?.logoVertical || "/images/logo-blis-vertical.png";
     const logoHorizontal = siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || cmsData?.footer?.logoHorizontal || "/images/blis-logo.png";
 
     const globalLinks = [
-        { icon: MessageCircle, url: socials.whatsapp || "", name: "WhatsApp" },
-        { icon: Instagram, url: socials.instagram || "", name: "Instagram" },
-        { icon: Facebook, url: socials.facebook || "", name: "Facebook" },
-        { icon: Youtube, url: socials.youtube || "", name: "YouTube" },
-        { icon: VideoIcon, url: socials.tiktok || "", name: "TikTok" },
-        { icon: Linkedin, url: socials.linkedin || "", name: "LinkedIn" },
-        { icon: Twitter, url: socials.twitter || "", name: "X (Twitter)" },
-        { icon: Mail, url: "", name: "Email" },
+        { icon: MessageCircle, url: socials.whatsapp, name: "WhatsApp" },
+        { icon: Instagram, url: socials.instagram, name: "Instagram" },
+        { icon: Facebook, url: socials.facebook, name: "Facebook" },
+        { icon: Youtube, url: socials.youtube, name: "YouTube" },
+        { icon: VideoIcon, url: socials.tiktok, name: "TikTok" },
+        { icon: Linkedin, url: socials.linkedin, name: "LinkedIn" },
+        { icon: Twitter, url: socials.twitter, name: "X (Twitter)" },
     ];
 
-    const activeLinks = globalLinks.filter(link => link.url !== "");
+    const activeLinks = globalLinks.filter(link => link.url !== "" && link.url !== "#");
+    
+    // Contact info from siteConfig
+    const contactInfo = {
+        email: siteConfig?.contactEmail || "",
+        phone: siteConfig?.contactPhone || "",
+        address: siteConfig?.contactAddress || ""
+    };
 
     const proyectos = ["Residencial Montana", "Residencial Ventura", "Arkadia Club", "Montebello"];
     const legal = ["Privacidad", "Términos", "Transparencia", "Reclamaciones"];
@@ -173,7 +189,7 @@ export function FooterSections() {
 
                     {/* Bottom bar */}
                     <div className="border-t border-white/10 pt-8 flex flex-col items-center md:flex-row justify-between md:items-center gap-3 text-xs font-mono text-gray-600 uppercase tracking-widest">
-                        <p className="text-center md:text-left">© {new Date().getFullYear()} Blis Corp. Todos los derechos reservados.</p>
+                        <p className="text-center md:text-left">{copyright}</p>
                         <p className="text-center md:text-right flex items-center gap-2">
                             Diseñado con visión en
                             <span className="inline-flex items-center gap-1">🇪🇨 Ecuador</span>
@@ -181,6 +197,30 @@ export function FooterSections() {
                             <span className="inline-flex items-center gap-1">🇵🇪 Perú</span>
                         </p>
                     </div>
+                    
+                    {/* Contact Info */}
+                    {(contactInfo.email || contactInfo.phone || contactInfo.address) && (
+                        <div className="mt-8 pt-6 border-t border-white/5 flex flex-wrap justify-center gap-6 text-xs text-gray-500">
+                            {contactInfo.email && (
+                                <a href={`mailto:${contactInfo.email}`} className="flex items-center gap-2 hover:text-white transition-colors">
+                                    <Mail className="w-3 h-3" />
+                                    {contactInfo.email}
+                                </a>
+                            )}
+                            {contactInfo.phone && (
+                                <a href={`tel:${contactInfo.phone}`} className="flex items-center gap-2 hover:text-white transition-colors">
+                                    <Phone className="w-3 h-3" />
+                                    {contactInfo.phone}
+                                </a>
+                            )}
+                            {contactInfo.address && (
+                                <span className="flex items-center gap-2">
+                                    <MapPin className="w-3 h-3" />
+                                    {contactInfo.address}
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
             </footer>
         </>

@@ -9,6 +9,7 @@ import { SalesProvider } from "@/context/SalesContext";
 import { ToastProvider } from "@/components/ui/Toast";
 import { LandingCMSProvider } from "@/context/LandingCMSContext";
 import { PWARegistrar } from "@/components/utils/PWARegistrar";
+import { DynamicMetadata } from "@/components/utils/DynamicMetadata";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -37,7 +38,8 @@ export default function RootLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <body className={`${montserrat.variable} font-sans antialiased bg-black text-white selection:bg-blis-red/30 selection:text-white cyber-texture`}>
-        <LandingCMSProvider>
+<LandingCMSProvider>
+          <DynamicMetadata />
           <AuthProvider>
             <ToastProvider>
               <ShopProvider>

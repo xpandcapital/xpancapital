@@ -292,8 +292,12 @@ interface LandingCMSContextType {
         socialTiktok: string;
         socialLinkedin: string;
         socialWhatsapp: string;
+        socialTwitter: string;
         footerDescription: string;
         footerCopyright: string;
+        contactEmail: string;
+        contactPhone: string;
+        contactAddress: string;
     };
     sectionOrder: string[];
     sectionVisibility: Record<string, boolean>;
@@ -421,8 +425,12 @@ const DEFAULT_SITE_CONFIG = {
     socialTiktok: '',
     socialLinkedin: '',
     socialWhatsapp: '',
+    socialTwitter: '',
     footerDescription: '',
-    footerCopyright: '© 2026 BLIS Corp. Todos los derechos reservados.'
+    footerCopyright: '© 2026 BLIS Corp. Todos los derechos reservados.',
+    contactEmail: '',
+    contactPhone: '',
+    contactAddress: ''
 };
 
 const LandingCMSContext = createContext<LandingCMSContextType | undefined>(undefined);
