@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Play, Eye, TrendingUp, ShieldCheck } from "lucide-react";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { useLandingCMS } from "@/context/LandingCMSContext";
+import { extractVideoUrl } from "@/lib/utils/video";
 
 export function VideoShowcase() {
     const { cmsData } = useLandingCMS();
@@ -43,7 +44,7 @@ export function VideoShowcase() {
                         {/* THE VIDEO IFRAME */}
                         <div className="absolute inset-0 w-full h-full">
                             <iframe
-                                src={videoData.embedUrl || "https://adilo.bigcommand.com/watch/LteCS2H5"}
+                                src={extractVideoUrl(videoData.embedUrl) || "https://adilo.bigcommand.com/watch/LteCS2H5"}
                                 className="w-full h-full border-0"
                                 allowFullScreen
                                 //@ts-ignore

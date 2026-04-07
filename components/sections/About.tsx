@@ -5,6 +5,7 @@ import { useRef, useState, useEffect } from "react";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { TrendingUp, X } from "lucide-react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
+import { extractVideoUrl } from "@/lib/utils/video";
 
 export function About() {
     const { cmsData } = useLandingCMS();
@@ -199,7 +200,7 @@ export function About() {
                                 style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
                                 // @ts-ignore
                                 allowtransparency="true"
-                                src={cmsData.about.videoUrl}
+                                src={extractVideoUrl(cmsData.about.videoUrl)}
                                 frameBorder="0"
                                 allowFullScreen
                                 scrolling="no"

@@ -6,6 +6,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { extractVideoUrl } from "@/lib/utils/video";
 
 interface Project {
     id: string;
@@ -114,7 +115,7 @@ export function FooterSections() {
                     >
                         {isVideoPlaying && footerVideo.url ? (
                             <iframe
-                                src={footerVideo.url}
+                                src={extractVideoUrl(footerVideo.url)}
                                 className="absolute inset-0 w-full h-full"
                                 allowFullScreen
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -127,7 +128,7 @@ export function FooterSections() {
                                 />
                                 <div className="relative z-10 flex flex-col items-center justify-center h-full p-8">
                                     <button 
-                                        onClick={() => footerVideo.url && setIsVideoPlaying(true)}
+                                        onClick={() => extractVideoUrl(footerVideo.url) && setIsVideoPlaying(true)}
                                         className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blis-red/20 border border-blis-red text-blis-red flex items-center justify-center mb-6 hover:scale-110 transition-transform backdrop-blur-md cursor-pointer"
                                     >
                                         <PlayCircle className="w-8 h-8 sm:w-10 sm:h-10" />
