@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Lock, Clock, Sparkles, BookOpen, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { usePublicBlog } from "@/lib/hooks/usePublicBlog";
+import { useLandingCMS } from "@/context/LandingCMSContext";
 
 // Floating decorative icons
 const floatingIcons = [
@@ -34,6 +35,8 @@ const fallbackArticles: Array<{
 ];
 
 export function BlogPremium() {
+    const { cmsData } = useLandingCMS();
+    const { title, subtitle, description } = cmsData.blog;
     const { posts, loading } = usePublicBlog();
 
     // Transform Supabase posts for display
@@ -70,9 +73,9 @@ export function BlogPremium() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                     >
-                        <h2 className="text-sm font-bold tracking-[0.2em] text-gray-500 uppercase mb-2">Conocimiento</h2>
+                        <h2 className="text-sm font-bold tracking-[0.2em] text-gray-500 uppercase mb-2">{title || 'Conocimiento'}</h2>
                         <h3 className="text-4xl md:text-5xl font-black text-white uppercase tracking-wide">
-                            Blog <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-yellow-300">Premium</span>
+                            {subtitle || 'Blog'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-yellow-300">Premium</span>
                         </h3>
                     </motion.div>
 

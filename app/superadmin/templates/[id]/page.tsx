@@ -1912,6 +1912,64 @@ export default function TemplateEditorPage() {
                 <InputField label="Subtítulo 2" value={sections.market?.subtitle2 || ''} onChange={(v) => updateSection('market', { subtitle2: v })} placeholder="Datos" />
               </div>
               <TextAreaField label="Descripción" value={sections.market?.description || ''} onChange={(v) => updateSection('market', { description: v })} rows={2} />
+              
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Insights ({(sections.market?.insights || []).length})</h4>
+              <div className="space-y-3">
+                {(sections.market?.insights || []).map((insight: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-blis-red font-bold text-xs">Insight {idx + 1}</span>
+                      <button onClick={() => removeArrayItem('market', 'insights', idx)} className="text-red-400 hover:text-red-300 text-xs">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <InputField label="Tipo" value={insight.type || ''} onChange={(v) => updateArrayItem('market', 'insights', idx, { type: v })} placeholder="mercado" />
+                      <InputField label="Título" value={insight.title || ''} onChange={(v) => updateArrayItem('market', 'insights', idx, { title: v })} placeholder="Tendencia" />
+                    </div>
+                    <TextAreaField label="Texto" value={insight.text || ''} onChange={(v) => updateArrayItem('market', 'insights', idx, { text: v })} rows={2} placeholder="Texto del insight..." />
+                  </div>
+                ))}
+                <button onClick={() => addArrayItem('market', 'insights', { type: '', title: '', text: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                  <Plus className="w-3 h-3" /> Agregar Insight
+                </button>
+              </div>
+              
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Estadísticas ({(sections.market?.stats || []).length})</h4>
+              <div className="space-y-3">
+                {(sections.market?.stats || []).map((stat: any, idx: number) => (
+                  <div key={idx} className="p-3 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-blis-red font-bold text-xs">Stat {idx + 1}</span>
+                      <button onClick={() => removeArrayItem('market', 'stats', idx)} className="text-red-400 hover:text-red-300 text-xs">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <InputField label="Título" value={stat.title || ''} onChange={(v) => updateArrayItem('market', 'stats', idx, { title: v })} placeholder="Título" />
+                      <InputField label="Valor" value={stat.value || ''} onChange={(v) => updateArrayItem('market', 'stats', idx, { value: v })} placeholder="+25%" />
+                    </div>
+                    <InputField label="Descripción" value={stat.desc || ''} onChange={(v) => updateArrayItem('market', 'stats', idx, { desc: v })} placeholder="Descripción corta" />
+                    <div className="grid grid-cols-2 gap-3 mt-2">
+                      <div>
+                        <label className="text-[10px] text-gray-400 uppercase mb-1 block">Ícono</label>
+                        <select value={stat.icon || 'TrendingUp'} onChange={(e) => updateArrayItem('market', 'stats', idx, { icon: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-2 text-xs text-white">
+                          <option value="TrendingUp">TrendingUp</option>
+                          <option value="BarChart3">BarChart3</option>
+                          <option value="Zap">Zap</option>
+                          <option value="DollarSign">DollarSign</option>
+                          <option value="Users">Users</option>
+                          <option value="Building">Building</option>
+                        </select>
+                      </div>
+                      <ColorPicker label="Color" value={stat.color || '#be0b3c'} onChange={(v) => updateArrayItem('market', 'stats', idx, { color: v })} />
+                    </div>
+                  </div>
+                ))}
+                <button onClick={() => addArrayItem('market', 'stats', { title: '', value: '', desc: '', icon: 'TrendingUp', color: '#be0b3c' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+                  <Plus className="w-3 h-3" /> Agregar Estadística
+                </button>
+              </div>
             </SectionCard>
           )}
 
@@ -1928,9 +1986,25 @@ export default function TemplateEditorPage() {
                 <InputField label="Ratio Escritura" value={sections.calculator?.escrituraRatio || ''} onChange={(v) => updateSection('calculator', { escrituraRatio: v })} placeholder="91" />
               </div>
               <InputField label="TIR" value={sections.calculator?.tirValue || ''} onChange={(v) => updateSection('calculator', { tirValue: v })} placeholder="22" />
-              <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-white/10">
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Etiquetas de Etapas</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <InputField label="Planos Label" value={sections.calculator?.planosLabel || ''} onChange={(v) => updateSection('calculator', { planosLabel: v })} placeholder="En Planos" />
+                <InputField label="Preventa Label" value={sections.calculator?.preventaLabel || ''} onChange={(v) => updateSection('calculator', { preventaLabel: v })} placeholder="Preventa" />
+                <InputField label="Escritura Label" value={sections.calculator?.escrituraLabel || ''} onChange={(v) => updateSection('calculator', { escrituraLabel: v })} placeholder="Escritura en Mano" />
+              </div>
+              <div className="grid grid-cols-3 gap-4 mt-2">
+                <TextAreaField label="Desc Planos" value={sections.calculator?.planosDesc || ''} onChange={(v) => updateSection('calculator', { planosDesc: v })} rows={2} placeholder="Máxima rentabilidad..." />
+                <TextAreaField label="Desc Preventa" value={sections.calculator?.preventaDesc || ''} onChange={(v) => updateSection('calculator', { preventaDesc: v })} rows={2} placeholder="Trazado visible..." />
+                <TextAreaField label="Desc Escritura" value={sections.calculator?.escrituraDesc || ''} onChange={(v) => updateSection('calculator', { escrituraDesc: v })} rows={2} placeholder="Saneamiento completo..." />
+              </div>
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Botones CTA</h4>
+              <div className="grid grid-cols-2 gap-4">
                 <InputField label="Texto Botón Principal" value={sections.calculator?.primaryBtnText || ''} onChange={(v) => updateSection('calculator', { primaryBtnText: v })} placeholder="Ver Proyectos" />
                 <LinkField label="Enlace Botón Principal" value={sections.calculator?.primaryBtnLink || ''} onChange={(v) => updateSection('calculator', { primaryBtnLink: v })} />
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <InputField label="Texto Botón Secundario" value={sections.calculator?.secondaryBtnText || ''} onChange={(v) => updateSection('calculator', { secondaryBtnText: v })} placeholder="Contactar" />
+                <LinkField label="Enlace Botón Secundario" value={sections.calculator?.secondaryBtnLink || ''} onChange={(v) => updateSection('calculator', { secondaryBtnLink: v })} />
               </div>
             </SectionCard>
           )}
@@ -2053,7 +2127,10 @@ export default function TemplateEditorPage() {
                       <InputField label="Autor" value={testimonial.author || ''} onChange={(v) => updateArrayItem('testimonials', 'items', idx, { author: v })} />
                       <InputField label="Rol" value={testimonial.role || ''} onChange={(v) => updateArrayItem('testimonials', 'items', idx, { role: v })} />
                     </div>
-                    <ImageUpload label="Foto" value={testimonial.image || ''} onChange={(v) => updateArrayItem('testimonials', 'items', idx, { image: v })} folder="cms/testimonials" />
+                    <div className="mt-2">
+                        <label className="text-[10px] text-gray-400 uppercase tracking-wider mb-1 block">Foto</label>
+                        <ImageUpload value={testimonial.image || ''} onChange={(v) => updateArrayItem('testimonials', 'items', idx, { image: v })} folder="cms/testimonials" />
+                      </div>
                   </div>
                 ))}
                 <button onClick={() => addArrayItem('testimonials', 'items', { quote: '', author: '', role: '', image: '' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
@@ -2068,6 +2145,12 @@ export default function TemplateEditorPage() {
             <SectionCard title="Preguntas Frecuentes">
               <VisibilityToggle section="faq" isVisible={isSectionVisible('faq')} onToggle={() => toggleSectionVisibility('faq')} />
               <InputField label="Título" value={sections.faq?.title || ''} onChange={(v) => updateSection('faq', { title: v })} placeholder="Preguntas Frecuentes" />
+              <InputField label="Subtítulo" value={sections.faq?.subtitle || ''} onChange={(v) => updateSection('faq', { subtitle: v })} placeholder="Transparencia" />
+              <div className="grid grid-cols-2 gap-4">
+                <InputField label="Satisfacción" value={sections.faq?.satisfactionRate || ''} onChange={(v) => updateSection('faq', { satisfactionRate: v })} placeholder="4.9" />
+                <InputField label="Texto CTA" value={sections.faq?.ctaText || ''} onChange={(v) => updateSection('faq', { ctaText: v })} placeholder="Habla con un Asesor" />
+              </div>
+              <LinkField label="Enlace CTA" value={sections.faq?.ctaLink || ''} onChange={(v) => updateSection('faq', { ctaLink: v })} />
               <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Preguntas ({(sections.faq?.items || []).length})</h4>
               <div className="space-y-3">
                 {(sections.faq?.items || []).map((q: any, idx: number) => (

@@ -9,7 +9,7 @@ import { useLandingCMS } from "@/context/LandingCMSContext";
 
 export function FAQ() {
     const { cmsData } = useLandingCMS();
-    const { title, items: faqs } = cmsData.faq;
+    const { title, subtitle, items: faqs, ctaText, ctaLink, satisfactionRate } = cmsData.faq;
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
     const toggleAccordion = (index: number) => {
@@ -30,14 +30,14 @@ export function FAQ() {
                         transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                     >
                         <span className="text-[#209f89] font-bold tracking-widest text-sm uppercase flex items-center justify-start gap-2 mb-4">
-                            <HelpCircle className="w-4 h-4" /> {title}
+                            <HelpCircle className="w-4 h-4" /> {title || 'Preguntas'}
                         </span>
                         <h2 className="text-4xl md:text-5xl font-black text-white uppercase tracking-wide text-left">
-                            Preguntas <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-white">Frecuentes</span>
+                            {subtitle || 'Frecuentes'}
                         </h2>
                     </motion.div>
 
-                    {/* Produced FAQ Widget — now positioned at the top right next to the title */}
+                    {/* Produced FAQ Widget */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
@@ -52,7 +52,7 @@ export function FAQ() {
                         </div>
                         <div className="flex items-baseline gap-1">
                             <div className="text-3xl font-black text-white tracking-tighter">
-                                4.9
+                                {satisfactionRate || '4.9'}
                             </div>
                             <span className="text-gray-400 text-xs uppercase tracking-widest font-mono">/ 5.0</span>
                         </div>
@@ -73,7 +73,7 @@ export function FAQ() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-                    {faqs.map((faq, index) => (
+                    {faqs && faqs.length > 0 ? faqs.map((faq, index) => (
                         <motion.div
                             key={index}
                             initial={{ opacity: 0, y: 20 }}
@@ -114,7 +114,12 @@ export function FAQ() {
                                 )}
                             </AnimatePresence>
                         </motion.div>
-                    ))}
+                    )) : (
+                        <div className="col-span-2 text-center py-12 text-gray-500">
+                            <HelpCircle className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                            <p>No hay preguntas frecuentes configuradas</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Additional contact prompt */}
@@ -128,8 +133,8 @@ export function FAQ() {
                     <p className="text-gray-500 font-light">
                         ¿Tienes una duda técnica o legal específica?
                     </p>
-                    <a href="#footer" className="text-blis-red font-bold uppercase tracking-widest hover:underline whitespace-nowrap">
-                        Habla con un Asesor →
+                    <a href={ctaLink || '#footer'} className="text-blis-red font-bold uppercase tracking-widest hover:underline whitespace-nowrap">
+                        {ctaText || 'Habla con un Asesor'} →
                     </a>
                 </motion.div>
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, X, MapPin, Ruler, CheckCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
+import { useLandingCMS } from "@/context/LandingCMSContext";
 
 interface ProjectData {
   id: string;
@@ -41,6 +42,9 @@ interface ProjectWithComputed extends ProjectData {
 }
 
 export function Projects() {
+  const { cmsData } = useLandingCMS();
+  const { title, subtitle, description } = cmsData.projects;
+  
   const [projects, setProjects] = useState<ProjectWithComputed[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<ProjectWithComputed | null>(null);
@@ -207,10 +211,10 @@ export function Projects() {
       <div className="container mx-auto px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-20">
           <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-wider">
-            Portafolio <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-500 to-white">DE PROYECTOS</span>
+            {title || 'Portafolio'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-gray-500 to-white">{subtitle || 'DE PROYECTOS'}</span>
           </h2>
           <p className="mt-6 text-gray-400 max-w-2xl mx-auto font-light">
-            Una colección de activos invaluables diseñados y ejecutados con precisión matemática y estética suprema. Haz clic para explorar detalles.
+            {description || 'Una colección de activos invaluables diseñados y ejecutados con precisión matemática y estética suprema. Haz clic para explorar detalles.'}
           </p>
         </motion.div>
 

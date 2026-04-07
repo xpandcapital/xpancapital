@@ -185,6 +185,10 @@ interface FaqItem {
 
 interface FaqData {
     title: string;
+    subtitle?: string;
+    satisfactionRate?: string;
+    ctaText?: string;
+    ctaLink?: string;
     items: FaqItem[];
 }
 
@@ -358,7 +362,16 @@ const DEFAULT_CMS_DATA: LandingCMSData = {
             { quote: "Blis Corp redefinió nuestra estrategia de inversión.", author: "Rafael S.", role: "Inversor", image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=256&q=80" }
         ] 
     },
-    faq: { title: "Transparencia", items: [] },
+    faq: { 
+        title: "Transparencia", 
+        subtitle: "Preguntas Frecuentes",
+        satisfactionRate: "4.9",
+        ctaText: "Habla con un Asesor",
+        ctaLink: "#footer",
+        items: [
+            { question: "¿Cuál es la diferencia entre comprar en planos y con escritura?", answer: "En planos obtienes mayor rentabilidad pero esperas más tiempo. Con escritura, el terreno está listo para escritura inmediata." }
+        ] 
+    },
     footer: { description: "Liderando la transformación digital.", copyright: "© 2026 Blis Corp.", logoVertical: "/images/logo-blis-vertical.png", logoHorizontal: "/images/blis-logo.png", socials: {} },
     commercial: { country: "EC", currency: "USD", taxName: "IVA", taxRate: 15 }
 };
