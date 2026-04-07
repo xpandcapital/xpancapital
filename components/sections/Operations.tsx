@@ -9,7 +9,6 @@ export function Operations() {
     const { cmsData } = useLandingCMS();
     const images = cmsData.operations.sliderImages;
     
-    // We use a simplified state for reliability
     const [currentIndex, setCurrentIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
@@ -18,9 +17,8 @@ export function Operations() {
     const [isVisible, setIsVisible] = useState(false);
 
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const sectionRef = useRef<HTMLElement | null>(null);
+    const sectionRef = useRef<HTMLElement>(null);
 
-    // Initial Setup
     useEffect(() => {
         setIsMounted(true);
         const check = () => setIsMobile(window.innerWidth < 768);
@@ -29,7 +27,7 @@ export function Operations() {
         return () => window.removeEventListener('resize', check);
     }, []);
 
-    // Intersection Observer - Solo reproducir cuando es visible
+    // Intersection Observer
     useEffect(() => {
         const section = sectionRef.current;
         if (!section) return;
@@ -37,14 +35,16 @@ export function Operations() {
         const observer = new IntersectionObserver(
             ([entry]) => {
                 setIsVisible(entry.isIntersecting);
+                if (entry.isIntersecting) {
+                    setProgress(0);
+                }
             },
-            { threshold: 0.3 } // 30% visible para activar
+            { threshold: 0.1 }
         );
 
         observer.observe(section);
         return () => observer.disconnect();
     }, []);
-
 
     const nextSlide = useCallback(() => {
         if (images.length === 0) return;
@@ -58,15 +58,16 @@ export function Operations() {
         setProgress(0);
     }, [images.length]);
 
-    // 4s Progress Timer Logic - Solo cuando es visible
+    // Auto-play timer - solo cuando es visible y no está pausado
     useEffect(() => {
-        if (isPaused || images.length === 0 || !isVisible) return;
+        if (isPaused || images.length === 0) return;
 
         const interval_ms = 4000;
         const frame_rate = 50;
         const step = (frame_rate / interval_ms) * 100;
 
         timerRef.current = setInterval(() => {
+            if (!isVisible) return;
             setProgress((prev) => {
                 if (prev >= 100) {
                     nextSlide();
