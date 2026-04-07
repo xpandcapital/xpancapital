@@ -109,10 +109,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
 
     return (
         <>
-            <motion.header
-                initial={{ y: -100 }}
-                animate={{ y: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
+            <header
                 className={`fixed top-0 left-0 right-0 z-[150] transition-all duration-300 ${(isScrolled || isDashboard)
                     ? "bg-black/80 backdrop-blur-lg border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
                     : "bg-transparent"
@@ -546,7 +543,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </motion.header>
+            </header>
 
             <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 

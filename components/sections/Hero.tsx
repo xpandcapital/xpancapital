@@ -69,8 +69,8 @@ export function Hero() {
             {/* --- FLOATING UI WIDGETS --- */}
             {mounted && (
                 <>
-                    {/* Widget 1: Ventas (Top Left) */}
-                    <motion.div
+{/* Widget 1: Ventas (Top Left) */}
+            <motion.div
 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0, y: [-10, 10, -10] }}
@@ -79,15 +79,15 @@ export function Hero() {
                     x: { duration: 1 },
                     y: { repeat: Infinity, duration: 7, ease: "easeInOut" }
                 }}
-                className="absolute top-[10%] left-[2%] sm:left-[8%] xl:left-[15%] flex flex-col gap-2 glass-card p-3 sm:p-4 rounded-2xl w-32 sm:w-44 md:w-40 xl:w-52 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl opacity-80 sm:opacity-100"
+                className="absolute top-[10%] left-[2%] sm:left-[8%] xl:left-[15%] flex flex-col gap-2 glass-card p-3 sm:p-4 rounded-2xl w-40 sm:w-44 md:w-40 xl:w-52 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl opacity-80 sm:opacity-100"
             >
                 <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] sm:text-[10px] font-mono text-gray-400 uppercase tracking-widest">Ventas</span>
+                    <span className="text-xs sm:text-[10px] font-mono text-gray-400 uppercase tracking-widest">Ventas</span>
                     <BarChart3 className="text-[#209f89] w-4 h-4 sm:w-4 sm:h-4" />
                 </div>
                 <div className="flex items-end gap-2">
-                    <span className="text-xl sm:text-2xl font-black text-white leading-none">+{cmsData.operations.stats.sales}</span>
-                    <span className="text-[10px] sm:text-[10px] text-[#209f89] font-bold mb-0.5">+12%</span>
+                    <span className="text-2xl sm:text-2xl font-black text-white leading-none">+{cmsData.operations.stats.sales}</span>
+                    <span className="text-xs sm:text-[10px] text-[#209f89] font-bold mb-0.5">+12%</span>
                 </div>
                 <div className="flex items-end gap-1 sm:gap-1 h-8 sm:h-8 mt-2 opacity-80">
                     {[40, 70, 45, 90, 65, 100].map((h, i) => (
@@ -107,7 +107,7 @@ export function Hero() {
                     x: { duration: 1, delay: 0.8 },
                     y: { repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.8 }
                 }}
-                className="absolute top-[10%] right-[2%] sm:right-[8%] xl:right-[15%] flex items-center gap-3 sm:gap-4 glass-card p-3 sm:p-4 rounded-2xl w-32 sm:w-52 md:w-48 lg:w-52 xl:w-56 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl opacity-80 sm:opacity-100"
+                className="absolute top-[10%] right-[2%] sm:right-[8%] xl:right-[15%] flex items-center gap-3 sm:gap-4 glass-card p-3 sm:p-4 rounded-2xl w-40 sm:w-52 md:w-48 lg:w-52 xl:w-56 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl opacity-80 sm:opacity-100"
             >
                 <div className="relative w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
                     <svg className="w-full h-full transform -rotate-90 drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]" viewBox="0 0 48 48">
@@ -117,7 +117,7 @@ export function Hero() {
                     <PieChart className="absolute w-4 h-4 sm:w-4 sm:h-4 text-amber-400" />
                 </div>
                 <div>
-                    <span className="text-[10px] sm:text-[10px] font-mono text-gray-400 uppercase tracking-widest block mb-0.5">Proyectos</span>
+                    <span className="text-xs sm:text-[10px] font-mono text-gray-400 uppercase tracking-widest block mb-0.5">Proyectos</span>
                     <span className="text-white font-bold text-sm sm:text-sm">{cmsData.map.locations.length} Activos</span>
                 </div>
             </motion.div>
@@ -132,11 +132,11 @@ export function Hero() {
                     x: { duration: 1, delay: 0.3 },
                     y: { repeat: Infinity, duration: 6, ease: "easeInOut", delay: 0.3 }
                 }}
-                className="absolute bottom-[22%] left-[2%] sm:left-[5%] xl:left-[10%] flex flex-col gap-2.5 sm:gap-4 glass-card p-3.5 sm:p-5 rounded-2xl w-36 md:w-52 lg:w-60 xl:w-64 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-xl bg-black/60 sm:bg-[#0a0a0a] opacity-80 sm:opacity-100"
+                className="absolute bottom-[22%] left-[2%] sm:left-[5%] xl:left-[10%] flex flex-col gap-2.5 sm:gap-4 glass-card p-4 sm:p-5 rounded-2xl w-44 md:w-52 lg:w-60 xl:w-64 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-xl bg-black/60 sm:bg-[#0a0a0a] opacity-80 sm:opacity-100"
             >
                 <div className="flex items-center gap-2 sm:gap-3 mb-1">
                     <Activity className="text-blis-red w-4 h-4 sm:w-6 sm:h-6 animate-pulse drop-shadow-[0_0_8px_rgba(190,11,60,0.8)]" />
-                    <span className="text-[10px] sm:text-xs font-mono text-gray-300 uppercase tracking-widest font-bold">Rendimiento</span>
+                    <span className="text-xs sm:text-xs font-mono text-gray-300 uppercase tracking-widest font-bold">Rendimiento</span>
                 </div>
                 <div className="space-y-2.5 sm:space-y-4">
                     <div className="h-2 sm:h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
@@ -157,13 +157,13 @@ export function Hero() {
                     x: { duration: 1, delay: 0.5 },
                     y: { repeat: Infinity, duration: 8, ease: "easeInOut", delay: 0.5 }
                 }}
-                className="absolute bottom-[18%] right-[1%] sm:right-[5%] xl:right-[10%] flex flex-col gap-1.5 sm:gap-2 glass-card p-3.5 sm:p-5 rounded-2xl w-36 sm:w-56 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl opacity-80 sm:opacity-100"
+                className="absolute bottom-[18%] right-[1%] sm:right-[5%] xl:right-[10%] flex flex-col gap-1.5 sm:gap-2 glass-card p-4 sm:p-5 rounded-2xl w-40 sm:w-56 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl opacity-80 sm:opacity-100"
             >
                 <div className="flex items-center gap-2 mb-1">
                     <TrendingUp className="text-blue-400 w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="text-[10px] sm:text-xs font-mono text-gray-400 uppercase tracking-widest">Plusvalía</span>
+                    <span className="text-xs sm:text-xs font-mono text-gray-400 uppercase tracking-widest">Plusvalía</span>
                 </div>
-                <div className="text-2xl sm:text-3xl font-black text-white tracking-tighter drop-shadow-md">
+                <div className="text-3xl sm:text-3xl font-black text-white tracking-tighter drop-shadow-md">
                     {cmsData.calculator.tirValue}<span className="text-blue-400 text-base sm:text-xl"></span>
                 </div>
                 <svg className="w-full h-8 sm:h-12 mt-1 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" viewBox="0 0 100 30" preserveAspectRatio="none">
@@ -193,7 +193,7 @@ export function Hero() {
                     transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
                     className="flex flex-col items-center w-full max-w-5xl pointer-events-auto"
                 >
-                    <span className="text-blis-red font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase mb-3 md:mb-5 text-[7px] sm:text-[8px] md:text-[9px] xl:text-sm [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[11px] [@media(min-width:1024px)_and_(max-width:1366px)]:!px-[1.2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!py-[0.5rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[1.2rem] bg-black/50 px-3 py-1.5 sm:px-5 sm:py-2 rounded-full border border-blis-red/30 backdrop-blur-xl shadow-[0_0_20px_rgba(190,11,60,0.2)]">
+                    <span className="text-blis-red font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase mb-3 md:mb-5 text-xs sm:text-[8px] md:text-[9px] xl:text-sm [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[11px] [@media(min-width:1024px)_and_(max-width:1366px)]:!px-[1.2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!py-[0.5rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[1.2rem] bg-black/50 px-3 py-1.5 sm:px-5 sm:py-2 rounded-full border border-blis-red/30 backdrop-blur-xl shadow-[0_0_20px_rgba(190,11,60,0.2)]">
                         {cmsData.hero.subtitle}
                     </span>
 
@@ -203,7 +203,7 @@ export function Hero() {
                     </h1>
 
                     <div className="mt-4 mb-6 md:mt-2 md:mb-8 px-4">
-                        <p className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-2xl [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[1rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!max-w-[550px] font-light text-gray-300 tracking-wide max-w-xl xl:max-w-4xl mx-auto leading-relaxed">
+                        <p className="text-sm sm:text-sm md:text-base lg:text-lg xl:text-2xl [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[1rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!max-w-[550px] font-light text-gray-300 tracking-wide max-w-xl xl:max-w-4xl mx-auto leading-relaxed">
                             {cmsData.hero.description}
                         </p>
                     </div>
