@@ -41,60 +41,44 @@ export async function GET() {
   }
 }
 
-// POST - Crear o actualizar configuración
+// POST - Actualizar configuración existente (parcial)
 export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const body = await request.json()
 
-    const {
-      enable_perishables,
-      enable_serialization,
-      enable_shipping,
-      business_type,
-      coins_nombre,
-      coins_ratio_usd,
-      recompensa_lectura_segundos,
-      recompensa_lectura_coins,
-      blog_premium_por_defecto
-    } = body
-
     // Verificar si existe config
     const { data: existing } = await supabase
       .from('empresa_config')
-      .select('id')
+      .select('*')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .single()
-
-    const configData = {
-      empresa_id: DEFAULT_EMPRESA_ID,
-      enable_perishables: enable_perishables ?? true,
-      enable_serialization: enable_serialization ?? true,
-      enable_shipping: enable_shipping ?? true,
-      business_type: business_type || 'physical',
-      coins_nombre,
-      coins_ratio_usd,
-      recompensa_lectura_segundos,
-      recompensa_lectura_coins,
-      blog_premium_por_defecto
-    }
 
     let data
     let error
 
     if (existing?.id) {
+      // Actualizar solo los campos enviados, mantener el resto igual
       const result = await supabase
         .from('empresa_config')
-        .update(configData)
+        .update(body)
         .eq('id', existing.id)
         .select()
         .single()
       data = result.data
       error = result.error
     } else {
+      // Crear nueva con valores por defecto + los enviados
+      const defaultConfig = {
+        empresa_id: DEFAULT_EMPRESA_ID,
+        enable_perishables: true,
+        enable_serialization: true,
+        enable_shipping: true,
+        business_type: 'physical'
+      }
       const result = await supabase
         .from('empresa_config')
-        .insert(configData)
+        .insert({ ...defaultConfig, ...body })
         .select()
         .single()
       data = result.data
