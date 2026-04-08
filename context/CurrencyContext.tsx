@@ -77,11 +77,21 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const exchangeRates = tasas;
     const safetyMarkup = config?.margen_seguridad || 0.02;
 
+    // Actualizar estados cuando config cambie (para mantener configuración guardada)
     useEffect(() => {
         if (config?.ultima_actualizacion) {
             setLastUpdated(new Date(config.ultima_actualizacion));
         }
-    }, [config?.ultima_actualizacion]);
+        
+        // Usar configuración guardada en lugar de valores por defecto
+        if (config?.moneda_base) {
+            const found = INITIAL_CURRENCIES.find(c => c.code === config.moneda_base);
+            if (found) {
+                setCurrencyState(found);
+                setFiscalCurrencyState(found);
+            }
+        }
+    }, [config]);
 
     const refreshRates = useCallback(async () => {
         const result = await refreshRatesFromAPI();

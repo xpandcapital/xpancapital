@@ -61,6 +61,10 @@ function AdminProductsContent() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUnlimitedSettings, setIsUnlimitedSettings] = useState(false);
     const [editingProduct, setEditingProduct] = useState<any>(null);
+    
+    // Estados por defecto desde configuración guardada
+    const [isPerishable, setIsPerishable] = useState(() => settings?.enablePerishables ?? false);
+    const [perishableHandling, setPerishableHandling] = useState<'discard' | 'reimburse'>('discard');
     const [searchTerm, setSearchTerm] = useState("");
     const [categoryFilters, setCategoryFilters] = useState<string[]>(["Todas"]);
     const [mounted, setMounted] = useState(false);
@@ -214,21 +218,21 @@ function AdminProductsContent() {
         }
     };
 
-    const [isPerishable, setIsPerishable] = useState(false);
-    const [perishableHandling, setPerishableHandling] = useState<'reimburse' | 'discard'>('discard');
+    // Estados ya declarados arriba con valores por defecto de configuración
     const [unitsPerBox, setUnitsPerBox] = useState(1);
     const [boxesToRegister, setBoxesToRegister] = useState(1);
-    const [isSerialized, setIsSerialized] = useState(false);
+    const [isSerialized, setIsSerialized] = useState(() => settings?.enableSerialization ?? false);
 
     const handleOpenModal = (product: any = null) => {
         console.log('🚀 Abriendo modal:', { product, categories: contextCategories.length, categoriesList: contextCategories });
         setEditingProduct(product);
         setIsUnlimitedSettings(product?.stock === -1);
-        setIsPerishable(product?.isPerishable || false);
+        // Si es producto nuevo, usar configuración del sistema. Si existe, usar valores del producto
+        setIsPerishable(product ? (product?.isPerishable || false) : (settings?.enablePerishables ?? false));
         setPerishableHandling(product?.perishableHandling || 'discard');
         setUnitsPerBox(product?.unitsPerBox || 1);
         setBoxesToRegister(1);
-        setIsSerialized(product?.isSerialized || false);
+        setIsSerialized(product ? (product?.isSerialized || false) : (settings?.enableSerialization ?? false));
         setIsModalOpen(true);
     };
 
