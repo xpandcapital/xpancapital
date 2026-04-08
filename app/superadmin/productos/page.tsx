@@ -14,6 +14,7 @@ import { toPng } from "html-to-image";
 import { QRCodeSVG } from "qrcode.react";
 import Barcode from "react-barcode";
 import RichTextEditor from "@/components/superadmin/RichTextEditor";
+import { PriceCalculator } from "@/components/superadmin/PriceCalculator";
 import { createPortal } from "react-dom";
 import { CategoryProvider, useCategories } from "@/context/CategoryContext";
 import { StatusProvider, useStatuses } from "@/context/StatusContext";
@@ -885,74 +886,13 @@ function AdminProductsContent() {
                                     </div>
                                 </div>
 
-                                {/* Grid de Precios - 2 columnas en móvil, 3 en desktop */}
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    {/* Precio Base */}
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Precio Base</label>
-                                        <div className="relative">
-                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">{selectedCurrency.symbol}</span>
-                                            <input name="originalPrice" step="0.01" defaultValue={editingProduct?.originalPrice || ''} type="number" placeholder="0.00" className="w-full bg-black/30 border border-white/10 rounded-2xl pl-10 pr-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all" />
-                                        </div>
-                                    </div>
-
-                                    {/* Descuento */}
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Descuento (% o $)</label>
-                                        <div className="relative">
-                                            <input name="discountPercentage" type="number" defaultValue={editingProduct?.discountPercentage || ''} placeholder="0" className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all pr-16" />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-xs">%/$</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Precio de Venta */}
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Precio Final</label>
-                                        <div className="relative">
-                                            {isMultiCurrencyEnabled ? (
-                                                <div className="flex gap-2">
-                                                    <select 
-                                                        name="currencyCode" 
-                                                        defaultValue={editingProduct?.currencyCode || selectedCurrency.code} 
-                                                        className="bg-white/10 border border-white/10 rounded-xl px-3 py-3 text-[10px] font-black text-emerald-500 focus:outline-none focus:border-emerald-500 w-20"
-                                                    >
-                                                        {activeCurrencies.map(c => (
-                                                            <option key={c.code} value={c.code}>{c.code}</option>
-                                                        ))}
-                                                    </select>
-                                                    <input 
-                                                        name="price" 
-                                                        step="0.01" 
-                                                        defaultValue={editingProduct?.price || ''} 
-                                                        type="number" 
-                                                        placeholder="0.00" 
-                                                        className="flex-1 bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all" 
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <>
-                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">{selectedCurrency.symbol}</span>
-                                                    <input 
-                                                        name="price" 
-                                                        step="0.01" 
-                                                        defaultValue={editingProduct?.price || ''} 
-                                                        type="number" 
-                                                        placeholder="0.00" 
-                                                        className="w-full bg-emerald-500/10 border border-emerald-500/20 rounded-xl pl-10 pr-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all" 
-                                                    />
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Fecha de descuento */}
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Descuento Válido Hasta</label>
-                                        <input name="discountUntil" type="date" defaultValue={editingProduct?.discountUntil || ''} className="w-full bg-black/30 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-emerald-500 transition-all" />
-                                    </div>
-                                </div>
+                                {/* Grid de Precios - Calculadora Inteligente */}
+                                <PriceCalculator 
+                                    editingProduct={editingProduct}
+                                    selectedCurrency={selectedCurrency}
+                                    isMultiCurrencyEnabled={isMultiCurrencyEnabled}
+                                    activeCurrencies={activeCurrencies}
+                                />
 
                                 {/* Segunda fila: BlisCoins, Stock, Alerta */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-white/5">

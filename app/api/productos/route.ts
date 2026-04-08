@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       stock = 0,
       stock_ilimitado = true,
       archivo_url,
-      activo = true,
+      activo = false, // Inicia como borrador
       destacado = false,
       sku,
       sku_prefix,
@@ -96,12 +96,14 @@ export async function POST(request: NextRequest) {
       precio_comparacion,
       descuento_porcentaje,
       descuento_hasta,
+      tipo_descuento = 'porcentaje',
       stock_bajo_nivel,
       es_perecedero,
       fecha_compra,
       fecha_vencimiento,
       manejo_perecedero,
-      lote_uid
+      lote_uid,
+      estado = 'borrador' // Estado inicial
     } = body
 
     if (!nombre || !slug) {
@@ -134,12 +136,14 @@ export async function POST(request: NextRequest) {
         precio_comparacion,
         descuento_porcentaje,
         descuento_hasta,
+        tipo_descuento,
         stock_bajo_nivel,
         es_perecedero,
         fecha_compra,
         fecha_vencimiento,
         manejo_perecedero,
-        lote_uid
+        lote_uid,
+        estado
       })
       .select()
       .single()
