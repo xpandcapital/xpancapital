@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 })
     }
 
-    // Build insert object with only fields that exist
+    // Build insert object - SIEMPRE inicia como borrador
     const insertData: any = {
       empresa_id: DEFAULT_EMPRESA_ID,
       nombre,
@@ -118,24 +118,33 @@ export async function POST(request: NextRequest) {
       descripcion,
       contenido,
       metodo_pago,
-      precio_coins,
-      precio_usd,
-      tipo,
+      precio_coins: precio_coins || 0,
+      precio_usd: precio_usd || 0,
+      tipo: tipo || 'digital',
       categoria_id,
       imagen_principal,
       galeria,
-      stock,
-      stock_ilimitado,
+      stock: stock || 0,
+      stock_ilimitado: stock_ilimitado ?? true,
       archivo_url,
-      activo: false,
-      destacado
+      activo: false, // SIEMPRE inicia como borrador
+      destacado: false, // Nunca destacado al inicio
+      estado: 'borrador', // Estado explícito
+      // Campos opcionales con valores por defecto
+      sku: sku || null,
+      sku_prefix: sku_prefix || 'SKU',
+      is_auto_sku: is_auto_sku ?? true,
+      precio_comparacion: precio_comparacion || null,
+      descuento_porcentaje: descuento_porcentaje || null,
+      descuento_hasta: descuento_hasta || null,
+      tipo_descuento: tipo_descuento || 'porcentaje',
+      stock_bajo_nivel: stock_bajo_nivel || 10,
+      es_perecedero: es_perecedero || false,
+      fecha_compra: fecha_compra || null,
+      fecha_vencimiento: fecha_vencimiento || null,
+      manejo_perecedero: manejo_perecedero || null,
+      lote_uid: lote_uid || null
     }
-    
-    // Only add optional fields if they exist in the database
-    // These will be ignored by Supabase if columns don't exist
-    if (sku !== undefined) insertData.sku = sku
-    if (sku_prefix !== undefined) insertData.sku_prefix = sku_prefix
-    if (is_auto_sku !== undefined) insertData.is_auto_sku = is_auto_sku
 
     const { data, error } = await supabase
       .from('productos')

@@ -54,29 +54,31 @@ export function PriceCalculator({ editingProduct, selectedCurrency, isMultiCurre
 
                 {/* Tipo de Descuento */}
                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tipo de Descuento</label>
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tipo</label>
                     <div className="flex bg-black/30 border border-white/10 rounded-2xl p-1">
                         <button
                             type="button"
                             onClick={() => setDiscountType('porcentaje')}
-                            className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                            className={`flex-1 py-3 rounded-xl text-lg font-black transition-all ${
                                 discountType === 'porcentaje' 
                                     ? 'bg-emerald-500 text-white' 
                                     : 'text-gray-500 hover:text-white'
                             }`}
+                            title="Porcentaje"
                         >
-                            % Porcentaje
+                            %
                         </button>
                         <button
                             type="button"
                             onClick={() => setDiscountType('monto_fijo')}
-                            className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                            className={`flex-1 py-3 rounded-xl text-lg font-black transition-all ${
                                 discountType === 'monto_fijo' 
                                     ? 'bg-emerald-500 text-white' 
                                     : 'text-gray-500 hover:text-white'
                             }`}
+                            title="Monto Fijo"
                         >
-                            $ Monto Fijo
+                            {selectedCurrency.symbol}
                         </button>
                     </div>
                     <input type="hidden" name="tipoDescuento" value={discountType} />
