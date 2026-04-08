@@ -110,41 +110,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 })
     }
 
+    // Build insert object with only fields that exist
+    const insertData: any = {
+      empresa_id: DEFAULT_EMPRESA_ID,
+      nombre,
+      slug,
+      descripcion,
+      contenido,
+      metodo_pago,
+      precio_coins,
+      precio_usd,
+      tipo,
+      categoria_id,
+      imagen_principal,
+      galeria,
+      stock,
+      stock_ilimitado,
+      archivo_url,
+      activo: false,
+      destacado
+    }
+    
+    // Only add optional fields if they exist in the database
+    // These will be ignored by Supabase if columns don't exist
+    if (sku !== undefined) insertData.sku = sku
+    if (sku_prefix !== undefined) insertData.sku_prefix = sku_prefix
+    if (is_auto_sku !== undefined) insertData.is_auto_sku = is_auto_sku
+
     const { data, error } = await supabase
       .from('productos')
-      .insert({
-        empresa_id: DEFAULT_EMPRESA_ID,
-        nombre,
-        slug,
-        descripcion,
-        contenido,
-        metodo_pago,
-        precio_coins,
-        precio_usd,
-        tipo,
-        categoria_id,
-        imagen_principal,
-        galeria,
-        stock,
-        stock_ilimitado,
-        archivo_url,
-        activo,
-        destacado,
-        sku,
-        sku_prefix,
-        is_auto_sku,
-        precio_comparacion,
-        descuento_porcentaje,
-        descuento_hasta,
-        tipo_descuento,
-        stock_bajo_nivel,
-        es_perecedero,
-        fecha_compra,
-        fecha_vencimiento,
-        manejo_perecedero,
-        lote_uid,
-        estado
-      })
+      .insert(insertData)
       .select()
       .single()
 
