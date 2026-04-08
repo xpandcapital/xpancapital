@@ -56,12 +56,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Crear o actualizar configuración
+// POST - Actualizar configuración (parcial)
 export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const body = await request.json()
-    const { moneda_base, monedas_activas, margen_seguridad, actualizar_automaticamente } = body
 
     // Upsert config
     const { data: existingConfig } = await supabase
@@ -73,31 +72,36 @@ export async function POST(request: NextRequest) {
     let data
     let error
 
+    // Build partial update object
+    const updates: Record<string, unknown> = {
+      ultima_actualizacion: new Date().toISOString()
+    }
+    if (body.moneda_base !== undefined) updates.moneda_base = body.moneda_base
+    if (body.monedas_activas !== undefined) updates.monedas_activas = body.monedas_activas
+    if (body.margen_seguridad !== undefined) updates.margen_seguridad = body.margen_seguridad
+    if (body.actualizar_automaticamente !== undefined) updates.actualizar_automaticamente = body.actualizar_automaticamente
+
     if (existingConfig) {
       const result = await supabase
         .from('monedas_config')
-        .update({
-          moneda_base: moneda_base || 'USD',
-          monedas_activas: monedas_activas || ['USD'],
-          margen_seguridad: margen_seguridad || 0.02,
-          actualizar_automaticamente: actualizar_automaticamente ?? true,
-          ultima_actualizacion: new Date().toISOString()
-        })
+        .update(updates)
         .eq('empresa_id', DEFAULT_EMPRESA_ID)
         .select()
         .single()
       data = result.data
       error = result.error
     } else {
+      // Insert new with defaults + provided values
+      const defaults = {
+        empresa_id: DEFAULT_EMPRESA_ID,
+        moneda_base: 'USD',
+        monedas_activas: ['USD'],
+        margen_seguridad: 0.02,
+        actualizar_automaticamente: true
+      }
       const result = await supabase
         .from('monedas_config')
-        .insert({
-          empresa_id: DEFAULT_EMPRESA_ID,
-          moneda_base: moneda_base || 'USD',
-          monedas_activas: monedas_activas || ['USD'],
-          margen_seguridad: margen_seguridad || 0.02,
-          actualizar_automaticamente: actualizar_automaticamente ?? true
-        })
+        .insert({ ...defaults, ...updates })
         .select()
         .single()
       data = result.data

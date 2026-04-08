@@ -55,9 +55,29 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const body = await request.json()
-  const { id, nombre, from_name, from_email, provider, smtp_host, smtp_port, smtp_user, smtp_pass, api_key, is_default } = body
+  const { id, ...updates } = body
 
-  if (is_default) {
+  if (!id) {
+    return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
+  }
+
+  // Only update provided fields
+  const allowedFields = ['nombre', 'from_name', 'from_email', 'provider', 
+                         'smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 
+                         'api_key', 'is_default']
+  const filteredUpdates: Record<string, unknown> = {}
+  
+  for (const key of allowedFields) {
+    if (updates[key] !== undefined) {
+      filteredUpdates[key] = updates[key]
+    }
+  }
+  
+  if (Object.keys(filteredUpdates).length === 0) {
+    return NextResponse.json({ error: 'No hay campos para actualizar' }, { status: 400 })
+  }
+
+  if (updates.is_default) {
     await supabase
       .from('email_senders')
       .update({ is_default: false })
@@ -66,18 +86,7 @@ export async function PUT(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('email_senders')
-    .update({
-      nombre,
-      from_name,
-      from_email,
-      provider,
-      smtp_host,
-      smtp_port,
-      smtp_user,
-      smtp_pass,
-      api_key,
-      is_default
-    })
+    .update(filteredUpdates)
     .eq('id', id)
     .eq('empresa_id', EMPRESA_ID)
     .select()

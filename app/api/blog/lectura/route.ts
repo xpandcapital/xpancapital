@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { user_id, post_id, tiempo_segundos } = body
+    const { user_id, post_id, tiempo_segundos, completado } = body
 
     if (!user_id || !post_id || tiempo_segundos === undefined) {
       return NextResponse.json({ 
@@ -145,23 +145,46 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const { data, error } = await supabase
+    // Check if record exists
+    const { data: existing } = await supabase
       .from('blog_lecturas')
-      .upsert({
-        user_id,
-        post_id,
-        tiempo_segundos,
-        completado: false,
-        recompensa_otorgada: false
-      }, { onConflict: 'user_id,post_id' })
-      .select()
+      .select('id, completado, recompensa_otorgada')
+      .eq('user_id', user_id)
+      .eq('post_id', post_id)
       .single()
 
-    if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 400 })
+    let result
+    if (existing) {
+      // Update only tiempo and optionally completado
+      const updates: any = { tiempo_segundos }
+      if (completado !== undefined) updates.completado = completado
+      
+      result = await supabase
+        .from('blog_lecturas')
+        .update(updates)
+        .eq('id', existing.id)
+        .select()
+        .single()
+    } else {
+      // Insert new record
+      result = await supabase
+        .from('blog_lecturas')
+        .insert({
+          user_id,
+          post_id,
+          tiempo_segundos,
+          completado: completado || false,
+          recompensa_otorgada: false
+        })
+        .select()
+        .single()
     }
 
-    return NextResponse.json({ success: true, data })
+    if (result.error) {
+      return NextResponse.json({ success: false, error: result.error.message }, { status: 400 })
+    }
+
+    return NextResponse.json({ success: true, data: result.data })
   } catch (error) {
     return NextResponse.json({ 
       success: false, 
