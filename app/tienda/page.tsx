@@ -1,72 +1,49 @@
 "use client";
 
-export interface ProductDef {
-  id: string;
-  slug?: string;
-  title: string;
-  category: string;
-  productType: 'curso' | 'pack' | 'mentoría' | 'ebook' | 'contratos' | 'kit';
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  sales: string;
-  image: string;
-  images?: string[];
-  description?: string;
-  content?: string;
-  isHot?: boolean;
-  stock?: number;
-  isCourse?: boolean;
-  reviews?: { name: string; avatar?: string; rating: number; date: string; comment: string }[];
-}
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/sections/Header";
 import { FooterSections } from "@/components/sections/Footer";
 import { ShopHeroSlider } from "@/components/tienda/ShopHeroSlider";
 import { ProductCategorySlider } from "@/components/tienda/ProductCategorySlider";
 import { ShopSidebar } from "@/components/tienda/ShopSidebar";
-import { UrgencyTimer } from "@/components/tienda/UrgencyTimer";
 import { LiveBuyerNotification } from "@/components/tienda/LiveBuyerNotification";
 import { CartSidebar } from "@/components/tienda/CartSidebar";
 import { CustomCursor } from "@/components/ui/CustomCursor";
-import { mapProductoToProductDef } from "@/lib/types/shop";
-import { StatsBar } from "@/components/tienda/StatsBar";
-import { FlashDeals } from "@/components/tienda/FlashDeals";
-import { TestimonialsCarousel } from "@/components/tienda/TestimonialsCarousel";
-import { TopSellers } from "@/components/tienda/TopSellers";
-import { TrustBanner } from "@/components/tienda/TrustBanner";
-import { BundlesSection } from "@/components/tienda/BundlesSection";
+import { mapProductoToProductDef, ProductDef } from "@/lib/types/shop";
 import { ProductSearch } from "@/components/tienda/ProductSearch";
-import { NewsletterBanner } from "@/components/tienda/NewsletterBanner";
+import type { ProductoCategoria } from "@/lib/hooks/useProducts";
 
 const EMPRESA_ID = "6186f014-c8c7-4027-9f08-8acf2bae3eae";
 
-// Mapeo de categorías a secciones del sidebar
-const CATEGORY_SECTIONS = [
-  { id: "cursos",         label: "Cursos",        match: ["capacitaciones", "cursos", "curso"] },
-  { id: "ebooks",         label: "Ebooks",         match: ["ebooks", "ebook", "libros"] },
-  { id: "contratos",      label: "Contratos",      match: ["contratos", "contrato", "legal"] },
-  { id: "kits",           label: "Kits",           match: ["kits", "kit", "plantillas"] },
-  { id: "desarrolladores",label: "Desarrolladores",match: ["desarrolladores", "pack", "paquete"] },
-  { id: "mentoria",       label: "Mentoría",       match: ["mentoría", "mentoria", "membresias", "membresía"] },
-];
-
 export default function ShopPage() {
   const [allProducts, setAllProducts] = useState<ProductDef[]>([]);
+  const [categories, setCategories] = useState<ProductoCategoria[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
-    const fetchProducts = async () => {
+    
+    const fetchData = async () => {
       try {
-        const res = await fetch(`/api/productos?empresa_id=${EMPRESA_ID}&all=true`);
-        const data = await res.json();
-        if (data.success && data.data && isMounted) {
-          const mapped = data.data
-            .filter((p: any) => p.activo !== false)
-            .map((p: any) => mapProductoToProductDef(p));
-          setAllProducts(mapped);
+        const [productsRes, categoriesRes] = await Promise.all([
+          fetch(`/api/productos?empresa_id=${EMPRESA_ID}&all=true`),
+          fetch(`/api/productos/categorias?empresa_id=${EMPRESA_ID}`)
+        ]);
+        
+        const productsData = await productsRes.json();
+        const categoriesData = await categoriesRes.json();
+        
+        if (isMounted) {
+          if (productsData.success && productsData.data) {
+            const mapped = productsData.data
+              .filter((p: any) => p.activo !== false)
+              .map((p: any) => mapProductoToProductDef(p));
+            setAllProducts(mapped);
+          }
+          
+          if (categoriesData.success && categoriesData.data) {
+            setCategories(categoriesData.data);
+          }
         }
       } catch (e) {
         console.error("Shop fetch error:", e);
@@ -74,24 +51,18 @@ export default function ShopPage() {
         if (isMounted) setLoading(false);
       }
     };
-    fetchProducts();
+    
+    fetchData();
     return () => { isMounted = false; };
   }, []);
 
-  // Agrupar productos por sección
-  const getProductsForSection = (section: typeof CATEGORY_SECTIONS[0]) => {
+  const getProductsForCategory = (categoriaNombre: string) => {
+    const catLower = categoriaNombre.toLowerCase();
     return allProducts.filter(p => {
-      const cat = p.category?.toLowerCase() || "";
-      const type = p.productType?.toLowerCase() || "";
-      return section.match.some(m => cat.includes(m) || type.includes(m));
+      const pCat = p.category?.toLowerCase() || "";
+      return pCat === catLower || pCat.includes(catLower);
     });
   };
-
-  // Productos sin categoría específica van a "kits"
-  const categorizedIds = new Set(
-    CATEGORY_SECTIONS.flatMap(s => getProductsForSection(s).map(p => p.id))
-  );
-  const uncategorized = allProducts.filter(p => !categorizedIds.has(p.id));
 
   return (
     <main className="min-h-screen text-white bg-black">
@@ -99,28 +70,14 @@ export default function ShopPage() {
       <Header />
       <CartSidebar />
 
-      {/* Layout con sidebar fijo */}
       <div className="relative flex">
-        {/* Sidebar fijo de categorías — w-64 = 256px */}
         <ShopSidebar />
 
-        {/* Contenido principal: margen izquierdo = ancho sidebar (256px), padding top = altura header (~112px) */}
         <div className="flex-1 md:ml-64 px-4 md:px-8 xl:px-10 pt-24 pb-16 space-y-10 min-w-0">
 
-          {/* Hero slider */}
           <ShopHeroSlider />
 
-          {/* Urgency timer */}
-          <UrgencyTimer />
-
-          {/* Buscador de productos */}
           <ProductSearch products={allProducts} />
-
-          {/* Stats con contadores animados */}
-          <StatsBar />
-
-          {/* Flash Deals con countdown */}
-          <FlashDeals />
 
           {loading ? (
             <div className="space-y-16">
@@ -137,69 +94,50 @@ export default function ShopPage() {
             </div>
           ) : (
             <>
-              {/* ── Carrusel 1 y 2 ── */}
-              {CATEGORY_SECTIONS.slice(0, 2).map(section => {
-                const products = getProductsForSection(section);
-                if (products.length === 0) return null;
-                return (
-                  <ProductCategorySlider key={section.id} id={section.id}
-                    title={section.label} subtitle={`${products.length} productos disponibles`} products={products} />
-                );
-              })}
-
-              {/* ── Ranking top vendidos ── */}
-              <TopSellers />
-
-              {/* ── Carrusel 3 y 4 ── */}
-              {CATEGORY_SECTIONS.slice(2, 4).map(section => {
-                const products = getProductsForSection(section);
-                if (products.length === 0) return null;
-                return (
-                  <ProductCategorySlider key={section.id} id={section.id}
-                    title={section.label} subtitle={`${products.length} productos disponibles`} products={products} />
-                );
-              })}
-
-              {/* ── Bundles / combos ── */}
-              <BundlesSection />
-
-              {/* ── Carrusel 5 y 6 + sin categoría ── */}
-              {CATEGORY_SECTIONS.slice(4).map(section => {
-                const products = getProductsForSection(section);
-                if (products.length === 0) return null;
-                return (
-                  <ProductCategorySlider key={section.id} id={section.id}
-                    title={section.label} subtitle={`${products.length} productos disponibles`} products={products} />
-                );
-              })}
-              {uncategorized.length > 0 && (
-                <ProductCategorySlider id="otros" title="Más Productos"
-                  subtitle={`${uncategorized.length} productos disponibles`} products={uncategorized} />
-              )}
-
-              {/* ── Testimonios ── */}
-              <TestimonialsCarousel />
-
-              {/* ── Newsletter ── */}
-              <NewsletterBanner />
-
-              {/* ── Banner de confianza ── */}
-              <TrustBanner />
-
-              {allProducts.length === 0 && (
+              {allProducts.length === 0 ? (
                 <div className="text-center py-20 text-gray-500">
                   <p className="text-xl font-black uppercase mb-2">Pronto nuevos productos</p>
                   <p className="text-sm">Estamos cargando el catálogo de productos.</p>
                 </div>
+              ) : (
+                <>
+                  {categories.map((category) => {
+                    const categoryProducts = getProductsForCategory(category.nombre);
+                    if (categoryProducts.length === 0) return null;
+                    return (
+                      <ProductCategorySlider 
+                        key={category.id}
+                        id={category.slug || category.id}
+                        title={category.nombre}
+                        subtitle={`${categoryProducts.length} producto${categoryProducts.length !== 1 ? 's' : ''} disponible${categoryProducts.length !== 1 ? 's' : ''}`}
+                        products={categoryProducts}
+                      />
+                    );
+                  })}
+
+                  {(() => {
+                    const categorizedIds = new Set(
+                      categories.flatMap(cat => getProductsForCategory(cat.nombre).map(p => p.id))
+                    );
+                    const uncategorized = allProducts.filter(p => !categorizedIds.has(p.id));
+                    if (uncategorized.length === 0) return null;
+                    return (
+                      <ProductCategorySlider 
+                        id="otros"
+                        title="Otros Productos"
+                        subtitle={`${uncategorized.length} producto${uncategorized.length !== 1 ? 's' : ''} disponible${uncategorized.length !== 1 ? 's' : ''}`}
+                        products={uncategorized}
+                      />
+                    );
+                  })()}
+                </>
               )}
             </>
           )}
         </div>
       </div>
 
-      {/* Notificaciones de compradores */}
       <LiveBuyerNotification />
-
       <FooterSections />
     </main>
   );

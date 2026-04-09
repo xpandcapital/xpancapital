@@ -366,8 +366,15 @@ export default function ProductDetailPage() {
                                     className="p-6"
                                 >
                                     {activeTab === "descripcion" && (
-                                        <div className="space-y-4 text-gray-400 text-sm leading-relaxed">
-                                            <p>{product.description || "Este producto incluye todo lo necesario para llevar tu negocio inmobiliario al siguiente nivel. Contenido creado por expertos BLIS con más de 10 años de experiencia en el mercado latinoamericano."}</p>
+                                        <div className="space-y-4 text-gray-300 text-sm leading-relaxed">
+                                            {product.description ? (
+                                                <div 
+                                                    className="prose prose-invert prose-sm max-w-none [&>h1]:text-lg [&>h1]:font-black [&>h1]:text-white [&>h1]:mb-4 [&>h2]:text-base [&>h2]:font-bold [&>h2]:text-white [&>h2]:mb-3 [&>h2]:mt-6 [&>h3]:text-sm [&>h3]:font-bold [&>h3]:text-blis-red [&>h3]:mb-2 [&>h3]:mt-4 [&>p]:text-gray-400 [&>p]:mb-4 [&>p]:leading-relaxed [&>ul]:list-disc [&>ul]:pl-6 [&>ul]:mb-4 [&>ul]:text-gray-400 [&>ol]:list-decimal [&>ol]:pl-6 [&>ol]:mb-4 [&>ol]:text-gray-400 [&>li]:mb-1 [&>img]:rounded-2xl [&>img]:w-full [&>img]:my-4 [&_img]:rounded-xl [&_img]:max-w-full [&>strong]:text-white [&>strong]:font-bold [&>em]:text-gray-300 [&>em]:italic [&_a]:text-blis-red [&_a]:underline [&_a]:hover:text-red-400"
+                                                    dangerouslySetInnerHTML={{ __html: product.description }}
+                                                />
+                                            ) : (
+                                                <p>Este producto incluye todo lo necesario para llevar tu negocio inmobiliario al siguiente nivel. Contenido creado por expertos BLIS con más de 10 años de experiencia en el mercado latinoamericano.</p>
+                                            )}
                                             <div className="grid grid-cols-2 gap-3 mt-4">
                                                 {["Acceso inmediato tras la compra", "Licencia de uso permanente", "Actualizaciones incluidas", "Soporte prioritario BLIS"].map((item, i) => (
                                                     <div key={i} className="flex items-center gap-2 text-xs">

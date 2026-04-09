@@ -18,6 +18,7 @@ export interface Producto {
   metodo_pago: 'coins' | 'dinero' | 'ambos'
   precio_coins?: number
   precio_usd?: number
+  precio_comparacion?: number
   tipo: 'digital' | 'fisico' | 'servicio' | 'suscripcion'
   categoria_id?: string
   categoria?: ProductoCategoria
