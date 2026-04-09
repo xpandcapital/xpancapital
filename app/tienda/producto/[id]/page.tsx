@@ -494,15 +494,29 @@ export default function ProductDetailPage() {
 
                                 <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent w-full" />
 
-                                {/* Section 3: Redesigned Call to Action */}
-                                <div className="space-y-4">
+                                {/* Section 3: Call to Action Buttons */}
+                                <div className="space-y-3">
+                                    {/* Add to Cart Button */}
                                     <motion.button
                                         onClick={() => {
                                             addToCart({ ...product, price: product.price * quantity });
                                             showToast("¡Añadido al carrito!", "success");
                                         }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="w-full bg-white/5 border border-white/10 text-white py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/10 transition-all"
+                                    >
+                                        <ShoppingCart className="w-5 h-5" />
+                                        <span className="text-base font-bold uppercase tracking-tight">Añadir al Carrito</span>
+                                    </motion.button>
+                                    
+                                    {/* Buy Now Button */}
+                                    <motion.button
+                                        onClick={() => {
+                                            addToCart({ ...product, price: product.price * quantity });
+                                            router.push('/tienda/checkout');
+                                        }}
                                         animate={{
-                                            scale: [1, 1.03, 1],
+                                            scale: [1, 1.02, 1],
                                             boxShadow: [
                                                 "0 15px 40px rgba(16,185,129,0.3)",
                                                 "0 20px 60px rgba(16,185,129,0.5)",
@@ -516,8 +530,8 @@ export default function ProductDetailPage() {
                                         }}
                                         className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:brightness-110 transition-all active:scale-[0.98] group relative overflow-hidden border border-emerald-400/30"
                                     >
-                                        <ShoppingCart className="w-5 h-5" />
-                                        <span className="text-xl font-black uppercase tracking-tight">¡COMPRAR AHORA!</span>
+                                        <Lock className="w-5 h-5" />
+                                        <span className="text-xl font-black uppercase tracking-tight">Comprar Ahora</span>
                                     </motion.button>
 
                                     <div className="flex justify-center gap-6 py-1 opacity-50">
@@ -526,8 +540,8 @@ export default function ProductDetailPage() {
                                             <span className="text-[8px] font-black uppercase tracking-[0.2em]">SSL SECURE</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Lock className="w-3.5 h-3.5 text-amber-500" />
-                                            <span className="text-[8px] font-black uppercase tracking-[0.2em]">GARANTIZADO</span>
+                                            <Truck className="w-3.5 h-3.5 text-amber-500" />
+                                            <span className="text-[8px] font-black uppercase tracking-[0.2em]">ACCESO INMEDIATO</span>
                                         </div>
                                     </div>
                                 </div>
@@ -573,11 +587,11 @@ export default function ProductDetailPage() {
                         <h2 className="text-3xl font-black uppercase">¡No esperes más para dominar el mercado!</h2>
                         <p className="text-gray-400 max-w-2xl mx-auto text-sm">Únete a miles de profesionales que ya usan las herramientas BLIS para escalar su negocio.</p>
                         <motion.button
-                            onClick={() => { addToCart({ ...product, price: product.price }); showToast("¡Agregado al carrito!", "success"); }}
+                            onClick={() => { addToCart({ ...product, price: product.price }); router.push('/tienda/checkout'); }}
                             whileTap={{ scale: 0.97 }}
                             className="inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-black uppercase tracking-widest text-sm rounded-2xl shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:brightness-110 transition-all"
                         >
-                            <ShoppingCart className="w-5 h-5" /> Comprar Ahora — ${product.price}
+                            <Lock className="w-5 h-5" /> Comprar Ahora — ${product.price.toFixed(2)}
                         </motion.button>
                     </div>
                 </div>

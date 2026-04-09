@@ -235,8 +235,109 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                 </div>
                             )}
 
-                            {/* Login Button / Profile */}
-                            {user ? (
+{/* Action Icons - Always visible */}
+                             <div className="hidden lg:flex items-center gap-4 border-r border-white/10 pr-6 mr-1">
+                                {/* Cart Dropdown */}
+                                <div className="relative group/cart">
+                                    <button className="relative text-gray-400 hover:text-white transition-colors">
+                                        <ShoppingCart className="w-5 h-5" />
+                                        {cart.length > 0 && (
+                                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-blis-red rounded-full border-2 border-black flex items-center justify-center text-[8px] font-black text-white">
+                                                {cart.length}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {/* Cart Mini-Menu */}
+                                    <div className="absolute top-full right-0 pt-4 w-64 scale-95 opacity-0 pointer-events-none group-hover/cart:scale-100 group-hover/cart:opacity-100 group-hover/cart:pointer-events-auto transition-all duration-300 origin-top-right z-50">
+                                        <div className="bg-[#0A0D11]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+                                            <div className="p-4 border-b border-white/5">
+                                                <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Carrito de Compras</h3>
+                                            </div>
+                                            <div className="max-h-60 overflow-y-auto p-2">
+                                                {cart.length > 0 ? cart.map((item, idx) => (
+                                                    <div key={idx} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors">
+                                                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                                                            <img src={item.image} className="w-full h-full object-cover" alt="" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-[10px] font-bold text-white truncate">{item.title}</p>
+                                                            <p className="text-[9px] text-blis-red font-black font-mono">${item.price}</p>
+                                                        </div>
+                                                    </div>
+                                                )) : (
+                                                    <div className="py-8 text-center">
+                                                        <ShoppingCart className="w-8 h-8 text-white/5 mx-auto mb-2" />
+                                                        <p className="text-[10px] text-gray-600 uppercase font-bold">Carrito vacío</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {cart.length > 0 && (
+                                                <div className="p-3 bg-black/50 border-t border-white/5">
+                                                    <button className="w-full py-2.5 rounded-xl bg-blis-red text-white text-[9px] font-black uppercase tracking-widest hover:bg-red-700 transition-all">
+                                                        Finalizar Compra
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Favorites Dropdown */}
+                                <div className="relative group/favs">
+                                    <button className="relative text-gray-400 hover:text-blis-red transition-colors">
+                                        <Heart className={`w-5 h-5 ${favorites.length > 0 ? 'fill-blis-red text-blis-red' : ''}`} />
+                                        {favorites.length > 0 && (
+                                            <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-white rounded-full border-2 border-black flex items-center justify-center text-[8px] font-black text-blis-red">
+                                                {favorites.length}
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {/* Favs Mini-Menu */}
+                                    <div className="absolute top-full right-0 pt-4 w-72 scale-95 opacity-0 pointer-events-none group-hover/favs:scale-100 group-hover/favs:opacity-100 group-hover/favs:pointer-events-auto transition-all duration-300 origin-top-right z-50">
+                                        <div className="bg-[#0A0D11]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+                                            <div className="p-4 border-b border-white/5">
+                                                <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Mis Favoritos ({favorites.length})</h3>
+                                            </div>
+                                            <div className="max-h-60 overflow-y-auto p-2 space-y-1">
+                                                {favorites.length > 0 ? favorites.map(fav => (
+                                                    <div key={fav.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors group/item">
+                                                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                                                            <img src={fav.image} className="w-full h-full object-cover" alt="" />
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-[10px] font-bold text-white truncate">{fav.title}</p>
+                                                            <p className="text-[9px] text-blis-red font-black font-mono">${fav.price}</p>
+                                                        </div>
+                                                    </div>
+                                                )) : (
+                                                    <div className="py-8 text-center">
+                                                        <Heart className="w-8 h-8 text-white/5 mx-auto mb-2" />
+                                                        <p className="text-[10px] text-gray-600 uppercase font-bold">No hay favoritos</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {favorites.length > 0 && (
+                                                <div className="p-3 bg-black/50 border-t border-white/5">
+                                                    <button
+                                                        onClick={() => {
+                                                            const text = `¡Hola! Mira estos productos de Blis Corp que me gustaron: \n${favorites.map(f => `- ${f.title}`).join('\n')}\n\nAyúdame a elegir en bliscorp.com`;
+                                                            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                                                        }}
+                                                        className="w-full py-2.5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/20 text-[#25D366] text-[9px] font-black uppercase tracking-widest hover:bg-[#25D366] hover:text-white transition-all flex items-center justify-center gap-2"
+                                                    >
+                                                        Compartir por WhatsApp
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                             {/* Login Button / Profile */}
+                             {user ? (
                                 <div className="flex items-center gap-6">
                                     {/* BlisCoins */}
                                     <div className="hidden lg:flex items-center gap-2 px-3 xl:px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 max-w-[120px] xl:max-w-none">
@@ -251,138 +352,37 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         <span className="text-[11px] font-black uppercase tracking-wider">{blisCoins.toLocaleString()} BLISCOINS</span>
                                     </div>
 
-                                    {/* Action Icons */}
-                                    <div className="flex items-center gap-4 border-r border-white/10 pr-6 mr-1">
-                                        {/* Cart Dropdown */}
-                                        <div className="relative group/cart">
-                                            <button className="relative text-gray-400 hover:text-white transition-colors">
-                                                <ShoppingCart className="w-5 h-5" />
-                                                {cart.length > 0 && (
-                                                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-blis-red rounded-full border-2 border-black flex items-center justify-center text-[8px] font-black text-white">
-                                                        {cart.length}
-                                                    </span>
-                                                )}
-                                            </button>
+                                    {/* Notification Dropdown - Only for logged users */}
+                                    <div className="relative group/notif">
+                                        <button className="relative text-gray-400 hover:text-white transition-colors">
+                                            <Bell className="w-5 h-5" />
+                                            <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-blis-red rounded-full border-2 border-black flex items-center justify-center">
+                                                <span className="flex h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_white]"></span>
+                                            </span>
+                                        </button>
 
-                                            {/* Cart Mini-Menu */}
-                                            <div className="absolute top-full right-0 pt-4 w-64 scale-95 opacity-0 pointer-events-none group-hover/cart:scale-100 group-hover/cart:opacity-100 group-hover/cart:pointer-events-auto transition-all duration-300 origin-top-right z-50">
-                                                <div className="bg-[#0A0D11]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
-                                                    <div className="p-4 border-b border-white/5">
-                                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Carrito de Compras</h3>
-                                                    </div>
-                                                    <div className="max-h-60 overflow-y-auto p-2">
-                                                        {cart.length > 0 ? cart.map((item, idx) => (
-                                                            <div key={idx} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors">
-                                                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                                                                    <img src={item.image} className="w-full h-full object-cover" alt="" />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-[10px] font-bold text-white truncate">{item.title}</p>
-                                                                    <p className="text-[9px] text-blis-red font-black font-mono">${item.price}</p>
-                                                                </div>
-                                                            </div>
-                                                        )) : (
-                                                            <div className="py-8 text-center">
-                                                                <ShoppingCart className="w-8 h-8 text-white/5 mx-auto mb-2" />
-                                                                <p className="text-[10px] text-gray-600 uppercase font-bold">Carrito vacío</p>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    {cart.length > 0 && (
-                                                        <div className="p-3 bg-black/50 border-t border-white/5">
-                                                            <button className="w-full py-2.5 rounded-xl bg-blis-red text-white text-[9px] font-black uppercase tracking-widest hover:bg-red-700 transition-all">
-                                                                Finalizar Compra
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                        {/* Notif Mini-Menu */}
+                                        <div className="absolute top-full right-0 pt-4 w-72 scale-95 opacity-0 pointer-events-none group-hover/notif:scale-100 group-hover/notif:opacity-100 group-hover/notif:pointer-events-auto transition-all duration-300 origin-top-right z-50">
+                                            <div className="bg-[#0A0D11]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+                                                <div className="p-4 border-b border-white/5">
+                                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Notificaciones</h3>
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Notification Dropdown */}
-                                        <div className="relative group/notif">
-                                            <button className="relative text-gray-400 hover:text-white transition-colors">
-                                                <Bell className="w-5 h-5" />
-                                                <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-blis-red rounded-full border-2 border-black flex items-center justify-center">
-                                                    <span className="flex h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_white]"></span>
-                                                </span>
-                                            </button>
-
-                                            {/* Notif Mini-Menu */}
-                                            <div className="absolute top-full right-0 pt-4 w-72 scale-95 opacity-0 pointer-events-none group-hover/notif:scale-100 group-hover/notif:opacity-100 group-hover/notif:pointer-events-auto transition-all duration-300 origin-top-right z-50">
-                                                <div className="bg-[#0A0D11]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
-                                                    <div className="p-4 border-b border-white/5">
-                                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Notificaciones</h3>
+                                                <div className="p-2 space-y-1">
+                                                    <div className="p-3 rounded-xl bg-blis-red/10 border border-blis-red/20">
+                                                        <p className="text-[10px] font-bold text-white mb-1">Nueva Mentoría</p>
+                                                        <p className="text-[9px] text-gray-400 leading-tight">Tu sesión de mentoría ha sido confirmada para mañana.</p>
                                                     </div>
-                                                    <div className="p-2 space-y-1">
-                                                        <div className="p-3 rounded-xl bg-blis-red/10 border border-blis-red/20">
-                                                            <p className="text-[10px] font-bold text-white mb-1">Nueva Mentoría</p>
-                                                            <p className="text-[9px] text-gray-400 leading-tight">Tu sesión de mentoría ha sido confirmada para mañana.</p>
-                                                        </div>
-                                                        <div className="p-3 rounded-xl hover:bg-white/5 transition-colors">
-                                                            <p className="text-[10px] font-bold text-gray-300 mb-1">BlisCoins Recibidos</p>
-                                                            <p className="text-[9px] text-gray-500 leading-tight">Has ganado 50 BlisCoins por tu reciente actividad.</p>
-                                                        </div>
-                                                        <div className="p-3 rounded-xl hover:bg-white/5 transition-colors">
-                                                            <p className="text-[10px] font-bold text-gray-300 mb-1">Seguridad</p>
-                                                            <p className="text-[9px] text-gray-500 leading-tight">Inicio de sesión detectado desde un nuevo dispositivo.</p>
-                                                        </div>
+                                                    <div className="p-3 rounded-xl hover:bg-white/5 transition-colors">
+                                                        <p className="text-[10px] font-bold text-gray-300 mb-1">BlisCoins Recibidos</p>
+                                                        <p className="text-[9px] text-gray-500 leading-tight">Has ganado 50 BlisCoins por tu reciente actividad.</p>
                                                     </div>
-                                                    <div className="p-3 bg-black/50 border-t border-white/5 text-center">
-                                                        <button className="text-[9px] font-black text-gray-500 uppercase tracking-widest hover:text-white transition-colors">Ver todas</button>
+                                                    <div className="p-3 rounded-xl hover:bg-white/5 transition-colors">
+                                                        <p className="text-[10px] font-bold text-gray-300 mb-1">Seguridad</p>
+                                                        <p className="text-[9px] text-gray-500 leading-tight">Inicio de sesión detectado desde un nuevo dispositivo.</p>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Favorites Dropdown */}
-                                        <div className="relative group/favs">
-                                            <button className="relative text-gray-400 hover:text-blis-red transition-colors">
-                                                <Heart className={`w-5 h-5 ${favorites.length > 0 ? 'fill-blis-red text-blis-red' : ''}`} />
-                                                {favorites.length > 0 && (
-                                                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-white rounded-full border-2 border-black flex items-center justify-center text-[8px] font-black text-blis-red">
-                                                        {favorites.length}
-                                                    </span>
-                                                )}
-                                            </button>
-
-                                            {/* Favs Mini-Menu */}
-                                            <div className="absolute top-full right-0 pt-4 w-72 scale-95 opacity-0 pointer-events-none group-hover/favs:scale-100 group-hover/favs:opacity-100 group-hover/favs:pointer-events-auto transition-all duration-300 origin-top-right z-50">
-                                                <div className="bg-[#0A0D11]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
-                                                    <div className="p-4 border-b border-white/5">
-                                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Mis Favoritos ({favorites.length})</h3>
-                                                    </div>
-                                                    <div className="max-h-60 overflow-y-auto p-2 space-y-1">
-                                                        {favorites.length > 0 ? favorites.map(fav => (
-                                                            <div key={fav.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors group/item">
-                                                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                                                                    <img src={fav.image} className="w-full h-full object-cover" alt="" />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <p className="text-[10px] font-bold text-white truncate">{fav.title}</p>
-                                                                    <p className="text-[9px] text-blis-red font-black font-mono">${fav.price}</p>
-                                                                </div>
-                                                            </div>
-                                                        )) : (
-                                                            <div className="py-8 text-center">
-                                                                <Heart className="w-8 h-8 text-white/5 mx-auto mb-2" />
-                                                                <p className="text-[10px] text-gray-600 uppercase font-bold">No hay favoritos</p>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    {favorites.length > 0 && (
-                                                        <div className="p-3 bg-black/50 border-t border-white/5">
-                                                            <button
-                                                                onClick={() => {
-                                                                    const text = `¡Hola! Mira estos productos de Blis Corp que me gustaron: \n${favorites.map(f => `- ${f.title}`).join('\n')}\n\nAyúdame a elegir en bliscorp.com`;
-                                                                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-                                                                }}
-                                                                className="w-full py-2.5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/20 text-[#25D366] text-[9px] font-black uppercase tracking-widest hover:bg-[#25D366] hover:text-white transition-all flex items-center justify-center gap-2"
-                                                            >
-                                                                Compartir por WhatsApp
-                                                            </button>
-                                                        </div>
-                                                    )}
+                                                <div className="p-3 bg-black/50 border-t border-white/5 text-center">
+                                                    <button className="text-[9px] font-black text-gray-500 uppercase tracking-widest hover:text-white transition-colors">Ver todas</button>
                                                 </div>
                                             </div>
                                         </div>
