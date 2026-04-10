@@ -1590,14 +1590,16 @@ function StandardVideoConverter() {
                 setProcessing(false);
                 setProgress(100);
                 video.pause();
+                video.muted = true;
                 video.playbackRate = 1;
             };
 
             video.muted = true;
             video.playbackRate = 16;
+            video.volume = 0;
             video.currentTime = 0;
-            await video.play();
             mediaRecorder.start();
+            await video.play();
 
             const duration = video.duration;
             const frameInterval = setInterval(() => {
@@ -1661,14 +1663,14 @@ function StandardVideoConverter() {
                 setProcessing(false);
                 setProgress(100);
                 video.pause();
-                video.playbackRate = 1;
+                video.muted = true;
             };
 
             video.muted = false;
-            video.playbackRate = 16;
+            video.playbackRate = 1;
             video.currentTime = 0;
-            await video.play();
             mediaRecorder.start();
+            await video.play();
 
             const duration = video.duration;
             const progressInterval = setInterval(() => {
@@ -1976,7 +1978,7 @@ function StandardVideoConverter() {
                     {processing && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-[10px] font-black text-emerald-400 uppercase">
-                                <span>Procesando...</span>
+                                <span>{mode === 'extract' ? 'Extrayendo audio...' : 'Procesando video...'}</span>
                                 <span>{progress}%</span>
                             </div>
                             <div className="h-3 bg-white/5 rounded-full overflow-hidden border border-emerald-500/20">
@@ -1985,7 +1987,12 @@ function StandardVideoConverter() {
                                     style={{ width: `${progress}%` }}
                                 />
                             </div>
-                            <div className="text-[9px] text-zinc-500 text-center">Procesando en segundo plano a alta velocidad...</div>
+                            <div className="text-[9px] text-zinc-500 text-center">
+                                {mode === 'extract' 
+                                    ? 'Procesando audio a velocidad normal para preservar calidad...'
+                                    : 'Procesando en segundo plano a 16x velocidad...'
+                                }
+                            </div>
                         </div>
                     )}
 
