@@ -1613,38 +1613,75 @@ function StandardVideoConverter() {
     };
 
     const extractAudio = async () => {
-        if (!file) return;
+        if (!file || !videoRef.current) return;
 
         setProcessing(true);
         setProgress(0);
         setError(null);
 
         try {
-            const audioContext = new AudioContext();
-            const arrayBuffer = await file.arrayBuffer();
-            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-            const offlineContext = new OfflineAudioContext(
-                audioBuffer.numberOfChannels,
-                audioBuffer.length,
-                audioBuffer.sampleRate
-            );
-
-            const source = offlineContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(offlineContext.destination);
-            source.start();
-
-            const renderedBuffer = await offlineContext.startRendering();
-
-            const wav = audioBufferToWav(renderedBuffer);
-            const blob = new Blob([wav], { type: 'audio/wav' });
+            const video = videoRef.current;
+            const stream = (video as any).captureStream ? (video as any).captureStream() : (video as any).mozCaptureStream();
             
-            setProcessedBlob(blob);
-            setProcessing(false);
-            setProgress(100);
+            if (!stream) {
+                throw new Error('Tu navegador no soporta captura de audio desde video');
+            }
+
+            const audioTracks = stream.getAudioTracks();
+            if (audioTracks.length === 0) {
+                throw new Error('Este video no tiene pista de audio');
+            }
+
+            const audioStream = new MediaStream(audioTracks);
+            const selectedFormat = AUDIO_FORMATS.find(f => f.id === audioFormat) || AUDIO_FORMATS[0];
+            
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+                ? 'audio/webm;codecs=opus' 
+                : MediaRecorder.isTypeSupported('audio/webm') 
+                    ? 'audio/webm' 
+                    : 'audio/mp4';
+
+            const chunks: Blob[] = [];
+            const mediaRecorder = new MediaRecorder(audioStream, {
+                mimeType,
+                audioBitsPerSecond: 192000
+            });
+
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: mimeType });
+                setProcessedBlob(blob);
+                setProcessing(false);
+                setProgress(100);
+            };
+
+            video.currentTime = 0;
+            await video.play();
+            mediaRecorder.start();
+
+            const duration = video.duration;
+            const progressInterval = setInterval(() => {
+                const currentProgress = Math.round((video.currentTime / duration) * 100);
+                setProgress(Math.min(currentProgress, 99));
+            }, 100);
+
+            video.onended = () => {
+                clearInterval(progressInterval);
+                mediaRecorder.stop();
+                video.pause();
+            };
+
+            video.onerror = () => {
+                clearInterval(progressInterval);
+                setError('Error durante la reproducción del video');
+                setProcessing(false);
+            };
+
         } catch (err: any) {
-            setError('No se pudo extraer el audio. El formato del video puede no ser compatible.');
+            setError(err.message || 'Error al extraer el audio');
             setProcessing(false);
         }
     };
