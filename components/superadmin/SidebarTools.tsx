@@ -1564,8 +1564,25 @@ function StandardVideoConverter() {
             const video = videoRef.current;
             const selectedQuality = QUALITY_PRESETS.find(q => q.id === quality) || QUALITY_PRESETS[1];
             
-            const targetWidth = quality === 'custom' ? customWidth : Math.min(selectedQuality.width, video.videoWidth);
-            const targetHeight = quality === 'custom' ? customHeight : Math.min(selectedQuality.height, video.videoHeight);
+            const videoAspect = video.videoWidth / video.videoHeight;
+            let targetWidth: number, targetHeight: number;
+            
+            if (quality === 'custom') {
+                targetWidth = customWidth;
+                targetHeight = customHeight;
+            } else {
+                const maxWidth = selectedQuality.width;
+                const maxHeight = selectedQuality.height;
+                
+                if (videoAspect > 1) {
+                    targetWidth = Math.min(maxWidth, video.videoWidth);
+                    targetHeight = Math.round(targetWidth / videoAspect);
+                } else {
+                    targetHeight = Math.min(maxHeight, video.videoHeight);
+                    targetWidth = Math.round(targetHeight * videoAspect);
+                }
+            }
+            
             const targetBitrate = quality === 'custom' ? customBitrate * 1000 : selectedQuality.bitrate;
 
             const canvas = document.createElement('canvas');
@@ -1573,7 +1590,7 @@ function StandardVideoConverter() {
             canvas.height = targetHeight;
             const ctx = canvas.getContext('2d')!;
 
-            const stream = canvas.captureStream(60);
+            const stream = canvas.captureStream(30);
             const mediaRecorder = new MediaRecorder(stream, {
                 mimeType: 'video/webm;codecs=vp9',
                 videoBitsPerSecond: targetBitrate
@@ -1591,11 +1608,9 @@ function StandardVideoConverter() {
                 setProgress(100);
                 video.pause();
                 video.muted = true;
-                video.playbackRate = 1;
             };
 
             video.muted = true;
-            video.playbackRate = 16;
             video.volume = 0;
             video.currentTime = 0;
             mediaRecorder.start();
@@ -1603,10 +1618,12 @@ function StandardVideoConverter() {
 
             const duration = video.duration;
             const frameInterval = setInterval(() => {
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, targetWidth, targetHeight);
                 ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
                 const currentProgress = Math.round((video.currentTime / duration) * 100);
                 setProgress(Math.min(currentProgress, 99));
-            }, 1000 / 60);
+            }, 1000 / 30);
 
             video.onended = () => {
                 clearInterval(frameInterval);
@@ -1978,7 +1995,7 @@ function StandardVideoConverter() {
                     {processing && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-[10px] font-black text-emerald-400 uppercase">
-                                <span>{mode === 'extract' ? 'Extrayendo audio...' : 'Procesando video...'}</span>
+                                <span>{mode === 'extract' ? 'Extrayendo audio...' : 'Convirtiendo video...'}</span>
                                 <span>{progress}%</span>
                             </div>
                             <div className="h-3 bg-white/5 rounded-full overflow-hidden border border-emerald-500/20">
@@ -1990,7 +2007,7 @@ function StandardVideoConverter() {
                             <div className="text-[9px] text-zinc-500 text-center">
                                 {mode === 'extract' 
                                     ? 'Procesando audio a velocidad normal para preservar calidad...'
-                                    : 'Procesando en segundo plano a 16x velocidad...'
+                                    : 'Convertir mantiene la duración original. Para compresión rápida, usa 16x en convertidor externo.'
                                 }
                             </div>
                         </div>
