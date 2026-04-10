@@ -1573,7 +1573,7 @@ function StandardVideoConverter() {
             canvas.height = targetHeight;
             const ctx = canvas.getContext('2d')!;
 
-            const stream = canvas.captureStream(30);
+            const stream = canvas.captureStream(60);
             const mediaRecorder = new MediaRecorder(stream, {
                 mimeType: 'video/webm;codecs=vp9',
                 videoBitsPerSecond: targetBitrate
@@ -1589,8 +1589,12 @@ function StandardVideoConverter() {
                 setProcessedBlob(blob);
                 setProcessing(false);
                 setProgress(100);
+                video.pause();
+                video.playbackRate = 1;
             };
 
+            video.muted = true;
+            video.playbackRate = 16;
             video.currentTime = 0;
             await video.play();
             mediaRecorder.start();
@@ -1598,8 +1602,9 @@ function StandardVideoConverter() {
             const duration = video.duration;
             const frameInterval = setInterval(() => {
                 ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
-                setProgress(Math.round((video.currentTime / duration) * 100));
-            }, 1000 / 30);
+                const currentProgress = Math.round((video.currentTime / duration) * 100);
+                setProgress(Math.min(currentProgress, 99));
+            }, 1000 / 60);
 
             video.onended = () => {
                 clearInterval(frameInterval);
@@ -1633,7 +1638,6 @@ function StandardVideoConverter() {
             }
 
             const audioStream = new MediaStream(audioTracks);
-            const selectedFormat = AUDIO_FORMATS.find(f => f.id === audioFormat) || AUDIO_FORMATS[0];
             
             const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
                 ? 'audio/webm;codecs=opus' 
@@ -1656,8 +1660,12 @@ function StandardVideoConverter() {
                 setProcessedBlob(blob);
                 setProcessing(false);
                 setProgress(100);
+                video.pause();
+                video.playbackRate = 1;
             };
 
+            video.muted = false;
+            video.playbackRate = 16;
             video.currentTime = 0;
             await video.play();
             mediaRecorder.start();
@@ -1671,12 +1679,11 @@ function StandardVideoConverter() {
             video.onended = () => {
                 clearInterval(progressInterval);
                 mediaRecorder.stop();
-                video.pause();
             };
 
             video.onerror = () => {
                 clearInterval(progressInterval);
-                setError('Error durante la reproducción del video');
+                setError('Error durante el procesamiento del video');
                 setProcessing(false);
             };
 
@@ -1968,16 +1975,17 @@ function StandardVideoConverter() {
                     {/* Progress Bar */}
                     {processing && (
                         <div className="space-y-2">
-                            <div className="flex items-center justify-between text-[10px] font-black text-zinc-400 uppercase">
+                            <div className="flex items-center justify-between text-[10px] font-black text-emerald-400 uppercase">
                                 <span>Procesando...</span>
                                 <span>{progress}%</span>
                             </div>
-                            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-3 bg-white/5 rounded-full overflow-hidden border border-emerald-500/20">
                                 <div
-                                    className="h-full bg-gradient-to-r from-blis-red to-amber-500 transition-all duration-300"
+                                    className="h-full bg-gradient-to-r from-emerald-400 via-green-400 to-cyan-400 transition-all duration-200 shadow-[0_0_20px_rgba(16,185,129,0.5)]"
                                     style={{ width: `${progress}%` }}
                                 />
                             </div>
+                            <div className="text-[9px] text-zinc-500 text-center">Procesando en segundo plano a alta velocidad...</div>
                         </div>
                     )}
 
