@@ -1502,7 +1502,7 @@ function StandardVideoConverter() {
     const [outputFormat, setOutputFormat] = useState('webm');
     const [audioFormat, setAudioFormat] = useState('mp3');
     const [quality, setQuality] = useState('1080p');
-    const [compressionLevel, setCompressionLevel] = useState('medium');
+    const [compressionLevel, setCompressionLevel] = useState('low');
     const [customWidth, setCustomWidth] = useState(1920);
     const [customHeight, setCustomHeight] = useState(1080);
     const [customBitrate, setCustomBitrate] = useState(8000);
@@ -1579,16 +1579,19 @@ function StandardVideoConverter() {
             const compressionSetting = COMPRESSION_LEVELS.find(l => l.id === compressionLevel) || COMPRESSION_LEVELS[1];
             const selectedFormat = OUTPUT_FORMATS.find(f => f.id === outputFormat) || OUTPUT_FORMATS[0];
             
+            // NEVER upscale - if video is smaller, keep original size
             const videoAspect = video.videoWidth / video.videoHeight;
             let targetWidth: number, targetHeight: number;
             
             if (quality === 'custom') {
-                targetWidth = customWidth;
-                targetHeight = customHeight;
+                // For custom, don't upscale either
+                targetWidth = Math.min(customWidth, video.videoWidth);
+                targetHeight = Math.min(customHeight, video.videoHeight);
             } else {
                 const maxWidth = selectedQuality.width;
                 const maxHeight = selectedQuality.height;
                 
+                // Always scale DOWN, never UP
                 if (videoAspect > 1) {
                     targetWidth = Math.min(maxWidth, video.videoWidth);
                     targetHeight = Math.round(targetWidth / videoAspect);
@@ -1970,43 +1973,62 @@ function StandardVideoConverter() {
                     {mode === 'compress' && (
                         <div className="space-y-6">
                             {/* Output Preview */}
-                            {videoInfo && (
-                                <div className="p-4 bg-gradient-to-r from-emerald-500/5 to-cyan-500/5 border border-emerald-500/20 rounded-xl">
-                                    <div className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-3">Vista Previa de Salida</div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                        <div>
-                                            <div className="text-[9px] text-zinc-500 uppercase">Original</div>
-                                            <div className="text-sm font-black text-white">{videoInfo.width}×{videoInfo.height}</div>
+                            {videoInfo && (() => {
+                                const selectedPreset = QUALITY_PRESETS.find(q => q.id === quality);
+                                const wouldUpscale = selectedPreset && 
+                                    (videoInfo.width < selectedPreset.width || videoInfo.height < selectedPreset.height);
+                                const isAlreadySmaller = wouldUpscale && quality !== 'custom';
+                                
+                                let outputW: number, outputH: number;
+                                const va = videoInfo.width / videoInfo.height;
+                                
+                                if (quality === 'custom') {
+                                    outputW = Math.min(customWidth, videoInfo.width);
+                                    outputH = Math.min(customHeight, videoInfo.height);
+                                } else if (isAlreadySmaller) {
+                                    outputW = videoInfo.width;
+                                    outputH = videoInfo.height;
+                                } else if (va > 1) {
+                                    outputW = Math.min(selectedPreset?.width || 1920, videoInfo.width);
+                                    outputH = Math.round(outputW / va);
+                                } else {
+                                    outputH = Math.min(selectedPreset?.height || 1080, videoInfo.height);
+                                    outputW = Math.round(outputH * va);
+                                }
+                                
+                                return (
+                                    <div className={`p-4 rounded-xl border ${isAlreadySmaller 
+                                        ? 'bg-amber-500/5 border-amber-500/20' 
+                                        : 'bg-gradient-to-r from-emerald-500/5 to-cyan-500/5 border-emerald-500/20'}`}>
+                                        <div className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-3">
+                                            {isAlreadySmaller ? '⚠️ Sin Cambios' : 'Vista Previa de Salida'}
                                         </div>
-                                        <div>
-                                            <div className="text-[9px] text-zinc-500 uppercase">Salida</div>
-                                            <div className="text-sm font-black text-emerald-400">
-                                                {quality === 'custom' ? `${customWidth}×${customHeight}` : 
-                                                    (() => {
-                                                        const va = videoInfo.width / videoInfo.height;
-                                                        const preset = QUALITY_PRESETS.find(q => q.id === quality);
-                                                        if (va > 1) {
-                                                            const w = Math.min(preset?.width || 1920, videoInfo.width);
-                                                            return `${w}×${Math.round(w / va)}`;
-                                                        } else {
-                                                            const h = Math.min(preset?.height || 1080, videoInfo.height);
-                                                            return `${Math.round(h * va)}×${h}`;
-                                                        }
-                                                    })()
-                                                }
+                                        {isAlreadySmaller && (
+                                            <div className="text-xs text-amber-400 mb-3">
+                                                El video ya es más pequeño que {quality}. Se mantendrá resolución original.
+                                            </div>
+                                        )}
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                            <div>
+                                                <div className="text-[9px] text-zinc-500 uppercase">Original</div>
+                                                <div className="text-sm font-black text-white">{videoInfo.width}×{videoInfo.height}</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-[9px] text-zinc-500 uppercase">Salida</div>
+                                                <div className="text-sm font-black text-emerald-400">{outputW}×{outputH}</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-[9px] text-zinc-500 uppercase">Formato</div>
+                                                <div className="text-sm font-black text-white">WebM (VP9)</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-[9px] text-zinc-500 uppercase">Audio</div>
+                                                <div className="text-sm font-black text-white">128 kbps Opus</div>
                                             </div>
                                         </div>
-                                        <div>
-                                            <div className="text-[9px] text-zinc-500 uppercase">Formato</div>
-                                            <div className="text-sm font-black text-white">WebM (VP9)</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-[9px] text-zinc-500 uppercase">Audio</div>
-                                            <div className="text-sm font-black text-white">128 kbps Opus</div>
-                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                );
+                            })()}
 
                             {/* Resolution Presets */}
                             <div>
