@@ -1473,12 +1473,24 @@ const AUDIO_FORMATS = [
 ];
 
 const QUALITY_PRESETS = [
-    { id: '4k', name: '4K Ultra HD', width: 3840, height: 2160, bitrate: 20000000 },
-    { id: '1080p', name: 'Full HD 1080p', width: 1920, height: 1080, bitrate: 8000000 },
-    { id: '720p', name: 'HD 720p', width: 1280, height: 720, bitrate: 5000000 },
-    { id: '480p', name: 'SD 480p', width: 854, height: 480, bitrate: 2500000 },
-    { id: '360p', name: 'Mobile 360p', width: 640, height: 360, bitrate: 1000000 },
+    { id: '4k', name: '4K Ultra HD', width: 3840, height: 2160, bitrate: 20000000, size: '~2GB/hora' },
+    { id: '1080p', name: 'Full HD 1080p', width: 1920, height: 1080, bitrate: 8000000, size: '~700MB/hora' },
+    { id: '720p', name: 'HD 720p', width: 1280, height: 720, bitrate: 5000000, size: '~450MB/hora' },
+    { id: '480p', name: 'SD 480p', width: 854, height: 480, bitrate: 2500000, size: '~200MB/hora' },
+    { id: '360p', name: 'Mobile 360p', width: 640, height: 360, bitrate: 1000000, size: '~80MB/hora' },
+    { id: '240p', name: 'Ultra Ligero', width: 426, height: 240, bitrate: 500000, size: '~40MB/hora' },
     { id: 'custom', name: 'Personalizado', width: 0, height: 0, bitrate: 0 },
+];
+
+const OUTPUT_FORMATS = [
+    { id: 'webm', name: 'WebM', mime: 'video/webm', codecs: 'vp9', audioCodecs: 'opus' },
+    { id: 'webm-vp8', name: 'WebM (VP8)', mime: 'video/webm', codecs: 'vp8', audioCodecs: 'vorbis' },
+];
+
+const COMPRESSION_LEVELS = [
+    { id: 'high', name: 'Alta Calidad', bitrateMultiplier: 1.5, desc: 'Mejor calidad, archivo más grande' },
+    { id: 'medium', name: 'Balanceado', bitrateMultiplier: 1, desc: 'Equilibrio entre calidad y tamaño' },
+    { id: 'low', name: 'Tamaño Reducido', bitrateMultiplier: 0.6, desc: 'Archivo pequeño, menor calidad' },
 ];
 
 function StandardVideoConverter() {
@@ -1490,6 +1502,7 @@ function StandardVideoConverter() {
     const [outputFormat, setOutputFormat] = useState('webm');
     const [audioFormat, setAudioFormat] = useState('mp3');
     const [quality, setQuality] = useState('1080p');
+    const [compressionLevel, setCompressionLevel] = useState('medium');
     const [customWidth, setCustomWidth] = useState(1920);
     const [customHeight, setCustomHeight] = useState(1080);
     const [customBitrate, setCustomBitrate] = useState(8000);
@@ -1563,6 +1576,8 @@ function StandardVideoConverter() {
         try {
             const video = videoRef.current;
             const selectedQuality = QUALITY_PRESETS.find(q => q.id === quality) || QUALITY_PRESETS[1];
+            const compressionSetting = COMPRESSION_LEVELS.find(l => l.id === compressionLevel) || COMPRESSION_LEVELS[1];
+            const selectedFormat = OUTPUT_FORMATS.find(f => f.id === outputFormat) || OUTPUT_FORMATS[0];
             
             const videoAspect = video.videoWidth / video.videoHeight;
             let targetWidth: number, targetHeight: number;
@@ -1583,17 +1598,35 @@ function StandardVideoConverter() {
                 }
             }
             
-            const targetBitrate = quality === 'custom' ? customBitrate * 1000 : selectedQuality.bitrate;
+            const baseBitrate = quality === 'custom' ? customBitrate * 1000 : selectedQuality.bitrate;
+            const targetBitrate = Math.round(baseBitrate * compressionSetting.bitrateMultiplier);
 
             const canvas = document.createElement('canvas');
             canvas.width = targetWidth;
             canvas.height = targetHeight;
             const ctx = canvas.getContext('2d')!;
 
-            const stream = canvas.captureStream(30);
-            const mediaRecorder = new MediaRecorder(stream, {
-                mimeType: 'video/webm;codecs=vp9',
-                videoBitsPerSecond: targetBitrate
+            // Capture video stream from canvas
+            const videoStream = canvas.captureStream(30);
+            
+            // Capture audio stream from video element
+            const audioStream = (video as any).captureStream ? (video as any).captureStream() : (video as any).mozCaptureStream();
+            const audioTracks = audioStream?.getAudioTracks() || [];
+            
+            // Combine video and audio tracks
+            const combinedStream = new MediaStream([
+                ...videoStream.getVideoTracks(),
+                ...audioTracks
+            ]);
+
+            const mimeType = MediaRecorder.isTypeSupported(`video/webm;codecs=${selectedFormat.codecs}`) 
+                ? `video/webm;codecs=${selectedFormat.codecs}` 
+                : 'video/webm';
+
+            const mediaRecorder = new MediaRecorder(combinedStream, {
+                mimeType,
+                videoBitsPerSecond: targetBitrate,
+                audioBitsPerSecond: 128000
             });
 
             const chunks: Blob[] = [];
@@ -1602,15 +1635,14 @@ function StandardVideoConverter() {
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
+                const blob = new Blob(chunks, { type: mimeType });
                 setProcessedBlob(blob);
                 setProcessing(false);
                 setProgress(100);
                 video.pause();
-                video.muted = true;
             };
 
-            video.muted = true;
+            video.muted = false;
             video.volume = 0;
             video.currentTime = 0;
             mediaRecorder.start();
@@ -1936,10 +1968,50 @@ function StandardVideoConverter() {
 
                     {/* Compress Settings */}
                     {mode === 'compress' && (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
+                            {/* Output Preview */}
+                            {videoInfo && (
+                                <div className="p-4 bg-gradient-to-r from-emerald-500/5 to-cyan-500/5 border border-emerald-500/20 rounded-xl">
+                                    <div className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-3">Vista Previa de Salida</div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        <div>
+                                            <div className="text-[9px] text-zinc-500 uppercase">Original</div>
+                                            <div className="text-sm font-black text-white">{videoInfo.width}×{videoInfo.height}</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-[9px] text-zinc-500 uppercase">Salida</div>
+                                            <div className="text-sm font-black text-emerald-400">
+                                                {quality === 'custom' ? `${customWidth}×${customHeight}` : 
+                                                    (() => {
+                                                        const va = videoInfo.width / videoInfo.height;
+                                                        const preset = QUALITY_PRESETS.find(q => q.id === quality);
+                                                        if (va > 1) {
+                                                            const w = Math.min(preset?.width || 1920, videoInfo.width);
+                                                            return `${w}×${Math.round(w / va)}`;
+                                                        } else {
+                                                            const h = Math.min(preset?.height || 1080, videoInfo.height);
+                                                            return `${Math.round(h * va)}×${h}`;
+                                                        }
+                                                    })()
+                                                }
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div className="text-[9px] text-zinc-500 uppercase">Formato</div>
+                                            <div className="text-sm font-black text-white">WebM (VP9)</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-[9px] text-zinc-500 uppercase">Audio</div>
+                                            <div className="text-sm font-black text-white">128 kbps Opus</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Resolution Presets */}
                             <div>
-                                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Calidad Objetivo</label>
-                                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Resolución de Salida</label>
+                                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                                     {QUALITY_PRESETS.filter(p => p.id !== 'custom').map((q) => (
                                         <button
                                             key={q.id}
@@ -1950,10 +2022,22 @@ function StandardVideoConverter() {
                                                     : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/20'
                                             }`}
                                         >
-                                            <div className="text-[10px] font-black uppercase">{q.id.toUpperCase()}</div>
+                                            <div className="text-[10px] font-black uppercase">{q.id}</div>
                                             <div className="text-[8px] text-zinc-600">{q.width}×{q.height}</div>
+                                            <div className="text-[7px] text-zinc-700 mt-1">{q.size}</div>
                                         </button>
                                     ))}
+                                    <button
+                                        onClick={() => setQuality('custom')}
+                                        className={`p-3 rounded-xl border text-center transition-all ${
+                                            quality === 'custom'
+                                                ? 'bg-purple-500/10 border-purple-500/50 text-purple-400'
+                                                : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/20'
+                                        }`}
+                                    >
+                                        <div className="text-[10px] font-black uppercase">Custom</div>
+                                        <div className="text-[8px] text-zinc-600">Personalizado</div>
+                                    </button>
                                 </div>
                             </div>
 
@@ -1988,6 +2072,48 @@ function StandardVideoConverter() {
                                     </div>
                                 </div>
                             )}
+
+                            {/* Compression Level */}
+                            <div>
+                                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Nivel de Compresión</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {COMPRESSION_LEVELS.map((level) => (
+                                        <button
+                                            key={level.id}
+                                            onClick={() => setCompressionLevel(level.id)}
+                                            className={`p-4 rounded-xl border text-center transition-all ${
+                                                compressionLevel === level.id
+                                                    ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400'
+                                                    : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/20'
+                                            }`}
+                                        >
+                                            <div className="text-[11px] font-black uppercase">{level.name}</div>
+                                            <div className="text-[8px] text-zinc-600 mt-1">{level.desc}</div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Output Format */}
+                            <div>
+                                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Formato de Salida</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {OUTPUT_FORMATS.map((format) => (
+                                        <button
+                                            key={format.id}
+                                            onClick={() => setOutputFormat(format.id)}
+                                            className={`p-3 rounded-xl border text-center transition-all ${
+                                                outputFormat === format.id
+                                                    ? 'bg-purple-500/10 border-purple-500/50 text-purple-400'
+                                                    : 'bg-white/[0.02] border-white/5 text-zinc-400 hover:border-white/20'
+                                            }`}
+                                        >
+                                            <div className="text-[11px] font-black uppercase">{format.name}</div>
+                                            <div className="text-[8px] text-zinc-600">Codec: {format.codecs.toUpperCase()}</div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     )}
 
