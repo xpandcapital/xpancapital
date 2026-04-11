@@ -1975,47 +1975,57 @@ function StandardVideoConverter() {
                             {/* Output Preview */}
                             {videoInfo && (() => {
                                 const selectedPreset = QUALITY_PRESETS.find(q => q.id === quality);
-                                const wouldUpscale = selectedPreset && 
-                                    (videoInfo.width < selectedPreset.width || videoInfo.height < selectedPreset.height);
-                                const isAlreadySmaller = wouldUpscale && quality !== 'custom';
+                                const videoAspect = videoInfo.width / videoInfo.height;
+                                const isVertical = videoAspect < 1;
                                 
+                                // Calculate what the output resolution would actually be
                                 let outputW: number, outputH: number;
-                                const va = videoInfo.width / videoInfo.height;
                                 
                                 if (quality === 'custom') {
                                     outputW = Math.min(customWidth, videoInfo.width);
                                     outputH = Math.min(customHeight, videoInfo.height);
-                                } else if (isAlreadySmaller) {
-                                    outputW = videoInfo.width;
-                                    outputH = videoInfo.height;
-                                } else if (va > 1) {
-                                    outputW = Math.min(selectedPreset?.width || 1920, videoInfo.width);
-                                    outputH = Math.round(outputW / va);
                                 } else {
-                                    outputH = Math.min(selectedPreset?.height || 1080, videoInfo.height);
-                                    outputW = Math.round(outputH * va);
+                                    const maxWidth = selectedPreset?.width || 1920;
+                                    const maxHeight = selectedPreset?.height || 1080;
+                                    
+                                    if (isVertical) {
+                                        // Vertical video - limit by height
+                                        outputH = Math.min(maxHeight, videoInfo.height);
+                                        outputW = Math.round(outputH * videoAspect);
+                                    } else {
+                                        // Horizontal video - limit by width
+                                        outputW = Math.min(maxWidth, videoInfo.width);
+                                        outputH = Math.round(outputW / videoAspect);
+                                    }
                                 }
+                                
+                                // Check if video would actually be downscaled
+                                const wouldChange = outputW < videoInfo.width || outputH < videoInfo.height;
+                                const isAlreadySmaller = !wouldChange && quality !== 'custom';
                                 
                                 return (
                                     <div className={`p-4 rounded-xl border ${isAlreadySmaller 
                                         ? 'bg-amber-500/5 border-amber-500/20' 
                                         : 'bg-gradient-to-r from-emerald-500/5 to-cyan-500/5 border-emerald-500/20'}`}>
-                                        <div className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-3">
-                                            {isAlreadySmaller ? '⚠️ Sin Cambios' : 'Vista Previa de Salida'}
+                                        <div className="text-[9px] font-black uppercase tracking-widest mb-3">
+                                            {isAlreadySmaller ? (
+                                                <span className="text-amber-400">⚠️ Sin Cambios - Video ya es más pequeño</span>
+                                            ) : (
+                                                <span className="text-emerald-400">Vista Previa de Salida</span>
+                                            )}
                                         </div>
-                                        {isAlreadySmaller && (
-                                            <div className="text-xs text-amber-400 mb-3">
-                                                El video ya es más pequeño que {quality}. Se mantendrá resolución original.
-                                            </div>
-                                        )}
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                             <div>
                                                 <div className="text-[9px] text-zinc-500 uppercase">Original</div>
                                                 <div className="text-sm font-black text-white">{videoInfo.width}×{videoInfo.height}</div>
+                                                <div className="text-[8px] text-zinc-600">{isVertical ? 'Vertical' : 'Horizontal'}</div>
                                             </div>
                                             <div>
                                                 <div className="text-[9px] text-zinc-500 uppercase">Salida</div>
                                                 <div className="text-sm font-black text-emerald-400">{outputW}×{outputH}</div>
+                                                <div className="text-[8px] text-zinc-600">
+                                                    {wouldChange ? '↓ Reducido' : '= Sin cambios'}
+                                                </div>
                                             </div>
                                             <div>
                                                 <div className="text-[9px] text-zinc-500 uppercase">Formato</div>
