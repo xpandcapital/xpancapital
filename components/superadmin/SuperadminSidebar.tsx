@@ -9,7 +9,7 @@ import {
     Coins, ChevronLeft, Menu, X, GraduationCap, Award, Cloud,
     ShoppingCart, Boxes, CandlestickChart, Scale, BarChart3,
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
-    FileSignature, TrendingUp, Layout, Shield, Mail
+    FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LucideProps } from "lucide-react";
@@ -155,7 +155,14 @@ export function SuperadminSidebar() {
         {
             title: "Sistema",
             items: [
-                { icon: Users, label: "Personal", href: "/superadmin/usuarios" },
+                { 
+                    icon: Users, 
+                    label: "Personal", 
+                    subItems: [
+                        { icon: Users, label: "Equipo", href: "/superadmin/usuarios" },
+                        { icon: UserPlus, label: "Postulantes", href: "/superadmin/postulantes" },
+                    ]
+                },
                 { icon: Wrench, label: "Utilidades", href: "/superadmin/utilidades" },
                 { 
                     icon: Settings, 
