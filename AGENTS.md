@@ -1,241 +1,373 @@
+# 📋 BLIS Corp - Documentación de Desarrollo
+
+## 📁 Estructura del Proyecto
+
+```
+blis-corp/
+├── app/                      # Next.js App Router
+│   ├── (auth)/              # Rutas de autenticación
+│   ├── (public)/            # Páginas públicas (landing, formularios)
+│   ├── superadmin/          # Panel de administración
+│   │   ├── _types/          # Tipos compartidos por módulo
+│   │   ├── _hooks/          # Hooks personalizados por módulo
+│   │   └── _components/     # Componentes modulares por módulo
+│   └── api/                 # API Routes
+├── components/              # Componentes reutilizables
+├── context/                 # React Context providers
+├── docs/                    # Documentación técnica
+├── lib/                     # Utilidades y hooks globales
+├── public/                   # Archivos estáticos
+└── supabase/                # Migraciones y funciones de BD
+```
+
+## 🏗️ Arquitectura Modular
+
+### Principios de Refactorización
+
+El proyecto sigue una arquitectura modular para componentes grandes:
+
+```
+app/superadmin/[módulo]/
+├── page.tsx                 # Página principal (<400 líneas)
+├── _types/
+│   └── index.ts            # Tipos e interfaces
+├── _hooks/
+│   ├── index.ts            # Barrel export
+│   └── use[Módulo].ts      # Hooks de estado y lógica
+└── _components/
+    ├── index.ts            # Barrel export
+    ├── [Component]1.tsx    # Componentes UI (<300 líneas)
+    └── [Component]2.tsx
+```
+
+### Módulos Refactorizados
+
+| Módulo | Original | Estado | Archivos |
+|--------|----------|--------|----------|
+| productos | 2,777 lines | ✅ Completado | 33 archivos |
+| api-nube | 3,404 lines | ✅ Modular | 12 archivos |
+| cursos | 1,742 lines | ✅ Parcial | 6 archivos |
+| clientes | 1,601 lines | ✅ Parcial | 6 archivos |
+| proyectos | 1,243 lines | ✅ Parcial | 3 archivos |
+| certificados | 778 lines | ✅ Parcial | 3 archivos |
+| configuracion | 690 lines | ✅ Parcial | 4 archivos |
+| ajustes | 687 lines | ✅ Parcial | 2 archivos |
+
 ---
 
-## 📊 SISTEMA DE LEADS Y CAMPAÑAS
+## 🗄️ Base de Datos (Supabase)
 
-### Estructura de Base de Datos
+### Tablas Principales
 
 ```sql
--- Tabla asesores
-CREATE TABLE asesores (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  empresa_id UUID REFERENCES empresas(id),
-  nombre TEXT NOT NULL,
-  email TEXT,
-  telefono TEXT,
-  whatsapp TEXT,
-  foto_url TEXT,
-  activo BOOLEAN DEFAULT true,
-  creado_en TIMESTAMPTZ DEFAULT now(),
-  actualizado_en TIMESTAMPTZ DEFAULT now()
-);
+-- Empresas (Multi-tenant)
+empresas (id, nombre, slug, config, created_at)
 
--- Tabla campañas
-CREATE TABLE campanas (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  empresa_id UUID REFERENCES empresas(id),
-  asesor_id UUID REFERENCES asesores(id),
-  nombre TEXT NOT NULL,
-  descripcion TEXT,
-  estado TEXT DEFAULT 'activa',
-  notificar_email BOOLEAN DEFAULT true,
-  notificar_whatsapp BOOLEAN DEFAULT false,
-  emails_notificacion TEXT[],
-  whatsapp_notificacion TEXT[],
-  notion_database_id TEXT,
-  notion_sync BOOLEAN DEFAULT false,
-  creado_en TIMESTAMPTZ DEFAULT now()
-);
+-- Usuarios y Roles
+profiles (id, empresa_id, email, nombre, rol, blis_coins...)
+roles (id, nombre, permisos)
 
--- Tabla leads (actualizada)
-CREATE TABLE leads (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  empresa_id UUID REFERENCES empresas(id),
-  campana_id UUID REFERENCES campanas(id),
-  asesor_id UUID REFERENCES asesores(id),
-  template_id UUID REFERENCES templates(id),
-  nombre TEXT NOT NULL,
-  email TEXT,
-  telefono TEXT,
-  whatsapp TEXT,
-  datos JSONB DEFAULT '{}',
-  ciudad TEXT,
-  presupuesto TEXT,
-  interes TEXT,
-  mensaje TEXT,
-  estado TEXT DEFAULT 'nuevo',
-  etiquetas TEXT[],
-  notas TEXT,
-  origen TEXT,
-  utm_source TEXT,
-  utm_medium TEXT,
-  utm_campaign TEXT,
-  creado_en TIMESTAMPTZ DEFAULT now()
-);
+-- Productos y Catálogo
+productos (id, empresa_id, nombre, precio, stock...)
+categorias (id, empresa_id, nombre...)
 
--- Tabla integraciones
-CREATE TABLE integraciones (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  empresa_id UUID REFERENCES empresas(id),
-  tipo TEXT CHECK (tipo IN ('whatsapp', 'email', 'notion', 'zapier', 'webhook')),
-  nombre TEXT NOT NULL,
-  config JSONB DEFAULT '{}',
-  activa BOOLEAN DEFAULT true
-);
+-- Plantillas y Landing Pages
+templates (id, empresa_id, nombre, secciones, config...)
+landings (id, empresa_id, template_id, slug...)
+
+-- Leads y Campañas
+campanas (id, empresa_id, asesor_id, nombre...)
+asesores (id, empresa_id, nombre, email...)
+leads (id, empresa_id, campana_id, asesor_id, datos...)
 ```
 
-### Configuración de Formularios
+### Migraciones Recientes
 
-```typescript
-// En template.secciones.captureHero.form
-interface FormConfig {
-  title: string;
-  subtitle: string;
-  submitText: string;
-  privacyText: string;
-  
-  // Destino del lead
-  campana_id?: string;          // ID de campaña
-  asesor_id?: string;            // ID de asesor asignado
-  redirectUrl?: string;         // URL después del envío
-  successTitle?: string;         // Título de éxito
-  successMessage?: string;       // Mensaje de éxito
-  
-  // Campos dinámicos
-  fields: FormField[];
-}
+- `022_templates_section_order.sql` - Orden y visibilidad de secciones
+- `029_leads_campanas.sql` - Sistema de leads y campañas
+- `030_api_keys.sql` - Almacenamiento de claves API
 
-interface FormField {
-  name: string;                  // nombre del campo
-  type: 'text' | 'email' | 'tel' | 'select' | 'textarea' | 'checkbox' | 'radio';
-  label: string;                 // etiqueta visible
-  placeholder?: string;
-  required?: boolean;
-  options?: string[];            // para select/radio/checkbox
-  validation?: {
-    min?: number;
-    max?: number;
-    pattern?: string;           // regex para validación
-    message?: string;           // mensaje de error
-  };
-}
+---
 
-// Ejemplo de configuración
-const formConfig: FormConfig = {
-  title: "Regístrate Ahora",
-  subtitle: "Completa el formulario",
-  submitText: "Quiero Participar",
-  campana_id: "uuid-campana",
-  asesor_id: "uuid-asesor",
-  redirectUrl: "/gracias",
-  fields: [
-    {
-      name: "nombre",
-      type: "text",
-      label: "Nombre Completo",
-      placeholder: "Tu nombre",
-      required: true
-    },
-    {
-      name: "email",
-      type: "email",
-      label: "Email",
-      placeholder: "tu@email.com",
-      required: true
-    },
-    {
-      name: "telefono",
-      type: "tel",
-      label: "WhatsApp",
-      placeholder: "+51 999 999 999",
-      required: true
-    },
-    {
-      name: "presupuesto",
-      type: "select",
-      label: "Presupuesto",
-      options: ["Hasta $10,000", "$10,000 - $25,000", "$25,000 - $50,000", "Más de $50,000"],
-      required: false
-    }
-  ]
-};
-```
+## 🔌 APIs y Endpoints
 
-### Flujo de Captura de Leads
+### Sistema de Leads
 
 ```
-1. Usuario llena formulario en /formulario/[slug]
-   ↓
-2. CaptureForm valida campos
-   ↓
-3. POST /api/leads con datos + campana_id + asesor_id
-   ↓
-4. Supabase guarda en tabla leads
-   ↓
-5. Trigger notifica_nuevo_lead()
-   ↓
-6. Notificaciones:
-   - Email a emails_notificacion[]
-   - WhatsApp a whatsapp_notificacion[]
-   - Notion (si notion_sync = true)
-   → Lead redirigido a redirectUrl
+POST /api/leads          # Crear lead desde formulario
+GET  /api/leads          # Listar leads (admin)
+PUT  /api/leads          # Actualizar estado/asignación
+
+POST /api/campanas       # Crear campaña
+GET  /api/campanas       # Listar campañas
+PUT  /api/campanas       # Actualizar campaña
+
+POST /api/asesores       # Crear asesor
+GET  /api/asesores       # Listar asesores
 ```
 
-### API Endpoints
+### Templates y Landing
 
-```typescript
-// GET /api/campanas - Listar campañas
-// POST /api/campanas - Crear campaña
-// PUT /api/campanas - Actualizar campaña
-// DELETE /api/campanas?id= - Eliminar campaña
+```
+GET  /api/templates           # Listar templates
+POST /api/templates           # Crear template
+GET  /api/templates/[id]      # Obtener template
+PUT  /api/templates/[id]      # Actualizar template
 
-// GET /api/asesores - Listar asesores
-// POST /api/asesores - Crear asesor
-// PUT /api/asesores - Actualizar asesor
-// DELETE /api/asesores?id= - Eliminar asesor
-
-// POST /api/leads - Crear lead (desde formulario)
-// GET /api/leads - Listar leads (con filtros)
-// PUT /api/leads - Actualizar lead (cambiar estado, asignar asesor)
+GET  /api/templates/landing   # CMS landing page
 ```
 
-### Hooks
+### Administración
 
-```typescript
-// lib/hooks/useCampanas.ts
-const { campanas, loading, create, update, delete } = useCampanas();
-
-// lib/hooks/useAsesores.ts
-const { asesores, loading, create, update, delete } = useAsesores();
+```
+GET  /api/admin/clientes      # Listar clientes
+PUT  /api/admin/clientes      # Actualizar cliente
+GET  /api/admin/cursos        # Listar cursos
+POST /api/admin/cursos        # Crear curso
+GET  /api/admin/proyectos     # Listar proyectos
 ```
 
 ---
 
-## 🔄 CAMBIOS RECIENTES
+## 🎨 Sistema de Leads y Campañas
 
-### 2026-03-30: Sistema de Leads y Branding
+### Estructura
 
-**Nuevas tablas:**
-- `asesores` - Gestión de asesores/vendedores
-- `campanas` - Campañas de marketing
-- `leads` - Leads con campos extendidos (campana_id, asesor_id, datos JSONB)
-- `integraciones` - Configuración de integraciones
+```typescript
+interface Campana {
+  id: string
+  empresa_id: string
+  asesor_id?: string
+  nombre: string
+  descripcion?: string
+  estado: 'activa' | 'pausada' | 'completada'
+  notificar_email: boolean
+  notificar_whatsapp: boolean
+  emails_notificacion: string[]
+  whatsapp_notificacion: string[]
+}
 
-**Nuevos archivos:**
-- `app/api/campanas/route.ts` - API de campañas
-- `app/api/asesores/route.ts` - API de asesores
-- `lib/hooks/useCampanas.ts` - Hook de campañas y asesores
-- `components/sections/CustomHeader.tsx` - Header personalizable
-- `components/sections/CustomFooter.tsx` - Footer personalizable
-- `supabase/migrations/029_leads_campanas.sql` - Migración de BD
+interface Lead {
+  id: string
+  empresa_id: string
+  campana_id?: string
+  asesor_id?: string
+  nombre: string
+  email?: string
+  telefono?: string
+  datos: Record<string, any>
+  estado: 'nuevo' | 'contactado' | 'calificado' | 'convertido'
+}
+```
 
-**Archivos modificados:**
-- `app/api/leads/route.ts` - Extendido con campos de campaña/asesor
-- `lib/hooks/useTemplate.ts` - Agregado getConfig() para branding
-- `lib/hooks/useTemplates.ts` - Agregado campo config a interfaz
-- `app/superadmin/templates/[id]/page.tsx` - Panel de configuración y branding
-- `app/gracias/page.tsx` - Aplica configuración de branding
-- `app/embudo/[slug]/page.tsx` - Aplica configuración de branding
-- `app/formulario/[slug]/page.tsx` - Aplica configuración de branding
-- `AGENTS.md` - Documentación actualizada
+### Flujo
 
-**Funcionalidad Pendiente:**
-- [ ] Editor de formulario dinámico en template editor
-- [ ] Dashboard de leads en superadmin
-- [ ] Integración real con WhatsApp (Twilio)
-- [ ] Integración real con Email (Resend/SendGrid)
-- [ ] Integración real con Notion
-- [ ] Selector de país para teléfono con iconos de bandera
+```
+Usuario → Formulario → POST /api/leads → Supabase
+    ↓
+Trigger notifica_nuevo_lead()
+    ↓
+Notificaciones: Email, WhatsApp, Notion
+    ↓
+Lead redirigido a página de gracias
+```
 
 ---
 
-*Documento v1.2 - BLIS Corp Development Team*
+## 🔧 Hooks Personalizados
+
+### Hooks Globales (`lib/hooks/`)
+
+```typescript
+// Gestión de templates
+useLandingTemplate() → { template, loading, updateSection }
+useTemplates() → { templates, create, update, delete }
+
+// Gestión de empresas
+useEmpresa() → { empresa, update, config }
+
+// Autenticación
+useAuth() → { user, session, signIn, signOut }
+```
+
+### Hooks por Módulo
+
+```typescript
+// Productos
+useProducts() → { products, loading, create, update, delete }
+useProductFilters() → { filters, setFilter, filteredProducts }
+
+// Clientes
+useClients() → { clients, loading, update, delete }
+
+// Proyectos
+useProjects() → { projects, loading, save, delete }
+useNotionSync() → { syncWithNotion, syncing }
+
+// Cursos
+useCourseManagement() → { courses, create, update, delete }
+
+// Certificados
+useTemplates() → { templates, loading, save, delete }
+useCanvasEditor() → { selectedId, moveElement, scaleElement }
+```
+
+---
+
+## 📦 Componentes Principales
+
+### Editor de Plantillas (`components/editor/`)
+
+- `ImageUpload.tsx` - Subida de imágenes con drag & drop
+- `MapPointEditor.tsx` - Editor visual de puntos en mapa
+- `ColorPicker.tsx` - Selector de colores con hex input
+
+### Secciones de Landing (`components/sections/`)
+
+- `Hero.tsx` - Sección de portada
+- `About.tsx` - Sección "Nosotros"
+- `Process.tsx` - Proceso de trabajo
+- `Projects.tsx` - Proyectos destacados
+- `Testimonials.tsx` - Testimonios
+- `CustomHeader.tsx` - Header personalizable
+- `CustomFooter.tsx` - Footer personalizable
+
+### Administración (`app/superadmin/`)
+
+- `productos/` - Gestión de productos
+- `clientes/` - Gestión de clientes
+- `cursos/` - Gestión de cursos
+- `proyectos/` - Gestión de proyectos
+- `certificados/` - Editor de certificados
+- `api-nube/` - Configuración de APIs
+
+---
+
+## 🚀 Comandos
+
+```bash
+# Desarrollo
+npm run dev              # Servidor de desarrollo
+npm run build            # Build de producción
+npm run lint             # Linting
+npm run typecheck        # Verificación de tipos
+
+# Supabase
+npx supabase start       # Iniciar instancia local
+npx supabase db push     # Aplicar migraciones
+npx supabase db reset    # Resetear base de datos
+
+# Seeds
+npx tsx scripts/seed-default-template.ts
+```
+
+---
+
+## 🔐 Autenticación y Permisos
+
+### Roles
+
+- `superadmin` - Acceso completo a todas las empresas
+- `admin` - Acceso completo a su empresa
+- `editor` - Puede editar contenido pero no configuración
+- `viewer` - Solo lectura
+
+### Middleware
+
+```typescript
+// middleware.ts
+export function middleware(request: NextRequest) {
+  // Verificar sesión
+  // Verificar permisos por rol
+  // Redirigir si no autorizado
+}
+```
+
+---
+
+## 📱 Responsive Design
+
+- Mobile-first approach
+- Tailwind CSS para estilos
+- Breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
+
+---
+
+## 🌐 Despliegue
+
+### Variables de Entorno
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_KEY=
+```
+
+### Plataformas Soportadas
+
+- Vercel (recomendado)
+- Netlify
+- Docker
+
+---
+
+## 📝 Convenciones de Código
+
+### Naming
+
+- **Componentes**: PascalCase (`ProductCard.tsx`)
+- **Hooks**: camelCase con prefijo `use` (`useProducts.ts`)
+- **Tipos**: PascalCase (`Product`, `Client`)
+- **Archivos**: camelCase para módulos, PascalCase para componentes
+
+### Estructura de Componentes
+
+```typescript
+// Imports agrupados
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Icon } from 'lucide-react'
+
+// Types
+interface Props {
+  title: string
+  children: React.ReactNode
+}
+
+// Componente
+export function Component({ title, children }: Props) {
+  // Hooks
+  const [state, setState] = useState()
+  
+  // Handlers
+  const handleClick = () => {}
+  
+  // Render
+  return (
+    <div>
+      {/* JSX */}
+    </div>
+  )
+}
+```
+
+---
+
+## 🔄 Changelog
+
+### 2026-04-08: Refactorización Modular
+
+- ✅ Refactorización de 8 módulos principales
+- ✅ Creación de ~69 archivos modulares
+- ✅ Extracción de tipos, hooks y componentes
+- ✅ Sin errores de TypeScript
+
+### 2026-03-30: Sistema de Leads
+
+- ✅ Tablas `campanas`, `asesores`, `leads`, `integraciones`
+- ✅ APIs de campañas y asesores
+- ✅ Hooks useCampanas y useAsesores
+
+---
+
+*Documento v2.0 - BLIS Corp Development Team*

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { createNotionPage } from '@/lib/integrations/notion'
+import { logger } from '@/lib/utils/logger'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -16,7 +17,7 @@ async function sendNotifications(
   campana: Record<string, unknown> | null,
   asesor: Record<string, unknown> | null
 ) {
-  console.log('[NOTIFICATION] Nuevo lead:', {
+  logger.debug('[NOTIFICATION] Nuevo lead:', {
     lead: lead.nombre,
     email: lead.email,
     campana: campana?.nombre || 'Sin campaña',
@@ -28,7 +29,7 @@ async function sendNotifications(
     // Notificar por email
     if (campana.notificar_email && Array.isArray(campana.emails_notificacion)) {
       for (const email of campana.emails_notificacion as string[]) {
-        console.log(`[EMAIL] Enviando a ${email}: Nuevo lead - ${lead.nombre}`)
+        logger.debug(`[EMAIL] Enviando a ${email}: Nuevo lead - ${lead.nombre}`)
         // TODO: Implementar envío real con Resend/SendGrid
       }
     }
@@ -36,7 +37,7 @@ async function sendNotifications(
     // Notificar por WhatsApp
     if (campana.notificar_whatsapp && Array.isArray(campana.whatsapp_notificacion)) {
       for (const phone of campana.whatsapp_notificacion as string[]) {
-        console.log(`[WHATSAPP] Enviando a ${phone}: Nuevo lead - ${lead.nombre}`)
+        logger.debug(`[WHATSAPP] Enviando a ${phone}: Nuevo lead - ${lead.nombre}`)
         // TODO: Implementar envío real con Twilio/WhatsApp API
       }
     }
@@ -76,15 +77,15 @@ async function sendNotifications(
           )
           
           if (result.success) {
-            console.log(`[NOTION] Lead sincronizado: ${result.pageId}`)
+            logger.debug(`[NOTION] Lead sincronizado: ${result.pageId}`)
           } else {
-            console.error(`[NOTION] Error: ${result.error}`)
+            logger.error(`[NOTION] Error: ${result.error}`)
           }
         } else {
-          console.warn('[NOTION] No hay API key configurada')
+          logger.warn('[NOTION] No hay API key configurada')
         }
       } catch (error) {
-        console.error('[NOTION] Error al sincronizar:', error)
+        logger.error('[NOTION] Error al sincronizar:', error)
       }
     }
   }
@@ -92,10 +93,10 @@ async function sendNotifications(
   // Si hay asesor asignado
   if (asesor) {
     if (asesor.whatsapp) {
-      console.log(`[WHATSAPP] Notificando asesor ${asesor.nombre}: ${asesor.whatsapp}`)
+      logger.debug(`[WHATSAPP] Notificando asesor ${asesor.nombre}: ${asesor.whatsapp}`)
     }
     if (asesor.email) {
-      console.log(`[EMAIL] Notificando asesor ${asesor.nombre}: ${asesor.email}`)
+      logger.debug(`[EMAIL] Notificando asesor ${asesor.nombre}: ${asesor.email}`)
     }
   }
 }

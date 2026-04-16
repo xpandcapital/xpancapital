@@ -7,6 +7,8 @@
  * - "Reserva $500 + Inicial 20% + 24 cuotas"
  */
 
+import { logger } from './utils/logger';
+
 // Verificar si un número parece ser un año (2020-2030)
 function isYear(n: number): boolean {
   return n >= 2020 && n <= 2030;
@@ -49,7 +51,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
   cuotas: { cantidad: number; monto: number | null; fecha_inicio: string | null };
   textoOriginal: string;
 } {
-  console.log('[parseFormaDePago] Input:', texto);
+  logger.debug('[parseFormaDePago] Input:', texto);
   
   if (!texto) {
     return { iniciales: [], cuotas: { cantidad: 24, monto: null, fecha_inicio: null }, textoOriginal: '' };
@@ -71,7 +73,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
     const monto = parseMonto(cuotasMensualesMatch[1]);
     if (monto && monto > 50 && !isYear(Math.floor(monto))) {
       cuotasMonto = monto;
-      console.log('[parseFormaDePago] Cuota mensual detectada:', monto);
+      logger.debug('[parseFormaDePago] Cuota mensual detectada:', monto);
     }
   }
 
@@ -83,7 +85,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
     const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     const mesNum = meses.indexOf(mesNombre.toLowerCase()) + 1;
     cuotasFechaInicio = `${año}-${mesNum.toString().padStart(2, '0')}`;
-    console.log('[parseFormaDePago] Fecha inicio cuotas:', cuotasFechaInicio);
+    logger.debug('[parseFormaDePago] Fecha inicio cuotas:', cuotasFechaInicio);
   }
 
   // Detectar número de cuotas: "24 cuotas", "48 meses", etc.
@@ -93,14 +95,14 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
     const num = parseInt(cuotasMatch[1], 10);
     if (num > 0 && num < 100 && !isYear(num)) {
       cuotasCantidad = num;
-      console.log('[parseFormaDePago] Cantidad cuotas:', cuotasCantidad);
+      logger.debug('[parseFormaDePago] Cantidad cuotas:', cuotasCantidad);
     }
   }
 
   // ── EXTRAER INICIALES ──────────────────────────────────────────────────────────
   // Dividir por líneas nuevas o comas - procesar en orden
   const lineas = texto.split(/\r?\n|,/);
-  console.log('[parseFormaDePago] Líneas encontradas:', lineas.length);
+  logger.debug('[parseFormaDePago] Líneas encontradas:', lineas.length);
 
   // Primero, identificar líneas que contienen montos con $
   // Cualquier monto con $ que NO esté en una línea de cuotas es un inicial
@@ -109,11 +111,11 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
     const lineaLower = lineaTrim.toLowerCase();
     
     if (!lineaTrim) return;
-    console.log(`[parseFormaDePago] Procesando línea ${idx}: "${lineaTrim}"`);
+    logger.debug(`[parseFormaDePago] Procesando línea ${idx}: "${lineaTrim}"`);
     
     // Si la línea menciona "cuota" o "mensual", es cuota - NO es inicial
     if (lineaLower.includes('cuota') || lineaLower.includes('mensual')) {
-      console.log('[parseFormaDePago]   -> Saltando (es cuota)');
+      logger.debug('[parseFormaDePago]   -> Saltando (es cuota)');
       return;
     }
 
@@ -127,7 +129,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
       const mes = montoConFecha[3].toLowerCase();
       const año = montoConFecha[4] || new Date().getFullYear().toString();
       
-      console.log(`[parseFormaDePago]   -> Patrón monto+fecha: monto=${monto}, dia=${dia}, mes=${mes}, año=${año}`);
+      logger.debug(`[parseFormaDePago]   -> Patrón monto+fecha: monto=${monto}, dia=${dia}, mes=${mes}, año=${año}`);
       
       if (monto && !isNaN(monto) && !isYear(Math.floor(monto))) {
         const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -144,7 +146,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
           monto: monto,
           fecha: fecha
         });
-        console.log(`[parseFormaDePago]   -> Agregado ${descripcion}: ${monto} en ${fecha}`);
+        logger.debug(`[parseFormaDePago]   -> Agregado ${descripcion}: ${monto} en ${fecha}`);
         return;
       }
     }
@@ -158,7 +160,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
       const mes = montoConFecha2[3].toLowerCase();
       const año = montoConFecha2[4] || new Date().getFullYear().toString();
       
-      console.log(`[parseFormaDePago]   -> Patrón monto+fecha (v2): monto=${monto}, dia=${dia}, mes=${mes}, año=${año}`);
+      logger.debug(`[parseFormaDePago]   -> Patrón monto+fecha (v2): monto=${monto}, dia=${dia}, mes=${mes}, año=${año}`);
       
       if (monto && !isNaN(monto) && !isYear(Math.floor(monto))) {
         const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -173,7 +175,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
           monto: monto,
           fecha: fecha
         });
-        console.log(`[parseFormaDePago]   -> Agregado ${descripcion}: ${monto} en ${fecha}`);
+        logger.debug(`[parseFormaDePago]   -> Agregado ${descripcion}: ${monto} en ${fecha}`);
         return;
       }
     }
@@ -183,7 +185,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
     const montoSimple = lineaTrim.match(/\$\s*([\d.,]+)(?:\s*(?:usd|dólares?))?/i);
     if (montoSimple) {
       const monto = parseMonto(montoSimple[1]);
-      console.log(`[parseFormaDePago]   -> Patrón simple $: monto=${monto}`);
+      logger.debug(`[parseFormaDePago]   -> Patrón simple $: monto=${monto}`);
       
       // Cualquier monto con $ es potencialmente un inicial, excepto si es año
       if (monto && !isNaN(monto) && !isYear(Math.floor(monto))) {
@@ -195,7 +197,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
           monto: monto,
           fecha: null
         });
-        console.log(`[parseFormaDePago]   -> Agregado ${descripcion} sin fecha: ${monto}`);
+        logger.debug(`[parseFormaDePago]   -> Agregado ${descripcion} sin fecha: ${monto}`);
         return;
       }
     }
@@ -215,7 +217,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
             monto: monto,
             fecha: null
           });
-          console.log(`[parseFormaDePago] -> Agregado por keyword "${kw}": ${monto}`);
+          logger.debug(`[parseFormaDePago] -> Agregado por keyword "${kw}": ${monto}`);
         }
       }
     });
@@ -231,7 +233,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
         monto: (precioTotal * porcentaje) / 100,
         fecha: null
       });
-      console.log(`[parseFormaDePago] -> Agregado por porcentaje: ${porcentaje}% = ${(precioTotal * porcentaje) / 100}`);
+      logger.debug(`[parseFormaDePago] -> Agregado por porcentaje: ${porcentaje}% = ${(precioTotal * porcentaje) / 100}`);
     }
   }
 
@@ -250,7 +252,7 @@ export function parseFormaDePago(texto: string, precioTotal?: number): {
     textoOriginal
   };
   
-  console.log('[parseFormaDePago] Resultado:', JSON.stringify(resultado, null, 2));
+  logger.debug('[parseFormaDePago] Resultado:', JSON.stringify(resultado, null, 2));
   return resultado;
 }
 

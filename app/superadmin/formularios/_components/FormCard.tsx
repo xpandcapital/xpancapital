@@ -1,13 +1,14 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Eye, Pencil, Users, MousePointerClick, TrendingUp } from 'lucide-react'
+import { Eye, Pencil, Users, MousePointerClick, TrendingUp, Trash2 } from 'lucide-react'
 import type { Formulario } from '../_types'
 
 interface FormCardProps {
   form: Formulario
   onEdit: (form: Formulario) => void
   onPublic: (form: Formulario) => void
+  onDelete?: (form: Formulario) => void
 }
 
 const statusConfig = {
@@ -16,7 +17,7 @@ const statusConfig = {
   pausado: { label: 'Pausado', dot: 'bg-red-500', bg: 'bg-red-500/10', text: 'text-red-400' },
 } as const
 
-export function FormCard({ form, onEdit, onPublic }: FormCardProps) {
+export function FormCard({ form, onEdit, onPublic, onDelete }: FormCardProps) {
   const status = statusConfig[form.estado]
   const conversion = form.vistas > 0 ? ((form.respuestas / form.vistas) * 100).toFixed(1) : '0.0'
 
@@ -76,6 +77,15 @@ export function FormCard({ form, onEdit, onPublic }: FormCardProps) {
           <Eye className="w-3.5 h-3.5" />
           Ver Público
         </button>
+        {onDelete && (
+          <button
+            onClick={() => onDelete(form)}
+            className="flex items-center justify-center bg-white/5 hover:bg-blis-red/10 border border-white/10 text-white/20 hover:text-blis-red text-[11px] font-bold py-2 px-3 rounded-xl transition-all"
+            title="Eliminar"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
     </motion.div>
   )

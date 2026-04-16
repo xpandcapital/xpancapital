@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCachedSupabaseStorage } from '@/lib/cachedSupabaseStorage';
 import { Loader2 } from 'lucide-react';
+import logger from '@/lib/utils/logger';
 
 export default function GestionDeLotesWrapper({ children }: { children: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
@@ -11,13 +12,13 @@ export default function GestionDeLotesWrapper({ children }: { children: React.Re
   useEffect(() => {
     const init = async () => {
       try {
-        console.log('[Wrapper] Initializing Supabase storage...');
+        logger.debug('[Wrapper] Initializing Supabase storage...');
         const storage = getCachedSupabaseStorage();
         await storage.ensureInitialized();
-        console.log('[Wrapper] Supabase storage ready');
+        logger.debug('[Wrapper] Supabase storage ready');
         setIsReady(true);
       } catch (e) {
-        console.error('[Wrapper] Failed to initialize:', e);
+        logger.error('[Wrapper] Failed to initialize:', e);
         setError(e instanceof Error ? e.message : 'Error initializing');
         setIsReady(true); // Show the app anyway with fallback
       }

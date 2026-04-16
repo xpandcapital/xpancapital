@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { Plus, Search, Edit2, Trash2, Image as ImageIcon, ChevronDown, ChevronUp, DollarSign, LayoutGrid, Globe, MapPin, Upload, UsersRound, FolderOpen, RefreshCw, ExternalLink, Table2, Save, X, Link2, Loader2, Download, List, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import logger from '@/lib/utils/logger';
 
 export type ProjectLot = {
   id: string;
@@ -249,7 +250,7 @@ const [aiParseResult, setAiParseResult] = useState<any>(null);
       setProjects(projectsWithLots);
       setError(null);
     } catch (err) {
-      console.error('[Proyectos] Error loading projects:', err);
+      logger.error('[Proyectos] Error loading projects:', err);
       setError(err instanceof Error ? err.message : 'Error loading projects');
     } finally {
       setIsLoading(false);
@@ -496,15 +497,15 @@ const handleAIParse = async () => {
     }
   }
   
-  if (!geminiKey || geminiKey.trim() === '') {
-    setAiParseResult({ 
-      success: false, 
-      error: 'No tienes configurada una API Key de Gemini. Ve a Configuración → API Keys → Gemini, ingresa tu key y guarda.' 
-    });
-    return;
-  }
-  
-  console.log('[AI Parse] Usando API key:', geminiKey.substring(0, 15) + '...');
+if (!geminiKey || geminiKey.trim() === '') {
+     setAiParseResult({ 
+       success: false, 
+       error: 'No tienes configurada una API Key de Gemini. Ve a Configuración → API Keys → Gemini, ingresa tu key y guarda.' 
+     });
+     return;
+   }
+   
+   logger.debug('[AI Parse] Usando API key:', geminiKey.substring(0, 15) + '...');
   
   setAiParsing(true);
   setAiParseResult(null);
@@ -517,18 +518,18 @@ const handleAIParse = async () => {
         project_id: notionModal.id,
         gemini_api_key: geminiKey
       }),
-    });
-    
-    const data = await res.json();
-    console.log('[AI Parse] Respuesta:', data);
-    setAiParseResult(data);
+});
+     
+     const data = await res.json();
+     logger.debug('[AI Parse] Respuesta:', data);
+     setAiParseResult(data);
     
     // Si fue exitoso, recargar los proyectos para ver los cambios
     if (data.success) {
       loadProjects();
     }
   } catch (err: any) {
-    console.error('[AI Parse] Error:', err);
+    logger.error('[AI Parse] Error:', err);
     setAiParseResult({ success: false, error: err.message });
   }
   

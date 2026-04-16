@@ -7,10 +7,12 @@ import { motion } from 'framer-motion'
 import { useCalendars } from './_hooks/useCalendars'
 import { defaultCalendar, type Calendario } from './_types'
 import { CalendarCard, CalendarTypeModal } from './_components'
+import { useToast } from '@/components/ui/Toast'
 
 export default function CalendariosPage() {
   const router = useRouter()
-  const { calendars, loading, error, create } = useCalendars()
+  const { calendars, loading, error, create, remove } = useCalendars()
+  const { showToast } = useToast()
   const [showTypeModal, setShowTypeModal] = useState(false)
   const [creating, setCreating] = useState(false)
 
@@ -26,10 +28,11 @@ export default function CalendariosPage() {
       }
       const result = await create(newCalendar)
       if (result.success && result.data) {
+        showToast('Calendario creado', 'success')
         router.push(`/superadmin/calendarios/${result.data.id}`)
       }
     } catch (err) {
-      console.error('[Calendarios] Error creating:', err)
+      showToast('Error al crear calendario', 'error')
     } finally {
       setCreating(false)
     }
@@ -40,7 +43,18 @@ export default function CalendariosPage() {
   }
 
   const handlePublic = (calendar: Calendario) => {
-    window.open(`/cal/${calendar.slug}`, '_blank')
+    window.open(`/calendario/${calendar.slug}`, '_blank')
+  }
+
+  const handleDelete = async (calendar: Calendario) => {
+    if (confirm(`¿Eliminar "${calendar.nombre}"?`)) {
+      const result = await remove(calendar.id)
+      if (result.success) {
+        showToast('Calendario eliminado', 'success')
+      } else {
+        showToast('Error al eliminar', 'error')
+      }
+    }
   }
 
   if (loading) {
@@ -70,11 +84,7 @@ export default function CalendariosPage() {
               disabled={creating}
               className="px-6 py-3 bg-blis-red rounded-2xl text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center gap-2.5 shadow-lg shadow-blis-red/20 disabled:opacity-50"
             >
-              {creating ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Plus className="w-4 h-4" />
-              )}
+              {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
               <span className="text-[10px] uppercase tracking-[0.2em] font-bold">
                 {creating ? 'Creando...' : 'Nuevo Calendario'}
               </span>
@@ -100,6 +110,7 @@ export default function CalendariosPage() {
                   calendar={calendar}
                   onEdit={handleEdit}
                   onPublic={handlePublic}
+                  onDelete={handleDelete}
                 />
               </motion.div>
             ))}

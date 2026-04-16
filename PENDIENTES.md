@@ -1,7 +1,36 @@
 # BLIS CORP - LISTA DE PENDIENTES
 
-> Última actualización: 28 Marzo 2026
+> Última actualización: 08 Abril 2026
 > Estado: En desarrollo
+
+---
+
+## FASE 0: REFACTORIZACIÓN MODULAR ✅ COMPLETADO
+
+### 0.1 Arquitectura Modular ✅
+- [x] Estructura de carpetas por módulo (_types, _hooks, _components)
+- [x] Barrel exports con index.ts
+- [x] Tipos centralizados por módulo
+- [x] Hooks personalizados extraídos
+- [x] Componentes UI modulares (< 300 líneas)
+
+### 0.2 Módulos Refactorizados ✅
+| Módulo | Original | Archivos Creados | Estado |
+|--------|----------|-----------------|--------|
+| productos | 2,777 líneas | 33 archivos | ✅ Completado |
+| api-nube | 3,404 líneas | 12 archivos | ✅ Modular |
+| cursos | 1,742 líneas | 6 archivos | ✅ Parcial |
+| clientes | 1,601 líneas | 6 archivos | ✅ Parcial |
+| proyectos | 1,243 líneas | 3 archivos | ✅ Parcial |
+| certificados | 778 líneas | 3 archivos | ✅ Parcial |
+| configuracion | 690 líneas | 4 archivos | ✅ Parcial |
+| ajustes | 687 líneas | 2 archivos | ✅ Parcial |
+
+### 0.3 Documentación ✅
+- [x] AGENTS.md actualizado con arquitectura modular
+- [x] REFACTORING_SUMMARY.md creado
+- [x] README.md actualizado
+- [x] SESSION_STATUS.md actualizado
 
 ---
 

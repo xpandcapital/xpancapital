@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/lib/utils/logger';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,7 +15,7 @@ async function getApiKeys() {
     .select('key_name, key_value');
 
   if (error) {
-    console.error('Error fetching API keys:', error);
+    logger.error('Error fetching API keys:', error);
   }
 
   const apiKeys: Record<string, string> = {};
@@ -22,7 +23,7 @@ async function getApiKeys() {
     apiKeys[k.key_name] = k.key_value || '';
   });
 
-  console.log('API Keys loaded:', {
+  logger.debug('API Keys loaded:', {
     unsplash: !!apiKeys.unsplash_access_key || !!apiKeys.unsplash_api_key,
     pexels: !!apiKeys.pexels_api_key,
     pixabay: !!apiKeys.pixabay_api_key,
@@ -74,7 +75,7 @@ async function searchUnsplash(query: string, apiKey: string, page: number = 1) {
       author: item.user?.name
     })) || [];
   } catch (error) {
-    console.error('Unsplash error:', error);
+    logger.error('Unsplash error:', error);
     return [];
   }
 }
@@ -103,7 +104,7 @@ async function searchPexels(query: string, apiKey: string, page: number = 1) {
       author: item.photographer
     })) || [];
   } catch (error) {
-    console.error('Pexels error:', error);
+    logger.error('Pexels error:', error);
     return [];
   }
 }
@@ -131,7 +132,7 @@ async function searchPixabay(query: string, apiKey: string, page: number = 1) {
       author: item.user
     })) || [];
   } catch (error) {
-    console.error('Pixabay error:', error);
+    logger.error('Pixabay error:', error);
     return [];
   }
 }
@@ -140,11 +141,11 @@ async function searchPixabay(query: string, apiKey: string, page: number = 1) {
 async function searchFreepik(query: string, apiKey: string, page: number = 1) {
   try {
     if (!apiKey) {
-      console.log('Freepik: No API key');
+      logger.debug('Freepik: No API key');
       return [];
     }
     
-    console.log('Freepik: Searching...', query);
+    logger.debug('Freepik: Searching...', query);
     
     const response = await fetch(
       `https://api.freepik.com/v1/resources?term=${encodeURIComponent(query)}&page=${page}&limit=20&filters[content_type][photo]=1`,
@@ -156,16 +157,16 @@ async function searchFreepik(query: string, apiKey: string, page: number = 1) {
       }
     );
 
-    console.log('Freepik status:', response.status);
+    logger.debug('Freepik status:', response.status);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.log('Freepik error:', response.status, errorText);
+      logger.error('Freepik error:', response.status, errorText);
       return [];
     }
 
     const data = await response.json();
-    console.log('Freepik results:', data.data?.length || 0);
+    logger.debug('Freepik results:', data.data?.length || 0);
     
     const items = data.data || [];
     
@@ -186,7 +187,7 @@ async function searchFreepik(query: string, apiKey: string, page: number = 1) {
       };
     });
   } catch (error) {
-    console.error('Freepik error:', error);
+    logger.error('Freepik error:', error);
     return [];
   }
 }
@@ -195,11 +196,11 @@ async function searchFreepik(query: string, apiKey: string, page: number = 1) {
 async function searchEnvato(query: string, token: string, page: number = 1) {
   try {
     if (!token) {
-      console.log('Envato: No token configured');
+      logger.debug('Envato: No token configured');
       return [];
     }
     
-    console.log('Envato: Token length:', token.length, 'Query:', query);
+    logger.debug('Envato: Token length:', token.length, 'Query:', query);
     
     // Buscar en ThemeForest — Email Templates
     // La API de Envato usa el endpoint de búsqueda con site y category_filter
@@ -219,11 +220,11 @@ async function searchEnvato(query: string, token: string, page: number = 1) {
     let usedEndpoint = '';
 
     for (const endpoint of endpoints) {
-      console.log('Envato trying:', endpoint);
+      logger.debug('Envato trying:', endpoint);
       const response = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
       });
-      console.log('Envato status:', response.status, 'for', endpoint);
+      logger.debug('Envato status:', response.status, 'for', endpoint);
       if (response.ok) {
         const json = await response.json();
         if (json.matches?.length > 0 || json.items?.length > 0) {
@@ -234,12 +235,12 @@ async function searchEnvato(query: string, token: string, page: number = 1) {
         if (!data) data = json; // guardar aunque vacío para debug
       } else {
         const err = await response.text();
-        console.log('Envato error:', response.status, err.substring(0, 200));
+        logger.error('Envato error:', response.status, err.substring(0, 200));
       }
     }
 
     const items = data?.matches || data?.items || [];
-    console.log('Envato items found:', items.length, 'endpoint:', usedEndpoint);
+    logger.debug('Envato items found:', items.length, 'endpoint:', usedEndpoint);
     
     if (!Array.isArray(items) || items.length === 0) {
       return [];
@@ -285,10 +286,10 @@ async function searchEnvato(query: string, token: string, page: number = 1) {
       };
     }).filter((img: any) => img.thumbnail && img.thumbnail.length > 5);
     
-    console.log('Envato valid results:', results.length);
+    logger.debug('Envato valid results:', results.length);
     return results;
   } catch (error) {
-    console.error('Envato error:', error);
+    logger.error('Envato error:', error);
     return [];
   }
 }
@@ -297,11 +298,11 @@ async function searchEnvato(query: string, token: string, page: number = 1) {
 async function searchBrandfetch(query: string, apiKey: string) {
   try {
     if (!apiKey) {
-      console.log('Brandfetch: No API key');
+      logger.debug('Brandfetch: No API key');
       return [];
     }
     
-    console.log('Brandfetch: Searching...', query);
+    logger.debug('Brandfetch: Searching...', query);
     
     const response = await fetch(
       `https://api.brandfetch.io/v2/brands/${encodeURIComponent(query)}`,
@@ -313,7 +314,7 @@ async function searchBrandfetch(query: string, apiKey: string) {
       }
     );
 
-    console.log('Brandfetch status:', response.status);
+    logger.debug('Brandfetch status:', response.status);
     
     if (!response.ok) return [];
     
@@ -353,7 +354,7 @@ async function searchBrandfetch(query: string, apiKey: string) {
     
     return results;
   } catch (error) {
-    console.error('Brandfetch error:', error);
+    logger.error('Brandfetch error:', error);
     return [];
   }
 }
@@ -579,7 +580,7 @@ async function downloadAndUpload(imageUrl: string, filename: string) {
 
     return { success: true, url: publicUrl.publicUrl };
   } catch (error) {
-    console.error('Upload error:', error);
+    logger.error('Upload error:', error);
     return { success: false, error: 'Failed to upload' };
   }
 }
@@ -587,7 +588,7 @@ async function downloadAndUpload(imageUrl: string, filename: string) {
 // ============ ENDPOINT PRINCIPAL ============
 
 export async function GET(request: NextRequest) {
-  console.log('=== IMAGES API CALLED ===');
+  logger.debug('=== IMAGES API CALLED ===');
   
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -623,7 +624,7 @@ export async function GET(request: NextRequest) {
     // SEARCH
     if (action === 'search') {
       const results: any[] = [];
-      console.log('Search:', query, 'Source:', source);
+      logger.debug('Search:', query, 'Source:', source);
 
       if (source === 'all' || source === 'unsplash') {
         results.push(...await searchUnsplash(query, apiKeys.unsplash, page));
@@ -644,7 +645,7 @@ export async function GET(request: NextRequest) {
         results.push(...await searchBrandfetch(query, apiKeys.brandfetch));
       }
 
-      console.log('Total results:', results.length);
+      logger.debug('Total results:', results.length);
       return NextResponse.json({ success: true, results, total: results.length });
     }
 
@@ -680,7 +681,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: false, error: 'Invalid action' }, { status: 400 });
   } catch (error) {
-    console.error('API Error:', error);
+    logger.error('API Error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -712,7 +713,7 @@ export async function POST(request: NextRequest) {
       });
 
     if (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -726,7 +727,7 @@ export async function POST(request: NextRequest) {
       path: data?.path
     });
   } catch (error) {
-    console.error('POST error:', error);
+    logger.error('POST error:', error);
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : 'Upload failed' 
     }, { status: 500 });

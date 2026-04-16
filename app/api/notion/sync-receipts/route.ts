@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { syncNotionReceipts } from '@/lib/notion-receipts';
 import { resolveNotionId } from '@/lib/notion';
+import logger from '@/lib/utils/logger';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
       
       if (resolved.type === 'page' && resolved.databases && resolved.databases.length > 0) {
         resolvedDbId = resolved.databases[0].id;
-        console.log(`[Notion Receipts Sync] Using database: ${resolved.databases[0].title}`);
+        logger.debug(`[Notion Receipts Sync] Using database: ${resolved.databases[0].title}`);
       } else if (resolved.type === 'page' && (!resolved.databases || resolved.databases.length === 0)) {
         return NextResponse.json({
           success: false,
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
       .select('id, lot_number, notion_page_id, client_name')
       .eq('project_id', project_id);
 
-    console.log(`[Notion Receipts Sync] Found ${lots?.length || 0} lots in project`);
+logger.debug(`[Notion Receipts Sync] Found ${lots?.length || 0} lots in project`);
 
     // Mapa: notion_page_id -> lot database id
     const notionPageToLotId = new Map<string, string>();
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
       lots.forEach(lot => {
         if (lot.notion_page_id) {
           notionPageToLotId.set(lot.notion_page_id, lot.id);
-          console.log(`[Notion Receipts Sync] Mapped notion_page ${lot.notion_page_id?.substring(0, 8)}... -> lot ${lot.lot_number}`);
+          logger.debug(`[Notion Receipts Sync] Mapped notion_page ${lot.notion_page_id?.substring(0, 8)}... -> lot ${lot.lot_number}`);
         }
         if (lot.lot_number) {
           const normalized = lot.lot_number.replace(/[^0-9]/g, '').padStart(2, '0');
@@ -201,7 +202,7 @@ export async function POST(request: NextRequest) {
       .update({ notion_receipts_last_sync: new Date().toISOString() })
       .eq('id', project_id);
 
-    console.log(`[Notion Receipts Sync] Complete: ${synced} synced, ${linked} linked, ${unlinked} unlinked, ${desistido} desistido`);
+    logger.debug(`[Notion Receipts Sync] Complete: ${synced} synced, ${linked} linked, ${unlinked} unlinked, ${desistido} desistido`);
 
     return NextResponse.json({
       success: true,
@@ -217,7 +218,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (err: any) {
-    console.error('Error en sync-receipts:', err);
+    logger.error('Error en sync-receipts:', err);
     return NextResponse.json(
       { success: false, error: err.message },
       { status: 500 }

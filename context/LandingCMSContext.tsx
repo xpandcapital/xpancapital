@@ -531,10 +531,12 @@ export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                     setCmsData(prev => {
                         const merged = { ...prev };
                         for (const key in result.data) {
-                            if (result.data[key] && typeof result.data[key] === 'object' && !Array.isArray(result.data[key])) {
-                                merged[key] = { ...prev[key], ...result.data[key] };
+                            const sectionKey = key as keyof LandingCMSData;
+                            const newValue = result.data[sectionKey as keyof typeof result.data];
+                            if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                                (merged as Record<string, unknown>)[sectionKey] = { ...prev[sectionKey], ...newValue };
                             } else {
-                                merged[key] = result.data[key];
+                                (merged as Record<string, unknown>)[sectionKey] = newValue;
                             }
                         }
                         return merged;
@@ -550,10 +552,12 @@ export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                         setCmsData(prev => {
                             const merged = { ...prev };
                             for (const key in templateResult.data.secciones) {
-                                if (templateResult.data.secciones[key] && typeof templateResult.data.secciones[key] === 'object' && !Array.isArray(templateResult.data.secciones[key])) {
-                                    merged[key] = { ...prev[key], ...templateResult.data.secciones[key] };
+                                const sectionKey = key as keyof LandingCMSData;
+                                const newValue = templateResult.data.secciones[sectionKey as keyof typeof templateResult.data.secciones];
+                                if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
+                                    (merged as Record<string, unknown>)[sectionKey] = { ...prev[sectionKey], ...newValue };
                                 } else {
-                                    merged[key] = templateResult.data.secciones[key];
+                                    (merged as Record<string, unknown>)[sectionKey] = newValue;
                                 }
                             }
                             return merged;

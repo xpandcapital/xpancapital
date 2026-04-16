@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { logger } from '@/lib/utils/logger';
 import { 
   Upload, FileText, Calculator, AlertCircle, 
   Calendar as CalendarIcon, DollarSign, User, ChevronLeft, Save,
@@ -75,7 +76,7 @@ const fallbackCopyTextToClipboard = (text: string): void => {
   try {
     document.execCommand('copy');
   } catch (err) {
-    console.error('Error copiando al portapapeles', err);
+    logger.error('Error copiando al portapapeles', err);
   }
   document.body.removeChild(textArea);
 };
@@ -208,13 +209,13 @@ const App = () => {
         // Actualizar caché de localStorage
         try {
           localStorage.setItem(`inmo_proj_lots_${projectId}`, JSON.stringify(transformedLots));
-        } catch (e) {
-          console.warn('[GestionDeLotes] Error saving to localStorage:', e);
-        }
-        console.log(`[GestionDeLotes] Loaded ${transformedLots.length} lots from Supabase`);
+} catch (e) {
+      logger.warn('[GestionDeLotes] Error saving to localStorage:', e);
+    }
+        logger.debug(`[GestionDeLotes] Loaded ${transformedLots.length} lots from Supabase`);
       }
     } catch (err) {
-      console.error('[GestionDeLotes] Error in loadLotsFromSupabase:', err);
+      logger.error('[GestionDeLotes] Error in loadLotsFromSupabase:', err);
     } finally {
       setIsSyncing(false);
     }
@@ -245,7 +246,7 @@ const App = () => {
   useEffect(() => {
     if (!activeProjectId) return;
     
-    console.log('[GestionDeLotes] Active project changed to:', activeProjectId);
+    logger.debug('[GestionDeLotes] Active project changed to:', activeProjectId);
     
     try {
       localStorage.setItem('inmo_active_project', activeProjectId);
@@ -307,7 +308,7 @@ const App = () => {
     // Escuchar cambios en localStorage de otras pestañas/páginas
     const handleStorageChange = (e) => {
       if (e.key === `inmo_proj_lots_${activeProjectId}` || e.key === 'inmo_data_updated') {
-        console.log('[GestionDeLotes] Detected external data update, reloading...');
+        logger.debug('[GestionDeLotes] Detected external data update, reloading...');
         loadLots();
       }
     };
@@ -361,11 +362,11 @@ const App = () => {
   // Sincronizar lotes con Supabase
   const syncLotsToSupabase = useCallback(async (lotsData) => {
     if (!activeProjectId || !lotsData || lotsData.length === 0) {
-      console.log('[GestionDeLotes] Skipping sync - activeProjectId:', activeProjectId, 'lotsData:', lotsData?.length);
+      logger.debug('[GestionDeLotes] Skipping sync - activeProjectId:', activeProjectId, 'lotsData:', lotsData?.length);
       return;
     }
     
-    console.log(`[GestionDeLotes] Syncing ${lotsData.length} lots for project ${activeProjectId}...`);
+    logger.debug(`[GestionDeLotes] Syncing ${lotsData.length} lots for project ${activeProjectId}...`);
     
     // Función para normalizar estados: Activo -> Disponible para sincronizar con Proyectos
     const normalizeStatus = (status) => {
@@ -390,7 +391,7 @@ const App = () => {
 
         const statusForSupabase = normalizeStatus(lot.status);
         
-        console.log('[GestionDeLotes] Syncing lot:', lot.loteNumber, {
+        logger.debug('[GestionDeLotes] Syncing lot:', lot.loteNumber, {
           project_id: activeProjectId,
           total_price: lot.totalPrice || 0,
           status: statusForSupabase,
@@ -432,7 +433,7 @@ const App = () => {
           .maybeSingle();
 
         if (selectError) {
-          console.error('[GestionDeLotes] Error checking existing lot:', lot.loteNumber, selectError);
+          logger.error('[GestionDeLotes] Error checking existing lot:', lot.loteNumber, selectError);
           continue;
         }
 
@@ -443,9 +444,9 @@ const App = () => {
             .eq('id', existing.id);
           
           if (updateError) {
-            console.error('[GestionDeLotes] Error updating lot:', lot.loteNumber, updateError);
+            logger.error('[GestionDeLotes] Error updating lot:', lot.loteNumber, updateError);
           } else {
-            console.log('[GestionDeLotes] Updated lot:', lot.loteNumber, 'status:', statusForSupabase);
+            logger.debug('[GestionDeLotes] Updated lot:', lot.loteNumber, 'status:', statusForSupabase);
           }
         } else {
           const { error: insertError } = await supabase
@@ -453,17 +454,17 @@ const App = () => {
             .insert(supabaseLot);
           
           if (insertError) {
-            console.error('[GestionDeLotes] Error inserting lot:', lot.loteNumber, insertError);
+            logger.error('[GestionDeLotes] Error inserting lot:', lot.loteNumber, insertError);
           } else {
-            console.log('[GestionDeLotes] Inserted lot:', lot.loteNumber, 'status:', statusForSupabase);
+            logger.debug('[GestionDeLotes] Inserted lot:', lot.loteNumber, 'status:', statusForSupabase);
           }
         }
       } catch (err) {
-        console.error('[GestionDeLotes] Unexpected error for lot:', lot.loteNumber, err);
+        logger.error('[GestionDeLotes] Unexpected error for lot:', lot.loteNumber, err);
       }
     }
     
-    console.log(`[GestionDeLotes] Finished syncing ${lotsData.length} lots`);
+    logger.debug(`[GestionDeLotes] Finished syncing ${lotsData.length} lots`);
   }, [activeProjectId]);
 
   const syncTimeoutRef = useRef(null);
@@ -484,7 +485,7 @@ const App = () => {
     
     if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     syncTimeoutRef.current = setTimeout(() => {
-      console.log('[GestionDeLotes] Syncing lots to Supabase...');
+      logger.debug('[GestionDeLotes] Syncing lots to Supabase...');
       lastSyncedLotsRef.current = lotsHash;
       syncLotsToSupabase(lots);
     }, 2000);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+import { logger } from '@/lib/utils/logger';
 
 interface TemplateSection {
   [key: string]: unknown;
@@ -62,18 +63,18 @@ export function useLandingTemplate(_templateId?: string) {
       const response = await fetch('/api/templates/landing');
       const data = await response.json();
       
-      console.log('[useLandingTemplate] API response:', data);
+      logger.debug('[useLandingTemplate] API response:', data);
       
       if (data.success && data.data) {
         setTemplate(data.data);
-        console.log('[useLandingTemplate] Template loaded:', data.data.nombre, 'secciones:', Object.keys(data.data.secciones || {}));
+        logger.debug('[useLandingTemplate] Template loaded:', data.data.nombre, 'secciones:', Object.keys(data.data.secciones || {}));
       } else {
-        console.log('[useLandingTemplate] No template found, using defaults');
+        logger.debug('[useLandingTemplate] No template found, using defaults');
         setError(data.error || 'No se encontró template activo');
         setTemplate(null);
       }
     } catch (err) {
-      console.error('[useLandingTemplate] Error:', err);
+      logger.error('[useLandingTemplate] Error:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
@@ -100,11 +101,13 @@ export function useLandingTemplate(_templateId?: string) {
 
   const getSectionData = useCallback((sectionKey: string): TemplateSection | null => {
     if (!template?.secciones) {
-      return DEFAULT_SECTIONS[sectionKey] || null;
+      const defaultSection = DEFAULT_SECTIONS[sectionKey as keyof typeof DEFAULT_SECTIONS];
+      return defaultSection !== undefined ? (defaultSection as TemplateSection) : null;
     }
-    const section = template.secciones[sectionKey];
+    const section = template.secciones[sectionKey as keyof typeof template.secciones];
     if (!section || Object.keys(section).length === 0) {
-      return DEFAULT_SECTIONS[sectionKey] || null;
+      const defaultSection = DEFAULT_SECTIONS[sectionKey as keyof typeof DEFAULT_SECTIONS];
+      return defaultSection !== undefined ? (defaultSection as TemplateSection) : null;
     }
     return section as TemplateSection;
   }, [template]);

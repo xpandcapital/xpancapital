@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowUpRight, X, MapPin, Ruler, CheckCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useLandingCMS } from "@/context/LandingCMSContext";
+import logger from "@/lib/utils/logger";
 
 interface ProjectData {
   id: string;
@@ -64,12 +65,12 @@ export function Projects() {
           .order("created_at", { ascending: false });
 
         if (error) {
-          console.error("Supabase query error:", error);
+          logger.error("Supabase query error:", error);
           throw error;
         }
 
         if (!data || data.length === 0) {
-          console.log("No active projects found");
+          logger.debug("No active projects found");
           setProjects([]);
           return;
         }
@@ -104,13 +105,13 @@ export function Projects() {
           };
         });
 
-        console.log("Loaded projects:", formattedProjects.length);
+        logger.debug("Loaded projects:", formattedProjects.length);
         formattedProjects.forEach(p => {
-          console.log(`Project ${p.name}: cover_image=${p.cover_image}, gallery=${p.carouselImages?.slice(0, 2)}`);
+          logger.debug(`Project ${p.name}: cover_image=${p.cover_image}, gallery=${p.carouselImages?.slice(0, 2)}`);
         });
         setProjects(formattedProjects);
       } catch (err) {
-        console.error("Error loading projects:", err);
+        logger.error("Error loading projects:", err);
       } finally {
         setLoading(false);
       }

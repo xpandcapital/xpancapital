@@ -1,0 +1,1 @@
+export { useSiteConfig } from './useSiteConfig'

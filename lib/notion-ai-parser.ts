@@ -5,6 +5,7 @@
  */
 
 import { parseFormaDePago as parseWithRules } from './parse-forma-pago';
+import { logger } from './utils/logger';
 
 export interface ParsedFormaDePago {
   iniciales: Array<{
@@ -38,7 +39,7 @@ export async function parseFormaDePagoWithAI(
 
   // Si no hay API key, usar reglas inmediatamente
   if (!geminiApiKey) {
-    console.log('[Notion AI Parser] No API key, usando reglas');
+    logger.debug('[Notion AI Parser] No API key, usando reglas');
     const result = parseWithRules(formaDePago);
     return {
       iniciales: result.iniciales,
@@ -121,7 +122,7 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin explicaciones):
 }`;
 
   try {
-    console.log('[Notion AI Parser] Enviando a Gemini...');
+    logger.debug('[Notion AI Parser] Enviando a Gemini...');
     
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
@@ -139,7 +140,7 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin explicaciones):
     );
 
     if (!response.ok) {
-      console.error('[Notion AI Parser] Gemini API error:', response.status);
+      logger.error('[Notion AI Parser] Gemini API error:', response.status);
       throw new Error(`API error: ${response.status}`);
     }
 
@@ -147,7 +148,7 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin explicaciones):
     const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
     
     if (!text) {
-      console.error('[Notion AI Parser] No response text from Gemini');
+      logger.error('[Notion AI Parser] No response text from Gemini');
       throw new Error('Empty response');
     }
 
@@ -155,7 +156,7 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin explicaciones):
     const cleanJson = text.replace(/```json\n?|\n?```/g, '').trim();
     const parsed = JSON.parse(cleanJson);
     
-    console.log('[Notion AI Parser] Gemini result:', parsed);
+    logger.debug('[Notion AI Parser] Gemini result:', parsed);
     
     // Validar estructura mínima
     if (!parsed.iniciales || !Array.isArray(parsed.iniciales)) {

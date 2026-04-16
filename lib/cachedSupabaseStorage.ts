@@ -1,6 +1,7 @@
 "use client";
 
 import { supabase } from '@/lib/supabaseClient';
+import logger from './utils/logger';
 
 const LOTS_KEY_PREFIX = 'inmo_proj_lots_';
 const CONFIG_KEY_PREFIX = 'inmo_proj_config_meta_';
@@ -24,7 +25,7 @@ class CachedSupabaseStorage {
     if (this.initialized) return;
     
     try {
-      console.log('[CachedSupabaseStorage] Starting initialization...');
+      logger.debug('[CachedSupabaseStorage] Starting initialization...');
       
       const { data: projectsData, error: projectsError } = await supabase
         .from('projects')
@@ -32,7 +33,7 @@ class CachedSupabaseStorage {
         .order('name');
 
       if (projectsError) {
-        console.error('[CachedSupabaseStorage] Error loading projects:', projectsError);
+        logger.error('[CachedSupabaseStorage] Error loading projects:', projectsError);
         this.initialized = true;
         return;
       }
@@ -75,16 +76,16 @@ class CachedSupabaseStorage {
           }
         }
         
-        console.log('[CachedSupabaseStorage] Initialized with', projectsData.length, 'projects');
+        logger.debug('[CachedSupabaseStorage] Initialized with', projectsData.length, 'projects');
       } else {
         this.cache.set(PROJECT_LIST_KEY, JSON.stringify([{ id: 'proj_default', name: 'Mi Primer Proyecto' }]));
         this.cache.set(ACTIVE_PROJECT_KEY, 'proj_default');
-        console.log('[CachedSupabaseStorage] No projects found, using default');
+        logger.debug('[CachedSupabaseStorage] No projects found, using default');
       }
       
       this.initialized = true;
     } catch (error) {
-      console.error('[CachedSupabaseStorage] Initialization error:', error);
+      logger.error('[CachedSupabaseStorage] Initialization error:', error);
       this.cache.set(PROJECT_LIST_KEY, JSON.stringify([{ id: 'proj_default', name: 'Mi Primer Proyecto' }]));
       this.cache.set(ACTIVE_PROJECT_KEY, 'proj_default');
       this.initialized = true;
@@ -206,7 +207,7 @@ class CachedSupabaseStorage {
         // Active project tracking - no supabase sync needed
       }
     } catch (error) {
-      console.error('[CachedSupabaseStorage] Sync error for key', key, ':', error);
+      logger.error('[CachedSupabaseStorage] Sync error for key', key, ':', error);
     }
   }
 

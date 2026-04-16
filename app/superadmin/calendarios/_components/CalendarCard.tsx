@@ -1,6 +1,6 @@
 "use client"
 
-import { Edit2, ExternalLink, Clock } from 'lucide-react'
+import { Edit2, ExternalLink, Clock, Trash2 } from 'lucide-react'
 import type { Calendario } from '../_types'
 import { calendarTypeLabels } from '../_types'
 
@@ -8,9 +8,10 @@ interface CalendarCardProps {
   calendar: Calendario
   onEdit: (calendar: Calendario) => void
   onPublic: (calendar: Calendario) => void
+  onDelete?: (calendar: Calendario) => void
 }
 
-export default function CalendarCard({ calendar, onEdit, onPublic }: CalendarCardProps) {
+export default function CalendarCard({ calendar, onEdit, onPublic, onDelete }: CalendarCardProps) {
   const typeLabel = calendarTypeLabels[calendar.tipo] || calendar.tipo
 
   const typeColors: Record<string, string> = {
@@ -77,6 +78,15 @@ export default function CalendarCard({ calendar, onEdit, onPublic }: CalendarCar
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </button>
+          {onDelete && (
+            <button
+              onClick={() => onDelete(calendar)}
+              className="py-2.5 px-3 bg-white/5 border border-white/5 rounded-xl text-white/20 hover:text-blis-red hover:bg-blis-red/5 transition-all duration-300"
+              title="Eliminar"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </div>

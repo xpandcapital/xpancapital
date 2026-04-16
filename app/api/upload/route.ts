@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import logger from '@/lib/utils/logger'
 
 // Configuración para aumentar el límite de tamaño en Vercel
 export const runtime = 'nodejs'
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File
     const folder = formData.get('folder') as string || 'cms'
     
-    console.log('📁 File received:', { 
+    logger.debug('File received:', { 
       name: file?.name, 
       size: file?.size, 
       type: file?.type,
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
       })
 
     if (uploadError) {
-      console.error('Upload error:', uploadError)
+      logger.error('Upload error:', uploadError)
       
       const { error: bucketError } = await supabase.storage.createBucket('cms-images', {
         public: true,

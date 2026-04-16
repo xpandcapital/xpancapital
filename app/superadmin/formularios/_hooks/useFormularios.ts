@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Formulario } from '../_types'
 
+export type { Formulario }
+
 const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
 interface UseFormulariosReturn {

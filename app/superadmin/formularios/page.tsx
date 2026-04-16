@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Plus, Eye, MousePointerClick, TrendingUp, CreditCard, FileText, Loader2 } from 'lucide-react'
 import { useFormularios } from './_hooks/useFormularios'
@@ -10,7 +11,8 @@ import type { Formulario } from './_types'
 import { useToast } from '@/components/ui/Toast'
 
 export default function FormulariosPage() {
-  const { formularios, loading, create } = useFormularios()
+  const router = useRouter()
+  const { formularios, loading, create, remove } = useFormularios()
   const { showToast } = useToast()
   const [creating, setCreating] = useState(false)
 
@@ -30,7 +32,8 @@ export default function FormulariosPage() {
     try {
       const result = await create({ ...defaultFormulario, nombre: `Formulario ${formularios.length + 1}`, slug: `form-${Date.now().toString().slice(-6)}` })
       if (result) {
-        showToast('Formulario creado correctamente', 'success')
+        showToast('Formulario creado', 'success')
+        router.push(`/superadmin/formularios/${result.id}`)
       } else {
         showToast('Error al crear formulario', 'error')
       }
@@ -42,11 +45,18 @@ export default function FormulariosPage() {
   }
 
   const handleEdit = (form: Formulario) => {
-    showToast(`Editando: ${form.nombre}`, 'info')
+    router.push(`/superadmin/formularios/${form.id}`)
   }
 
   const handlePublic = (form: Formulario) => {
     window.open(`/f/${form.slug}`, '_blank')
+  }
+
+  const handleDelete = async (form: Formulario) => {
+    if (confirm(`¿Eliminar "${form.nombre}"?`)) {
+      await remove(form.id)
+      showToast('Formulario eliminado', 'success')
+    }
   }
 
   if (loading) {
@@ -119,7 +129,7 @@ export default function FormulariosPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
-                <FormCard form={form} onEdit={handleEdit} onPublic={handlePublic} />
+                <FormCard form={form} onEdit={handleEdit} onPublic={handlePublic} onDelete={handleDelete} />
               </motion.div>
             ))}
           </div>

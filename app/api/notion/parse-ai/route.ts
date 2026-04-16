@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/lib/utils/logger';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[Notion AI] Iniciando análisis para proyecto:', project_id);
+    logger.debug('[Notion AI] Iniciando análisis para proyecto:', project_id);
 
     // Obtener lotes del proyecto (con cliente, no solo "Vendido")
     const { data: lots, error: lotsError } = await supabase
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
       .neq('client_name', 'No especificado');
 
     if (lotsError) {
-      console.error('[Notion AI] Error obteniendo lotes:', lotsError);
+      logger.error('[Notion AI] Error obteniendo lotes:', lotsError);
       throw lotsError;
     }
 
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log(`[Notion AI] ${lots.length} lotes encontrados con cliente`);
+    logger.debug(`[Notion AI] ${lots.length} lotes encontrados con cliente`);
 
     let processed = 0;
     let skipped = 0;
@@ -122,23 +123,23 @@ export async function POST(request: NextRequest) {
       try {
         const formaPagoText = lot.extra_data?.forma_pago || '';
         
-        console.log(`[Notion AI] Lote ${lot.lot_number}: forma_pago = "${formaPagoText?.substring(0, 100) || 'SIN DATO'}..."`);
+        logger.debug(`[Notion AI] Lote ${lot.lot_number}: forma_pago = "${formaPagoText?.substring(0, 100) || 'SIN DATO'}..."`);
         
         if (!formaPagoText || formaPagoText.trim() === '') {
-          console.log(`[Notion AI] Lote ${lot.lot_number} omitido: SIN forma de pago`);
+          logger.debug(`[Notion AI] Lote ${lot.lot_number} omitido: SIN forma de pago`);
           skipped++;
           continue;
         }
 
-        console.log(`[Notion AI] Analizando lote ${lot.lot_number} con Gemini...`);
+        logger.debug(`[Notion AI] Analizando lote ${lot.lot_number} con Gemini...`);
 
         // Llamar a Gemini
         const parsed = await parseWithGemini(formaPagoText, gemini_api_key);
-        console.log(`[Notion AI] Resultado:`, JSON.stringify(parsed, null, 2));
+        logger.debug(`[Notion AI] Resultado:`, JSON.stringify(parsed, null, 2));
 
         // Obtener los initial_payments ACTUALES para mantener los `actual`
         const existingPayments = Array.isArray(lot.initial_payments) ? lot.initial_payments : [];
-        console.log(`[Notion AI] Pagos existentes:`, existingPayments.length);
+        logger.debug(`[Notion AI] Pagos existentes:`, existingPayments.length);
 
         // Construir nuevos initial_payments combinando esperados del AI con actual de recibos
         const newInitialPayments: any[] = [];
@@ -178,7 +179,7 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        console.log(`[Notion AI] Lote ${lot.lot_number}: ${newInitialPayments.length} pagos iniciales`);
+        logger.debug(`[Notion AI] Lote ${lot.lot_number}: ${newInitialPayments.length} pagos iniciales`);
 
         // Actualizar en Supabase
         const updateData = {
@@ -201,10 +202,10 @@ export async function POST(request: NextRequest) {
           .eq('id', lot.id);
 
         if (updateError) {
-          console.error(`[Notion AI] ❌ Error update lote ${lot.lot_number}:`, updateError);
+          logger.error(`[Notion AI] ❌ Error update lote ${lot.lot_number}:`, updateError);
           errors.push(`Lote ${lot.lot_number}: ${updateError.message}`);
         } else {
-          console.log(`[Notion AI] ✓ Lote ${lot.lot_number} actualizado`);
+          logger.debug(`[Notion AI] ✓ Lote ${lot.lot_number} actualizado`);
           processed++;
           results.push({
             lot_number: lot.lot_number,
@@ -222,7 +223,7 @@ export async function POST(request: NextRequest) {
         await new Promise(r => setTimeout(r, 500));
 
       } catch (err: any) {
-        console.error(`[Notion AI] Error lote ${lot.lot_number}:`, err);
+        logger.error(`[Notion AI] Error lote ${lot.lot_number}:`, err);
         errors.push(`Lote ${lot.lot_number}: ${err.message}`);
       }
     }
@@ -238,7 +239,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (err: any) {
-    console.error('[Notion AI] Error general:', err);
+    logger.error('[Notion AI] Error general:', err);
     return NextResponse.json(
       { success: false, error: err.message },
       { status: 500 }

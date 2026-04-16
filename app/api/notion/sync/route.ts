@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { queryDatabase, mapNotionPageToLot, getDatabaseSchema, resolveNotionId } from '@/lib/notion';
+import logger from '@/lib/utils/logger';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
         // Es una página con bases de datos dentro - tomar la primera
         detectedDatabases = resolved.databases;
         resolvedDbId = resolved.databases[0].id;
-        console.log(`[Notion Sync] Detected page with ${resolved.databases.length} database(s). Using: ${resolved.databases[0].title}`);
+        logger.debug(`[Notion Sync] Detected page with ${resolved.databases.length} database(s). Using: ${resolved.databases[0].title}`);
       } else if (resolved.type === 'page' && (!resolved.databases || resolved.databases.length === 0)) {
         return NextResponse.json({
           success: false,
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     try {
       schema = await getDatabaseSchema(resolvedDbId);
     } catch (err) {
-      console.error('Error obteniendo schema:', err);
+      logger.error('Error obteniendo schema:', err);
     }
 
     // 4. Obtener todas las páginas de la DB de Notion
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
     
     const filteredCount = allLots.length - lots.length;
     if (filteredCount > 0) {
-      console.log(`[Notion Sync] Filtered out ${filteredCount} special lots (zDesistidos)`);
+      logger.debug(`[Notion Sync] Filtered out ${filteredCount} special lots (zDesistidos)`);
     }
 
     // 6. Sincronizar con Supabase usando upsert por notion_page_id
@@ -181,7 +182,7 @@ export async function POST(request: NextRequest) {
         }
         synced++;
       } catch (err: any) {
-        console.error(`Error sincronizando lote ${lot.lot_number}:`, err.message);
+        logger.error(`Error sincronizando lote ${lot.lot_number}:`, err.message);
         errors++;
         details.push({ action: 'error', lot: lot.lot_number, error: err.message });
       }
@@ -204,7 +205,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (err: any) {
-    console.error('Error en sync Notion:', err);
+    logger.error('Error en sync Notion:', err);
     return NextResponse.json(
       { success: false, error: err.message },
       { status: 500 }

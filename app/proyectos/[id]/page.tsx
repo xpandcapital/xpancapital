@@ -13,6 +13,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Header } from "@/components/sections/Header";
 import { FooterSections } from "@/components/sections/Footer";
 import { ConstructionLoader } from "@/components/ui/ConstructionLoader";
+import logger from "@/lib/utils/logger";
 
 interface ProjectData {
   id: string;
@@ -55,7 +56,7 @@ export default function ProjectDetailPage() {
 
         if (error) throw error;
         
-        console.log(`Project ${projectId}:`, {
+        logger.debug(`Project ${projectId}:`, {
           cover_image: data.cover_image,
           gallery_images: data.gallery_images,
           name: data.name

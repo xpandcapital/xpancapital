@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCachedSupabaseStorage } from '@/lib/cachedSupabaseStorage';
 import { Loader2 } from 'lucide-react';
+import logger from '@/lib/utils/logger';
 
 export default function SupabaseStorageProvider({ children }: { children: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
@@ -10,7 +11,7 @@ export default function SupabaseStorageProvider({ children }: { children: React.
   useEffect(() => {
     const init = async () => {
       try {
-        console.log('[SupabaseStorageProvider] Starting initialization...');
+        logger.debug('[SupabaseStorageProvider] Starting initialization...');
         const storage = getCachedSupabaseStorage();
         await storage.ensureInitialized();
         
@@ -38,10 +39,10 @@ export default function SupabaseStorageProvider({ children }: { children: React.
           configurable: true,
         });
         
-        console.log('[SupabaseStorageProvider] localStorage overridden successfully');
+        logger.debug('[SupabaseStorageProvider] localStorage overridden successfully');
         setIsReady(true);
       } catch (e) {
-        console.error('[SupabaseStorageProvider] Failed to initialize:', e);
+        logger.error('[SupabaseStorageProvider] Failed to initialize:', e);
         setIsReady(true); // Continue anyway with fallback
       }
     };

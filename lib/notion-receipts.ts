@@ -3,6 +3,7 @@
  * Sincroniza recibos de Notion con Supabase
  */
 import { queryDatabase, resolveNotionId } from './notion';
+import { logger } from './utils/logger';
 
 export interface NotionReceipt {
   id: string;
@@ -95,7 +96,7 @@ export function mapNotionPageToReceipt(page: any): NotionReceipt {
   
   // Debug: mostrar campos disponibles
   const availableFields = Object.keys(props).map(k => `${k}(${props[k]?.type})`).join(', ');
-  console.log(`[Notion Receipt] Processing page. Available fields: ${availableFields}`);
+  logger.debug(`[Notion Receipt] Processing page. Available fields: ${availableFields}`);
 
   const titleProp = Object.values(props).find((p: any) => p.type === 'title') as any;
   const receiptTitle = titleProp?.title?.[0]?.plain_text || `Recibo-${page.id.substring(0, 8)}`;
@@ -113,9 +114,9 @@ export function mapNotionPageToReceipt(page: any): NotionReceipt {
   if (montoRaw === null) montoRaw = get('Pago');
   if (montoRaw === null) montoRaw = findPropByKeywords(props, ['monto', 'valor', 'cantidad', 'pago', 'amount', 'price', 'precio']);
   
-  console.log(`[Notion Receipt] Raw monto value: ${montoRaw} (type: ${typeof montoRaw})`);
+  logger.debug(`[Notion Receipt] Raw monto value: ${montoRaw} (type: ${typeof montoRaw})`);
   const monto = parseNumber(montoRaw);
-  console.log(`[Notion Receipt] Parsed monto: ${monto}`);
+  logger.debug(`[Notion Receipt] Parsed monto: ${monto}`);
   
   // Buscar fecha
   let fechaRaw = get('Fecha');
@@ -190,9 +191,9 @@ export async function syncNotionReceipts(databaseId: string, projectId: string):
       }
     } catch (e) {}
     
-    console.log(`[Notion Receipts] Querying database: ${resolvedDbId}`);
+    logger.debug(`[Notion Receipts] Querying database: ${resolvedDbId}`);
     const pages = await queryDatabase(resolvedDbId);
-    console.log(`[Notion Receipts] Found ${pages.length} pages`);
+    logger.debug(`[Notion Receipts] Found ${pages.length} pages`);
     
     for (const page of pages) {
       try {
@@ -205,7 +206,7 @@ export async function syncNotionReceipts(databaseId: string, projectId: string):
     
     return { success: true, receipts, errors };
   } catch (err: any) {
-    console.error('[Notion Receipts] Error:', err);
+    logger.error('[Notion Receipts] Error:', err);
     return { success: false, receipts: [], errors: [err.message] };
   }
 }

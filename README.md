@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BLIS Corp - Plataforma Inmobiliaria Multi-Tenant
 
-## Getting Started
+Plataforma SaaS para gestión inmobiliaria con sistema de leads, campañas, y landing pages personalizables.
 
-First, run the development server:
+## 🚀 Inicio Rápido
 
 ```bash
+# Instalar dependencias
+npm install
+
+# Configurar variables de entorno
+cp .env.example .env.local
+
+# Iniciar servidor de desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrir [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Estructura del Proyecto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+blis-corp/
+├── app/                    # Next.js App Router
+│   ├── (auth)/           # Autenticación
+│   ├── (public)/         # Páginas públicas
+│   ├── superadmin/       # Panel de administración
+│   └── api/              # API Routes
+├── components/           # Componentes reutilizables
+├── context/              # React Context
+├── lib/                  # Utilidades y hooks
+├── public/               # Archivos estáticos
+└── supabase/             # Migraciones BD
+```
 
-## Learn More
+## 🏗️ Arquitectura Modular
 
-To learn more about Next.js, take a look at the following resources:
+Cada módulo sigue esta estructura:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/superadmin/[módulo]/
+├── page.tsx              # Página principal
+├── _types/index.ts       # Tipos
+├── _hooks/               # Hooks personalizados
+└── _components/          # Componentes UI
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Ver [REFACTORING_SUMMARY.md](./REFACTORING_SUMMARY.md) para detalles.
 
-## Deploy on Vercel
+## 🔧 Comandos
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run dev              # Servidor de desarrollo
+npm run build            # Build de producción
+npm run lint             # Linting
+npm run typecheck        # Verificación de tipos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Supabase
+npx supabase start       # Iniciar instancia local
+npx supabase db push     # Aplicar migraciones
+npx supabase db reset    # Resetear base de datos
+```
+
+## 🔌 APIs Principales
+
+| Endpoint | Descripción |
+|----------|-------------|
+| `/api/leads` | Gestión de leads |
+| `/api/campanas` | Campañas de marketing |
+| `/api/templates` | Plantillas de landing |
+| `/api/admin/clientes` | Gestión de clientes |
+| `/api/admin/cursos` | Gestión de cursos |
+| `/api/admin/proyectos` | Gestión de proyectos |
+
+## 📝 Variables de Entorno
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=        # URL de Supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=  # Clave pública
+SUPABASE_SERVICE_KEY=           # Clave de servicio
+```
+
+## 🛠️ Tecnologías
+
+- **Framework**: Next.js 14 (App Router)
+- **Base de datos**: Supabase (PostgreSQL)
+- **Estilos**: Tailwind CSS
+- **Animaciones**: Framer Motion
+- **Iconos**: Lucide Icons
+- **Estado**: React Context + Hooks
+
+## 📊 Módulos Principales
+
+| Módulo | Descripción | Líneas |
+|--------|-------------|--------|
+| `productos` | Gestión de productos | ~400 |
+| `clientes` | Gestión de clientes | ~500 |
+| `cursos` | Sistema de cursos | ~300 |
+| `proyectos` | Gestión de proyectos | ~400 |
+| `certificados` | Editor de certificados | ~300 |
+| `api-nube` | Configuración de APIs | ~400 |
+
+## 🔐 Roles de Usuario
+
+- `superadmin` - Acceso total
+- `admin` - Acceso a su empresa
+- `editor` - Edición de contenido
+- `viewer` - Solo lectura
+
+## 📖 Documentación
+
+- [AGENTS.md](./AGENTS.md) - Documentación técnica completa
+- [REFACTORING_SUMMARY.md](./REFACTORING_SUMMARY.md) - Resumen de refactorización
+- [SESSION_STATUS.md](./SESSION_STATUS.md) - Estado actual del desarrollo
+
+## 🤝 Contribuir
+
+1. Crear rama feature: `git checkout -b feature/nueva-funcionalidad`
+2. Commit: `git commit -m 'Añadir nueva funcionalidad'`
+3. Push: `git push origin feature/nueva-funcionalidad`
+4. Crear Pull Request
+
+## 📄 Licencia
+
+Privado - BLIS Corp © 2026

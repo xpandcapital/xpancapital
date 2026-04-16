@@ -1,2 +1,6 @@
 export { FormCard } from './FormCard'
 export { BuilderButton } from './BuilderButton'
+export { FormBuildPanel } from './FormBuildPanel'
+export { FormFlowPanel } from './FormFlowPanel'
+export { FormAppearancePanel } from './FormAppearancePanel'
+export { FormSharePanel } from './FormSharePanel'
