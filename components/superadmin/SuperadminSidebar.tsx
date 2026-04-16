@@ -9,7 +9,8 @@ import {
     Coins, ChevronLeft, Menu, X, GraduationCap, Award, Cloud,
     ShoppingCart, Boxes, CandlestickChart, Scale, BarChart3,
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
-    FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase
+    FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
+    CalendarDays, Megaphone
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LucideProps } from "lucide-react";
@@ -139,8 +140,14 @@ export function SuperadminSidebar() {
                 },
                 { 
                     icon: Mail, 
-                    label: "Correos", 
-                    href: "/superadmin/mails" 
+                    label: "Comunicación", 
+                    subItems: [
+                        { icon: Mail, label: "Correos", href: "/superadmin/mails" },
+                        { icon: CalendarDays, label: "Calendarios", href: "/superadmin/calendarios" },
+                        { icon: FileText, label: "Formularios", href: "/superadmin/formularios" },
+                        { icon: UsersRound, label: "Leads", href: "/superadmin/leads" },
+                        { icon: Megaphone, label: "Campañas", href: "/superadmin/campanas" },
+                    ]
                 },
                 { 
                     icon: FileText, 
