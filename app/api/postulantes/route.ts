@@ -171,20 +171,25 @@ export async function PUT(request: NextRequest) {
             });
 
             if (!authError && newUser.user?.id) {
-              // Create profile
+              // Create profile with all inherited data
               await supabase.from('profiles').upsert({
                 id: newUser.user.id,
                 email: advisorEmail,
                 nombre: advisorName,
                 empresa_id: EMPRESA_ID,
                 rol: 'editor',
+                telefono: advisorPhone,
+                fecha_nacimiento: postulante.fecha_nacimiento || null,
+                estado_civil: postulante.estado_civil || null,
+                tipo_documento: postulante.document_id ? 'Cedula' : null,
+                numero_documento: postulante.document_id || null,
                 creado_en: new Date().toISOString(),
               }, { onConflict: 'id' });
             }
           }
         }
 
-        // Create advisor record
+        // Create advisor record with all inherited postulante data
         await supabase
           .from('advisors')
           .insert({
@@ -192,10 +197,20 @@ export async function PUT(request: NextRequest) {
             email: advisorEmail,
             phone: advisorPhone,
             phone_code: '+593',
+            document_id: postulante.document_id || '',
+            puesto: postulante.puesto_postula || null,
+            lugar_residencia: postulante.lugar_residencia || null,
+            estado_civil: postulante.estado_civil || null,
+            nivel_estudios: postulante.nivel_estudios || null,
+            aspiracion_salarial: postulante.aspiracion_salarial || null,
+            disponibilidad_inmediata: postulante.disponibilidad_inmediata === 'Sí' || postulante.disponibilidad_inmediata === true,
+            disponibilidad_viaje: postulante.disponibilidad_viaje === 'Sí' || postulante.disponibilidad_viaje === true,
+            acceso_tecnologia: postulante.acceso_tecnologia || null,
+            herramientas: postulante.herramientas_dominadas ? postulante.herramientas_dominadas.split(',').map((s: string) => s.trim()) : null,
             postulante_id: postulante.id,
             aceptado_en: new Date().toISOString(),
             is_active: true,
-            notes: `Creado automáticamente desde postulante aceptado. Puesto: ${postulante.puesto_postula || 'N/A'}`,
+            notes: `Creado desde postulante. Puesto: ${postulante.puesto_postula || 'N/A'}${postulante.experiencia_reciente ? '. Exp: ' + postulante.experiencia_reciente.substring(0, 100) : ''}`,
           });
       }
     }

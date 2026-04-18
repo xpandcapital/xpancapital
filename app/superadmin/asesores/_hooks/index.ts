@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import type { Advisor, EquipoCurso, EquipoProducto } from '../_types'
+import type { Advisor, EquipoCurso, EquipoProducto, Role } from '../_types'
 
 const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
@@ -42,7 +42,7 @@ export function useEquipoCursos(advisorId: string | null) {
     try {
       const { data, error } = await supabase
         .from('equipo_cursos')
-        .select('*, cursos:id_curso(nombre, precio_usd, imagen_principal)')
+        .select('*, cursos:id_curso(nombre, precio_usd, imagen_principal, para_equipo)')
         .eq('advisor_id', advisorId)
         .order('asignado_en', { ascending: false })
       if (error) throw error
@@ -122,4 +122,32 @@ export function useEquipoProductos(advisorId: string | null) {
   }
 
   return { productos, loading, assignProducto, removeProducto, refetch: fetchProductos }
+}
+
+export function useRoles() {
+  const [roles, setRoles] = useState<Role[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchRoles = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/admin/roles')
+      const data = await res.json()
+      if (data.success) setRoles(data.data || [])
+    } catch {
+      setRoles([
+        { id: '1', nombre: 'usuario', label: 'Usuario', permisos: ['ver_productos', 'comprar'], color: '#6b7280' },
+        { id: '2', nombre: 'cliente', label: 'Cliente', permisos: ['ver_productos', 'comprar', 'ver_historial'], color: '#3b82f6' },
+        { id: '3', nombre: 'editor', label: 'Editor', permisos: ['ver_productos', 'comprar', 'editar_contenido', 'crear_posts'], color: '#8b5cf6' },
+        { id: '4', nombre: 'admin', label: 'Admin', permisos: ['ver_productos', 'comprar', 'editar_contenido', 'gestionar_productos', 'gestionar_usuarios'], color: '#f59e0b' },
+        { id: '5', nombre: 'superadmin', label: 'Super Admin', permisos: ['*'], color: '#be0b3c' },
+      ])
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchRoles() }, [fetchRoles])
+
+  return { roles, loading, refetch: fetchRoles }
 }

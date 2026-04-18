@@ -18,17 +18,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     const {
-      nombre,
-      email,
-      phone,
-      phone_code,
-      document_id,
-      password,
-      commission_type,
-      commission_value,
-      commission_trigger_percent,
-      notes,
-      postulante_id,
+      nombre, email, phone, phone_code, document_id,
+      password, commission_type, commission_value, commission_trigger_percent,
+      notes, postulante_id, puesto, rol, lugar_residencia, estado_civil,
+      nivel_estudios, aspiracion_salarial, disponibilidad_inmediata,
+      disponibilidad_viaje, acceso_tecnologia, herramientas,
     } = body
 
     if (!nombre || !email) {
@@ -37,7 +31,6 @@ export async function POST(request: NextRequest) {
 
     const normalizedEmail = email.toLowerCase().trim()
 
-    // 1. Check if user already exists in auth
     const { data: existingUsers } = await supabase.auth.admin.listUsers()
     const existingUser = existingUsers?.users?.find(u => u.email === normalizedEmail)
 
@@ -48,15 +41,11 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       userId = existingUser.id
     } else {
-      // 2. Create Supabase Auth user
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email: normalizedEmail,
         password: generatedPassword,
         email_confirm: true,
-        user_metadata: {
-          nombre,
-          empresa_id: EMPRESA_ID,
-        },
+        user_metadata: { nombre, empresa_id: EMPRESA_ID },
       })
 
       if (createError) {
@@ -67,25 +56,18 @@ export async function POST(request: NextRequest) {
       isNewUser = true
 
       if (userId) {
-        // 3. Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: userId,
-            email: normalizedEmail,
-            nombre,
-            empresa_id: EMPRESA_ID,
-            rol: 'editor',
-            creado_en: new Date().toISOString(),
-          }, { onConflict: 'id' })
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError)
-        }
+        await supabase.from('profiles').upsert({
+          id: userId,
+          email: normalizedEmail,
+          nombre,
+          empresa_id: EMPRESA_ID,
+          rol: rol || 'editor',
+          telefono: phone || null,
+          creado_en: new Date().toISOString(),
+        }, { onConflict: 'id' })
       }
     }
 
-    // 4. Check if advisor already exists
     const { data: existingAdvisor } = await supabase
       .from('advisors')
       .select('id')
@@ -101,7 +83,6 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 5. Create advisor record
     const { data: advisor, error: advisorError } = await supabase
       .from('advisors')
       .insert({
@@ -110,10 +91,21 @@ export async function POST(request: NextRequest) {
         phone: phone || '',
         phone_code: phone_code || '+593',
         document_id: document_id || '',
+        puesto: puesto || null,
+        rol: rol || 'editor',
+        lugar_residencia: lugar_residencia || null,
+        estado_civil: estado_civil || null,
+        nivel_estudios: nivel_estudios || null,
+        aspiracion_salarial: aspiracion_salarial || null,
+        disponibilidad_inmediata: disponibilidad_inmediata !== undefined ? disponibilidad_inmediata : true,
+        disponibilidad_viaje: disponibilidad_viaje || null,
+        acceso_tecnologia: acceso_tecnologia || null,
+        herramientas: herramientas || null,
         commission_type: commission_type || 'percentage',
         commission_value: commission_value || 0,
         commission_trigger_percent: commission_trigger_percent || 30,
         is_active: true,
+        auth_user_id: userId,
         notes: notes || '',
         postulante_id: postulante_id || null,
         aceptado_en: postulante_id ? new Date().toISOString() : null,
@@ -141,24 +133,36 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
-    const { id, ...updates } = body
+    const { id, rol, ...updates } = body
 
     if (!id) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
     }
 
-    const { data, error } = await supabase
+    // Update advisor record
+    const advisorUpdates = { ...updates }
+    if (rol) advisorUpdates.rol = rol
+
+    const { data: advisor, error } = await supabase
       .from('advisors')
-      .update(updates)
+      .update(advisorUpdates)
       .eq('id', id)
-      .select()
+      .select('*, auth_user_id, email')
       .single()
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, data })
+    // Sync role to profile if the advisor has an auth user
+    if (rol && advisor?.auth_user_id) {
+      await supabase
+        .from('profiles')
+        .update({ rol, nombre: advisor.name, actualizado_en: new Date().toISOString() })
+        .eq('id', advisor.auth_user_id)
+    }
+
+    return NextResponse.json({ success: true, data: advisor })
   } catch (error) {
     console.error('[API Error] /api/admin/equipo PUT:', error)
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
