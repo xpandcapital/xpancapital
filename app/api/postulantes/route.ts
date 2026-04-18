@@ -121,12 +121,12 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = createClient();
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const body = await request.json();
+    const id = searchParams.get('id') || body.id;
 
     if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 });
 
-    const body = await request.json();
-    const { ...updates } = body;
+    const { id: _id, ...updates } = body;
     updates.actualizado_en = new Date().toISOString();
 
     const { data, error } = await supabase
