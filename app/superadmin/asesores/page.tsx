@@ -6,8 +6,9 @@ import {
   UsersRound, Plus, Search, Edit2, Trash2, 
   Phone, Mail, FileText, Percent, DollarSign,
   ChevronDown, ChevronUp, X, Check, Loader2,
-  UserCheck, AlertCircle
+  UserCheck, AlertCircle, BookOpen
 } from 'lucide-react';
+import { AssignmentModal } from './_components/AssignmentModal';
 
 type Advisor = {
   id: string;
@@ -31,6 +32,7 @@ export default function AsesoresPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingAdvisor, setEditingAdvisor] = useState<Advisor | null>(null);
   const [expandedAdvisor, setExpandedAdvisor] = useState<string | null>(null);
+  const [assigningAdvisor, setAssigningAdvisor] = useState<Advisor | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{ isOpen: boolean; advisor: Advisor | null }>({
     isOpen: false,
     advisor: null
@@ -287,6 +289,16 @@ export default function AsesoresPage() {
                     className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"
                   >
                     <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setAssigningAdvisor(advisor);
+                    }}
+                    className="p-2 bg-blis-red/10 hover:bg-blis-red/20 text-blis-red rounded-lg transition-all"
+                    title="Asignar cursos y productos"
+                  >
+                    <BookOpen className="w-4 h-4" />
                   </button>
                   <button
                     onClick={(e) => {
@@ -607,6 +619,13 @@ export default function AsesoresPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {assigningAdvisor && (
+        <AssignmentModal
+          advisor={assigningAdvisor}
+          onClose={() => setAssigningAdvisor(null)}
+        />
       )}
     </div>
   );

@@ -137,6 +137,33 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Auto-create team member when postulante is accepted
+    if (updates.estado === 'aceptado' && data) {
+      const postulante = data;
+      // Check if advisor already exists for this postulante
+      const { data: existingAdvisor } = await supabase
+        .from('advisors')
+        .select('id')
+        .eq('postulante_id', postulante.id)
+        .single();
+
+      if (!existingAdvisor) {
+        await supabase
+          .from('advisors')
+          .insert({
+            name: postulante.nombre_completo || postulante.nombre || 'Sin nombre',
+            email: postulante.correo_contacto || postulante.email || '',
+            phone: postulante.celular_contacto || postulante.telefono || '',
+            phone_code: '+593',
+            postulante_id: postulante.id,
+            aceptado_en: new Date().toISOString(),
+            is_active: true,
+            notes: `Creado automáticamente desde postulante aceptado. Puesto: ${postulante.puesto_postula || 'N/A'}`,
+          });
+      }
+    }
+
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('[API Error] /api/postulantes:', error);
