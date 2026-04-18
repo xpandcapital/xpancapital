@@ -45,3 +45,30 @@ nul
 NUL
 
 .vercel
+
+# Stray scripts and templates
+*.bat
+*.ps1
+/fix_*.js
+/debug_*.js
+/test_db*.js
+/test_memo.js
+/test-api.js
+/check_*.js
+/add_*.js
+/update_*.js
+/holy_grail*.js
+/find_*.js
+/final_*.js
+/format.js
+/tailwind_config_copy.js
+/package_original.json
+/new_ideas.json
+*.py
+/add_order_index.sql
+/supabase_*.sql
+/components_disabled/
+/Mercury-MP-new/
+/medical/
+/tmp/
+/data/
