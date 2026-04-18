@@ -138,23 +138,59 @@ export async function PUT(request: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    // Auto-create team member when postulante is accepted
+    // Auto-create team member (auth user + profile + advisor) when postulante is accepted
     if (updates.estado === 'aceptado' && data) {
       const postulante = data;
+      const advisorEmail = (postulante.correo_contacto || postulante.email || '').toLowerCase().trim();
+      const advisorName = postulante.nombre_completo || postulante.nombre || 'Sin nombre';
+      const advisorPhone = postulante.celular_contacto || postulante.telefono || '';
+
       // Check if advisor already exists for this postulante
       const { data: existingAdvisor } = await supabase
         .from('advisors')
-        .select('id')
+        .select('id, email')
         .eq('postulante_id', postulante.id)
         .single();
 
       if (!existingAdvisor) {
+        // Create Supabase Auth user so the team member can log in
+        if (advisorEmail) {
+          const { data: existingUsers } = await supabase.auth.admin.listUsers();
+          const existingUser = existingUsers?.users?.find(u => u.email === advisorEmail);
+
+          if (!existingUser) {
+            const tempPassword = Math.random().toString(36).slice(-10) + 'Aa1!';
+            const { data: newUser, error: authError } = await supabase.auth.admin.createUser({
+              email: advisorEmail,
+              password: tempPassword,
+              email_confirm: true,
+              user_metadata: {
+                nombre: advisorName,
+                empresa_id: EMPRESA_ID,
+              },
+            });
+
+            if (!authError && newUser.user?.id) {
+              // Create profile
+              await supabase.from('profiles').upsert({
+                id: newUser.user.id,
+                email: advisorEmail,
+                nombre: advisorName,
+                empresa_id: EMPRESA_ID,
+                rol: 'editor',
+                creado_en: new Date().toISOString(),
+              }, { onConflict: 'id' });
+            }
+          }
+        }
+
+        // Create advisor record
         await supabase
           .from('advisors')
           .insert({
-            name: postulante.nombre_completo || postulante.nombre || 'Sin nombre',
-            email: postulante.correo_contacto || postulante.email || '',
-            phone: postulante.celular_contacto || postulante.telefono || '',
+            name: advisorName,
+            email: advisorEmail,
+            phone: advisorPhone,
             phone_code: '+593',
             postulante_id: postulante.id,
             aceptado_en: new Date().toISOString(),

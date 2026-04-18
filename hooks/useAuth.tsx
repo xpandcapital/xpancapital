@@ -182,34 +182,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const signUp = async (email: string, password: string, nombre?: string, apellido?: string): Promise<{ success: boolean; error?: string }> => {
-        // Registration disabled
-        return { success: false, error: "El registro está deshabilitado. Contacta al administrador." };
+        const supabase = getSupabase();
+        if (!supabase) {
+            return { success: false, error: "Supabase no está configurado" };
+        }
         
-        // const supabase = getSupabase();
-        // if (!supabase) {
-        //     return { success: false, error: "Supabase no está configurado" };
-        // }
-        
-        // try {
-        //     const { error } = await supabase.auth.signUp({
-        //         email,
-        //         password,
-        //         options: {
-        //             data: {
-        //                 nombre,
-        //                 apellido,
-        //             },
-        //         },
-        //     });
+        try {
+            const { error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        nombre,
+                        apellido,
+                    },
+                },
+            });
 
-        //     if (error) {
-        //         return { success: false, error: error.message };
-        //     }
+            if (error) {
+                return { success: false, error: error.message };
+            }
 
-        //     return { success: true };
-        // } catch (err) {
-        //     return { success: false, error: err instanceof Error ? err.message : "Error desconocido" };
-        // }
+            return { success: true };
+        } catch (err) {
+            return { success: false, error: err instanceof Error ? err.message : "Error desconocido" };
+        }
     };
 
     const logout = async () => {

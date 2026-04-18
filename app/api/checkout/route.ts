@@ -153,9 +153,9 @@ export async function POST(request: NextRequest) {
           finalUserId = newUser.user?.id;
           isNewUser = true;
 
-          // Crear perfil en tabla perfiles
+          // Crear perfil en tabla profiles
           if (finalUserId) {
-            await supabase.from('perfiles').upsert({
+            await supabase.from('profiles').upsert({
               id: finalUserId,
               email: email.toLowerCase(),
               nombre,

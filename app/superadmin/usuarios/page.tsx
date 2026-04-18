@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UserPlus, Shield, Mail, Download, Search, Filter, User, CheckCircle2, X, Loader2 } from "lucide-react";
+import { UserPlus, Shield, Mail, Download, Search, Filter, User, CheckCircle2, X, Loader2, Eye, EyeOff, Copy, KeyRound } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 
@@ -20,6 +20,13 @@ export default function AdminUsers() {
     const { showToast } = useToast();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+    const [newUserName, setNewUserName] = useState('');
+    const [newUserEmail, setNewUserEmail] = useState('');
+    const [newUserPassword, setNewUserPassword] = useState('');
+    const [newUserRole, setNewUserRole] = useState('editor');
+    const [showPassword, setShowPassword] = useState(false);
+    const [creatingUser, setCreatingUser] = useState(false);
+    const [createdPassword, setCreatedPassword] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [roleFilter, setRoleFilter] = useState("Todos");
     const [statusFilter, setStatusFilter] = useState("Todos");
@@ -231,10 +238,10 @@ export default function AdminUsers() {
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-md"
+                            className="relative bg-zinc-950 border border-white/10 rounded-2xl p-6 w-full max-w-md"
                         >
                             <button
-                                onClick={() => setIsModalOpen(false)}
+                                onClick={() => { setIsModalOpen(false); setCreatedPassword(null); }}
                                 className="absolute top-4 right-4 p-2 hover:bg-white/5 rounded-lg"
                             >
                                 <X className="w-5 h-5 text-gray-400" />
@@ -244,19 +251,154 @@ export default function AdminUsers() {
                                 {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
                             </h2>
                             
-                            <div className="space-y-4">
-                                <p className="text-gray-400 text-sm">
-                                    La gestión de usuarios se realiza desde Supabase Auth.
-                                    Los usuarios se registran automáticamente al iniciar sesión.
-                                </p>
-                                
-                                <button
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold hover:bg-white/10 transition-colors"
-                                >
-                                    Cerrar
-                                </button>
-                            </div>
+                            {createdPassword ? (
+                                <div className="space-y-4">
+                                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <KeyRound className="w-4 h-4 text-emerald-400" />
+                                            <p className="text-emerald-400 font-bold text-sm">Usuario creado exitosamente</p>
+                                        </div>
+                                        <p className="text-gray-300 text-xs mb-3">
+                                            Comparte estas credenciales con el nuevo usuario:
+                                        </p>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2">
+                                                <span className="text-[10px] text-gray-500 uppercase font-bold w-12">Email</span>
+                                                <code className="flex-1 text-emerald-300 font-mono text-xs">{newUserEmail}</code>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2">
+                                                <span className="text-[10px] text-gray-500 uppercase font-bold w-12">Clave</span>
+                                                <code className="flex-1 text-emerald-300 font-mono text-xs break-all">{createdPassword}</code>
+                                                <button onClick={() => navigator.clipboard.writeText(createdPassword)} className="p-1 hover:bg-white/5 rounded">
+                                                    <Copy className="w-3.5 h-3.5 text-gray-400" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => { setIsModalOpen(false); setCreatedPassword(null); }}
+                                        className="w-full py-3 bg-blis-red rounded-xl text-white font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                    >
+                                        Cerrar
+                                    </button>
+                                </div>
+                            ) : editingUser ? (
+                                <div className="space-y-4">
+                                    <p className="text-gray-400 text-sm">
+                                        Para editar el rol y estado de este usuario, utiliza la gestión de equipo o Supabase Auth.
+                                    </p>
+                                    <button
+                                        onClick={() => setIsModalOpen(false)}
+                                        className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold hover:bg-white/10 transition-colors"
+                                    >
+                                        Cerrar
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Nombre Completo *</label>
+                                        <input
+                                            type="text"
+                                            value={newUserName}
+                                            onChange={(e) => setNewUserName(e.target.value)}
+                                            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
+                                            placeholder="Nombre del usuario"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Email *</label>
+                                        <input
+                                            type="email"
+                                            value={newUserEmail}
+                                            onChange={(e) => setNewUserEmail(e.target.value)}
+                                            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
+                                            placeholder="correo@ejemplo.com"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Contraseña</label>
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                value={newUserPassword}
+                                                onChange={(e) => setNewUserPassword(e.target.value)}
+                                                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 pr-12 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
+                                                placeholder="Dejar vacío para generar automáticamente"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-white transition-colors"
+                                            >
+                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        <p className="text-[10px] text-gray-600 uppercase tracking-widest">Se genera automáticamente si se deja vacío</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Rol</label>
+                                        <select
+                                            value={newUserRole}
+                                            onChange={(e) => setNewUserRole(e.target.value)}
+                                            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
+                                        >
+                                            <option value="usuario">Usuario</option>
+                                            <option value="cliente">Cliente</option>
+                                            <option value="editor">Editor</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex gap-3 pt-2">
+                                        <button
+                                            onClick={() => setIsModalOpen(false)}
+                                            className="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-400 font-bold hover:bg-white/10 transition-colors text-sm"
+                                        >
+                                            Cancelar
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (!newUserName.trim() || !newUserEmail.trim()) {
+                                                    showToast('Nombre y email son obligatorios', 'error');
+                                                    return;
+                                                }
+                                                setCreatingUser(true);
+                                                try {
+                                                    const res = await fetch('/api/admin/create-user', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            nombre: newUserName,
+                                                            email: newUserEmail,
+                                                            password: newUserPassword || undefined,
+                                                            rol: newUserRole,
+                                                        }),
+                                                    });
+                                                    const data = await res.json();
+                                                    if (data.success) {
+                                                        if (data.generatedPassword) {
+                                                            setCreatedPassword(data.generatedPassword);
+                                                        }
+                                                        showToast('Usuario creado exitosamente');
+                                                        fetchUsers();
+                                                    } else {
+                                                        showToast(data.error || 'Error al crear usuario', 'error');
+                                                    }
+                                                } catch {
+                                                    showToast('Error al crear usuario', 'error');
+                                                } finally {
+                                                    setCreatingUser(false);
+                                                }
+                                            }}
+                                            disabled={creatingUser || !newUserName.trim() || !newUserEmail.trim()}
+                                            className="flex-1 py-3 bg-blis-red rounded-xl text-white font-bold hover:scale-[1.02] active:scale-[0.98] transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                                        >
+                                            {creatingUser ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                                            Crear Usuario
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </motion.div>
                     </motion.div>
                 )}

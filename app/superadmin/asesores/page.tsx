@@ -6,7 +6,7 @@ import {
   UsersRound, Plus, Search, Edit2, Trash2, 
   Phone, Mail, FileText, Percent, DollarSign,
   ChevronDown, ChevronUp, X, Check, Loader2,
-  UserCheck, AlertCircle, BookOpen
+  UserCheck, AlertCircle, BookOpen, Eye, EyeOff, KeyRound, Copy
 } from 'lucide-react';
 import { AssignmentModal } from './_components/AssignmentModal';
 
@@ -23,6 +23,8 @@ type Advisor = {
   is_active: boolean;
   created_at: string;
   notes: string;
+  postulante_id?: string;
+  aceptado_en?: string;
 };
 
 export default function AsesoresPage() {
@@ -37,6 +39,10 @@ export default function AsesoresPage() {
     isOpen: false,
     advisor: null
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [createdPassword, setCreatedPassword] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -48,12 +54,18 @@ export default function AsesoresPage() {
     commission_value: 0,
     commission_trigger_percent: 30,
     is_active: true,
-    notes: ''
+    notes: '',
+    password: '',
   });
 
   useEffect(() => {
     loadAdvisors();
   }, []);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const loadAdvisors = async () => {
     try {
@@ -72,6 +84,7 @@ export default function AsesoresPage() {
   };
 
   const handleOpenModal = (advisor?: Advisor) => {
+    setCreatedPassword(null);
     if (advisor) {
       setEditingAdvisor(advisor);
       setFormData({
@@ -84,7 +97,8 @@ export default function AsesoresPage() {
         commission_value: advisor.commission_value || 0,
         commission_trigger_percent: advisor.commission_trigger_percent || 30,
         is_active: advisor.is_active,
-        notes: advisor.notes || ''
+        notes: advisor.notes || '',
+        password: '',
       });
     } else {
       setEditingAdvisor(null);
@@ -98,34 +112,50 @@ export default function AsesoresPage() {
         commission_value: 0,
         commission_trigger_percent: 30,
         is_active: true,
-        notes: ''
+        notes: '',
+        password: '',
       });
     }
     setShowModal(true);
   };
 
   const handleSaveAdvisor = async () => {
+    setIsSaving(true);
     try {
       if (editingAdvisor) {
+        const { password, ...updateData } = formData;
         const { error } = await supabase
           .from('advisors')
-          .update(formData)
+          .update(updateData)
           .eq('id', editingAdvisor.id);
 
         if (error) throw error;
+        showToast('Asesor actualizado correctamente');
       } else {
-        const { error } = await supabase
-          .from('advisors')
-          .insert([formData]);
+        const res = await fetch('/api/admin/equipo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+        const data = await res.json();
 
-        if (error) throw error;
+        if (!data.success) {
+          throw new Error(data.error || 'Error al crear asesor');
+        }
+
+        if (data.generatedPassword) {
+          setCreatedPassword(data.generatedPassword);
+        }
+
+        showToast(data.isNewUser ? 'Empleado creado con acceso al sistema' : 'Asesor creado');
       }
 
       await loadAdvisors();
-      setShowModal(false);
+      if (!createdPassword) setShowModal(false);
     } catch (error) {
-      console.error('Error saving advisor:', error);
-      alert('Error al guardar el asesor');
+      showToast(error instanceof Error ? error.message : 'Error al guardar', 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -142,9 +172,10 @@ export default function AsesoresPage() {
       
       await loadAdvisors();
       setShowDeleteConfirm({ isOpen: false, advisor: null });
+      showToast('Asesor eliminado');
     } catch (error) {
       console.error('Error deleting advisor:', error);
-      alert('Error al eliminar el asesor');
+      showToast('Error al eliminar el asesor', 'error');
     }
   };
 
@@ -178,14 +209,22 @@ export default function AsesoresPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-8">
+      {toast && (
+        <div className={`fixed top-4 right-4 z-[100] px-6 py-3 rounded-xl font-bold text-sm shadow-2xl animate-in slide-in-from-right ${
+          toast.type === 'success' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' : 'bg-red-500/10 border border-red-500/30 text-red-400'
+        }`}>
+          {toast.message}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
-            Gestión de Asesores
+            Equipo
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Administra el equipo de asesores y vendedores inmobiliarios.
+            Administra el equipo. Los miembros pueden acceder al sistema con su email y contraseña.
           </p>
         </div>
         <button
@@ -193,7 +232,7 @@ export default function AsesoresPage() {
           className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-blis-red/30"
         >
           <Plus className="w-4 h-4" />
-          Nuevo Asesor
+          Nuevo Empleado
         </button>
       </div>
 
@@ -233,6 +272,11 @@ export default function AsesoresPage() {
                     {!advisor.is_active && (
                       <span className="px-2 py-0.5 rounded bg-gray-500/10 text-gray-400 text-[10px] font-bold uppercase">
                         Inactivo
+                      </span>
+                    )}
+                    {advisor.postulante_id && (
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase flex items-center gap-1">
+                        <UserCheck className="w-2.5 h-2.5" /> Postulante
                       </span>
                     )}
                   </div>
@@ -374,7 +418,7 @@ export default function AsesoresPage() {
           <div className="text-center py-12">
             <UsersRound className="w-12 h-12 text-gray-700 mx-auto mb-4" />
             <p className="text-gray-500">
-              {searchTerm ? 'No se encontraron asesores con ese criterio de búsqueda.' : 'No hay asesores registrados.'}
+              {searchTerm ? 'No se encontraron miembros con ese criterio.' : 'No hay miembros del equipo.'}
             </p>
           </div>
         )}
@@ -386,193 +430,250 @@ export default function AsesoresPage() {
           <div className="bg-zinc-950 border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-white/5 flex items-center justify-between">
               <h2 className="text-xl font-black text-white uppercase tracking-tight">
-                {editingAdvisor ? 'Editar Asesor' : 'Nuevo Asesor'}
+                {editingAdvisor ? 'Editar Miembro' : 'Nuevo Empleado'}
               </h2>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => { setShowModal(false); setCreatedPassword(null); }}
                 className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Name */}
-              <div className="space-y-2">
-                <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
-                  Nombre Completo *
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
-                  placeholder="Ej: Juan Carlos Pérez"
-                />
+            {/* Password reveal after creation */}
+            {createdPassword && (
+              <div className="mx-6 mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                <div className="flex items-center gap-2 mb-2">
+                  <KeyRound className="w-4 h-4 text-emerald-400" />
+                  <p className="text-emerald-400 font-bold text-sm">Empleado creado exitosamente</p>
+                </div>
+                <p className="text-gray-300 text-xs mb-2">
+                  La contraseña temporal se generó automáticamente. Compártela con el miembro del equipo:
+                </p>
+                <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-3">
+                  <code className="flex-1 text-emerald-300 font-mono text-sm break-all">{createdPassword}</code>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(createdPassword)}
+                    className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                    title="Copiar contraseña"
+                  >
+                    <Copy className="w-4 h-4 text-gray-400" />
+                  </button>
+                </div>
+                <p className="text-gray-500 text-[10px] mt-2 uppercase tracking-widest">
+                  El empleado puede cambiar su contraseña después de iniciar sesión
+                </p>
               </div>
+            )}
 
-              {/* Document ID */}
-              <div className="space-y-2">
-                <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
-                  Cédula / RUC
-                </label>
-                <input
-                  type="text"
-                  value={formData.document_id}
-                  onChange={(e) => setFormData({ ...formData, document_id: e.target.value })}
-                  className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
-                  placeholder="Ej: 1712345678"
-                />
-              </div>
-
-              {/* Contact Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {!createdPassword && (
+              <div className="p-6 space-y-6">
+                {/* Name */}
                 <div className="space-y-2">
                   <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
-                    Email
+                    Nombre Completo *
                   </label>
                   <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
-                    placeholder="juan@email.com"
+                    placeholder="Ej: Juan Carlos Pérez"
                   />
                 </div>
+
+                {/* Document ID */}
                 <div className="space-y-2">
                   <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
-                    Teléfono
+                    Cédula / RUC
                   </label>
-                  <div className="flex gap-2">
-                    <select
-                      value={formData.phone_code}
-                      onChange={(e) => setFormData({ ...formData, phone_code: e.target.value })}
-                      className="bg-black border border-white/10 rounded-xl px-2 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
-                    >
-                      <option value="+593">+593</option>
-                      <option value="+1">+1</option>
-                      <option value="+34">+34</option>
-                      <option value="+57">+57</option>
-                      <option value="+51">+51</option>
-                      <option value="+52">+52</option>
-                      <option value="+54">+54</option>
-                      <option value="+56">+56</option>
-                    </select>
+                  <input
+                    type="text"
+                    value={formData.document_id}
+                    onChange={(e) => setFormData({ ...formData, document_id: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
+                    placeholder="Ej: 1712345678"
+                  />
+                </div>
+
+                {/* Contact Info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                      Email *
+                    </label>
                     <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
-                      placeholder="0991234567"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
+                      placeholder="juan@blis.com"
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Commission Settings */}
-              <div className="border-t border-white/5 pt-6">
-                <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-4">
-                  Configuración de Comisión
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
-                      Tipo de Comisión
+                      Teléfono
                     </label>
-                    <select
-                      value={formData.commission_type}
-                      onChange={(e) => setFormData({ ...formData, commission_type: e.target.value as 'percentage' | 'fixed' })}
-                      className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
-                    >
-                      <option value="percentage">Porcentaje (%)</option>
-                      <option value="fixed">Monto Fijo ($)</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
-                      Valor de Comisión
-                    </label>
-                    <div className="relative">
-                      {formData.commission_type === 'percentage' ? (
-                        <Percent className="w-4 h-4 text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" />
-                      ) : (
-                        <DollarSign className="w-4 h-4 text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" />
-                      )}
+                    <div className="flex gap-2">
+                      <select
+                        value={formData.phone_code}
+                        onChange={(e) => setFormData({ ...formData, phone_code: e.target.value })}
+                        className="bg-black border border-white/10 rounded-xl px-2 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
+                      >
+                        <option value="+593">+593</option>
+                        <option value="+1">+1</option>
+                        <option value="+34">+34</option>
+                        <option value="+57">+57</option>
+                        <option value="+51">+51</option>
+                        <option value="+52">+52</option>
+                        <option value="+54">+54</option>
+                        <option value="+56">+56</option>
+                      </select>
                       <input
-                        type="number"
-                        value={formData.commission_value}
-                        onChange={(e) => setFormData({ ...formData, commission_value: parseFloat(e.target.value) || 0 })}
-                        className={`w-full bg-black border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors ${
-                          formData.commission_type === 'percentage' ? '' : ''
-                        }`}
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="flex-1 bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
+                        placeholder="0991234567"
                       />
                     </div>
                   </div>
+                </div>
+
+                {/* Password (only for new) */}
+                {!editingAdvisor && (
                   <div className="space-y-2">
                     <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
-                      Liberar al (%) Pagado
+                      Contraseña Inicial
                     </label>
-                    <input
-                      type="number"
-                      value={formData.commission_trigger_percent}
-                      onChange={(e) => setFormData({ ...formData, commission_trigger_percent: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
-                      min="0"
-                      max="100"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 pr-12 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
+                        placeholder="Dejar vacío para generar automáticamente"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-white transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-gray-600 uppercase tracking-widest">
+                      Si dejas esto vacío, se generará una contraseña temporal automáticamente
+                    </p>
+                  </div>
+                )}
+
+                {/* Commission Settings */}
+                <div className="border-t border-white/5 pt-6">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-4">
+                    Configuración de Comisión
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                        Tipo de Comisión
+                      </label>
+                      <select
+                        value={formData.commission_type}
+                        onChange={(e) => setFormData({ ...formData, commission_type: e.target.value as 'percentage' | 'fixed' })}
+                        className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
+                      >
+                        <option value="percentage">Porcentaje (%)</option>
+                        <option value="fixed">Monto Fijo ($)</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                        Valor de Comisión
+                      </label>
+                      <div className="relative">
+                        {formData.commission_type === 'percentage' ? (
+                          <Percent className="w-4 h-4 text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                        ) : (
+                          <DollarSign className="w-4 h-4 text-gray-500 absolute left-4 top-1/2 -translate-y-1/2" />
+                        )}
+                        <input
+                          type="number"
+                          value={formData.commission_value}
+                          onChange={(e) => setFormData({ ...formData, commission_value: parseFloat(e.target.value) || 0 })}
+                          className="w-full bg-black border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                        Liberar al (%) Pagado
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.commission_trigger_percent}
+                        onChange={(e) => setFormData({ ...formData, commission_trigger_percent: parseFloat(e.target.value) || 0 })}
+                        className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors"
+                        min="0"
+                        max="100"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Notes */}
-              <div className="space-y-2">
-                <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
-                  Observaciones
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  rows={3}
-                  className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors resize-none"
-                  placeholder="Notas adicionales sobre el asesor..."
-                />
-              </div>
-
-              {/* Active Toggle */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setFormData({ ...formData, is_active: !formData.is_active })}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${
-                    formData.is_active ? 'bg-emerald-500' : 'bg-gray-600'
-                  }`}
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
-                      formData.is_active ? 'translate-x-6' : 'translate-x-0.5'
-                    }`}
+                {/* Notes */}
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+                    Observaciones
+                  </label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    rows={3}
+                    className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors resize-none"
+                    placeholder="Notas adicionales..."
                   />
-                </button>
-                <span className="text-white text-sm font-medium">
-                  {formData.is_active ? 'Asesor Activo' : 'Asesor Inactivo'}
-                </span>
-              </div>
-            </div>
+                </div>
 
+                {/* Active Toggle */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setFormData({ ...formData, is_active: !formData.is_active })}
+                    className={`w-12 h-6 rounded-full transition-colors relative ${
+                      formData.is_active ? 'bg-emerald-500' : 'bg-gray-600'
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-transform ${
+                        formData.is_active ? 'translate-x-6' : 'translate-x-0.5'
+                      }`}
+                    />
+                  </button>
+                  <span className="text-white text-sm font-medium">
+                    {formData.is_active ? 'Miembro Activo' : 'Miembro Inactivo'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Footer buttons */}
             <div className="p-6 border-t border-white/5 flex justify-end gap-3">
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => { setShowModal(false); setCreatedPassword(null); }}
                 className="px-6 py-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-all font-medium text-sm"
               >
-                Cancelar
+                {createdPassword ? 'Cerrar' : 'Cancelar'}
               </button>
-              <button
-                onClick={handleSaveAdvisor}
-                disabled={!formData.name.trim()}
-                className="px-6 py-2.5 bg-blis-red rounded-xl text-white font-bold text-sm hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                <Check className="w-4 h-4" />
-                {editingAdvisor ? 'Guardar Cambios' : 'Crear Asesor'}
-              </button>
+              {!createdPassword && (
+                <button
+                  onClick={handleSaveAdvisor}
+                  disabled={!formData.name.trim() || !formData.email.trim() || isSaving}
+                  className="px-6 py-2.5 bg-blis-red rounded-xl text-white font-bold text-sm hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  {editingAdvisor ? 'Guardar Cambios' : 'Crear Empleado'}
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -588,7 +689,7 @@ export default function AsesoresPage() {
               </div>
               <div>
                 <h2 className="text-xl font-black text-white uppercase tracking-tight">
-                  Eliminar Asesor
+                  Eliminar Miembro
                 </h2>
                 <p className="text-gray-400 text-sm">
                   Esta acción no se puede deshacer
@@ -597,9 +698,8 @@ export default function AsesoresPage() {
             </div>
 
             <p className="text-gray-300 mb-6">
-              ¿Estás seguro de que deseas eliminar al asesor{' '}
+              ¿Estás seguro de que deseas eliminar a{' '}
               <span className="text-white font-bold">{showDeleteConfirm.advisor.name}</span>? 
-              Todos los datos asociados se perderán permanentemente.
             </p>
 
             <div className="flex justify-end gap-3">
