@@ -16,7 +16,7 @@ import {
     Smile, ImagePlus, Strikethrough, Superscript, Subscript,
     Trash, Undo, Redo, Eraser, Table as TableIcon,
     MonitorPlay, FileCode, Upload, Scissors, GripHorizontal, Edit,
-    ChevronUp, ChevronDown, Sparkles, EyeOff, Loader2
+    ChevronUp, ChevronDown, Sparkles, EyeOff, Loader2, Users
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -60,6 +60,7 @@ interface Course {
     bliscoins: number;
     image: string | null;
     certificateTemplateId: string | null;
+    paraEquipo: boolean;
 }
 
 function ImageCropper({ src, onCrop, onCancel }: { src: string; onCrop: (base64: string) => void; onCancel: () => void }) {
@@ -733,6 +734,7 @@ export default function AdminCourses() {
                     activo?: boolean;
                     certificado_template_id?: string;
                     creado_en?: string;
+                    para_equipo?: boolean;
                 }) => ({
                     id: c.id,
                     title: c.nombre,
@@ -744,7 +746,8 @@ export default function AdminCourses() {
                     allowComments: true,
                     bliscoins: c.precio_coins || 0,
                     image: null,
-                    certificateTemplateId: c.certificado_template_id || null
+                    certificateTemplateId: c.certificado_template_id || null,
+                    paraEquipo: c.para_equipo || false
                 }));
                 setCourses(mappedCourses);
             }
@@ -813,7 +816,8 @@ export default function AdminCourses() {
                 precio_coins: currentCourse.bliscoins || 0,
                 precio_usd: currentCourse.price || 0,
                 activo: currentCourse.status === 'Publicado',
-                certificado_template_id: currentCourse.certificateTemplateId || null
+                certificado_template_id: currentCourse.certificateTemplateId || null,
+                para_equipo: currentCourse.paraEquipo || false
             };
 
             const isNew = currentCourse.id.startsWith('new') || currentCourse.id.length < 10;
@@ -856,7 +860,8 @@ export default function AdminCourses() {
             allowComments: true,
             bliscoins: 0,
             image: null,
-            certificateTemplateId: null
+            certificateTemplateId: null,
+            paraEquipo: false
         };
         setCourses(prev => [...prev, newCourse]);
         setCurrentCourse(newCourse);
@@ -1401,13 +1406,24 @@ export default function AdminCourses() {
                                                 </select>
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest leading-none pb-1">Comentarios</label>
+<div className="space-y-2">
+                                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Comentarios</label>
                                                 <button
                                                     onClick={() => setCurrentCourse({ ...currentCourse, allowComments: !currentCourse.allowComments })}
                                                     className={`w-full py-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${currentCourse.allowComments ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/5 border-white/10 text-gray-500'}`}
                                                 >
                                                     {currentCourse.allowComments ? 'Activo' : 'Off'}
+                                                </button>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Para Equipo</label>
+                                                <button
+                                                    onClick={() => setCurrentCourse({ ...currentCourse, paraEquipo: !currentCourse.paraEquipo })}
+                                                    className={`w-full py-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${currentCourse.paraEquipo ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : 'bg-white/5 border-white/10 text-gray-500'}`}
+                                                >
+                                                    <Users className="w-3.5 h-3.5" />
+                                                    {currentCourse.paraEquipo ? 'Solo Equipo' : 'Público'}
                                                 </button>
                                             </div>
                                         </div>
@@ -1715,6 +1731,7 @@ export default function AdminCourses() {
                                     <button onClick={() => { setCurrentCourse(course); setView("editor"); }} className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all text-black"><Eye className="w-6 h-6" /></button>
                                 </div>
                                 <div className="absolute top-6 left-6 px-3 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[8px] font-black text-white/50 uppercase tracking-widest border border-white/10 uppercase">{course.category}</div>
+                                {course.paraEquipo && <div className="absolute top-6 right-6 px-3 py-1 bg-amber-500/20 backdrop-blur-md rounded-lg text-[8px] font-black text-amber-400 uppercase tracking-widest border border-amber-500/30 flex items-center gap-1"><Users className="w-3 h-3" /> Equipo</div>}
                             </div>
                             <div className="space-y-4 flex-1">
                                 <h3 className="text-xl font-black text-white uppercase tracking-tighter leading-tight group-hover:text-blis-red transition-colors">{course.title || 'Sin título'}</h3>

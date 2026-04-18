@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
         .eq('empresa_id', DEFAULT_EMPRESA_ID)
         .eq('slug', slug)
         .eq('activo', true)
+        .neq('para_equipo', true)
         .single()
 
       if (error || !curso) {
@@ -49,6 +50,7 @@ export async function GET(request: NextRequest) {
       .select('id, nombre, slug, descripcion, precio_coins, precio_usd, creado_en')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .eq('activo', true)
+      .neq('para_equipo', true)
       .order('creado_en', { ascending: false })
 
     if (error) {

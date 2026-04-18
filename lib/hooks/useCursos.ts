@@ -28,6 +28,7 @@ export interface Curso {
   max_intentos: number
   nota_aprobacion: number
   activo: boolean
+  para_equipo?: boolean
   creado_en: string
   progreso?: {
     id: string

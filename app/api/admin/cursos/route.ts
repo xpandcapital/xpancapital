@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
         precio_coins,
         precio_usd,
         activo,
+        para_equipo,
         creado_en,
         certificado_template_id,
         plantilla:certificado_plantillas(id, nombre)
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
       max_intentos,
       nota_aprobacion,
       certificado_template_id,
+      para_equipo,
       activo = true
     } = body
 
@@ -94,6 +96,7 @@ export async function POST(request: NextRequest) {
         max_intentos: max_intentos || 3,
         nota_aprobacion: nota_aprobacion || 70,
         certificado_template_id,
+        para_equipo,
         activo
       })
       .select()

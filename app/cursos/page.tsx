@@ -28,8 +28,9 @@ export default function CursosPage() {
     }, []);
 
     const filteredCursos = cursos.filter(curso =>
-        curso.nombre.toLowerCase().includes(search.toLowerCase()) ||
-        curso.descripcion?.toLowerCase().includes(search.toLowerCase())
+        !curso.para_equipo &&
+        (curso.nombre.toLowerCase().includes(search.toLowerCase()) ||
+        curso.descripcion?.toLowerCase().includes(search.toLowerCase()))
     );
 
     if (loading) {
