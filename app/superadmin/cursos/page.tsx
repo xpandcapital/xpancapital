@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { createPortal } from "react-dom";
 import {
     Plus, Search, BookOpen, Video, FileText,
     Save, Eye, Trash2, ChevronRight, X,
@@ -1102,8 +1101,8 @@ export default function AdminCourses() {
                         -moz-appearance: textfield;
                     }
                 `}</style>
-                {/* Course Preview Modal — rendered via portal to escape all stacking contexts */}
-                {showPreview && currentCourse && typeof document !== 'undefined' && createPortal(
+                {/* Preview Modal */}
+                {showPreview && currentCourse && (
                     <div className="fixed inset-0 bg-black flex flex-col overflow-hidden" style={{ zIndex: 999999 }}>
                         <div className="flex items-center justify-between px-8 py-4 bg-zinc-950 border-b border-white/10 shrink-0">
                             <div className="flex items-center gap-3">
@@ -1158,43 +1157,32 @@ export default function AdminCourses() {
                                 ))}
                             </div>
                         </div>
-                    </div>,
-                    document.body
+                    </div>
                 )}
 
-                {/* Thin Header — rendered via Portal so it's always full-width, 
-                    outside all parent overflow/clip containers. 
-                    z-[45] so the sidebar (z-50) naturally sits on top of its left edge. */}
-                {typeof document !== 'undefined' && createPortal(
-                    <div
-                        className="fixed right-0 bg-black border-b border-white/5 px-4 md:px-8 py-3 flex items-center justify-between"
-                        style={{ top: '80px', zIndex: 45, left: 'var(--sidebar-width, 64px)', transition: 'left 0.3s ease' }}
-                    >
-                        <div className="flex items-center gap-4">
-                            <button onClick={() => setView("list")} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 transition-all"><ChevronRight className="w-3.5 h-3.5 rotate-180" /></button>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h1 className="text-sm font-black text-white uppercase tracking-widest">{currentCourse.title || "Nuevo Curso"}</h1>
-                                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded bg-white/5 uppercase tracking-[0.2em] ${currentCourse.status === 'Publicado' ? 'text-emerald-500' : 'text-amber-500'}`}>{currentCourse.status}</span>
-                                </div>
-                                <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest flex items-center gap-2 mt-0.5">
-                                    {isSaving ? <span className="text-amber-500 animate-pulse">Guardando...</span> : <span><Check className="w-2.5 h-2.5 inline mr-1 text-emerald-500" /> Sincronizado</span>}
-                                </p>
+                {/* Editor Header Bar */}
+                <div className="sticky top-0 z-[60] bg-black border-b border-white/5 px-4 md:px-8 py-3 flex items-center justify-between -mx-6 -mt-6 mb-6" style={{ marginLeft: 'calc(-1 * (1.5rem + 0px))', marginRight: 'calc(-1 * (1.5rem + 0px))' }}>
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => setView("list")} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 transition-all"><ChevronRight className="w-3.5 h-3.5 rotate-180" /></button>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-sm font-black text-white uppercase tracking-widest">{currentCourse.title || "Nuevo Curso"}</h1>
+                                <span className={`text-[8px] font-black px-1.5 py-0.5 rounded bg-white/5 uppercase tracking-[0.2em] ${currentCourse.status === 'Publicado' ? 'text-emerald-500' : 'text-amber-500'}`}>{currentCourse.status}</span>
                             </div>
+                            <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest flex items-center gap-2 mt-0.5">
+                                {isSaving ? <span className="text-amber-500 animate-pulse">Guardando...</span> : <span><Check className="w-2.5 h-2.5 inline mr-1 text-emerald-500" /> Sincronizado</span>}
+                            </p>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 text-[9px] font-black text-gray-500 uppercase">
-                                <Clock className="w-3 h-3" /> {currentCourse.lastSaved || '--:--'}
-                            </div>
-                            <button onClick={() => setShowPreview(true)} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-white/5">Previsualizar</button>
-                            <button onClick={() => saveBorrador('Publicado')} className="px-5 py-2 bg-blis-red text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-blis-red/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Publicar</button>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 text-[9px] font-black text-gray-500 uppercase">
+                            <Clock className="w-3 h-3" /> {currentCourse.lastSaved || '--:--'}
                         </div>
-                    </div>,
-                    document.body
-                )}
-
-                {/* Spacer to compensate for the portal-fixed header height */}
-                <div className="h-[50px] mb-2" />
+                        <button onClick={() => saveBorrador('Borrador')} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-white/5">Guardar</button>
+                        <button onClick={() => setShowPreview(true)} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-white/5">Previsualizar</button>
+                        <button onClick={() => saveBorrador('Publicado')} className="px-5 py-2 bg-blis-red text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-blis-red/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Publicar</button>
+                    </div>
+                </div>
 
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
