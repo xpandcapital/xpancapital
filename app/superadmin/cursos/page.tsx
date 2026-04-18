@@ -795,12 +795,12 @@ export default function AdminCourses() {
         }
     }, [currentCourse, view]);
 
-    const saveBorrador = async () => {
+    const saveBorrador = async (statusOverride?: "Borrador" | "Publicado") => {
         if (!currentCourse) return;
         setIsSaving(true);
         
         try {
-            // Generate slug from title
+            const effectiveStatus = statusOverride || currentCourse.status;
             const slug = currentCourse.title
                 .toLowerCase()
                 .normalize("NFD")
@@ -815,7 +815,7 @@ export default function AdminCourses() {
                 modulos: currentCourse.modules,
                 precio_coins: currentCourse.bliscoins || 0,
                 precio_usd: currentCourse.price || 0,
-                activo: currentCourse.status === 'Publicado',
+                activo: effectiveStatus === 'Publicado',
                 certificado_template_id: currentCourse.certificateTemplateId || null,
                 para_equipo: currentCourse.paraEquipo || false
             };
@@ -831,13 +831,16 @@ export default function AdminCourses() {
             const data = await response.json();
             
             if (data.success) {
-                // Update course with server ID if it was new
                 if (isNew && data.data) {
-                    setCurrentCourse(prev => prev ? { ...prev, id: data.data.id } : null);
-                    await fetchCourses(); // Refresh list
+                    setCurrentCourse(prev => prev ? { ...prev, id: data.data.id, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null);
+                    await fetchCourses();
+                } else {
+                    setCurrentCourse(prev => prev ? { ...prev, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null);
                 }
                 setShowToast(true);
                 setTimeout(() => setShowToast(false), 2000);
+            } else {
+                console.error('Error saving course:', data.error);
             }
         } catch (error) {
             console.error('Error saving course:', error);
@@ -1184,7 +1187,7 @@ export default function AdminCourses() {
                                 <Clock className="w-3 h-3" /> {currentCourse.lastSaved || '--:--'}
                             </div>
                             <button onClick={() => setShowPreview(true)} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-white/5">Previsualizar</button>
-                            <button onClick={() => { setCurrentCourse({ ...currentCourse, status: 'Publicado' }); saveBorrador(); }} className="px-5 py-2 bg-blis-red text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-blis-red/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Publicar</button>
+                            <button onClick={() => saveBorrador('Publicado')} className="px-5 py-2 bg-blis-red text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-blis-red/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Publicar</button>
                         </div>
                     </div>,
                     document.body

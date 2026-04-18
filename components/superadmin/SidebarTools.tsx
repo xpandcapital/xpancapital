@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
+    Plus,
     Calculator as CalcIcon,
     Table as TableIcon,
     FileEdit,
@@ -619,6 +620,14 @@ const TOOL_INDEX: ToolDef[] = [
             simple: "Sube un video y selecciona el formato de salida.",
             advanced: "Convierte un video 4K a 1080p WebM, o extrae el audio en MP3 de alta calidad."
         }
+    },
+    {
+        id: 'youtube_batch', name: 'YouTube Batch DL', description: 'Descarga masiva de videos de YouTube en máxima calidad', cat: 'Multimedia', icon: Download, isIA: false,
+        help: "Agrega enlaces de YouTube uno por uno y descárgalos en máxima calidad (video+audio). Máximo 4 descargas simultáneas con cola automática.",
+        examples: {
+            simple: "Pega un enlace de YouTube y presiona Enter para agregar.",
+            advanced: "Agrega múltiples enlaces, selecciona calidad máxima y descarga todos en lote."
+        }
     }
 ];
 
@@ -910,6 +919,7 @@ const SmartAITool = ({ tool }: { tool: ToolDef }) => {
                                                                                                         tool.id === 'winner_gen' ? <StandardWinner /> :
                                                                                                             tool.id === 'shuffle' ? <StandardShuffle /> :
                                                                                                                 tool.id === 'video_converter' ? <StandardVideoConverter /> :
+                                                                                                                    tool.id === 'youtube_batch' ? <YouTubeBatchDownloader /> :
                                                                                                                     tool.id === 'margin' || tool.id === 'markup' || tool.id === 'sku_profit' ? <StandardMarkup /> :
                                                                                                                     tool.id === 'percentage' ? <PercentageTool /> :
                                                                                                                         tool.id === 'average' ? <AverageTool /> :
@@ -3290,6 +3300,230 @@ function CalculatorSuite() {
         </div>
     );
 };
+
+// --- YouTube Batch Downloader ---
+interface DownloadItem {
+    id: string
+    url: string
+    title: string
+    status: 'pending' | 'downloading' | 'done' | 'error'
+    progress: number
+    error?: string
+    thumbnail?: string
+    format?: string
+    size?: string
+    downloadUrl?: string
+}
+
+const YouTubeBatchDownloader = () => {
+    const [links, setLinks] = useState<DownloadItem[]>([])
+    const [inputUrl, setInputUrl] = useState('')
+    const [quality, setQuality] = useState<'best' | '720p' | '480p'>('best')
+    const [globalStatus, setGlobalStatus] = useState<'idle' | 'downloading'>('idle')
+    const activeDownloads = useRef<Set<string>>(new Set())
+    const MAX_CONCURRENT = 4
+
+    const addLink = () => {
+        const url = inputUrl.trim()
+        if (!url) return
+        const ytRegex = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+        const match = url.match(ytRegex)
+        if (!match) return
+        const videoId = match[1]
+        if (links.some(l => l.url.includes(videoId))) { setInputUrl(''); return }
+        const newItem: DownloadItem = {
+            id: `dl-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            url,
+            title: `Video ${links.length + 1}`,
+            status: 'pending',
+            progress: 0,
+            thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`,
+        }
+        setLinks(prev => [...prev, newItem])
+        setInputUrl('')
+    }
+
+    const removeLink = (id: string) => setLinks(prev => prev.filter(l => l.id !== id))
+
+    const startDownload = async (item: DownloadItem) => {
+        if (activeDownloads.current.size >= MAX_CONCURRENT) return
+        activeDownloads.current.add(item.id)
+
+        setLinks(prev => prev.map(l => l.id === item.id ? { ...l, status: 'downloading' as const, progress: 0 } : l))
+
+        try {
+            const res = await fetch('/api/tools/youtube-download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: item.url, quality }),
+            })
+            const data = await res.json()
+
+            if (data.success) {
+                setLinks(prev => prev.map(l => l.id === item.id ? {
+                    ...l,
+                    status: 'done' as const,
+                    progress: 100,
+                    title: data.title || l.title,
+                    size: data.size || '',
+                    downloadUrl: data.downloadUrl,
+                } : l))
+            } else {
+                setLinks(prev => prev.map(l => l.id === item.id ? {
+                    ...l,
+                    status: 'error' as const,
+                    error: data.error || 'Error desconocido',
+                } : l))
+            }
+        } catch {
+            setLinks(prev => prev.map(l => l.id === item.id ? {
+                ...l,
+                status: 'error' as const,
+                error: 'Error de conexión',
+            } : l))
+        } finally {
+            activeDownloads.current.delete(item.id)
+            processQueue()
+        }
+    }
+
+    const processQueue = useCallback(() => {
+        setLinks(prev => {
+            const pending = prev.filter(l => l.status === 'pending')
+            const canStart = MAX_CONCURRENT - activeDownloads.current.size
+            for (let i = 0; i < Math.min(canStart, pending.length); i++) {
+                startDownload(pending[i])
+            }
+            return prev
+        })
+    }, [links])
+
+    const startAll = () => {
+        setGlobalStatus('downloading')
+        processQueue()
+    }
+
+    const onKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') { e.preventDefault(); addLink() }
+    }
+
+    const completedCount = links.filter(l => l.status === 'done').length
+    const downloadingCount = links.filter(l => l.status === 'downloading').length
+    const errorCount = links.filter(l => l.status === 'error').length
+
+    return (
+        <div className="space-y-4">
+            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-xs font-black text-white uppercase tracking-widest">YouTube Batch Downloader</h3>
+                        <p className="text-[10px] text-gray-500 mt-0.5">Máximo 4 descargas simultáneas · Máxima calidad</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {links.length > 0 && (
+                            <div className="flex items-center gap-3 text-[10px] font-bold">
+                                {completedCount > 0 && <span className="text-emerald-400">{completedCount} ✓</span>}
+                                {downloadingCount > 0 && <span className="text-amber-400">{downloadingCount} ↓</span>}
+                                {errorCount > 0 && <span className="text-red-400">{errorCount} ✗</span>}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                        <input
+                            type="text"
+                            value={inputUrl}
+                            onChange={e => setInputUrl(e.target.value)}
+                            onKeyDown={onKeyDown}
+                            placeholder="Pega un enlace de YouTube aquí..."
+                            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 pr-10 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors"
+                        />
+                        {inputUrl && (
+                            <button onClick={() => setInputUrl('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-white transition-colors">
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        )}
+                    </div>
+                    <button onClick={addLink} className="px-4 py-3 bg-blis-red text-white rounded-xl font-bold text-xs hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5">
+                        <Plus className="w-3.5 h-3.5" /> Agregar
+                    </button>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Calidad:</span>
+                    {(['best', '720p', '480p'] as const).map(q => (
+                        <button key={q} onClick={() => setQuality(q)}
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${quality === q ? 'bg-blis-red/10 text-blis-red border border-blis-red/30' : 'bg-white/5 text-gray-500 border border-white/5 hover:bg-white/10'}`}>
+                            {q === 'best' ? 'Máxima' : q}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {links.length > 0 && (
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{links.length} video{links.length > 1 ? 's' : ''} en cola</span>
+                        <button onClick={startAll} disabled={globalStatus === 'downloading' || links.filter(l => l.status === 'pending').length === 0}
+                            className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
+                            <Download className="w-3.5 h-3.5" /> Descargar Todo
+                        </button>
+                    </div>
+
+                    {links.map(item => (
+                        <div key={item.id} className="bg-zinc-950 border border-white/5 rounded-xl p-3 flex items-center gap-3 hover:border-white/10 transition-colors">
+                            {item.thumbnail && (
+                                <div className="w-20 h-12 rounded-lg overflow-hidden shrink-0 bg-zinc-800">
+                                    <img src={item.thumbnail} alt="" className="w-full h-full object-cover" />
+                                </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs font-bold text-white truncate">{item.title}</p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                    {item.status === 'pending' && <span className="text-[10px] text-gray-500 font-bold">En cola</span>}
+                                    {item.status === 'downloading' && (
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="w-full bg-white/5 rounded-full h-1 max-w-[120px]">
+                                                <div className="bg-amber-500 h-1 rounded-full animate-pulse" style={{ width: '60%' }} />
+                                            </div>
+                                            <span className="text-[10px] text-amber-400 font-bold">Descargando...</span>
+                                        </div>
+                                    )}
+                                    {item.status === 'done' && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><Check className="w-3 h-3" /> Completado</span>
+                                            {item.size && <span className="text-[10px] text-gray-500">{item.size}</span>}
+                                            {item.downloadUrl && (
+                                                <a href={item.downloadUrl} download target="_blank" rel="noopener noreferrer"
+                                                    className="text-[10px] text-blis-red hover:underline flex items-center gap-0.5">
+                                                    <Download className="w-3 h-3" /> Guardar
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+                                    {item.status === 'error' && <span className="text-[10px] text-red-400 font-bold">Error: {item.error}</span>}
+                                </div>
+                            </div>
+                            <button onClick={() => removeLink(item.id)} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors shrink-0">
+                                <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {links.length === 0 && (
+                <div className="bg-zinc-950 border border-dashed border-white/10 rounded-2xl p-12 text-center">
+                    <Download className="w-12 h-12 text-gray-700 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm font-medium">Agrega enlaces de YouTube para descargar</p>
+                    <p className="text-gray-600 text-xs mt-1">Pega la URL y presiona Enter o haz clic en Agregar</p>
+                </div>
+            )}
+        </div>
+    )
+}
 
 export const SidebarTools = () => {
     const [activeTool, setActiveTool] = useState<string>('calc');
