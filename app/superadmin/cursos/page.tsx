@@ -784,15 +784,19 @@ export default function AdminCourses() {
         }
     }, [currentCourse]);
 
-    // Autosave Persistence (to LocalStorage/Simulated DB)
+    // Autosave - only when in editor, save as draft (preserving current status)
+    const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
     useEffect(() => {
-        if (view === "editor" && currentCourse) {
-            const timer = setTimeout(() => {
+        if (view === "editor" && currentCourse && currentCourse.title.trim()) {
+            if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+            autoSaveRef.current = setTimeout(() => {
                 saveBorrador();
-            }, 4000);
-            return () => clearTimeout(timer);
+            }, 5000);
         }
-    }, [currentCourse, view]);
+        return () => {
+            if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+        };
+    }, [currentCourse?.title, currentCourse?.modules?.length, currentCourse?.price, currentCourse?.paraEquipo, view]);
 
     const saveBorrador = async (statusOverride?: "Borrador" | "Publicado") => {
         if (!currentCourse) return;
@@ -819,7 +823,7 @@ export default function AdminCourses() {
                 para_equipo: currentCourse.paraEquipo || false
             };
 
-            const isNew = currentCourse.id.startsWith('new') || currentCourse.id.length < 10;
+            const isNew = !currentCourse.id || currentCourse.id.startsWith('new');
             
             const response = await fetch('/api/admin/cursos', {
                 method: isNew ? 'POST' : 'PUT',
@@ -830,19 +834,21 @@ export default function AdminCourses() {
             const data = await response.json();
             
             if (data.success) {
-                if (isNew && data.data) {
+                if (isNew && data.data?.id) {
                     setCurrentCourse(prev => prev ? { ...prev, id: data.data.id, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null);
                     await fetchCourses();
-                } else {
+                } else if (!isNew) {
                     setCurrentCourse(prev => prev ? { ...prev, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null);
                 }
                 setShowToast(true);
                 setTimeout(() => setShowToast(false), 2000);
             } else {
                 console.error('Error saving course:', data.error);
+                alert('Error al guardar: ' + (data.error || 'Error desconocido'));
             }
         } catch (error) {
             console.error('Error saving course:', error);
+            alert('Error de conexión al guardar');
         } finally {
             setIsSaving(false);
         }

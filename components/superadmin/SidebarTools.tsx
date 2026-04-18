@@ -3313,6 +3313,7 @@ interface DownloadItem {
     format?: string
     size?: string
     downloadUrl?: string
+    isDirectDownload?: boolean
 }
 
 const YouTubeBatchDownloader = () => {
@@ -3323,13 +3324,16 @@ const YouTubeBatchDownloader = () => {
     const activeDownloads = useRef<Set<string>>(new Set())
     const MAX_CONCURRENT = 4
 
+    const extractVideoId = (url: string): string | null => {
+        const match = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|p\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
+        return match ? match[1] : null
+    }
+
     const addLink = () => {
         const url = inputUrl.trim()
         if (!url) return
-        const ytRegex = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-        const match = url.match(ytRegex)
-        if (!match) return
-        const videoId = match[1]
+        const videoId = extractVideoId(url)
+        if (!videoId) return
         if (links.some(l => l.url.includes(videoId))) { setInputUrl(''); return }
         const newItem: DownloadItem = {
             id: `dl-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -3348,8 +3352,7 @@ const YouTubeBatchDownloader = () => {
     const startDownload = async (item: DownloadItem) => {
         if (activeDownloads.current.size >= MAX_CONCURRENT) return
         activeDownloads.current.add(item.id)
-
-        setLinks(prev => prev.map(l => l.id === item.id ? { ...l, status: 'downloading' as const, progress: 0 } : l))
+        setLinks(prev => prev.map(l => l.id === item.id ? { ...l, status: 'downloading' as const, progress: 10, error: undefined } : l))
 
         try {
             const res = await fetch('/api/tools/youtube-download', {
@@ -3388,19 +3391,32 @@ const YouTubeBatchDownloader = () => {
     }
 
     const processQueue = useCallback(() => {
-        setLinks(prev => {
-            const pending = prev.filter(l => l.status === 'pending')
+        setLinks(currentLinks => {
+            const pending = currentLinks.filter(l => l.status === 'pending')
             const canStart = MAX_CONCURRENT - activeDownloads.current.size
             for (let i = 0; i < Math.min(canStart, pending.length); i++) {
                 startDownload(pending[i])
             }
-            return prev
+            return currentLinks
         })
-    }, [links])
+    }, [quality])
 
     const startAll = () => {
         setGlobalStatus('downloading')
-        processQueue()
+        const pending = links.filter(l => l.status === 'pending')
+        const canStart = MAX_CONCURRENT - activeDownloads.current.size
+        for (let i = 0; i < Math.min(canStart, pending.length); i++) {
+            startDownload(pending[i])
+        }
+    }
+
+    const retryItem = (item: DownloadItem) => {
+        setLinks(prev => prev.map(l => l.id === item.id ? { ...l, status: 'pending' as const, error: undefined, progress: 0 } : l))
+        setTimeout(() => startDownload({ ...item, status: 'pending' }), 100)
+    }
+
+    const clearCompleted = () => {
+        setLinks(prev => prev.filter(l => l.status !== 'done'))
     }
 
     const onKeyDown = (e: React.KeyboardEvent) => {
@@ -3410,6 +3426,7 @@ const YouTubeBatchDownloader = () => {
     const completedCount = links.filter(l => l.status === 'done').length
     const downloadingCount = links.filter(l => l.status === 'downloading').length
     const errorCount = links.filter(l => l.status === 'error').length
+    const pendingCount = links.filter(l => l.status === 'pending').length
 
     return (
         <div className="space-y-4">
@@ -3466,10 +3483,15 @@ const YouTubeBatchDownloader = () => {
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{links.length} video{links.length > 1 ? 's' : ''} en cola</span>
-                        <button onClick={startAll} disabled={globalStatus === 'downloading' || links.filter(l => l.status === 'pending').length === 0}
-                            className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
-                            <Download className="w-3.5 h-3.5" /> Descargar Todo
-                        </button>
+                        <div className="flex items-center gap-2">
+                            {completedCount > 0 && (
+                                <button onClick={clearCompleted} className="px-2.5 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-[10px] text-gray-400 font-bold uppercase tracking-widest transition-all">Limpiar completados</button>
+                            )}
+                            <button onClick={startAll} disabled={pendingCount === 0 && downloadingCount === 0}
+                                className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
+                                <Download className="w-3.5 h-3.5" /> {downloadingCount > 0 ? `Descargando (${downloadingCount})` : 'Descargar Todo'}
+                            </button>
+                        </div>
                     </div>
 
                     {links.map(item => (
@@ -3496,14 +3518,19 @@ const YouTubeBatchDownloader = () => {
                                             <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><Check className="w-3 h-3" /> Completado</span>
                                             {item.size && <span className="text-[10px] text-gray-500">{item.size}</span>}
                                             {item.downloadUrl && (
-                                                <a href={item.downloadUrl} download target="_blank" rel="noopener noreferrer"
+                                                <a href={item.downloadUrl} target="_blank" rel="noopener noreferrer" download
                                                     className="text-[10px] text-blis-red hover:underline flex items-center gap-0.5">
-                                                    <Download className="w-3 h-3" /> Guardar
+                                                    <Download className="w-3 h-3" /> {item.isDirectDownload !== false ? 'Guardar' : 'Abrir'}
                                                 </a>
                                             )}
                                         </div>
                                     )}
-                                    {item.status === 'error' && <span className="text-[10px] text-red-400 font-bold">Error: {item.error}</span>}
+                                    {item.status === 'error' && (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-red-400 font-bold">{item.error}</span>
+                                            <button onClick={() => retryItem(item)} className="px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded text-[10px] text-red-400 font-bold hover:bg-red-500/20 transition-all">Reintentar</button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <button onClick={() => removeLink(item.id)} className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors shrink-0">
@@ -3529,7 +3556,7 @@ export const SidebarTools = () => {
     const [activeTool, setActiveTool] = useState<string>('calc');
     const [selectedCountry, setSelectedCountry] = useState('Perú');
     const [searchQuery, setSearchQuery] = useState('');
-    const [expandedCats, setExpandedCats] = useState<string[]>(['Favoritos', 'Finanzas']);
+    const [expandedCats, setExpandedCats] = useState<string[]>([]);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     useEffect(() => {
