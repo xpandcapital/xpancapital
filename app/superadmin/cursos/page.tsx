@@ -785,7 +785,8 @@ export default function AdminCourses() {
     }, [currentCourse]);
 
     // Autosave - only when in editor, save as draft (preserving current status)
-    const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
+const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
+    const saveVersionRef = useRef(0);
     useEffect(() => {
         if (view === "editor" && currentCourse && currentCourse.title.trim()) {
             if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
@@ -800,6 +801,8 @@ export default function AdminCourses() {
 
     const saveBorrador = async (statusOverride?: "Borrador" | "Publicado") => {
         if (!currentCourse) return;
+        if (isSaving) return; // Prevent double-saves
+        const currentVersion = ++saveVersionRef.current;
         setIsSaving(true);
         
         try {
@@ -811,9 +814,12 @@ export default function AdminCourses() {
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/(^-|-$)/g, '') || 'curso';
 
-            const courseData = {
+            // Don't send slug on updates - only on creation
+            const isNew = !currentCourse.id || currentCourse.id.startsWith('new');
+            
+            const courseData: Record<string, any> = {
                 nombre: currentCourse.title || 'Sin título',
-                slug: baseSlug,
+                slug: isNew ? baseSlug : undefined,
                 descripcion: currentCourse.category,
                 modulos: currentCourse.modules,
                 precio_coins: currentCourse.bliscoins || 0,
@@ -822,8 +828,9 @@ export default function AdminCourses() {
                 para_equipo: currentCourse.paraEquipo || false
             };
 
-            const isNew = !currentCourse.id || currentCourse.id.startsWith('new');
-            
+            // Remove undefined values (slug on updates)
+            Object.keys(courseData).forEach(key => courseData[key] === undefined && delete courseData[key]);
+
             const response = await fetch('/api/admin/cursos', {
                 method: isNew ? 'POST' : 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -831,6 +838,9 @@ export default function AdminCourses() {
             });
 
             const data = await response.json();
+            
+            // Only update if this is still the latest save
+            if (currentVersion !== saveVersionRef.current) return;
             
             if (data.success) {
                 if (isNew && data.data?.id) {
@@ -842,26 +852,40 @@ export default function AdminCourses() {
                 setShowToast(true);
                 setTimeout(() => setShowToast(false), 2000);
             } else if (data.error?.includes('slug') || data.error?.includes('duplicate')) {
-                // Retry with a unique slug suffix
-                const uniqueSlug = `${baseSlug}-${Date.now().toString(36)}`;
-                const retryData = isNew ? { ...courseData, slug: uniqueSlug } : { id: currentCourse.id, ...courseData, slug: uniqueSlug };
-                const retryRes = await fetch('/api/admin/cursos', {
-                    method: isNew ? 'POST' : 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(retryData)
-                });
-                const retryResult = await retryRes.json();
-                if (retryResult.success) {
-                    if (isNew && retryResult.data?.id) {
+                // If slug collision on POST, retry with unique slug
+                if (isNew) {
+                    const uniqueSlug = `${baseSlug}-${Date.now().toString(36)}`;
+                    courseData.slug = uniqueSlug;
+                    const retryRes = await fetch('/api/admin/cursos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(courseData)
+                    });
+                    const retryResult = await retryRes.json();
+                    if (retryResult.success && retryResult.data?.id) {
                         setCurrentCourse(prev => prev ? { ...prev, id: retryResult.data.id, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null);
                         await fetchCourses();
-                    } else if (!isNew) {
-                        setCurrentCourse(prev => prev ? { ...prev, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null);
+                        setShowToast(true);
+                        setTimeout(() => setShowToast(false), 2000);
+                    } else {
+                        alert('Error al guardar: ' + (retryResult.error || 'Error desconocido'));
                     }
-                    setShowToast(true);
-                    setTimeout(() => setShowToast(false), 2000);
                 } else {
-                    alert('Error al guardar: ' + (retryResult.error || 'Error desconocido'));
+                    // On PUT with slug collision, just remove slug and retry
+                    const { slug: _s, ...dataNoSlug } = courseData;
+                    const retryRes = await fetch('/api/admin/cursos', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: currentCourse.id, ...dataNoSlug })
+                    });
+                    const retryResult = await retryRes.json();
+                    if (retryResult.success) {
+                        setCurrentCourse(prev => prev ? { ...prev, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null);
+                        setShowToast(true);
+                        setTimeout(() => setShowToast(false), 2000);
+                    } else {
+                        alert('Error al guardar: ' + (retryResult.error || 'Error desconocido'));
+                    }
                 }
             } else {
                 alert('Error al guardar: ' + (data.error || 'Error desconocido'));
@@ -872,7 +896,7 @@ export default function AdminCourses() {
         } finally {
             setIsSaving(false);
         }
-    };
+};
 
     const handleCreateNew = () => {
         const newCourse: Course = {

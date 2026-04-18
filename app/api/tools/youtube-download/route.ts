@@ -28,22 +28,22 @@ export async function POST(request: NextRequest) {
       if (noembedData.title) title = noembedData.title
     } catch {}
 
-    // Build download links using multiple services
-    // Format: provide direct links the user can open
+    // Return video info with download options via external services
+    // Users can right-click > save as, or use browser download managers
     const downloadLinks = [
       {
-        label: 'Video 1080p (MP4)',
-        url: `https://pi.ytub.top/pi/down/${videoId}`,
-        quality: '1080p',
+        label: 'Descargar Video (Y2Mate)',
+        url: `https://www.y2mate.com/youtube/${videoId}`,
+        quality: quality === 'best' ? '1080p' : quality === '720p' ? '720p' : '480p',
       },
       {
-        label: 'Video 720p (MP4)',
-        url: `https://pi.ytub.top/pi/down/${videoId}/720`,
-        quality: '720p',
+        label: 'Descargar Video (SaveFrom)',
+        url: `https://en.savefrom.net/1-youtube-video-downloader-360/?url=https://www.youtube.com/watch?v=${videoId}`,
+        quality: 'multiple',
       },
       {
-        label: 'Solo Audio (MP3)',
-        url: `https://pi.ytub.top/pi/mp3/${videoId}`,
+        label: 'Descargar Audio MP3',
+        url: `https://www.y2mate.com/youtube-mp3/${videoId}`,
         quality: 'audio',
       },
     ]
