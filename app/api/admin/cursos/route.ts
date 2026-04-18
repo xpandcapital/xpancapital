@@ -9,6 +9,19 @@ function getSupabase() {
   return createClient(supabaseUrl, supabaseServiceKey)
 }
 
+const MISSING_COLS_PATTERNS = ['certificado_template_id', 'imagen_principal', 'schema cache']
+
+function stripMissingCols(data: Record<string, any>): Record<string, any> {
+  const clean = { ...data }
+  delete clean.certificado_template_id
+  delete clean.imagen_principal
+  return clean
+}
+
+function isMissingColError(error: { message?: string }): boolean {
+  return MISSING_COLS_PATTERNS.some(p => error.message?.includes(p))
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabase()
@@ -31,20 +44,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('cursos')
-      .select(`
-        id,
-        nombre,
-        slug,
-        descripcion,
-        modulos,
-        precio_coins,
-        precio_usd,
-        activo,
-        para_equipo,
-        creado_en,
-        imagen_principal,
-        certificado_template_id
-      `)
+      .select('*')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .order('creado_en', { ascending: false })
 
@@ -64,24 +64,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     let {
-      nombre,
-      slug,
-      descripcion,
-      modulos,
-      precio_coins,
-      precio_usd,
-      max_intentos,
-      nota_aprobacion,
-      certificado_template_id,
-      para_equipo,
-      activo = true
+      nombre, slug, descripcion, modulos, precio_coins, precio_usd,
+      max_intentos, nota_aprobacion, certificado_template_id, imagen_principal,
+      para_equipo, activo = true
     } = body
 
     if (!nombre || !slug) {
       return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 })
     }
 
-    // Check for slug uniqueness
     const { data: existingSlug } = await supabase
       .from('cursos')
       .select('id')
@@ -89,29 +80,22 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (existingSlug) {
-      // Append a short suffix to make it unique
       slug = `${slug}-${Date.now().toString(36)}`
     }
 
-    // Build insert object - only include columns that exist
     const insertData: Record<string, any> = {
       empresa_id: DEFAULT_EMPRESA_ID,
-      nombre,
-      slug,
-      descripcion,
+      nombre, slug, descripcion,
       modulos: modulos || [],
       precio_coins: precio_coins || 0,
       precio_usd: precio_usd || 0,
       max_intentos: max_intentos || 3,
       nota_aprobacion: nota_aprobacion || 70,
-      para_equipo,
-      activo
+      para_equipo, activo
     }
 
-    // Only include certificado_template_id if provided (column may not exist yet)
-    if (certificado_template_id) {
-      insertData.certificado_template_id = certificado_template_id
-    }
+    if (certificado_template_id) insertData.certificado_template_id = certificado_template_id
+    if (imagen_principal) insertData.imagen_principal = imagen_principal
 
     const { data, error } = await supabase
       .from('cursos')
@@ -120,12 +104,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      // If certificado_template_id column doesn't exist, retry without it
-      if (error.message?.includes('certificado_template_id') || error.message?.includes('schema cache')) {
-        delete insertData.certificado_template_id
+      if (isMissingColError(error)) {
+        const cleanData = stripMissingCols(insertData)
         const { data: retryData, error: retryError } = await supabase
           .from('cursos')
-          .insert(insertData)
+          .insert(cleanData)
           .select()
           .single()
 
@@ -153,7 +136,6 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
     }
 
-    // Check for slug uniqueness if slug is being updated
     if (updates.slug) {
       const { data: existing } = await supabase
         .from('cursos')
@@ -163,7 +145,6 @@ export async function PUT(request: NextRequest) {
         .single()
 
       if (existing) {
-        // Append a short suffix to make it unique
         updates.slug = `${updates.slug}-${Date.now().toString(36)}`
       }
     }
@@ -177,9 +158,8 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      // If certificado_template_id column doesn't exist, retry without it
-      if (error.message?.includes('certificado_template_id') || error.message?.includes('schema cache')) {
-        const { certificado_template_id, ...cleanUpdates } = updates
+      if (isMissingColError(error)) {
+        const cleanUpdates = stripMissingCols(updates)
         const { data: retryData, error: retryError } = await supabase
           .from('cursos')
           .update(cleanUpdates)
