@@ -17,14 +17,19 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('user_id')
 
     if (slug) {
-      const { data: curso, error } = await supabase
+      const teamMember = searchParams.get('team_member') === 'true'
+      let query = supabase
         .from('cursos')
         .select('*')
         .eq('empresa_id', DEFAULT_EMPRESA_ID)
         .eq('slug', slug)
         .eq('activo', true)
-        .neq('para_equipo', true)
-        .single()
+
+      if (!teamMember) {
+        query = query.neq('para_equipo', true)
+      }
+
+      const { data: curso, error } = await query.single()
 
       if (error || !curso) {
         return NextResponse.json({ error: 'Curso no encontrado' }, { status: 404 })
