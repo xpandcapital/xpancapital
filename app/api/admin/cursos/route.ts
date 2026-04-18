@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabase()
     const body = await request.json()
 
-    const {
+    let {
       nombre,
       slug,
       descripcion,
@@ -77,6 +77,18 @@ export async function POST(request: NextRequest) {
 
     if (!nombre || !slug) {
       return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 })
+    }
+
+    // Check for slug uniqueness
+    const { data: existingSlug } = await supabase
+      .from('cursos')
+      .select('id')
+      .eq('slug', slug)
+      .single()
+
+    if (existingSlug) {
+      // Append a short suffix to make it unique
+      slug = `${slug}-${Date.now().toString(36)}`
     }
 
     // Build insert object - only include columns that exist
@@ -137,6 +149,21 @@ export async function PUT(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
+    }
+
+    // Check for slug uniqueness if slug is being updated
+    if (updates.slug) {
+      const { data: existing } = await supabase
+        .from('cursos')
+        .select('id')
+        .eq('slug', updates.slug)
+        .neq('id', id)
+        .single()
+
+      if (existing) {
+        // Append a short suffix to make it unique
+        updates.slug = `${updates.slug}-${Date.now().toString(36)}`
+      }
     }
 
     const { data, error } = await supabase

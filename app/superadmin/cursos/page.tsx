@@ -804,22 +804,21 @@ export default function AdminCourses() {
         
         try {
             const effectiveStatus = statusOverride || currentCourse.status;
-            const slug = currentCourse.title
+            const baseSlug = currentCourse.title
                 .toLowerCase()
                 .normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, "")
                 .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '') || `curso-${Date.now()}`;
+                .replace(/(^-|-$)/g, '') || 'curso';
 
             const courseData = {
                 nombre: currentCourse.title || 'Sin título',
-                slug: slug,
+                slug: baseSlug,
                 descripcion: currentCourse.category,
                 modulos: currentCourse.modules,
                 precio_coins: currentCourse.bliscoins || 0,
                 precio_usd: currentCourse.price || 0,
                 activo: effectiveStatus === 'Publicado',
-                certificado_template_id: currentCourse.certificateTemplateId || null,
                 para_equipo: currentCourse.paraEquipo || false
             };
 
@@ -842,8 +841,29 @@ export default function AdminCourses() {
                 }
                 setShowToast(true);
                 setTimeout(() => setShowToast(false), 2000);
+            } else if (data.error?.includes('slug') || data.error?.includes('duplicate')) {
+                // Retry with a unique slug suffix
+                const uniqueSlug = `${baseSlug}-${Date.now().toString(36)}`;
+                const retryData = isNew ? { ...courseData, slug: uniqueSlug } : { id: currentCourse.id, ...courseData, slug: uniqueSlug };
+                const retryRes = await fetch('/api/admin/cursos', {
+                    method: isNew ? 'POST' : 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(retryData)
+                });
+                const retryResult = await retryRes.json();
+                if (retryResult.success) {
+                    if (isNew && retryResult.data?.id) {
+                        setCurrentCourse(prev => prev ? { ...prev, id: retryResult.data.id, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null);
+                        await fetchCourses();
+                    } else if (!isNew) {
+                        setCurrentCourse(prev => prev ? { ...prev, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null);
+                    }
+                    setShowToast(true);
+                    setTimeout(() => setShowToast(false), 2000);
+                } else {
+                    alert('Error al guardar: ' + (retryResult.error || 'Error desconocido'));
+                }
             } else {
-                console.error('Error saving course:', data.error);
                 alert('Error al guardar: ' + (data.error || 'Error desconocido'));
             }
         } catch (error) {
