@@ -3314,6 +3314,7 @@ interface DownloadItem {
     size?: string
     downloadUrl?: string
     isDirectDownload?: boolean
+    downloadLinks?: { label: string; url: string; quality: string }[]
 }
 
 const YouTubeBatchDownloader = () => {
@@ -3349,7 +3350,7 @@ const YouTubeBatchDownloader = () => {
 
     const removeLink = (id: string) => setLinks(prev => prev.filter(l => l.id !== id))
 
-    const startDownload = async (item: DownloadItem) => {
+const startDownload = async (item: DownloadItem) => {
         if (activeDownloads.current.size >= MAX_CONCURRENT) return
         activeDownloads.current.add(item.id)
         setLinks(prev => prev.map(l => l.id === item.id ? { ...l, status: 'downloading' as const, progress: 10, error: undefined } : l))
@@ -3370,6 +3371,8 @@ const YouTubeBatchDownloader = () => {
                     title: data.title || l.title,
                     size: data.size || '',
                     downloadUrl: data.downloadUrl,
+                    downloadLinks: data.downloadLinks || [],
+                    isDirectDownload: data.isDirectDownload,
                 } : l))
             } else {
                 setLinks(prev => prev.map(l => l.id === item.id ? {
@@ -3514,14 +3517,23 @@ const YouTubeBatchDownloader = () => {
                                         </div>
                                     )}
                                     {item.status === 'done' && (
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-col gap-1">
                                             <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><Check className="w-3 h-3" /> Listo</span>
-                                            {item.downloadUrl && (
-                                                <button onClick={() => { window.open(item.downloadUrl, '_blank'); }}
-                                                    className="px-2 py-0.5 bg-blis-red/10 border border-blis-red/30 rounded text-[10px] text-blis-red font-bold hover:bg-blis-red/20 transition-all flex items-center gap-1">
+                                            {item.downloadLinks && item.downloadLinks.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1 mt-0.5">
+                                                    {item.downloadLinks.map((link: { label: string; url: string; quality: string }) => (
+                                                        <button key={link.quality} onClick={() => window.open(link.url, '_blank')}
+                                                            className="px-2 py-1 bg-blis-red/10 border border-blis-red/30 rounded text-[9px] text-blis-red font-bold hover:bg-blis-red/20 transition-all flex items-center gap-1">
+                                                            <Download className="w-2.5 h-2.5" /> {link.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            ) : item.downloadUrl ? (
+                                                <button onClick={() => window.open(item.downloadUrl, '_blank')}
+                                                    className="px-2 py-1 bg-blis-red/10 border border-blis-red/30 rounded text-[10px] text-blis-red font-bold hover:bg-blis-red/20 transition-all flex items-center gap-1">
                                                     <Download className="w-3 h-3" /> Descargar
                                                 </button>
-                                            )}
+                                            ) : null}
                                         </div>
                                     )}
                                     {item.status === 'error' && (

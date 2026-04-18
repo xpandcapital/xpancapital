@@ -28,74 +28,36 @@ export async function POST(request: NextRequest) {
       if (noembedData.title) title = noembedData.title
     } catch {}
 
-    // Try cobalt.tools API
-    const qualityMap: Record<string, string> = { best: '1080', '720p': '720', '480p': '480' }
-    const videoQuality = qualityMap[quality] || '1080'
-
-    try {
-      const cobaltRes = await fetch('https://api.cobalt.tools', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-          url,
-          videoQuality,
-          filenameStyle: 'pretty',
-          downloadMode: 'auto',
-        }),
-        signal: AbortSignal.timeout(30000),
-      })
-
-      if (cobaltRes.ok) {
-        const cobaltData = await cobaltRes.json()
-
-        // cobalt returns { status: "redirect"|"tunnel"|"picker", url, filename, ... }
-        if (cobaltData.url) {
-          return NextResponse.json({
-            success: true,
-            title: cobaltData.filename || title,
-            downloadUrl: cobaltData.url,
-            size: '',
-            thumbnail,
-            isDirectDownload: true,
-          })
-        }
-
-        if (cobaltData.status === 'picker' && cobaltData.picker?.length > 0) {
-          // Pick best quality video from picker
-          const videos = cobaltData.picker.filter((p: any) => p.type === 'video')
-          const bestVideo = videos.find((v: any) => v.quality === qualityMap[quality]) || videos[0] || cobaltData.picker[0]
-          if (bestVideo?.url) {
-            return NextResponse.json({
-              success: true,
-              title: cobaltData.filename || title,
-              downloadUrl: bestVideo.url,
-              size: '',
-              thumbnail,
-              isDirectDownload: true,
-            })
-          }
-        }
-
-        if (cobaltData.error) {
-          return NextResponse.json({
-            success: false,
-            error: cobaltData.error.code === 'content.video_unavailable' || cobaltData.error.code === 'content.video_private'
-              ? 'Video no disponible o es privado. Intenta con un video público.'
-              : `Error: ${cobaltData.error.code || 'desconocido'}`,
-          }, { status: 400 })
-        }
-      }
-    } catch (err: any) {
-      console.error('[YouTube DL] Cobalt API error:', err?.message || err)
-    }
+    // Build download links using multiple services
+    // Format: provide direct links the user can open
+    const downloadLinks = [
+      {
+        label: 'Video 1080p (MP4)',
+        url: `https://pi.ytub.top/pi/down/${videoId}`,
+        quality: '1080p',
+      },
+      {
+        label: 'Video 720p (MP4)',
+        url: `https://pi.ytub.top/pi/down/${videoId}/720`,
+        quality: '720p',
+      },
+      {
+        label: 'Solo Audio (MP3)',
+        url: `https://pi.ytub.top/pi/mp3/${videoId}`,
+        quality: 'audio',
+      },
+    ]
 
     return NextResponse.json({
-      success: false,
-      error: 'No se pudo procesar la descarga. El servicio puede estar temporalmente no disponible. Intenta de nuevo más tarde.',
-    }, { status: 503 })
+      success: true,
+      title,
+      thumbnail,
+      downloadLinks,
+      videoId,
+      size: '',
+      downloadUrl: downloadLinks[0].url,
+      isDirectDownload: false,
+    })
 
   } catch (error: any) {
     console.error('[YouTube Download Error]', error)
