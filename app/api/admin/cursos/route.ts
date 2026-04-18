@@ -36,12 +36,14 @@ export async function GET(request: NextRequest) {
         nombre,
         slug,
         descripcion,
+        modulos,
         precio_coins,
         precio_usd,
         activo,
         para_equipo,
         creado_en,
-        imagen_principal
+        imagen_principal,
+        certificado_template_id
       `)
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .order('creado_en', { ascending: false })

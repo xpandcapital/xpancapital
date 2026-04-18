@@ -734,6 +734,7 @@ export default function AdminCourses() {
                     certificado_template_id?: string;
                     creado_en?: string;
                     para_equipo?: boolean;
+                    imagen_principal?: string;
                 }) => ({
                     id: c.id,
                     title: c.nombre,
@@ -744,7 +745,7 @@ export default function AdminCourses() {
                     hasCertificate: !!c.certificado_template_id,
                     allowComments: true,
                     bliscoins: c.precio_coins || 0,
-                    image: null,
+                    image: c.imagen_principal || null,
                     certificateTemplateId: c.certificado_template_id || null,
                     paraEquipo: c.para_equipo || false
                 }));
@@ -801,7 +802,6 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
 
     const saveBorrador = async (statusOverride?: "Borrador" | "Publicado") => {
         if (!currentCourse) return;
-        if (isSaving) return; // Prevent double-saves
         const currentVersion = ++saveVersionRef.current;
         setIsSaving(true);
         
@@ -825,8 +825,11 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
                 precio_coins: currentCourse.bliscoins || 0,
                 precio_usd: currentCourse.price || 0,
                 activo: effectiveStatus === 'Publicado',
-                para_equipo: currentCourse.paraEquipo || false
+                para_equipo: currentCourse.paraEquipo || false,
             };
+
+            if (currentCourse.image) courseData.imagen_principal = currentCourse.image;
+            if (currentCourse.certificateTemplateId) courseData.certificado_template_id = currentCourse.certificateTemplateId;
 
             // Remove undefined values (slug on updates)
             Object.keys(courseData).forEach(key => courseData[key] === undefined && delete courseData[key]);
