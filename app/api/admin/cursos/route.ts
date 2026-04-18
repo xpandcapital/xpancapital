@@ -18,10 +18,7 @@ export async function GET(request: NextRequest) {
     if (id) {
       const { data, error } = await supabase
         .from('cursos')
-        .select(`
-          *,
-          plantilla:certificado_plantillas(id, nombre)
-        `)
+        .select('*')
         .eq('id', id)
         .single()
 
@@ -44,8 +41,7 @@ export async function GET(request: NextRequest) {
         activo,
         para_equipo,
         creado_en,
-        certificado_template_id,
-        plantilla:certificado_plantillas(id, nombre)
+        imagen_principal
       `)
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .order('creado_en', { ascending: false })
@@ -83,32 +79,53 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 })
     }
 
+    // Build insert object - only include columns that exist
+    const insertData: Record<string, any> = {
+      empresa_id: DEFAULT_EMPRESA_ID,
+      nombre,
+      slug,
+      descripcion,
+      modulos: modulos || [],
+      precio_coins: precio_coins || 0,
+      precio_usd: precio_usd || 0,
+      max_intentos: max_intentos || 3,
+      nota_aprobacion: nota_aprobacion || 70,
+      para_equipo,
+      activo
+    }
+
+    // Only include certificado_template_id if provided (column may not exist yet)
+    if (certificado_template_id) {
+      insertData.certificado_template_id = certificado_template_id
+    }
+
     const { data, error } = await supabase
       .from('cursos')
-      .insert({
-        empresa_id: DEFAULT_EMPRESA_ID,
-        nombre,
-        slug,
-        descripcion,
-        modulos: modulos || [],
-        precio_coins: precio_coins || 0,
-        precio_usd: precio_usd || 0,
-        max_intentos: max_intentos || 3,
-        nota_aprobacion: nota_aprobacion || 70,
-        certificado_template_id,
-        para_equipo,
-        activo
-      })
+      .insert(insertData)
       .select()
       .single()
 
     if (error) {
+      // If certificado_template_id column doesn't exist, retry without it
+      if (error.message?.includes('certificado_template_id') || error.message?.includes('schema cache')) {
+        delete insertData.certificado_template_id
+        const { data: retryData, error: retryError } = await supabase
+          .from('cursos')
+          .insert(insertData)
+          .select()
+          .single()
+
+        if (retryError) {
+          return NextResponse.json({ error: retryError.message }, { status: 500 })
+        }
+        return NextResponse.json({ success: true, data: retryData })
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, data })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Error del servidor' }, { status: 500 })
   }
 }
 
@@ -131,12 +148,28 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
+      // If certificado_template_id column doesn't exist, retry without it
+      if (error.message?.includes('certificado_template_id') || error.message?.includes('schema cache')) {
+        const { certificado_template_id, ...cleanUpdates } = updates
+        const { data: retryData, error: retryError } = await supabase
+          .from('cursos')
+          .update(cleanUpdates)
+          .eq('id', id)
+          .eq('empresa_id', DEFAULT_EMPRESA_ID)
+          .select()
+          .single()
+
+        if (retryError) {
+          return NextResponse.json({ error: retryError.message }, { status: 500 })
+        }
+        return NextResponse.json({ success: true, data: retryData })
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, data })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Error del servidor' }, { status: 500 })
   }
 }
 

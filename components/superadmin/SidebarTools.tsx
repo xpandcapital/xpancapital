@@ -3515,13 +3515,12 @@ const YouTubeBatchDownloader = () => {
                                     )}
                                     {item.status === 'done' && (
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><Check className="w-3 h-3" /> Completado</span>
-                                            {item.size && <span className="text-[10px] text-gray-500">{item.size}</span>}
+                                            <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1"><Check className="w-3 h-3" /> Listo</span>
                                             {item.downloadUrl && (
-                                                <a href={item.downloadUrl} target="_blank" rel="noopener noreferrer" download
-                                                    className="text-[10px] text-blis-red hover:underline flex items-center gap-0.5">
-                                                    <Download className="w-3 h-3" /> {item.isDirectDownload !== false ? 'Guardar' : 'Abrir'}
-                                                </a>
+                                                <button onClick={() => { window.open(item.downloadUrl, '_blank'); }}
+                                                    className="px-2 py-0.5 bg-blis-red/10 border border-blis-red/30 rounded text-[10px] text-blis-red font-bold hover:bg-blis-red/20 transition-all flex items-center gap-1">
+                                                    <Download className="w-3 h-3" /> Descargar
+                                                </button>
                                             )}
                                         </div>
                                     )}
