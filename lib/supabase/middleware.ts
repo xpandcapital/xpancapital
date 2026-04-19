@@ -8,34 +8,39 @@ export async function updateSession(request: NextRequest) {
   // Respuesta base que permite continuar con la petición
   let supabaseResponse = NextResponse.next({ request })
 
-  // Crear cliente Supabase que lee/escribe cookies en la petición/respuesta
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          // Primero actualizar las cookies en la petición para que los handlers posteriores las vean
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          )
-          // Crear nueva respuesta con las cookies actualizadas
-          supabaseResponse = NextResponse.next({ request })
-          // Escribir las cookies en la respuesta que se envía al navegador
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
+  let user: any = null
 
-  // CRUCIAL: Llamar getUser() para que Supabase refresque el token si es necesario
-  // Esto también valida la sesión contra el servidor de Supabase
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    // Crear cliente Supabase que lee/escribe cookies en la petición/respuesta
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            )
+            supabaseResponse = NextResponse.next({ request })
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+
+    // Refrescar la sesión y obtener el usuario autenticado
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    user = authUser
+  } catch (error) {
+    // Si Supabase falla (red, cookies corruptas, etc.), continuar sin sesión
+    // El usuario será tratado como no autenticado
+    console.error('[Middleware] Error al verificar sesión:', error)
+  }
 
   const { pathname } = request.nextUrl
 

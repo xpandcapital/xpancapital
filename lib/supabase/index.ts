@@ -2,6 +2,7 @@
 // BLIS CORP - SUPABASE CLIENT HELPERS
 // Cliente tipado con patrones de seguridad y error handling
 // Usa @supabase/ssr para sincronizar sesión en cookies (compatible con middleware)
+// ⚠️ El cliente se crea de forma lazy (bajo demanda) para evitar errores en SSR
 // ═══════════════════════════════════════════════════════════════════════════════
 
 import { createBrowserClient } from '@supabase/ssr'
@@ -11,12 +12,33 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CLIENTE PARA NAVEGADOR (Client-side)
-// Usa createBrowserClient de @supabase/ssr que sincroniza sesión en cookies
-// Esto permite que el middleware lea la sesión desde las cookies
+// CLIENTE PARA NAVEGADOR (Client-side) — LAZY SINGLETON
+// Se crea en la primera llamada, no al importar el módulo.
+// Esto evita errores de SSR porque createBrowserClient necesita document/cookies.
+// Los 23+ archivos que importan { supabase } siguen funcionando igual.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const supabase: SupabaseClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
+let _supabaseClient: SupabaseClient | null = null
+
+function getSupabaseClient(): SupabaseClient {
+  if (!_supabaseClient) {
+    _supabaseClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
+  }
+  return _supabaseClient
+}
+
+// Proxy que delega todas las propiedades al cliente real (lazy)
+// Esto permite que `supabase.auth.getUser()` funcigue igual que antes
+export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    const client = getSupabaseClient()
+    const value = (client as any)[prop]
+    if (typeof value === 'function') {
+      return value.bind(client)
+    }
+    return value
+  },
+})
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CLIENTE ADMIN (Service Role)

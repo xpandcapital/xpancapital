@@ -3,10 +3,9 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Search as SearchIcon, Instagram, Youtube, Facebook, Music2, ShoppingCart, Bell, Heart, LogOut, LayoutDashboard, User, ShieldCheck, ChevronDown } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import Image from "next/image"
 import { useAuth } from "@/hooks/useAuth"
-import { AuthModal } from "@/components/auth/AuthModal"
 import { useShop } from "@/context/ShopContext"
 import { useLandingCMS } from "@/context/LandingCMSContext"
 
@@ -21,10 +20,10 @@ interface HeaderProps {
 
 export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProps = {}) {
     const pathname = usePathname()
+    const router = useRouter()
     const [isScrolled, setIsScrolled] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
     const { user, logout } = useAuth()
     const { cart, favorites, blisCoins } = useShop()
     const { cmsData, templateData, siteConfig } = useLandingCMS()
@@ -435,7 +434,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                 </div>
                             ) : (
                                 <button
-                                    onClick={() => setIsAuthModalOpen(true)}
+                                    onClick={() => router.push('/login')}
                                     className="flex-shrink-0 px-5 py-2.5 rounded-full bg-blis-red/15 border border-blis-red/40 text-blis-red text-xs font-black uppercase tracking-widest hover:bg-blis-red hover:text-white hover:border-blis-red transition-all duration-300 shadow-[0_0_20px_rgba(190,11,60,0.15)] hover:shadow-[0_0_25px_rgba(190,11,60,0.4)]"
                                 >
                                     Ingresar
@@ -543,8 +542,6 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                     )}
                 </AnimatePresence>
             </header>
-
-            <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
 
 
             {/* ======================== */}
@@ -685,7 +682,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                 )}
                                 {!user && (
                                     <button
-                                        onClick={() => { setMobileMenuOpen(false); setIsAuthModalOpen(true); }}
+                                        onClick={() => { setMobileMenuOpen(false); router.push('/login'); }}
                                         className="w-full mt-8 py-4 rounded-xl bg-blis-red/15 border border-blis-red/40 text-blis-red font-bold uppercase tracking-widest text-xs hover:bg-blis-red hover:text-white transition-all shadow-[0_0_20px_rgba(190,11,60,0.15)]"
                                     >
                                         Iniciar Sesión
