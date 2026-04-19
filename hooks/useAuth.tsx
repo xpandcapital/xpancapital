@@ -7,7 +7,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { getSupabase } from '@/lib/supabase'
 import type { UserRole } from '@/lib/auth/permissions'
 import type { PermisosAdicionales } from '@/lib/auth/permissions'
 
@@ -37,13 +37,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
-function getSupabase() {
+// Obtener el cliente singleton de Supabase (compatible con SSR)
+function getSupabaseClient() {
   if (typeof window === 'undefined') return null
-  return createClient()
+  return getSupabase()
 }
 
 async function fetchProfile(userId: string): Promise<User | null> {
-  const supabase = getSupabase()
+  const supabase = getSupabaseClient()
   if (!supabase) return null
 
   try {
@@ -98,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Escuchar cambios en la sesión de Supabase (login, logout, token refresh)
     let mounted = true
-    const supabase = getSupabase()
+    const supabase = getSupabaseClient()
 
     // Obtener sesión inicial con manejo de errores
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -170,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const loginWithEmail = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    const supabase = getSupabase()
+    const supabase = getSupabaseClient()
     if (!supabase) {
       return { success: false, error: 'Supabase no está configurado' }
     }
@@ -208,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, nombre?: string, apellido?: string): Promise<{ success: boolean; error?: string }> => {
-    const supabase = getSupabase()
+    const supabase = getSupabaseClient()
     if (!supabase) {
       return { success: false, error: 'Supabase no está configurado' }
     }
@@ -236,7 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = async () => {
-    const supabase = getSupabase()
+    const supabase = getSupabaseClient()
     if (supabase) {
       await supabase.auth.signOut()
     }

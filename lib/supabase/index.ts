@@ -2,40 +2,23 @@
 // BLIS CORP - SUPABASE CLIENT HELPERS
 // Cliente tipado con patrones de seguridad y error handling
 // Usa @supabase/ssr para sincronizar sesión en cookies (compatible con middleware)
+// ⚠️ IMPORTANTE: Un solo singleton para toda la app. Múltiples instancias rompen las cookies.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-import { createBrowserClient } from '@supabase/ssr'
 import { SupabaseClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+import { createClient } from '@/lib/supabase/client'
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CLIENTE PARA NAVEGADOR (Client-side)
-// Singleton lazy — se crea solo cuando se necesita y solo en el navegador.
-// @supabase/ssr sincroniza la sesión en cookies automáticamente.
+// CLIENTE PARA NAVEGADOR — SINGLETON COMPARTIDO
+// createClient() de @/lib/supabase/client devuelve siempre la misma instancia.
+// Los 23+ archivos que importan { supabase } usan este mismo singleton.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-let _supabaseClient: SupabaseClient | null = null
-
-export function getSupabase(): SupabaseClient {
-  if (!_supabaseClient) {
-    _supabaseClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
-  }
-  return _supabaseClient
-}
-
-// Para compatibilidad con los imports existentes que usan { supabase }
-// Se crea bajo demanda solo en el navegador
 export const supabase: SupabaseClient = typeof window !== 'undefined'
-  ? createBrowserClient(supabaseUrl, supabaseAnonKey)
+  ? createClient()
   : (null as unknown as SupabaseClient)
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// CLIENTE ADMIN (Service Role)
-// Se movió a @/lib/supabase/server.ts (SOLO SERVER-SIDE)
-// Importar desde ahí en API routes: import { supabaseAdmin } from '@/lib/supabase/server'
-// ═══════════════════════════════════════════════════════════════════════════════
+export { createClient as getSupabase } from '@/lib/supabase/client'
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TIPOS DE RESPUESTA
