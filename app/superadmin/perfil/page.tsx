@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Lock, Mail, Phone, Save, ShieldCheck, User as UserIcon, X, RotateCw, FlipHorizontal, Check, Search, ChevronDown, Trash2, Bell } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { isAdminRole } from "@/lib/auth/permissions";
+import { isAdminRole, ROLE_CONFIG } from "@/lib/auth/permissions";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 
@@ -271,17 +271,39 @@ export default function AdminProfile() {
         }
     }, [user, router]);
 
-    const [name, setName] = useState(user?.name || "Admin General");
+    const [name, setName] = useState("");
     const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState(user?.email || "admin@bliscorp.com");
-    const [phone, setPhone] = useState(user?.phone || "");
-    const [profilePic, setProfilePic] = useState<string | null>(user?.profilePic || null);
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [profilePic, setProfilePic] = useState<string | null>(null);
     const [cropperSrc, setCropperSrc] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isCountryOpen, setIsCountryOpen] = useState(false);
     const [countrySearch, setCountrySearch] = useState("");
-    const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[3]); // México by default or generic
+    const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
     const [notifications, setNotifications] = useState(true);
+
+    // Inicializar campos cuando el usuario carga (evitar valores default que se sobreescriben)
+    useEffect(() => {
+        if (user) {
+            const fullName = user.name || "";
+            const parts = fullName.trim().split(/\s+/);
+            setName(parts[0] || "");
+            setLastName(parts.slice(1).join(" ") || "");
+            setEmail(user.email || "");
+            // Parsear teléfono: separar código de país del número
+            const rawPhone = user.phone || "";
+            const phoneMatch = rawPhone.match(/^(\+\d+)\s*(.*)$/);
+            if (phoneMatch) {
+                const foundCountry = COUNTRIES.find(c => c.code === phoneMatch[1]);
+                if (foundCountry) setSelectedCountry(foundCountry);
+                setPhone(phoneMatch[2] || "");
+            } else {
+                setPhone(rawPhone);
+            }
+            setProfilePic(user.profilePic || null);
+        }
+    }, [user])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -294,7 +316,8 @@ export default function AdminProfile() {
 
     const handleUpdate = async () => {
         try {
-            await updateProfile({ name: `${name} ${lastName}`.trim(), email, phone: `${selectedCountry.code} ${phone}`, profilePic });
+            const fullPhone = phone ? `${selectedCountry.code} ${phone}` : '';
+            await updateProfile({ name: `${name} ${lastName}`.trim(), email, phone: fullPhone, profilePic });
             showToast("Perfil actualizado correctamente", "success");
         } catch (error) {
             showToast("Error al actualizar perfil", "error");
@@ -348,8 +371,8 @@ export default function AdminProfile() {
                                 <Camera className="w-10 h-10 text-white" />
                             </div>
                         </div>
-                        <h2 className="text-2xl font-black text-white mb-2">{name}</h2>
-                        <p className="text-gray-500 font-mono text-sm mb-6">Administrador | Nivel 1</p>
+                        <h2 className="text-2xl font-black text-white mb-2">{name} {lastName}</h2>
+                            <p className="text-gray-500 font-mono text-sm mb-6">{ROLE_CONFIG[user?.role || 'usuario']?.label || 'Miembro'}</p>
 
                         <button
                             onClick={() => fileInputRef.current?.click()}
@@ -415,7 +438,7 @@ export default function AdminProfile() {
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     exit={{ opacity: 0, y: 10 }}
-                                                    className="absolute top-full left-0 mt-2 w-56 bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl"
+                                                    className="absolute top-full left-0 mt-2 w-56 bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden z-[200] shadow-2xl"
                                                 >
                                                     <div className="p-2 border-b border-white/5 bg-black/20 sticky top-0 z-10">
                                                         <div className="relative">
