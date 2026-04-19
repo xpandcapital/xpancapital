@@ -401,11 +401,11 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                     {user.role === 'superadmin' ? 'SUPER ADMIN' : user.role === 'admin' ? 'ADMIN' : 'MIEMBRO'}
                                                 </p>
                                             </div>
-                                            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blis-red to-red-900 border border-white/20 flex items-center justify-center text-white font-black text-xl shadow-[0_4px_15px_rgba(190,11,60,0.4)] group-hover:scale-105 transition-all overflow-hidden">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blis-red to-red-900 border border-white/20 flex items-center justify-center text-white font-black text-sm shadow-[0_4px_15px_rgba(190,11,60,0.4)] group-hover:scale-105 transition-all overflow-hidden shrink-0">
                                                 {user.profilePic ? (
                                                     <img src={user.profilePic} alt="Avatar" className="w-full h-full object-cover" />
                                                 ) : (
-                                                    (user.name || user.id).charAt(0).toUpperCase()
+                                                    (user.name || '').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'U'
                                                 )}
                                             </div>
                                         </button>
@@ -594,11 +594,11 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                             {user && (
                                 <div className="px-6 py-3 border-b border-white/8 bg-white/[0.02]">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blis-red to-red-900 border border-white/20 flex items-center justify-center text-white font-black text-xl shadow-lg shrink-0 overflow-hidden">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blis-red to-red-900 border border-white/20 flex items-center justify-center text-white font-black text-sm shadow-lg shrink-0 overflow-hidden">
                                             {user?.profilePic ? (
                                                 <img src={user.profilePic} alt="Profile" className="w-full h-full object-cover" />
                                             ) : (
-                                                (user?.name || user?.id || 'U').charAt(0).toUpperCase()
+                                                (user?.name || '').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'U'
                                             )}
                                         </div>
                                         <div className="text-left overflow-hidden">
@@ -616,7 +616,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                     <div className="mt-3 flex gap-2">
                                         <div className="flex-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center">
                                             <p className="text-[7px] font-bold uppercase tracking-widest opacity-60 leading-none mb-1">BLISCOINS</p>
-                                            <p className="text-xs font-black">2,450</p>
+                                            <p className="text-xs font-black">{user?.blis_coins?.toLocaleString() || '0'}</p>
                                         </div>
                                         <div className="flex-1 px-3 py-1.5 rounded-lg bg-blis-red/10 border border-blis-red/20 text-blis-red text-center">
                                             <p className="text-[7px] font-bold uppercase tracking-widest opacity-60 leading-none mb-1">Favoritos</p>

@@ -103,7 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {}
     return null
   })
-  const [loading, setLoading] = useState(true)
+  // Si ya hay usuario del cache, no mostrar loading
+  const [loading, setLoading] = useState(() => {
+    if (typeof window === 'undefined') return true
+    try {
+      const cached = localStorage.getItem(CACHE_KEY)
+      return !cached
+    } catch { return true }
+  })
   const router = useRouter()
 
   // Persistir usuario en cache cuando cambia
@@ -119,11 +126,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user])
 
   useEffect(() => {
-    // Escuchar cambios en la sesión de Supabase (login, logout, token refresh)
     let mounted = true
     const supabase = getSupabaseClient()
 
-    // Obtener sesión inicial con manejo de errores
+    // Obtener sesión inicial — si ya tenemos cache, actualizar en background
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!mounted) return
       if (session?.user) {
