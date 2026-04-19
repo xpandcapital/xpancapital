@@ -1,0 +1,1 @@
+export { useGestionLotes } from './useGestionLotes';
