@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export function MiembrosHeader() {
     const { user } = useAuth();
-    const isAdmin = user?.role === "admin";
+    const isAdmin = user?.role ? ['superadmin', 'admin', 'editor'].includes(user.role) : false;
     const profileHref = isAdmin ? "/superadmin/perfil" : "/miembros/perfil";
 
     return (

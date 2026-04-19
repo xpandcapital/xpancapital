@@ -26,7 +26,7 @@ export function MiembrosSidebar() {
     const [sidebarWidth, setSidebarWidth] = useState(64);
     const pathname = usePathname();
     const { user } = useAuth();
-    const isAdmin = user?.role === "admin";
+    const isAdmin = user?.role ? ['superadmin', 'admin', 'editor'].includes(user.role) : false;
 
     useEffect(() => {
         const handleResize = () => {

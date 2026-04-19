@@ -1,32 +1,28 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // BLIS CORP - SUPABASE CLIENT HELPERS
 // Cliente tipado con patrones de seguridad y error handling
+// Usa @supabase/ssr para sincronizar sesión en cookies (compatible con middleware)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CLIENTE PARA NAVEGADOR (Client-side)
+// Usa createBrowserClient de @supabase/ssr que sincroniza sesión en cookies
+// Esto permite que el middleware lea la sesión desde las cookies
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase: SupabaseClient = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CLIENTE ADMIN (Service Role - SOLO SERVER-SIDE)
+// CLIENTE ADMIN (Service Role)
+// Se movió a @/lib/supabase/server.ts (SOLO SERVER-SIDE)
+// Importar desde ahí en API routes: import { supabaseAdmin } from '@/lib/supabase/server'
 // ═══════════════════════════════════════════════════════════════════════════════
-
-export const supabaseAdmin: SupabaseClient | null = supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    })
-  : null
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TIPOS DE RESPUESTA
@@ -431,7 +427,6 @@ export function subscribeToNotifications(
 
 export default {
   supabase,
-  supabaseAdmin,
   createResult,
   createError,
   fetchWithRetry,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase/server'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 export async function GET(request: NextRequest) {

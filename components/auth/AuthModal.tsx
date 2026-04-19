@@ -1,9 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Lock, Chrome, Facebook, Apple, ArrowRight, Github } from "lucide-react";
+import { X, Mail, Lock, Chrome, Facebook, Apple, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { getDefaultRouteForRole, isAdminRole } from "@/lib/auth/permissions";
 
 interface AuthModalProps {
     isOpen: boolean;
@@ -14,25 +16,32 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     const [mode, setMode] = useState<"login" | "register">("login");
     const [id, setId] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState(false);
-    const { login } = useAuth();
+    const [error, setError] = useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+    const { loginWithEmail } = useAuth();
+    const router = useRouter();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(false);
+        setError(null);
+        setSubmitting(true);
         try {
-            const role = login(id, password);
-            if (role) {
+            const result = await loginWithEmail(id, password);
+            if (result.success) {
                 onClose();
-                // Usamos location.href para asegurar una limpieza completa del estado de la home
-                window.location.href = role === "admin" ? "/superadmin" : "/miembros";
+                // Esperar a que el auth context se actualice y redirigir según rol
+                setTimeout(() => {
+                    router.push(getDefaultRouteForRole('admin'));
+                }, 100);
             } else {
-                setError(true);
-                setTimeout(() => setError(false), 2000);
+                setError(result.error || 'Credenciales incorrectas');
+                setTimeout(() => setError(null), 3000);
             }
         } catch (err) {
-            console.error("Login Error:", err);
-            setError(true);
+            setError('Error al iniciar sesión');
+            setTimeout(() => setError(null), 3000);
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -137,7 +146,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                         animate={{ opacity: 1, y: 0 }}
                                         className="text-[10px] text-blis-red font-black uppercase tracking-widest text-center"
                                     >
-                                        Datos incorrectos. Verifica tus credenciales.
+                                        {error}
                                     </motion.p>
                                 )}
 

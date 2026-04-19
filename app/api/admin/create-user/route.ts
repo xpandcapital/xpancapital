@@ -34,13 +34,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Ya existe un usuario con este email' }, { status: 409 })
     }
 
-    // 2. Create Supabase Auth user
+    // 2. Create Supabase Auth user con app_metadata para el rol
+    const userRol = rol || 'usuario'
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email: normalizedEmail,
       password: generatedPassword,
       email_confirm: true,
       user_metadata: {
         nombre,
+        empresa_id: EMPRESA_ID,
+      },
+      app_metadata: {
+        rol: userRol,
         empresa_id: EMPRESA_ID,
       },
     })

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Camera, Lock, Mail, Phone, Save, ShieldCheck, User as UserIcon, X, RotateCw, FlipHorizontal, Check, Search, ChevronDown, Trash2, Bell } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { isAdminRole } from "@/lib/auth/permissions";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 
@@ -265,7 +266,7 @@ export default function AdminProfile() {
     const { showToast } = useToast();
 
     useEffect(() => {
-        if (user && user.role !== "admin") {
+        if (user && !isAdminRole(user.role)) {
             router.replace("/miembros/perfil");
         }
     }, [user, router]);

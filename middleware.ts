@@ -1,27 +1,15 @@
-import { NextResponse } from 'next/server'
+// Middleware principal de autenticación y autorización
+// Delega la lógica de sesión a @supabase/ssr y redirige según rol
+import { updateSession } from '@/lib/supabase/middleware'
 import type { NextRequest } from 'next/server'
 
-const protectedPaths = ['/superadmin', '/miembros', '/admin']
-const authPaths = ['/login', '/register', '/auth']
-
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-
-  const isProtected = protectedPaths.some(path => pathname.startsWith(path))
-  if (!isProtected) return NextResponse.next()
-
-  const sessionToken = request.cookies.get('sb-access-token')?.value
-    || request.cookies.get('supabase-auth-token')?.value
-
-  if (!sessionToken) {
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  return NextResponse.next()
+export async function middleware(request: NextRequest) {
+  return await updateSession(request)
 }
 
 export const config = {
-  matcher: ['/superadmin/:path*', '/miembros/:path*', '/admin/:path*'],
+  // Ejecutar en todas las rutas excepto archivos estáticos e imágenes
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }

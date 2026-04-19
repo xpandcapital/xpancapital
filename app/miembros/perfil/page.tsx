@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { isAdminRole } from "@/lib/auth/permissions";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import { useCoins } from "@/lib/hooks/useCoins";
@@ -287,7 +288,7 @@ export default function ProfilePage() {
     const { balance, transactions, loading: coinsLoading, fetchBalance, fetchTransactions } = useCoins(user?.id);
 
     useEffect(() => {
-        if (user?.role === "admin") {
+        if (user && isAdminRole(user.role)) {
             router.replace("/superadmin/perfil");
         }
     }, [user, router]);

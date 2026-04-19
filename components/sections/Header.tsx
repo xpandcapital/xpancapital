@@ -397,7 +397,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                 </p>
                                                 <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                                    {user.role === 'admin' ? 'MASTER ADMIN' : 'MIEMBRO GOLD'}
+                                                    {user.role === 'superadmin' ? 'SUPER ADMIN' : user.role === 'admin' ? 'ADMIN' : 'MIEMBRO'}
                                                 </p>
                                             </div>
                                             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blis-red to-red-900 border border-white/20 flex items-center justify-center text-white font-black text-xl shadow-[0_4px_15px_rgba(190,11,60,0.4)] group-hover:scale-105 transition-all overflow-hidden">
@@ -413,13 +413,13 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         <div className="absolute top-full right-0 pt-4 w-56 scale-95 opacity-0 pointer-events-none group-hover/user:scale-100 group-hover/user:opacity-100 group-hover/user:pointer-events-auto transition-all duration-300 origin-top-right z-50">
                                             <div className="bg-[#0A0D11]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
                                                 <div className="py-2">
-                                                    <button onClick={() => handleNavigation(user.role === 'admin' ? '/superadmin/perfil' : '/miembros/perfil')} className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
+                                                    <button onClick={() => handleNavigation(['superadmin', 'admin', 'editor'].includes(user.role) ? '/superadmin/perfil' : '/miembros/perfil')} className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
                                                         <User className="w-4 h-4 text-blis-red" /> MI PERFIL
                                                     </button>
                                                     <button onClick={() => handleNavigation('/miembros')} className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-gray-300 hover:text-white hover:bg-white/5 transition-colors">
                                                         <LayoutDashboard className="w-4 h-4 text-blis-red" /> ÁREA DE MIEMBROS
                                                     </button>
-                                                    {user.role === 'admin' && (
+                                                    {['superadmin', 'admin', 'editor'].includes(user.role) && (
                                                         <button onClick={() => handleNavigation('/superadmin')} className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-white hover:bg-blis-red/10 transition-colors">
                                                             <ShieldCheck className="w-4 h-4 text-blis-red" /> SUPER ADMIN
                                                         </button>
@@ -609,7 +609,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                             <div className="flex items-center gap-1.5">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                                 <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">
-                                                    {user?.role === 'admin' ? 'MASTER ADMIN' : 'MIEMBRO GOLD'}
+                                                    {user?.role === 'superadmin' ? 'SUPER ADMIN' : ['admin', 'editor'].includes(user?.role || '') ? 'ADMIN' : 'MIEMBRO'}
                                                 </p>
                                             </div>
                                         </div>
@@ -660,7 +660,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                 {/* Dashboards Buttons */}
                                 {user && (
                                     <div className="mt-3 space-y-2">
-                                        {user?.role === 'admin' && (
+                                        {['superadmin', 'admin', 'editor'].includes(user?.role || '') && (
                                             <button
                                                 onClick={() => handleNavigation('/superadmin')}
                                                 className="w-full py-3 rounded-lg bg-blis-red text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-[0_6px_15px_rgba(190,11,60,0.2)]"
