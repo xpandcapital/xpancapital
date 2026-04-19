@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (!pending || pending.length === 0) {
-      return NextResponse.json({ success: true, message: 'No hay registros pendientes', processed: 0 })
+      // No hay registros en la cola — sincronizar directamente desde profiles
+      return await syncAllProfiles(supabase)
     }
 
     let processed = 0
