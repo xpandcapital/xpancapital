@@ -286,15 +286,17 @@ export default function AdminProfile() {
     const [notifications, setNotifications] = useState(true);
     const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 
-    // Inicializar campos cuando el usuario carga (evitar valores default que se sobreescriben)
+    // Flag para no reiniciar los campos cuando el usuario está editando
+    const [formInitialized, setFormInitialized] = useState(false);
+
+    // Inicializar campos del formulario SOLO UNA VEZ cuando el usuario carga
     useEffect(() => {
-        if (user) {
+        if (user && !formInitialized) {
             const fullName = user.name || "";
             const parts = fullName.trim().split(/\s+/);
             setName(parts[0] || "");
             setLastName(parts.slice(1).join(" ") || "");
             setEmail(user.email || "");
-            // Parsear teléfono: separar código de país del número
             const rawPhone = user.phone || "";
             const phoneMatch = rawPhone.match(/^(\+\d+)\s*(.*)$/);
             if (phoneMatch) {
@@ -305,8 +307,9 @@ export default function AdminProfile() {
                 setPhone(rawPhone);
             }
             setProfilePic(user.profilePic || null);
+            setFormInitialized(true);
         }
-    }, [user])
+    }, [user, formInitialized])
 
     // Calcular posición del dropdown de países y cerrar al hacer click fuera
     useEffect(() => {
