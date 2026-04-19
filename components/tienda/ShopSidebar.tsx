@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
+import { ROLE_CONFIG } from "@/lib/auth/permissions";
 import {
     ShoppingBag,
     Briefcase,
@@ -35,6 +37,7 @@ const bottomNav = [
 ];
 
 export function ShopSidebar() {
+    const { user } = useAuth();
     const [activeId, setActiveId] = useState<string>("");
     const { getCartCount, favorites, openCart } = useShop();
     const [sidebarBottom, setSidebarBottom] = useState("0px");
@@ -228,14 +231,26 @@ export function ShopSidebar() {
             {/* User Area Footer */}
             <div className="p-4 border-t border-white/5">
                 <button className="w-full flex items-center gap-3 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-left">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blis-red to-black border border-white/10 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&q=80')] bg-cover opacity-80 mix-blend-luminosity" />
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blis-red to-black border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {user?.profilePic ? (
+                            <img src={user.profilePic} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                            <span className="text-white font-black text-sm">
+                                {(user?.name || '').split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'U'}
+                            </span>
+                        )}
                     </div>
                     <div className="flex-1 overflow-hidden">
-                        <p className="text-sm font-bold text-white truncate">Buen día, Kevin</p>
-                        <p className="text-xs text-[#209f89] flex items-center gap-1 font-mono">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#209f89] animate-pulse" />
-                            Premium
+                        <p className="text-sm font-bold text-white truncate">
+                            {(() => {
+                                const hour = new Date().getHours()
+                                const greeting = hour < 12 ? 'Buen día' : hour < 19 ? 'Buenas tardes' : 'Buenas noches'
+                                return `${greeting}, ${user?.name?.split(' ')[0] || 'Usuario'}`
+                            })()}
+                        </p>
+                        <p className="text-xs flex items-center gap-1 font-mono text-emerald-400">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            {ROLE_CONFIG[user?.role || 'usuario']?.label || 'Miembro'}
                         </p>
                     </div>
                 </button>

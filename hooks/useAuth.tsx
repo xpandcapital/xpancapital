@@ -273,10 +273,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/')
   }
 
-  const updateProfile = (data: { name?: string; profilePic?: string | null; email?: string; phone?: string }) => {
+  const updateProfile = async (data: { name?: string; profilePic?: string | null; email?: string; phone?: string }) => {
     if (!user) return
+    // Actualizar estado local inmediatamente para UI responsive
     const updatedUser = { ...user, ...data }
     setUser(updatedUser)
+
+    // Guardar en Supabase en background
+    try {
+      const supabase = getSupabaseClient()
+      if (supabase) {
+        const updateData: Record<string, unknown> = {}
+        if (data.name !== undefined) {
+          const parts = data.name.trim().split(' ')
+          updateData.nombre = parts[0] || ''
+          updateData.apellido = parts.slice(1).join(' ') || ''
+        }
+        if (data.profilePic !== undefined) updateData.avatar_url = data.profilePic
+        if (data.phone !== undefined) updateData.telefono = data.phone
+
+        if (Object.keys(updateData).length > 0) {
+          await supabase
+            .from('profiles')
+            .update(updateData)
+            .eq('id', user.id)
+        }
+      }
+    } catch (err) {
+      console.error('[Auth] Error guardando perfil:', err)
+    }
   }
 
   const refreshUser = async () => {
