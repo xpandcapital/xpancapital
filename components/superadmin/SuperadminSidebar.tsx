@@ -17,6 +17,7 @@ import { LucideProps } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { SECTION_PERMISSIONS } from "@/lib/auth/permissions";
+import { CompanySwitcher } from "./CompanySwitcher";
 
 const permissionToSection: Record<string, string> = {}
 Object.entries(SECTION_PERMISSIONS).forEach(([section, perm]) => {
@@ -265,6 +266,12 @@ export function SuperadminSidebar() {
                         <ChevronLeft className={`w-5 h-5 transition-transform duration-500 ${isCollapsed ? 'rotate-180' : ''}`} />
                     </button>
                 </div>
+
+                {!isCollapsed && (
+                    <div className="px-3 pb-2">
+                        <CompanySwitcher />
+                    </div>
+                )}
 
                 <nav className="flex-1 px-3 space-y-6 overflow-y-auto scrollbar-hide py-4">
                     {sections.map((section, idx) => (
