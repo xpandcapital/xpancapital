@@ -1,4 +1,5 @@
 import { SuperadminSidebar } from "@/components/superadmin/SuperadminSidebar";
+import { SuperadminGuard } from "@/components/superadmin/SuperadminGuard";
 
 export default function AdminLayout({
     children,
@@ -12,7 +13,9 @@ export default function AdminLayout({
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,#209f89_0%,transparent_50%)] opacity-[0.03] pointer-events-none" />
                 <main className="flex-1 p-0 md:p-0 z-50 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-white/10 w-full max-w-full">
                     <div className="max-w-[1600px] mx-auto w-full">
-                        {children}
+                        <SuperadminGuard>
+                            {children}
+                        </SuperadminGuard>
                     </div>
                 </main>
             </div>
