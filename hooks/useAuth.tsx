@@ -279,7 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const updatedUser = { ...user, ...data }
     setUser(updatedUser)
 
-    // Guardar en Supabase en background
+    // Guardar en Supabase
     try {
       const supabase = getSupabaseClient()
       if (supabase) {
@@ -289,14 +289,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updateData.nombre = parts[0] || ''
           updateData.apellido = parts.slice(1).join(' ') || ''
         }
-        if (data.profilePic !== undefined) updateData.avatar_url = data.profilePic
+        // Si la imagen es base64, subirla a Storage en vez de guardarla en la BD
+        if (data.profilePic !== undefined) {
+          if (data.profilePic && data.profilePic.startsWith('data:image')) {
+            try {
+              const fileExt = data.profilePic.includes('image/png') ? 'png' : 'jpg'
+              const fileName = `${user.id}-avatar.${fileExt}`
+              // Convertir base64 a Uint8Array
+              const base64Data = data.profilePic.split(',')[1]
+              const byteCharacters = atob(base64Data)
+              const byteArray = new Uint8Array(byteCharacters.length)
+              for (let i = 0; i < byteCharacters.length; i++) {
+                byteArray[i] = byteCharacters.charCodeAt(i)
+              }
+              const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(fileName, byteArray, {
+                  contentType: data.profilePic.includes('image/png') ? 'image/png' : 'image/jpeg',
+                  upsert: true,
+                })
+              if (!uploadError && uploadData) {
+                const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
+                updateData.avatar_url = urlData?.publicUrl || null
+              } else {
+                console.warn('[Auth] Storage upload failed, keeping existing avatar')
+              }
+            } catch (uploadErr) {
+              console.warn('[Auth] Error uploading avatar:', uploadErr)
+            }
+          } else if (data.profilePic === null) {
+            updateData.avatar_url = null
+          } else {
+            updateData.avatar_url = data.profilePic
+          }
+        }
         if (data.phone !== undefined) updateData.telefono = data.phone
 
         if (Object.keys(updateData).length > 0) {
-          await supabase
+          const { error } = await supabase
             .from('profiles')
             .update(updateData)
             .eq('id', user.id)
+
+          if (error) {
+            console.error('[Auth] Error guardando perfil en BD:', error)
+          } else {
+            // Refrescar el usuario desde la BD para asegurar consistencia
+            await refreshUser()
+          }
         }
       }
     } catch (err) {
