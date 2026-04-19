@@ -1,517 +1,351 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Building2, Save, Upload, Palette, Globe, MapPin, CreditCard, Users, Crown, Check
-} from "lucide-react";
-import { useToast } from "@/components/ui/Toast";
+  Building2, Plus, Trash2, Save, Users, Crown, X, UserPlus,
+  ChevronRight, Globe, Mail, Shield
+} from 'lucide-react'
+import { useToast } from '@/components/ui/Toast'
 
 interface Empresa {
-  id: string;
-  slug: string;
-  nombre: string;
-  nombre_legal: string | null;
-  logo_url: string | null;
-  logo_dark_url: string | null;
-  favicon_url: string | null;
-  color_primario: string;
-  color_secundario: string;
-  color_acento: string;
-  moneda_base: string;
-  monedas_activas: string[];
-  idioma: string;
-  zona_horaria: string;
-  pais_fiscal: string;
-  ruc: string | null;
-  razon_social: string | null;
-  direccion_fiscal: string | null;
-  dominio_principal: string | null;
-  dominios_alias: string[];
-  activo: boolean;
-  plan: string;
-  plan_limite_usuarios: number;
-  plan_limite_productos: number;
-  plan_limite_almacenamiento: number;
+  id: string
+  slug: string
+  nombre: string
+  nombre_legal: string | null
+  logo_url: string | null
+  color_primario: string
+  color_secundario: string
+  color_acento: string
+  moneda_base: string
+  idioma: string
+  zona_horaria: string
+  pais_fiscal: string
+  ruc: string | null
+  dominio_principal: string | null
+  activo: boolean
+  plan: string
+  plan_limite_usuarios: number
+  plan_limite_productos: number
+  plan_limite_almacenamiento: number
+  creado_en: string
+  user_count?: number
 }
 
-interface EmpresaConfig {
-  id: string;
-  empresa_id: string;
-  blog_activo: boolean;
-  tienda_activa: boolean;
-  academia_activa: boolean;
-  referidos_activo: boolean;
-  bliscoins_activo: boolean;
-  envios_activo: boolean;
-  envios_gratis_monto: number | null;
-  coins_por_lectura: number;
-  segundos_lectura: number;
-  coins_registro: number;
-  coins_referido: number;
+interface EmpresaUser {
+  id: string
+  email: string
+  nombre: string
+  apellido: string | null
+  rol: string
+  avatar_url: string | null
+  creado_en: string
 }
 
-const PAISES = [
-  { codigo: 'PE', nombre: 'Perú 🇵🇪' },
-  { codigo: 'MX', nombre: 'México 🇲🇽' },
-  { codigo: 'CO', nombre: 'Colombia 🇨🇴' },
-  { codigo: 'CL', nombre: 'Chile 🇨🇱' },
-  { codigo: 'EC', nombre: 'Ecuador 🇪🇨' },
-  { codigo: 'AR', nombre: 'Argentina 🇦🇷' },
-  { codigo: 'ES', nombre: 'España 🇪🇸' },
-  { codigo: 'US', nombre: 'Estados Unidos 🇺🇸' }
-];
+const ROLE_LABELS: Record<string, string> = {
+  superadmin: 'Super Admin',
+  admin: 'Admin',
+  editor: 'Editor',
+  cliente: 'Cliente',
+  usuario: 'Usuario',
+}
 
-const MONEDAS = [
-  { codigo: 'USD', nombre: 'USD - Dólar estadounidense' },
-  { codigo: 'PEN', nombre: 'PEN - Sol peruano' },
-  { codigo: 'MXN', nombre: 'MXN - Peso mexicano' },
-  { codigo: 'COP', nombre: 'COP - Peso colombiano' },
-  { codigo: 'CLP', nombre: 'CLP - Peso chileno' },
-  { codigo: 'EUR', nombre: 'EUR - Euro' }
-];
+const ROLE_COLORS: Record<string, string> = {
+  superadmin: '#be0b3c',
+  admin: '#f59e0b',
+  editor: '#8b5cf6',
+  cliente: '#3b82f6',
+  usuario: '#6b7280',
+}
 
 const PLANES = [
-  { id: 'free', nombre: 'Free', limite_usuarios: 5, limite_productos: 50 },
-  { id: 'starter', nombre: 'Starter', limite_usuarios: 20, limite_productos: 200 },
-  { id: 'pro', nombre: 'Pro', limite_usuarios: 100, limite_productos: 1000 },
-  { id: 'enterprise', nombre: 'Enterprise', limite_usuarios: 500, limite_productos: 5000 }
-];
-
-function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 shadow-4xl">
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
-        <div className="p-2 rounded-xl bg-white/5 border border-white/10">
-          {icon}
-        </div>
-        <h2 className="text-lg font-black text-white uppercase tracking-wide">{title}</h2>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`space-y-2 ${className || ''}`}>
-      <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{label}</label>
-      {children}
-    </div>
-  );
-}
+  { id: 'free', nombre: 'Free', usuarios: 5, productos: 50 },
+  { id: 'starter', nombre: 'Starter', usuarios: 20, productos: 200 },
+  { id: 'pro', nombre: 'Pro', usuarios: 100, productos: 1000 },
+  { id: 'enterprise', nombre: 'Enterprise', usuarios: 500, productos: 5000 },
+]
 
 export default function EmpresasPage() {
-  const { showToast } = useToast();
-  const [empresa, setEmpresa] = useState<Empresa | null>(null);
-  const [config, setConfig] = useState<EmpresaConfig | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { showToast } = useToast()
+  const [empresas, setEmpresas] = useState<Empresa[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [showCreate, setShowCreate] = useState(false)
+  const [showUsers, setShowUsers] = useState(false)
+  const [users, setUsers] = useState<EmpresaUser[]>([])
+  const [loadingUsers, setLoadingUsers] = useState(false)
+  const [newEmpresa, setNewEmpresa] = useState({ nombre: '', slug: '', nombre_legal: '', color_primario: '#be0b3c', pais_fiscal: 'PE', moneda_base: 'USD', idioma: 'es', zona_horaria: 'America/Lima', plan: 'free' })
+  const [newUser, setNewUser] = useState({ email: '', nombre: '', apellido: '', rol: 'editor', password: '' })
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchEmpresa();
-  }, []);
+  useEffect(() => { fetchEmpresas() }, [])
 
-  const fetchEmpresa = async () => {
-    setLoading(true);
+  const fetchEmpresas = async () => {
+    setLoading(true)
     try {
-      const response = await fetch('/api/admin/empresa');
-      const data = await response.json();
+      const res = await fetch('/api/admin/empresa?list=all')
+      const data = await res.json()
       if (data.success) {
-        setEmpresa(data.empresa);
-        setConfig(data.config);
+        const empresaList = data.empresas || []
+        const withCounts = await Promise.all(empresaList.map(async (e: Empresa) => {
+          try {
+            const uRes = await fetch(`/api/admin/empresa/usuarios?empresa_id=${e.id}`)
+            const uData = await uRes.json()
+            return { ...e, user_count: uData.users?.length || 0 }
+          } catch { return { ...e, user_count: 0 } }
+        }))
+        setEmpresas(withCounts)
       }
-    } catch {
-      showToast('Error al cargar datos de la empresa', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
+    } catch { showToast('Error al cargar empresas', 'error') }
+    finally { setLoading(false) }
+  }
 
-  const handleSave = async () => {
-    if (!empresa) return;
-    setSaving(true);
+  const fetchUsers = async (empresaId: string) => {
+    setLoadingUsers(true)
     try {
-      const response = await fetch('/api/admin/empresa', {
-        method: 'PUT',
+      const res = await fetch(`/api/admin/empresa/usuarios?empresa_id=${empresaId}`)
+      const data = await res.json()
+      if (data.success) setUsers(data.users || [])
+    } catch { showToast('Error al cargar usuarios', 'error') }
+    finally { setLoadingUsers(false) }
+  }
+
+  const handleCreate = async () => {
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/empresa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newEmpresa) })
+      const data = await res.json()
+      if (data.success) {
+        showToast('Empresa creada exitosamente', 'success')
+        setShowCreate(false)
+        setNewEmpresa({ nombre: '', slug: '', nombre_legal: '', color_primario: '#be0b3c', pais_fiscal: 'PE', moneda_base: 'USD', idioma: 'es', zona_horaria: 'America/Lima', plan: 'free' })
+        fetchEmpresas()
+      } else { showToast(data.error || 'Error al crear', 'error') }
+    } catch { showToast('Error al crear empresa', 'error') }
+    finally { setSaving(false) }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('¿Estás seguro de eliminar esta empresa? Esta acción no se puede deshacer.')) return
+    setDeleting(id)
+    try {
+      const res = await fetch(`/api/admin/empresa?id=${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (data.success) {
+        showToast('Empresa eliminada', 'success')
+        if (selectedId === id) { setSelectedId(null); setShowUsers(false) }
+        fetchEmpresas()
+      } else { showToast(data.error || 'Error al eliminar', 'error') }
+    } catch { showToast('Error al eliminar', 'error') }
+    finally { setDeleting(null) }
+  }
+
+  const handleCreateUser = async () => {
+    const selectedEmpresa = empresas.find(e => e.id === selectedId)
+    if (!selectedEmpresa) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/empresa/usuarios', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ empresa, config })
-      });
-      const data = await response.json();
+        body: JSON.stringify({ ...newUser, empresa_id: selectedEmpresa.id }),
+      })
+      const data = await res.json()
       if (data.success) {
-        showToast('Cambios guardados exitosamente', 'success');
-      } else {
-        showToast(data.error || 'Error al guardar', 'error');
-      }
-    } catch {
-      showToast('Error al guardar', 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
+        showToast('Usuario creado exitosamente', 'success')
+        setNewUser({ email: '', nombre: '', apellido: '', rol: 'editor', password: '' })
+        fetchUsers(selectedEmpresa.id)
+        fetchEmpresas()
+      } else { showToast(data.error || 'Error al crear usuario', 'error') }
+    } catch { showToast('Error al crear usuario', 'error') }
+    finally { setSaving(false) }
+  }
+
+  const handleRemoveUser = async (userId: string) => {
+    if (!window.confirm('¿Eliminar este usuario de la empresa?')) return
+    try {
+      const res = await fetch(`/api/admin/empresa/usuarios?userId=${userId}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (data.success) {
+        showToast('Usuario eliminado', 'success')
+        if (selectedId) fetchUsers(selectedId)
+      } else { showToast(data.error || 'Error al eliminar', 'error') }
+    } catch { showToast('Error al eliminar usuario', 'error') }
+  }
+
+  const handleViewUsers = (empresaId: string) => {
+    setSelectedId(empresaId)
+    setShowUsers(true)
+    fetchUsers(empresaId)
+  }
+
+  const generateSlug = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+
+  const selectedEmpresa = empresas.find(e => e.id === selectedId)
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
       </div>
-    );
+    )
   }
 
   return (
     <div className="space-y-8 w-full mx-auto pb-20 px-4 md:px-8 pt-8 bg-black min-h-screen">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
         <div className="w-full sm:w-auto">
-          <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none sm:leading-tight">
-            Empresas
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">
-            Configura los datos de tu empresa, branding y funcionalidades.
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none sm:leading-tight">Empresas</h1>
+          <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">Gestiona las empresas del sistema. Cada empresa tiene sus propias API keys, usuarios y configuración.</p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="w-full sm:w-auto bg-blis-red text-white px-8 py-4 sm:py-5 rounded-3xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all flex items-center justify-center shrink-0 gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)] mt-4 sm:mt-0 disabled:opacity-50"
-        >
-          <Save className="w-5 h-5" />
-          {saving ? 'Guardando...' : 'Guardar Cambios'}
+        <button onClick={() => setShowCreate(true)} className="w-full sm:w-auto bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+          <Plus className="w-4 h-4" />Nueva Empresa
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Section title="Identidad" icon={<Building2 className="w-5 h-5 text-blue-500" />}>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Field label="Nombre Comercial">
-                <input
-                  type="text"
-                  value={empresa?.nombre || ''}
-                  onChange={(e) => setEmpresa(prev => prev ? { ...prev, nombre: e.target.value } : null)}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50"
-                />
-              </Field>
-              <Field label="Nombre Legal">
-                <input
-                  type="text"
-                  value={empresa?.nombre_legal || ''}
-                  onChange={(e) => setEmpresa(prev => prev ? { ...prev, nombre_legal: e.target.value } : null)}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50"
-                />
-              </Field>
-            </div>
-            <Field label="Slug (URL)">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-500 text-sm whitespace-nowrap">misitio.com/</span>
-                <input
-                  type="text"
-                  value={empresa?.slug || ''}
-                  onChange={(e) => setEmpresa(prev => prev ? { ...prev, slug: e.target.value } : null)}
-                  className="flex-1 bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50 font-mono"
-                />
-              </div>
-            </Field>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Field label="Logo Principal">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center overflow-hidden">
-                    {empresa?.logo_url ? (
-                      <img src={empresa.logo_url} alt="Logo" className="w-full h-full object-contain" />
-                    ) : (
-                      <Upload className="w-6 h-6 text-gray-600" />
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    value={empresa?.logo_url || ''}
-                    onChange={(e) => setEmpresa(prev => prev ? { ...prev, logo_url: e.target.value } : null)}
-                    placeholder="URL del logo..."
-                    className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/50"
-                  />
-                </div>
-              </Field>
-              <Field label="Logo Dark">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center overflow-hidden">
-                    {empresa?.logo_dark_url ? (
-                      <img src={empresa.logo_dark_url} alt="Logo Dark" className="w-full h-full object-contain" />
-                    ) : (
-                      <Upload className="w-6 h-6 text-gray-600" />
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    value={empresa?.logo_dark_url || ''}
-                    onChange={(e) => setEmpresa(prev => prev ? { ...prev, logo_dark_url: e.target.value } : null)}
-                    placeholder="URL del logo dark..."
-                    className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/50"
-                  />
-                </div>
-              </Field>
-              <Field label="Favicon">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-zinc-900 border border-white/10 flex items-center justify-center overflow-hidden">
-                    {empresa?.favicon_url ? (
-                      <img src={empresa.favicon_url} alt="Favicon" className="w-full h-full object-contain" />
-                    ) : (
-                      <Upload className="w-6 h-6 text-gray-600" />
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    value={empresa?.favicon_url || ''}
-                    onChange={(e) => setEmpresa(prev => prev ? { ...prev, favicon_url: e.target.value } : null)}
-                    placeholder="URL del favicon..."
-                    className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500/50"
-                  />
-                </div>
-              </Field>
-            </div>
-          </div>
-        </Section>
-
-        <Section title="Colores" icon={<Palette className="w-5 h-5 text-purple-500" />}>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Field label="Color Primario">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {empresas.map(empresa => (
+          <motion.div key={empresa.id} layout className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden hover:border-blis-red/30 transition-all group">
+            <div className="p-5">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={empresa?.color_primario || '#B10D24'}
-                    onChange={(e) => setEmpresa(prev => prev ? { ...prev, color_primario: e.target.value } : null)}
-                    className="w-12 h-12 rounded-xl border border-white/10 cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={empresa?.color_primario || ''}
-                    onChange={(e) => setEmpresa(prev => prev ? { ...prev, color_primario: e.target.value } : null)}
-                    className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-blue-500/50"
-                  />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-lg" style={{ backgroundColor: empresa.color_primario || '#be0b3c' }}>
+                    {empresa.nombre.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-white font-bold text-sm truncate">{empresa.nombre}</h3>
+                    <p className="text-gray-500 text-[10px] font-mono">/{empresa.slug}</p>
+                  </div>
                 </div>
-              </Field>
-              <Field label="Color Secundario">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={empresa?.color_secundario || '#000000'}
-                    onChange={(e) => setEmpresa(prev => prev ? { ...prev, color_secundario: e.target.value } : null)}
-                    className="w-12 h-12 rounded-xl border border-white/10 cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={empresa?.color_secundario || ''}
-                    onChange={(e) => setEmpresa(prev => prev ? { ...prev, color_secundario: e.target.value } : null)}
-                    className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-blue-500/50"
-                  />
+                <div className="flex items-center gap-1">
+                  <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${empresa.activo ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}>
+                    {empresa.activo ? 'Activa' : 'Inactiva'}
+                  </span>
                 </div>
-              </Field>
-              <Field label="Color Acento">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={empresa?.color_acento || '#10B981'}
-                    onChange={(e) => setEmpresa(prev => prev ? { ...prev, color_acento: e.target.value } : null)}
-                    className="w-12 h-12 rounded-xl border border-white/10 cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={empresa?.color_acento || ''}
-                    onChange={(e) => setEmpresa(prev => prev ? { ...prev, color_acento: e.target.value } : null)}
-                    className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-mono focus:outline-none focus:border-blue-500/50"
-                  />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="text-center p-2 rounded-lg bg-white/[0.02]">
+                  <div className="text-white font-bold text-sm">{empresa.user_count || 0}</div>
+                  <div className="text-[9px] text-gray-600 uppercase tracking-wider">Usuarios</div>
                 </div>
-              </Field>
-            </div>
-            <div className="p-6 rounded-xl bg-zinc-900/50 border border-white/5">
-              <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Vista Previa</div>
-              <div className="flex items-center gap-4">
-                <div className="px-6 py-3 rounded-xl font-black text-sm" style={{ backgroundColor: empresa?.color_primario, color: '#fff' }}>
-                  Botón Primario
+                <div className="text-center p-2 rounded-lg bg-white/[0.02]">
+                  <div className="text-white font-bold text-sm capitalize">{PLANES.find(p => p.id === empresa.plan)?.nombre || empresa.plan}</div>
+                  <div className="text-[9px] text-gray-600 uppercase tracking-wider">Plan</div>
                 </div>
-                <div className="px-6 py-3 rounded-xl font-black text-sm border" style={{ backgroundColor: empresa?.color_secundario, borderColor: empresa?.color_primario }}>
-                  Botón Secundario
+              </div>
+
+              {empresa.pais_fiscal && (
+                <div className="flex items-center gap-2 text-[11px] text-gray-400 mb-3">
+                  <Globe className="w-3 h-3" />
+                  <span>{empresa.pais_fiscal} · {empresa.moneda_base} · {empresa.idioma?.toUpperCase()}</span>
                 </div>
-                <div className="px-6 py-3 rounded-xl font-bold text-sm" style={{ backgroundColor: empresa?.color_acento, color: '#fff' }}>
-                  Acento
-                </div>
+              )}
+
+              {empresa.dominio_principal && (
+                <div className="text-[11px] text-gray-500 mb-3 truncate">{empresa.dominio_principal}</div>
+              )}
+
+              <div className="flex items-center gap-2 pt-3 border-t border-white/5">
+                <button onClick={() => handleViewUsers(empresa.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-[11px] font-bold transition-colors">
+                  <Users className="w-3.5 h-3.5" />Usuarios
+                </button>
+                <a href={`/superadmin/ajustes/empresas?id=${empresa.id}`} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-[11px] font-bold transition-colors">
+                  <Save className="w-3.5 h-3.5" />Configurar
+                </a>
+                {empresa.id !== '6186f014-c8c7-4027-9f08-8acf2bae3eae' && (
+                  <button onClick={() => handleDelete(empresa.id)} disabled={deleting === empresa.id} className="flex items-center justify-center p-2 rounded-lg bg-white/5 hover:bg-red-500/10 text-gray-500 hover:text-red-400 transition-colors disabled:opacity-50">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             </div>
-          </div>
-        </Section>
-
-        <Section title="Regional" icon={<Globe className="w-5 h-5 text-green-500" />}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Field label="País Fiscal">
-              <select
-                value={empresa?.pais_fiscal || 'PE'}
-                onChange={(e) => setEmpresa(prev => prev ? { ...prev, pais_fiscal: e.target.value } : null)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none"
-              >
-                {PAISES.map(pais => (
-                  <option key={pais.codigo} value={pais.codigo}>{pais.nombre}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Idioma">
-              <select
-                value={empresa?.idioma || 'es'}
-                onChange={(e) => setEmpresa(prev => prev ? { ...prev, idioma: e.target.value } : null)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none"
-              >
-                <option value="es">Español</option>
-                <option value="en">English</option>
-                <option value="pt">Português</option>
-              </select>
-            </Field>
-            <Field label="Moneda Base">
-              <select
-                value={empresa?.moneda_base || 'USD'}
-                onChange={(e) => setEmpresa(prev => prev ? { ...prev, moneda_base: e.target.value } : null)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none"
-              >
-                {MONEDAS.map(moneda => (
-                  <option key={moneda.codigo} value={moneda.codigo}>{moneda.nombre}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Zona Horaria">
-              <select
-                value={empresa?.zona_horaria || 'America/Lima'}
-                onChange={(e) => setEmpresa(prev => prev ? { ...prev, zona_horaria: e.target.value } : null)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none"
-              >
-                <option value="America/Lima">Lima (UTC-5)</option>
-                <option value="America/Mexico_City">Ciudad de México (UTC-6)</option>
-                <option value="America/Bogota">Bogotá (UTC-5)</option>
-                <option value="America/Santiago">Santiago (UTC-4)</option>
-                <option value="America/Guayaquil">Guayaquil (UTC-5)</option>
-                <option value="America/New_York">New York (UTC-5)</option>
-                <option value="Europe/Madrid">Madrid (UTC+1)</option>
-              </select>
-            </Field>
-          </div>
-        </Section>
-
-        <Section title="Datos Fiscales" icon={<CreditCard className="w-5 h-5 text-amber-500" />}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Field label="RUC / NIT / RFC">
-              <input
-                type="text"
-                value={empresa?.ruc || ''}
-                onChange={(e) => setEmpresa(prev => prev ? { ...prev, ruc: e.target.value } : null)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50"
-              />
-            </Field>
-            <Field label="Razón Social">
-              <input
-                type="text"
-                value={empresa?.razon_social || ''}
-                onChange={(e) => setEmpresa(prev => prev ? { ...prev, razon_social: e.target.value } : null)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50"
-              />
-            </Field>
-            <Field label="Dirección Fiscal" className="md:col-span-2">
-              <input
-                type="text"
-                value={empresa?.direccion_fiscal || ''}
-                onChange={(e) => setEmpresa(prev => prev ? { ...prev, direccion_fiscal: e.target.value } : null)}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50"
-              />
-            </Field>
-          </div>
-        </Section>
-
-        <Section title="Plan y Límites" icon={<Crown className="w-5 h-5 text-amber-500" />}>
-          <div className="space-y-6">
-            <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-900/50 border border-white/5">
-              <div className="px-4 py-2 rounded-xl bg-blis-red/20 text-blis-red font-bold uppercase tracking-wider text-sm">
-                {PLANES.find(p => p.id === empresa?.plan)?.nombre || empresa?.plan}
-              </div>
-              <div className="text-gray-400 text-sm">
-                Plan actual
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-6">
-              <div className="text-center p-4 rounded-xl bg-zinc-900/50 border border-white/5">
-                <div className="text-2xl font-black text-white">{empresa?.plan_limite_usuarios || 0}</div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Usuarios</div>
-              </div>
-              <div className="text-center p-4 rounded-xl bg-zinc-900/50 border border-white/5">
-                <div className="text-2xl font-black text-white">{empresa?.plan_limite_productos || 0}</div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Productos</div>
-              </div>
-              <div className="text-center p-4 rounded-xl bg-zinc-900/50 border border-white/5">
-                <div className="text-2xl font-black text-white">{((empresa?.plan_limite_almacenamiento || 0) / 1024 / 1024 / 1024).toFixed(1)} GB</div>
-                <div className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Almacenamiento</div>
-              </div>
-            </div>
-          </div>
-        </Section>
-
-        <Section title="Funcionalidades" icon={<Users className="w-5 h-5 text-purple-500" />}>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { key: 'blog_activo', label: 'Blog' },
-              { key: 'tienda_activa', label: 'Tienda' },
-              { key: 'academia_activa', label: 'Academia' },
-              { key: 'referidos_activo', label: 'Referidos' },
-              { key: 'bliscoins_activo', label: 'BlisCoins' },
-              { key: 'envios_activo', label: 'Envíos' }
-            ].map(({ key, label }) => (
-              <label key={key} className="flex items-center justify-between p-4 rounded-xl bg-zinc-900/50 border border-white/5 hover:bg-zinc-900 cursor-pointer transition-colors">
-                <span className="text-white text-sm font-medium">{label}</span>
-                <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${config?.[key as keyof EmpresaConfig] ? 'bg-blis-red border-blis-red' : 'border-white/20'}`}>
-                  {config?.[key as keyof EmpresaConfig] && <Check className="w-3 h-3 text-white" />}
-                </div>
-                <input
-                  type="checkbox"
-                  checked={config?.[key as keyof EmpresaConfig] as boolean || false}
-                  onChange={(e) => setConfig(prev => prev ? { ...prev, [key]: e.target.checked } : null)}
-                  className="hidden"
-                />
-              </label>
-            ))}
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-white/5">
-            <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">BlisCoins</div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Field label="Coins por Lectura">
-                <input
-                  type="number"
-                  value={config?.coins_por_lectura || 0}
-                  onChange={(e) => setConfig(prev => prev ? { ...prev, coins_por_lectura: parseInt(e.target.value) || 0 } : null)}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500/50"
-                />
-              </Field>
-              <Field label="Segundos Lectura">
-                <input
-                  type="number"
-                  value={config?.segundos_lectura || 0}
-                  onChange={(e) => setConfig(prev => prev ? { ...prev, segundos_lectura: parseInt(e.target.value) || 0 } : null)}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500/50"
-                />
-              </Field>
-              <Field label="Coins Registro">
-                <input
-                  type="number"
-                  value={config?.coins_registro || 0}
-                  onChange={(e) => setConfig(prev => prev ? { ...prev, coins_registro: parseInt(e.target.value) || 0 } : null)}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500/50"
-                />
-              </Field>
-              <Field label="Coins Referido">
-                <input
-                  type="number"
-                  value={config?.coins_referido || 0}
-                  onChange={(e) => setConfig(prev => prev ? { ...prev, coins_referido: parseInt(e.target.value) || 0 } : null)}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500/50"
-                />
-              </Field>
-            </div>
-          </div>
-        </Section>
+          </motion.div>
+        ))}
       </div>
+
+      <AnimatePresence>
+        {showCreate && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-zinc-950 border border-white/10 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-black text-white uppercase tracking-wide">Nueva Empresa</h2>
+                <button onClick={() => setShowCreate(false)} className="p-1 hover:bg-white/10 rounded-lg text-gray-400"><X className="w-5 h-5" /></button>
+              </div>
+              <div className="space-y-4">
+                <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Nombre Comercial *</label><input type="text" value={newEmpresa.nombre} onChange={e => setNewEmpresa(prev => ({ ...prev, nombre: e.target.value, slug: generateSlug(e.target.value) }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50" placeholder="Mi Empresa" /></div>
+                <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Slug (URL) *</label><input type="text" value={newEmpresa.slug} onChange={e => setNewEmpresa(prev => ({ ...prev, slug: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white font-mono focus:outline-none focus:border-blis-red/50" placeholder="mi-empresa" /></div>
+                <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Color Primario</label><div className="flex items-center gap-3"><input type="color" value={newEmpresa.color_primario} onChange={e => setNewEmpresa(prev => ({ ...prev, color_primario: e.target.value }))} className="w-12 h-12 rounded-xl border border-white/10 cursor-pointer" /><input type="text" value={newEmpresa.color_primario} onChange={e => setNewEmpresa(prev => ({ ...prev, color_primario: e.target.value }))} className="flex-1 bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-blis-red/50" /></div></div>
+                <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Plan</label><select value={newEmpresa.plan} onChange={e => setNewEmpresa(prev => ({ ...prev, plan: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 appearance-none">{PLANES.map(p => <option key={p.id} value={p.id}>{p.nombre} ({p.usuarios} users)</option>)}</select></div>
+                <button onClick={handleCreate} disabled={saving || !newEmpresa.nombre || !newEmpresa.slug} className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">{saving ? 'Creando...' : 'Crear Empresa'}</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showUsers && selectedEmpresa && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setShowUsers(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-zinc-950 border border-white/10 rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black" style={{ backgroundColor: selectedEmpresa.color_primario }}>{selectedEmpresa.nombre.charAt(0)}</div>
+                  <div>
+                    <h2 className="text-lg font-black text-white">{selectedEmpresa.nombre}</h2>
+                    <p className="text-xs text-gray-500">/{selectedEmpresa.slug}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowUsers(false)} className="p-1 hover:bg-white/10 rounded-lg text-gray-400"><X className="w-5 h-5" /></button>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Usuarios asignados ({users.length})</h3>
+                {loadingUsers ? (
+                  <div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" /></div>
+                ) : users.length === 0 ? (
+                  <div className="text-center py-8 text-gray-600 text-sm">No hay usuarios asignados a esta empresa</div>
+                ) : (
+                  users.map(user => (
+                    <div key={user.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ backgroundColor: ROLE_COLORS[user.rol] || '#6b7280' }}>{(user.nombre?.charAt(0) || '').toUpperCase()}{(user.apellido?.charAt(0) || '').toUpperCase()}</div>
+                        <div className="min-w-0">
+                          <p className="text-white text-sm font-medium truncate">{user.nombre} {user.apellido || ''}</p>
+                          <p className="text-gray-500 text-[11px] truncate">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: `${ROLE_COLORS[user.rol] || '#6b7280'}20`, color: ROLE_COLORS[user.rol] || '#6b7280' }}>{ROLE_LABELS[user.rol] || user.rol}</span>
+                        <button onClick={() => handleRemoveUser(user.id)} className="p-1 hover:bg-red-500/10 rounded text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="border-t border-white/5 pt-4">
+                <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4">Agregar usuario</h3>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><label className="text-[9px] text-gray-600 uppercase tracking-wider mb-1 block">Nombre</label><input type="text" value={newUser.nombre} onChange={e => setNewUser(prev => ({ ...prev, nombre: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" /></div>
+                    <div><label className="text-[9px] text-gray-600 uppercase tracking-wider mb-1 block">Apellido</label><input type="text" value={newUser.apellido} onChange={e => setNewUser(prev => ({ ...prev, apellido: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" /></div>
+                  </div>
+                  <div><label className="text-[9px] text-gray-600 uppercase tracking-wider mb-1 block">Email *</label><input type="email" value={newUser.email} onChange={e => setNewUser(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" placeholder="correo@empresa.com" /></div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><label className="text-[9px] text-gray-600 uppercase tracking-wider mb-1 block">Contraseña</label><input type="password" value={newUser.password} onChange={e => setNewUser(prev => ({ ...prev, password: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" placeholder="Auto-generada" /></div>
+                    <div><label className="text-[9px] text-gray-600 uppercase tracking-wider mb-1 block">Rol</label><select value={newUser.rol} onChange={e => setNewUser(prev => ({ ...prev, rol: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50 appearance-none">{Object.entries(ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div>
+                  </div>
+                  <button onClick={handleCreateUser} disabled={saving || !newUser.email || !newUser.nombre} className="w-full bg-blis-red text-white py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                    <UserPlus className="w-4 h-4" />{saving ? 'Creando...' : 'Crear Usuario'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
-  );
+  )
 }

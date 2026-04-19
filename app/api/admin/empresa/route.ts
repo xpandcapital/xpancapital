@@ -9,14 +9,31 @@ function getSupabase() {
   return createClient(supabaseUrl, supabaseServiceKey)
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabase()
+    const { searchParams } = new URL(request.url)
+    const listAll = searchParams.get('list')
+
+    if (listAll === 'all') {
+      const { data: empresas, error: listError } = await supabase
+        .from('empresas')
+        .select('*')
+        .order('creado_en', { ascending: true })
+
+      if (listError) {
+        return NextResponse.json({ success: false, error: listError.message }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true, empresas })
+    }
+
+    const empresaId = searchParams.get('id') || DEFAULT_EMPRESA_ID
 
     const { data: empresa, error: empresaError } = await supabase
       .from('empresas')
       .select('*')
-      .eq('id', DEFAULT_EMPRESA_ID)
+      .eq('id', empresaId)
       .single()
 
     if (empresaError) {
@@ -26,7 +43,7 @@ export async function GET() {
     const { data: config, error: configError } = await supabase
       .from('empresa_config')
       .select('*')
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
+      .eq('empresa_id', empresaId)
       .single()
 
     if (configError && configError.code !== 'PGRST116') {
@@ -36,6 +53,115 @@ export async function GET() {
     return NextResponse.json({ success: true, empresa, config })
   } catch {
     return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = getSupabase()
+    const body = await request.json()
+    const { nombre, slug, nombre_legal, color_primario, pais_fiscal, moneda_base, idioma, zona_horaria, plan } = body
+
+    if (!nombre || !slug) {
+      return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 })
+    }
+
+    const { data: existing } = await supabase
+      .from('empresas')
+      .select('id')
+      .eq('slug', slug)
+      .single()
+
+    if (existing) {
+      return NextResponse.json({ error: 'Ya existe una empresa con ese slug' }, { status: 409 })
+    }
+
+    const { data: empresa, error } = await supabase
+      .from('empresas')
+      .insert({
+        nombre,
+        slug,
+        nombre_legal: nombre_legal || nombre,
+        color_primario: color_primario || '#be0b3c',
+        color_secundario: '#000000',
+        color_acento: '#10b981',
+        pais_fiscal: pais_fiscal || 'PE',
+        moneda_base: moneda_base || 'USD',
+        idioma: idioma || 'es',
+        zona_horaria: zona_horaria || 'America/Lima',
+        plan: plan || 'free',
+        plan_limite_usuarios: 5,
+        plan_limite_productos: 50,
+        plan_limite_almacenamiento: 1073741824,
+        activo: true,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    await supabase
+      .from('empresa_config')
+      .insert({
+        empresa_id: empresa.id,
+        blog_activo: true,
+        tienda_activa: true,
+        academia_activa: false,
+        referidos_activo: true,
+        bliscoins_activo: true,
+        envios_activo: false,
+        coins_por_lectura: 5,
+        segundos_lectura: 60,
+        coins_registro: 100,
+        coins_referido: 50,
+      })
+
+    return NextResponse.json({ success: true, empresa })
+  } catch {
+    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const supabase = getSupabase()
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
+    }
+
+    if (id === DEFAULT_EMPRESA_ID) {
+      return NextResponse.json({ error: 'No se puede eliminar la empresa principal' }, { status: 403 })
+    }
+
+    const { data: users } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('empresa_id', id)
+
+    if (users && users.length > 0) {
+      return NextResponse.json({ error: `Esta empresa tiene ${users.length} usuario(s) asignado(s). Reasigna los usuarios antes de eliminar.` }, { status: 409 })
+    }
+
+    await supabase.from('empresa_config').delete().eq('empresa_id', id)
+    await supabase.from('api_keys').delete().eq('empresa_id', id)
+
+    const { error } = await supabase
+      .from('empresas')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
 }
 
