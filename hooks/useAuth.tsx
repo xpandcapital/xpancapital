@@ -97,32 +97,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Escuchar cambios en la sesión de Supabase (login, logout, token refresh)
+    let mounted = true
     const supabase = getSupabase()
-    if (!supabase) {
-      setLoading(false)
-      return
-    }
 
-    // Obtener sesión inicial
+    // Obtener sesión inicial con manejo de errores
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!mounted) return
       if (session?.user) {
-        const profile = await fetchProfile(session.user.id)
-        if (profile) {
-          setUser(profile)
-        } else {
-          // Si no hay profile, crear un usuario básico con datos de la sesión
-          const rol = (session.user.app_metadata?.rol as UserRole) || 'usuario'
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            role: rol,
-            blis_coins: 0,
-            empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID,
-            permisos_adicionales: null,
-          })
+        try {
+          const profile = await fetchProfile(session.user.id)
+          if (profile && mounted) {
+            setUser(profile)
+          } else if (mounted) {
+            const rol = (session.user.app_metadata?.rol as UserRole) || 'usuario'
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              role: rol,
+              blis_coins: 0,
+              empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID,
+              permisos_adicionales: null,
+            })
+          }
+        } catch (err) {
+          console.error('[Auth] Error fetching profile:', err)
+          if (mounted) {
+            const rol = (session.user.app_metadata?.rol as UserRole) || 'usuario'
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              role: rol,
+              blis_coins: 0,
+              empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID,
+              permisos_adicionales: null,
+            })
+          }
         }
       }
-      setLoading(false)
+      if (mounted) setLoading(false)
+    }).catch((err) => {
+      console.error('[Auth] Error getting session:', err)
+      if (mounted) setLoading(false)
     })
 
     // Escuchar cambios de autenticación (login/logout)
@@ -140,8 +155,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     )
 
     return () => {
+      mounted = false
       subscription.unsubscribe()
     }
+  }, [])
+
+  // Timeout de seguridad: si loading no se resuelve en 5 segundos, forzar false
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      console.warn('[Auth] Timeout: forzando loading=false después de 5s')
+      setLoading(false)
+    }, 5000)
+    return () => clearTimeout(timer)
   }, [])
 
   const loginWithEmail = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
