@@ -13,7 +13,6 @@ import type {
 
 import { TerminalStyles, ChartScrollbar, VerticalSlider } from '../_components/TerminalStyles';
 
-  const MASTER_GEMINI = "AIzaSyDTaDqoOzRBeDlZlS2rvUFse9aLMVHUsHU";
   const INTERVALS = ['1m', '5m', '15m', '1h', '4h', '1d'];
 
 export function useTerminalLogic(props: {
@@ -34,12 +33,12 @@ export function useTerminalLogic(props: {
         const savedSymbol = localStorage.getItem('blis_active_symbol');
         if (savedSymbol) setActiveSymbol(savedSymbol);
       }
-      const gemini = localStorage.getItem("gemini_key") || MASTER_GEMINI;
+      const gemini = localStorage.getItem("gemini_key") || "";
       const openai = localStorage.getItem("openai_key") || localStorage.getItem("chatgpt_key") || "";
       const bKey = localStorage.getItem("binance_api_key") || localStorage.getItem("blis_binance_key") || "";
       const bSecret = localStorage.getItem("binance_secret_key") || localStorage.getItem("blis_binance_secret") || "";
       setKeys({ gemini, openai, binance_key: bKey, binance_secret: bSecret });
-    } catch (e) { console.warn("localStorage no disponible:", e); setKeys({ gemini: MASTER_GEMINI, openai: "", binance_key: "", binance_secret: "" }); }
+    } catch (e) { console.warn("localStorage no disponible:", e); setKeys({ gemini: "", openai: "", binance_key: "", binance_secret: "" }); }
   }, []);
 
   const handleOpenApiModal = () => { router.push('/superadmin/api-nube'); };

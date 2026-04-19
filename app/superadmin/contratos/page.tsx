@@ -47,12 +47,10 @@ interface FinancialReport {
     pendingToRegularize: number;    // Lo que debe pagar HOY
 }
 
-const DEFAULT_GEMINI = 'AIzaSyDTaDqoOzRBeDlZlS2rvUFse9aLMVHUsHU';
-
 const getAIConfig = () => {
-    if (typeof window === 'undefined') return { gemini_key: DEFAULT_GEMINI };
+    if (typeof window === 'undefined') return { gemini_key: '' };
     const stored = localStorage.getItem('blis_ai_config');
-    return { gemini_key: (stored ? JSON.parse(stored).gemini_key : DEFAULT_GEMINI) };
+    return { gemini_key: (stored ? JSON.parse(stored).gemini_key || '' : '') };
 };
 
 // ==========================================

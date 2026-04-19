@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
-import { Suspense } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import GestionDeLotesApp from '../../GestionDeLotes';
-import { useGestionLotes } from './_hooks';
-import { LoadingSpinner, ProjectNotFound, ProjectSelector, SuspenseFallback } from './_components';
+import { Suspense } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import GestionDeLotesApp from '../../GestionDeLotes'
+import { useGestionLotes } from './_hooks'
+import { LoadingSpinner, ProjectNotFound, ProjectSelector, SuspenseFallback } from './_components'
 
 function GestionLotesContent() {
-  const params = useParams();
-  const router = useRouter();
-  const slug = params?.slug as string;
+  const params = useParams()
+  const router = useRouter()
+  const slug = params?.slug as string
 
   const {
     isLoading,
@@ -17,10 +17,10 @@ function GestionLotesContent() {
     activeProjectId,
     projectNotFound,
     handleProjectChange,
-  } = useGestionLotes(slug);
+  } = useGestionLotes(slug)
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (projectNotFound) {
@@ -29,7 +29,7 @@ function GestionLotesContent() {
         slug={slug}
         onNavigate={() => router.push('/superadmin/gestion-lotes/_none_')}
       />
-    );
+    )
   }
 
   if (!activeProjectId) {
@@ -39,10 +39,10 @@ function GestionLotesContent() {
         onSelectProject={handleProjectChange}
         onNavigateToProjects={() => router.push('/superadmin/proyectos')}
       />
-    );
+    )
   }
 
-  return <GestionDeLotesApp />;
+  return <GestionDeLotesApp />
 }
 
 export default function GestionLotesPage() {
@@ -50,5 +50,5 @@ export default function GestionLotesPage() {
     <Suspense fallback={<SuspenseFallback />}>
       <GestionLotesContent />
     </Suspense>
-  );
+  )
 }

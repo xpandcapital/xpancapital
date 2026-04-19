@@ -772,7 +772,7 @@ Reglas adicionales:
 
     setIsProcessingSingleLot(true);
     setProcessingLog([`Iniciando análisis de ${files.length} archivo(s) para el Lote ${lot.loteNumber}...`]);
-    const apiKey = "AIzaSyDTaDqoOzRBeDlZlS2rvUFse9aLMVHUsHU"; 
+    const apiKey = localStorage.getItem("gemini_key") || ""; 
 
     const fileToBase64 = (file) => new Promise((resolve) => {
       const reader = new FileReader();
@@ -937,7 +937,7 @@ const handleMassiveUpload = async (e) => {
       reader.readAsDataURL(file);
     });
 
-    const apiKey = "AIzaSyDTaDqoOzRBeDlZlS2rvUFse9aLMVHUsHU"; 
+    const apiKey = localStorage.getItem("gemini_key") || ""; 
 const CHUNK_SIZE = 3; 
     
     // Crear un mapa con números de lote normalizados para mejor coincidencia
@@ -1519,7 +1519,7 @@ const CHUNK_SIZE = 3;
     const saldoEscritura = Math.max(0, lot.totalPrice - totalInitialPaid - totalQuotasPaid - tradeIn - totalToPayNow - futureQuotasTotal);
 
     setIsGeneratingMessage(true);
-    const apiKey = "AIzaSyDTaDqoOzRBeDlZlS2rvUFse9aLMVHUsHU"; 
+    const apiKey = localStorage.getItem("gemini_key") || ""; 
 
     let roleInstruction = "";
     let toneInstructions = "";
