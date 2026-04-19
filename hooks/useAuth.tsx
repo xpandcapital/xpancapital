@@ -138,27 +138,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (profile && mounted) {
             setUser(profile)
           } else if (mounted) {
+            // Si fetchProfile falla, NO borrar datos del cache
+            // Usar datos del JWT + preservar cache existente
             const rol = (session.user.app_metadata?.rol as UserRole) || 'usuario'
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              role: rol,
-              blis_coins: 0,
-              empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID,
-              permisos_adicionales: null,
+            setUser(prev => {
+              if (prev && prev.id === session.user.id) {
+                // Ya tenemos datos del cache — solo actualizar rol y empresa_id
+                return { ...prev, role: rol, empresa_id: session.user.app_metadata?.empresa_id || prev.empresa_id || EMPRESA_ID }
+              }
+              // No hay cache — crear usuario básico del JWT
+              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID, permisos_adicionales: null }
             })
           }
         } catch (err) {
           console.error('[Auth] Error fetching profile:', err)
           if (mounted) {
             const rol = (session.user.app_metadata?.rol as UserRole) || 'usuario'
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              role: rol,
-              blis_coins: 0,
-              empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID,
-              permisos_adicionales: null,
+            setUser(prev => {
+              if (prev && prev.id === session.user.id) {
+                return { ...prev, role: rol }
+              }
+              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID, permisos_adicionales: null }
             })
           }
         }
@@ -175,7 +175,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (event === 'SIGNED_IN' && session?.user) {
           const profile = await fetchProfile(session.user.id)
           if (profile) {
-            setUser(profile)
+            setUser(prev => {
+              if (prev && prev.id === profile.id) {
+                return { ...prev, ...profile }
+              }
+              return profile
+            })
           }
         } else if (event === 'SIGNED_OUT') {
           setUser(null)
@@ -275,6 +280,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (data: { name?: string; profilePic?: string | null; email?: string; phone?: string }) => {
     if (!user) return
+    // Guardar el estado anterior por si necesitamos revertir
+    const previousUser = user
+
     // Actualizar estado local inmediatamente para UI responsive
     const updatedUser = { ...user, ...data }
     setUser(updatedUser)
@@ -289,13 +297,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updateData.nombre = parts[0] || ''
           updateData.apellido = parts.slice(1).join(' ') || ''
         }
-        // Si la imagen es base64, subirla a Storage en vez de guardarla en la BD
         if (data.profilePic !== undefined) {
           if (data.profilePic && data.profilePic.startsWith('data:image')) {
             try {
               const fileExt = data.profilePic.includes('image/png') ? 'png' : 'jpg'
               const fileName = `${user.id}-avatar.${fileExt}`
-              // Convertir base64 a Uint8Array
               const base64Data = data.profilePic.split(',')[1]
               const byteCharacters = atob(base64Data)
               const byteArray = new Uint8Array(byteCharacters.length)
@@ -310,9 +316,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 })
               if (!uploadError && uploadData) {
                 const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
-                updateData.avatar_url = urlData?.publicUrl || null
+                if (urlData?.publicUrl) {
+                  updateData.avatar_url = urlData.publicUrl
+                  // Actualizar el estado con la URL real de Storage
+                  setUser(prev => prev ? { ...prev, profilePic: urlData.publicUrl } : prev)
+                }
               } else {
-                console.warn('[Auth] Storage upload failed, keeping existing avatar')
+                console.warn('[Auth] Storage upload failed:', uploadError)
+                // No guardar base64 en la BD — es muy grande
               }
             } catch (uploadErr) {
               console.warn('[Auth] Error uploading avatar:', uploadErr)
@@ -320,6 +331,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } else if (data.profilePic === null) {
             updateData.avatar_url = null
           } else {
+            // Es una URL existente (ya estaba en Storage)
             updateData.avatar_url = data.profilePic
           }
         }
@@ -333,14 +345,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           if (error) {
             console.error('[Auth] Error guardando perfil en BD:', error)
-          } else {
-            // Refrescar el usuario desde la BD para asegurar consistencia
-            await refreshUser()
+            // Revertir al estado anterior si falló el guardado
+            setUser(previousUser)
           }
+          // No llamamos refreshUser() aquí — el estado local ya es correcto
+          // y refreshUser() causaría un race condition sobreescribiendo los datos
         }
       }
     } catch (err) {
       console.error('[Auth] Error guardando perfil:', err)
+      // Revertir al estado anterior si falló
+      setUser(previousUser)
     }
   }
 
