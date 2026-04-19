@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 import { Camera, Lock, Mail, Phone, Save, ShieldCheck, User as UserIcon, X, RotateCw, FlipHorizontal, Check, Search, ChevronDown, Trash2, Bell } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -278,10 +279,12 @@ export default function AdminProfile() {
     const [profilePic, setProfilePic] = useState<string | null>(null);
     const [cropperSrc, setCropperSrc] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const countryBtnRef = useRef<HTMLButtonElement>(null);
     const [isCountryOpen, setIsCountryOpen] = useState(false);
     const [countrySearch, setCountrySearch] = useState("");
     const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
     const [notifications, setNotifications] = useState(true);
+    const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 
     // Inicializar campos cuando el usuario carga (evitar valores default que se sobreescriben)
     useEffect(() => {
@@ -304,6 +307,27 @@ export default function AdminProfile() {
             setProfilePic(user.profilePic || null);
         }
     }, [user])
+
+    // Calcular posición del dropdown de países y cerrar al hacer click fuera
+    useEffect(() => {
+        if (isCountryOpen && countryBtnRef.current) {
+            const rect = countryBtnRef.current.getBoundingClientRect()
+            setDropdownPos({ top: rect.bottom + 8, left: rect.left })
+        }
+    }, [isCountryOpen])
+
+    useEffect(() => {
+        if (!isCountryOpen) return
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as HTMLElement
+            if (!target.closest('.country-dropdown') && !target.closest('.country-trigger')) {
+                setIsCountryOpen(false)
+                setCountrySearch("")
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [isCountryOpen])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -399,7 +423,7 @@ export default function AdminProfile() {
                 </div>
 
                 <div className="lg:col-span-2 space-y-10">
-                    <div className="bg-zinc-950 border border-white/5 rounded-3xl overflow-hidden">
+                    <div className="bg-zinc-950 border border-white/5 rounded-3xl">
                         <div className="px-8 py-6 border-b border-white/5 bg-white/[0.02]">
                             <h2 className="text-xl font-black text-white uppercase tracking-widest">Datos Personales</h2>
                         </div>
@@ -425,57 +449,58 @@ export default function AdminProfile() {
                                 <div className="flex gap-2">
                                     <div className="relative">
                                         <button
+                                            ref={countryBtnRef}
                                             onClick={() => setIsCountryOpen(!isCountryOpen)}
-                                            className="h-full bg-white/5 border border-white/10 rounded-xl px-4 flex items-center gap-2 hover:bg-white/10 transition-all text-sm font-bold text-white min-w-[100px]"
+                                            className="country-trigger h-full bg-white/5 border border-white/10 rounded-xl px-4 flex items-center gap-2 hover:bg-white/10 transition-all text-sm font-bold text-white min-w-[100px]"
                                         >
                                             <span>{selectedCountry.flag}</span>
                                             <span>{selectedCountry.code}</span>
                                             <ChevronDown className={`w-3 h-3 transition-transform ${isCountryOpen ? 'rotate-180' : ''}`} />
                                         </button>
-                                        <AnimatePresence>
-                                            {isCountryOpen && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 10 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, y: 10 }}
-                                                    className="absolute top-full left-0 mt-2 w-56 bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden z-[200] shadow-2xl"
-                                                >
-                                                    <div className="p-2 border-b border-white/5 bg-black/20 sticky top-0 z-10">
-                                                        <div className="relative">
-                                                            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
-                                                            <input
-                                                                type="text"
-                                                                autoFocus
-                                                                placeholder="País..."
-                                                                value={countrySearch}
-                                                                onChange={(e) => setCountrySearch(e.target.value)}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-2 py-1.5 text-[10px] font-bold text-white focus:outline-none focus:border-blis-red transition-all"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="max-h-60 overflow-y-auto scrollbar-hide">
-                                                        {COUNTRIES.filter(c => c.name.toLowerCase().includes(countrySearch.toLowerCase())).map((c) => (
-                                                            <button
-                                                                key={c.code}
-                                                                onClick={() => {
-                                                                    setSelectedCountry(c);
-                                                                    setIsCountryOpen(false);
-                                                                    setCountrySearch("");
-                                                                }}
-                                                                className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/10 transition-colors text-left"
-                                                            >
-                                                                <span className="text-lg">{c.flag}</span>
-                                                                <div className="flex flex-col">
-                                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">{c.name}</span>
-                                                                    <span className="text-[9px] text-gray-500 font-bold">{c.code}</span>
-                                                                </div>
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
                                     </div>
+                                    {isCountryOpen && typeof window !== 'undefined' && createPortal(
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="country-dropdown fixed bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden z-[9999] shadow-2xl w-56"
+                                            style={{ top: dropdownPos.top, left: dropdownPos.left }}
+                                        >
+                                            <div className="p-2 border-b border-white/5 bg-black/20 sticky top-0 z-10">
+                                                <div className="relative">
+                                                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+                                                    <input
+                                                        type="text"
+                                                        autoFocus
+                                                        placeholder="País..."
+                                                        value={countrySearch}
+                                                        onChange={(e) => setCountrySearch(e.target.value)}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-lg pl-7 pr-2 py-1.5 text-[10px] font-bold text-white focus:outline-none focus:border-blis-red transition-all"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="max-h-60 overflow-y-auto">
+                                                {COUNTRIES.filter(c => c.name.toLowerCase().includes(countrySearch.toLowerCase())).map((c) => (
+                                                    <button
+                                                        key={c.code}
+                                                        onClick={() => {
+                                                            setSelectedCountry(c);
+                                                            setIsCountryOpen(false);
+                                                            setCountrySearch("");
+                                                        }}
+                                                        className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/10 transition-colors text-left"
+                                                    >
+                                                        <span className="text-lg">{c.flag}</span>
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black text-white uppercase tracking-widest">{c.name}</span>
+                                                            <span className="text-[9px] text-gray-500 font-bold">{c.code}</span>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.div>,
+                                        document.body
+                                    )}
                                     <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="123 456 7890" className="flex-1 bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blis-red transition-all text-sm font-bold" />
                                 </div>
                             </div>
