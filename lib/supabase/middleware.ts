@@ -84,17 +84,22 @@ export async function updateSession(request: NextRequest) {
   const isLogin = pathname === '/login'
 
   // 1. Usuario no autenticado intentando acceder a ruta protegida → redirigir a login
+  // IMPORTANTE: Las cookies de sesión se preservan en la redirección
   if (!user && (isSuperadmin || isMiembros || isAdmin)) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(url)
+    // Copiar las cookies refrescadas a la redirección
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach(cookie => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    return redirectResponse
   }
 
   // 2. Usuario autenticado en login → NO redirigir automáticamente
   // Permitimos que el usuario vea la página de login incluso si ya tiene sesión.
   // La página /login maneja la redirección post-login en el frontend.
-  // Excepción: redirigir si tiene sesión válida con rol admin y hay redirect param
   if (user && isLogin) {
     const rol = user.app_metadata?.rol || 'usuario'
     if (['superadmin', 'admin', 'editor'].includes(rol)) {
@@ -103,10 +108,14 @@ export async function updateSession(request: NextRequest) {
       const redirectParam = url.searchParams.get('redirect')
       url.pathname = redirectParam || '/superadmin'
       url.searchParams.delete('redirect')
-      return NextResponse.redirect(url)
+      // Copiar las cookies refrescadas a la redirección
+      const redirectResponse = NextResponse.redirect(url)
+      supabaseResponse.cookies.getAll().forEach(cookie => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+      })
+      return redirectResponse
     }
     // Para clientes/usuarios, o sesiones sin rol definido, permitir la página de login
-    // (pueden querer re-autenticarse con credenciales diferentes)
   }
 
   // 3. Cliente/usuario intentando acceder a superadmin o admin → redirigir a miembros
@@ -115,7 +124,12 @@ export async function updateSession(request: NextRequest) {
     if (['cliente', 'usuario'].includes(rol)) {
       const url = request.nextUrl.clone()
       url.pathname = '/miembros'
-      return NextResponse.redirect(url)
+      // Copiar las cookies refrescadas a la redirección
+      const redirectResponse = NextResponse.redirect(url)
+      supabaseResponse.cookies.getAll().forEach(cookie => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+      })
+      return redirectResponse
     }
   }
 
@@ -123,7 +137,12 @@ export async function updateSession(request: NextRequest) {
   if (isAdmin) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace('/admin', '/superadmin')
-    return NextResponse.redirect(url)
+    // Copiar las cookies refrescadas a la redirección
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach(cookie => {
+      redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    return redirectResponse
   }
 
   // 5. Para todo lo demás, continuar con la respuesta que incluye cookies refrescadas
