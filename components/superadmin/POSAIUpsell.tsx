@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Plus, Loader2, Lightbulb, PackagePlus, ArrowRight } from 'lucide-react';
+import { aiChat } from '@/lib/ai-client';
 
 interface Suggestion {
     id?: string;
@@ -25,47 +26,42 @@ export const POSAIUpsell = ({ cart, catalog, onAddProduct }: POSAIUpsellProps) =
     const getSuggestions = async () => {
         if (cart.length === 0 && !context) return;
 
-        // --- UNIFIED KEY ORCHESTRATOR ---
-        const getAIConfig = () => {
-            if (typeof window === 'undefined') return { gemini_key: '', openai_key: '', groq_key: '' };
-            const stored = localStorage.getItem('blis_ai_config');
-            if (stored) {
-                try {
-                    const parsed = JSON.parse(stored);
-                    return {
-                        gemini_key: parsed.gemini_key || localStorage.getItem('gemini_key') || '',
-                        openai_key: parsed.openai_key || localStorage.getItem('openai_key') || '',
-                        groq_key: parsed.groq_key || localStorage.getItem('groq_key') || ''
-                    };
-                } catch { }
-            }
-            return {
-                gemini_key: localStorage.getItem('gemini_key') || '',
-                openai_key: localStorage.getItem('openai_key') || '',
-                groq_key: localStorage.getItem('groq_key') || ''
-            };
-        };
-
-        const config = getAIConfig();
-
         setIsGenerating(true);
         try {
-            const response = await fetch('/api/pos-ai-suggestions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    cart,
-                    context,
-                    catalog,
-                    apiKey: config.gemini_key,
-                    gptKey: config.openai_key,
-                    groqKey: config.groq_key
-                })
-            });
-            const data = await response.json();
-            setSuggestions(data);
+            const catalogInfo = catalog.map(p => `ID:${p.id}|${p.name}|$${p.price}`).join('\n');
+            const cartInfo = cart.map(c => `${c.name} ($${c.price})`).join(', ');
+            const prompt = `Eres un asistente de ventas inteligente para un punto de venta. Analiza el carrito y catálogo para sugerir productos adicionales (upsell/cross-sell).
+
+Carrito actual: ${cartInfo || 'Vacío'}
+Contexto del cliente: ${context || 'Sin contexto adicional'}
+Catálogo disponible:
+${catalogInfo}
+
+Responde SOLO con JSON:
+{
+  "catalog_suggestions": [
+    {"id": "product_id_from_catalog", "title": "nombre del producto", "reason": "por qué combinaría con el carrito", "estimated_price": precio_numero}
+  ],
+  "ideal_suggestions": [
+    {"title": "producto ideal no en catálogo", "reason": "por qué sería útil al cliente", "estimated_price": precio_estimado}
+  ]
+}`;
+
+            const result = await aiChat({ model: 'gemini-flash', prompt, systemPrompt: 'Eres un experto en estrategias de ventas y upsell. Responde siempre en JSON válido.', temperature: 0.7 });
+            
+            if (result.error) {
+                setSuggestions({ catalog_suggestions: [], ideal_suggestions: [], error: result.error } as any);
+            } else {
+                try {
+                    const data = JSON.parse(result.text.replace(/```json|```/gi, '').trim());
+                    setSuggestions(data);
+                } catch {
+                    setSuggestions({ catalog_suggestions: [], ideal_suggestions: [], error: 'No se pudieron procesar las sugerencias' } as any);
+                }
+            }
         } catch (error) {
             console.error("Error getting suggestions:", error);
+            setSuggestions({ catalog_suggestions: [], ideal_suggestions: [], error: 'Error de conexión con la IA' } as any);
         } finally {
             setIsGenerating(false);
         }

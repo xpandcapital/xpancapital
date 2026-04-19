@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
+import { aiChat } from '@/lib/ai-client';
 
 // ==========================================
 // ESTRUCTURAS DE DATOS
@@ -47,12 +48,6 @@ interface FinancialReport {
     pendingToRegularize: number;    // Lo que debe pagar HOY
 }
 
-const getAIConfig = () => {
-    if (typeof window === 'undefined') return { gemini_key: '' };
-    const stored = localStorage.getItem('blis_ai_config');
-    return { gemini_key: (stored ? JSON.parse(stored).gemini_key || '' : '') };
-};
-
 // ==========================================
 // COMPONENTE PRINCIPAL
 // ==========================================
@@ -81,7 +76,6 @@ export default function BulkContractReconciliation() {
 
     // --- Motor de IA para Clasificación y Extracción ---
     const processFileWithIA = async (base64: string, mime: string, fileName: string) => {
-        const config = getAIConfig();
         setAiThinking(true);
         setProcessingQueue(prev => [...prev, fileName]);
 
@@ -101,17 +95,15 @@ export default function BulkContractReconciliation() {
             Responde SOLO con este JSON:
             { "docType": "CONTRATO" | "RECIBO", "data": { ... } }`;
 
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${config.gemini_key}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: mime, data: base64 } }] }],
-                    generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
-                })
+            const result = await aiChat({
+                model: 'gemini-flash',
+                prompt,
+                images: [{ mimeType: mime, data: base64 }],
+                temperature: 0.1
             });
 
-            const res = await resp.json();
-            const parsed = JSON.parse(res.candidates[0].content.parts[0].text);
+            if (result.error) { throw new Error(result.error); }
+            const parsed = JSON.parse(result.text);
 
             if (parsed.docType === 'CONTRATO') {
                 setContract(prev => ({ ...prev, ...parsed.data, status: 'analyzed' }));

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { aiChat } from '@/lib/ai-client';
 import { safeText } from '../TerminalComponents';
 import type {
   AutoPilotState, ChatMessage, ControlMode, DataSource, DrawMode,
@@ -1103,14 +1104,10 @@ export function useTerminalLogic(props: {
       const memoryContext = aiKnowledgeRef.current.length > 0 ? `\n🧠 REGLAS APRENDIDAS (Memorias Previas de Fallos a Evitar):\n${aiKnowledgeRef.current.slice(0,5).map(k=>`- ${k.rule}`).join('\n')}` : '';
       const promptText = `Eres el Agente Autónomo Institucional HFT de Blis Corp. \n MODO ACTUAL: ${tradeMode} (Operando en ${tradeMode === 'REAL' ? 'Binance Real Spot/Futuros' : 'Simulación Virtual (Paper)'}).\n Activo Seleccionado: ${activeSymbol}.\n Balance Disponible (USDT): $${(tradeMode === 'REAL' ? balance : paperBalance).toFixed(2)}.\n Fondos del Activo (${activeSymbol}): $${((activeAssetBalance || 0) * (ticker?.price || currentPriceRef.current || 0)).toFixed(2)}.\n Mercado Actual: $${(ticker?.price || currentPriceRef.current || 0).toFixed(2)}.${memoryContext}\n\nEl usuario dice o pide: "${userText}"`;
       const sysInst = "Si el usuario pide hacer operaciones, mayor ganancia, encender bot, operar, configurar modos, ajustar score/cooldown/trailing/posiciones, o similar, debes devolver la intención como acción de plataforma en JSON. IMPORTANTE: Cualquier instrucción que implique operar, configurar parámetros del motor, o activar modos (agresivo/moderado/defensivo) SIEMPRE debe devolver action: 'START_AUTOPILOT' para iniciar o reiniciar el motor con los nuevos parámetros. Si el usuario pide CERRAR posiciones, vender, liquidar todo, retirarse, DEBES devolver action: 'CLOSE_TRADE'.\n\nFORMATO JSON ESTRICTO:\n{\n  \"reply\": \"Respuesta profesional confirmando la instrucción y los parámetros configurados\",\n  \"action\": \"START_AUTOPILOT\" | \"STOP_AUTOPILOT\" | \"CLOSE_TRADE\" | \"NONE\",\n  \"mode\": \"SCALPING\" | \"SWING\",\n  \"freeBudget\": true | false,\n  \"leverage\": (número opcional si pide multiplicador),\n  \"durationMins\": null,\n  \"riskLevel\": \"NORMAL\" | \"HIGH\" | \"TURBO\"\n}\n\nREGLAS DE RIESGO:\n- Si menciona 'score mínimo 2', 'cooldown 30s', 'agresivo', 'máximo riesgo', 'ultra' → riskLevel: 'TURBO'\n- Si menciona 'score mínimo 3', 'moderado', 'balanceado' → riskLevel: 'HIGH'\n- Si menciona 'score mínimo 5', 'defensivo', 'conservador', 'seguro' → riskLevel: 'NORMAL'\n- durationMins siempre null (duración indefinida por defecto)\n\nPERSONALIDAD: Motor Cuantitativo Institucional de Blis Corp. Responde siempre profesional y analítico.";
-      let rawText = "";
-      if (keys.openai) {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${keys.openai}` }, body: JSON.stringify({ model: 'gpt-4o-mini', response_format: { type: "json_object" }, messages: [{ role: 'system', content: sysInst }, { role: 'user', content: promptText }] }) });
-        const resText = await res.text(); let data; try { data = JSON.parse(resText); } catch { throw new Error("Fallo de Red OpenAI: Clave Invalida o API caída."); }; if (data.error) throw new Error(data.error.message); rawText = data.choices?.[0]?.message?.content;
-      } else {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${keys.gemini}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ systemInstruction: { parts: [{ text: sysInst }] }, generationConfig: { responseMimeType: "application/json" }, contents: [{ parts: [{ text: promptText }] }] }) });
-        const resText = await res.text(); let data; try { data = JSON.parse(resText); } catch { throw new Error("Fallo de Red Gemini: Verifica tu Key."); }; if (data.error) throw new Error(data.error.message); rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      }
+      const model = keys.openai ? 'openai' : 'gemini';
+      const result = await aiChat({ model, prompt: promptText, systemPrompt: sysInst, temperature: 0.7 });
+      if (result.error) throw new Error(result.error);
+      const rawText = result.text;
       if (!rawText) throw new Error("Respuesta vacía de la IA");
       let parsed; try { parsed = JSON.parse(rawText.replace(/```json|```/gi, '').trim()); } catch { throw new Error("La IA devolvió formato inválido."); }
       setChatMessages((prev: any) => [...prev, { role: 'bot', text: safeText(parsed.reply || "Intención recibida."), timestamp: Date.now() }]);
@@ -1134,8 +1131,11 @@ export function useTerminalLogic(props: {
             try {
               const sysText = "Eres el Analista Cuantitativo Institucional de Blis Corp. Evalúas resultados algorítmicos. Emite un reporte siempre bajo una perspectiva técnica, imparcial, constructiva y profesional. Nunca insultes ni seas grosero.";
               const usrText = `Sesión HFT Finalizada. Operaciones: ${trades.length}. WinRate: ${winRate}%. Profit Neto: $${totalPnl.toFixed(2)}. Dame un reporte estrictamente profesional en JSON evaluando la sesión:\n{ "title": "título técnico descriptivo", "performanceOpinion": "análisis institucional y neutral del rendimiento", "educationalLesson": "recomendación matemática o de riesgo" }`;
-              if (keys.openai) { const res = await fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${keys.openai}` }, body: JSON.stringify({ model: 'gpt-4o-mini', response_format: { type: "json_object" }, messages: [{ role: 'system', content: sysText }, { role: 'user', content: usrText }] }) }); const data = await res.json(); const txt = data.choices?.[0]?.message?.content; if (txt) repData = JSON.parse(txt); }
-              else { const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${keys.gemini}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ systemInstruction: { parts: [{ text: sysText }] }, generationConfig: { responseMimeType: "application/json" }, contents: [{ parts: [{ text: usrText }] }] }) }); const raw = await res.json(); if (raw?.candidates?.[0]?.content?.parts?.[0]?.text) { const cleanJson = raw.candidates[0].content.parts[0].text.replace(/```json|```/gi, '').trim(); repData = JSON.parse(cleanJson); } }
+              const model = keys.openai ? 'openai' : 'gemini';
+              const reportResult = await aiChat({ model, prompt: usrText, systemPrompt: sysText, temperature: 0.5 });
+              if (!reportResult.error && reportResult.text) {
+                try { repData = JSON.parse(reportResult.text.replace(/```json|```/gi, '').trim()); } catch(e) { console.error("Error parsing report AI", e); }
+              }
             } catch (e) { console.error("Error reporte IA", e); }
           }
           const rep = { id: pendingReportSessionId, date: Date.now(), totalPnl, winRate, ...repData };

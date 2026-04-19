@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { logger } from '@/lib/utils/logger';
+import { aiChat } from '@/lib/ai-client';
 import { 
   Upload, FileText, Calculator, AlertCircle, 
   Calendar as CalendarIcon, DollarSign, User, ChevronLeft, Save,
@@ -772,7 +773,6 @@ Reglas adicionales:
 
     setIsProcessingSingleLot(true);
     setProcessingLog([`Iniciando análisis de ${files.length} archivo(s) para el Lote ${lot.loteNumber}...`]);
-    const apiKey = localStorage.getItem("gemini_key") || ""; 
 
     const fileToBase64 = (file) => new Promise((resolve) => {
       const reader = new FileReader();
@@ -781,31 +781,28 @@ Reglas adicionales:
     });
 
     try {
-      const parts = [];
+      const images = [];
+      const textParts = [];
       for (const file of files) {
         const base64 = await fileToBase64(file);
-        parts.push({ text: `--- DOCUMENTO: ${file.name} ---` });
-        parts.push({ inlineData: { mimeType: file.type, data: base64 } });
+        images.push({ mimeType: file.type, data: base64 });
+        textParts.push(`--- DOCUMENTO: ${file.name} ---`);
       }
 
       const validMonths = paymentMonthsGlobal.join(", ");
-      parts.push({ text: generateAIPromptText(validMonths) });
+      const fullPrompt = textParts.join('\n') + '\n\n' + generateAIPromptText(validMonths);
 
       setProcessingLog(prev => [...prev, `Enviando documentos a Gemini AI...`]);
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: { responseMimeType: "application/json" }
-        })
+      const result = await aiChat({
+        model: 'gemini-flash',
+        prompt: fullPrompt,
+        images,
+        temperature: 0.1
       });
 
-      if (response.ok) {
-        const aiDataRaw = await response.json();
-        const aiData = JSON.parse(aiDataRaw.candidates[0].content.parts[0].text);
+      if (!result.error) {
+        const aiData = JSON.parse(result.text);
 
         let updatedLot = { ...lot };
         
@@ -937,8 +934,7 @@ const handleMassiveUpload = async (e) => {
       reader.readAsDataURL(file);
     });
 
-    const apiKey = localStorage.getItem("gemini_key") || ""; 
-const CHUNK_SIZE = 3; 
+    const CHUNK_SIZE = 3; 
     
     // Crear un mapa con números de lote normalizados para mejor coincidencia
     // LOTE-01, LOTE--01, Lote 01, L01, LOTE 1 deben coincidir todos
@@ -975,29 +971,26 @@ const CHUNK_SIZE = 3;
       setProcessingLog(prev => [...prev, `Enviando paquete de ${chunk.length} documentos a Gemini IA (Archivos ${i+1} al ${Math.min(i + CHUNK_SIZE, files.length)})...`]);
 
       try {
-        const parts = [];
+        const images = [];
+        const textParts = [];
         for (const file of chunk) {
           const base64 = await fileToBase64(file);
-          parts.push({ text: `--- DOCUMENTO: ${file.name} ---` });
-          parts.push({ inlineData: { mimeType: file.type, data: base64 } });
+          images.push({ mimeType: file.type, data: base64 });
+          textParts.push(`--- DOCUMENTO: ${file.name} ---`);
         }
 
         const validMonths = paymentMonthsGlobal.join(", ");
-        parts.push({ text: generateAIPromptText(validMonths) });
+        const fullPrompt = textParts.join('\n') + '\n\n' + generateAIPromptText(validMonths);
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts }],
-            generationConfig: { responseMimeType: "application/json" }
-          })
+        const result = await aiChat({
+          model: 'gemini-flash',
+          prompt: fullPrompt,
+          images,
+          temperature: 0.1
         });
 
-        if (response.ok) {
-          const aiDataRaw = await response.json();
-          const aiData = JSON.parse(aiDataRaw.candidates[0].content.parts[0].text);
+        if (!result.error) {
+          const aiData = JSON.parse(result.text);
           
           setProcessingLog(prev => [...prev, `✅ Análisis completado. Contratos encontrados: ${aiData.contratosEncontrados?.length || 0}. Recibos detectados: ${aiData.recibosEncontrados?.length || 0}.`]);
 
@@ -1519,7 +1512,6 @@ const CHUNK_SIZE = 3;
     const saldoEscritura = Math.max(0, lot.totalPrice - totalInitialPaid - totalQuotasPaid - tradeIn - totalToPayNow - futureQuotasTotal);
 
     setIsGeneratingMessage(true);
-    const apiKey = localStorage.getItem("gemini_key") || ""; 
 
     let roleInstruction = "";
     let toneInstructions = "";
@@ -1563,31 +1555,13 @@ const CHUNK_SIZE = 3;
       5. Máximo 3 párrafos.
     `;
 
-    const fetchWithRetry = async (url, options, retries = 5) => {
-      const delays = [1000, 2000, 4000, 8000, 16000];
-      for (let i = 0; i < retries; i++) {
-        try {
-          const res = await fetch(url, options);
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          return await res.json();
-        } catch (err) {
-          if (i === retries - 1) throw err;
-          await new Promise(r => setTimeout(r, delays[i]));
-        }
-      }
-    };
-
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-      const data = await fetchWithRetry(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }],
-          systemInstruction: { parts: [{ text: "Eres un redactor profesional experto en comunicación inmobiliaria y cobranzas. Siempre redacta en español de Ecuador." }] }
-        })
+      const result = await aiChat({
+        model: 'gemini-flash',
+        prompt: promptText,
+        systemPrompt: "Eres un redactor profesional experto en comunicación inmobiliaria y cobranzas. Siempre redacta en español de Ecuador."
       });
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo generar el mensaje.";
+      const text = result.error ? "No se pudo generar el mensaje." : (result.text || "No se pudo generar el mensaje.");
       updateSelectedLot({ generatedMessage: text });
     } catch (error) {
       showAlert('Error', 'Error de conexión con la IA. Por favor, intente nuevamente.');

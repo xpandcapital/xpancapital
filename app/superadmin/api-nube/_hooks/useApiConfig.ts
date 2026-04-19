@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabaseClient'
 import type { ApiStatus, Environment } from '../_types'
 
 const DEFAULT_VALUES: Record<string, string> = {
@@ -234,16 +233,21 @@ export function useApiConfig() {
   const loadApiKeys = async () => {
     setIsLoading(true)
     try {
-      const { data, error } = await supabase.from('api_keys').select('key_name, key_value')
-      if (error) throw error
-      if (data) {
+      const response = await fetch('/api/admin/api-keys?unmasked=true')
+      const result = await response.json()
+      if (result.success && result.keys) {
         const newValues = { ...apiValues }
-        data.forEach((row: { key_name: string; key_value: string }) => {
+        const newUpdated: Record<string, string> = {}
+        result.keys.forEach((row: { key_name: string; key_value: string; has_value: boolean; updated_at?: string }) => {
           if (row.key_name in newValues) {
-            (newValues as Record<string, string>)[row.key_name] = row.key_value || ''
+            if (row.key_value) {
+              (newValues as Record<string, string>)[row.key_name] = row.key_value
+            }
           }
+          if (row.updated_at) newUpdated[row.key_name] = row.updated_at
         })
         setApiValues(newValues)
+        setLastUpdated(prev => ({ ...prev, ...newUpdated }))
       }
     } catch {
       const newValues = { ...apiValues }
@@ -278,26 +282,29 @@ export function useApiConfig() {
   const handleSaveAll = async () => {
     setIsSaving(true)
     try {
-      let count = 0
-      for (const [key_name, key_value] of Object.entries(apiValues)) {
-        const { error } = await supabase
-          .from('api_keys')
-          .upsert(
-            { key_name, key_value: key_value || '', updated_at: new Date().toISOString() },
-            { onConflict: 'key_name' }
-          )
-        if (!error) count++
+      const changedEntries: Record<string, string> = {}
+      Object.entries(apiValues).forEach(([k, v]) => {
+        if (v !== DEFAULT_VALUES[k as keyof typeof DEFAULT_VALUES] || lastUpdated[k]) {
+          changedEntries[k] = v || ''
+        }
+      })
+
+      const response = await fetch('/api/admin/api-keys', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keys: changedEntries }),
+      })
+      const result = await response.json()
+
+      if (result.success) {
+        window.dispatchEvent(new CustomEvent('blis_config_updated'))
+        alert(`✅ ${result.saved} claves guardadas correctamente`)
+      } else {
+        throw new Error(result.error || 'Error al guardar')
       }
+    } catch (err: any) {
       Object.entries(apiValues).forEach(([k, v]) => localStorage.setItem(k, v))
-      localStorage.setItem("blis_ai_config", JSON.stringify({
-        gemini_key: apiValues.gemini_key,
-        openai_key: apiValues.openai_key
-      }))
-      window.dispatchEvent(new CustomEvent('blis_config_updated'))
-      alert(`✅ ${count} claves guardadas correctamente`)
-    } catch {
-      Object.entries(apiValues).forEach(([k, v]) => localStorage.setItem(k, v))
-      alert("⚠️ Guardado en localStorage (error en Supabase)")
+      alert(`⚠️ Guardado en localStorage (error: ${err.message})`)
     } finally {
       setIsSaving(false)
     }

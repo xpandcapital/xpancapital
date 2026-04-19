@@ -6,6 +6,7 @@
 
 import { parseFormaDePago as parseWithRules } from './parse-forma-pago';
 import { logger } from './utils/logger';
+import { aiChat } from './ai-client';
 
 export interface ParsedFormaDePago {
   iniciales: Array<{
@@ -27,9 +28,8 @@ export interface ParsedFormaDePago {
  */
 export async function parseFormaDePagoWithAI(
   formaDePago: string,
-  geminiApiKey?: string
+  _geminiApiKey?: string
 ): Promise<ParsedFormaDePago> {
-  // Si no hay texto, retornar vacío
   if (!formaDePago || formaDePago.trim() === '') {
     return {
       iniciales: [],
@@ -37,18 +37,12 @@ export async function parseFormaDePagoWithAI(
     };
   }
 
-  // Si no hay API key, usar reglas inmediatamente
-  if (!geminiApiKey) {
-    logger.debug('[Notion AI Parser] No API key, usando reglas');
+  // Si no hay texto significativo, usar reglas
+  if (formaDePago.trim().length < 5) {
     const result = parseWithRules(formaDePago);
     return {
       iniciales: result.iniciales,
-      cuotas: {
-        cantidad: result.cuotas.cantidad,
-        monto: result.cuotas.monto,
-        fecha_inicio: result.cuotas.fecha_inicio,
-        dia_pago: null
-      }
+      cuotas: { cantidad: result.cuotas.cantidad, monto: result.cuotas.monto, fecha_inicio: result.cuotas.fecha_inicio, dia_pago: null }
     };
   }
 
@@ -122,43 +116,30 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin explicaciones):
 }`;
 
   try {
-    logger.debug('[Notion AI Parser] Enviando a Gemini...');
-    
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.1,
-            responseMimeType: 'application/json'
-          }
-        })
-      }
-    );
+    logger.debug('[Notion AI Parser] Enviando a través del proxy...');
 
-    if (!response.ok) {
-      logger.error('[Notion AI Parser] Gemini API error:', response.status);
-      throw new Error(`API error: ${response.status}`);
+    const result = await aiChat({
+      model: 'gemini-flash',
+      prompt,
+      temperature: 0.1
+    });
+
+    if (result.error) {
+      logger.error('[Notion AI Parser] Proxy error:', result.error);
+      throw new Error(result.error);
     }
 
-    const result = await response.json();
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-    
+    const text = result.text;
     if (!text) {
-      logger.error('[Notion AI Parser] No response text from Gemini');
+      logger.error('[Notion AI Parser] No response text from proxy');
       throw new Error('Empty response');
     }
 
-    // Limpiar posible markdown
     const cleanJson = text.replace(/```json\n?|\n?```/g, '').trim();
     const parsed = JSON.parse(cleanJson);
-    
-    logger.debug('[Notion AI Parser] Gemini result:', parsed);
-    
-    // Validar estructura mínima
+
+    logger.debug('[Notion AI Parser] AI result:', parsed);
+
     if (!parsed.iniciales || !Array.isArray(parsed.iniciales)) {
       throw new Error('Invalid response structure');
     }
@@ -177,9 +158,8 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin explicaciones):
       }
     };
   } catch (error) {
-    console.warn('[Notion AI Parser] Error con Gemini, usando reglas:', error);
-    
-    // Fallback a reglas
+    console.warn('[Notion AI Parser] Error con proxy, usando reglas:', error);
+
     const result = parseWithRules(formaDePago);
     return {
       iniciales: result.iniciales,
@@ -191,26 +171,4 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin explicaciones):
       }
     };
   }
-}
-
-/**
- * Obtiene la API key de Gemini desde localStorage o Supabase
- */
-export async function getGeminiApiKey(): Promise<string | null> {
-  if (typeof window === 'undefined') return null;
-  
-  // Intentar desde localStorage primero
-  const localKey = localStorage.getItem('gemini_key');
-  if (localKey) return localKey;
-  
-  // Intentar desde blis_ai_config
-  const configStr = localStorage.getItem('blis_ai_config');
-  if (configStr) {
-    try {
-      const config = JSON.parse(configStr);
-      if (config.gemini_key) return config.gemini_key;
-    } catch {}
-  }
-  
-  return null;
 }
