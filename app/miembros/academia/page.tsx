@@ -36,7 +36,7 @@ export default function AcademyPage() {
                 <BookOpen className="w-16 h-16 text-gray-600 mb-4" />
                 <h2 className="text-2xl font-bold text-white mb-2">Inicia sesión para ver tus cursos</h2>
                 <p className="text-gray-500 mb-6">Accede a tu cuenta para continuar tu formación.</p>
-                <a href="/acceso" className="px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
+                <a href="/login" className="px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
                     Iniciar Sesión
                 </a>
             </div>

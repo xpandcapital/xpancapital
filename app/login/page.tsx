@@ -23,9 +23,9 @@ function LoginForm() {
   useEffect(() => {
     if (!loading && user) {
       if (redirectTo) {
-        router.push(redirectTo)
+        window.location.href = redirectTo
       } else {
-        router.push(getDefaultRouteForRole(user.role))
+        window.location.href = getDefaultRouteForRole(user.role)
       }
     }
   }, [user, loading, redirectTo, router])

@@ -18,7 +18,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
-    const { loginWithEmail } = useAuth();
+    const { loginWithEmail, user } = useAuth();
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -29,10 +29,10 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             const result = await loginWithEmail(id, password);
             if (result.success) {
                 onClose();
-                // Esperar a que el auth context se actualice y redirigir según rol
+                // Usar window.location.href para forzar recarga completa y que el middleware lea las nuevas cookies
                 setTimeout(() => {
-                    router.push(getDefaultRouteForRole('admin'));
-                }, 100);
+                    window.location.href = '/superadmin';
+                }, 200);
             } else {
                 setError(result.error || 'Credenciales incorrectas');
                 setTimeout(() => setError(null), 3000);

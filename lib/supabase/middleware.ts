@@ -86,21 +86,22 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // 2. Usuario autenticado en login → redirigir según rol
+  // 2. Usuario autenticado en login → NO redirigir automáticamente
+  // Permitimos que el usuario vea la página de login incluso si ya tiene sesión.
+  // La página /login maneja la redirección post-login en el frontend.
+  // Excepción: redirigir si tiene sesión válida con rol admin y hay redirect param
   if (user && isLogin) {
     const rol = user.app_metadata?.rol || 'usuario'
-    const url = request.nextUrl.clone()
-    const redirectParam = url.searchParams.get('redirect')
-
-    if (redirectParam) {
-      url.pathname = redirectParam
+    if (['superadmin', 'admin', 'editor'].includes(rol)) {
+      // Admin logueado intentando ir a login → redirigir a superadmin
+      const url = request.nextUrl.clone()
+      const redirectParam = url.searchParams.get('redirect')
+      url.pathname = redirectParam || '/superadmin'
       url.searchParams.delete('redirect')
-    } else if (['superadmin', 'admin', 'editor'].includes(rol)) {
-      url.pathname = '/superadmin'
-    } else {
-      url.pathname = '/miembros'
+      return NextResponse.redirect(url)
     }
-    return NextResponse.redirect(url)
+    // Para clientes/usuarios, o sesiones sin rol definido, permitir la página de login
+    // (pueden querer re-autenticarse con credenciales diferentes)
   }
 
   // 3. Cliente/usuario intentando acceder a superadmin o admin → redirigir a miembros
