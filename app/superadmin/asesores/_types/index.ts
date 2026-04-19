@@ -26,6 +26,7 @@ export interface Advisor {
   aceptado_en?: string
   auth_user_id?: string
   avatar_url?: string
+  permisos_adicionales?: { extra?: string[]; denied?: string[] } | null
 }
 
 export interface EquipoCurso {

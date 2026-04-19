@@ -162,6 +162,14 @@ export async function PUT(request: NextRequest) {
         .eq('id', advisor.auth_user_id)
     }
 
+    // Sync permisos_adicionales if provided
+    if (body.permisos_adicionales !== undefined && advisor?.auth_user_id) {
+      await supabase
+        .from('profiles')
+        .update({ permisos_adicionales: body.permisos_adicionales })
+        .eq('id', advisor.auth_user_id)
+    }
+
     return NextResponse.json({ success: true, data: advisor })
   } catch (error) {
     console.error('[API Error] /api/admin/equipo PUT:', error)

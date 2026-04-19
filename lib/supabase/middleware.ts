@@ -1,17 +1,64 @@
-// Middleware helper para Supabase SSR
-// Refresca la sesión desde cookies, verifica autenticación y rol,
-// y redirige según permisos del usuario
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { SECTION_PERMISSIONS, ROLE_DEFAULTS } from '@/lib/auth/permissions'
+import type { UserRole } from '@/lib/auth/permissions'
+
+const SECTION_ROUTES: Record<string, string[]> = {
+  'dashboard:ver': ['/superadmin'],
+  'proyectos:ver': ['/superadmin/proyectos'],
+  'lotes:ver': ['/superadmin/gestion-lotes'],
+  'contratos:ver': ['/superadmin/contratos'],
+  'asesores:ver': ['/superadmin/asesores'],
+  'pos:ver': ['/superadmin/pos'],
+  'productos:ver': ['/superadmin/productos'],
+  'clientes:ver': ['/superadmin/clientes'],
+  'cursos:ver': ['/superadmin/cursos'],
+  'certificados:ver': ['/superadmin/certificados'],
+  'trading:ver': ['/superadmin/trading'],
+  'templates:ver': ['/superadmin/templates'],
+  'mails:ver': ['/superadmin/mails'],
+  'calendarios:ver': ['/superadmin/calendarios'],
+  'formularios:ver': ['/superadmin/formularios'],
+  'leads:ver': ['/superadmin/leads'],
+  'campanas:ver': ['/superadmin/campanas'],
+  'blog:ver': ['/superadmin/blog'],
+  'equipo:ver': ['/superadmin/usuarios'],
+  'postulantes:ver': ['/superadmin/postulantes'],
+  'utilidades:ver': ['/superadmin/utilidades'],
+  'configuracion:ver': ['/superadmin/configuracion'],
+  'api-nube:ver': ['/superadmin/api-nube'],
+  'analiticas:ver': ['/superadmin/analiticas'],
+  'ajustes:ver': ['/superadmin/ajustes'],
+  'roles:ver': ['/superadmin/ajustes/roles'],
+  'empresas:ver': ['/superadmin/ajustes/empresas'],
+  'perfil:ver': ['/superadmin/perfil'],
+  'miembros:ver': ['/miembros'],
+}
+
+function canAccess(rol: string, pathname: string): boolean {
+  if (pathname === '/superadmin' || pathname === '/superadmin/') return true
+  if (pathname === '/superadmin/perfil') return true
+
+  const normalizedRol = (rol || 'usuario') as UserRole
+  const defaults = ROLE_DEFAULTS[normalizedRol]
+  if (!defaults) return false
+  if (defaults.includes('*')) return true
+
+  for (const [permission, routes] of Object.entries(SECTION_ROUTES)) {
+    if (routes.some(route => pathname.startsWith(route))) {
+      return defaults.includes(permission as any)
+    }
+  }
+
+  return true
+}
 
 export async function updateSession(request: NextRequest) {
-  // Respuesta base que permite continuar con la petición
   let supabaseResponse = NextResponse.next({ request })
 
   let user: any = null
 
   try {
-    // Crear cliente Supabase que lee/escribe cookies en la petición/respuesta
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -33,18 +80,14 @@ export async function updateSession(request: NextRequest) {
       }
     )
 
-    // Refrescar la sesión y obtener el usuario autenticado
     const { data: { user: authUser } } = await supabase.auth.getUser()
     user = authUser
   } catch (error) {
-    // Si Supabase falla (red, cookies corruptas, etc.), continuar sin sesión
-    // El usuario será tratado como no autenticado
     console.error('[Middleware] Error al verificar sesión:', error)
   }
 
   const { pathname } = request.nextUrl
 
-  // Rutas públicas que no requieren autenticación
   const publicPaths = [
     '/', '/blog', '/tienda', '/cursos', '/proyectos',
     '/verificar', '/gracias', '/f', '/formulario', '/embudo',
@@ -53,7 +96,6 @@ export async function updateSession(request: NextRequest) {
   const isPublic = publicPaths.some(p =>
     pathname === p || pathname.startsWith(p + '/')
   )
-  // APIs públicas (leads, calendarios públicos, etc.)
   const isPublicApi = pathname.startsWith('/api/') && (
     pathname.startsWith('/api/leads') ||
     pathname.startsWith('/api/calendarios/public') ||
@@ -77,19 +119,16 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/api/cms/landing')
   )
 
-  // Rutas protegidas
   const isSuperadmin = pathname.startsWith('/superadmin')
   const isMiembros = pathname.startsWith('/miembros')
   const isAdmin = pathname.startsWith('/admin')
   const isLogin = pathname === '/login'
 
-  // 1. Usuario no autenticado intentando acceder a ruta protegida → redirigir a login
-  // IMPORTANTE: Las cookies de sesión se preservan en la redirección
+  // 1. No autenticado → redirigir a login
   if (!user && (isSuperadmin || isMiembros || isAdmin)) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('redirect', pathname)
-    // Copiar las cookies refrescadas a la redirección
     const redirectResponse = NextResponse.redirect(url)
     supabaseResponse.cookies.getAll().forEach(cookie => {
       redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
@@ -97,34 +136,39 @@ export async function updateSession(request: NextRequest) {
     return redirectResponse
   }
 
-  // 2. Usuario autenticado en login → NO redirigir automáticamente
-  // Permitimos que el usuario vea la página de login incluso si ya tiene sesión.
-  // La página /login maneja la redirección post-login en el frontend.
+  // 2. Autenticado en login → redirigir según rol
   if (user && isLogin) {
     const rol = user.app_metadata?.rol || 'usuario'
     if (['superadmin', 'admin', 'editor'].includes(rol)) {
-      // Admin logueado intentando ir a login → redirigir a superadmin
       const url = request.nextUrl.clone()
       const redirectParam = url.searchParams.get('redirect')
       url.pathname = redirectParam || '/superadmin'
       url.searchParams.delete('redirect')
-      // Copiar las cookies refrescadas a la redirección
       const redirectResponse = NextResponse.redirect(url)
       supabaseResponse.cookies.getAll().forEach(cookie => {
         redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
       })
       return redirectResponse
     }
-    // Para clientes/usuarios, o sesiones sin rol definido, permitir la página de login
   }
 
-  // 3. Cliente/usuario intentando acceder a superadmin o admin → redirigir a miembros
+  // 3. Cliente/usuario intentando acceder a superadmin/admin → redirigir a miembros
   if (user && (isSuperadmin || isAdmin)) {
     const rol = user.app_metadata?.rol || 'usuario'
     if (['cliente', 'usuario'].includes(rol)) {
       const url = request.nextUrl.clone()
       url.pathname = '/miembros'
-      // Copiar las cookies refrescadas a la redirección
+      const redirectResponse = NextResponse.redirect(url)
+      supabaseResponse.cookies.getAll().forEach(cookie => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+      })
+      return redirectResponse
+    }
+
+    // 4. Verificar permisos granulares por sección
+    if (!canAccess(rol, pathname)) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/superadmin'
       const redirectResponse = NextResponse.redirect(url)
       supabaseResponse.cookies.getAll().forEach(cookie => {
         redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
@@ -133,11 +177,10 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // 4. Redirigir /admin a /superadmin (unificado)
+  // 5. Redirigir /admin a /superadmin
   if (isAdmin) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace('/admin', '/superadmin')
-    // Copiar las cookies refrescadas a la redirección
     const redirectResponse = NextResponse.redirect(url)
     supabaseResponse.cookies.getAll().forEach(cookie => {
       redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
@@ -145,6 +188,5 @@ export async function updateSession(request: NextRequest) {
     return redirectResponse
   }
 
-  // 5. Para todo lo demás, continuar con la respuesta que incluye cookies refrescadas
   return supabaseResponse
 }

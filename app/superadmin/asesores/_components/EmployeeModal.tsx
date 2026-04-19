@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { X, Check, Loader2, Eye, EyeOff, KeyRound } from 'lucide-react'
 import type { Advisor, Role } from '../_types'
+import { PermissionSelector } from '@/components/ui/PermissionSelector'
+import type { PermisosAdicionales, UserRole } from '@/lib/auth/permissions'
 
 interface EmployeeModalProps {
   advisor: Advisor | null
@@ -87,6 +89,9 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
     notes: advisor?.notes || '',
     password: '',
   })
+  const [permisosAdicionales, setPermisosAdicionales] = useState<PermisosAdicionales>(
+    advisor?.permisos_adicionales || { extra: [], denied: [] }
+  )
 
   const handleSave = async () => {
     if (!form.name.trim() || !form.email.trim()) {
@@ -99,7 +104,7 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
         const res = await fetch('/api/admin/equipo', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: advisor.id, ...form }),
+          body: JSON.stringify({ id: advisor.id, ...form, permisos_adicionales: permisosAdicionales }),
         })
         const data = await res.json()
         if (!data.success) throw new Error(data.error || 'Error al guardar')
@@ -108,7 +113,7 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
         const res = await fetch('/api/admin/equipo', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(form),
+          body: JSON.stringify({ ...form, permisos_adicionales: permisosAdicionales }),
         })
         const data = await res.json()
         if (!data.success) throw new Error(data.error || 'Error al crear')
@@ -235,6 +240,17 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Permisos adicionales */}
+            <div>
+              <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Permisos Personalizados</h3>
+              <p className="text-[10px] text-gray-600 mb-3">Agrega o deniega permisos específicos además de los del rol seleccionado.</p>
+              <PermissionSelector
+                role={(form.rol || 'editor') as UserRole}
+                permisosAdicionales={permisosAdicionales}
+                onChange={setPermisosAdicionales}
+              />
             </div>
 
             {/* Password (new only) */}

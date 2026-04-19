@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -15,11 +15,23 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { LucideProps } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
+import { usePermissions } from "@/hooks/usePermissions";
+import { SECTION_PERMISSIONS } from "@/lib/auth/permissions";
+
+const permissionToSection: Record<string, string> = {}
+Object.entries(SECTION_PERMISSIONS).forEach(([section, perm]) => {
+    permissionToSection[perm] = section
+})
+
+function getSectionFromPermission(permission: string): string {
+    return permissionToSection[permission] || ''
+}
 
 type SubItem = {
     icon: React.ComponentType<LucideProps>;
     label: string;
     href: string;
+    permission?: string;
 };
 
 type NavItem = {
@@ -27,6 +39,7 @@ type NavItem = {
     label: string;
     href?: string;
     subItems?: SubItem[];
+    permission?: string;
 };
 
 type Section = {
@@ -38,6 +51,7 @@ export function SuperadminSidebar() {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [sidebarWidth, setSidebarWidth] = useState(64);
     const pathname = usePathname();
+    const { canAccessSection, loading: permLoading } = usePermissions();
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [hoveredSection, setHoveredSection] = useState<string | null>(null);
 
@@ -83,19 +97,20 @@ export function SuperadminSidebar() {
         setExpandedSections(initialExpanded);
     }, [pathname]);
 
-    const sections: Section[] = [
+    const allSections: Section[] = [
         {
             title: "Principal",
             items: [
-                { icon: LayoutDashboard, label: "Dashboard", href: "/superadmin" },
+                { icon: LayoutDashboard, label: "Dashboard", href: "/superadmin", permission: "dashboard:ver" },
                 { 
                     icon: Building2, 
                     label: "Proyectos", 
+                    permission: "proyectos:ver",
                     subItems: [
-                        { icon: Building2, label: "Todos los Proyectos", href: "/superadmin/proyectos" },
-                        { icon: FolderOpen, label: "Gestión de Lotes", href: "/superadmin/gestion-lotes/_none_" },
-                        { icon: FileSignature, label: "Contratos", href: "/superadmin/contratos" },
-                        { icon: UsersRound, label: "Asesores", href: "/superadmin/asesores" },
+                        { icon: Building2, label: "Todos los Proyectos", href: "/superadmin/proyectos", permission: "proyectos:ver" },
+                        { icon: FolderOpen, label: "Gestión de Lotes", href: "/superadmin/gestion-lotes/_none_", permission: "lotes:ver" },
+                        { icon: FileSignature, label: "Contratos", href: "/superadmin/contratos", permission: "contratos:ver" },
+                        { icon: UsersRound, label: "Asesores", href: "/superadmin/asesores", permission: "asesores:ver" },
                     ]
                 },
             ]
@@ -106,25 +121,28 @@ export function SuperadminSidebar() {
                 { 
                     icon: ShoppingCart, 
                     label: "Punto de Venta", 
+                    permission: "pos:ver",
                     subItems: [
-                        { icon: ShoppingCart, label: "Terminal POS", href: "/superadmin/pos" },
-                        { icon: ShoppingBag, label: "Productos", href: "/superadmin/productos" },
-                        { icon: Coins, label: "Clientes", href: "/superadmin/clientes" },
-                        { icon: Settings, label: "Ajustes del Comercio", href: "/superadmin/ajustes/comercio" },
+                        { icon: ShoppingCart, label: "Terminal POS", href: "/superadmin/pos", permission: "pos:ver" },
+                        { icon: ShoppingBag, label: "Productos", href: "/superadmin/productos", permission: "productos:ver" },
+                        { icon: Coins, label: "Clientes", href: "/superadmin/clientes", permission: "clientes:ver" },
+                        { icon: Settings, label: "Ajustes del Comercio", href: "/superadmin/ajustes/comercio", permission: "ajustes:ver" },
                     ]
                 },
                 { 
                     icon: GraduationCap, 
-                    label: "Academia", 
+                    label: "Academia",
+                    permission: "cursos:ver",
                     subItems: [
-                        { icon: GraduationCap, label: "Cursos", href: "/superadmin/cursos" },
-                        { icon: Award, label: "Certificados", href: "/superadmin/certificados" },
+                        { icon: GraduationCap, label: "Cursos", href: "/superadmin/cursos", permission: "cursos:ver" },
+                        { icon: Award, label: "Certificados", href: "/superadmin/certificados", permission: "certificados:ver" },
                     ]
                 },
                 { 
                     icon: TrendingUp, 
                     label: "Trading", 
-                    href: "/superadmin/trading" 
+                    href: "/superadmin/trading",
+                    permission: "trading:ver"
                 },
 ]
         },
@@ -134,27 +152,30 @@ export function SuperadminSidebar() {
                 { 
                     icon: Layout, 
                     label: "Páginas", 
+                    permission: "templates:ver",
                     subItems: [
-                        { icon: Layout, label: "Todas las Páginas", href: "/superadmin/templates" },
+                        { icon: Layout, label: "Todas las Páginas", href: "/superadmin/templates", permission: "templates:ver" },
                     ]
                 },
                 { 
                     icon: Mail, 
-                    label: "Comunicación", 
+                    label: "Comunicación",
+                    permission: "mails:ver",
                     subItems: [
-                        { icon: Mail, label: "Correos", href: "/superadmin/mails" },
-                        { icon: CalendarDays, label: "Calendarios", href: "/superadmin/calendarios" },
-                        { icon: FileText, label: "Formularios", href: "/superadmin/formularios" },
-                        { icon: UsersRound, label: "Leads", href: "/superadmin/leads" },
-                        { icon: Megaphone, label: "Campañas", href: "/superadmin/campanas" },
+                        { icon: Mail, label: "Correos", href: "/superadmin/mails", permission: "mails:ver" },
+                        { icon: CalendarDays, label: "Calendarios", href: "/superadmin/calendarios", permission: "calendarios:ver" },
+                        { icon: FileText, label: "Formularios", href: "/superadmin/formularios", permission: "formularios:ver" },
+                        { icon: UsersRound, label: "Leads", href: "/superadmin/leads", permission: "leads:ver" },
+                        { icon: Megaphone, label: "Campañas", href: "/superadmin/campanas", permission: "campanas:ver" },
                     ]
                 },
                 { 
                     icon: FileText, 
                     label: "Blog", 
+                    permission: "blog:ver",
                     subItems: [
-                        { icon: FileText, label: "Entradas", href: "/superadmin/blog" },
-                        { icon: ImageIcon, label: "Rutas", href: "/superadmin/blog/rutas" },
+                        { icon: FileText, label: "Entradas", href: "/superadmin/blog", permission: "blog:ver" },
+                        { icon: ImageIcon, label: "Rutas", href: "/superadmin/blog/rutas", permission: "blog:ver" },
                     ]
                 },
             ]
@@ -165,28 +186,54 @@ export function SuperadminSidebar() {
                 { 
                     icon: Users, 
                     label: "Personal", 
+                    permission: "equipo:ver",
                     subItems: [
-                        { icon: Users, label: "Equipo", href: "/superadmin/usuarios" },
-                        { icon: UserPlus, label: "Postulantes", href: "/superadmin/postulantes" },
+                        { icon: Users, label: "Equipo", href: "/superadmin/usuarios", permission: "equipo:ver" },
+                        { icon: UserPlus, label: "Postulantes", href: "/superadmin/postulantes", permission: "postulantes:ver" },
                     ]
                 },
-                { icon: Wrench, label: "Utilidades", href: "/superadmin/utilidades" },
+                { icon: Wrench, label: "Utilidades", href: "/superadmin/utilidades", permission: "utilidades:ver" },
                 { 
                     icon: Settings, 
                     label: "Configuración", 
+                    permission: "configuracion:ver",
                     subItems: [
-                        { icon: ImageIcon, label: "Sitio y Branding", href: "/superadmin/configuracion" },
-                        { icon: Cloud, label: "APIs y Nube", href: "/superadmin/api-nube" },
-                        { icon: Activity, label: "Métricas y SEO", href: "/superadmin/analiticas" },
-                        { icon: ShoppingCart, label: "Comercio", href: "/superadmin/ajustes/comercio" },
-                        { icon: Shield, label: "Roles y Niveles", href: "/superadmin/ajustes/roles" },
-                        { icon: Building2, label: "Empresas", href: "/superadmin/ajustes/empresas" },
+                        { icon: ImageIcon, label: "Sitio y Branding", href: "/superadmin/configuracion", permission: "configuracion:ver" },
+                        { icon: Cloud, label: "APIs y Nube", href: "/superadmin/api-nube", permission: "api-nube:ver" },
+                        { icon: Activity, label: "Métricas y SEO", href: "/superadmin/analiticas", permission: "analiticas:ver" },
+                        { icon: ShoppingCart, label: "Comercio", href: "/superadmin/ajustes/comercio", permission: "ajustes:ver" },
+                        { icon: Shield, label: "Roles y Niveles", href: "/superadmin/ajustes/roles", permission: "roles:ver" },
+                        { icon: Building2, label: "Empresas", href: "/superadmin/ajustes/empresas", permission: "empresas:ver" },
                     ]
                 },
-                { icon: UserCircle, label: "Mi Perfil", href: "/superadmin/perfil" },
+                { icon: UserCircle, label: "Mi Perfil", href: "/superadmin/perfil", permission: "perfil:ver" },
             ]
         }
     ];
+
+    // Filter sections based on permissions
+    const sections = useMemo(() => {
+        if (permLoading) return allSections
+        return allSections.map(section => ({
+            ...section,
+            items: section.items
+                .map(item => {
+                    if (item.permission && !canAccessSection(getSectionFromPermission(item.permission))) {
+                        return null
+                    }
+                    if (item.subItems) {
+                        const filteredSubItems = item.subItems.filter(sub => {
+                            if (!sub.permission) return true
+                            return canAccessSection(getSectionFromPermission(sub.permission))
+                        })
+                        if (filteredSubItems.length === 0) return null
+                        return { ...item, subItems: filteredSubItems }
+                    }
+                    return item
+                })
+                .filter((item): item is NavItem => item !== null)
+        })).filter(section => section.items.length > 0)
+    }, [permLoading, canAccessSection])
 
     return (
         <>

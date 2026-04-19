@@ -10,17 +10,13 @@ export async function GET() {
       .order('nombre')
 
     if (error) {
-      // If roles table doesn't exist yet, return defaults
-      return NextResponse.json({
-        success: true,
-        data: [
-          { id: '1', nombre: 'usuario', label: 'Usuario', permisos: ['ver_productos', 'comprar'], color: '#6b7280' },
-          { id: '2', nombre: 'cliente', label: 'Cliente', permisos: ['ver_productos', 'comprar', 'ver_historial', 'favoritos'], color: '#3b82f6' },
-          { id: '3', nombre: 'editor', label: 'Editor', permisos: ['ver_productos', 'comprar', 'ver_historial', 'favoritos', 'editar_contenido', 'crear_posts'], color: '#8b5cf6' },
-          { id: '4', nombre: 'admin', label: 'Admin', permisos: ['ver_productos', 'comprar', 'ver_historial', 'favoritos', 'editar_contenido', 'crear_posts', 'gestionar_productos', 'ver_analiticas', 'gestionar_usuarios'], color: '#f59e0b' },
-          { id: '5', nombre: 'superadmin', label: 'Super Admin', permisos: ['*'], color: '#be0b3c' },
-        ],
-      })
+      return NextResponse.json({ success: true, data: [
+        { id: '1', nombre: 'usuario', label: 'Usuario', permisos: ['miembros:ver', 'productos:ver', 'perfil:ver', 'perfil:editar'] },
+        { id: '2', nombre: 'cliente', label: 'Cliente', permisos: ['miembros:ver', 'productos:ver', 'cursos:ver', 'certificados:ver', 'perfil:ver', 'perfil:editar', 'facturacion:ver'] },
+        { id: '3', nombre: 'editor', label: 'Editor', permisos: ['dashboard:ver', 'proyectos:ver', 'lotes:ver', 'contratos:ver', 'asesores:ver', 'productos:ver', 'productos:editar', 'clientes:ver', 'cursos:ver', 'cursos:editar', 'leads:ver', 'blog:ver', 'blog:crear', 'equipo:ver', 'perfil:ver', 'perfil:editar'] },
+        { id: '4', nombre: 'admin', label: 'Admin', permisos: ['*'] },
+        { id: '5', nombre: 'superadmin', label: 'Super Admin', permisos: ['*'] },
+      ] })
     }
 
     return NextResponse.json({ success: true, data })
@@ -74,6 +70,17 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    if (updates.permisos) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('rol', data.nombre)
+
+      if (profiles && profiles.length > 0) {
+        console.log(`[Roles API] Role "${data.nombre}" updated, ${profiles.length} profiles may be affected`)
+      }
     }
 
     return NextResponse.json({ success: true, data })
