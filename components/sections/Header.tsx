@@ -24,7 +24,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     const [isScrolled, setIsScrolled] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-    const { user, logout } = useAuth()
+    const { user, logout, loading } = useAuth()
     const { cart, favorites, blisCoins } = useShop()
     const { cmsData, templateData, siteConfig } = useLandingCMS()
     const isDashboard = pathname?.startsWith('/superadmin') || pathname?.startsWith('/miembros')
@@ -336,7 +336,9 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                             </div>
 
                              {/* Login Button / Profile */}
-                             {user ? (
+                             {loading ? (
+                                <div className="flex-shrink-0 w-20 h-10 rounded-full bg-white/5 animate-pulse" />
+                             ) : user ? (
                                 <div className="flex items-center gap-6">
                                     {/* BlisCoins */}
                                     <div className="hidden lg:flex items-center gap-2 px-3 xl:px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 max-w-[120px] xl:max-w-none">
@@ -432,14 +434,14 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         </div>
                                     </div>
                                 </div>
-                            ) : (
+                            ) : !loading ? (
                                 <button
                                     onClick={() => router.push('/login')}
                                     className="flex-shrink-0 px-5 py-2.5 rounded-full bg-blis-red/15 border border-blis-red/40 text-blis-red text-xs font-black uppercase tracking-widest hover:bg-blis-red hover:text-white hover:border-blis-red transition-all duration-300 shadow-[0_0_20px_rgba(190,11,60,0.15)] hover:shadow-[0_0_25px_rgba(190,11,60,0.4)]"
                                 >
                                     Ingresar
                                 </button>
-                            )}
+                            ) : null}
                         </div>
 
                         {/* Right: Hamburger (mobile only) */}
@@ -680,7 +682,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         </button>
                                     </div>
                                 )}
-                                {!user && (
+                                {!user && !loading && (
                                     <button
                                         onClick={() => { setMobileMenuOpen(false); router.push('/login'); }}
                                         className="w-full mt-8 py-4 rounded-xl bg-blis-red/15 border border-blis-red/40 text-blis-red font-bold uppercase tracking-widest text-xs hover:bg-blis-red hover:text-white transition-all shadow-[0_0_20px_rgba(190,11,60,0.15)]"

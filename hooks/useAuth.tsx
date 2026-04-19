@@ -91,10 +91,32 @@ async function fetchProfile(userId: string): Promise<User | null> {
   }
 }
 
+const CACHE_KEY = 'blis_auth_user'
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  // Inicializar desde cache si existe (evita flash de "no logueado")
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window === 'undefined') return null
+    try {
+      const cached = localStorage.getItem(CACHE_KEY)
+      if (cached) return JSON.parse(cached)
+    } catch {}
+    return null
+  })
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+
+  // Persistir usuario en cache cuando cambia
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      if (user) {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(user))
+      } else {
+        localStorage.removeItem(CACHE_KEY)
+      }
+    } catch {}
+  }, [user])
 
   useEffect(() => {
     // Escuchar cambios en la sesión de Supabase (login, logout, token refresh)
