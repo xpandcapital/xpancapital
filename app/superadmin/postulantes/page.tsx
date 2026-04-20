@@ -6,28 +6,16 @@ import {
   Briefcase, Trash2, Edit3, Loader2,
   Eye, TrendingUp, Users, UserCheck, AlertCircle,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/components/ui/Toast"
-import { Postulante, diccionarioPreguntas } from "./_types"
+import { Postulante, EMPRESA_ID, ESTADOS, ESTADO_LABELS, ESTADO_COLORS, diccionarioPreguntas } from "./_types"
 import { PostulanteDetailModal } from "./_components/PostulanteDetailModal"
 import { PostulanteFormModal } from "./_components/PostulanteFormModal"
 
-const EMPRESA_ID = "6186f014-c8c7-4027-9f08-8acf2bae3eae"
+const EMPRESA_ID_CONST = EMPRESA_ID
 
-const ESTADOS = ["nuevo", "en_revision", "entrevista", "aceptado", "rechazado"] as const
-
-const ESTADO_LABELS: Record<string, string> = {
-  nuevo: "Nuevo", en_revision: "En Revisión", entrevista: "Entrevista",
-  aceptado: "Aceptado", rechazado: "Rechazado",
-}
-
-const ESTADO_STYLES: Record<string, string> = {
-  nuevo: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  en_revision: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-  entrevista: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  aceptado: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-  rechazado: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-}
+const ESTADOS_CONST = ESTADOS
 
 interface FormField {
   nombre_completo: string; correo_contacto: string; puesto_postula: string;
@@ -40,6 +28,7 @@ const emptyForm: FormField = {
 
 export default function AdminPostulantes() {
   const { showToast } = useToast()
+  const router = useRouter()
   const [postulantes, setPostulantes] = useState<Postulante[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -82,7 +71,7 @@ export default function AdminPostulantes() {
     }
     setSaving(true)
     try {
-      const payload = { ...form, celular_contacto: form.celular_contacto || null, empresa_id: EMPRESA_ID }
+      const payload = { ...form, celular_contacto: form.celular_contacto || null, empresa_id: EMPRESA_ID_CONST }
       const res = await fetch("/api/postulantes", {
         method: editingPostulante ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -189,7 +178,7 @@ export default function AdminPostulantes() {
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
             className="bg-transparent text-sm text-white focus:outline-none appearance-none pr-6">
             <option value="Todos">Todos los estados</option>
-            {ESTADOS.map((e) => <option key={e} value={e}>{ESTADO_LABELS[e]}</option>)}
+            {ESTADOS_CONST.map((e) => <option key={e} value={e}>{ESTADO_LABELS[e]}</option>)}
           </select>
         </div>
       </div>
@@ -217,7 +206,7 @@ export default function AdminPostulantes() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filtered.map((p) => (
-                  <tr key={p.id} className="hover:bg-white/[0.03] transition-colors cursor-pointer" onClick={() => setDetailPostulante(p)}>
+                  <tr key={p.id} className="hover:bg-white/[0.03] transition-colors cursor-pointer" onClick={() => router.push(`/superadmin/postulantes/${p.id}`)}>
                     <td className="px-6 py-5 font-semibold text-white">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-blis-red/10 text-blis-red border border-white/5 flex items-center justify-center font-black">
@@ -236,14 +225,14 @@ export default function AdminPostulantes() {
                       <div className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5 text-gray-500" /><span className="text-gray-300">{p.puesto_postula || "—"}</span></div>
                     </td>
                     <td className="px-6 py-5">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-xl text-[10px] font-bold border ${ESTADO_STYLES[p.estado]}`}>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-xl text-[10px] font-bold border ${ESTADO_COLORS[p.estado]}`}>
                         {ESTADO_LABELS[p.estado]}
                       </span>
                     </td>
                     <td className="px-6 py-5 text-gray-500">{new Date(p.creado_en).toLocaleDateString()}</td>
                     <td className="px-6 py-5" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-2">
-                        <button onClick={() => openEditModal(p)} className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white" title="Editar"><Edit3 className="w-4 h-4" /></button>
+                        <button onClick={() => router.push(`/superadmin/postulantes/${p.id}`)} className="p-2 rounded-lg hover:bg-white/5 transition-colors text-gray-400 hover:text-white" title="Editar"><Edit3 className="w-4 h-4" /></button>
                         <button onClick={() => setDeleteConfirm(p.id)} className="p-2 rounded-lg hover:bg-red-500/10 transition-colors text-gray-400 hover:text-red-400" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>
