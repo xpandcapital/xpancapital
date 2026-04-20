@@ -95,12 +95,20 @@ export function usePermissions() {
 }
 
 // Calcula permisos usando los de la BD como base
+// Los roles con wildcard (*) en ROLE_DEFAULTS siempre mantienen acceso total
 function getEffectivePermissionsFromDB(
   rol: string,
   dbPermissions: string[],
   permisosAdicionales?: PermisosAdicionales | null
 ): Set<string> {
+  const defaults = ROLE_DEFAULTS[rol as UserRole] || ROLE_DEFAULTS.usuario
+  const hasWildcardDefault = defaults.includes('*' as any)
+
   const base = new Set<string>(dbPermissions)
+
+  if (hasWildcardDefault) {
+    base.add('*')
+  }
 
   if (permisosAdicionales?.extra) {
     permisosAdicionales.extra.forEach(p => base.add(p))
@@ -108,6 +116,11 @@ function getEffectivePermissionsFromDB(
 
   if (permisosAdicionales?.denied) {
     permisosAdicionales.denied.forEach(p => base.delete(p))
+  }
+
+  // Re-add wildcard if role requires it (denied list can't remove it)
+  if (hasWildcardDefault) {
+    base.add('*')
   }
 
   return base
