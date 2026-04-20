@@ -7,6 +7,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('roles')
       .select('*')
+      .order('orden', { ascending: true, nullsFirst: false })
       .order('nombre')
 
     if (error) {
@@ -55,6 +56,21 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
+
+    // Batch reorder
+    if (body.batch && Array.isArray(body.batch)) {
+      const results = await Promise.all(
+        body.batch.map((item: { id: string; orden: number }) =>
+          supabase.from('roles').update({ orden: item.orden }).eq('id', item.id).select().single()
+        )
+      )
+      const failed = results.find(r => r.error)
+      if (failed?.error) {
+        return NextResponse.json({ error: failed.error.message }, { status: 500 })
+      }
+      return NextResponse.json({ success: true })
+    }
+
     const { id, ...updates } = body
 
     if (!id) {
