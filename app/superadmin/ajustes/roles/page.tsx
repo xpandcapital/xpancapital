@@ -42,6 +42,7 @@ export default function RolesPage() {
   const [editPermisos, setEditPermisos] = useState<string[]>([])
   const [editingField, setEditingField] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [showCreate, setShowCreate] = useState(false)
   const [newRole, setNewRole] = useState({ nombre: '', label: '', descripcion: '', color: '#6b7280' })
 
@@ -105,8 +106,9 @@ export default function RolesPage() {
 
   const handleDelete = async (role: CustomRole) => {
     if (!role.id) return
-    if (!window.confirm(`¿Eliminar el rol "${role.label}"? Los usuarios con este rol quedarán sin permisos.`)) return
+    if (SYSTEM_ROLES.includes(role.nombre)) return
     await deleteRole(role.id)
+    setConfirmDelete(null)
   }
 
   if (loading) {
@@ -174,7 +176,15 @@ export default function RolesPage() {
                         ) : (
                           <span className="text-sm font-bold text-white cursor-pointer hover:text-blis-red transition-colors" onClick={e => { e.stopPropagation(); startEdit(role.nombre, 'label', role.label) }}>{role.label || role.nombre}</span>
                         )}
-                        <span className="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase" style={{ backgroundColor: `${role.color || '#6b7280'}15`, color: role.color || '#6b7280' }}>{role.nombre}</span>
+                        {editingField === `${role.nombre}__nombre` ? (
+                          <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                            <input type="text" value={editValue} onChange={e => setEditValue(e.target.value.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''))} onKeyDown={e => { if (e.key === 'Enter') saveField(role, 'nombre'); if (e.key === 'Escape') cancelEdit() }} className="bg-black/50 border border-white/20 rounded px-1.5 py-0.5 text-[9px] text-gray-300 font-mono w-24 focus:outline-none focus:border-blis-red/50" autoFocus />
+                            <button onClick={() => saveField(role, 'nombre')} className="p-0.5 text-emerald-400 hover:text-emerald-300"><Check className="w-3 h-3" /></button>
+                            <button onClick={cancelEdit} className="p-0.5 text-gray-500 hover:text-gray-300"><X className="w-3 h-3" /></button>
+                          </div>
+                        ) : (
+                          <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${!isSystem ? 'cursor-pointer hover:opacity-75 transition-opacity' : ''}`} style={{ backgroundColor: `${role.color || '#6b7280'}15`, color: role.color || '#6b7280' }} onClick={e => { e.stopPropagation(); if (!isSystem) startEdit(role.nombre, 'nombre', role.nombre) }}>{role.nombre} {!isSystem && <Edit2 className="w-2 h-2 inline" />}</span>
+                        )}
                         {isSystem && <span className="text-[9px] px-1.5 py-0.5 bg-amber-500/10 text-amber-400 rounded-full font-bold">sistema</span>}
                       </div>
                       <div className="flex items-center gap-2">
@@ -206,11 +216,17 @@ export default function RolesPage() {
                     ) : (
                       <button onClick={() => startEdit(role.nombre, 'color', role.color)} className="w-6 h-6 rounded-lg border border-white/10 hover:scale-110 transition-transform" style={{ backgroundColor: role.color || '#6b7280' }} title="Cambiar color" />
                     )}
-                    {!isSystem && role.id && (
-                      <button onClick={() => handleDelete(role)} className="p-1.5 hover:bg-red-500/10 rounded-lg text-gray-500 hover:text-red-400 transition-colors" title="Eliminar rol">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        if (isSystem) return
+                        setConfirmDelete(role.id || role.nombre)
+                      }}
+                      disabled={isSystem}
+                      className={`p-1.5 rounded-lg transition-colors ${isSystem ? 'text-gray-700 cursor-not-allowed' : 'hover:bg-red-500/10 text-gray-500 hover:text-red-400'}`}
+                      title={isSystem ? 'Los roles del sistema no se pueden eliminar' : 'Eliminar rol'}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
 
@@ -331,6 +347,22 @@ export default function RolesPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {confirmDelete && (() => {
+        const roleToDelete = roles.find(r => r.id === confirmDelete || r.nombre === confirmDelete)
+        return (
+          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setConfirmDelete(null)}>
+            <div className="bg-zinc-950 border border-white/10 rounded-2xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-bold text-white mb-2">¿Eliminar rol?</h3>
+              <p className="text-gray-400 text-sm mb-4">Se eliminará el rol <span className="text-white font-bold">{roleToDelete?.label || roleToDelete?.nombre}</span>. Los usuarios asignados a este rol quedarán sin permisos.</p>
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setConfirmDelete(null)} className="px-4 py-2 bg-white/5 rounded-xl text-gray-300 text-sm font-bold hover:bg-white/10 transition-colors">Cancelar</button>
+                <button onClick={() => roleToDelete && handleDelete(roleToDelete)} disabled={saving === 'delete'} className="px-4 py-2 bg-red-500 rounded-xl text-white text-sm font-bold hover:bg-red-600 transition-colors disabled:opacity-50">{saving === 'delete' ? 'Eliminando...' : 'Eliminar'}</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
