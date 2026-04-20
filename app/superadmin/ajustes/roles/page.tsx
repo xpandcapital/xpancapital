@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, ChevronDown, Save, X, Trash2, Plus, ArrowUp, ArrowDown, Edit2, Check } from 'lucide-react'
+import { Shield, ChevronDown, Save, X, Trash2, Plus, ArrowUp, ArrowDown, Edit2, Check, Copy, ClipboardPaste } from 'lucide-react'
 import { CustomRole, useRoles } from './_components/useRoles'
 import { PERMISSIONS } from '@/lib/auth/permissions'
 import { useToast } from '@/components/ui/Toast'
@@ -43,6 +43,7 @@ export default function RolesPage() {
   const [editingField, setEditingField] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [clipboard, setClipboard] = useState<string[] | null>(null)
   const [showCreate, setShowCreate] = useState(false)
   const [newRole, setNewRole] = useState({ nombre: '', label: '', descripcion: '', color: '#6b7280' })
 
@@ -232,6 +233,14 @@ export default function RolesPage() {
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Permisos de <span className="text-white">{role.label || role.nombre}</span></p>
                           <div className="flex gap-2">
+                            <button onClick={() => { setClipboard([...editPermisos]); showToast(`Permisos copiados (${editPermisos.length})`, 'success') }} className="px-3 py-1.5 bg-white/5 rounded-lg text-gray-400 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-colors flex items-center gap-1" title="Copiar permisos de este rol">
+                              <Copy className="w-3 h-3" />Copiar
+                            </button>
+                            {clipboard !== null && (
+                              <button onClick={() => { setEditPermisos([...clipboard]); showToast(`${clipboard.length} permisos pegados`, 'success') }} className="px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-blue-500/20 transition-colors flex items-center gap-1" title="Pegar permisos copiados">
+                                <ClipboardPaste className="w-3 h-3" />Pegar ({clipboard.length})
+                              </button>
+                            )}
                             {!isWildcard && (
                               <button onClick={() => handleSavePermisos(role)} disabled={!!saving} className="px-3 py-1.5 bg-blis-red rounded-lg text-white text-[10px] font-bold uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-1 disabled:opacity-50">
                                 <Save className="w-3 h-3" />{saving ? '...' : 'Guardar'}
