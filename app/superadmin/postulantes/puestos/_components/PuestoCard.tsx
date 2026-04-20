@@ -1,6 +1,6 @@
 "use client"
 
-import { Briefcase, ExternalLink, Copy, Trash2, Users, FileQuestion, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Briefcase, ExternalLink, Copy, Trash2, FileQuestion, ToggleLeft, ToggleRight, Code } from 'lucide-react'
 import { PuestoTrabajo, PuestoPregunta } from '../../_types'
 
 interface PuestoCardProps {
@@ -12,9 +12,10 @@ interface PuestoCardProps {
   onDelete: (id: string) => void
   onCopyLink: (slug: string) => void
   onPreview: (slug: string) => void
+  onCopyEmbed: (slug: string) => void
 }
 
-export function PuestoCard({ puesto, preguntaCount, isSelected, onClick, onToggleActivo, onDelete, onCopyLink, onPreview }: PuestoCardProps) {
+export function PuestoCard({ puesto, preguntaCount, isSelected, onClick, onToggleActivo, onDelete, onCopyLink, onPreview, onCopyEmbed }: PuestoCardProps) {
   return (
     <div
       onClick={onClick}
@@ -76,10 +77,16 @@ export function PuestoCard({ puesto, preguntaCount, isSelected, onClick, onToggl
           <Copy className="w-3 h-3" />Link
         </button>
         <button
-          onClick={() => onPreview(puesto.slug)}
+          onClick={() => onCopyEmbed(puesto.slug)}
           className="flex-1 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center gap-1"
         >
-          <ExternalLink className="w-3 h-3" />Vista
+          <Code className="w-3 h-3" />Embed
+        </button>
+        <button
+          onClick={() => onPreview(puesto.slug)}
+          className="py-1.5 px-2 text-[10px] font-bold rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          <ExternalLink className="w-3 h-3" />
         </button>
         <button
           onClick={() => onDelete(puesto.id)}

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { Save, ExternalLink, Copy, Trash2, Loader2, ToggleLeft, ToggleRight } from 'lucide-react'
+import { Save, ExternalLink, Copy, Trash2, Loader2, ToggleLeft, ToggleRight, Code } from 'lucide-react'
 import { PuestoTrabajo, PuestoPregunta } from '../../_types'
 import { PreguntaAssigner } from './PreguntaAssigner'
 
@@ -21,12 +21,13 @@ interface PuestoEditorProps {
   onCopyLink: (slug: string) => void
   onPreview: (slug: string) => void
   onDeselect: () => void
+  onCopyEmbed: (slug: string) => void
 }
 
 export function PuestoEditor({
   puesto, selectedPP, preguntas, grupos, puestos, saving,
   onUpdatePuesto, onDelete, onTogglePregunta, onUpdatePregunta,
-  onSavePuestoPreguntas, onCopyPreguntasFrom, onCopyLink, onPreview, onDeselect,
+  onSavePuestoPreguntas, onCopyPreguntasFrom, onCopyLink, onPreview, onDeselect, onCopyEmbed,
 }: PuestoEditorProps) {
   const [editNombre, setEditNombre] = useState(puesto.nombre)
   const [editSlug, setEditSlug] = useState(puesto.slug)
@@ -113,6 +114,9 @@ export function PuestoEditor({
             <div className="flex items-center gap-2 shrink-0">
               <button onClick={() => onCopyLink(puesto.slug)} className="p-2 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors" title="Copiar link del formulario">
                 <Copy className="w-4 h-4" />
+              </button>
+              <button onClick={() => onCopyEmbed(puesto.slug)} className="p-2 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors" title="Copiar código de incrustación">
+                <Code className="w-4 h-4" />
               </button>
               <button onClick={() => onPreview(puesto.slug)} className="p-2 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors" title="Vista previa del formulario">
                 <ExternalLink className="w-4 h-4" />

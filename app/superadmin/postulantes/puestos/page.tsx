@@ -45,6 +45,13 @@ export default function PuestosPage() {
     showToast('Link copiado al portapapeles', 'success')
   }
 
+  const handleCopyEmbed = (slug: string) => {
+    const url = `${window.location.origin}/embed/postulante/${slug}`
+    const code = `<iframe src="${url}" width="100%" height="800" frameborder="0" style="border:none;max-width:100%;"></iframe>`
+    navigator.clipboard.writeText(code)
+    showToast('Código de incrustación copiado', 'success')
+  }
+
   const handlePreview = (slug: string) => {
     window.open(`/formulario/postulante/${slug}`, '_blank')
   }
@@ -93,6 +100,7 @@ export default function PuestosPage() {
               }}
               onCopyLink={handleCopyLink}
               onPreview={handlePreview}
+              onCopyEmbed={handleCopyEmbed}
             />
           ))}
         </div>
