@@ -34,9 +34,10 @@ export function usePermissions() {
       try {
         const res = await fetch('/api/admin/roles')
         if (res.ok) {
-          const roles = await res.json()
+          const json = await res.json()
+          const rolesArray = Array.isArray(json) ? json : (json.data || [])
           const userRole = user.role || 'usuario'
-          const roleData = roles.find?.((r: { nombre: string }) => r.nombre === userRole)
+          const roleData = rolesArray.find?.((r: { nombre: string }) => r.nombre === userRole)
           if (roleData?.permisos) {
             setRolePermissions(roleData.permisos)
           }

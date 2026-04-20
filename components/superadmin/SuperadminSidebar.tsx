@@ -10,7 +10,7 @@ import {
     ShoppingCart, Boxes, CandlestickChart, Scale, BarChart3,
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
-    CalendarDays, Megaphone
+    CalendarDays, Megaphone, ClipboardList
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LucideProps } from "lucide-react";
@@ -19,13 +19,14 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { SECTION_PERMISSIONS } from "@/lib/auth/permissions";
 import { CompanySwitcher } from "./CompanySwitcher";
 
-const permissionToSection: Record<string, string> = {}
+const permissionToSections: Record<string, string[]> = {}
 Object.entries(SECTION_PERMISSIONS).forEach(([section, perm]) => {
-    permissionToSection[perm] = section
+    if (!permissionToSections[perm]) permissionToSections[perm] = []
+    permissionToSections[perm].push(section)
 })
 
-function getSectionFromPermission(permission: string): string {
-    return permissionToSection[permission] || ''
+function getSectionsFromPermission(permission: string): string[] {
+    return permissionToSections[permission] || []
 }
 
 type SubItem = {
@@ -52,7 +53,7 @@ export function SuperadminSidebar() {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [sidebarWidth, setSidebarWidth] = useState(64);
     const pathname = usePathname();
-    const { canAccessSection, loading: permLoading } = usePermissions();
+    const { canAccessSection, loading: permLoading, isAdmin } = usePermissions();
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const [hoveredSection, setHoveredSection] = useState<string | null>(null);
 
@@ -191,6 +192,8 @@ export function SuperadminSidebar() {
                     subItems: [
                         { icon: Users, label: "Equipo", href: "/superadmin/usuarios", permission: "equipo:ver" },
                         { icon: UserPlus, label: "Postulantes", href: "/superadmin/postulantes", permission: "postulantes:ver" },
+                         { icon: Briefcase, label: "Puestos", href: "/superadmin/postulantes/puestos", permission: "postulantes:ver" },
+                         { icon: ClipboardList, label: "Preguntas", href: "/superadmin/postulantes/preguntas", permission: "postulantes:ver" },
                     ]
                 },
                 { icon: Wrench, label: "Utilidades", href: "/superadmin/utilidades", permission: "utilidades:ver" },
@@ -213,19 +216,29 @@ export function SuperadminSidebar() {
     ];
 
     // Filter sections based on permissions
+    // Superadmin/admin see everything — skip filtering entirely
     const sections = useMemo(() => {
         if (permLoading) return allSections
+        if (isAdmin) return allSections
+
         return allSections.map(section => ({
             ...section,
             items: section.items
                 .map(item => {
-                    if (item.permission && !canAccessSection(getSectionFromPermission(item.permission))) {
-                        return null
+                    if (item.permission) {
+                        const sectionsForPerm = getSectionsFromPermission(item.permission)
+                        const hasAccess = sectionsForPerm.length > 0
+                            ? sectionsForPerm.some(s => canAccessSection(s))
+                            : canAccessSection(item.permission)
+                        if (!hasAccess) return null
                     }
                     if (item.subItems) {
                         const filteredSubItems = item.subItems.filter(sub => {
                             if (!sub.permission) return true
-                            return canAccessSection(getSectionFromPermission(sub.permission))
+                            const sectionsForPerm = getSectionsFromPermission(sub.permission)
+                            return sectionsForPerm.length > 0
+                                ? sectionsForPerm.some(s => canAccessSection(s))
+                                : canAccessSection(sub.permission)
                         })
                         if (filteredSubItems.length === 0) return null
                         return { ...item, subItems: filteredSubItems }
@@ -234,7 +247,7 @@ export function SuperadminSidebar() {
                 })
                 .filter((item): item is NavItem => item !== null)
         })).filter(section => section.items.length > 0)
-    }, [permLoading, canAccessSection])
+    }, [permLoading, canAccessSection, isAdmin])
 
     return (
         <>
