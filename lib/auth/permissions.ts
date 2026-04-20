@@ -159,6 +159,8 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
   'blog': 'blog:ver',
   'usuarios': 'equipo:ver',
   'postulantes': 'postulantes:ver',
+  'postulantes/puestos': 'postulantes:ver',
+  'postulantes/preguntas': 'postulantes:ver',
   'utilidades': 'utilidades:ver',
   'configuracion': 'configuracion:ver',
   'api-nube': 'api-nube:ver',
