@@ -7,6 +7,21 @@ export async function GET(request: NextRequest) {
     const supabase = createClient()
     const { searchParams } = new URL(request.url)
     const empresaId = searchParams.get('empresa_id') || DEFAULT_EMPRESA_ID
+    const search = searchParams.get('search')
+
+    if (search) {
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select('id, email, nombre, apellido, rol, empresa_id, avatar_url')
+        .or(`email.ilike.%${search}%,nombre.ilike.%${search}%`)
+        .limit(10)
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true, users: users || [] })
+    }
 
     const { data: users, error } = await supabase
       .from('profiles')
@@ -110,7 +125,13 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'userId es requerido' }, { status: 400 })
     }
 
-    const { error } = await supabase.auth.admin.deleteUser(userId)
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        empresa_id: null,
+        actualizado_en: new Date().toISOString()
+      })
+      .eq('id', userId)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

@@ -169,7 +169,8 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const body = await request.json()
-    const { empresa, config } = body
+    const { id, empresa, config } = body
+    const empresaId = id || DEFAULT_EMPRESA_ID
 
     if (empresa) {
       const empresaData: Record<string, unknown> = {}
@@ -178,7 +179,8 @@ export async function PUT(request: NextRequest) {
         'color_primario', 'color_secundario', 'color_acento',
         'moneda_base', 'monedas_activas', 'idioma', 'zona_horaria',
         'pais_fiscal', 'ruc', 'razon_social', 'direccion_fiscal',
-        'dominio_principal', 'dominios_alias'
+        'dominio_principal', 'dominios_alias', 'activo', 'plan',
+        'plan_limite_usuarios', 'plan_limite_productos', 'plan_limite_almacenamiento'
       ]
 
       empresaFields.forEach(field => {
@@ -191,7 +193,7 @@ export async function PUT(request: NextRequest) {
         const { error } = await supabase
           .from('empresas')
           .update(empresaData)
-          .eq('id', DEFAULT_EMPRESA_ID)
+          .eq('id', empresaId)
 
         if (error) {
           return NextResponse.json({ success: false, error: error.message }, { status: 500 })
@@ -217,12 +219,12 @@ export async function PUT(request: NextRequest) {
         const { error: configUpdateError } = await supabase
           .from('empresa_config')
           .update(configData)
-          .eq('empresa_id', DEFAULT_EMPRESA_ID)
+          .eq('empresa_id', empresaId)
 
         if (configUpdateError) {
           const { error: insertError } = await supabase
             .from('empresa_config')
-            .insert({ empresa_id: DEFAULT_EMPRESA_ID, ...configData })
+            .insert({ empresa_id: empresaId, ...configData })
 
           if (insertError) {
             return NextResponse.json({ success: false, error: insertError.message }, { status: 500 })
