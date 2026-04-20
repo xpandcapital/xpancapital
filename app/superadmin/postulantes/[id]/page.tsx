@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Upload, FileText, X, Loader2 } from 'lucide-react'
+import { ArrowLeft, Save, Upload, FileText, X, Loader2, ChevronDown } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { Postulante, ESTADO_LABELS, ESTADO_COLORS, gruposPreguntas, diccionarioPreguntas } from '../_types'
 
@@ -104,7 +104,9 @@ export default function PostulanteEditPage() {
     finally { setUploading(false) }
   }
 
-  const input = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50"
+  const input = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 placeholder:text-gray-600"
+  const selectCls = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 appearance-none"
+  const dateCls = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 [color-scheme:dark]"
   const label = "text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block"
 
   if (loading) {
@@ -157,16 +159,20 @@ export default function PostulanteEditPage() {
             <h2 className="text-lg font-black text-white uppercase tracking-wide border-b border-white/5 pb-4">Administración</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div><label className={label}>Puesto que postula</label><input type="text" value={form.puesto_postula || ''} onChange={e => upd('puesto_postula', e.target.value)} className={input} /></div>
-              <div><label className={label}>Calificación</label><input type="text" value={form.calificacion || ''} onChange={e => upd('calificacion', e.target.value)} className={input} placeholder="A+, A, B, C..." /></div>
-              <div><label className={label}>Fecha de entrevista</label><input type="date" value={form.fecha_entrevista?.split('T')[0] || ''} onChange={e => upd('fecha_entrevista', e.target.value)} className={input} /></div>
+              <div><label className={label}>Calificación</label><input type="text" value={form.calificacion || ''} onChange={e => upd('calificacion', e.target.value)} className={input} /></div>
+              <div><label className={label}>Fecha de entrevista</label><input type="date" value={form.fecha_entrevista?.split('T')[0] || ''} onChange={e => upd('fecha_entrevista', e.target.value)} className={dateCls} /></div>
               <div><label className={label}>Proyecto interesado</label><input type="text" value={form.proyecto_interesado || ''} onChange={e => upd('proyecto_interesado', e.target.value)} className={input} /></div>
-              <div><label className={label}>Tipo de entrevista</label>
-                <select value={form.entrevista_tipo || ''} onChange={e => upd('entrevista_tipo', e.target.value)} className={input}>
-                  <option value="">Sin definir</option>
-                  <option value="presencial">Presencial</option>
-                  <option value="videoconferencia">Videoconferencia</option>
-                  <option value="telefonica">Telefónica</option>
-                </select>
+              <div>
+                <label className={label}>Tipo de entrevista</label>
+                <div className="relative">
+                  <select value={form.entrevista_tipo || ''} onChange={e => upd('entrevista_tipo', e.target.value)} className={selectCls}>
+                    <option value="">Sin definir</option>
+                    <option value="presencial">Presencial</option>
+                    <option value="videoconferencia">Videoconferencia</option>
+                    <option value="telefonica">Telefónica</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
               </div>
               <div><label className={label}>Notas de entrevista</label><textarea value={form.entrevista_notas || ''} onChange={e => upd('entrevista_notas', e.target.value)} className={`${input} resize-none`} rows={3} /></div>
             </div>
@@ -195,12 +201,15 @@ export default function PostulanteEditPage() {
             <h2 className="text-lg font-black text-white uppercase tracking-wide border-b border-white/5 pb-4">{currentGroup.titulo}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {currentGroup.campos.map(key => {
-                const label = diccionarioPreguntas[key] || key
+                const lbl = diccionarioPreguntas[key] || key
                 const value = form[key]
-                const isLongText = key.startsWith('experiencia') || key.startsWith('motivo') || key.startsWith('resolucion') || key.startsWith('manejo') || key.startsWith('porque') || key.startsWith('conocimiento') || key.startsWith('areas') || key.startsWith('actualizacion') || key.startsWith('informacion') || key.startsWith('preguntas_candidato') || key.startsWith('condicion') || key.startsWith('disponibilidad_horarios') || key.startsWith('compromisos') || key.startsWith('capacitaciones') || key.startsWith('herramientas') || key.startsWith('roles_disfrutados')
-                const isSelect = key === 'estado_civil' || key === 'disponibilidad_inmediata' || key === 'disponibilidad_viaje' || key === 'estado' || key === 'puesto_postula' || key === 'calificacion' || key === 'entrevista_tipo' || key === 'preferencia_trabajo' || key === 'nivel_estudios'
+                const isLongText = key.startsWith('experiencia') || key.startsWith('motivo') || key.startsWith('resolucion') || key.startsWith('manejo') || key.startsWith('porque') || key.startsWith('conocimiento') || key.startsWith('areas') || key.startsWith('actualizacion') || key.startsWith('informacion') || key.startsWith('preguntas_candidato') || key.startsWith('condicion') || key.startsWith('disponibilidad_horarios') || key.startsWith('compromisos') || key.startsWith('capacitaciones') || key.startsWith('herramientas') || key.startsWith('roles_disfrutados') || key.startsWith('trabajo_equipo') || key.startsWith('entrevista_notas')
+                const isSelect = key === 'estado_civil' || key === 'disponibilidad_inmediata' || key === 'disponibilidad_viaje' || key === 'preferencia_trabajo' || key === 'nivel_estudios'
                 const isBoolean = key === 'check_portafolio'
                 const isDate = key === 'fecha_nacimiento' || key === 'fecha_entrevista'
+                const isCvField = key === 'cv_archivo'
+
+                if (isCvField) return null
 
                 if (isBoolean) {
                   return (
@@ -209,7 +218,7 @@ export default function PostulanteEditPage() {
                         <input type="checkbox" checked={!!value} onChange={e => upd(key, e.target.checked)} className="sr-only peer" />
                         <div className="w-12 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blis-red after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all" />
                       </label>
-                      <span className="text-white text-sm font-bold">{label}</span>
+                      <span className="text-white text-sm font-bold">{lbl}</span>
                     </div>
                   )
                 }
@@ -217,8 +226,8 @@ export default function PostulanteEditPage() {
                 if (isLongText) {
                   return (
                     <div key={key} className="md:col-span-2">
-                      <label className={label}>{label}</label>
-                      <textarea value={value || ''} onChange={e => upd(key, e.target.value)} className={`${input} resize-none`} rows={3} placeholder={label} />
+                      <label className={label}>{lbl}</label>
+                      <textarea value={value || ''} onChange={e => upd(key, e.target.value)} className={`${input} resize-none`} rows={3} />
                     </div>
                   )
                 }
@@ -226,15 +235,18 @@ export default function PostulanteEditPage() {
                 if (isSelect && key === 'estado_civil') {
                   return (
                     <div key={key}>
-                      <label className={label}>{label}</label>
-                      <select value={value || ''} onChange={e => upd(key, e.target.value)} className={input}>
-                        <option value="">Seleccionar</option>
-                        <option value="soltero/a">Soltero/a</option>
-                        <option value="casado/a">Casado/a</option>
-                        <option value="divorciado/a">Divorciado/a</option>
-                        <option value="viudo/a">Viudo/a</option>
-                        <option value="union_libre">Unión libre</option>
-                      </select>
+                      <label className={label}>{lbl}</label>
+                      <div className="relative">
+                        <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
+                          <option value="">Seleccionar</option>
+                          <option value="soltero/a">Soltero/a</option>
+                          <option value="casado/a">Casado/a</option>
+                          <option value="divorciado/a">Divorciado/a</option>
+                          <option value="viudo/a">Viudo/a</option>
+                          <option value="union_libre">Unión libre</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      </div>
                     </div>
                   )
                 }
@@ -242,13 +254,54 @@ export default function PostulanteEditPage() {
                 if (isSelect && (key === 'disponibilidad_inmediata' || key === 'disponibilidad_viaje')) {
                   return (
                     <div key={key}>
-                      <label className={label}>{label}</label>
-                      <select value={value || ''} onChange={e => upd(key, e.target.value)} className={input}>
-                        <option value="">Seleccionar</option>
-                        <option value="si">Sí</option>
-                        <option value="no">No</option>
-                        <option value="condicionado">Condicionado</option>
-                      </select>
+                      <label className={label}>{lbl}</label>
+                      <div className="relative">
+                        <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
+                          <option value="">Seleccionar</option>
+                          <option value="si">Sí</option>
+                          <option value="no">No</option>
+                          <option value="condicionado">Condicionado</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      </div>
+                    </div>
+                  )
+                }
+
+                if (isSelect && key === 'preferencia_trabajo') {
+                  return (
+                    <div key={key}>
+                      <label className={label}>{lbl}</label>
+                      <div className="relative">
+                        <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
+                          <option value="">Seleccionar</option>
+                          <option value="solo">Solo</option>
+                          <option value="en_equipo">En equipo</option>
+                          <option value="indiferente">Indiferente</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      </div>
+                    </div>
+                  )
+                }
+
+                if (isSelect && key === 'nivel_estudios') {
+                  return (
+                    <div key={key}>
+                      <label className={label}>{lbl}</label>
+                      <div className="relative">
+                        <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
+                          <option value="">Seleccionar</option>
+                          <option value="primaria">Primaria</option>
+                          <option value="secundaria">Secundaria</option>
+                          <option value="tecnico">Técnico</option>
+                          <option value="universitario">Universitario</option>
+                          <option value="postgrado">Postgrado</option>
+                          <option value="maestria">Maestría</option>
+                          <option value="doctorado">Doctorado</option>
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      </div>
                     </div>
                   )
                 }
@@ -256,16 +309,16 @@ export default function PostulanteEditPage() {
                 if (isDate) {
                   return (
                     <div key={key}>
-                      <label className={label}>{label}</label>
-                      <input type="date" value={value?.split('T')[0] || ''} onChange={e => upd(key, e.target.value)} className={input} />
+                      <label className={label}>{lbl}</label>
+                      <input type="date" value={value?.split('T')[0] || ''} onChange={e => upd(key, e.target.value)} className={dateCls} />
                     </div>
                   )
                 }
 
                 return (
                   <div key={key}>
-                    <label className={label}>{label}</label>
-                    <input type={key.includes('salarial') || key.includes('anos') ? 'number' : 'text'} value={value || ''} onChange={e => upd(key, e.target.value)} className={input} placeholder={label} />
+                    <label className={label}>{lbl}</label>
+                    <input type={key.includes('salarial') || key.includes('anos') ? 'number' : 'text'} value={value || ''} onChange={e => upd(key, e.target.value)} className={input} />
                   </div>
                 )
               })}
