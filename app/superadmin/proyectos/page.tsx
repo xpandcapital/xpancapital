@@ -636,7 +636,7 @@ if (!geminiKey || geminiKey.trim() === '') {
                 <Download className="w-4 h-4" />
                 <span className="text-[10px] uppercase tracking-[0.2em] font-bold">Exportar</span>
               </button>
-              <button onClick={() => { setEditingProject(null); setFormData({ name: '', id: '', status: 'EN PLANOS', website: '', location: '', description: '', cover_image: '', gallery_images: [], start_date: new Date().toISOString().split('T')[0], end_date: '', logo_url: '', primary_color: '#be0b3c', secondary_color: '' }); setShowModal(true); }} className="px-6 py-3 bg-blis-red rounded-2xl text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center gap-2.5 shadow-lg shadow-blis-red/20">
+              <button onClick={() => { setEditingProject(null); setFormData({ name: '', id: '', status: 'EN PLANOS', website: '', location: '', description: '', cover_image: '', gallery_images: [], start_date: new Date().toISOString().split('T')[0], end_date: '', logo_url: '', primary_color: '#be0b3c', secondary_color: '' }); router.push('/superadmin/proyectos/new'); }} className="px-6 py-3 bg-blis-red rounded-2xl text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center gap-2.5 shadow-lg shadow-blis-red/20">
                 <Plus className="w-4 h-4" />
                 <span className="text-[10px] uppercase tracking-[0.2em] font-bold">Nuevo Proyecto</span>
               </button>
@@ -694,7 +694,7 @@ if (!geminiKey || geminiKey.trim() === '') {
                       <td className="px-5 py-4 text-sm font-black text-amber-400">{available}</td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => openEditProject(project)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all" title="Editar"><Edit2 className="w-3.5 h-3.5" /></button>
+                          <button onClick={() => router.push(`/superadmin/proyectos/${project.id}`)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all" title="Editar"><Edit2 className="w-3.5 h-3.5" /></button>
                           <button onClick={() => {
                             const slug = getProjectSlug(project.name);
                             router.push(`/superadmin/gestion-lotes/${slug}`);
@@ -804,7 +804,7 @@ if (!geminiKey || geminiKey.trim() === '') {
                   
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    <button onClick={() => openEditProject(project)} className="flex-1 py-2.5 bg-white/5 border border-white/5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 hover:border-white/10 transition-all duration-300 flex items-center justify-center gap-2">
+                    <button onClick={() => router.push(`/superadmin/proyectos/${project.id}`)} className="flex-1 py-2.5 bg-white/5 border border-white/5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 hover:border-white/10 transition-all duration-300 flex items-center justify-center gap-2">
                       <Edit2 className="w-3.5 h-3.5" />
                       <span className="text-[10px] uppercase tracking-widest font-bold">Editar</span>
                     </button>
