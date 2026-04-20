@@ -44,7 +44,7 @@ export default function EmpresaEditPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center h-[60vh]">
         <Loader2 className="w-8 h-8 text-blis-red animate-spin" />
       </div>
     )
@@ -52,7 +52,7 @@ export default function EmpresaEditPage() {
 
   if (!empresa) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center h-[60vh]">
         <div className="text-center">
           <p className="text-white text-xl font-bold mb-2">Empresa no encontrada</p>
           <button onClick={() => router.push('/superadmin/ajustes/empresas')} className="text-blis-red hover:underline text-sm">Volver a empresas</button>
@@ -62,7 +62,7 @@ export default function EmpresaEditPage() {
   }
 
   return (
-    <div className="w-full mx-auto px-4 md:px-8 pt-8 pb-20 bg-black min-h-screen">
+    <div className="w-full mx-auto px-4 md:px-8 pt-8 pb-20 bg-black">
       <div className="flex items-center gap-4 mb-8">
         <button onClick={() => router.push('/superadmin/ajustes/empresas')} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="w-5 h-5" />

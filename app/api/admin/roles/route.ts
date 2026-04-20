@@ -99,6 +99,17 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
     }
 
+    const { data: role } = await supabase
+      .from('roles')
+      .select('nombre')
+      .eq('id', id)
+      .single()
+
+    const SYSTEM_ROLES = ['superadmin', 'admin', 'editor', 'cliente', 'usuario']
+    if (role && SYSTEM_ROLES.includes(role.nombre)) {
+      return NextResponse.json({ error: 'No se pueden eliminar los roles del sistema' }, { status: 403 })
+    }
+
     const { error } = await supabase
       .from('roles')
       .delete()

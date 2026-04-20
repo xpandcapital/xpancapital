@@ -1,382 +1,259 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Shield, Award, Plus, Edit2, Trash2, Save, X, Star, Crown, Zap, Users, ChevronDown
-} from "lucide-react";
-import { useToast } from "@/components/ui/Toast";
-import { PermissionSelector } from "@/components/ui/PermissionSelector";
-import type { UserRole, PermisosAdicionales } from "@/lib/auth/permissions";
-import { ROLE_DEFAULTS, PERMISSIONS } from "@/lib/auth/permissions";
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Shield, ChevronDown, Save, X, Trash2, Plus } from 'lucide-react'
+import { CustomRole, useRoles } from './_components/useRoles'
+import { PERMISSIONS } from '@/lib/auth/permissions'
 
-interface NivelCliente {
-  id: string;
-  nombre: string;
-  slug: string;
-  color: string;
-  icono: string;
-  orden: number;
-  compras_minimas: number;
-  coins_minimos: number;
-  referidos_minimos: number;
-  monto_minimo: number;
-  descuento_porcentaje: number;
-  coins_bonus_porcentaje: number;
-  envio_gratis: boolean;
-  soporte_prioritario: boolean;
-  acceso_eventos: boolean;
-  comision_porcentaje: number;
-  comision_tipo: string;
+const ROLE_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#6b7280']
+const SYSTEM_ROLES = ['superadmin', 'admin', 'editor', 'cliente', 'usuario']
+
+const PERMISSION_GROUPS: Record<string, string[]> = {
+  'Dashboard': ['dashboard:ver'],
+  'Proyectos': ['proyectos:ver', 'proyectos:crear', 'proyectos:editar', 'proyectos:eliminar'],
+  'Lotes': ['lotes:ver', 'lotes:editar'],
+  'Contratos': ['contratos:ver', 'contratos:crear', 'contratos:editar'],
+  'Asesores': ['asesores:ver', 'asesores:crear', 'asesores:editar'],
+  'POS': ['pos:ver'],
+  'Productos': ['productos:ver', 'productos:crear', 'productos:editar', 'productos:eliminar'],
+  'Clientes': ['clientes:ver', 'clientes:editar'],
+  'Cursos': ['cursos:ver', 'cursos:crear', 'cursos:editar', 'cursos:eliminar'],
+  'Certificados': ['certificados:ver', 'certificados:crear'],
+  'Trading': ['trading:ver'],
+  'Páginas': ['templates:ver', 'templates:editar'],
+  'Correos': ['mails:ver', 'mails:enviar'],
+  'Calendarios': ['calendarios:ver', 'calendarios:editar'],
+  'Leads': ['leads:ver', 'leads:editar'],
+  'Campañas': ['campanas:ver', 'campanas:crear'],
+  'Blog': ['blog:ver', 'blog:crear', 'blog:editar', 'blog:eliminar'],
+  'Equipo': ['equipo:ver', 'equipo:crear', 'equipo:editar'],
+  'Configuración': ['configuracion:ver', 'configuracion:editar'],
+  'Ajustes': ['ajustes:ver', 'ajustes:editar'],
+  'Roles': ['roles:ver', 'roles:editar'],
+  'Empresas': ['empresas:ver', 'empresas:editar'],
 }
 
-interface RolUsuario {
-  id?: string;
-  nombre: string;
-  label: string;
-  descripcion: string;
-  color: string;
-  permisos: string[];
-}
+export default function RolesPage() {
+  const { roles, loading, saving, createRole, updateRole, deleteRole } = useRoles()
+  const [expandedRole, setExpandedRole] = useState<string | null>(null)
+  const [editPermisos, setEditPermisos] = useState<string[]>([])
+  const [showCreate, setShowCreate] = useState(false)
+  const [newRole, setNewRole] = useState({ nombre: '', label: '', descripcion: '', color: '#6b7280' })
 
-const ICONOS_DISPONIBLES = ['Award', 'Star', 'Crown', 'Zap', 'Users', 'Shield'];
-const COLORES_DISPONIBLES = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6'];
-
-export default function RolesNivelesPage() {
-  const { showToast } = useToast();
-  const [niveles, setNiveles] = useState<NivelCliente[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editData, setEditData] = useState<Partial<NivelCliente>>({});
-  const [roles, setRoles] = useState<RolUsuario[]>([]);
-  const [editingRole, setEditingRole] = useState<string | null>(null);
-  const [editRolePermisos, setEditRolePermisos] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetchNiveles();
-    fetchRoles();
-  }, []);
-
-  const fetchNiveles = async () => {
-    try {
-      const response = await fetch('/api/context/niveles-cliente');
-      const data = await response.json();
-      if (data.success) setNiveles(data.data || []);
-    } catch {
-      showToast('Error al cargar niveles', 'error');
-    }
-  };
-
-  const fetchRoles = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/admin/roles');
-      const data = await response.json();
-      if (data.success && data.data) {
-        setRoles(data.data);
-      }
-    } catch {
-      showToast('Error al cargar roles', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSaveNivel = async (id: string) => {
-    try {
-      const response = await fetch(`/api/context/niveles-cliente/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editData)
-      });
-      const data = await response.json();
-      if (data.success) {
-        setNiveles(prev => prev.map(n => n.id === id ? { ...n, ...editData } : n));
-        setEditingId(null);
-        setEditData({});
-        showToast('Nivel actualizado exitosamente', 'success');
-      } else {
-        showToast(data.error || 'Error al actualizar', 'error');
-      }
-    } catch {
-      showToast('Error al actualizar nivel', 'error');
-    }
-  };
-
-  const handleCreateNivel = async () => {
-    try {
-      const response = await fetch('/api/context/niveles-cliente', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: 'Nuevo Nivel', slug: 'nuevo-nivel', color: '#6B7280', icono: 'Award',
-          orden: niveles.length, compras_minimas: 0, coins_minimos: 0, referidos_minimos: 0,
-          monto_minimo: 0, descuento_porcentaje: 0, coins_bonus_porcentaje: 0, envio_gratis: false,
-          soporte_prioritario: false, acceso_eventos: false, comision_porcentaje: 0, comision_tipo: 'porcentaje'
-        })
-      });
-      const data = await response.json();
-      if (data.success) {
-        setNiveles(prev => [...prev, data.data]);
-        setEditingId(data.data.id);
-        setEditData(data.data);
-        showToast('Nivel creado exitosamente', 'success');
-      } else {
-        showToast(data.error || 'Error al crear', 'error');
-      }
-    } catch {
-      showToast('Error al crear nivel', 'error');
-    }
-  };
-
-  const handleDeleteNivel = async (id: string) => {
-    if (!window.confirm('¿Estás seguro de eliminar este nivel?')) return;
-    try {
-      const response = await fetch(`/api/context/niveles-cliente/${id}`, { method: 'DELETE' });
-      const data = await response.json();
-      if (data.success) {
-        setNiveles(prev => prev.filter(n => n.id !== id));
-        showToast('Nivel eliminado', 'success');
-      }
-    } catch {
-      showToast('Error al eliminar nivel', 'error');
-    }
-  };
-
-  const handleSaveRolePermisos = async (roleNombre: string) => {
-    try {
-      const role = roles.find(r => r.nombre === roleNombre);
-      if (!role?.id) {
-        const response = await fetch('/api/admin/roles', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nombre: roleNombre, label: role?.label || roleNombre, descripcion: role?.descripcion || '', permisos: editRolePermisos, color: role?.color || '#6b7280' })
-        });
-        const data = await response.json();
-        if (data.success) showToast('Rol creado', 'success');
-      } else {
-        const response = await fetch('/api/admin/roles', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: role.id, permisos: editRolePermisos })
-        });
-        const data = await response.json();
-        if (data.success) showToast('Permisos del rol actualizados', 'success');
-      }
-      setEditingRole(null);
-      fetchRoles();
-    } catch {
-      showToast('Error al guardar permisos', 'error');
-    }
-  };
-
-  const getIconComponent = (icono: string) => {
-    switch (icono) {
-      case 'Star': return Star;
-      case 'Crown': return Crown;
-      case 'Zap': return Zap;
-      case 'Users': return Users;
-      case 'Shield': return Shield;
-      default: return Award;
-    }
-  };
-
-  const getRoleDefaults = (nombre: string): string[] => {
-    const defaults = ROLE_DEFAULTS[nombre as UserRole]
-    return defaults?.includes('*') ? Object.keys(PERMISSIONS) : (defaults || [])
+  const handleTogglePermiso = (permiso: string) => {
+    setEditPermisos(prev => prev.includes(permiso) ? prev.filter(p => p !== permiso) : [...prev, permiso])
   }
 
-  const getRoleColor = (nombre: string) => {
-    const found = roles.find(r => r.nombre === nombre)
-    return found?.color || (
-      nombre === 'superadmin' ? '#be0b3c' :
-      nombre === 'admin' ? '#f59e0b' :
-      nombre === 'editor' ? '#8b5cf6' :
-      nombre === 'cliente' ? '#3b82f6' : '#6b7280'
+  const handleExpand = (roleName: string, permisos: string[]) => {
+    if (expandedRole === roleName) {
+      setExpandedRole(null)
+    } else {
+      setExpandedRole(roleName)
+      setEditPermisos(permisos.includes('*') ? Object.keys(PERMISSIONS) : [...permisos])
+    }
+  }
+
+  const handleSave = async (role: CustomRole) => {
+    if (role.id) {
+      await updateRole(role.id, { permisos: editPermisos })
+    } else {
+      await createRole({ nombre: role.nombre, permisos: editPermisos })
+    }
+    setExpandedRole(null)
+  }
+
+  const handleCreate = async () => {
+    if (!newRole.nombre) return
+    const ok = await createRole({
+      nombre: newRole.nombre.toLowerCase().replace(/\s+/g, '_'),
+      label: newRole.label || newRole.nombre,
+      descripcion: newRole.descripcion,
+      color: newRole.color,
+      permisos: [],
+    })
+    if (ok) {
+      setShowCreate(false)
+      setNewRole({ nombre: '', label: '', descripcion: '', color: '#6b7280' })
+    }
+  }
+
+  const handleDelete = async (role: CustomRole) => {
+    if (!role.id) return
+    if (!window.confirm(`¿Eliminar el rol "${role.label}"? Los usuarios con este rol quedarán sin permisos.`)) return
+    await deleteRole(role.id)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+      </div>
     )
   }
 
   return (
-    <div className="space-y-8 w-full mx-auto pb-20 px-4 md:px-8 pt-8 bg-black min-h-screen">
+    <div className="space-y-8 w-full mx-auto pb-20 px-4 md:px-8 pt-8 bg-black">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
         <div className="w-full sm:w-auto">
-          <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none sm:leading-tight">
-            Roles y Niveles
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">
-            Configura los roles de usuario y los niveles de cliente con sus beneficios.
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none sm:leading-tight">Roles de Usuario</h1>
+          <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">Gestiona los roles del sistema y sus permisos. Puedes crear roles personalizados.</p>
         </div>
+        <button onClick={() => setShowCreate(true)} className="w-full sm:w-auto bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+          <Plus className="w-4 h-4" />Nuevo Rol
+        </button>
       </div>
 
-      {/* Roles de Usuario */}
-      <div className="bg-zinc-950 border border-white/5 rounded-[2rem] p-8 shadow-4xl">
-        <div className="flex items-center gap-4 mb-8">
+      <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+        <div className="p-6 border-b border-white/5 flex items-center gap-4">
           <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-            <Shield className="w-6 h-6 text-blue-500" />
+            <Shield className="w-6 h-6 text-blis-red" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-white uppercase tracking-wide">Roles de Usuario</h2>
-            <p className="text-gray-500 text-sm">Permisos predefinidos por tipo de usuario</p>
+            <h2 className="text-xl font-black text-white uppercase tracking-wide">Roles del Sistema</h2>
+            <p className="text-gray-500 text-sm">{roles.length} roles configurados</p>
           </div>
         </div>
 
-        <div className="space-y-4">
-          {(['superadmin', 'admin', 'editor', 'cliente', 'usuario'] as UserRole[]).map((roleName) => {
-            const role = roles.find(r => r.nombre === roleName)
-            const defaults = getRoleDefaults(roleName)
-            const rolePermisos = role?.permisos || defaults
-            const isWildcard = rolePermisos.includes('*')
-            const dbPermisos = isWildcard ? Object.keys(PERMISSIONS) : rolePermisos
-            const isEditing = editingRole === roleName
-            const color = getRoleColor(roleName)
+        <div className="divide-y divide-white/5">
+          {roles.map(role => {
+            const isSystem = SYSTEM_ROLES.includes(role.nombre)
+            const isWildcard = role.permisos?.includes('*')
+            const permCount = isWildcard ? Object.keys(PERMISSIONS).length : (role.permisos?.length || 0)
+            const isExpanded = expandedRole === role.nombre
 
             return (
-              <motion.div key={roleName} layout className="border border-white/5 rounded-2xl overflow-hidden">
-                <button onClick={() => {
-                  if (isEditing) { setEditingRole(null) }
-                  else { setEditingRole(roleName); setEditRolePermisos([...dbPermisos]) }
-                }} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors">
+              <div key={role.nombre} className="border-b border-white/5 last:border-b-0">
+                <button onClick={() => handleExpand(role.nombre, role.permisos || [])} className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}20`, borderColor: `${color}50`, borderWidth: 1 }}>
-                      <Shield className="w-5 h-5" style={{ color }} />
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${role.color || '#6b7280'}20`, borderColor: `${role.color || '#6b7280'}50`, borderWidth: 1 }}>
+                      <Shield className="w-5 h-5" style={{ color: role.color || '#6b7280' }} />
                     </div>
                     <div className="text-left">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-white">{role?.label || roleName.charAt(0).toUpperCase() + roleName.slice(1)}</p>
-                        <span className="text-[9px] px-2 py-0.5 rounded-full font-bold" style={{ backgroundColor: `${color}15`, color, borderColor: `${color}40`, borderWidth: 1 }}>{roleName}</span>
+                        <p className="text-sm font-bold text-white">{role.label || role.nombre}</p>
+                        <span className="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase" style={{ backgroundColor: `${role.color || '#6b7280'}15`, color: role.color || '#6b7280' }}>{role.nombre}</span>
+                        {isSystem && <span className="text-[9px] px-1.5 py-0.5 bg-amber-500/10 text-amber-400 rounded-full font-bold">sistema</span>}
                       </div>
-                      <p className="text-gray-500 text-xs">{isWildcard ? 'Acceso total' : `${dbPermisos.length} permisos`}</p>
+                      <p className="text-gray-500 text-xs">{isWildcard ? 'Acceso total' : `${permCount} permisos`}</p>
                     </div>
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isEditing ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                 </button>
 
                 <AnimatePresence>
-                  {isEditing && (
+                  {isExpanded && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <div className="px-4 pb-4 border-t border-white/5">
-                        <div className="mt-4 mb-3 flex items-center justify-between">
-                          <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Permisos del rol <span className="text-white">{role?.label || roleName}</span></p>
+                      <div className="px-4 pb-4 pt-2">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Permisos de <span className="text-white">{role.label || role.nombre}</span></p>
                           <div className="flex gap-2">
-                            <button onClick={() => setEditingRole(null)} className="px-3 py-1.5 bg-white/5 rounded-lg text-gray-400 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-all flex items-center gap-1">
-                              <X className="w-3 h-3" /> Cancelar
+                            <button onClick={() => setExpandedRole(null)} className="px-3 py-1.5 bg-white/5 rounded-lg text-gray-400 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-all flex items-center gap-1">
+                              <X className="w-3 h-3" />Cancelar
                             </button>
-                            <button onClick={() => handleSaveRolePermisos(roleName)} className="px-3 py-1.5 bg-blis-red rounded-lg text-white text-[10px] font-bold uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-1">
-                              <Save className="w-3 h-3" /> Guardar
-                            </button>
+                            {!isWildcard && (
+                              <button onClick={() => handleSave(role)} disabled={saving} className="px-3 py-1.5 bg-blis-red rounded-lg text-white text-[10px] font-bold uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-1 disabled:opacity-50">
+                                <Save className="w-3 h-3" />{saving ? '...' : 'Guardar'}
+                              </button>
+                            )}
                           </div>
                         </div>
 
-                        <PermissionSelector
-                          role={roleName}
-                          permisosAdicionales={null}
-                          onChange={() => {}}
-                          readOnly={true}
-                        />
+                        {role.descripcion && (
+                          <p className="text-gray-400 text-xs mb-3 italic">{role.descripcion}</p>
+                        )}
 
-                        {!isWildcard && (
-                          <div className="mt-4 space-y-3">
-                            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Modificar permisos de este rol</p>
-                            <div className="flex flex-wrap gap-1.5 max-h-60 overflow-y-auto p-3 bg-black/50 border border-white/5 rounded-xl">
-                              {Object.entries(PERMISSIONS).map(([key, label]) => (
-                                <button
-                                  key={key}
-                                  onClick={() => setEditRolePermisos(prev => prev.includes(key) ? prev.filter(p => p !== key) : [...prev, key])}
-                                  className={`text-[9px] px-2 py-0.5 rounded-full border transition-all ${editRolePermisos.includes(key) ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/[0.02] border-white/5 text-gray-600 hover:border-white/20'}`}
-                                >
-                                  {label}
-                                </button>
-                              ))}
+                        {isWildcard ? (
+                          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                            <p className="text-emerald-400 font-bold text-sm">Acceso Total</p>
+                            <p className="text-emerald-400/60 text-[11px]">Este rol tiene acceso a todas las secciones del sistema</p>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {Object.entries(PERMISSION_GROUPS).map(([group, permKeys]) => {
+                              const groupChecked = permKeys.filter(p => editPermisos.includes(p))
+                              if (groupChecked.length === 0 && permKeys.length > 2) return null
+                              return (
+                                <div key={group}>
+                                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">{group}</p>
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {permKeys.map(key => (
+                                      <button
+                                        key={key}
+                                        onClick={() => handleTogglePermiso(key)}
+                                        className={`text-[9px] px-2 py-0.5 rounded-full border transition-all ${editPermisos.includes(key) ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/[0.02] border-white/5 text-gray-600 hover:border-white/20'}`}
+                                      >
+                                        {PERMISSIONS[key as keyof typeof PERMISSIONS] || key}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                            <div className="pt-2 border-t border-white/5">
+                              <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-2">Todos los permisos</p>
+                              <div className="flex items-center gap-3">
+                                <button onClick={() => setEditPermisos(Object.keys(PERMISSIONS))} className="text-[10px] px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold hover:bg-emerald-500/20 transition-colors">Seleccionar todos</button>
+                                <button onClick={() => setEditPermisos([])} className="text-[10px] px-3 py-1 rounded-lg bg-white/5 text-gray-400 font-bold hover:bg-white/10 transition-colors">Limpiar</button>
+                              </div>
                             </div>
+                          </div>
+                        )}
+
+                        {!isSystem && role.id && (
+                          <div className="mt-4 pt-4 border-t border-white/5">
+                            <button onClick={() => handleDelete(role)} className="px-3 py-2 bg-red-500/10 text-red-400 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-red-500/20 transition-colors flex items-center gap-1">
+                              <Trash2 className="w-3 h-3" />Eliminar Rol
+                            </button>
                           </div>
                         )}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
+              </div>
             )
           })}
         </div>
       </div>
 
-      {/* Niveles de Cliente */}
-      <div className="bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden shadow-4xl">
-        <div className="flex items-center justify-between p-8 border-b border-white/5">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-white/5 border border-white/10">
-              <Award className="w-6 h-6 text-amber-500" />
-            </div>
-            <div>
-              <h2 className="text-xl font-black text-white uppercase tracking-wide">Niveles de Cliente</h2>
-              <p className="text-gray-500 text-sm">Sistema de recompensas por fidelidad</p>
-            </div>
-          </div>
-          <button onClick={handleCreateNivel} className="px-4 py-2 bg-blis-red text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:scale-105 transition-all flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Nuevo Nivel
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="p-8 space-y-4">
-            {[1, 2, 3].map(i => (<div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse" />))}
-          </div>
-        ) : (
-          <div className="divide-y divide-white/5">
-            <AnimatePresence>
-              {niveles.map((nivel) => {
-                const isEditing = editingId === nivel.id;
-                const IconComponent = getIconComponent(isEditing ? (editData.icono || nivel.icono) : nivel.icono);
-                return (
-                  <motion.div key={nivel.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="p-6 hover:bg-white/[0.02] transition-colors">
-                    {isEditing ? (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Nombre</label><input type="text" value={editData.nombre || nivel.nombre} onChange={(e) => setEditData(prev => ({ ...prev, nombre: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white" /></div>
-                          <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Color</label><div className="flex gap-2">{COLORES_DISPONIBLES.map(color => (<button key={color} onClick={() => setEditData(prev => ({ ...prev, color }))} className={`w-8 h-8 rounded-lg ${editData.color === color ? 'ring-2 ring-white' : ''}`} style={{ backgroundColor: color }} />))}</div></div>
-                          <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Ícono</label><div className="flex gap-2">{ICONOS_DISPONIBLES.map(icono => { const Icon = getIconComponent(icono); return (<button key={icono} onClick={() => setEditData(prev => ({ ...prev, icono }))} className={`p-2 rounded-lg border ${editData.icono === icono ? 'border-white' : 'border-white/10'}`}><Icon className="w-5 h-5" style={{ color: editData.color || nivel.color }} /></button>) })}</div></div>
-                        </div>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Compras mínimas</label><input type="number" value={editData.compras_minimas ?? nivel.compras_minimas} onChange={(e) => setEditData(prev => ({ ...prev, compras_minimas: parseInt(e.target.value) || 0 }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white" /></div>
-                          <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Coins mínimos</label><input type="number" value={editData.coins_minimos ?? nivel.coins_minimos} onChange={(e) => setEditData(prev => ({ ...prev, coins_minimos: parseInt(e.target.value) || 0 }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white" /></div>
-                          <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Descuento (%)</label><input type="number" value={editData.descuento_porcentaje ?? nivel.descuento_porcentaje} onChange={(e) => setEditData(prev => ({ ...prev, descuento_porcentaje: parseFloat(e.target.value) || 0 }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white" /></div>
-                          <div><label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Comisión referidos (%)</label><input type="number" value={editData.comision_porcentaje ?? nivel.comision_porcentaje} onChange={(e) => setEditData(prev => ({ ...prev, comision_porcentaje: parseFloat(e.target.value) || 0 }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white" /></div>
-                        </div>
-                        <div className="flex flex-wrap gap-4">
-                          {[{key: 'envio_gratis', label: 'Envío gratis'}, {key: 'soporte_prioritario', label: 'Soporte prioritario'}, {key: 'acceso_eventos', label: 'Acceso a eventos'}].map(({key, label}) => (
-                            <label key={key} className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={(editData[key as keyof NivelCliente] ?? nivel[key as keyof NivelCliente]) as boolean} onChange={(e) => setEditData(prev => ({ ...prev, [key]: e.target.checked }))} className="w-4 h-4 rounded border-white/20 bg-black/50" /><span className="text-sm text-gray-300">{label}</span></label>
-                          ))}
-                        </div>
-                        <div className="flex justify-end gap-2">
-                          <button onClick={() => { setEditingId(null); setEditData({}); }} className="px-4 py-2 bg-white/5 text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:bg-white/10 transition-colors flex items-center gap-2"><X className="w-4 h-4" />Cancelar</button>
-                          <button onClick={() => handleSaveNivel(nivel.id)} className="px-4 py-2 bg-blis-red text-white text-xs font-bold uppercase tracking-wider rounded-xl hover:scale-105 transition-all flex items-center gap-2"><Save className="w-4 h-4" />Guardar</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${nivel.color}20`, borderColor: `${nivel.color}50`, borderWidth: 1 }}><IconComponent className="w-6 h-6" style={{ color: nivel.color }} /></div>
-                          <div><h3 className="font-bold text-white">{nivel.nombre}</h3><p className="text-gray-500 text-xs">{nivel.descuento_porcentaje}% descuento • {nivel.comision_porcentaje}% comisión referidos</p></div>
-                          <div className="hidden md:flex gap-2">
-                            {nivel.envio_gratis && <span className="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/30">Envío gratis</span>}
-                            {nivel.soporte_prioritario && <span className="text-[9px] px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/30">Soporte prioritario</span>}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => { setEditingId(nivel.id); setEditData(nivel); }} className="p-2 hover:bg-white/5 rounded-xl transition-colors text-gray-400 hover:text-white"><Edit2 className="w-4 h-4" /></button>
-                          <button onClick={() => handleDeleteNivel(nivel.id)} className="p-2 hover:bg-red-500/10 rounded-xl transition-colors text-gray-400 hover:text-red-400"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                )
-              })}
-            </AnimatePresence>
-          </div>
+      <AnimatePresence>
+        {showCreate && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setShowCreate(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-zinc-950 border border-white/10 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-black text-white uppercase tracking-wide">Nuevo Rol</h2>
+                <button onClick={() => setShowCreate(false)} className="p-1 hover:bg-white/10 rounded-lg text-gray-400"><X className="w-5 h-5" /></button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Nombre del Rol *</label>
+                  <input type="text" value={newRole.nombre} onChange={e => setNewRole(prev => ({ ...prev, nombre: e.target.value, label: prev.label || e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50" placeholder="ej: supervisor" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Etiqueta (visible)</label>
+                  <input type="text" value={newRole.label} onChange={e => setNewRole(prev => ({ ...prev, label: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50" placeholder="Supervisor" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Descripción</label>
+                  <textarea value={newRole.descripcion} onChange={e => setNewRole(prev => ({ ...prev, descripcion: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 resize-none" rows={2} placeholder="Rol con acceso limitado a ventas y reportes" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Color</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {ROLE_COLORS.map(color => (
+                      <button key={color} onClick={() => setNewRole(prev => ({ ...prev, color }))} className={`w-10 h-10 rounded-xl border-2 transition-all ${newRole.color === color ? 'border-white scale-110' : 'border-transparent hover:border-white/30'}`} style={{ backgroundColor: color }} />
+                    ))}
+                  </div>
+                </div>
+                <button onClick={handleCreate} disabled={saving || !newRole.nombre} className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+                  {saving ? 'Creando...' : 'Crear Rol'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
     </div>
-  );
+  )
 }
