@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Empresa, EmpresaUser, EmpresaConfig } from '../_types'
+import { Empresa, EmpresaUser } from '../_types'
 
 export function useEmpresas() {
   const [empresas, setEmpresas] = useState<Empresa[]>([])
@@ -7,8 +7,6 @@ export function useEmpresas() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [showCreate, setShowCreate] = useState(false)
   const [showUsers, setShowUsers] = useState(false)
-  const [showConfig, setShowConfig] = useState(false)
-  const [configData, setConfigData] = useState<EmpresaConfig | null>(null)
   const [users, setUsers] = useState<EmpresaUser[]>([])
   const [searchResults, setSearchResults] = useState<EmpresaUser[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
@@ -59,23 +57,6 @@ export function useEmpresas() {
     } catch { setSearchResults([]) }
   }, [])
 
-  const fetchConfig = useCallback(async (empresaId: string) => {
-    try {
-      const res = await fetch(`/api/admin/empresa?id=${empresaId}`)
-      const data = await res.json()
-      if (data.success && data.config) {
-        setConfigData(data.config)
-      } else {
-        setConfigData({
-          blog_activo: true, tienda_activa: true, academia_activa: false,
-          referidos_activo: true, bliscoins_activo: true, envios_activo: false,
-          envios_gratis_monto: null, coins_por_lectura: 5, segundos_lectura: 60,
-          coins_registro: 100, coins_referido: 50,
-        })
-      }
-    } catch { setConfigData(null) }
-  }, [])
-
   const handleCreate = useCallback(async () => {
     setSaving(true)
     try {
@@ -98,7 +79,7 @@ export function useEmpresas() {
       const res = await fetch(`/api/admin/empresa?id=${id}`, { method: 'DELETE' })
       const data = await res.json()
       if (data.success) {
-        if (selectedId === id) { setSelectedId(null); setShowUsers(false); setShowConfig(false) }
+        if (selectedId === id) { setSelectedId(null); setShowUsers(false) }
         fetchEmpresas()
         return true
       }
@@ -157,23 +138,6 @@ export function useEmpresas() {
     } catch {}
   }, [selectedId, fetchUsers, fetchEmpresas])
 
-  const handleSaveConfig = useCallback(async (empresaId: string, empresa: Partial<Empresa>, config: Partial<EmpresaConfig>) => {
-    setSaving(true)
-    try {
-      const res = await fetch('/api/admin/empresa', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: empresaId, empresa, config }),
-      })
-      const data = await res.json()
-      if (data.success) {
-        fetchEmpresas()
-        return true
-      }
-      return data.error || 'Error al guardar'
-    } catch { return 'Error al guardar' } finally { setSaving(false) }
-  }, [fetchEmpresas])
-
   const generateSlug = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
 
   const openUsers = useCallback((empresaId: string) => {
@@ -182,22 +146,16 @@ export function useEmpresas() {
     fetchUsers(empresaId)
   }, [fetchUsers])
 
-  const openConfig = useCallback(async (empresaId: string) => {
-    setSelectedId(empresaId)
-    setShowConfig(true)
-    await fetchConfig(empresaId)
-  }, [fetchConfig])
-
   const selectedEmpresa = empresas.find(e => e.id === selectedId)
 
   return {
-    empresas, loading, selectedId, showCreate, showUsers, showConfig,
-    configData, users, searchResults, loadingUsers, newEmpresa, newUser,
+    empresas, loading, showCreate, showUsers,
+    users, searchResults, loadingUsers, newEmpresa, newUser,
     saving, deleting, selectedEmpresa,
-    setNewEmpresa, setNewUser, setShowCreate, setShowUsers, setShowConfig,
-    setConfigData, setSearchResults,
+    setNewEmpresa, setNewUser, setShowCreate, setShowUsers,
+    setSearchResults,
     handleCreate, handleDelete, handleCreateUser, handleAssignUser,
-    handleUnassignUser, handleSaveConfig, searchUsers, generateSlug,
-    openUsers, openConfig, fetchEmpresas,
+    handleUnassignUser, searchUsers, generateSlug,
+    openUsers, fetchEmpresas,
   }
 }

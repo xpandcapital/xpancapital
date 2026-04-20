@@ -1,19 +1,20 @@
 "use client"
 
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Users, Settings, Trash2, Globe } from 'lucide-react'
+import { Users, Trash2, Globe } from 'lucide-react'
 import { Empresa, PLANES } from '../_types'
 
 interface Props {
   empresa: Empresa
   onDelete: (id: string) => Promise<boolean | string>
   onViewUsers: (id: string) => void
-  onConfig: (id: string) => void
   deleting: string | null
   mainEmpresaId: string
 }
 
-export function EmpresaCard({ empresa, onDelete, onViewUsers, onConfig, deleting, mainEmpresaId }: Props) {
+export function EmpresaCard({ empresa, onDelete, onViewUsers, deleting, mainEmpresaId }: Props) {
+  const router = useRouter()
   const isMain = empresa.id === mainEmpresaId
 
   return (
@@ -60,8 +61,8 @@ export function EmpresaCard({ empresa, onDelete, onViewUsers, onConfig, deleting
           <button onClick={() => onViewUsers(empresa.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-[11px] font-bold transition-colors">
             <Users className="w-3.5 h-3.5" />Usuarios
           </button>
-          <button onClick={() => onConfig(empresa.id)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-[11px] font-bold transition-colors">
-            <Settings className="w-3.5 h-3.5" />Configurar
+          <button onClick={() => router.push(`/superadmin/ajustes/empresas/${empresa.id}`)} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blis-red/10 hover:bg-blis-red text-gray-300 hover:text-white text-[11px] font-bold transition-colors">
+            Configurar
           </button>
           {!isMain && (
             <button onClick={() => onDelete(empresa.id)} disabled={deleting === empresa.id} className="flex items-center justify-center p-2 rounded-lg bg-white/5 hover:bg-red-500/10 text-gray-500 hover:text-red-400 transition-colors disabled:opacity-50">

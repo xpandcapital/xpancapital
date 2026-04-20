@@ -4,19 +4,19 @@ import { AnimatePresence } from 'framer-motion'
 import { Plus } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { useEmpresas } from './_hooks'
-import { EmpresaCard, CreateEmpresaModal, UsersModal, ConfigModal } from './_components'
+import { EmpresaCard, CreateEmpresaModal, UsersModal } from './_components'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 export default function EmpresasPage() {
   const { showToast } = useToast()
   const {
-    empresas, loading, showCreate, showUsers, showConfig,
-    configData, users, searchResults, loadingUsers,
+    empresas, loading, showCreate, showUsers,
+    users, searchResults, loadingUsers,
     newEmpresa, newUser, saving, deleting, selectedEmpresa,
-    setNewEmpresa, setNewUser, setShowCreate, setShowUsers, setShowConfig,
+    setNewEmpresa, setNewUser, setShowCreate, setShowUsers,
     handleCreate, handleDelete, handleCreateUser, handleAssignUser,
-    handleUnassignUser, handleSaveConfig, searchUsers, generateSlug,
-    openUsers, openConfig,
+    handleUnassignUser, searchUsers, generateSlug,
+    openUsers,
   } = useEmpresas()
 
   const onCreate = async () => {
@@ -62,7 +62,6 @@ export default function EmpresasPage() {
             empresa={empresa}
             onDelete={onDelete}
             onViewUsers={openUsers}
-            onConfig={openConfig}
             deleting={deleting}
             mainEmpresaId={DEFAULT_EMPRESA_ID}
           />
@@ -97,18 +96,6 @@ export default function EmpresasPage() {
             onUnassignUser={handleUnassignUser}
             onSearch={searchUsers}
             onClose={() => setShowUsers(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showConfig && selectedEmpresa && (
-          <ConfigModal
-            empresa={selectedEmpresa}
-            config={configData}
-            saving={saving}
-            onSave={handleSaveConfig}
-            onClose={() => setShowConfig(false)}
           />
         )}
       </AnimatePresence>
