@@ -13,6 +13,7 @@ import {
   PermisosAdicionales,
   SECTION_PERMISSIONS,
   ROLE_CONFIG,
+  ROLE_DEFAULTS,
   UserRole,
   Permission,
 } from '@/lib/auth/permissions'
