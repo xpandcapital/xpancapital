@@ -38,23 +38,23 @@ const PERMISSION_GROUPS: Record<string, string[]> = {
 export default function RolesPage() {
   const { showToast } = useToast()
   const { roles, loading, saving, createRole, updateRole, reorderRoles, deleteRole } = useRoles()
-  const [expandedRole, setExpandedRole] = useState<string | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editPermisos, setEditPermisos] = useState<string[]>([])
   const [editingField, setEditingField] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [showCreate, setShowCreate] = useState(false)
   const [newRole, setNewRole] = useState({ nombre: '', label: '', descripcion: '', color: '#6b7280' })
 
-  const startEdit = (roleNombre: string, field: string, value: string) => {
-    setEditingField(`${roleNombre}__${field}`)
+  const startEdit = (roleId: string, field: string, value: string) => {
+    setEditingField(`${roleId}__${field}`)
     setEditValue(value)
   }
 
   const saveField = async (role: CustomRole, field: string) => {
     if (!role.id) return
-    await updateRole(role.id, { [field]: editValue })
-    setEditingField(null)
+    const result = await updateRole(role.id, { [field]: editValue })
+    if (result) setEditingField(null)
     setEditValue('')
   }
 
@@ -63,20 +63,18 @@ export default function RolesPage() {
     setEditValue('')
   }
 
-  const handleExpand = (roleNombre: string, permisos: string[]) => {
-    if (expandedRole === roleNombre) {
-      setExpandedRole(null)
+  const handleExpand = (roleId: string, permisos: string[]) => {
+    if (expandedId === roleId) {
+      setExpandedId(null)
     } else {
-      setExpandedRole(roleNombre)
+      setExpandedId(roleId)
       setEditPermisos(permisos.includes('*') ? Object.keys(PERMISSIONS) : [...permisos])
     }
   }
 
   const handleSavePermisos = async (role: CustomRole) => {
-    if (role.id) {
-      await updateRole(role.id, { permisos: editPermisos })
-    }
-    setExpandedRole(null)
+    if (role.id) await updateRole(role.id, { permisos: editPermisos })
+    setExpandedId(null)
   }
 
   const handleCreate = async () => {
@@ -106,9 +104,8 @@ export default function RolesPage() {
 
   const handleDelete = async (role: CustomRole) => {
     if (!role.id) return
-    if (SYSTEM_ROLES.includes(role.nombre)) return
     await deleteRole(role.id)
-    setConfirmDelete(null)
+    setConfirmDeleteId(null)
   }
 
   if (loading) {
@@ -147,21 +144,22 @@ export default function RolesPage() {
             const isSystem = SYSTEM_ROLES.includes(role.nombre)
             const isWildcard = role.permisos?.includes('*')
             const permCount = isWildcard ? Object.keys(PERMISSIONS).length : (role.permisos?.length || 0)
-            const isExpanded = expandedRole === role.nombre
-            const isSaving = saving === role.id || saving === 'reorder'
-            const editingThisLabel = editingField === `${role.nombre}__label`
-            const editingThisDesc = editingField === `${role.nombre}__descripcion`
-            const editingThisColor = editingField === `${role.nombre}__color`
+            const isExpanded = expandedId === role.id
+            const roleId = role.id || ''
+            const editingThisLabel = editingField === `${roleId}__label`
+            const editingThisName = editingField === `${roleId}__nombre`
+            const editingThisDesc = editingField === `${roleId}__descripcion`
+            const editingThisColor = editingField === `${roleId}__color`
 
             return (
-              <div key={role.id || role.nombre} className={`border-b border-white/5 last:border-b-0 ${isExpanded ? 'bg-white/[0.02]' : ''}`}>
+              <div key={roleId || role.nombre} className={`border-b border-white/5 last:border-b-0 ${isExpanded ? 'bg-white/[0.02]' : ''}`}>
                 <div className="flex items-center gap-3 p-4">
                   <div className="flex flex-col gap-0.5 shrink-0">
-                    <button onClick={() => moveRole(idx, 'up')} disabled={idx === 0 || isSaving} className="p-0.5 hover:bg-white/10 rounded text-gray-500 hover:text-white disabled:opacity-20 transition-colors"><ArrowUp className="w-3.5 h-3.5" /></button>
-                    <button onClick={() => moveRole(idx, 'down')} disabled={idx === roles.length - 1 || isSaving} className="p-0.5 hover:bg-white/10 rounded text-gray-500 hover:text-white disabled:opacity-20 transition-colors"><ArrowDown className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => moveRole(idx, 'up')} disabled={idx === 0 || !!saving} className="p-0.5 hover:bg-white/10 rounded text-gray-500 hover:text-white disabled:opacity-20 transition-colors"><ArrowUp className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => moveRole(idx, 'down')} disabled={idx === roles.length - 1 || !!saving} className="p-0.5 hover:bg-white/10 rounded text-gray-500 hover:text-white disabled:opacity-20 transition-colors"><ArrowDown className="w-3.5 h-3.5" /></button>
                   </div>
 
-                  <button onClick={() => handleExpand(role.nombre, role.permisos || [])} className="flex-1 flex items-center gap-4 text-left hover:bg-white/[0.02] -mx-2 px-2 py-1 rounded-lg transition-colors">
+                  <button onClick={() => handleExpand(roleId, role.permisos || [])} className="flex-1 flex items-center gap-4 text-left hover:bg-white/[0.02] -mx-2 px-2 py-1 rounded-lg transition-colors">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${role.color || '#6b7280'}20`, borderColor: `${role.color || '#6b7280'}50`, borderWidth: 1 }}>
                       <Shield className="w-5 h-5" style={{ color: role.color || '#6b7280' }} />
                     </div>
@@ -174,16 +172,16 @@ export default function RolesPage() {
                             <button onClick={cancelEdit} className="p-0.5 text-gray-500 hover:text-gray-300"><X className="w-3.5 h-3.5" /></button>
                           </div>
                         ) : (
-                          <span className="text-sm font-bold text-white cursor-pointer hover:text-blis-red transition-colors" onClick={e => { e.stopPropagation(); startEdit(role.nombre, 'label', role.label) }}>{role.label || role.nombre}</span>
+                          <span className="text-sm font-bold text-white cursor-pointer hover:text-blis-red transition-colors" onClick={e => { e.stopPropagation(); startEdit(roleId, 'label', role.label) }}>{role.label || role.nombre}</span>
                         )}
-                        {editingField === `${role.nombre}__nombre` ? (
+                        {editingThisName ? (
                           <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                             <input type="text" value={editValue} onChange={e => setEditValue(e.target.value.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, ''))} onKeyDown={e => { if (e.key === 'Enter') saveField(role, 'nombre'); if (e.key === 'Escape') cancelEdit() }} className="bg-black/50 border border-white/20 rounded px-1.5 py-0.5 text-[9px] text-gray-300 font-mono w-24 focus:outline-none focus:border-blis-red/50" autoFocus />
                             <button onClick={() => saveField(role, 'nombre')} className="p-0.5 text-emerald-400 hover:text-emerald-300"><Check className="w-3 h-3" /></button>
                             <button onClick={cancelEdit} className="p-0.5 text-gray-500 hover:text-gray-300"><X className="w-3 h-3" /></button>
                           </div>
                         ) : (
-                          <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${!isSystem ? 'cursor-pointer hover:opacity-75 transition-opacity' : ''}`} style={{ backgroundColor: `${role.color || '#6b7280'}15`, color: role.color || '#6b7280' }} onClick={e => { e.stopPropagation(); if (!isSystem) startEdit(role.nombre, 'nombre', role.nombre) }}>{role.nombre} {!isSystem && <Edit2 className="w-2 h-2 inline" />}</span>
+                          <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${!isSystem ? 'cursor-pointer hover:opacity-75 transition-opacity' : ''}`} style={{ backgroundColor: `${role.color || '#6b7280'}15`, color: role.color || '#6b7280' }} onClick={e => { e.stopPropagation(); if (!isSystem) startEdit(roleId, 'nombre', role.nombre) }}>{role.nombre} {!isSystem && <Edit2 className="w-2 h-2 inline" />}</span>
                         )}
                         {isSystem && <span className="text-[9px] px-1.5 py-0.5 bg-amber-500/10 text-amber-400 rounded-full font-bold">sistema</span>}
                       </div>
@@ -195,8 +193,8 @@ export default function RolesPage() {
                             <button onClick={cancelEdit} className="p-0.5 text-gray-500 hover:text-gray-300"><X className="w-3.5 h-3.5" /></button>
                           </div>
                         ) : (
-                          <p className="text-gray-500 text-[11px] cursor-pointer hover:text-gray-300 transition-colors" onClick={e => { e.stopPropagation(); startEdit(role.nombre, 'descripcion', role.descripcion || '') }}>
-                            {role.descripcion || 'Sin descripción'} <Edit2 className="w-2.5 h-2.5 inline opacity-0 group-hover:opacity-100" />
+                          <p className="text-gray-500 text-[11px] cursor-pointer hover:text-gray-300 transition-colors" onClick={e => { e.stopPropagation(); startEdit(roleId, 'descripcion', role.descripcion || '') }}>
+                            {role.descripcion || 'Sin descripción'} <Edit2 className="w-2.5 h-2.5 inline" />
                           </p>
                         )}
                         <span className="text-gray-600 text-[10px]">· {isWildcard ? 'Acceso total' : `${permCount} permisos`}</span>
@@ -214,13 +212,10 @@ export default function RolesPage() {
                         <button onClick={cancelEdit} className="p-0.5 text-gray-500"><X className="w-3 h-3" /></button>
                       </div>
                     ) : (
-                      <button onClick={() => startEdit(role.nombre, 'color', role.color)} className="w-6 h-6 rounded-lg border border-white/10 hover:scale-110 transition-transform" style={{ backgroundColor: role.color || '#6b7280' }} title="Cambiar color" />
+                      <button onClick={() => startEdit(roleId, 'color', role.color)} className="w-6 h-6 rounded-lg border border-white/10 hover:scale-110 transition-transform" style={{ backgroundColor: role.color || '#6b7280' }} title="Cambiar color" />
                     )}
                     <button
-                      onClick={() => {
-                        if (isSystem) return
-                        setConfirmDelete(role.id || role.nombre)
-                      }}
+                      onClick={() => isSystem ? null : setConfirmDeleteId(roleId)}
                       disabled={isSystem}
                       className={`p-1.5 rounded-lg transition-colors ${isSystem ? 'text-gray-700 cursor-not-allowed' : 'hover:bg-red-500/10 text-gray-500 hover:text-red-400'}`}
                       title={isSystem ? 'Los roles del sistema no se pueden eliminar' : 'Eliminar rol'}
@@ -238,11 +233,11 @@ export default function RolesPage() {
                           <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Permisos de <span className="text-white">{role.label || role.nombre}</span></p>
                           <div className="flex gap-2">
                             {!isWildcard && (
-                              <button onClick={() => handleSavePermisos(role)} disabled={saving === role.id} className="px-3 py-1.5 bg-blis-red rounded-lg text-white text-[10px] font-bold uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-1 disabled:opacity-50">
-                                <Save className="w-3 h-3" />{saving === role.id ? '...' : 'Guardar'}
+                              <button onClick={() => handleSavePermisos(role)} disabled={!!saving} className="px-3 py-1.5 bg-blis-red rounded-lg text-white text-[10px] font-bold uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-1 disabled:opacity-50">
+                                <Save className="w-3 h-3" />{saving ? '...' : 'Guardar'}
                               </button>
                             )}
-                            <button onClick={() => setExpandedRole(null)} className="px-3 py-1.5 bg-white/5 rounded-lg text-gray-400 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-colors flex items-center gap-1">
+                            <button onClick={() => setExpandedId(null)} className="px-3 py-1.5 bg-white/5 rounded-lg text-gray-400 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-colors flex items-center gap-1">
                               <X className="w-3 h-3" />Cerrar
                             </button>
                           </div>
@@ -280,9 +275,7 @@ export default function RolesPage() {
                                     {permKeys.map(key => (
                                       <button
                                         key={key}
-                                        onClick={() => {
-                                          setEditPermisos(prev => prev.includes(key) ? prev.filter(p => p !== key) : [...prev, key])
-                                        }}
+                                        onClick={() => setEditPermisos(prev => prev.includes(key) ? prev.filter(p => p !== key) : [...prev, key])}
                                         className={`text-[9px] px-2 py-0.5 rounded-full border transition-all ${editPermisos.includes(key) ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/[0.02] border-white/5 text-gray-600 hover:border-white/20'}`}
                                       >
                                         {PERMISSIONS[key as keyof typeof PERMISSIONS] || key}
@@ -348,15 +341,15 @@ export default function RolesPage() {
         )}
       </AnimatePresence>
 
-      {confirmDelete && (() => {
-        const roleToDelete = roles.find(r => r.id === confirmDelete || r.nombre === confirmDelete)
+      {confirmDeleteId && (() => {
+        const roleToDelete = roles.find(r => r.id === confirmDeleteId)
         return (
-          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setConfirmDelete(null)}>
+          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setConfirmDeleteId(null)}>
             <div className="bg-zinc-950 border border-white/10 rounded-2xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
               <h3 className="text-lg font-bold text-white mb-2">¿Eliminar rol?</h3>
               <p className="text-gray-400 text-sm mb-4">Se eliminará el rol <span className="text-white font-bold">{roleToDelete?.label || roleToDelete?.nombre}</span>. Los usuarios asignados a este rol quedarán sin permisos.</p>
               <div className="flex gap-3 justify-end">
-                <button onClick={() => setConfirmDelete(null)} className="px-4 py-2 bg-white/5 rounded-xl text-gray-300 text-sm font-bold hover:bg-white/10 transition-colors">Cancelar</button>
+                <button onClick={() => setConfirmDeleteId(null)} className="px-4 py-2 bg-white/5 rounded-xl text-gray-300 text-sm font-bold hover:bg-white/10 transition-colors">Cancelar</button>
                 <button onClick={() => roleToDelete && handleDelete(roleToDelete)} disabled={saving === 'delete'} className="px-4 py-2 bg-red-500 rounded-xl text-white text-sm font-bold hover:bg-red-600 transition-colors disabled:opacity-50">{saving === 'delete' ? 'Eliminando...' : 'Eliminar'}</button>
               </div>
             </div>
