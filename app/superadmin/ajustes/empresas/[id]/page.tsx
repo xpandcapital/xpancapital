@@ -5,6 +5,7 @@ import { ArrowLeft, Save, Building2, Palette, Globe, FileText, Crown, ToggleLeft
 import { useState } from 'react'
 import { useEmpresaEdit } from './useEmpresaEdit'
 import { useToast } from '@/components/ui/Toast'
+import { ImageUpload } from '@/components/editor/ImageUpload'
 import { PLANES, PAISES, MONEDAS, ZONAS_HORARIAS } from '../_types'
 
 type Tab = 'identidad' | 'apariencia' | 'regional' | 'fiscal' | 'plan' | 'features'
@@ -123,8 +124,14 @@ export default function EmpresaEditPage() {
               )
             })}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div><label className={label}>Logo URL</label><input type="text" value={(empresaForm.logo_url as string) || ''} onChange={e => upd('logo_url', e.target.value)} className={input} placeholder="https://..." /></div>
-              <div><label className={label}>Favicon URL</label><input type="text" value={(empresaForm.favicon_url as string) || ''} onChange={e => upd('favicon_url', e.target.value)} className={input} placeholder="https://..." /></div>
+              <div>
+                <label className={label}>Logo</label>
+                <ImageUpload value={(empresaForm.logo_url as string) || ''} onChange={v => upd('logo_url', v)} folder="empresas/logos" />
+              </div>
+              <div>
+                <label className={label}>Favicon</label>
+                <ImageUpload value={(empresaForm.favicon_url as string) || ''} onChange={v => upd('favicon_url', v)} folder="empresas/favicons" compact />
+              </div>
             </div>
           </div>
         )}

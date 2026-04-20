@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       const { data: users, error } = await supabase
         .from('profiles')
         .select('id, email, nombre, apellido, rol, empresa_id, avatar_url')
-        .or(`email.ilike.%${search}%,nombre.ilike.%${search}%`)
+        .or(`email.ilike.%${search}%,nombre.ilike.%${search}%,apellido.ilike.%${search}%`)
         .limit(10)
 
       if (error) {
