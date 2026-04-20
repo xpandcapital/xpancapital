@@ -1,5 +1,6 @@
 import { Montserrat } from "next/font/google";
 import "../../../globals.css";
+import { ToastProvider } from "@/components/ui/Toast";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -19,7 +20,9 @@ export default function EmbedLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <body className={`${montserrat.variable} font-sans antialiased bg-zinc-950 text-white selection:bg-blis-red/30 selection:text-white`}>
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

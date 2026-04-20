@@ -91,7 +91,7 @@ export async function updateSession(request: NextRequest) {
   const publicPaths = [
     '/', '/blog', '/tienda', '/cursos', '/proyectos',
     '/verificar', '/gracias', '/f', '/formulario', '/embudo',
-    '/calendario', '/certificado', '/login',
+    '/calendario', '/certificado', '/login', '/embed',
   ]
   const isPublic = publicPaths.some(p =>
     pathname === p || pathname.startsWith(p + '/')
@@ -116,6 +116,10 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/api/sync-media') ||
     pathname.startsWith('/api/storage') ||
     pathname.startsWith('/api/envato') ||
+    pathname.startsWith('/api/postulantes/public') ||
+    pathname.startsWith('/api/postulantes/puestos/by-slug') ||
+    pathname.startsWith('/api/postulantes/upload') ||
+    pathname.startsWith('/api/postulantes/puestos') ||
     pathname.startsWith('/api/cms/landing')
   )
 
