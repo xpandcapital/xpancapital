@@ -5,6 +5,7 @@ import { X, Check, Loader2, Eye, EyeOff, KeyRound } from 'lucide-react'
 import type { Advisor, Role } from '../_types'
 import { PermissionSelector } from '@/components/ui/PermissionSelector'
 import type { PermisosAdicionales, UserRole } from '@/lib/auth/permissions'
+import { ROLE_CONFIG } from '@/lib/auth/permissions'
 
 interface EmployeeModalProps {
   advisor: Advisor | null
@@ -74,7 +75,7 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
     phone_code: advisor?.phone_code || '+593',
     document_id: advisor?.document_id || '',
     puesto: advisor?.puesto || '',
-    rol: advisor?.rol || 'editor',
+    rol: advisor?.rol || 'empleado',
     lugar_residencia: advisor?.lugar_residencia || '',
     estado_civil: advisor?.estado_civil || '',
     nivel_estudios: advisor?.nivel_estudios || '',
@@ -110,10 +111,11 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
         if (!data.success) throw new Error(data.error || 'Error al guardar')
         setToast('Empleado actualizado')
       } else {
+        const { name, ...rest } = form
         const res = await fetch('/api/admin/equipo', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...form, permisos_adicionales: permisosAdicionales }),
+          body: JSON.stringify({ ...rest, nombre: name, permisos_adicionales: permisosAdicionales }),
         })
         const data = await res.json()
         if (!data.success) throw new Error(data.error || 'Error al crear')
@@ -230,15 +232,20 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
               <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-4">Rol y Permisos</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {(roles.length > 0 ? roles : [
-                  { id: '1', nombre: 'editor', label: 'Editor', color: '#8b5cf6' },
-                  { id: '2', nombre: 'admin', label: 'Admin', color: '#f59e0b' },
-                  { id: '3', nombre: 'superadmin', label: 'Super Admin', color: '#be0b3c' },
-                ]).map(role => (
-                  <button key={role.id || role.nombre} onClick={() => updateField('rol', role.nombre)} className={`p-3 rounded-xl border text-center transition-all ${form.rol === role.nombre ? 'border-blis-red bg-blis-red/10 text-white' : 'border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/10'}`}>
-                    <p className="text-xs font-bold">{role.label}</p>
-                    <p className="text-[9px] text-gray-500 mt-0.5">{role.nombre}</p>
-                  </button>
-                ))}
+                  { id: '1', nombre: 'empleado', label: 'Empleado', color: '#10b981' },
+                  { id: '2', nombre: 'editor', label: 'Editor', color: '#8b5cf6' },
+                  { id: '3', nombre: 'admin', label: 'Admin', color: '#f59e0b' },
+                  { id: '4', nombre: 'superadmin', label: 'Super Admin', color: '#be0b3c' },
+                ]).map(role => {
+                  const cfg = ROLE_CONFIG[role.nombre as UserRole]
+                  const isSelected = form.rol === role.nombre
+                  return (
+                    <button key={role.id || role.nombre} onClick={() => updateField('rol', role.nombre)} className={`p-3 rounded-xl border text-center transition-all ${isSelected ? `${cfg?.bgColor || 'bg-blis-red/10'} ${cfg?.color || 'text-white'} border-current` : 'border-white/5 bg-white/[0.02] text-gray-400 hover:border-white/10'}`}>
+                      <p className="text-xs font-bold">{role.label}</p>
+                      <p className="text-[9px] text-gray-500 mt-0.5">{role.nombre}</p>
+                    </button>
+                  )
+                })}
               </div>
             </div>
 

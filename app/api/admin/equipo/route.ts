@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
           email: normalizedEmail,
           nombre,
           empresa_id: EMPRESA_ID,
-          rol: rol || 'editor',
+rol: rol || 'empleado',
           telefono: phone || null,
           creado_en: new Date().toISOString(),
         }, { onConflict: 'id' })
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         phone_code: phone_code || '+593',
         document_id: document_id || '',
         puesto: puesto || null,
-        rol: rol || 'editor',
+        rol: rol || 'empleado',
         lugar_residencia: lugar_residencia || null,
         estado_civil: estado_civil || null,
         nivel_estudios: nivel_estudios || null,
