@@ -224,29 +224,17 @@ const [aiParseResult, setAiParseResult] = useState<any>(null);
     setUploadingGallery(false);
   };
 
-  const loadProjects = useCallback(async () => {
+const loadProjects = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data: projectsData, error: projectsError } = await supabase
-        .from('projects')
-        .select('*')
-        .order('order_index', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: false });
-
-      if (projectsError) throw projectsError;
-
-      const projectsWithLots = await Promise.all(
-        (projectsData || []).map(async (project) => {
-          const { data: lots } = await supabase
-            .from('project_lots')
-            .select('*')
-            .eq('project_id', project.id)
-            .order('lot_number');
-          
-          return { ...project, lots: lots || [], gallery_images: project.gallery_images || [] };
-        })
-      );
-
+      const res = await fetch('/api/admin/projects');
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Error loading projects');
+      const projectsWithLots = (json.data || []).map((p: any) => ({
+        ...p,
+        lots: p.lots || [],
+        gallery_images: p.gallery_images || [],
+      }));
       setProjects(projectsWithLots);
       setError(null);
     } catch (err) {
@@ -266,6 +254,7 @@ const [aiParseResult, setAiParseResult] = useState<any>(null);
 
     try {
       const projectData = {
+        id: formData.id.toUpperCase(),
         name: formData.name,
         status: formData.status,
         website: formData.website || null,
@@ -278,65 +267,17 @@ const [aiParseResult, setAiParseResult] = useState<any>(null);
         logo_url: formData.logo_url || null,
         primary_color: formData.primary_color || '#be0b3c',
         secondary_color: formData.secondary_color || null,
+        is_active: true,
+        order_index: editingProject ? editingProject.order_index : 0,
       };
 
-      if (editingProject) {
-        // Check if ID changed
-        if (editingProject.id !== formData.id.toUpperCase()) {
-          // ID changed - create new project and delete old one
-          const confirmMsg = `El ID cambió de "${editingProject.id}" a "${formData.id.toUpperCase()}". Se creará un nuevo proyecto. ¿Continuar?`;
-          if (!confirm(confirmMsg)) return;
-          
-          // Create new project with new ID
-          const { error: insertError } = await supabase
-            .from('projects')
-            .insert([{
-              id: formData.id.toUpperCase(),
-              ...projectData,
-              is_active: true,
-              order_index: editingProject.order_index,
-            }]);
-          
-          if (insertError) throw insertError;
-          
-          // Delete old project
-          const { error: deleteError } = await supabase
-            .from('projects')
-            .delete()
-            .eq('id', editingProject.id);
-          
-          if (deleteError) throw deleteError;
-        } else {
-          // ID didn't change - just update
-          const { error } = await supabase
-            .from('projects')
-            .update(projectData)
-            .eq('id', editingProject.id);
-          if (error) throw error;
-        }
-      } else {
-        const minOrderIndex = projects.length > 0 
-          ? Math.min(...projects.map(p => p.order_index ?? 0))
-          : 0;
-        
-        if (projects.length > 0) {
-          const updatePromises = projects.map(project => {
-            const currentIndex = project.order_index ?? projects.indexOf(project);
-            return supabase.from('projects').update({ order_index: currentIndex + 1 }).eq('id', project.id);
-          });
-          await Promise.all(updatePromises);
-        }
-
-        const { error } = await supabase
-          .from('projects')
-          .insert([{
-            id: formData.id.toUpperCase(),
-            ...projectData,
-            is_active: true,
-            order_index: 0,
-          }]);
-        if (error) throw error;
-      }
+      const res = await fetch(`/api/admin/projects${editingProject ? `/${editingProject.id}` : ''}`, {
+        method: editingProject ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(projectData),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Error al guardar');
 
       await loadProjects();
       setShowModal(false);
@@ -539,14 +480,12 @@ if (!geminiKey || geminiKey.trim() === '') {
   const handleDeleteProject = async (project: Project) => {
     if (!confirm(`¿Eliminar el proyecto "${project.name}"?\n\nEsta acción eliminará también todos sus lotes y no se puede deshacer.`)) return;
     try {
-      // Eliminar lotes primero
-      await supabase.from('project_lots').delete().eq('project_id', project.id);
-      // Eliminar proyecto
-      const { error } = await supabase.from('projects').delete().eq('id', project.id);
-      if (error) throw error;
+      const res = await fetch(`/api/admin/projects/${project.id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Error al eliminar');
       setProjects(prev => prev.filter(p => p.id !== project.id));
     } catch (err: any) {
-      alert('Error al eliminar: ' + err.message);
+      alert('Error al eliminar: ' + (err.message || 'Error desconocido'));
     }
   };
 

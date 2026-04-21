@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Trash2, RefreshCw, ExternalLink, Loader2, Upload, X, Plus, Globe, MapPin, Sparkles, FolderOpen } from 'lucide-react'
-import { supabase } from '@/lib/supabaseClient'
 
 const STATUS_OPTIONS = ['EN PLANOS', 'PREVENTA', 'VENTA CON ESCRITURA', 'VENTA FINALIZADA', 'PROYECTO ENTREGADO']
+
+const getProjectSlug = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
 
 type Project = {
   id: string; name: string; status: string; website: string | null; location: string | null
@@ -14,6 +15,7 @@ type Project = {
   primary_color: string; secondary_color: string | null; is_active: boolean
   order_index: number | null; created_at: string
   notion_database_id?: string | null; notion_receipts_database_id?: string | null; notion_last_sync?: string | null
+  lots?: any[]
 }
 
 export default function ProjectDetailPage() {
@@ -39,8 +41,10 @@ export default function ProjectDetailPage() {
     if (isNew) { setLoading(false); return }
     setLoading(true)
     try {
-      const { data, error } = await supabase.from('projects').select('*').eq('id', projectId).single()
-      if (error) throw error
+      const res = await fetch(`/api/admin/projects/${projectId}`)
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Error al cargar')
+      const data = json.data
       if (data) {
         setProject(data)
         setFormData({
@@ -87,8 +91,9 @@ export default function ProjectDetailPage() {
     if (!project) return
     if (!confirm(`¿Eliminar "${project.name}"? Esta acción eliminará también todos sus lotes y no se puede deshacer.`)) return
     try {
-      await supabase.from('project_lots').delete().eq('project_id', project.id)
-      await supabase.from('projects').delete().eq('id', project.id)
+      const res = await fetch(`/api/admin/projects/${project.id}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Error al eliminar')
       router.push('/superadmin/proyectos')
     } catch (err: any) { alert('Error al eliminar: ' + (err.message || 'Error desconocido')) }
   }
@@ -134,7 +139,7 @@ export default function ProjectDetailPage() {
               <a href={`/proyectos/${displayId.toLowerCase()}`} target="_blank" className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-all text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <ExternalLink className="w-3.5 h-3.5" />Ver Landing
               </a>
-              <button onClick={() => router.push(`/superadmin/gestion-lotes/${displayId.toLowerCase()}`)} className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-all text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <button onClick={() => router.push(`/superadmin/gestion-lotes/${getProjectSlug(formData.name)}`)} className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-all text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <FolderOpen className="w-3.5 h-3.5" />Lotes
               </button>
             </>
