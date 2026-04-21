@@ -44,7 +44,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const openCart = useCallback(() => setIsCartOpen(true), []);
     const closeCart = useCallback(() => setIsCartOpen(false), []);
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { showToast } = useToast();
     const userRef = useRef(user);
     const syncInProgress = useRef(false);
@@ -57,7 +57,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     // Sync functions with ref to avoid dependency issues
     const syncCartToSupabase = useCallback(async (cartItems: Product[]) => {
         const currentUser = userRef.current;
-        if (!currentUser || syncInProgress.current) return;
+        if (!currentUser || authLoading || syncInProgress.current) return;
         syncInProgress.current = true;
         try {
             await fetch('/api/shop/cart', {
@@ -74,7 +74,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
     const syncFavoritesToSupabase = useCallback(async (favoriteItems: Product[]) => {
         const currentUser = userRef.current;
-        if (!currentUser) return;
+        if (!currentUser || authLoading) return;
         
         try {
             await fetch('/api/shop/favorites', {
@@ -118,7 +118,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         
         localStorage.setItem("blis_cart", JSON.stringify(cart));
         
-        if (userRef.current) {
+        if (userRef.current && !authLoading) {
             if (cartSyncTimer.current) clearTimeout(cartSyncTimer.current);
             cartSyncTimer.current = setTimeout(() => {
                 syncCartToSupabase(cart);
@@ -137,7 +137,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         
         localStorage.setItem("blis_favorites", JSON.stringify(favorites));
         
-        if (userRef.current) {
+        if (userRef.current && !authLoading) {
             if (favSyncTimer.current) clearTimeout(favSyncTimer.current);
             favSyncTimer.current = setTimeout(() => {
                 syncFavoritesToSupabase(favorites);

@@ -60,6 +60,9 @@ export async function POST(request: NextRequest) {
       })
 
     if (upsertError) {
+      if (upsertError.code === '23503') {
+        return NextResponse.json({ success: true, warning: 'Profile not found, cart stored locally' })
+      }
       return NextResponse.json({ success: false, error: upsertError.message }, { status: 500 })
     }
 
