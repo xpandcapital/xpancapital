@@ -2,7 +2,7 @@
 
 import { useMisCapacitaciones } from './_hooks/useMisCapacitaciones'
 import { useRouter } from 'next/navigation'
-import { GraduationCap, Loader2, BookOpen, Clock, CheckCircle2, PlayCircle, AlertCircle } from 'lucide-react'
+import { GraduationCap, Loader2, BookOpen, CheckCircle2, PlayCircle, AlertCircle } from 'lucide-react'
 
 const ESTADO_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   asignado: { label: 'Sin iniciar', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20', icon: BookOpen },
