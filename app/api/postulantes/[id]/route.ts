@@ -19,17 +19,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   } catch { return NextResponse.json({ error: 'Error interno' }, { status: 500 }) }
 }
 
+const NON_COLUMNS = ['puesto', 'creado_en', 'actualizado_en']
+
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
     const supabase = createClient()
     const body = await request.json()
 
+    const { id: _id, puesto: _puesto, creado_en: _c, actualizado_en: _a, ...updates } = body
+
     const { data, error } = await supabase
       .from('postulantes')
-      .update(body)
+      .update(updates)
       .eq('id', id)
-      .select()
+      .select('*, puesto:puestos_trabajo(id, nombre, slug)')
       .single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

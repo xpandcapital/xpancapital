@@ -130,7 +130,7 @@ export async function PUT(request: NextRequest) {
 
     if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 });
 
-    const { id: _id, ...updates } = body;
+    const { id: _id, puesto: _puesto, creado_en: _c, actualizado_en: _a, ...updates } = body;
     updates.actualizado_en = new Date().toISOString();
 
     const { data, error } = await supabase
