@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Upload, FileText, X, Loader2, ChevronDown, UserPlus, Eye, EyeOff, Copy, CheckCircle } from 'lucide-react'
+import { ArrowLeft, Save, Upload, FileText, X, Loader2, ChevronDown, Eye, EyeOff, Copy, CheckCircle, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { Postulante, ESTADO_LABELS, ESTADO_COLORS, gruposPreguntas, diccionarioPreguntas } from '../_types'
 import { PuestoCombobox } from './_components/PuestoCombobox'
@@ -39,8 +39,8 @@ export default function PostulanteEditPage() {
   const [activeTab, setActiveTab] = useState<Tab>('datos')
   const [form, setForm] = useState<Record<string, any>>({})
   const [uploading, setUploading] = useState(false)
-  const [creatingUser, setCreatingUser] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   const fetchPostulante = useCallback(async () => {
     setLoading(true)
@@ -63,6 +63,12 @@ export default function PostulanteEditPage() {
   const upd = (key: string, value: any) => setForm(prev => ({ ...prev, [key]: value }))
 
   const handleSave = async () => {
+    if (form.estado === 'aceptado' && !form.correo_corporativo && !form.usuario_creado) {
+      setValidationError('El correo corporativo es obligatorio para aceptar un postulante')
+      setActiveTab('admin')
+      return
+    }
+    setValidationError(null)
     setSaving(true)
     try {
       const res = await fetch(`/api/postulantes/${id}`, {
@@ -72,7 +78,11 @@ export default function PostulanteEditPage() {
       })
       const data = await res.json()
       if (data.success) {
-        showToast('Cambios guardados', 'success')
+        if (data.data?.usuario_creado && !form.usuario_creado) {
+          showToast('Postulante aceptado. Usuario creado exitosamente.', 'success')
+        } else {
+          showToast('Cambios guardados', 'success')
+        }
         setPostulante(data.data)
         setForm(data.data)
       } else {
@@ -105,34 +115,6 @@ export default function PostulanteEditPage() {
       }
     } catch { showToast('Error al subir archivo', 'error') }
     finally { setUploading(false) }
-  }
-
-  const handleCreateUser = async () => {
-    setCreatingUser(true)
-    try {
-      const res = await fetch('/api/postulantes/create-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          postulante_id: id,
-          correo_corporativo: form.correo_corporativo || undefined,
-          contrasena_asignada: form.contrasena_asignada || undefined,
-        }),
-      })
-      const data = await res.json()
-      if (data.success) {
-        showToast('Usuario creado exitosamente', 'success')
-        setForm(prev => ({
-          ...prev,
-          correo_corporativo: data.data.email,
-          contrasena_asignada: data.data.password,
-          usuario_creado: true,
-        }))
-      } else {
-        showToast(data.error || 'Error al crear usuario', 'error')
-      }
-    } catch { showToast('Error al crear usuario', 'error') }
-    finally { setCreatingUser(false) }
   }
 
   const input = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 placeholder:text-gray-600"
@@ -215,16 +197,47 @@ export default function PostulanteEditPage() {
             </div>
 
             <div className="border-t border-white/5 pt-5">
-              <h3 className="text-sm font-black text-white uppercase tracking-wider mb-4">Correo Corporativo y Usuario</h3>
+              <h3 className="text-sm font-black text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                Correo Corporativo y Usuario
+                {form.estado === 'aceptado' && !form.usuario_creado && (
+                  <span className="text-[10px] text-amber-400 font-bold normal-case tracking-normal">· Requerido para aceptar</span>
+                )}
+              </h3>
+              {validationError && form.estado === 'aceptado' && !form.usuario_creado && (
+                <div className="mb-4 flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 text-amber-400 text-sm">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {validationError}
+                </div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className={label}>Correo corporativo</label>
-                  <input type="email" value={form.correo_corporativo || ''} onChange={e => upd('correo_corporativo', e.target.value)} className={input} placeholder="correo@empresa.com" />
+                  <label className={label}>
+                    Correo corporativo
+                    {form.estado === 'aceptado' && !form.usuario_creado && <span className="text-blis-red ml-1">*</span>}
+                  </label>
+                  <input
+                    type="email"
+                    value={form.correo_corporativo || ''}
+                    onChange={e => { upd('correo_corporativo', e.target.value); setValidationError(null) }}
+                    className={`${input} ${form.estado === 'aceptado' && !form.usuario_creado && !form.correo_corporativo ? 'border-amber-500/50 focus:border-amber-500' : ''}`}
+                    placeholder={form.correo_contacto || 'correo@empresa.com'}
+                  />
+                  {form.correo_contacto && !form.correo_corporativo && (
+                    <button type="button" onClick={() => { upd('correo_corporativo', form.correo_contacto); setValidationError(null) }} className="mt-1 text-[10px] text-gray-500 hover:text-blis-red transition-colors">
+                      Usar correo de contacto: {form.correo_contacto}
+                    </button>
+                  )}
                 </div>
                 <div>
                   <label className={label}>Contraseña asignada</label>
                   <div className="relative">
-                    <input type={showPassword ? 'text' : 'password'} value={form.contrasena_asignada || ''} onChange={e => upd('contrasena_asignada', e.target.value)} className={`${input} pr-20`} placeholder="Auto-generada si se deja vacío" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={form.contrasena_asignada || ''}
+                      onChange={e => upd('contrasena_asignada', e.target.value)}
+                      className={`${input} pr-20`}
+                      placeholder="Se auto-genera al guardar si se deja vacío"
+                    />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="p-1 text-gray-500 hover:text-white transition-colors">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -241,14 +254,15 @@ export default function PostulanteEditPage() {
               <div className="mt-4 flex items-center gap-3">
                 {form.usuario_creado ? (
                   <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold">
-                    <CheckCircle className="w-4 h-4" /> Usuario creado
+                    <CheckCircle className="w-4 h-4" /> Usuario creado — se creó automáticamente al aceptar
+                  </div>
+                ) : form.estado === 'aceptado' ? (
+                  <div className="flex items-center gap-2 text-amber-400 text-sm font-bold">
+                    <AlertTriangle className="w-4 h-4" /> Al guardar se creará el usuario automáticamente
                   </div>
                 ) : (
-                  <button onClick={handleCreateUser} disabled={creatingUser} className="bg-white/10 text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-white/20 transition-all disabled:opacity-50 flex items-center gap-2">
-                    <UserPlus className="w-4 h-4" />{creatingUser ? 'Creando...' : 'Crear Usuario'}
-                  </button>
+                  <span className="text-gray-600 text-xs">Al cambiar estado a Aceptado se creará el usuario automáticamente</span>
                 )}
-                <span className="text-gray-600 text-xs">Crea un usuario en Supabase Auth con las credenciales corporativas</span>
               </div>
             </div>
 
