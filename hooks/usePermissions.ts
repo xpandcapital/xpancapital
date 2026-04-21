@@ -2,7 +2,7 @@
 // Combina el rol del perfil con permisos adicionales y permisos del rol en la BD
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import {
   getEffectivePermissions,
@@ -22,11 +22,17 @@ export function usePermissions() {
   const { user, loading: authLoading } = useAuth()
   const [rolePermissions, setRolePermissions] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  const fetchedRef = useRef<string>('')
 
-  // Obtener permisos del rol desde la tabla `roles` en la BD
   useEffect(() => {
+    if (authLoading) return
+
+    const userId = user?.id || ''
+    if (fetchedRef.current === userId) return
+    fetchedRef.current = userId
+
     async function fetchRolePermissions() {
-      if (!user?.id) {
+      if (!userId) {
         setRolePermissions([])
         setLoading(false)
         return
@@ -37,22 +43,19 @@ export function usePermissions() {
         if (res.ok) {
           const json = await res.json()
           const rolesArray = Array.isArray(json) ? json : (json.data || [])
-          const userRole = user.role || 'usuario'
+          const userRole = user?.role || 'usuario'
           const roleData = rolesArray.find?.((r: { nombre: string }) => r.nombre === userRole)
           if (roleData?.permisos) {
             setRolePermissions(roleData.permisos)
           }
         }
       } catch {
-        // Si falla, usar los permisos por defecto del sistema
       } finally {
         setLoading(false)
       }
     }
 
-    if (!authLoading) {
-      fetchRolePermissions()
-    }
+    fetchRolePermissions()
   }, [user?.id, user?.role, authLoading])
 
   // Calcular permisos efectivos: rol por defecto + BD + permisos adicionales
