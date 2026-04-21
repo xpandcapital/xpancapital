@@ -99,6 +99,10 @@ export async function POST(request: NextRequest) {
       proyecto_interesado: body.proyecto_interesado,
       calificacion: body.calificacion,
       fecha_entrevista: body.fecha_entrevista,
+      correo_corporativo: body.correo_corporativo,
+      contrasena_asignada: body.contrasena_asignada,
+      usuario_creado: body.usuario_creado,
+      puesto_trabajo_id: body.puesto_trabajo_id,
       entrevista_tipo: body.entrevista_tipo,
       entrevista_notas: body.entrevista_notas,
     };

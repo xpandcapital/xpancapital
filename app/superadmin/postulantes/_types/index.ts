@@ -58,6 +58,9 @@ export interface Postulante {
   roles_disfrutados?: string
   preguntas_candidato?: string
   informacion_adicional?: string
+  correo_corporativo?: string
+  contrasena_asignada?: string
+  usuario_creado?: boolean
   creado_en: string
   actualizado_en: string
 }
@@ -162,7 +165,7 @@ export const PUESTOS_DEFAULT = [
 ]
 
 export const gruposPreguntas = [
-  { titulo: 'Sistema y Control', icon: 'Settings', campos: ['estado', 'calificacion', 'fecha_entrevista', 'proyecto_interesado', 'puesto_postula'] },
+  { titulo: 'Sistema y Control', icon: 'Settings', campos: ['estado', 'calificacion', 'fecha_entrevista', 'proyecto_interesado', 'puesto_postula', 'puesto_trabajo_id', 'correo_corporativo', 'contrasena_asignada', 'usuario_creado'] },
   { titulo: 'Datos Personales y Contacto', icon: 'User', campos: ['nombre_completo', 'apodo_preferido', 'celular_contacto', 'correo_contacto', 'fecha_nacimiento', 'estado_civil', 'lugar_residencia', 'tiempo_residencia', 'personas_cargo', 'apoyo_familiar'] },
   { titulo: 'Logística y Herramientas', icon: 'Truck', campos: ['licencia_vehiculo', 'transporte_trabajo', 'acceso_tecnologia', 'disponibilidad_inmediata', 'disponibilidad_viaje', 'disponibilidad_horarios', 'compromisos_horarios', 'horario_preferido', 'condicion_medica'] },
   { titulo: 'Perfil Profesional', icon: 'GraduationCap', campos: ['nivel_estudios', 'capacitaciones_recientes', 'herramientas_dominadas', 'cv_archivo', 'check_portafolio', 'link_portafolio', 'aspiracion_salarial'] },
@@ -174,6 +177,10 @@ export const gruposPreguntas = [
 export const diccionarioPreguntas: Record<string, string> = {
   estado: 'Estado', calificacion: 'Calificación', fecha_entrevista: 'Fecha de entrevista',
   proyecto_interesado: 'Proyecto Interesado', puesto_postula: 'Puesto de trabajo al que postula',
+  puesto_trabajo_id: 'Puesto de trabajo',
+  correo_corporativo: 'Correo corporativo',
+  contrasena_asignada: 'Contraseña asignada',
+  usuario_creado: 'Usuario creado',
   nombre_completo: '¿Cuál es tu nombre completo?', apodo_preferido: '¿Tienes algún nombre o apodo con el que prefieras que te llamemos?',
   celular_contacto: 'Celular de contacto + Cod País', correo_contacto: 'Correo de contacto',
   fecha_nacimiento: '¿Cuál es tu fecha de nacimiento?', estado_civil: '¿Cuál es tu estado civil?',

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const { data, error } = await supabase
       .from('postulantes')
-      .select('*')
+      .select('*, puesto:puestos_trabajo(id, nombre, slug)')
       .eq('id', id)
       .single()
 

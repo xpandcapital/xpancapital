@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Upload, FileText, X, Loader2, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Save, Upload, FileText, X, Loader2, ChevronDown, UserPlus, Eye, EyeOff, Copy, CheckCircle } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
 import { Postulante, ESTADO_LABELS, ESTADO_COLORS, gruposPreguntas, diccionarioPreguntas } from '../_types'
+import { PuestoCombobox } from './_components/PuestoCombobox'
 
 type Tab = 'datos' | 'logistica' | 'profesional' | 'experiencia' | 'psicologia' | 'alineacion' | 'admin'
 
@@ -38,6 +39,8 @@ export default function PostulanteEditPage() {
   const [activeTab, setActiveTab] = useState<Tab>('datos')
   const [form, setForm] = useState<Record<string, any>>({})
   const [uploading, setUploading] = useState(false)
+  const [creatingUser, setCreatingUser] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const fetchPostulante = useCallback(async () => {
     setLoading(true)
@@ -104,6 +107,34 @@ export default function PostulanteEditPage() {
     finally { setUploading(false) }
   }
 
+  const handleCreateUser = async () => {
+    setCreatingUser(true)
+    try {
+      const res = await fetch('/api/postulantes/create-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postulante_id: id,
+          correo_corporativo: form.correo_corporativo || undefined,
+          contrasena_asignada: form.contrasena_asignada || undefined,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        showToast('Usuario creado exitosamente', 'success')
+        setForm(prev => ({
+          ...prev,
+          correo_corporativo: data.data.email,
+          contrasena_asignada: data.data.password,
+          usuario_creado: true,
+        }))
+      } else {
+        showToast(data.error || 'Error al crear usuario', 'error')
+      }
+    } catch { showToast('Error al crear usuario', 'error') }
+    finally { setCreatingUser(false) }
+  }
+
   const input = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 placeholder:text-gray-600"
   const selectCls = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 appearance-none"
   const dateCls = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 [color-scheme:dark]"
@@ -158,7 +189,8 @@ export default function PostulanteEditPage() {
           <div className="space-y-5">
             <h2 className="text-lg font-black text-white uppercase tracking-wide border-b border-white/5 pb-4">Administración</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div><label className={label}>Puesto que postula</label><input type="text" value={form.puesto_postula || ''} onChange={e => upd('puesto_postula', e.target.value)} className={input} /></div>
+              <div><label className={label}>Puesto que postula (texto libre)</label><input type="text" value={form.puesto_postula || ''} onChange={e => upd('puesto_postula', e.target.value)} className={input} /></div>
+              <div><label className={label}>Puesto de trabajo</label><PuestoCombobox value={form.puesto_trabajo_id} puestoNombre={form.puesto?.nombre} onChange={(id, nombre) => { upd('puesto_trabajo_id', id); upd('puesto_postula', nombre) }} /></div>
               <div><label className={label}>Calificación</label><input type="text" value={form.calificacion || ''} onChange={e => upd('calificacion', e.target.value)} className={input} /></div>
               <div><label className={label}>Fecha de entrevista</label><input type="date" value={form.fecha_entrevista?.split('T')[0] || ''} onChange={e => upd('fecha_entrevista', e.target.value)} className={dateCls} /></div>
               <div><label className={label}>Proyecto interesado</label><input type="text" value={form.proyecto_interesado || ''} onChange={e => upd('proyecto_interesado', e.target.value)} className={input} /></div>
@@ -174,8 +206,52 @@ export default function PostulanteEditPage() {
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
               </div>
-              <div><label className={label}>Notas de entrevista</label><textarea value={form.entrevista_notas || ''} onChange={e => upd('entrevista_notas', e.target.value)} className={`${input} resize-none`} rows={3} /></div>
             </div>
+
+            <div className="border-t border-white/5 pt-5">
+              <div className="grid grid-cols-1 gap-5">
+                <div><label className={label}>Notas de entrevista</label><textarea value={form.entrevista_notas || ''} onChange={e => upd('entrevista_notas', e.target.value)} className={`${input} resize-none`} rows={3} /></div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5">
+              <h3 className="text-sm font-black text-white uppercase tracking-wider mb-4">Correo Corporativo y Usuario</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className={label}>Correo corporativo</label>
+                  <input type="email" value={form.correo_corporativo || ''} onChange={e => upd('correo_corporativo', e.target.value)} className={input} placeholder="correo@empresa.com" />
+                </div>
+                <div>
+                  <label className={label}>Contraseña asignada</label>
+                  <div className="relative">
+                    <input type={showPassword ? 'text' : 'password'} value={form.contrasena_asignada || ''} onChange={e => upd('contrasena_asignada', e.target.value)} className={`${input} pr-20`} placeholder="Auto-generada si se deja vacío" />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="p-1 text-gray-500 hover:text-white transition-colors">
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                      {form.contrasena_asignada && (
+                        <button type="button" onClick={() => { navigator.clipboard.writeText(form.contrasena_asignada); showToast('Copiada', 'success') }} className="p-1 text-gray-500 hover:text-white transition-colors">
+                          <Copy className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                {form.usuario_creado ? (
+                  <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold">
+                    <CheckCircle className="w-4 h-4" /> Usuario creado
+                  </div>
+                ) : (
+                  <button onClick={handleCreateUser} disabled={creatingUser} className="bg-white/10 text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-white/20 transition-all disabled:opacity-50 flex items-center gap-2">
+                    <UserPlus className="w-4 h-4" />{creatingUser ? 'Creando...' : 'Crear Usuario'}
+                  </button>
+                )}
+                <span className="text-gray-600 text-xs">Crea un usuario en Supabase Auth con las credenciales corporativas</span>
+              </div>
+            </div>
+
             <div className="border-t border-white/5 pt-5">
               <label className={label}>CV / Portafolio</label>
               <div className="flex items-center gap-4">
@@ -208,7 +284,6 @@ export default function PostulanteEditPage() {
                 const isBoolean = key === 'check_portafolio'
                 const isDate = key === 'fecha_nacimiento' || key === 'fecha_entrevista'
                 const isCvField = key === 'cv_archivo'
-
                 if (isCvField) return null
 
                 if (isBoolean) {
@@ -239,11 +314,7 @@ export default function PostulanteEditPage() {
                       <div className="relative">
                         <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
                           <option value="">Seleccionar</option>
-                          <option value="soltero/a">Soltero/a</option>
-                          <option value="casado/a">Casado/a</option>
-                          <option value="divorciado/a">Divorciado/a</option>
-                          <option value="viudo/a">Viudo/a</option>
-                          <option value="union_libre">Unión libre</option>
+                          <option value="soltero/a">Soltero/a</option><option value="casado/a">Casado/a</option><option value="divorciado/a">Divorciado/a</option><option value="viudo/a">Viudo/a</option><option value="union_libre">Unión libre</option>
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                       </div>
@@ -258,9 +329,7 @@ export default function PostulanteEditPage() {
                       <div className="relative">
                         <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
                           <option value="">Seleccionar</option>
-                          <option value="si">Sí</option>
-                          <option value="no">No</option>
-                          <option value="condicionado">Condicionado</option>
+                          <option value="si">Sí</option><option value="no">No</option><option value="condicionado">Condicionado</option>
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                       </div>
@@ -275,9 +344,7 @@ export default function PostulanteEditPage() {
                       <div className="relative">
                         <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
                           <option value="">Seleccionar</option>
-                          <option value="solo">Solo</option>
-                          <option value="en_equipo">En equipo</option>
-                          <option value="indiferente">Indiferente</option>
+                          <option value="solo">Solo</option><option value="en_equipo">En equipo</option><option value="indiferente">Indiferente</option>
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                       </div>
@@ -292,13 +359,7 @@ export default function PostulanteEditPage() {
                       <div className="relative">
                         <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
                           <option value="">Seleccionar</option>
-                          <option value="primaria">Primaria</option>
-                          <option value="secundaria">Secundaria</option>
-                          <option value="tecnico">Técnico</option>
-                          <option value="universitario">Universitario</option>
-                          <option value="postgrado">Postgrado</option>
-                          <option value="maestria">Maestría</option>
-                          <option value="doctorado">Doctorado</option>
+                          <option value="primaria">Primaria</option><option value="secundaria">Secundaria</option><option value="tecnico">Técnico</option><option value="universitario">Universitario</option><option value="postgrado">Postgrado</option><option value="maestria">Maestría</option><option value="doctorado">Doctorado</option>
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                       </div>
