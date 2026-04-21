@@ -1,5 +1,16 @@
 # 📋 BLIS Corp - Documentación de Desarrollo
 
+## ⚠️ IDIOMA OBLIGATORIO
+
+**TODAS las respuestas, comentarios, explicaciones, mensajes de commit y comunicación con el usuario DEBEN estar en ESPAÑOL.** No importa el idioma en el que el usuario escriba, la respuesta SIEMPRE debe ser en español. Esto incluye:
+- Explicaciones de código o decisiones técnicas
+- Confirmaciones de acciones realizadas
+- Preguntas de clarificación
+- Mensajes de error y advertencias
+- Comentarios en código si se solicitan
+
+**EXCEPCIÓN:** El código fuente (nombres de variables, funciones, textos de UI, etc.) se mantiene en el idioma original del proyecto.
+
 ## 📁 Estructura del Proyecto
 
 ```

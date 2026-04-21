@@ -13,33 +13,49 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const { searchParams } = new URL(request.url)
-    
+
+    const id = searchParams.get('id')
+
+    if (id) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, nombre, apellido, email, telefono, rol, activo, blis_coins, total_referidos, creado_en')
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true, data })
+    }
+
     const page = parseInt(searchParams.get('page') || '1')
     const perPage = parseInt(searchParams.get('per_page') || '20')
     const search = searchParams.get('search') || ''
     const rol = searchParams.get('rol')
-    
+
     let query = supabase
       .from('profiles')
-      .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en', { count: 'exact' })
+      .select('id, nombre, apellido, email, telefono, rol, activo, blis_coins, total_referidos, creado_en', { count: 'exact' })
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .order('creado_en', { ascending: false })
       .range((page - 1) * perPage, page * perPage - 1)
-    
+
     if (search) {
       query = query.or(`nombre.ilike.%${search}%,apellido.ilike.%${search}%,email.ilike.%${search}%`)
     }
-    
+
     if (rol) {
       query = query.eq('rol', rol)
     }
-    
+
     const { data, error, count } = await query
-    
+
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
-    
+
     return NextResponse.json({
       success: true,
       data,

@@ -715,6 +715,17 @@ export default function AdminCourses() {
     // Refs for scrolling to edit sections
     const itemRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape' && showPreview) {
+                e.preventDefault();
+                setShowPreview(false);
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [showPreview]);
+
     // Fetch courses from Supabase
     const fetchCourses = async () => {
         setLoading(true);

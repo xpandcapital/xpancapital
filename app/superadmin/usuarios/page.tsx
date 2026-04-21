@@ -1,29 +1,37 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UserPlus, Shield, Mail, Download, Search, Filter, User, CheckCircle2, X, Loader2, Eye, EyeOff, Copy, KeyRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { UserPlus, Shield, Download, Search, Filter, User, CheckCircle2, X, Loader2, Eye, EyeOff, Copy, KeyRound, Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 
-interface UserProfile {
-    id: string;
-    nombre: string;
-    apellido: string;
-    email: string;
-    rol: string;
-    activo: boolean;
-    creado_en: string;
-    empresa_id: string;
-}
+const ROLE_OPTIONS = [
+    { value: 'superadmin', label: 'Super Admin' },
+    { value: 'admin', label: 'Admin' },
+    { value: 'empleado', label: 'Empleado' },
+    { value: 'editor', label: 'Editor' },
+    { value: 'vendedor', label: 'Vendedor' },
+    { value: 'cliente', label: 'Cliente' },
+];
+
+const ROLE_BADGES: Record<string, string> = {
+    'superadmin': 'bg-blis-red/20 text-blis-red border-blis-red/30',
+    'admin': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    'empleado': 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    'editor': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    'vendedor': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    'cliente': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+};
 
 export default function AdminUsers() {
+    const router = useRouter();
     const { showToast } = useToast();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
     const [newUserName, setNewUserName] = useState('');
     const [newUserEmail, setNewUserEmail] = useState('');
     const [newUserPassword, setNewUserPassword] = useState('');
-    const [newUserRole, setNewUserRole] = useState('editor');
+    const [newUserRole, setNewUserRole] = useState('empleado');
     const [showPassword, setShowPassword] = useState(false);
     const [creatingUser, setCreatingUser] = useState(false);
     const [createdPassword, setCreatedPassword] = useState<string | null>(null);
@@ -77,14 +85,7 @@ export default function AdminUsers() {
     });
 
     const getRoleBadge = (rol: string) => {
-        const styles: Record<string, string> = {
-            'superadmin': 'bg-blis-red/20 text-blis-red border-blis-red/30',
-            'admin': 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-            'editor': 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-            'vendedor': 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-            'cliente': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-        };
-        return styles[rol] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+        return ROLE_BADGES[rol] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     };
 
     return (
@@ -141,11 +142,9 @@ export default function AdminUsers() {
                             className="bg-transparent text-sm text-white focus:outline-none appearance-none pr-6"
                         >
                             <option value="Todos">Todos los roles</option>
-                            <option value="superadmin">Super Admin</option>
-                            <option value="admin">Admin</option>
-                            <option value="editor">Editor</option>
-                            <option value="vendedor">Vendedor</option>
-                            <option value="cliente">Cliente</option>
+                            {ROLE_OPTIONS.map(r => (
+                                <option key={r.value} value={r.value}>{r.label}</option>
+                            ))}
                         </select>
                     </div>
                     <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
@@ -183,6 +182,7 @@ export default function AdminUsers() {
                                     <th className="px-6 py-4">Rol</th>
                                     <th className="px-6 py-4">Estado</th>
                                     <th className="px-6 py-4">Fecha</th>
+                                    <th className="px-6 py-4">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5 text-sm">
@@ -203,7 +203,7 @@ export default function AdminUsers() {
                                         <td className="px-6 py-5">
                                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[10px] font-bold border ${getRoleBadge(user.rol)}`}>
                                                 <Shield className="w-3 h-3" />
-                                                {user.rol}
+                                                {ROLE_OPTIONS.find(r => r.value === user.rol)?.label || user.rol}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
@@ -214,6 +214,15 @@ export default function AdminUsers() {
                                         </td>
                                         <td className="px-6 py-5 text-gray-500">
                                             {new Date(user.creado_en).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <button
+                                                onClick={() => router.push(`/superadmin/usuarios/${user.id}`)}
+                                                className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-all"
+                                                title="Editar usuario"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -230,7 +239,7 @@ export default function AdminUsers() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                        onClick={() => setIsModalOpen(false)}
+                        onClick={() => { setIsModalOpen(false); setCreatedPassword(null); }}
                     >
                         <div className="absolute inset-0 bg-black/80" />
                         <motion.div
@@ -247,32 +256,28 @@ export default function AdminUsers() {
                                 <X className="w-5 h-5 text-gray-400" />
                             </button>
                             
-                            <h2 className="text-xl font-bold text-white mb-4">
-                                {editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}
-                            </h2>
-                            
                             {createdPassword ? (
                                 <div className="space-y-4">
-                                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <KeyRound className="w-4 h-4 text-emerald-400" />
-                                            <p className="text-emerald-400 font-bold text-sm">Usuario creado exitosamente</p>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                            <KeyRound className="w-5 h-5 text-emerald-400" />
                                         </div>
-                                        <p className="text-gray-300 text-xs mb-3">
-                                            Comparte estas credenciales con el nuevo usuario:
-                                        </p>
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2">
-                                                <span className="text-[10px] text-gray-500 uppercase font-bold w-12">Email</span>
-                                                <code className="flex-1 text-emerald-300 font-mono text-xs">{newUserEmail}</code>
-                                            </div>
-                                            <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2">
-                                                <span className="text-[10px] text-gray-500 uppercase font-bold w-12">Clave</span>
-                                                <code className="flex-1 text-emerald-300 font-mono text-xs break-all">{createdPassword}</code>
-                                                <button onClick={() => navigator.clipboard.writeText(createdPassword)} className="p-1 hover:bg-white/5 rounded">
-                                                    <Copy className="w-3.5 h-3.5 text-gray-400" />
-                                                </button>
-                                            </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold text-white">Usuario Creado</h2>
+                                            <p className="text-xs text-gray-400">Comparte estas credenciales</p>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-2">
+                                        <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2">
+                                            <span className="text-[10px] text-gray-500 uppercase font-bold w-12">Email</span>
+                                            <code className="flex-1 text-emerald-300 font-mono text-xs">{newUserEmail}</code>
+                                        </div>
+                                        <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2">
+                                            <span className="text-[10px] text-gray-500 uppercase font-bold w-12">Clave</span>
+                                            <code className="flex-1 text-emerald-300 font-mono text-xs break-all">{createdPassword}</code>
+                                            <button onClick={() => navigator.clipboard.writeText(createdPassword)} className="p-1 hover:bg-white/5 rounded">
+                                                <Copy className="w-3.5 h-3.5 text-gray-400" />
+                                            </button>
                                         </div>
                                     </div>
                                     <button
@@ -282,20 +287,9 @@ export default function AdminUsers() {
                                         Cerrar
                                     </button>
                                 </div>
-                            ) : editingUser ? (
-                                <div className="space-y-4">
-                                    <p className="text-gray-400 text-sm">
-                                        Para editar el rol y estado de este usuario, utiliza la gestión de equipo o Supabase Auth.
-                                    </p>
-                                    <button
-                                        onClick={() => setIsModalOpen(false)}
-                                        className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold hover:bg-white/10 transition-colors"
-                                    >
-                                        Cerrar
-                                    </button>
-                                </div>
                             ) : (
                                 <div className="space-y-4">
+                                    <h2 className="text-xl font-bold text-white mb-4">Nuevo Usuario</h2>
                                     <div className="space-y-2">
                                         <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Nombre Completo *</label>
                                         <input
@@ -343,15 +337,14 @@ export default function AdminUsers() {
                                             onChange={(e) => setNewUserRole(e.target.value)}
                                             className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
                                         >
-                                            <option value="usuario">Usuario</option>
-                                            <option value="cliente">Cliente</option>
-                                            <option value="editor">Editor</option>
-                                            <option value="admin">Admin</option>
+                                            {ROLE_OPTIONS.map(r => (
+                                                <option key={r.value} value={r.value}>{r.label}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="flex gap-3 pt-2">
                                         <button
-                                            onClick={() => setIsModalOpen(false)}
+                                            onClick={() => { setIsModalOpen(false); setCreatedPassword(null); }}
                                             className="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-400 font-bold hover:bg-white/10 transition-colors text-sm"
                                         >
                                             Cancelar
