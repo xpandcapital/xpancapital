@@ -47,6 +47,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const { user } = useAuth();
     const { showToast } = useToast();
     const userRef = useRef(user);
+    const syncInProgress = useRef(false);
 
     // Keep user ref updated
     useEffect(() => {
@@ -56,16 +57,18 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     // Sync functions with ref to avoid dependency issues
     const syncCartToSupabase = useCallback(async (cartItems: Product[]) => {
         const currentUser = userRef.current;
-        if (!currentUser) return;
-        
+        if (!currentUser || syncInProgress.current) return;
+        syncInProgress.current = true;
         try {
             await fetch('/api/shop/cart', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: currentUser.id, items: cartItems })
             });
-        } catch (e) {
+        } catch {
             // Silent fail - localStorage is the primary storage
+        } finally {
+            syncInProgress.current = false;
         }
     }, []);
 
@@ -79,7 +82,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: currentUser.id, products: favoriteItems.map(f => f.id) })
             });
-        } catch (e) {
+        } catch {
             // Silent fail - localStorage is the primary storage
         }
     }, []);
@@ -108,25 +111,41 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         }
     }, [user]);
 
-    // Sync cart to localStorage and Supabase
+    // Sync cart to localStorage and Supabase (debounced)
+    const cartSyncTimer = useRef<NodeJS.Timeout | null>(null);
     useEffect(() => {
         if (!isLoaded || typeof window === "undefined") return;
         
         localStorage.setItem("blis_cart", JSON.stringify(cart));
         
         if (userRef.current) {
-            syncCartToSupabase(cart).catch(() => {});
+            if (cartSyncTimer.current) clearTimeout(cartSyncTimer.current);
+            cartSyncTimer.current = setTimeout(() => {
+                syncCartToSupabase(cart);
+            }, 2000);
+        }
+
+        return () => {
+            if (cartSyncTimer.current) clearTimeout(cartSyncTimer.current);
         }
     }, [cart, isLoaded, syncCartToSupabase]);
 
-    // Sync favorites to localStorage and Supabase
+    // Sync favorites to localStorage and Supabase (debounced)
+    const favSyncTimer = useRef<NodeJS.Timeout | null>(null);
     useEffect(() => {
         if (!isLoaded || typeof window === "undefined") return;
         
         localStorage.setItem("blis_favorites", JSON.stringify(favorites));
         
         if (userRef.current) {
-            syncFavoritesToSupabase(favorites).catch(() => {});
+            if (favSyncTimer.current) clearTimeout(favSyncTimer.current);
+            favSyncTimer.current = setTimeout(() => {
+                syncFavoritesToSupabase(favorites);
+            }, 2000);
+        }
+
+        return () => {
+            if (favSyncTimer.current) clearTimeout(favSyncTimer.current);
         }
     }, [favorites, isLoaded, syncFavoritesToSupabase]);
 

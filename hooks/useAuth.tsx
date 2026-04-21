@@ -54,7 +54,35 @@ async function fetchProfile(userId: string): Promise<User | null> {
       .eq('id', userId)
       .single()
 
-    if (error || !data) return null
+    if (error) {
+      if (error.code === '406' || error.message?.includes('406') || error.message?.includes('Not Acceptable')) {
+        console.warn('[Auth] Profile fetch 406 - schema cache may need reload. Trying with * select.')
+        const { data: retryData, error: retryError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
+        if (retryError || !retryData) return null
+        const p = retryData as any
+        const rol = (p.rol || 'usuario') as UserRole
+        const validRoles: UserRole[] = ['superadmin', 'admin', 'editor', 'empleado', 'cliente', 'usuario']
+        const normalizedRol = validRoles.includes(rol) ? rol : 'usuario'
+        return {
+          id: p.id,
+          email: p.email || '',
+          name: `${p.nombre || ''} ${p.apellido || ''}`.trim(),
+          profilePic: p.avatar_url,
+          blis_coins: p.blis_coins || 0,
+          role: normalizedRol,
+          phone: undefined,
+          empresa_id: p.empresa_id || EMPRESA_ID,
+          permisos_adicionales: p.permisos_adicionales || null,
+        }
+      }
+      return null
+    }
+
+    if (!data) return null
 
     const profile = data as {
       id: string
