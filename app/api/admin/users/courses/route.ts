@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     }
 
     let assignedCourses: any[] = []
+    let advisorId: string | null = null
 
     const { data: advisor } = await supabase
       .from('advisors')
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
       .single()
 
     if (advisor) {
+      advisorId = advisor.id
       const { data: cursos } = await supabase
         .from('equipo_cursos')
         .select('*, cursos:id_curso(id, nombre, imagen_principal, para_equipo)')
@@ -49,13 +51,12 @@ export async function GET(request: NextRequest) {
       .from('cursos')
       .select('id, nombre, imagen_principal, para_equipo, precio_usd, activo')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .eq('para_equipo', true)
 
     return NextResponse.json({
       success: true,
       assigned: assignedCourses,
       available: availableCourses || [],
-      advisorId: advisor?.id || null,
+      advisorId,
     })
   } catch (error: any) {
     console.error('[API Error] /api/admin/users/courses:', error)

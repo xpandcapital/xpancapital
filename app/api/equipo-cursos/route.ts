@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
-    let { advisor_id, curso_id, email } = body
+    let { advisor_id, curso_id, email, nombre } = body
 
     if (!curso_id) {
       return NextResponse.json({ error: 'curso_id es requerido' }, { status: 400 })
@@ -38,7 +39,25 @@ export async function POST(request: NextRequest) {
         .select('id')
         .eq('email', email)
         .single()
-      if (advisor) advisor_id = advisor.id
+
+      if (advisor) {
+        advisor_id = advisor.id
+      } else {
+        const { data: newAdvisor, error: createError } = await supabase
+          .from('advisors')
+          .insert({
+            email,
+            nombre: nombre || email.split('@')[0],
+            empresa_id: DEFAULT_EMPRESA_ID,
+          })
+          .select('id')
+          .single()
+
+        if (createError) {
+          return NextResponse.json({ error: `Error creando asesor: ${createError.message}` }, { status: 500 })
+        }
+        advisor_id = newAdvisor.id
+      }
     }
 
     if (!advisor_id) {

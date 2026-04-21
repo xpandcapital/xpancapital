@@ -199,7 +199,7 @@ export default function EditarUsuarioPage() {
             const res = await fetch('/api/equipo-cursos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ curso_id: courseId, email: user?.email }),
+                body: JSON.stringify({ curso_id: courseId, email: user?.email, nombre: user?.nombre }),
             });
             const data = await res.json();
             if (data.success) {

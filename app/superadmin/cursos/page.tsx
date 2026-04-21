@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
     Plus, Search, BookOpen, Video, FileText,
     Save, Eye, Trash2, ChevronRight, X,
@@ -699,6 +700,7 @@ function RichTextEditor({ value, onChange, placeholder }: { value: string; onCha
 }
 
 export default function AdminCourses() {
+    const router = useRouter();
     const [view, setView] = useState<"list" | "editor">("list");
     const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(true);
@@ -1243,7 +1245,7 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
                             <Clock className="w-3 h-3" /> {currentCourse.lastSaved || '--:--'}
                         </div>
                         <button onClick={() => saveBorrador('Borrador')} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-white/5">Guardar</button>
-                        <button onClick={() => setShowPreview(true)} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-white/5">Previsualizar</button>
+                        <button onClick={() => currentCourse && router.push(`/superadmin/cursos/${currentCourse.id}/preview`)} className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border border-white/5">Previsualizar</button>
                         <button onClick={() => saveBorrador('Publicado')} className="px-5 py-2 bg-blis-red text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-blis-red/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Publicar</button>
                     </div>
                 </div>
