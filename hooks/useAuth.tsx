@@ -70,7 +70,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
 
     // Normalizar el rol: si no está en los roles válidos, usar 'usuario'
     let normalizedRol = (profile.rol || 'usuario') as UserRole
-    const validRoles: UserRole[] = ['superadmin', 'admin', 'editor', 'cliente', 'usuario']
+    const validRoles: UserRole[] = ['superadmin', 'admin', 'editor', 'empleado', 'cliente', 'usuario']
     if (!validRoles.includes(normalizedRol)) {
       normalizedRol = 'usuario'
     }

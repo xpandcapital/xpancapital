@@ -24,10 +24,11 @@ export async function GET(request: NextRequest) {
         .from('cursos')
         .select('id, nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos')
         .eq('para_equipo', true)
-        .eq('activo', true)
-        .order('creado_en', { ascending: false })
 
-      if (cursosError) return NextResponse.json({ error: cursosError.message }, { status: 500 })
+      if (cursosError) {
+        console.error('[/api/equipo-cursos/me] cursos error:', cursosError)
+        return NextResponse.json({ error: cursosError.message }, { status: 500 })
+      }
 
       let assignedMap: Record<string, any> = {}
       const { data: advisor } = await supabase

@@ -25,14 +25,14 @@ interface CursoAsignado {
 }
 
 export function useMisCapacitaciones() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [cursos, setCursos] = useState<CursoAsignado[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
 
   const fetchCursos = useCallback(async () => {
-    if (!user?.email) { setLoading(false); return }
+    if (!user?.email) return
     setLoading(true)
     try {
       const res = await fetch(`/api/equipo-cursos/me?email=${encodeURIComponent(user.email)}`)
@@ -47,7 +47,14 @@ export function useMisCapacitaciones() {
     finally { setLoading(false) }
   }, [user?.email])
 
-  useEffect(() => { fetchCursos() }, [fetchCursos])
+  useEffect(() => {
+    if (!authLoading && user?.email) {
+      fetchCursos()
+    } else if (!authLoading && !user?.email) {
+      setLoading(false)
+      setError('No se pudo obtener tu correo. Inicia sesión de nuevo.')
+    }
+  }, [authLoading, user?.email, fetchCursos])
 
   const toggleLesson = async (equipoCursoId: string, leccionId: string, completado: boolean) => {
     if (equipoCursoId.startsWith('pending-')) {
@@ -56,12 +63,13 @@ export function useMisCapacitaciones() {
         const assignRes = await fetch('/api/equipo-cursos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ curso_id: cursoId }),
+          body: JSON.stringify({ curso_id: cursoId, email: user?.email }),
         })
         const assignData = await assignRes.json()
         if (!assignData.success) return false
         const newId = assignData.data?.id
         if (!newId) return false
+        await fetchCursos()
         const progRes = await fetch('/api/equipo-cursos/progress', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -91,5 +99,5 @@ export function useMisCapacitaciones() {
     } catch { return false }
   }
 
-  return { cursos, loading, error, refetch: fetchCursos, toggleLesson, isAdmin }
+  return { cursos, loading: loading || authLoading, error, refetch: fetchCursos, toggleLesson, isAdmin }
 }
