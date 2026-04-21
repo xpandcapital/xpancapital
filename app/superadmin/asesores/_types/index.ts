@@ -36,9 +36,10 @@ export interface EquipoCurso {
   progreso: number
   estado: 'asignado' | 'en_progreso' | 'completado' | 'bloqueado'
   nota_final: number | null
+  lecciones_completadas: string[]
   asignado_en: string
   completado_en: string | null
-  cursos?: { nombre: string; precio_usd: number; imagen_principal: string | null; para_equipo?: boolean }
+  cursos?: { nombre: string; descripcion?: string; precio_usd: number; imagen_principal: string | null; para_equipo?: boolean; modulos?: any; slug?: string }
 }
 
 export interface EquipoProducto {

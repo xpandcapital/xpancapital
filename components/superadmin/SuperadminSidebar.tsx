@@ -10,7 +10,7 @@ import {
     ShoppingCart, Boxes, CandlestickChart, Scale, BarChart3,
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
-    CalendarDays, Megaphone, ClipboardList
+    CalendarDays, Megaphone, ClipboardList, BookOpenCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LucideProps } from "lucide-react";
@@ -137,6 +137,7 @@ export function SuperadminSidebar() {
                     permission: "cursos:ver",
                     subItems: [
                         { icon: GraduationCap, label: "Cursos", href: "/superadmin/cursos", permission: "cursos:ver" },
+                        { icon: BookOpenCheck, label: "Capacitaciones", href: "/superadmin/mis-capacitaciones", permission: "capacitaciones:ver" },
                         { icon: Award, label: "Certificados", href: "/superadmin/certificados", permission: "certificados:ver" },
                     ]
                 },

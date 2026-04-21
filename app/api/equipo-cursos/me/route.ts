@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('equipo_cursos')
-      .select('*, cursos:id_curso(nombre, precio_usd, imagen_principal, slug, para_equipo)')
+      .select('*, cursos:id_curso(nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos)')
       .eq('advisor_id', advisor.id)
       .order('asignado_en', { ascending: false })
 

@@ -76,6 +76,9 @@ export const PERMISSIONS = {
   // Postulantes
   'postulantes:ver': 'Ver Postulantes',
   'postulantes:editar': 'Evaluar Postulantes',
+  // Capacitaciones
+  'capacitaciones:ver': 'Ver Capacitaciones',
+  'capacitaciones:editar': 'Editar Progreso de Capacitaciones',
   // Utilidades
   'utilidades:ver': 'Ver Utilidades',
   // Configuración
@@ -127,7 +130,7 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
     'asesores:ver',
     'productos:ver',
     'clientes:ver',
-    'cursos:ver',
+    'capacitaciones:ver',
     'leads:ver',
     'equipo:ver',
     'postulantes:ver',
@@ -173,6 +176,7 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
   'postulantes': 'postulantes:ver',
   'postulantes/puestos': 'postulantes:ver',
   'postulantes/preguntas': 'postulantes:ver',
+  'mis-capacitaciones': 'capacitaciones:ver',
   'utilidades': 'utilidades:ver',
   'configuracion': 'configuracion:ver',
   'api-nube': 'api-nube:ver',

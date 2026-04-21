@@ -33,6 +33,7 @@ const PERMISSION_CATEGORIES: Record<string, Permission[]> = {
   'Blog': ['blog:ver', 'blog:crear', 'blog:editar', 'blog:eliminar'],
   'Equipo': ['equipo:ver', 'equipo:crear', 'equipo:editar'],
   'Postulantes': ['postulantes:ver', 'postulantes:editar'],
+  'Capacitaciones': ['capacitaciones:ver', 'capacitaciones:editar'],
   'Utilidades': ['utilidades:ver'],
   'Configuración': ['configuracion:ver', 'configuracion:editar'],
   'APIs y Nube': ['api-nube:ver'],
