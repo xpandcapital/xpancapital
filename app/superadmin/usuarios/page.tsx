@@ -24,6 +24,17 @@ const ROLE_BADGES: Record<string, string> = {
     'cliente': 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
 };
 
+interface UserProfile {
+    id: string;
+    nombre: string;
+    apellido: string;
+    email: string;
+    rol: string;
+    activo: boolean;
+    creado_en: string;
+    empresa_id: string;
+}
+
 export default function AdminUsers() {
     const router = useRouter();
     const { showToast } = useToast();
@@ -63,7 +74,7 @@ export default function AdminUsers() {
     const exportUsers = () => {
         const headers = ["Nombre,Apellido,Email,Rol,Estado,Fecha de Registro\n"];
         const data = users.map(u => 
-            `${u.nombre},${u.apellido},${u.email},${u.rol},${u.activo ? 'Activo' : 'Inactivo'},${new Date(u.creado_en).toLocaleDateString()}`
+            `${u.nombre},${u.apellido},${u.email},${u.rol},${isActivo(u) ? 'Activo' : 'Inactivo'},${new Date(u.creado_en).toLocaleDateString()}`
         ).join("\n");
         const blob = new Blob([headers + data], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
@@ -79,14 +90,16 @@ export default function AdminUsers() {
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesRole = roleFilter === "Todos" || user.rol === roleFilter;
         const matchesStatus = statusFilter === "Todos" || 
-            (statusFilter === "Activo" && user.activo) || 
-            (statusFilter === "Inactivo" && !user.activo);
+            (statusFilter === "Activo" && isActivo(user)) || 
+            (statusFilter === "Inactivo" && !isActivo(user));
         return matchesSearch && matchesRole && matchesStatus;
     });
 
     const getRoleBadge = (rol: string) => {
         return ROLE_BADGES[rol] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
     };
+
+    const isActivo = (user: UserProfile) => user.activo !== false;
 
     return (
         <div className="space-y-8 w-full mx-auto pb-10 px-4 md:px-8 pt-8 md:pt-8">
@@ -112,7 +125,7 @@ export default function AdminUsers() {
                         <span className="sm:hidden">Exportar</span>
                     </button>
                     <button
-                        onClick={() => { setEditingUser(null); setIsModalOpen(true); }}
+                        onClick={() => { setIsModalOpen(true); }}
                         className="flex-1 sm:flex-none bg-blis-red text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-wider text-[10px] sm:text-xs hover:bg-white hover:text-black transition-colors flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]"
                     >
                         <UserPlus className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
@@ -207,9 +220,9 @@ export default function AdminUsers() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold ${user.activo ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold ${isActivo(user) ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                                                 <CheckCircle2 className="w-3 h-3" />
-                                                {user.activo ? 'Activo' : 'Inactivo'}
+                                                {isActivo(user) ? 'Activo' : 'Inactivo'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5 text-gray-500">
