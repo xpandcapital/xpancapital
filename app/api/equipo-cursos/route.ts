@@ -26,10 +26,23 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
-    const { advisor_id, curso_id } = body
+    let { advisor_id, curso_id, email } = body
 
-    if (!advisor_id || !curso_id) {
-      return NextResponse.json({ error: 'advisor_id y curso_id son requeridos' }, { status: 400 })
+    if (!curso_id) {
+      return NextResponse.json({ error: 'curso_id es requerido' }, { status: 400 })
+    }
+
+    if (!advisor_id && email) {
+      const { data: advisor } = await supabase
+        .from('advisors')
+        .select('id')
+        .eq('email', email)
+        .single()
+      if (advisor) advisor_id = advisor.id
+    }
+
+    if (!advisor_id) {
+      return NextResponse.json({ error: 'advisor_id o email son requeridos' }, { status: 400 })
     }
 
     const { data, error } = await supabase
@@ -40,7 +53,13 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       if (error.code === '23505') {
-        return NextResponse.json({ error: 'Este curso ya está asignado a este miembro' }, { status: 409 })
+        const { data: existing } = await supabase
+          .from('equipo_cursos')
+          .select('*')
+          .eq('advisor_id', advisor_id)
+          .eq('curso_id', curso_id)
+          .single()
+        return NextResponse.json({ success: true, data: existing })
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }

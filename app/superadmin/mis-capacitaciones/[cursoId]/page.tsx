@@ -108,10 +108,24 @@ export default function CursoDetallePage() {
     if (!equipoCurso) return
     setTogglingLesson(leccionId)
     try {
+      let equipoId = equipoCurso.id
+      if (equipoId.startsWith('pending-')) {
+        const assignRes = await fetch('/api/equipo-cursos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ curso_id: cursoId, email: user?.email }),
+        })
+        const assignData = await assignRes.json()
+        if (!assignData.success) return
+        equipoId = assignData.data?.id
+        if (!equipoId) return
+        await fetchData()
+      }
+
       const res = await fetch('/api/equipo-cursos/progress', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ equipo_curso_id: equipoCurso.id, leccion_id: leccionId, completado }),
+        body: JSON.stringify({ equipo_curso_id: equipoId, leccion_id: leccionId, completado }),
       })
       const data = await res.json()
       if (data.success) {

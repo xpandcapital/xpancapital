@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 
 interface CursoAsignado {
   id: string
-  advisor_id: string
+  advisor_id: string | null
   curso_id: string
   progreso: number
   estado: 'asignado' | 'en_progreso' | 'completado' | 'bloqueado'
@@ -29,6 +29,7 @@ export function useMisCapacitaciones() {
   const [cursos, setCursos] = useState<CursoAsignado[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const fetchCursos = useCallback(async () => {
     if (!user?.email) { setLoading(false); return }
@@ -38,6 +39,7 @@ export function useMisCapacitaciones() {
       const data = await res.json()
       if (data.success) {
         setCursos(data.data || [])
+        setIsAdmin(data.isAdmin || false)
       } else {
         setError(data.error || 'Error al cargar cursos')
       }
@@ -48,6 +50,32 @@ export function useMisCapacitaciones() {
   useEffect(() => { fetchCursos() }, [fetchCursos])
 
   const toggleLesson = async (equipoCursoId: string, leccionId: string, completado: boolean) => {
+    if (equipoCursoId.startsWith('pending-')) {
+      try {
+        const cursoId = equipoCursoId.replace('pending-', '')
+        const assignRes = await fetch('/api/equipo-cursos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ curso_id: cursoId }),
+        })
+        const assignData = await assignRes.json()
+        if (!assignData.success) return false
+        const newId = assignData.data?.id
+        if (!newId) return false
+        const progRes = await fetch('/api/equipo-cursos/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ equipo_curso_id: newId, leccion_id: leccionId, completado }),
+        })
+        const progData = await progRes.json()
+        if (progData.success) {
+          await fetchCursos()
+          return true
+        }
+        return false
+      } catch { return false }
+    }
+
     try {
       const res = await fetch('/api/equipo-cursos/progress', {
         method: 'POST',
@@ -63,5 +91,5 @@ export function useMisCapacitaciones() {
     } catch { return false }
   }
 
-  return { cursos, loading, error, refetch: fetchCursos, toggleLesson }
+  return { cursos, loading, error, refetch: fetchCursos, toggleLesson, isAdmin }
 }
