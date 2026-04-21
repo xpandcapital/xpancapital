@@ -194,12 +194,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Timeout de seguridad: si loading no se resuelve en 5 segundos, forzar false
+  // Timeout de seguridad: si loading no se resuelve en 8 segundos, forzar false
   useEffect(() => {
     const timer = setTimeout(() => {
-      console.warn('[Auth] Timeout: forzando loading=false después de 5s')
-      setLoading(false)
-    }, 5000)
+      setLoading(prev => {
+        if (prev) {
+          console.warn('[Auth] Timeout: forzando loading=false después de 8s')
+          return false
+        }
+        return prev
+      })
+    }, 8000)
     return () => clearTimeout(timer)
   }, [])
 
