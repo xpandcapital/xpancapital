@@ -11,15 +11,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'email es requerido' }, { status: 400 })
     }
 
+    let isAdmin = false
+
     const { data: profile } = await supabase
       .from('profiles')
-      .select('id, rol')
+      .select('id, rol, email')
       .eq('email', email)
       .single()
 
-    const isAdmin = profile && ['superadmin', 'admin'].includes(profile.rol)
+    if (profile && ['superadmin', 'admin', 'empleado'].includes(profile.rol)) {
+      isAdmin = profile.rol === 'superadmin' || profile.rol === 'admin'
+    }
 
-    if (isAdmin) {
+    if (!profile) {
+      const { data: authUsers } = await supabase.auth.admin.listUsers()
+      const authUser = authUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase())
+      if (authUser) {
+        const { data: profileById } = await supabase
+          .from('profiles')
+          .select('id, rol')
+          .eq('id', authUser.id)
+          .single()
+        if (profileById) {
+          if (['superadmin', 'admin'].includes(profileById.rol)) isAdmin = true
+        }
+      }
+    }
+
+    const effectiveIsAdmin = isAdmin || (profile && ['superadmin', 'admin'].includes(profile.rol))
+
+    if (effectiveIsAdmin) {
       const { data: allCursos, error: cursosError } = await supabase
         .from('cursos')
         .select('id, nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos')
@@ -27,14 +48,15 @@ export async function GET(request: NextRequest) {
 
       if (cursosError) {
         console.error('[/api/equipo-cursos/me] cursos error:', cursosError)
-        return NextResponse.json({ error: cursosError.message }, { status: 500 })
+        return NextResponse.json({ error: cursosError.message, debug: { email, profileFound: !!profile } }, { status: 500 })
       }
 
       let assignedMap: Record<string, any> = {}
+      const advisorEmail = email.toLowerCase().trim()
       const { data: advisor } = await supabase
         .from('advisors')
         .select('id')
-        .eq('email', email)
+        .eq('email', advisorEmail)
         .single()
 
       if (advisor) {
@@ -70,10 +92,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data, isTeamMember: true, isAdmin: true })
     }
 
+    const advisorEmail = email.toLowerCase().trim()
     const { data: advisor, error: advisorError } = await supabase
       .from('advisors')
       .select('id')
-      .eq('email', email)
+      .eq('email', advisorEmail)
       .single()
 
     if (advisorError || !advisor) {
@@ -88,7 +111,8 @@ export async function GET(request: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true, data, isTeamMember: true })
-  } catch {
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+  } catch (err: any) {
+    console.error('[/api/equipo-cursos/me] error:', err)
+    return NextResponse.json({ error: err.message || 'Error interno' }, { status: 500 })
   }
 }

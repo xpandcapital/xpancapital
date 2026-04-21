@@ -52,6 +52,7 @@ type Section = {
 export function SuperadminSidebar() {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [sidebarWidth, setSidebarWidth] = useState(64);
+    const [isHoverExpanded, setIsHoverExpanded] = useState(false);
     const pathname = usePathname();
     const { canAccessSection, loading: permLoading, isAdmin } = usePermissions();
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
@@ -76,13 +77,13 @@ export function SuperadminSidebar() {
         const handleResize = () => {
             const isMobile = window.innerWidth < 768;
             setSidebarWidth(isMobile ? 56 : 64);
-            const w = isCollapsed ? (isMobile ? '56px' : '64px') : '260px';
+            const w = isExpanded ? '260px' : (isMobile ? '56px' : '64px');
             document.documentElement.style.setProperty('--sidebar-width', w);
         };
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [isCollapsed]);
+    }, [isExpanded]);
 
     useEffect(() => {
         const initialExpanded: Record<string, boolean> = {};
@@ -250,19 +251,23 @@ export function SuperadminSidebar() {
         })).filter(section => section.items.length > 0)
     }, [permLoading, canAccessSection, isAdmin])
 
+    const isExpanded = !isCollapsed || isHoverExpanded;
+
     return (
         <>
             <motion.aside
                 initial={false}
                 animate={{
-                    width: isCollapsed ? sidebarWidth : 260,
+                    width: isExpanded ? 260 : sidebarWidth,
                 }}
+                onMouseEnter={() => { if (isCollapsed) setIsHoverExpanded(true) }}
+                onMouseLeave={() => setIsHoverExpanded(false)}
                 className="flex flex-col bg-zinc-950 border-r border-white/5 h-[calc(100vh-80px)] md:h-full fixed md:relative left-0 top-[80px] md:top-0 z-[999] overflow-hidden shadow-[15px_0_40px_rgba(0,0,0,0.8)] flex-shrink-0"
                 style={{ pointerEvents: 'auto' }}
             >
-                <div className={`pt-6 pb-4 px-4 flex items-center ${isCollapsed ? 'justify-center px-0' : 'justify-between'}`}>
+                <div className={`pt-6 pb-4 px-4 flex items-center ${!isExpanded ? 'justify-center px-0' : 'justify-between'}`}>
                     <AnimatePresence mode="wait">
-                        {!isCollapsed && (
+                        {isExpanded && (
                             <motion.span
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -275,13 +280,13 @@ export function SuperadminSidebar() {
                     </AnimatePresence>
                     <button
                         onClick={() => setIsCollapsed(!isCollapsed)}
-                        className={`p-2 hover:bg-white/5 rounded-xl text-gray-400 transition-colors ${isCollapsed ? 'hover:text-blis-red' : ''}`}
+                        className={`p-2 hover:bg-white/5 rounded-xl text-gray-400 transition-colors ${!isExpanded ? 'hover:text-blis-red' : ''}`}
                     >
-                        <ChevronLeft className={`w-5 h-5 transition-transform duration-500 ${isCollapsed ? 'rotate-180' : ''}`} />
+                        <ChevronLeft className={`w-5 h-5 transition-transform duration-500 ${!isExpanded ? 'rotate-180' : ''}`} />
                     </button>
                 </div>
 
-                {!isCollapsed && (
+                {isExpanded && (
                     <div className="px-3 pb-2">
                         <CompanySwitcher />
                     </div>
@@ -290,7 +295,7 @@ export function SuperadminSidebar() {
                 <nav className="flex-1 px-3 space-y-6 overflow-y-auto scrollbar-hide py-4">
                     {sections.map((section, idx) => (
                         <div key={idx} className="space-y-1">
-                            {!isCollapsed && (
+                            {isExpanded && (
                                 <motion.h3
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
@@ -299,7 +304,7 @@ export function SuperadminSidebar() {
                                     {section.title}
                                 </motion.h3>
                             )}
-                            {isCollapsed && (
+                            {!isExpanded && (
                                 <div className="h-px bg-white/5 mx-2 my-4" />
                             )}
                             <div className="space-y-1">
@@ -312,7 +317,7 @@ export function SuperadminSidebar() {
                                             <div 
                                                 key={i}
                                                 onMouseEnter={() => {
-                                                    if (typeof window !== 'undefined' && window.innerWidth >= 768 && isCollapsed) {
+                                                    if (typeof window !== 'undefined' && window.innerWidth >= 768 && !isExpanded) {
                                                         setHoveredSection(typedItem.label);
                                                     }
                                                 }}
@@ -323,12 +328,12 @@ export function SuperadminSidebar() {
                                                     className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group font-medium relative ${hasActiveChild
                                                         ? 'bg-blis-red text-white shadow-lg shadow-blis-red/20'
                                                         : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                                        } ${isCollapsed ? 'justify-center px-0' : ''}`}
-                                                    title={isCollapsed ? typedItem.label : ""}
+                                                        } ${!isExpanded ? 'justify-center px-0' : ''}`}
+                                                    title={!isExpanded ? typedItem.label : ""}
                                                 >
                                                     <typedItem.icon className={`w-5 h-5 flex-shrink-0 transition-colors ${hasActiveChild ? 'text-white' : 'group-hover:text-blis-red'}`} />
                                                     <AnimatePresence>
-                                                        {!isCollapsed && (
+                                                        {isExpanded && (
                                                             <motion.span
                                                                 initial={{ opacity: 0, x: -10 }}
                                                                 animate={{ opacity: 1, x: 0 }}
@@ -340,7 +345,7 @@ export function SuperadminSidebar() {
                                                         )}
                                                     </AnimatePresence>
                                                     <AnimatePresence>
-                                                        {!isCollapsed && (
+                                                        {isExpanded && (
                                                             <motion.span
                                                                 initial={{ opacity: 0, rotate: 0 }}
                                                                 animate={{ opacity: 1, rotate: expandedSections[typedItem.label] ? 90 : 0 }}
@@ -353,7 +358,7 @@ export function SuperadminSidebar() {
                                                     </AnimatePresence>
                                                 </button>
                                                 <AnimatePresence>
-                                                    {expanded && !isCollapsed && (
+                                                    {expanded && isExpanded && (
                                                         <motion.div
                                                             initial={{ height: 0, opacity: 0 }}
                                                             animate={{ height: 'auto', opacity: 1 }}
@@ -397,15 +402,15 @@ export function SuperadminSidebar() {
                                             key={i}
                                             href={item.href!}
                                             onClick={() => window.innerWidth < 1024 && setIsCollapsed(true)}
-                                            className={`flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group font-medium relative ${isActive
-                                                ? 'bg-blis-red text-white shadow-lg shadow-blis-red/20'
-                                                : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                                } ${isCollapsed ? 'justify-center px-0' : ''}`}
-                                            title={isCollapsed ? item.label : ""}
+className={`flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group font-medium relative ${isActive
+                                                    ? 'bg-blis-red text-white shadow-lg shadow-blis-red/20'
+                                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                                    } ${!isExpanded ? 'justify-center px-0' : ''}`}
+                                            title={!isExpanded ? item.label : ""}
                                         >
                                             <item.icon className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'group-hover:text-blis-red'}`} />
                                             <AnimatePresence>
-                                                {!isCollapsed && (
+                                                {isExpanded && (
                                                     <motion.span
                                                         initial={{ opacity: 0, x: -10 }}
                                                         animate={{ opacity: 1, x: 0 }}
@@ -416,7 +421,7 @@ export function SuperadminSidebar() {
                                                     </motion.span>
                                                 )}
                                             </AnimatePresence>
-                                            {isActive && !isCollapsed && (
+                                            {isActive && isExpanded && (
                                                 <motion.div
                                                     layoutId="active-indicator"
                                                     className="absolute left-0 w-1 h-6 bg-white rounded-r-full"

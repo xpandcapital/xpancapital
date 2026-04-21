@@ -30,31 +30,38 @@ export function useMisCapacitaciones() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
-
-  const fetchCursos = useCallback(async () => {
-    if (!user?.email) return
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/equipo-cursos/me?email=${encodeURIComponent(user.email)}`)
-      const data = await res.json()
-      if (data.success) {
-        setCursos(data.data || [])
-        setIsAdmin(data.isAdmin || false)
-      } else {
-        setError(data.error || 'Error al cargar cursos')
-      }
-    } catch { setError('Error de conexión') }
-    finally { setLoading(false) }
-  }, [user?.email])
+  const [fetched, setFetched] = useState(false)
 
   useEffect(() => {
-    if (!authLoading && user?.email) {
-      fetchCursos()
-    } else if (!authLoading && !user?.email) {
+    if (authLoading) return
+    if (!user?.email) {
       setLoading(false)
-      setError('No se pudo obtener tu correo. Inicia sesión de nuevo.')
+      if (!fetched) setError('Inicia sesión para ver tus capacitaciones')
+      return
     }
-  }, [authLoading, user?.email, fetchCursos])
+    if (fetched) return
+
+    const doFetch = async () => {
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/equipo-cursos/me?email=${encodeURIComponent(user.email)}`)
+        const data = await res.json()
+        if (data.success) {
+          setCursos(data.data || [])
+          setIsAdmin(data.isAdmin || false)
+          setError(null)
+        } else {
+          setError(data.error || 'Error al cargar cursos')
+        }
+      } catch {
+        setError('Error de conexión')
+      } finally {
+        setLoading(false)
+        setFetched(true)
+      }
+    }
+    doFetch()
+  }, [authLoading, user?.email, fetched])
 
   const toggleLesson = async (equipoCursoId: string, leccionId: string, completado: boolean) => {
     if (equipoCursoId.startsWith('pending-')) {
@@ -69,7 +76,6 @@ export function useMisCapacitaciones() {
         if (!assignData.success) return false
         const newId = assignData.data?.id
         if (!newId) return false
-        await fetchCursos()
         const progRes = await fetch('/api/equipo-cursos/progress', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -77,7 +83,9 @@ export function useMisCapacitaciones() {
         })
         const progData = await progRes.json()
         if (progData.success) {
-          await fetchCursos()
+          const freshRes = await fetch(`/api/equipo-cursos/me?email=${encodeURIComponent(user!.email!)}`)
+          const freshData = await freshRes.json()
+          if (freshData.success) setCursos(freshData.data || [])
           return true
         }
         return false
@@ -99,5 +107,5 @@ export function useMisCapacitaciones() {
     } catch { return false }
   }
 
-  return { cursos, loading: loading || authLoading, error, refetch: fetchCursos, toggleLesson, isAdmin }
+  return { cursos, loading: loading || authLoading, error, refetch: () => { setFetched(false) }, toggleLesson, isAdmin }
 }

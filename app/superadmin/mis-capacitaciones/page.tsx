@@ -12,13 +12,22 @@ const ESTADO_CONFIG: Record<string, { label: string; color: string; icon: any }>
 }
 
 export default function MisCapacitacionesPage() {
-  const { cursos, loading, error } = useMisCapacitaciones()
-  const router = useRouter()
+const { cursos, loading, error } = useMisCapacitaciones()
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
         <Loader2 className="w-8 h-8 text-blis-red animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <AlertCircle className="w-12 h-12 text-red-400" />
+        <p className="text-white/60 text-center">{error}</p>
+        <button onClick={() => window.location.reload()} className="text-blis-red text-sm hover:underline mt-2">Reintentar</button>
       </div>
     )
   }
