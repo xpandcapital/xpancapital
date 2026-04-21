@@ -4,7 +4,7 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // Tipos de rol del sistema (coinciden con profiles.rol en la BD)
-export type UserRole = 'superadmin' | 'admin' | 'editor' | 'cliente' | 'usuario'
+export type UserRole = 'superadmin' | 'admin' | 'editor' | 'empleado' | 'cliente' | 'usuario'
 
 // Permisos disponibles en el sistema
 export const PERMISSIONS = {
@@ -121,6 +121,18 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
     'equipo:ver',
     'perfil:ver', 'perfil:editar',
   ],
+  empleado: [
+    'dashboard:ver',
+    'proyectos:ver', 'lotes:ver',
+    'asesores:ver',
+    'productos:ver',
+    'clientes:ver',
+    'cursos:ver',
+    'leads:ver',
+    'equipo:ver',
+    'postulantes:ver',
+    'perfil:ver', 'perfil:editar',
+  ],
   cliente: [
     'miembros:ver',
     'productos:ver',
@@ -177,7 +189,8 @@ export const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bgCol
   superadmin: { label: 'Super Admin', color: 'text-white', bgColor: 'bg-blis-red' },
   admin: { label: 'Admin', color: 'text-amber-400', bgColor: 'bg-amber-500/20 border-amber-500/30' },
   editor: { label: 'Editor', color: 'text-purple-400', bgColor: 'bg-purple-500/20 border-purple-500/30' },
-  cliente: { label: 'Cliente', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20 border-emerald-500/30' },
+  empleado: { label: 'Empleado', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20 border-emerald-500/30' },
+  cliente: { label: 'Cliente', color: 'text-blue-400', bgColor: 'bg-blue-500/20 border-blue-500/30' },
   usuario: { label: 'Usuario', color: 'text-gray-400', bgColor: 'bg-gray-500/20 border-gray-500/30' },
 }
 
@@ -236,6 +249,7 @@ export function getDefaultRouteForRole(rol: string): string {
     case 'superadmin':
     case 'admin':
     case 'editor':
+    case 'empleado':
       return '/superadmin'
     case 'cliente':
     case 'usuario':
@@ -246,5 +260,5 @@ export function getDefaultRouteForRole(rol: string): string {
 
 // Verifica si un rol tiene acceso al panel de administración
 export function isAdminRole(rol: string): boolean {
-  return ['superadmin', 'admin', 'editor'].includes(rol)
+  return ['superadmin', 'admin', 'editor', 'empleado'].includes(rol)
 }

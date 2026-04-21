@@ -76,7 +76,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
               email,
               nombre: data.nombre_completo || 'Sin nombre',
               empresa_id: EMPRESA_ID,
-              rol: 'editor',
+              rol: 'empleado',
               telefono: data.celular_contacto || null,
               creado_en: new Date().toISOString(),
             }, { onConflict: 'id' })

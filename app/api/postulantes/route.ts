@@ -181,7 +181,7 @@ export async function PUT(request: NextRequest) {
                 email: advisorEmail,
                 nombre: advisorName,
                 empresa_id: EMPRESA_ID,
-                rol: 'editor',
+                rol: 'empleado',
                 telefono: advisorPhone,
                 fecha_nacimiento: postulante.fecha_nacimiento || null,
                 estado_civil: postulante.estado_civil || null,

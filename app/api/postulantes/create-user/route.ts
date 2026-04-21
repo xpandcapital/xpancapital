@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       email,
       nombre: postulante.nombre_completo || 'Sin nombre',
       empresa_id: EMPRESA_ID,
-      rol: 'editor',
+      rol: 'empleado',
       telefono: postulante.celular_contacto || null,
       creado_en: new Date().toISOString(),
     }, { onConflict: 'id' })

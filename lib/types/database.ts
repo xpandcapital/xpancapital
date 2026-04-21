@@ -124,7 +124,7 @@ export interface NivelCliente {
 
 export type TipoCuenta = 'persona' | 'empresa'
 export type TipoDocumento = 'DNI' | 'RUC' | 'Cedula' | 'Pasaporte' | 'CE' | 'RUT' | 'CURP' | 'RFC' | 'NIT' | 'TI' | 'CC' | 'CPF' | 'CI'
-export type RolUsuario = 'usuario' | 'cliente' | 'editor' | 'admin' | 'superadmin'
+export type RolUsuario = 'usuario' | 'cliente' | 'editor' | 'empleado' | 'admin' | 'superadmin'
 export type CourierPreferido = 'pickup' | 'home' | 'office'
 
 export interface Profile {
