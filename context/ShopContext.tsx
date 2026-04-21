@@ -115,7 +115,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("blis_cart", JSON.stringify(cart));
         
         if (userRef.current) {
-            syncCartToSupabase(cart);
+            syncCartToSupabase(cart).catch(() => {});
         }
     }, [cart, isLoaded, syncCartToSupabase]);
 
@@ -126,7 +126,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("blis_favorites", JSON.stringify(favorites));
         
         if (userRef.current) {
-            syncFavoritesToSupabase(favorites);
+            syncFavoritesToSupabase(favorites).catch(() => {});
         }
     }, [favorites, isLoaded, syncFavoritesToSupabase]);
 

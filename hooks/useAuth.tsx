@@ -94,23 +94,18 @@ async function fetchProfile(userId: string): Promise<User | null> {
 const CACHE_KEY = 'blis_auth_user'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Inicializar desde cache si existe (evita flash de "no logueado")
-  const [user, setUser] = useState<User | null>(() => {
-    if (typeof window === 'undefined') return null
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
     try {
       const cached = localStorage.getItem(CACHE_KEY)
-      if (cached) return JSON.parse(cached)
+      if (cached) {
+        setUser(JSON.parse(cached))
+      }
     } catch {}
-    return null
-  })
-  // Si ya hay usuario del cache, no mostrar loading
-  const [loading, setLoading] = useState(() => {
-    if (typeof window === 'undefined') return true
-    try {
-      const cached = localStorage.getItem(CACHE_KEY)
-      return !cached
-    } catch { return true }
-  })
+  }, [])
+
   const router = useRouter()
 
   // Persistir usuario en cache cuando cambia
