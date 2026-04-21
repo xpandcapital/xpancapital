@@ -47,8 +47,7 @@ export async function POST(request: NextRequest) {
           .from('advisors')
           .insert({
             email,
-            nombre: nombre || email.split('@')[0],
-            empresa_id: DEFAULT_EMPRESA_ID,
+            name: nombre || email.split('@')[0],
           })
           .select('id')
           .single()

@@ -233,8 +233,12 @@ export default function CursoDetallePage() {
                     {activeLesson ? (
                         <div className="max-w-4xl mx-auto w-full">
                             {activeLesson.type === 'video' && activeLesson.videoUrl ? (
-                                <div className="relative aspect-video bg-black w-full">
-                                    <iframe src={activeLesson.videoUrl} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                                <div className="aspect-video bg-black w-full">
+                                    {activeLesson.videoUrl.includes('<iframe') || activeLesson.videoUrl.includes('<script') ? (
+                                        <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: activeLesson.videoUrl.replace(/width=".*?"/g, 'width="100%"').replace(/height=".*?"/g, 'height="100%"') }} />
+                                    ) : (
+                                        <iframe src={activeLesson.videoUrl} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                                    )}
                                 </div>
                             ) : activeLesson.type === 'video' ? (
                                 <div className="aspect-video bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center w-full">

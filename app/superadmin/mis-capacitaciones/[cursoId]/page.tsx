@@ -36,6 +36,8 @@ interface CursoData {
     para_equipo?: boolean
     precio_usd?: number
     precio_coins?: number
+    sequential_progress?: boolean
+    require_completion?: boolean
 }
 
 interface EquipoCurso {
@@ -173,6 +175,25 @@ export default function CursoViewerPage() {
     const modulos: Module[] = cursoData?.modulos || []
     const totalLessons = modulos.reduce((sum, m) => sum + (m.lessons?.length || 0), 0)
     const completedCount = completedSet.size
+    const isSequential = cursoData?.sequential_progress || false
+    const requireCompletion = cursoData?.require_completion || false
+    const allLessonsFlat = modulos.flatMap(m => m.lessons || [])
+
+    const isLessonLocked = (mIdx: number, lIdx: number): boolean => {
+        if (!isSequential) return false
+        if (mIdx === 0 && lIdx === 0) return false
+        const prevLessonIdx = mIdx * 100 + lIdx - 1
+        if (lIdx === 0 && mIdx > 0) {
+            const prevModule = modulos[mIdx - 1]
+            const prevModuleLessons = prevModule?.lessons || []
+            if (prevModuleLessons.length === 0) return false
+            const lastLessonOfPrev = prevModuleLessons[prevModuleLessons.length - 1]
+            return !completedSet.has(lastLessonOfPrev.id)
+        }
+        const prevLesson = modulos[mIdx]?.lessons?.[lIdx - 1]
+        if (!prevLesson) return false
+        return requireCompletion ? !completedSet.has(prevLesson.id) : false
+    }
 
     const allLessons = modulos.flatMap(m => m.lessons.map(l => ({ lesson: l, moduleId: m.id })))
     const currentIndex = activeLesson ? allLessons.findIndex(item => item.lesson.id === activeLesson.id) : -1
@@ -263,34 +284,37 @@ export default function CursoViewerPage() {
                                         {moduleLessons.map((lesson, lIdx) => {
                                             const isActive = activeLesson?.id === lesson.id
                                             const isCompleted = completedSet.has(lesson.id)
+                                            const isLocked = isLessonLocked(mIdx, lIdx)
                                             const typeConfig = TYPE_CONFIG[lesson.type] || TYPE_CONFIG.text
                                             const LessonIcon = typeConfig.icon
 
                                             return (
                                                 <button
                                                     key={lesson.id}
-                                                    onClick={() => selectLesson(lesson, modulo.id)}
-                                                    className={`w-full flex items-center gap-3 px-5 py-2.5 transition-all text-left group ${
-                                                        isActive ? 'bg-blis-red/5 border-l-2 border-l-blis-red' : 'hover:bg-white/[0.02] border-l-2 border-l-transparent'
-                                                    }`}
+                                                    onClick={() => !isLocked && selectLesson(lesson, modulo.id)}
+                                                    className={`w-full flex items-center gap-3 px-5 py-2.5 transition-all text-left group ${isLocked ? 'opacity-40 cursor-not-allowed' : isActive ? 'bg-blis-red/5 border-l-2 border-l-blis-red' : 'hover:bg-white/[0.02] border-l-2 border-l-transparent'}`}
                                                 >
                                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                                         isCompleted
                                                             ? 'bg-emerald-500 border-emerald-500'
-                                                            : isActive
-                                                                ? 'border-blis-red bg-blis-red/10'
-                                                                : 'border-gray-700 bg-transparent group-hover:border-gray-500'
+                                                            : isLocked
+                                                                ? 'border-gray-800 bg-transparent'
+                                                                : isActive
+                                                                    ? 'border-blis-red bg-blis-red/10'
+                                                                    : 'border-gray-700 bg-transparent group-hover:border-gray-500'
                                                     }`}>
                                                         {isCompleted ? (
                                                             <CheckCircle2 className="w-3 h-3 text-white" />
+                                                        ) : isLocked ? (
+                                                            <Lock className="w-2.5 h-2.5 text-gray-600" />
                                                         ) : (
                                                             <Circle className="w-2.5 h-2.5 hidden" />
                                                         )}
                                                     </div>
-                                                    <LessonIcon className={`w-3.5 h-3.5 shrink-0 ${isActive ? typeConfig.color : 'text-gray-600'}`} />
+                                                    {isLocked ? <Lock className="w-3 h-3 text-gray-600 shrink-0" /> : <LessonIcon className={`w-3.5 h-3.5 shrink-0 ${isActive ? typeConfig.color : 'text-gray-600'}`} />}
                                                     <div className="flex-1 min-w-0">
-                                                        <p className={`text-xs truncate ${isActive ? 'text-white font-bold' : 'text-gray-400 group-hover:text-white'}`}>{lesson.title}</p>
-                                                        <p className={`text-[9px] ${isActive ? 'text-blis-red/60' : 'text-gray-700'}`}>{typeConfig.label}</p>
+                                                        <p className={`text-xs truncate ${isLocked ? 'text-gray-600' : isActive ? 'text-white font-bold' : 'text-gray-400 group-hover:text-white'}`}>{lesson.title}</p>
+                                                        <p className={`text-[9px] ${isLocked ? 'text-gray-700' : isActive ? 'text-blis-red/60' : 'text-gray-700'}`}>{isLocked ? 'Bloqueado' : typeConfig.label}</p>
                                                     </div>
                                                 </button>
                                             )
@@ -339,12 +363,16 @@ export default function CursoViewerPage() {
                             {/* Video Player */}
                             {activeLesson.type === 'video' && activeLesson.videoUrl ? (
                                 <div className="relative aspect-video bg-black w-full">
-                                    <iframe
-                                        src={activeLesson.videoUrl}
-                                        className="w-full h-full"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                    />
+                                    {activeLesson.videoUrl.includes('<iframe') || activeLesson.videoUrl.includes('<script') ? (
+                                        <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: activeLesson.videoUrl.replace(/width=".*?"/g, 'width="100%"').replace(/height=".*?"/g, 'height="100%"') }} />
+                                    ) : (
+                                        <iframe
+                                            src={activeLesson.videoUrl}
+                                            className="w-full h-full"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    )}
                                     <button
                                         onClick={() => setShowVideoExpand(true)}
                                         className="absolute top-4 right-4 p-2 bg-black/60 backdrop-blur-sm rounded-lg text-white/80 hover:text-white hover:bg-black/80 transition-all"
@@ -478,12 +506,16 @@ export default function CursoViewerPage() {
                         </button>
                     </div>
                     <div className="flex-1" onClick={(e) => e.stopPropagation()}>
-                        <iframe
-                            src={activeLesson.videoUrl}
-                            className="w-full h-full"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                        />
+                        {activeLesson.videoUrl.includes('<iframe') || activeLesson.videoUrl.includes('<script') ? (
+                            <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: activeLesson.videoUrl.replace(/width=".*?"/g, 'width="100%"').replace(/height=".*?"/g, 'height="100%"') }} />
+                        ) : (
+                            <iframe
+                                src={activeLesson.videoUrl}
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        )}
                     </div>
                 </div>
             )}

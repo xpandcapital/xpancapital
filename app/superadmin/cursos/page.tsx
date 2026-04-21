@@ -61,6 +61,8 @@ interface Course {
     image: string | null;
     certificateTemplateId: string | null;
     paraEquipo: boolean;
+    sequentialProgress: boolean;
+    requireCompletion: boolean;
 }
 
 function ImageCropper({ src, onCrop, onCancel }: { src: string; onCrop: (base64: string) => void; onCancel: () => void }) {
@@ -747,6 +749,8 @@ export default function AdminCourses() {
                     certificado_template_id?: string;
                     creado_en?: string;
                     para_equipo?: boolean;
+                    sequential_progress?: boolean;
+                    require_completion?: boolean;
                     imagen_principal?: string;
                 }) => ({
                     id: c.id,
@@ -760,7 +764,9 @@ export default function AdminCourses() {
                     bliscoins: c.precio_coins || 0,
                     image: c.imagen_principal || null,
                     certificateTemplateId: c.certificado_template_id || null,
-                    paraEquipo: c.para_equipo || false
+                    paraEquipo: c.para_equipo || false,
+                    sequentialProgress: c.sequential_progress || false,
+                    requireCompletion: c.require_completion || false
                 }));
                 setCourses(mappedCourses);
             }
@@ -839,6 +845,8 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
                 precio_usd: currentCourse.price || 0,
                 activo: effectiveStatus === 'Publicado',
                 para_equipo: currentCourse.paraEquipo || false,
+                sequential_progress: currentCourse.sequentialProgress || false,
+                require_completion: currentCourse.requireCompletion || false,
             };
 
             if (currentCourse.image) courseData.imagen_principal = currentCourse.image;
@@ -929,7 +937,9 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
             bliscoins: 0,
             image: null,
             certificateTemplateId: null,
-            paraEquipo: false
+            paraEquipo: false,
+            sequentialProgress: false,
+            requireCompletion: false
         };
         setCourses(prev => [...prev, newCourse]);
         setCurrentCourse(newCourse);
@@ -1482,6 +1492,28 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
                                                     <Users className="w-3.5 h-3.5" />
                                                     {currentCourse.paraEquipo ? 'Solo Equipo' : 'Público'}
                                                 </button>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Progreso Secuencial</label>
+                                                <button
+                                                    onClick={() => setCurrentCourse({ ...currentCourse, sequentialProgress: !currentCourse.sequentialProgress })}
+                                                    className={`w-full py-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${currentCourse.sequentialProgress ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-white/5 border-white/10 text-gray-500'}`}
+                                                >
+                                                    {currentCourse.sequentialProgress ? 'Activado' : 'Desactivado'}
+                                                </button>
+                                                <p className="text-[8px] text-gray-600">Las lecciones se desbloquean en orden</p>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Completar para Avanzar</label>
+                                                <button
+                                                    onClick={() => setCurrentCourse({ ...currentCourse, requireCompletion: !currentCourse.requireCompletion })}
+                                                    className={`w-full py-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${currentCourse.requireCompletion ? 'bg-purple-500/10 border-purple-500/30 text-purple-400' : 'bg-white/5 border-white/10 text-gray-500'}`}
+                                                >
+                                                    {currentCourse.requireCompletion ? 'Requerido' : 'Opcional'}
+                                                </button>
+                                                <p className="text-[8px] text-gray-600">Marcar como completado para avanzar</p>
                                             </div>
                                         </div>
                                     </div>
