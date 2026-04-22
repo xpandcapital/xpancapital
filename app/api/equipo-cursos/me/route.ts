@@ -19,26 +19,9 @@ export async function GET(request: NextRequest) {
       .eq('email', email)
       .single()
 
-    if (profile && ['superadmin', 'admin', 'empleado'].includes(profile.rol)) {
-      isAdmin = profile.rol === 'superadmin' || profile.rol === 'admin'
-    }
+    const userRol = profile?.rol
+    const effectiveIsAdmin = ['superadmin', 'admin', 'empleado'].includes(userRol || '')
 
-    if (!profile) {
-      const { data: authUsers } = await supabase.auth.admin.listUsers()
-      const authUser = authUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase())
-      if (authUser) {
-        const { data: profileById } = await supabase
-          .from('profiles')
-          .select('id, rol')
-          .eq('id', authUser.id)
-          .single()
-        if (profileById) {
-          if (['superadmin', 'admin'].includes(profileById.rol)) isAdmin = true
-        }
-      }
-    }
-
-    const effectiveIsAdmin = isAdmin || (profile && ['superadmin', 'admin'].includes(profile.rol))
     const profileId = profile?.id
     const normalizedEmail = email.toLowerCase().trim()
 
