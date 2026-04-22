@@ -55,14 +55,39 @@ async function fetchProfile(userId: string): Promise<User | null> {
       .single()
 
     if (error) {
-      if (error.code === '406' || error.message?.includes('406') || error.message?.includes('Not Acceptable')) {
-        console.warn('[Auth] Profile fetch 406 - schema cache stale. Retrying with full select.')
+      if (error.code === '406' || error.message?.includes('406') || error.message?.includes('Not Acceptable') || error.code === 'PGRST116') {
+        console.warn('[Auth] Profile not found or 406 - retrying and creating if needed.')
         const { data: retryData, error: retryError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
           .single()
-        if (retryError || !retryData) return null
+        if (retryError && retryError.code !== 'PGRST116') return null
+        if (!retryData) {
+          const { data: authUser } = await supabase.auth.getUser(userId)
+          if (authUser?.user?.email) {
+            const email = authUser.user.email
+            const nombre = (authUser.user.user_metadata?.nombre as string) || email.split('@')[0]
+            const rol = (authUser.user.app_metadata?.rol as string) || 'usuario'
+            await supabase.from('profiles').insert({
+              id: userId,
+              email,
+              nombre,
+              rol,
+              empresa_id: EMPRESA_ID,
+            })
+            return {
+              id: userId,
+              email,
+              name: nombre,
+              role: rol as UserRole,
+              blis_coins: 0,
+              empresa_id: EMPRESA_ID,
+              permisos_adicionales: null,
+            }
+          }
+          return null
+        }
         const p = retryData as any
         const rol = (p.rol || 'usuario') as UserRole
         const validRoles: UserRole[] = ['superadmin', 'admin', 'editor', 'empleado', 'cliente', 'usuario']
