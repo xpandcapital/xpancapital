@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import {
     ArrowLeft, GraduationCap, ChevronDown, ChevronRight, Video, FileText,
     HelpCircle, CheckCircle2, Loader2, BookOpen, Play, X, MonitorPlay,
-    Clock, Award, Download, ExternalLink, ListChecks, Circle, Lock, Menu
+    Clock, Award, Download, ExternalLink, ListChecks, Circle, Lock
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -330,36 +330,14 @@ export default function CursoViewerPage() {
                 {sidebarContent}
             </div>
 
-            {/* Mobile Sidebar Overlay */}
-            {sidebarOpen && (
-                <div className="fixed inset-0 z-[60] md:hidden">
-                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300" onClick={() => setSidebarOpen(false)} />
-                    <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-zinc-950 border-r border-white/5 flex flex-col transform transition-transform duration-300 ease-out translate-x-0">
-                        <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
-                            <span className="text-xs font-bold text-white uppercase tracking-widest">Contenido</span>
-                            <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-lg text-gray-400">
-                                <X className="w-4 h-4" />
-                            </button>
-                        </div>
-                        {sidebarContent}
-                    </div>
-                </div>
-            )}
-
             {/* Content */}
             <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
                 {/* Top Bar */}
                 <div className="shrink-0 px-4 md:px-6 py-3 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                         <button
-                            onClick={() => setSidebarOpen(true)}
-                            className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-all md:hidden shrink-0"
-                        >
-                            <Menu className="w-5 h-5" />
-                        </button>
-                        <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-all hidden md:flex"
+                            className="hidden md:flex p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-all"
                         >
                             <BookOpen className="w-4 h-4" />
                         </button>
@@ -380,7 +358,7 @@ export default function CursoViewerPage() {
                 </div>
 
                 {/* Lesson Content */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto pb-4 md:pb-0">
                     {activeLesson ? (
                         <div className="max-w-4xl mx-auto w-full">
                             {activeLesson.type === 'video' && activeLesson.videoUrl ? (
@@ -499,6 +477,82 @@ export default function CursoViewerPage() {
                                             Siguiente
                                         </button>
                                     </div>
+                                </div>
+
+                                {/* Mobile Course Tree - always visible below action buttons */}
+                                <div className="md:hidden mt-6 border-t border-white/10 pt-4">
+                                    <button
+                                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                                        className="flex items-center justify-between w-full mb-3"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <BookOpen className="w-4 h-4 text-blis-red" />
+                                            <span className="text-xs font-black text-white uppercase tracking-widest">Contenido del curso</span>
+                                            <span className="text-[10px] text-gray-500">{completedCount}/{totalLessons}</span>
+                                        </div>
+                                        {sidebarOpen ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
+                                    </button>
+
+                                    {sidebarOpen && (
+                                        <div className="space-y-1 max-h-[50vh] overflow-y-auto">
+                                            {modulos.map((modulo, mIdx) => {
+                                                const isOpen = openModules.has(modulo.id)
+                                                const moduleLessons = modulo.lessons || []
+                                                const completedInModule = moduleLessons.filter(l => completedSet.has(l.id)).length
+
+                                                return (
+                                                    <div key={modulo.id} className="border-b border-white/[0.03] last:border-b-0">
+                                                        <button
+                                                            onClick={() => toggleModule(modulo.id)}
+                                                            className="w-full flex items-center gap-2 py-2.5 px-2 hover:bg-white/[0.02] transition-colors"
+                                                        >
+                                                            <div className={`w-5 h-5 rounded text-[9px] font-black flex items-center justify-center shrink-0 ${
+                                                                completedInModule === moduleLessons.length && moduleLessons.length > 0
+                                                                    ? 'bg-emerald-500/10 text-emerald-400'
+                                                                    : 'bg-white/5 text-gray-500'
+                                                            }`}>
+                                                                {completedInModule === moduleLessons.length && moduleLessons.length > 0 ? <CheckCircle2 className="w-3 h-3" /> : mIdx + 1}
+                                                            </div>
+                                                            <div className="flex-1 text-left min-w-0">
+                                                                <p className="text-white text-[11px] font-bold truncate">{modulo.title}</p>
+                                                                <p className="text-[9px] text-gray-600">{completedInModule}/{moduleLessons.length}</p>
+                                                            </div>
+                                                            {isOpen ? <ChevronDown className="w-3 h-3 text-gray-600 shrink-0" /> : <ChevronRight className="w-3 h-3 text-gray-600 shrink-0" />}
+                                                        </button>
+
+                                                        {isOpen && moduleLessons.length > 0 && (
+                                                            <div className="pb-1">
+                                                                {moduleLessons.map((lesson, lIdx) => {
+                                                                    const isActive = activeLesson?.id === lesson.id
+                                                                    const isCompleted = completedSet.has(lesson.id)
+                                                                    const isLocked = isLessonLocked(mIdx, lIdx)
+                                                                    const typeConfig = TYPE_CONFIG[lesson.type] || TYPE_CONFIG.text
+
+                                                                    return (
+                                                                        <button
+                                                                            key={lesson.id}
+                                                                            onClick={() => !isLocked && selectLesson(lesson, modulo.id)}
+                                                                            className={`w-full flex items-center gap-2 px-3 py-2 transition-all text-left ${isLocked ? 'opacity-40 cursor-not-allowed' : isActive ? 'bg-blis-red/10' : 'hover:bg-white/[0.02]'}`}
+                                                                        >
+                                                                            {isCompleted ? (
+                                                                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                                                            ) : isLocked ? (
+                                                                                <Lock className="w-3.5 h-3.5 text-gray-600 shrink-0" />
+                                                                            ) : (
+                                                                                <Circle className="w-3.5 h-3.5 text-gray-600 shrink-0" />
+                                                                            )}
+                                                                            <span className={`text-[11px] truncate flex-1 ${isLocked ? 'text-gray-600' : isActive ? 'text-white font-bold' : 'text-gray-400'}`}>{lesson.title}</span>
+                                                                            <span className={`text-[9px] shrink-0 ${isLocked ? 'text-gray-700' : isActive ? 'text-blis-red' : 'text-gray-700'}`}>{isLocked ? '' : typeConfig.label}</span>
+                                                                        </button>
+                                                                    )
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )
+                                            })}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
