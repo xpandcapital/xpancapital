@@ -108,7 +108,8 @@ function LoginForm() {
               Correo Electrónico
             </label>
             <input
-              type="email"
+              type="text"
+              inputMode="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}

@@ -253,8 +253,9 @@ export function getDefaultRouteForRole(rol: string): string {
     case 'superadmin':
     case 'admin':
     case 'editor':
-    case 'empleado':
       return '/superadmin'
+    case 'empleado':
+      return '/superadmin/mis-capacitaciones'
     case 'cliente':
     case 'usuario':
     default:
