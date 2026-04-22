@@ -39,8 +39,17 @@ export async function GET(request: NextRequest) {
     }
 
     const effectiveIsAdmin = isAdmin || (profile && ['superadmin', 'admin'].includes(profile.rol))
+    const profileId = profile?.id
+    const normalizedEmail = email.toLowerCase().trim()
 
     if (effectiveIsAdmin) {
+      const { data: advisor } = await supabase
+        .from('advisors')
+        .select('id')
+        .eq('email', normalizedEmail)
+        .single()
+      const advisorId = advisor?.id || null
+
       const { data: allCursos, error: cursosError } = await supabase
         .from('cursos')
         .select('id, nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos')
@@ -52,21 +61,29 @@ export async function GET(request: NextRequest) {
       }
 
       let assignedMap: Record<string, any> = {}
-      const advisorEmail = email.toLowerCase().trim()
-      const { data: advisor } = await supabase
-        .from('advisors')
-        .select('id')
-        .eq('email', advisorEmail)
-        .single()
 
-      if (advisor) {
+      if (advisorId) {
         const { data: asignaciones } = await supabase
           .from('equipo_cursos')
           .select('*')
-          .eq('advisor_id', advisor.id)
+          .eq('advisor_id', advisorId)
         if (asignaciones) {
           for (const a of asignaciones) {
             assignedMap[a.curso_id] = a
+          }
+        }
+      }
+
+      if (profileId) {
+        const { data: progresoByUser } = await supabase
+          .from('equipo_cursos')
+          .select('*')
+          .eq('user_id', profileId)
+        if (progresoByUser) {
+          for (const p of progresoByUser) {
+            if (!assignedMap[p.curso_id]) {
+              assignedMap[p.curso_id] = p
+            }
           }
         }
       }
@@ -77,7 +94,8 @@ export async function GET(request: NextRequest) {
           ? { ...asignacion, cursos: curso }
           : {
               id: `pending-${curso.id}`,
-              advisor_id: advisor?.id || null,
+              advisor_id: advisorId,
+              user_id: profileId,
               curso_id: curso.id,
               progreso: 0,
               estado: 'asignado',
@@ -92,21 +110,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data, isTeamMember: true, isAdmin: true })
     }
 
-    const advisorEmail = email.toLowerCase().trim()
-    const { data: advisor, error: advisorError } = await supabase
+    const { data: advisor } = await supabase
       .from('advisors')
       .select('id')
-      .eq('email', advisorEmail)
+      .eq('email', normalizedEmail)
       .single()
 
-    if (advisorError || !advisor) {
+    const advisorId = advisor?.id
+
+    if (!advisorId) {
       return NextResponse.json({ success: true, data: [], isTeamMember: false })
     }
 
     const { data, error } = await supabase
       .from('equipo_cursos')
       .select('*, cursos:id_curso(nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos)')
-      .eq('advisor_id', advisor.id)
+      .eq('advisor_id', advisorId)
       .order('asignado_en', { ascending: false })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
