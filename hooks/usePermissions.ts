@@ -110,7 +110,8 @@ function getEffectivePermissionsFromDB(
   const defaults = ROLE_DEFAULTS[rol as UserRole] || ROLE_DEFAULTS.usuario
   const hasWildcardDefault = defaults.includes('*' as any)
 
-  const base = new Set<string>(dbPermissions)
+  // Use DB permissions if available, otherwise fall back to defaults
+  const base = new Set<string>(dbPermissions.length > 0 ? dbPermissions : defaults)
 
   if (hasWildcardDefault) {
     base.add('*')

@@ -1,6 +1,17 @@
+"use client"
+
 import { Bell, Search } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function SuperadminHeader() {
+    const { user } = useAuth()
+
+    const nameParts = (user?.name || 'Usuario').split(' ')
+    const firstName = nameParts[0] || ''
+    const firstSurname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : ''
+    const displayName = [firstName, firstSurname].filter(Boolean).join(' ')
+    const initials = [firstName[0], firstSurname[0]].filter(Boolean).join('').toUpperCase() || 'U'
+
     return (
         <header className="h-20 bg-zinc-950/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-20">
             <div className="flex items-center gap-4 w-96">
@@ -20,12 +31,12 @@ export function SuperadminHeader() {
                     <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blis-red rounded-full shadow-[0_0_8px_rgba(190,11,60,1)] text-[8px] flex items-center justify-center font-bold text-white"></span>
                 </button>
                 <div className="flex items-center gap-3 pl-6 border-l border-white/10">
-                    <div className="w-10 h-10 rounded-full bg-blis-red/20 border border-blis-red/50 flex items-center justify-center text-blis-red font-bold">
-                        A
+                    <div className="w-10 h-10 rounded-full bg-blis-red/20 border border-blis-red/50 flex items-center justify-center text-blis-red font-bold text-sm">
+                        {initials}
                     </div>
                     <div className="hidden md:block">
-                        <p className="text-sm font-semibold text-white">Super Administrador</p>
-                        <p className="text-xs text-gray-500">Acceso Total</p>
+                        <p className="text-sm font-semibold text-white truncate max-w-[150px]">{displayName}</p>
+                        <p className="text-xs text-gray-500 capitalize">{user?.role || 'Usuario'}</p>
                     </div>
                 </div>
             </div>
