@@ -70,8 +70,6 @@ export async function GET(request: NextRequest) {
         console.error('[/api/equipo-cursos/me] cursos error:', cursosError)
       }
 
-      const assignedCursoIds = new Set(Object.keys(assignedMap))
-
       const data = (allCursos || []).map(curso => {
         const asignacion = assignedMap[curso.id]
         if (asignacion) {

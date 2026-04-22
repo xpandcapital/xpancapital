@@ -28,8 +28,10 @@ export function usePermissions() {
     if (authLoading) return
 
     const userId = user?.id || ''
-    if (fetchedRef.current === userId) return
-    fetchedRef.current = userId
+    const userRole = user?.role || 'usuario'
+    const refKey = `${userId}:${userRole}`
+    if (fetchedRef.current === refKey) return
+    fetchedRef.current = refKey
 
     async function fetchRolePermissions() {
       if (!userId) {
@@ -43,7 +45,6 @@ export function usePermissions() {
         if (res.ok) {
           const json = await res.json()
           const rolesArray = Array.isArray(json) ? json : (json.data || [])
-          const userRole = user?.role || 'usuario'
           const roleData = rolesArray.find?.((r: { nombre: string }) => r.nombre === userRole)
           if (roleData?.permisos) {
             setRolePermissions(roleData.permisos)

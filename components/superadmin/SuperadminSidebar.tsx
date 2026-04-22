@@ -16,6 +16,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LucideProps } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useAuth } from "@/hooks/useAuth";
 import { SECTION_PERMISSIONS } from "@/lib/auth/permissions";
 import { CompanySwitcher } from "./CompanySwitcher";
 
@@ -54,7 +55,8 @@ export function SuperadminSidebar() {
     const [isHoverExpanded, setIsHoverExpanded] = useState(false);
     const [sidebarWidth, setSidebarWidth] = useState(64);
     const pathname = usePathname();
-    const { canAccessSection, loading: permLoading, isAdmin, allowedSections } = usePermissions();
+    const { canAccessSection, loading: permLoading, isAdmin } = usePermissions();
+    const { user } = useAuth();
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const isExpanded = !isCollapsed || isHoverExpanded;
 
@@ -222,25 +224,17 @@ export function SuperadminSidebar() {
 
     // Filter sections based on permissions
     // Superadmin/admin see everything — skip filtering entirely
-    // For empleado/editor roles, use allowedSections directly (more reliable than async effectivePermissions)
+    // empleado is NOT admin for sidebar purposes (canViewAllCourses=true but sidebar still filters)
+    const userRole = user?.role
+    const skipFiltering = (isAdmin && userRole !== 'empleado')
+
     const sections = useMemo(() => {
         if (permLoading) return allSections
-        if (isAdmin) return allSections
+        if (skipFiltering) return allSections
 
-        // Determine if we have reliable permissions to filter with
-        // allowedSections can be empty if rolePermissions from DB failed to load
-        // canAccessSection is the ground truth (uses effectivePermissions)
-        // If allowedSections is populated, use it for filtering (more precise)
-        // Otherwise fall back to canAccessSection
-        const useAllowedSections = allowedSections && allowedSections.length > 0
-
-        const accessible = (sectionPath: string) => {
-            if (useAllowedSections) {
-                return allowedSections!.includes(sectionPath)
-            }
-            // Fallback: use canAccessSection which checks effectivePermissions directly
-            return canAccessSection(sectionPath)
-        }
+        // Use canAccessSection as primary filter - it uses effectivePermissions which come from
+        // ROLE_DEFAULTS (always available) or rolePermissions from the API (when loaded)
+        const accessible = (sectionPath: string) => canAccessSection(sectionPath)
 
         return allSections.map(section => ({
             ...section,
@@ -268,7 +262,7 @@ export function SuperadminSidebar() {
                 })
                 .filter((item): item is NavItem => item !== null)
         })).filter(section => section.items.length > 0)
-    }, [permLoading, canAccessSection, isAdmin, allowedSections])
+    }, [permLoading, canAccessSection, skipFiltering, userRole])
 
     return (
         <>
