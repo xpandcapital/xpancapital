@@ -8,9 +8,7 @@ export function SuperadminHeader() {
 
     const nameParts = (user?.name || 'Usuario').split(' ')
     const firstName = nameParts[0] || ''
-    const firstSurname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : ''
-    const displayName = [firstName, firstSurname].filter(Boolean).join(' ')
-    const initials = [firstName[0], firstSurname[0]].filter(Boolean).join('').toUpperCase() || 'U'
+    const initials = firstName[0]?.toUpperCase() || 'U'
 
     return (
         <header className="h-20 bg-zinc-950/80 backdrop-blur-md border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-20">
@@ -35,7 +33,7 @@ export function SuperadminHeader() {
                         {initials}
                     </div>
                     <div className="hidden md:block">
-                        <p className="text-sm font-semibold text-white truncate max-w-[150px]">{displayName}</p>
+                        <p className="text-sm font-semibold text-white truncate max-w-[150px]">{firstName}</p>
                         <p className="text-xs text-gray-500 capitalize">{user?.role || 'Usuario'}</p>
                     </div>
                 </div>

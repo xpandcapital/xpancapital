@@ -229,7 +229,8 @@ export function SuperadminSidebar() {
     const skipFiltering = (isAdmin && userRole !== 'empleado')
 
     const sections = useMemo(() => {
-        if (permLoading) return allSections
+        // While loading, show skeleton (empty) to prevent flash of all sections
+        if (permLoading) return []
         if (skipFiltering) return allSections
 
         // Use canAccessSection as primary filter - it uses effectivePermissions which come from
@@ -307,7 +308,15 @@ export function SuperadminSidebar() {
                 )}
 
                 <nav className="flex-1 px-3 space-y-6 overflow-y-auto scrollbar-hide py-4">
-                    {sections.map((section, idx) => (
+                    {sections.length === 0 && permLoading ? (
+                        <div className="space-y-2 animate-pulse px-1">
+                            {[1,2,3,4,5,6,7,8].map(i => (
+                                <div key={i} className="h-9 bg-white/5 rounded-xl" />
+                            ))}
+                        </div>
+                    ) : sections.length === 0 ? (
+                        <div className="text-gray-600 text-xs text-center py-8 px-4">Sin acceso</div>
+                    ) : sections.map((section, idx) => (
                         <div key={idx} className="space-y-1">
                             {isExpanded && (
                                 <motion.h3
