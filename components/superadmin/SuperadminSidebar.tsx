@@ -54,7 +54,7 @@ export function SuperadminSidebar() {
     const [isHoverExpanded, setIsHoverExpanded] = useState(false);
     const [sidebarWidth, setSidebarWidth] = useState(64);
     const pathname = usePathname();
-    const { canAccessSection, loading: permLoading, isAdmin } = usePermissions();
+    const { canAccessSection, loading: permLoading, isAdmin, allowedSections } = usePermissions();
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const isExpanded = !isCollapsed || isHoverExpanded;
 
@@ -222,9 +222,18 @@ export function SuperadminSidebar() {
 
     // Filter sections based on permissions
     // Superadmin/admin see everything — skip filtering entirely
+    // For empleado/editor roles, use allowedSections directly (more reliable than async effectivePermissions)
     const sections = useMemo(() => {
         if (permLoading) return allSections
         if (isAdmin) return allSections
+
+        // Use allowedSections as primary filter, canAccessSection as fallback
+        const accessible = (sectionPath: string) => {
+            if (allowedSections && allowedSections.length > 0) {
+                return allowedSections.includes(sectionPath)
+            }
+            return canAccessSection(sectionPath)
+        }
 
         return allSections.map(section => ({
             ...section,
@@ -233,7 +242,7 @@ export function SuperadminSidebar() {
                     if (item.permission) {
                         const sectionsForPerm = getSectionsFromPermission(item.permission)
                         const hasAccess = sectionsForPerm.length > 0
-                            ? sectionsForPerm.some(s => canAccessSection(s))
+                            ? sectionsForPerm.some(s => accessible(s))
                             : canAccessSection(item.permission)
                         if (!hasAccess) return null
                     }
@@ -242,7 +251,7 @@ export function SuperadminSidebar() {
                             if (!sub.permission) return true
                             const sectionsForPerm = getSectionsFromPermission(sub.permission)
                             return sectionsForPerm.length > 0
-                                ? sectionsForPerm.some(s => canAccessSection(s))
+                                ? sectionsForPerm.some(s => accessible(s))
                                 : canAccessSection(sub.permission)
                         })
                         if (filteredSubItems.length === 0) return null
@@ -252,7 +261,7 @@ export function SuperadminSidebar() {
                 })
                 .filter((item): item is NavItem => item !== null)
         })).filter(section => section.items.length > 0)
-    }, [permLoading, canAccessSection, isAdmin])
+    }, [permLoading, canAccessSection, isAdmin, allowedSections])
 
     return (
         <>
