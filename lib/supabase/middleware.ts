@@ -57,6 +57,7 @@ export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   let user: any = null
+  let profileRol: string | null = null
 
   try {
     const supabase = createServerClient(
@@ -82,6 +83,15 @@ export async function updateSession(request: NextRequest) {
 
     const { data: { user: authUser } } = await supabase.auth.getUser()
     user = authUser
+
+    if (user?.id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('rol')
+        .eq('id', user.id)
+        .single()
+      if (profile?.rol) profileRol = profile.rol
+    }
   } catch (error) {
     console.error('[Middleware] Error al verificar sesión:', error)
   }
@@ -142,8 +152,8 @@ export async function updateSession(request: NextRequest) {
 
   // 2. Autenticado en login → redirigir según rol
   if (user && isLogin) {
-    const rol = user.app_metadata?.rol || 'usuario'
-    if (['superadmin', 'admin', 'editor'].includes(rol)) {
+    const rol = profileRol || user.app_metadata?.rol || user.app_metadata?.role || 'usuario'
+    if (['superadmin', 'admin', 'editor', 'empleado'].includes(rol)) {
       const url = request.nextUrl.clone()
       const redirectParam = url.searchParams.get('redirect')
       url.pathname = redirectParam || '/superadmin'
@@ -158,7 +168,7 @@ export async function updateSession(request: NextRequest) {
 
   // 3. Cliente/usuario intentando acceder a superadmin/admin → redirigir a miembros
   if (user && (isSuperadmin || isAdmin)) {
-    const rol = user.app_metadata?.rol || 'usuario'
+    const rol = profileRol || user.app_metadata?.rol || user.app_metadata?.role || 'usuario'
     if (['cliente', 'usuario'].includes(rol)) {
       const url = request.nextUrl.clone()
       url.pathname = '/miembros'
