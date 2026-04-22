@@ -324,7 +324,7 @@ export default function CursoViewerPage() {
     )
 
     return (
-        <div className="flex flex-col md:flex-row h-[calc(100vh-5rem)] md:h-screen bg-black overflow-hidden -ml-14 md:ml-0 -mt-4 md:mt-0">
+        <div className="flex flex-col md:flex-row fixed inset-0 top-20 md:top-20 bg-black overflow-hidden z-[5] pl-14 md:pl-0">
             {/* Desktop Sidebar */}
             <div className="hidden md:flex w-80 shrink-0 bg-zinc-950 border-r border-white/5 flex-col">
                 {sidebarContent}
