@@ -148,15 +148,6 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
     'miembros:ver',
     'productos:ver',
     'perfil:ver', 'perfil:editar',
-    'dashboard:ver',
-    'proyectos:ver', 'lotes:ver',
-    'asesores:ver',
-    'clientes:ver',
-    'capacitaciones:ver',
-    'leads:ver',
-    'equipo:ver',
-    'postulantes:ver',
-    'facturacion:ver',
   ],
 }
 
