@@ -225,8 +225,11 @@ export function SuperadminSidebar() {
     // Filter sections based on permissions
     // Superadmin/admin see everything — skip filtering entirely
     // empleado is NOT admin for sidebar purposes (canViewAllCourses=true but sidebar still filters)
-    const userRole = user?.role
+    const userRole = user?.role as string | undefined
     const skipFiltering = (isAdmin && userRole !== 'empleado')
+
+    // DEBUG
+    console.log(`[Sidebar] userRole=${userRole} isAdmin=${isAdmin} skipFiltering=${skipFiltering} permLoading=${permLoading}`)
 
     const sections = useMemo(() => {
         if (permLoading) return allSections
@@ -234,7 +237,10 @@ export function SuperadminSidebar() {
 
         // Use canAccessSection as primary filter - it uses effectivePermissions which come from
         // ROLE_DEFAULTS (always available) or rolePermissions from the API (when loaded)
-        const accessible = (sectionPath: string) => canAccessSection(sectionPath)
+        const accessible = (sectionPath: string) => {
+            const result = canAccessSection(sectionPath)
+            return result
+        }
 
         return allSections.map(section => ({
             ...section,

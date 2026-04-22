@@ -56,11 +56,8 @@ function CourseCard({ curso, navigatingTo, onClick }: {
           ${navigatingTo === curso.curso_id ? 'opacity-50 pointer-events-none' : ''}
         `}
       >
-        {/* Left status bar */}
-        <div className={`absolute left-0 top-0 bottom-0 w-1 ${estado.dot}`} />
-
-        {/* Image area - compact */}
-        <div className="relative h-36 overflow-hidden bg-zinc-900 ml-1">
+        {/* Image area - square and outside the image */}
+        <div className="relative aspect-square overflow-hidden bg-zinc-900 ml-1">
           {navigatingTo === curso.curso_id && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
               <Loader2 className="w-8 h-8 text-blis-red animate-spin" />
@@ -77,26 +74,21 @@ function CourseCard({ curso, navigatingTo, onClick }: {
               <GraduationCap className="w-12 h-12 text-gray-700" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+        </div>
 
-          {/* Status badge - bottom left of image */}
-          <div className="absolute bottom-3 left-4">
-            <div className={`flex items-center gap-1.5 ${estado.bg} ${estado.color} border ${estado.border} px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider`}>
-              <EstadoIcon className="w-3 h-3" />
-              {estado.label}
-            </div>
+        {/* Status & team badge - below image */}
+        <div className="flex items-center gap-2 px-4 pt-3">
+          <div className={`flex items-center gap-1.5 ${estado.bg} ${estado.color} border ${estado.border} px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider`}>
+            <EstadoIcon className="w-3 h-3" />
+            {estado.label}
           </div>
-
-          {/* Solo equipo badge */}
           {cursoData?.para_equipo && (
-            <div className="absolute top-3 right-3">
-              <span className="text-[9px] font-bold px-2 py-1 rounded-full bg-blis-red/20 text-blis-red border border-blis-red/30 uppercase tracking-wider">Solo Equipo</span>
-            </div>
+            <span className="text-[9px] font-bold px-2 py-1 rounded-full bg-blis-red/10 text-blis-red border border-blis-red/20 uppercase tracking-wider">Solo Equipo</span>
           )}
         </div>
 
         {/* Content */}
-        <div className="p-4 pl-5">
+        <div className="p-4">
           <h3 className="text-white font-bold text-sm mb-3 line-clamp-2 leading-tight group-hover:text-blis-red transition-colors">
             {cursoData?.nombre || 'Curso'}
           </h3>
@@ -283,7 +275,7 @@ export default function MisCapacitacionesPage() {
         <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Tus Cursos</h2>
         <span className="text-xs text-gray-600">{cursos.length} cursos</span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
         {cursos.map(curso => {
           const estado = ESTADO_CONFIG[curso.estado] || ESTADO_CONFIG.asignado
           const EstadoIcon = estado.icon
