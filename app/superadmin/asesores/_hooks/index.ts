@@ -40,13 +40,32 @@ export function useEquipoCursos(advisorId: string | null) {
     if (!advisorId) { setCursos([]); return }
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      const { data: equipoData, error } = await supabase
         .from('equipo_cursos')
-        .select('*, cursos:id_curso(nombre, precio_usd, imagen_principal, para_equipo)')
+        .select('*')
         .eq('advisor_id', advisorId)
         .order('asignado_en', { ascending: false })
       if (error) throw error
-      setCursos(data || [])
+
+      let cursosInfo: Record<string, any> = {}
+      if (equipoData && equipoData.length > 0) {
+        const cursoIds = [...new Set(equipoData.map(e => e.curso_id).filter(Boolean))]
+        if (cursoIds.length > 0) {
+          const { data: cursosData } = await supabase
+            .from('cursos')
+            .select('id, nombre, precio_usd, imagen_principal, para_equipo')
+            .in('id', cursoIds)
+          if (cursosData) {
+            for (const c of cursosData) cursosInfo[c.id] = c
+          }
+        }
+      }
+
+      const merged = (equipoData || []).map((ec: any) => ({
+        ...ec,
+        cursos: cursosInfo[ec.curso_id] || null,
+      }))
+      setCursos(merged)
     } catch {
       setCursos([])
     } finally {
@@ -86,13 +105,31 @@ export function useEquipoProductos(advisorId: string | null) {
     if (!advisorId) { setProductos([]); return }
     setLoading(true)
     try {
-      const { data, error } = await supabase
+      const { data: equipoProdsData, error } = await supabase
         .from('equipo_productos')
-        .select('*, productos:id_producto(nombre, precio_usd, imagen_principal)')
+        .select('*')
         .eq('advisor_id', advisorId)
         .order('asignado_en', { ascending: false })
-      if (error) throw error
-      setProductos(data || [])
+
+      let productosInfo: Record<string, any> = {}
+      if (equipoProdsData && equipoProdsData.length > 0) {
+        const productoIds = [...new Set(equipoProdsData.map(e => e.producto_id).filter(Boolean))]
+        if (productoIds.length > 0) {
+          const { data: prodsData } = await supabase
+            .from('productos')
+            .select('id, nombre, precio_usd, imagen_principal')
+            .in('id', productoIds)
+          if (prodsData) {
+            for (const p of prodsData) productosInfo[p.id] = p
+          }
+        }
+      }
+
+      const merged = (equipoProdsData || []).map((ep: any) => ({
+        ...ep,
+        productos: productosInfo[ep.producto_id] || null,
+      }))
+      setProductos(merged)
     } catch {
       setProductos([])
     } finally {
