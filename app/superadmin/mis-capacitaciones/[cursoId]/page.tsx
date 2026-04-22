@@ -324,7 +324,7 @@ export default function CursoViewerPage() {
     )
 
     return (
-        <div className="flex flex-col md:flex-row h-screen bg-black overflow-hidden">
+        <div className="flex flex-col md:flex-row h-[calc(100vh-5rem)] md:h-screen bg-black overflow-hidden -ml-14 md:ml-0 -mt-4 md:mt-0">
             {/* Desktop Sidebar */}
             <div className="hidden md:flex w-80 shrink-0 bg-zinc-950 border-r border-white/5 flex-col">
                 {sidebarContent}
@@ -332,9 +332,9 @@ export default function CursoViewerPage() {
 
             {/* Mobile Sidebar Overlay */}
             {sidebarOpen && (
-                <div className="fixed inset-0 z-50 md:hidden">
-                    <div className="absolute inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
-                    <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-zinc-950 border-r border-white/5 flex flex-col animate-in slide-in-from-left">
+                <div className="fixed inset-0 z-[60] md:hidden">
+                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300" onClick={() => setSidebarOpen(false)} />
+                    <div className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-zinc-950 border-r border-white/5 flex flex-col transform transition-transform duration-300 ease-out translate-x-0">
                         <div className="flex items-center justify-between px-4 py-2 border-b border-white/5">
                             <span className="text-xs font-bold text-white uppercase tracking-widest">Contenido</span>
                             <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-lg text-gray-400">
