@@ -12,6 +12,7 @@ const ESTADO_CONFIG: Record<string, { label: string; color: string; icon: any }>
 }
 
 export default function MisCapacitacionesPage() {
+const router = useRouter();
 const { cursos, loading, error } = useMisCapacitaciones()
 
   if (loading) {
