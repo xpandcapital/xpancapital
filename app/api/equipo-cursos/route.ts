@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
-    let { advisor_id, curso_id, email, nombre } = body
+    let { advisor_id, curso_id, email, nombre, user_id } = body
 
     if (!curso_id) {
       return NextResponse.json({ error: 'curso_id es requerido' }, { status: 400 })
@@ -63,9 +63,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'advisor_id o email son requeridos' }, { status: 400 })
     }
 
+    const insertData: Record<string, any> = { advisor_id, curso_id }
+    if (user_id) insertData.user_id = user_id
+
     const { data, error } = await supabase
       .from('equipo_cursos')
-      .insert({ advisor_id, curso_id })
+      .insert(insertData)
       .select()
       .single()
 
