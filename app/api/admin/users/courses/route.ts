@@ -52,10 +52,13 @@ export async function GET(request: NextRequest) {
       .select('id, nombre, imagen_principal, para_equipo, precio_usd, activo')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
 
+    const assignedCourseIds = new Set(assignedCourses.map(c => c.curso_id).filter(Boolean))
+
     return NextResponse.json({
       success: true,
       assigned: assignedCourses,
-      available: availableCourses || [],
+      available: (availableCourses || []).filter(c => !assignedCourseIds.has(c.id)),
+      assignedCourseIds: Array.from(assignedCourseIds),
       advisorId,
     })
   } catch (error: any) {
