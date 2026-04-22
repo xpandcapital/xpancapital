@@ -1,6 +1,8 @@
 import { SuperadminSidebar } from "@/components/superadmin/SuperadminSidebar";
 import { SuperadminGuard } from "@/components/superadmin/SuperadminGuard";
 
+export const dynamic = 'force-dynamic';
+
 export default function AdminLayout({
     children,
 }: {

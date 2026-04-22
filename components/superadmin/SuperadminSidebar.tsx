@@ -228,9 +228,6 @@ export function SuperadminSidebar() {
     const userRole = user?.role as string | undefined
     const skipFiltering = (isAdmin && userRole !== 'empleado')
 
-    // DEBUG
-    console.log(`[Sidebar] userRole=${userRole} isAdmin=${isAdmin} skipFiltering=${skipFiltering} permLoading=${permLoading}`)
-
     const sections = useMemo(() => {
         if (permLoading) return allSections
         if (skipFiltering) return allSections
