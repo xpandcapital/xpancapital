@@ -50,13 +50,13 @@ async function fetchProfile(userId: string): Promise<User | null> {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, nombre, apellido, avatar_url, blis_coins, rol, empresa_id, permisos_adicionales')
+      .select('id, email, nombre, apellido, avatar_url, blis_coins, rol, empresa_id')
       .eq('id', userId)
       .single()
 
     if (error) {
       if (error.code === '406' || error.message?.includes('406') || error.message?.includes('Not Acceptable')) {
-        console.warn('[Auth] Profile fetch 406 - schema cache may need reload. Trying with * select.')
+        console.warn('[Auth] Profile fetch 406 - schema cache stale. Retrying with full select.')
         const { data: retryData, error: retryError } = await supabase
           .from('profiles')
           .select('*')
