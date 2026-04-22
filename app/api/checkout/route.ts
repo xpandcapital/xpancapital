@@ -216,6 +216,75 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // ── Auto-asignar cursos comprados en la tienda ───────────────────────────
+    if (finalUserId && email) {
+      const cursoProducts = productos.filter((p: any) => p.productType === 'curso' || p.tipo === 'servicio');
+      for (const product of cursoProducts) {
+        try {
+          let cursoId = product.curso_id || product.id;
+          let cursoExists = false;
+          const { data: cursoData } = await supabase
+            .from('cursos')
+            .select('id')
+            .eq('id', cursoId)
+            .maybeSingle();
+          if (cursoData) {
+            cursoExists = true;
+          } else {
+            const { data: cursoBySlug } = await supabase
+              .from('cursos')
+              .select('id')
+              .eq('slug', product.slug || product.id)
+              .maybeSingle();
+            if (cursoBySlug) {
+              cursoId = cursoBySlug.id;
+              cursoExists = true;
+            }
+          }
+          if (cursoExists && cursoId) {
+            const { data: advisor } = await supabase
+              .from('advisors')
+              .select('id')
+              .eq('email', email.toLowerCase())
+              .maybeSingle();
+            let advisorId = advisor?.id;
+            if (!advisorId) {
+              const { data: newAdvisor, error: createAdvError } = await supabase
+                .from('advisors')
+                .insert({
+                  email: email.toLowerCase(),
+                  name: nombre || email.split('@')[0],
+                })
+                .select('id')
+                .single();
+              if (createAdvError) {
+                console.error('[Checkout] Error creando advisor:', createAdvError);
+                continue;
+              }
+              advisorId = newAdvisor?.id;
+            }
+            if (advisorId) {
+              const { error: assignError } = await supabase
+                .from('equipo_cursos')
+                .insert({
+                  advisor_id: advisorId,
+                  curso_id: cursoId,
+                  user_id: finalUserId,
+                  estado: 'asignado',
+                });
+              if (assignError && assignError.code !== '23505') {
+                console.error('[Checkout] Error auto-asignando curso:', assignError);
+              } else if (!assignError) {
+                console.log(`[Checkout] Curso ${cursoId} auto-asignado a ${email}`);
+              }
+            }
+          }
+        } catch (e) {
+          console.error('[Checkout] Error en auto-asignación de curso:', e);
+        }
+      }
+    }
+
     // ── Enviar email ─────────────────────────────────────────────────────────
     const nombreProductos = productos.map((p: any) => p.nombre || `Producto #${p.producto_id?.substring(0, 6)}`);
 
