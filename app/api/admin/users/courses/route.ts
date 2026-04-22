@@ -38,26 +38,31 @@ export async function GET(request: NextRequest) {
 
     if (advisor) {
       advisorId = advisor.id
-      const { data: cursos } = await supabase
+      const { data: equipoCursos } = await supabase
         .from('equipo_cursos')
-        .select('*, cursos:id_curso(id, nombre, imagen_principal, para_equipo)')
+        .select('id, advisor_id, curso_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en')
         .eq('advisor_id', advisor.id)
         .order('asignado_en', { ascending: false })
 
-      assignedCourses = cursos || []
+      assignedCourses = equipoCursos || []
     }
 
-    const { data: availableCourses } = await supabase
+    const { data: allCursos } = await supabase
       .from('cursos')
       .select('id, nombre, imagen_principal, para_equipo, precio_usd, activo')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
 
     const assignedCourseIds = new Set(assignedCourses.map(c => c.curso_id).filter(Boolean))
 
+    const cursosConInfo = assignedCourses.map(ac => {
+      const info = allCursos?.find(c => c.id === ac.curso_id)
+      return { ...ac, cursos: info || null }
+    })
+
     return NextResponse.json({
       success: true,
-      assigned: assignedCourses,
-      available: (availableCourses || []).filter(c => !assignedCourseIds.has(c.id)),
+      assigned: cursosConInfo,
+      available: (allCursos || []).filter(c => !assignedCourseIds.has(c.id)),
       assignedCourseIds: Array.from(assignedCourseIds),
       advisorId,
     })
