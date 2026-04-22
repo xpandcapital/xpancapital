@@ -33,16 +33,6 @@ export async function GET(request: NextRequest) {
         .single()
       const advisorId = advisor?.id || null
 
-      const { data: allCursos, error: cursosError } = await supabase
-        .from('cursos')
-        .select('id, nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos')
-        .eq('para_equipo', true)
-
-      if (cursosError) {
-        console.error('[/api/equipo-cursos/me] cursos error:', cursosError)
-        return NextResponse.json({ error: cursosError.message, debug: { email, profileFound: !!profile } }, { status: 500 })
-      }
-
       let assignedMap: Record<string, any> = {}
 
       if (advisorId) {
@@ -71,24 +61,37 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      const { data: allCursos, error: cursosError } = await supabase
+        .from('cursos')
+        .select('id, nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos')
+        .eq('activo', true)
+
+      if (cursosError) {
+        console.error('[/api/equipo-cursos/me] cursos error:', cursosError)
+      }
+
+      const assignedCursoIds = new Set(Object.keys(assignedMap))
+
       const data = (allCursos || []).map(curso => {
         const asignacion = assignedMap[curso.id]
-        return asignacion
-          ? { ...asignacion, cursos: curso }
-          : {
-              id: `pending-${curso.id}`,
-              advisor_id: advisorId,
-              user_id: profileId,
-              curso_id: curso.id,
-              progreso: 0,
-              estado: 'asignado',
-              nota_final: null,
-              lecciones_completadas: [],
-              asignado_en: new Date().toISOString(),
-              completado_en: null,
-              cursos: curso,
-            }
-      })
+        if (asignacion) {
+          return { ...asignacion, cursos: curso }
+        }
+        if (!curso.para_equipo) return null
+        return {
+          id: `pending-${curso.id}`,
+          advisor_id: advisorId,
+          user_id: profileId,
+          curso_id: curso.id,
+          progreso: 0,
+          estado: 'asignado',
+          nota_final: null,
+          lecciones_completadas: [],
+          asignado_en: new Date().toISOString(),
+          completado_en: null,
+          cursos: curso,
+        }
+      }).filter(Boolean)
 
       return NextResponse.json({ success: true, data, isTeamMember: true, isAdmin: true })
     }

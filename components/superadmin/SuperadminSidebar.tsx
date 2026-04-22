@@ -227,11 +227,18 @@ export function SuperadminSidebar() {
         if (permLoading) return allSections
         if (isAdmin) return allSections
 
-        // Use allowedSections as primary filter, canAccessSection as fallback
+        // Determine if we have reliable permissions to filter with
+        // allowedSections can be empty if rolePermissions from DB failed to load
+        // canAccessSection is the ground truth (uses effectivePermissions)
+        // If allowedSections is populated, use it for filtering (more precise)
+        // Otherwise fall back to canAccessSection
+        const useAllowedSections = allowedSections && allowedSections.length > 0
+
         const accessible = (sectionPath: string) => {
-            if (allowedSections && allowedSections.length > 0) {
-                return allowedSections.includes(sectionPath)
+            if (useAllowedSections) {
+                return allowedSections!.includes(sectionPath)
             }
+            // Fallback: use canAccessSection which checks effectivePermissions directly
             return canAccessSection(sectionPath)
         }
 
