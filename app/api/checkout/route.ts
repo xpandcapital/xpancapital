@@ -271,6 +271,7 @@ export async function POST(request: NextRequest) {
                   curso_id: cursoId,
                   user_id: finalUserId,
                   estado: 'asignado',
+                  lecciones_completadas: [],
                 });
               if (assignError && assignError.code !== '23505') {
                 console.error('[Checkout] Error auto-asignando curso:', assignError);

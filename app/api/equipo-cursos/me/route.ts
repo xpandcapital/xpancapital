@@ -105,11 +105,30 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: [], isTeamMember: false })
     }
 
-    const { data, error } = await supabase
+    const { data: equipoCursosData, error } = await supabase
       .from('equipo_cursos')
-      .select('*, cursos:id_curso(nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos)')
+      .select('*')
       .eq('advisor_id', advisorId)
       .order('asignado_en', { ascending: false })
+
+    let cursosInfo: Record<string, any> = {}
+    if (equipoCursosData && equipoCursosData.length > 0) {
+      const cursoIds = [...new Set(equipoCursosData.map(e => e.curso_id).filter(Boolean))]
+      if (cursoIds.length > 0) {
+        const { data: cursosData } = await supabase
+          .from('cursos')
+          .select('id, nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos')
+          .in('id', cursoIds)
+        if (cursosData) {
+          for (const c of cursosData) cursosInfo[c.id] = c
+        }
+      }
+    }
+
+    const data = (equipoCursosData || []).map((ec: any) => ({
+      ...ec,
+      cursos: cursosInfo[ec.curso_id] || null,
+    }))
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true, data, isTeamMember: true })

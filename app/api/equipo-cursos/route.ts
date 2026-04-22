@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'advisor_id o email son requeridos' }, { status: 400 })
     }
 
-    const insertData: Record<string, any> = { advisor_id, curso_id }
+    const insertData: Record<string, any> = { advisor_id, curso_id, lecciones_completadas: [] }
     if (user_id) insertData.user_id = user_id
 
     const { data: inserted, error } = await supabase

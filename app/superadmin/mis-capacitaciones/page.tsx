@@ -14,6 +14,7 @@ const ESTADO_CONFIG: Record<string, { label: string; color: string; icon: any }>
 export default function MisCapacitacionesPage() {
 const router = useRouter();
 const { cursos, loading, error } = useMisCapacitaciones()
+const [navigatingTo, setNavigatingTo] = useState<string | null>(null)
 
   if (loading) {
     return (
@@ -102,10 +103,15 @@ const { cursos, loading, error } = useMisCapacitaciones()
           return (
             <div
               key={curso.id}
-              onClick={() => router.push(`/superadmin/mis-capacitaciones/${curso.curso_id}`)}
-              className="group bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden hover:border-blis-red/20 transition-all cursor-pointer"
+              onClick={() => { setNavigatingTo(curso.curso_id); router.push(`/superadmin/mis-capacitaciones/${curso.curso_id}`); }}
+              className={`group bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden hover:border-blis-red/20 transition-all cursor-pointer ${navigatingTo === curso.curso_id ? 'opacity-50 pointer-events-none' : ''}`}
             >
               <div className="aspect-square relative overflow-hidden bg-zinc-900">
+                {navigatingTo === curso.curso_id && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                    <Loader2 className="w-8 h-8 text-blis-red animate-spin" />
+                  </div>
+                )}
                 {cursoData?.imagen_principal ? (
                   <img src={cursoData.imagen_principal} alt={cursoData.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 ) : (

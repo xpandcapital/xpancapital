@@ -1813,7 +1813,7 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
                     {courses.map((course) => (
                         <div key={course.id} className="bg-zinc-950 border border-white/5 rounded-[2.5rem] p-6 space-y-5 hover:border-white/10 transition-all flex flex-col group relative overflow-hidden shadow-2xl">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-blis-red/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blis-red/10 transition-colors" />
-                            <div className="aspect-video w-full bg-zinc-900 rounded-[2.5rem] border border-white/5 overflow-hidden relative shadow-2xl group-hover:scale-[1.02] transition-transform duration-700">
+                            <div className="aspect-square w-full bg-zinc-900 rounded-xl border border-white/5 overflow-hidden relative shadow-2xl group-hover:scale-[1.02] transition-transform duration-700">
                                 {course.image ? <img src={course.image} className="w-full h-full object-cover" alt="Course" /> : <div className="absolute inset-0 flex items-center justify-center text-zinc-800"><GraduationCap className="w-16 h-16 opacity-10" /></div>}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

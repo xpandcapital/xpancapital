@@ -21,7 +21,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Registro no encontrado' }, { status: 404 })
     }
 
-    const completed: string[] = equipoCurso.lecciones_completadas || []
+    let rawCompleted = equipoCurso.lecciones_completadas
+    if (typeof rawCompleted === 'string') {
+      try { rawCompleted = JSON.parse(rawCompleted) } catch { rawCompleted = [] }
+    }
+    if (!Array.isArray(rawCompleted)) rawCompleted = []
+    const completed: string[] = rawCompleted
+
     let updated: string[]
 
     if (completado) {
@@ -58,11 +64,21 @@ export async function POST(request: NextRequest) {
         ...(estado === 'completado' ? { nota_final: progreso, completado_en } : {}),
       })
       .eq('id', equipo_curso_id)
-      .select('*, cursos:id_curso(nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos)')
+      .select()
       .single()
 
+    let cursoInfo = null
+    if (data) {
+      const { data: c } = await supabase
+        .from('cursos')
+        .select('nombre, descripcion, precio_usd, imagen_principal, slug, para_equipo, modulos')
+        .eq('id', equipoCurso.curso_id)
+        .single()
+      cursoInfo = c
+    }
+
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json({ success: true, data })
+    return NextResponse.json({ success: true, data: { ...data, cursos: cursoInfo } })
   } catch (err: any) {
     console.error('[POST /api/equipo-cursos/progress]', err)
     return NextResponse.json({ error: err.message || 'Error interno' }, { status: 500 })
