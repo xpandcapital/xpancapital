@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('equipo_cursos')
-      .select('*, cursos:id_curso(nombre, precio_usd, imagen_principal)')
+      .select('id, advisor_id, curso_id, progreso, estado, nota_final, lecciones_completadas, asignado_en, completado_en')
       .order('asignado_en', { ascending: false })
 
     if (advisorId) query = query.eq('advisor_id', advisorId)
@@ -66,25 +66,28 @@ export async function POST(request: NextRequest) {
     const insertData: Record<string, any> = { advisor_id, curso_id }
     if (user_id) insertData.user_id = user_id
 
-    const { data, error } = await supabase
+    const { data: inserted, error } = await supabase
       .from('equipo_cursos')
       .insert(insertData)
-      .select('*, cursos:id_curso(id, nombre, imagen_principal, para_equipo, precio_usd)')
+      .select('id, advisor_id, curso_id, progreso, estado, lecciones_completadas, asignado_en')
       .single()
 
     if (error) {
       if (error.code === '23505') {
         const { data: existing } = await supabase
           .from('equipo_cursos')
-          .select('*, cursos:id_curso(id, nombre, imagen_principal, para_equipo, precio_usd)')
+          .select('*')
           .eq('advisor_id', advisor_id)
           .eq('curso_id', curso_id)
           .single()
-        return NextResponse.json({ success: true, data: existing })
+        const { data: cursoInfo } = await supabase.from('cursos').select('id, nombre, imagen_principal, para_equipo, precio_usd').eq('id', curso_id).single()
+        return NextResponse.json({ success: true, data: { ...existing, cursos: cursoInfo } })
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
-    return NextResponse.json({ success: true, data })
+
+    const { data: cursoInfo } = await supabase.from('cursos').select('id, nombre, imagen_principal, para_equipo, precio_usd').eq('id', curso_id).single()
+    return NextResponse.json({ success: true, data: { ...inserted, cursos: cursoInfo } })
   } catch (error) {
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
