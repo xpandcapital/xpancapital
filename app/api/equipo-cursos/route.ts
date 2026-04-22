@@ -69,14 +69,14 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('equipo_cursos')
       .insert(insertData)
-      .select()
+      .select('*, cursos:id_curso(id, nombre, imagen_principal, para_equipo, precio_usd)')
       .single()
 
     if (error) {
       if (error.code === '23505') {
         const { data: existing } = await supabase
           .from('equipo_cursos')
-          .select('*')
+          .select('*, cursos:id_curso(id, nombre, imagen_principal, para_equipo, precio_usd)')
           .eq('advisor_id', advisor_id)
           .eq('curso_id', curso_id)
           .single()
