@@ -25,14 +25,23 @@ const PERMISSION_GROUPS: Record<string, string[]> = {
   'Páginas': ['templates:ver', 'templates:editar'],
   'Correos': ['mails:ver', 'mails:enviar'],
   'Calendarios': ['calendarios:ver', 'calendarios:editar'],
+  'Formularios': ['formularios:ver', 'formularios:crear'],
   'Leads': ['leads:ver', 'leads:editar'],
   'Campañas': ['campanas:ver', 'campanas:crear'],
   'Blog': ['blog:ver', 'blog:crear', 'blog:editar', 'blog:eliminar'],
   'Equipo': ['equipo:ver', 'equipo:crear', 'equipo:editar'],
+  'Postulantes': ['postulantes:ver', 'postulantes:editar'],
+  'Capacitaciones': ['capacitaciones:ver', 'capacitaciones:editar'],
+  'Utilidades': ['utilidades:ver'],
   'Configuración': ['configuracion:ver', 'configuracion:editar'],
+  'APIs y Nube': ['api-nube:ver'],
+  'Analíticas': ['analiticas:ver'],
   'Ajustes': ['ajustes:ver', 'ajustes:editar'],
   'Roles': ['roles:ver', 'roles:editar'],
   'Empresas': ['empresas:ver', 'empresas:editar'],
+  'Miembros': ['miembros:ver'],
+  'Perfil': ['perfil:ver', 'perfil:editar'],
+  'Facturación': ['facturacion:ver'],
 }
 
 export default function RolesPage() {

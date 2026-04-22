@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from 'react'
 import { useMisCapacitaciones } from './_hooks/useMisCapacitaciones'
 import { useRouter } from 'next/navigation'
 import { GraduationCap, Loader2, BookOpen, CheckCircle2, PlayCircle, AlertCircle } from 'lucide-react'
