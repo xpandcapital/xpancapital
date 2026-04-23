@@ -4,12 +4,14 @@ import { useState, useEffect, Suspense } from 'react'
 import { ShieldCheck, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { usePermissions } from '@/hooks/usePermissions'
 import { getDefaultRouteForRole, ROLE_CONFIG, type UserRole } from '@/lib/auth/permissions'
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading, loginWithEmail } = useAuth()
+  const { defaultRoute, loading: permLoading } = usePermissions()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,14 +23,14 @@ function LoginForm() {
 
   // Si ya está autenticado, redirigir según rol
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && !permLoading && user) {
       if (redirectTo) {
         window.location.href = redirectTo
       } else {
-        window.location.href = getDefaultRouteForRole(user.role)
+        window.location.href = defaultRoute || getDefaultRouteForRole(user.role)
       }
     }
-  }, [user, loading, redirectTo, router])
+  }, [user, loading, permLoading, redirectTo, defaultRoute, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

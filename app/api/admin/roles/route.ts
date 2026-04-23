@@ -12,12 +12,12 @@ export async function GET() {
 
     if (error) {
       return NextResponse.json({ success: true, data: [
-        { id: '1', nombre: 'usuario', label: 'Usuario', permisos: ['miembros:ver', 'productos:ver', 'perfil:ver', 'perfil:editar', 'facturacion:ver'] },
-        { id: '2', nombre: 'cliente', label: 'Cliente', permisos: ['miembros:ver', 'productos:ver', 'cursos:ver', 'certificados:ver', 'perfil:ver', 'perfil:editar', 'facturacion:ver'] },
-        { id: '3', nombre: 'editor', label: 'Editor', permisos: ['dashboard:ver', 'proyectos:ver', 'lotes:ver', 'contratos:ver', 'asesores:ver', 'productos:ver', 'productos:editar', 'clientes:ver', 'cursos:ver', 'cursos:editar', 'leads:ver', 'blog:ver', 'blog:crear', 'equipo:ver', 'perfil:ver', 'perfil:editar', 'capacitaciones:ver'] },
-        { id: '4', nombre: 'empleado', label: 'Empleado', permisos: ['dashboard:ver', 'proyectos:ver', 'lotes:ver', 'asesores:ver', 'productos:ver', 'clientes:ver', 'capacitaciones:ver', 'leads:ver', 'equipo:ver', 'postulantes:ver', 'perfil:ver', 'perfil:editar'] },
-        { id: '5', nombre: 'admin', label: 'Admin', permisos: ['*'] },
-        { id: '6', nombre: 'superadmin', label: 'Super Admin', permisos: ['*'] },
+        { id: '1', nombre: 'usuario', label: 'Usuario', permisos: ['miembros:ver', 'productos:ver', 'perfil:ver', 'perfil:editar', 'facturacion:ver'], ruta_inicio: '/miembros' },
+        { id: '2', nombre: 'cliente', label: 'Cliente', permisos: ['miembros:ver', 'productos:ver', 'cursos:ver', 'certificados:ver', 'perfil:ver', 'perfil:editar', 'facturacion:ver'], ruta_inicio: '/miembros' },
+        { id: '3', nombre: 'editor', label: 'Editor', permisos: ['dashboard:ver', 'proyectos:ver', 'lotes:ver', 'contratos:ver', 'asesores:ver', 'productos:ver', 'productos:editar', 'clientes:ver', 'cursos:ver', 'cursos:editar', 'leads:ver', 'blog:ver', 'blog:crear', 'equipo:ver', 'perfil:ver', 'perfil:editar', 'capacitaciones:ver'], ruta_inicio: '/superadmin' },
+        { id: '4', nombre: 'empleado', label: 'Empleado', permisos: ['dashboard:ver', 'proyectos:ver', 'lotes:ver', 'asesores:ver', 'productos:ver', 'clientes:ver', 'capacitaciones:ver', 'leads:ver', 'equipo:ver', 'postulantes:ver', 'perfil:ver', 'perfil:editar'], ruta_inicio: '/superadmin/mis-capacitaciones' },
+        { id: '5', nombre: 'admin', label: 'Admin', permisos: ['*'], ruta_inicio: '/superadmin' },
+        { id: '6', nombre: 'superadmin', label: 'Super Admin', permisos: ['*'], ruta_inicio: '/superadmin' },
       ] })
     }
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
-    const { nombre, label, descripcion, permisos, color } = body
+    const { nombre, label, descripcion, permisos, color, ruta_inicio } = body
 
     if (!nombre || !label) {
       return NextResponse.json({ error: 'Nombre y label son requeridos' }, { status: 400 })
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('roles')
-      .insert({ nombre, label, descripcion, permisos, color: color || '#6b7280' })
+      .insert({ nombre, label, descripcion, permisos, color: color || '#6b7280', ruta_inicio: ruta_inicio || null })
       .select()
       .single()
 

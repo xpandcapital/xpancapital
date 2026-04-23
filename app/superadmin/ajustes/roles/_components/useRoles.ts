@@ -10,6 +10,7 @@ export interface CustomRole {
   color: string
   orden: number
   is_system?: boolean
+  ruta_inicio?: string | null
 }
 
 const SYSTEM_ROLES = ['superadmin', 'admin', 'editor', 'cliente', 'usuario']
@@ -31,6 +32,7 @@ export function useRoles() {
           is_system: SYSTEM_ROLES.includes(r.nombre),
           permisos: Array.isArray(r.permisos) ? r.permisos : [],
           orden: r.orden ?? 99,
+          ruta_inicio: r.ruta_inicio || null,
         })))
       }
     } catch { showToast('Error al cargar roles', 'error') }

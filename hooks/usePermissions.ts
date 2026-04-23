@@ -21,6 +21,7 @@ import {
 export function usePermissions() {
   const { user, loading: authLoading } = useAuth()
   const [rolePermissions, setRolePermissions] = useState<string[]>([])
+  const [roleRutaInicio, setRoleRutaInicio] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const fetchedRef = useRef<string>('')
 
@@ -36,6 +37,7 @@ export function usePermissions() {
     async function fetchRolePermissions() {
       if (!userId) {
         setRolePermissions([])
+        setRoleRutaInicio(null)
         setLoading(false)
         return
       }
@@ -48,6 +50,9 @@ export function usePermissions() {
           const roleData = rolesArray.find?.((r: { nombre: string }) => r.nombre === userRole)
           if (roleData?.permisos) {
             setRolePermissions(roleData.permisos)
+          }
+          if (roleData?.ruta_inicio) {
+            setRoleRutaInicio(roleData.ruta_inicio)
           }
         }
       } catch {
@@ -69,7 +74,7 @@ export function usePermissions() {
     : getEffectivePermissions(rol, permisosAdicionales)
 
   const isAdmin = checkIsAdmin(rol)
-  const defaultRoute = getDefaultRouteForRole(rol)
+  const defaultRoute = getDefaultRouteForRole(rol, roleRutaInicio)
   const roleConfig = ROLE_CONFIG[rol] || ROLE_CONFIG.usuario
 
   return {

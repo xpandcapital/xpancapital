@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, ChevronDown, Save, X, Trash2, Plus, ArrowUp, ArrowDown, Edit2, Check, Copy, ClipboardPaste } from 'lucide-react'
+import { Shield, ChevronDown, Save, X, Trash2, Plus, ArrowUp, ArrowDown, Edit2, Check, Copy, ClipboardPaste, Home } from 'lucide-react'
 import { CustomRole, useRoles } from './_components/useRoles'
-import { PERMISSIONS } from '@/lib/auth/permissions'
+import { PERMISSIONS, AVAILABLE_ROUTES, ROLE_CONFIG, SECTION_PERMISSIONS } from '@/lib/auth/permissions'
 import { useToast } from '@/components/ui/Toast'
 
 const ROLE_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#6b7280']
@@ -55,6 +55,17 @@ export default function RolesPage() {
   const [clipboard, setClipboard] = useState<string[] | null>(null)
   const [showCreate, setShowCreate] = useState(false)
   const [newRole, setNewRole] = useState({ nombre: '', label: '', descripcion: '', color: '#6b7280' })
+  const [editRutaInicio, setEditRutaInicio] = useState<string | null>(null)
+
+  const getAvailableRoutesForRole = (role: CustomRole) => {
+    const isWildcard = role.permisos?.includes('*')
+    if (isWildcard) return AVAILABLE_ROUTES
+    return AVAILABLE_ROUTES.filter(route => {
+      if (route.section === 'dashboard') return true
+      if (role.permisos?.some(p => p.startsWith(route.section + ':'))) return true
+      return false
+    })
+  }
 
   const startEdit = (roleId: string, field: string, value: string) => {
     setEditingField(`${roleId}__${field}`)
@@ -239,6 +250,28 @@ export default function RolesPage() {
                   {isExpanded && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                       <div className="px-4 pb-4 pt-2 border-t border-white/5">
+                        {/* Página de inicio */}
+                        <div className="mb-4 p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Home className="w-3.5 h-3.5 text-blis-red" />
+                            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Página de inicio al iniciar sesión</p>
+                          </div>
+                          <select
+                            value={role.ruta_inicio || ''}
+                            onChange={async (e) => {
+                              const val = e.target.value || null
+                              await updateRole(role.id!, { ruta_inicio: val })
+                            }}
+                            className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blis-red/50 appearance-none cursor-pointer"
+                          >
+                            <option value="">Default del rol ({ROLE_CONFIG[role.nombre as keyof typeof ROLE_CONFIG]?.defaultRoute || '/superadmin'})</option>
+                            {getAvailableRoutesForRole(role).map(route => (
+                              <option key={route.path} value={route.path}>{route.label} ({route.path})</option>
+                            ))}
+                          </select>
+                          <p className="text-[9px] text-gray-600 mt-1.5">Al iniciar sesión, este rol será redirigido a esta página.</p>
+                        </div>
+
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Permisos de <span className="text-white">{role.label || role.nombre}</span></p>
                           <div className="flex gap-2">

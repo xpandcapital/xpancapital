@@ -188,14 +188,14 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
   'dashboard': 'dashboard:ver',
 }
 
-// Colores y labels para cada rol
-export const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bgColor: string }> = {
-  superadmin: { label: 'Super Admin', color: 'text-white', bgColor: 'bg-blis-red' },
-  admin: { label: 'Admin', color: 'text-amber-400', bgColor: 'bg-amber-500/20 border-amber-500/30' },
-  editor: { label: 'Editor', color: 'text-purple-400', bgColor: 'bg-purple-500/20 border-purple-500/30' },
-  empleado: { label: 'Empleado', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20 border-emerald-500/30' },
-  cliente: { label: 'Cliente', color: 'text-blue-400', bgColor: 'bg-blue-500/20 border-blue-500/30' },
-  usuario: { label: 'Usuario', color: 'text-gray-400', bgColor: 'bg-gray-500/20 border-gray-500/30' },
+// Colores, labels y ruta de inicio para cada rol
+export const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bgColor: string; defaultRoute: string }> = {
+  superadmin: { label: 'Super Admin', color: 'text-white', bgColor: 'bg-blis-red', defaultRoute: '/superadmin' },
+  admin: { label: 'Admin', color: 'text-amber-400', bgColor: 'bg-amber-500/20 border-amber-500/30', defaultRoute: '/superadmin' },
+  editor: { label: 'Editor', color: 'text-purple-400', bgColor: 'bg-purple-500/20 border-purple-500/30', defaultRoute: '/superadmin' },
+  empleado: { label: 'Empleado', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20 border-emerald-500/30', defaultRoute: '/superadmin/mis-capacitaciones' },
+  cliente: { label: 'Cliente', color: 'text-blue-400', bgColor: 'bg-blue-500/20 border-blue-500/30', defaultRoute: '/miembros' },
+  usuario: { label: 'Usuario', color: 'text-gray-400', bgColor: 'bg-gray-500/20 border-gray-500/30', defaultRoute: '/miembros' },
 }
 
 // Permisos adicionales por usuario (overrides)
@@ -246,21 +246,34 @@ export function canAccessSection(
   return hasPermission(permissions, required)
 }
 
+// Rutas disponibles como página de inicio
+export const AVAILABLE_ROUTES: { path: string; label: string; section: string }[] = [
+  { path: '/superadmin', label: 'Dashboard', section: 'dashboard' },
+  { path: '/superadmin/proyectos', label: 'Proyectos', section: 'proyectos' },
+  { path: '/superadmin/mis-capacitaciones', label: 'Mis Capacitaciones', section: 'capacitaciones' },
+  { path: '/superadmin/productos', label: 'Productos', section: 'productos' },
+  { path: '/superadmin/clientes', label: 'Clientes', section: 'clientes' },
+  { path: '/superadmin/cursos', label: 'Cursos', section: 'cursos' },
+  { path: '/superadmin/leads', label: 'Leads', section: 'leads' },
+  { path: '/superadmin/asesores', label: 'Asesores', section: 'asesores' },
+  { path: '/superadmin/postulantes', label: 'Postulantes', section: 'postulantes' },
+  { path: '/superadmin/campanas', label: 'Campañas', section: 'campanas' },
+  { path: '/superadmin/blog', label: 'Blog', section: 'blog' },
+  { path: '/superadmin/certificados', label: 'Certificados', section: 'certificados' },
+  { path: '/superadmin/templates', label: 'Páginas', section: 'templates' },
+  { path: '/superadmin/utilidades', label: 'Utilidades', section: 'utilidades' },
+  { path: '/superadmin/api-nube', label: 'APIs y Nube', section: 'api-nube' },
+  { path: '/superadmin/analiticas', label: 'Analíticas', section: 'analiticas' },
+  { path: '/superadmin/ajustes', label: 'Ajustes', section: 'ajustes' },
+  { path: '/miembros', label: 'Área de Miembros', section: 'miembros' },
+  { path: '/superadmin/perfil', label: 'Perfil', section: 'perfil' },
+]
+
 // Determina la ruta de destino según el rol después del login
-export function getDefaultRouteForRole(rol: string): string {
+export function getDefaultRouteForRole(rol: string, customRoute?: string | null): string {
+  if (customRoute) return customRoute
   const normalizedRol = (rol || 'usuario') as UserRole
-  switch (normalizedRol) {
-    case 'superadmin':
-    case 'admin':
-    case 'editor':
-      return '/superadmin'
-    case 'empleado':
-      return '/superadmin/mis-capacitaciones'
-    case 'cliente':
-    case 'usuario':
-    default:
-      return '/miembros'
-  }
+  return ROLE_CONFIG[normalizedRol]?.defaultRoute || ROLE_CONFIG.usuario.defaultRoute
 }
 
 // Verifica si un rol tiene acceso al panel de administración
