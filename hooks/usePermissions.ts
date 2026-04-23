@@ -24,6 +24,7 @@ export function usePermissions() {
   const [roleRutaInicio, setRoleRutaInicio] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const fetchedRef = useRef<string>('')
+  const effectivePermissionsRef = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     if (authLoading) return
@@ -38,6 +39,7 @@ export function usePermissions() {
       if (!userId) {
         setRolePermissions([])
         setRoleRutaInicio(null)
+        effectivePermissionsRef.current = new Set()
         setLoading(false)
         return
       }
@@ -48,9 +50,11 @@ export function usePermissions() {
           const json = await res.json()
           const rolesArray = Array.isArray(json) ? json : (json.data || [])
           const roleData = rolesArray.find?.((r: { nombre: string }) => r.nombre === userRole)
-          if (roleData?.permisos) {
-            setRolePermissions(roleData.permisos)
-          }
+          const permisos = roleData?.permisos || []
+          setRolePermissions(permisos)
+          effectivePermissionsRef.current = permisos.length > 0
+            ? getEffectivePermissionsFromDB(userRole, permisos, null)
+            : getEffectivePermissions(userRole, null)
           if (roleData?.ruta_inicio) {
             setRoleRutaInicio(roleData.ruta_inicio)
           }
@@ -68,10 +72,12 @@ export function usePermissions() {
   const rol = (user?.role || 'usuario') as UserRole
   const permisosAdicionales = user?.permisos_adicionales as PermisosAdicionales | null | undefined
 
-  // Si tenemos permisos de la BD, usarlos como base; si no, usar los del sistema
-  const effectivePermissions = rolePermissions.length > 0
-    ? getEffectivePermissionsFromDB(rol, rolePermissions, permisosAdicionales)
-    : getEffectivePermissions(rol, permisosAdicionales)
+  // Usar ref para evitar problemas de timing - solo se actualiza cuando loading es false
+  const effectivePermissions = loading
+    ? new Set<string>()
+    : (rolePermissions.length > 0
+        ? getEffectivePermissionsFromDB(rol, rolePermissions, permisosAdicionales)
+        : getEffectivePermissions(rol, permisosAdicionales))
 
   const isAdmin = checkIsAdmin(rol)
   const defaultRoute = getDefaultRouteForRole(rol, roleRutaInicio)

@@ -230,30 +230,13 @@ export function SuperadminSidebar() {
 
     const sections = useMemo(() => {
         if (skipFiltering) return allSections
-        // While loading, show minimal sections based on ROLE_DEFAULTS for the role
-        // This prevents flash of all sections then disappearing
+
+        // NEVER show ROLE_DEFAULTS to the user - only show what the API returns
+        // If still loading, show empty (skeleton is handled separately in the render)
         if (permLoading) {
-            if (!userRole) return []
-            const roleDefaults = ROLE_DEFAULTS[userRole as UserRole]
-            if (!roleDefaults) return []
-            const permSet = new Set(roleDefaults)
-            return allSections.map(section => ({
-                ...section,
-                items: section.items.filter(item => {
-                    if (item.permission) {
-                        const sectionsForPerm = getSectionsFromPermission(item.permission)
-                        return sectionsForPerm.length > 0
-                            ? sectionsForPerm.some(s => checkPermission(permSet, SECTION_PERMISSIONS[s] || s))
-                            : checkPermission(permSet, item.permission)
-                    }
-                    return true
-                })
-            })).filter(section => section.items.length > 0)
+            return []
         }
 
-        // After loading: use effectivePermissions from the API
-        // If effectivePermissions has content, use it exclusively (no fallback)
-        // If effectivePermissions is empty (misconfigured role), show nothing
         const filterSections = (permSet: Set<string>) => {
             return allSections.map(section => ({
                 ...section,
