@@ -230,12 +230,31 @@ export function SuperadminSidebar() {
 
     const sections = useMemo(() => {
         if (skipFiltering) return allSections
+        // While loading, show minimal sections based on ROLE_DEFAULTS for the role
+        // This prevents flash of all sections then disappearing
+        if (permLoading) {
+            if (!userRole) return []
+            const roleDefaults = ROLE_DEFAULTS[userRole as UserRole]
+            if (!roleDefaults) return []
+            const permSet = new Set(roleDefaults)
+            return allSections.map(section => ({
+                ...section,
+                items: section.items.filter(item => {
+                    if (item.permission) {
+                        const sectionsForPerm = getSectionsFromPermission(item.permission)
+                        return sectionsForPerm.length > 0
+                            ? sectionsForPerm.some(s => checkPermission(permSet, SECTION_PERMISSIONS[s] || s))
+                            : checkPermission(permSet, item.permission)
+                    }
+                    return true
+                })
+            })).filter(section => section.items.length > 0)
+        }
 
-        // Use ROLE_DEFAULTS as fallback when loading, or when permissions result in 0 sections
-        const roleDefaults = userRole ? ROLE_DEFAULTS[userRole as UserRole] : null
-        const fallbackPermissions = roleDefaults ? new Set(roleDefaults) : null
-
-        const filterSections = (permissions: Set<string>) => {
+        // After loading: use effectivePermissions from the API
+        // If effectivePermissions has content, use it exclusively (no fallback)
+        // If effectivePermissions is empty (misconfigured role), show nothing
+        const filterSections = (permSet: Set<string>) => {
             return allSections.map(section => ({
                 ...section,
                 items: section.items
@@ -243,8 +262,8 @@ export function SuperadminSidebar() {
                         if (item.permission) {
                             const sectionsForPerm = getSectionsFromPermission(item.permission)
                             const hasAccess = sectionsForPerm.length > 0
-                                ? sectionsForPerm.some(s => checkPermission(permissions, SECTION_PERMISSIONS[s] || s))
-                                : checkPermission(permissions, item.permission)
+                                ? sectionsForPerm.some(s => checkPermission(permSet, SECTION_PERMISSIONS[s] || s))
+                                : checkPermission(permSet, item.permission)
                             if (!hasAccess) return null
                         }
                         if (item.subItems) {
@@ -252,8 +271,8 @@ export function SuperadminSidebar() {
                                 if (!sub.permission) return true
                                 const sectionsForPerm = getSectionsFromPermission(sub.permission)
                                 return sectionsForPerm.length > 0
-                                    ? sectionsForPerm.some(s => checkPermission(permissions, SECTION_PERMISSIONS[s] || s))
-                                    : checkPermission(permissions, sub.permission)
+                                    ? sectionsForPerm.some(s => checkPermission(permSet, SECTION_PERMISSIONS[s] || s))
+                                    : checkPermission(permSet, sub.permission)
                             })
                             if (filteredSubItems.length === 0) return null
                             return { ...item, subItems: filteredSubItems }
@@ -264,19 +283,8 @@ export function SuperadminSidebar() {
             })).filter(section => section.items.length > 0)
         }
 
-        if (permLoading) {
-            return fallbackPermissions ? filterSections(fallbackPermissions) : []
-        }
-
-        const filteredByPerms = filterSections(effectivePermissions)
-        
-        // If permissions from API result in 0 sections (broken config), fall back to ROLE_DEFAULTS
-        if (filteredByPerms.length === 0 && fallbackPermissions) {
-            return filterSections(fallbackPermissions)
-        }
-
-        return filteredByPerms
-    }, [permLoading, canAccessSection, skipFiltering, userRole, effectivePermissions])
+        return filterSections(effectivePermissions)
+    }, [permLoading, skipFiltering, userRole, effectivePermissions])
 
     return (
         <>
@@ -324,8 +332,14 @@ export function SuperadminSidebar() {
                                 <div key={i} className="h-9 bg-white/5 rounded-xl" />
                             ))}
                         </div>
+                    ) : sections.length === 0 && !permLoading ? (
+                        <div className="text-gray-600 text-xs text-center py-8 px-4">Sin permisos asignados</div>
                     ) : sections.length === 0 ? (
-                        <div className="text-gray-600 text-xs text-center py-8 px-4">Sin acceso</div>
+                        <div className="space-y-2 animate-pulse px-1">
+                            {[1,2,3,4,5].map(i => (
+                                <div key={i} className="h-9 bg-white/5 rounded-xl" />
+                            ))}
+                        </div>
                     ) : sections.map((section, idx) => (
                         <div key={idx} className="space-y-1">
                             {isExpanded && (
