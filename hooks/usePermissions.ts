@@ -80,6 +80,7 @@ export function usePermissions() {
   return {
     // Permisos
     permissions: effectivePermissions,
+    effectivePermissions,
     hasPermission: useCallback(
       (permission: string) => checkPermission(effectivePermissions, permission),
       [effectivePermissions]

@@ -55,7 +55,7 @@ export function SuperadminSidebar() {
     const [isHoverExpanded, setIsHoverExpanded] = useState(false);
     const [sidebarWidth, setSidebarWidth] = useState(64);
     const pathname = usePathname();
-    const { canAccessSection, loading: permLoading, isAdmin } = usePermissions();
+    const { canAccessSection, loading: permLoading, isAdmin, effectivePermissions } = usePermissions();
     const { user } = useAuth();
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const isExpanded = !isCollapsed || isHoverExpanded;
@@ -229,58 +229,54 @@ export function SuperadminSidebar() {
     const skipFiltering = (isAdmin && userRole !== 'empleado')
 
     const sections = useMemo(() => {
-        // While loading, use ROLE_DEFAULTS as fallback
-        if (permLoading) {
-            if (skipFiltering) return allSections
-            const roleDefaults = userRole ? ROLE_DEFAULTS[userRole as UserRole] : null
-            if (!roleDefaults) return []
-            const defaultedPermissions = new Set(roleDefaults)
-            return allSections.map(section => ({
-                ...section,
-                items: section.items.filter(item => {
-                    if (item.permission) {
-                        const sectionsForPerm = getSectionsFromPermission(item.permission)
-                        return sectionsForPerm.length > 0
-                            ? sectionsForPerm.some(s => checkPermission(defaultedPermissions, SECTION_PERMISSIONS[s] || s))
-                            : checkPermission(defaultedPermissions, item.permission)
-                    }
-                    return true
-                })
-            })).filter(section => section.items.length > 0)
-        }
         if (skipFiltering) return allSections
 
-        const accessible = (sectionPath: string) => {
-            return canAccessSection(sectionPath)
+        // Use ROLE_DEFAULTS as fallback when loading, or when permissions result in 0 sections
+        const roleDefaults = userRole ? ROLE_DEFAULTS[userRole as UserRole] : null
+        const fallbackPermissions = roleDefaults ? new Set(roleDefaults) : null
+
+        const filterSections = (permissions: Set<string>) => {
+            return allSections.map(section => ({
+                ...section,
+                items: section.items
+                    .map(item => {
+                        if (item.permission) {
+                            const sectionsForPerm = getSectionsFromPermission(item.permission)
+                            const hasAccess = sectionsForPerm.length > 0
+                                ? sectionsForPerm.some(s => checkPermission(permissions, SECTION_PERMISSIONS[s] || s))
+                                : checkPermission(permissions, item.permission)
+                            if (!hasAccess) return null
+                        }
+                        if (item.subItems) {
+                            const filteredSubItems = item.subItems.filter(sub => {
+                                if (!sub.permission) return true
+                                const sectionsForPerm = getSectionsFromPermission(sub.permission)
+                                return sectionsForPerm.length > 0
+                                    ? sectionsForPerm.some(s => checkPermission(permissions, SECTION_PERMISSIONS[s] || s))
+                                    : checkPermission(permissions, sub.permission)
+                            })
+                            if (filteredSubItems.length === 0) return null
+                            return { ...item, subItems: filteredSubItems }
+                        }
+                        return item
+                    })
+                    .filter((item): item is NavItem => item !== null)
+            })).filter(section => section.items.length > 0)
         }
 
-        return allSections.map(section => ({
-            ...section,
-            items: section.items
-                .map(item => {
-                    if (item.permission) {
-                        const sectionsForPerm = getSectionsFromPermission(item.permission)
-                        const hasAccess = sectionsForPerm.length > 0
-                            ? sectionsForPerm.some(s => accessible(s))
-                            : canAccessSection(item.permission)
-                        if (!hasAccess) return null
-                    }
-                    if (item.subItems) {
-                        const filteredSubItems = item.subItems.filter(sub => {
-                            if (!sub.permission) return true
-                            const sectionsForPerm = getSectionsFromPermission(sub.permission)
-                            return sectionsForPerm.length > 0
-                                ? sectionsForPerm.some(s => accessible(s))
-                                : canAccessSection(sub.permission)
-                        })
-                        if (filteredSubItems.length === 0) return null
-                        return { ...item, subItems: filteredSubItems }
-                    }
-                    return item
-                })
-                .filter((item): item is NavItem => item !== null)
-        })).filter(section => section.items.length > 0)
-    }, [permLoading, canAccessSection, skipFiltering, userRole])
+        if (permLoading) {
+            return fallbackPermissions ? filterSections(fallbackPermissions) : []
+        }
+
+        const filteredByPerms = filterSections(effectivePermissions)
+        
+        // If permissions from API result in 0 sections (broken config), fall back to ROLE_DEFAULTS
+        if (filteredByPerms.length === 0 && fallbackPermissions) {
+            return filterSections(fallbackPermissions)
+        }
+
+        return filteredByPerms
+    }, [permLoading, canAccessSection, skipFiltering, userRole, effectivePermissions])
 
     return (
         <>
