@@ -2,6 +2,7 @@
 
 import { usePermissions } from '@/hooks/usePermissions'
 import { Shield, LogOut } from 'lucide-react'
+import { useEffect } from 'react'
 import { PERMISSIONS, type Permission } from '@/lib/auth/permissions'
 
 interface PermissionGuardProps {
@@ -11,7 +12,13 @@ interface PermissionGuardProps {
 }
 
 export function PermissionGuard({ section, children, fallback }: PermissionGuardProps) {
-  const { canAccessSection, loading } = usePermissions()
+  const { canAccessSection, loading, defaultRoute } = usePermissions()
+
+  useEffect(() => {
+    if (!loading && !canAccessSection(section) && defaultRoute) {
+      window.location.href = defaultRoute
+    }
+  }, [loading, canAccessSection, section, defaultRoute])
 
   if (loading) {
     return (
@@ -31,15 +38,15 @@ export function PermissionGuard({ section, children, fallback }: PermissionGuard
         </div>
         <h2 className="text-xl font-black text-white mb-2">Acceso restringido</h2>
         <p className="text-gray-500 text-sm max-w-md mb-6">
-          No tienes permisos para acceder a esta sección. Contacta al administrador si crees que deberías tener acceso.
-        </p>
+            No tienes permisos para acceder a esta sección. Contacta al administrador si crees que deberías tener acceso.
+          </p>
         <a
-          href="/superadmin"
-          className="px-6 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm font-bold hover:bg-white/10 transition-all flex items-center gap-2"
+          href={defaultRoute || '/superadmin'}
+          className="px-6 py-2.5 bg-blis-red text-white text-sm font-bold rounded-xl hover:bg-blis-red/80 transition-all flex items-center gap-2"
         >
           <LogOut className="w-4 h-4" />
-          Volver al Dashboard
-        </a>
+            Ir a mi página de inicio
+          </a>
       </div>
     )
   }

@@ -17,7 +17,7 @@ import { LucideProps } from "lucide-react";
 import { ForwardRefExoticComponent, RefAttributes } from "react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAuth } from "@/hooks/useAuth";
-import { SECTION_PERMISSIONS } from "@/lib/auth/permissions";
+import { SECTION_PERMISSIONS, ROLE_DEFAULTS, hasPermission as checkPermission, type UserRole } from "@/lib/auth/permissions";
 import { CompanySwitcher } from "./CompanySwitcher";
 
 const permissionToSections: Record<string, string[]> = {}
@@ -229,15 +229,29 @@ export function SuperadminSidebar() {
     const skipFiltering = (isAdmin && userRole !== 'empleado')
 
     const sections = useMemo(() => {
-        // While loading, show skeleton (empty) to prevent flash of all sections
-        if (permLoading) return []
+        // While loading, use ROLE_DEFAULTS as fallback
+        if (permLoading) {
+            if (skipFiltering) return allSections
+            const roleDefaults = userRole ? ROLE_DEFAULTS[userRole as UserRole] : null
+            if (!roleDefaults) return []
+            const defaultedPermissions = new Set(roleDefaults)
+            return allSections.map(section => ({
+                ...section,
+                items: section.items.filter(item => {
+                    if (item.permission) {
+                        const sectionsForPerm = getSectionsFromPermission(item.permission)
+                        return sectionsForPerm.length > 0
+                            ? sectionsForPerm.some(s => checkPermission(defaultedPermissions, SECTION_PERMISSIONS[s] || s))
+                            : checkPermission(defaultedPermissions, item.permission)
+                    }
+                    return true
+                })
+            })).filter(section => section.items.length > 0)
+        }
         if (skipFiltering) return allSections
 
-        // Use canAccessSection as primary filter - it uses effectivePermissions which come from
-        // ROLE_DEFAULTS (always available) or rolePermissions from the API (when loaded)
         const accessible = (sectionPath: string) => {
-            const result = canAccessSection(sectionPath)
-            return result
+            return canAccessSection(sectionPath)
         }
 
         return allSections.map(section => ({
