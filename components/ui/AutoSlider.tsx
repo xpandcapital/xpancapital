@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { CalendarIcon, ArrowRight, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
@@ -20,7 +20,6 @@ interface AutoSliderProps {
     getArticleSlug?: (article: Article) => string;
 }
 
-// Helper to get slug for an article
 const defaultGetSlug = (art: Article): string => {
     if (!art) return '';
     if (art.slug && art.slug.length > 0) return art.slug;
@@ -34,8 +33,31 @@ export function AutoSlider({ articles, variant = "light", direction = "ltr", get
     const scrollRef = useRef<HTMLDivElement>(null);
     const [progress, setProgress] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
+    const slideNextRef = useRef<(() => void) | null>(null);
 
-    // Auto-scroll logic
+    const slideNext = useCallback(() => {
+        if (!scrollRef.current) return;
+        const scrollAmount = direction === "ltr" ? 280 : -280;
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        if (direction === "ltr" && scrollLeft + clientWidth >= scrollWidth - 10) {
+            scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        } else if (direction === "rtl" && scrollLeft <= 10) {
+            scrollRef.current.scrollTo({ left: scrollWidth, behavior: "smooth" });
+        } else {
+            scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+        }
+    }, [direction]);
+
+    const slidePrev = useCallback(() => {
+        if (!scrollRef.current) return;
+        const scrollAmount = direction === "ltr" ? -280 : 280;
+        scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }, [direction]);
+
+    useEffect(() => {
+        slideNextRef.current = slideNext;
+    }, [slideNext]);
+
     useEffect(() => {
         let startTime = Date.now();
         let animationFrame: number;
@@ -47,47 +69,23 @@ export function AutoSlider({ articles, variant = "light", direction = "ltr", get
                 const delta = now - startTime;
                 startTime = now;
                 accumulatedTime += delta;
-
                 const currentProgress = (accumulatedTime / 4000) * 100;
-
                 if (currentProgress >= 100) {
-                    slideNext(true);
+                    slideNextRef.current?.();
                     accumulatedTime = 0;
                     setProgress(0);
                 } else {
                     setProgress(currentProgress);
                 }
             } else {
-                startTime = Date.now(); // Reset start time so it doesn't jump when unpaused
+                startTime = Date.now();
             }
             animationFrame = requestAnimationFrame(updateProgress);
         };
 
         animationFrame = requestAnimationFrame(updateProgress);
         return () => cancelAnimationFrame(animationFrame);
-    }, [isHovered, direction]);
-
-    const slideNext = (auto = false) => {
-        if (!scrollRef.current) return;
-        const scrollAmount = direction === "ltr" ? 280 : -280;
-
-        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-
-        // Handling Seamless loop visually
-        if (direction === "ltr" && scrollLeft + clientWidth >= scrollWidth - 10) {
-            scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
-        } else if (direction === "rtl" && scrollLeft <= 10) {
-            scrollRef.current.scrollTo({ left: scrollWidth, behavior: "smooth" });
-        } else {
-            scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-        }
-    };
-
-    const slidePrev = () => {
-        if (!scrollRef.current) return;
-        const scrollAmount = direction === "ltr" ? -280 : 280;
-        scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    };
+    }, [isHovered]);
 
     if (!articles || articles.length === 0) return null;
 
@@ -97,7 +95,6 @@ export function AutoSlider({ articles, variant = "light", direction = "ltr", get
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-            {/* Header controls & Progress */}
             <div className="flex items-center justify-between mb-2 px-2">
                 <div className="w-24 h-1 bg-gray-500/20 rounded-full overflow-hidden relative">
                     <div
@@ -114,7 +111,7 @@ export function AutoSlider({ articles, variant = "light", direction = "ltr", get
                         <ChevronLeft className="w-4 h-4" />
                     </button>
                     <button
-                        onClick={() => slideNext()}
+                        onClick={slideNext}
                         className="p-1.5 rounded-full bg-blis-red/20 border border-blis-red/50 hover:bg-blis-red text-blis-red hover:text-white transition-colors backdrop-blur-md"
                         aria-label="Siguiente"
                     >
@@ -132,13 +129,13 @@ export function AutoSlider({ articles, variant = "light", direction = "ltr", get
                     const articleSlug = getArticleSlug(article);
                     if (!articleSlug) return null;
                     return (
-                        <Link 
-                            key={`slide-${idx}`} 
+                        <Link
+                            key={`slide-${idx}`}
                             href={`/blog/articulo/${articleSlug}`}
                             className={`shrink-0 w-[260px] sm:w-[280px] snap-center group/card relative backdrop-blur-3xl overflow-hidden transition-all duration-500 flex flex-col no-underline hover:no-underline touch-pan-x ${variant === 'dark'
                                 ? 'bg-[#0A0D11]/40 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:border-blis-red/50 rounded-3xl text-white'
                                 : 'bg-white/40 border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.05)] hover:border-blis-red/30 rounded-3xl text-gray-900'
-                            }`}
+                                }`}
                         >
                             <div className={`relative w-full aspect-video overflow-hidden ${variant === 'dark' ? 'bg-black' : 'bg-gray-100'}`}>
                                 <img src={article.image} alt={article.title} className="w-full h-full object-cover opacity-80 group-hover/card:opacity-100 group-hover/card:scale-110 transition-all duration-700" />
@@ -151,10 +148,10 @@ export function AutoSlider({ articles, variant = "light", direction = "ltr", get
                             </div>
                             <div className="p-5 flex flex-col flex-grow relative z-10">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <span className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-lg border 
-                                        ${article.isPremium 
-                                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-600' 
-                                            : article.category === 'Legal' 
+                                    <span className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-lg border
+                                        ${article.isPremium
+                                            ? 'bg-amber-500/10 border-amber-500/30 text-amber-600'
+                                            : article.category === 'Legal'
                                                 ? 'bg-blue-500/10 border-blue-500/30 text-blue-600'
                                                 : article.category === 'Propietarios'
                                                     ? 'bg-rose-500/10 border-rose-500/30 text-rose-600'

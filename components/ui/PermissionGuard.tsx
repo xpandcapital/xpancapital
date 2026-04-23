@@ -1,18 +1,22 @@
 "use client"
 
+import { useEffect } from 'react'
 import { usePermissions } from '@/hooks/usePermissions'
-import { useRouter } from 'next/navigation'
-import { PERMISSIONS, type Permission } from '@/lib/auth/permissions'
+import { type Permission } from '@/lib/auth/permissions'
 
 interface PermissionGuardProps {
   section: string
   children: React.ReactNode
-  fallback?: React.ReactNode
 }
 
-export function PermissionGuard({ section, children, fallback }: PermissionGuardProps) {
+export function PermissionGuard({ section, children }: PermissionGuardProps) {
   const { canAccessSection, loading, defaultRoute } = usePermissions()
-  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !canAccessSection(section)) {
+      window.location.href = defaultRoute || '/superadmin'
+    }
+  }, [loading, canAccessSection, section, defaultRoute])
 
   if (loading) {
     return (
@@ -23,10 +27,6 @@ export function PermissionGuard({ section, children, fallback }: PermissionGuard
   }
 
   if (!canAccessSection(section)) {
-    const redirectUrl = defaultRoute || '/superadmin'
-    if (typeof window !== 'undefined') {
-      window.location.href = redirectUrl
-    }
     return null
   }
 

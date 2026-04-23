@@ -3,6 +3,14 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const SPARK_ANIMATIONS = [
+  { xTarget: -12, yTarget: 18, repeatDelay: 0.4 },
+  { xTarget: 15, yTarget: -8, repeatDelay: 1.2 },
+  { xTarget: -8, yTarget: -15, repeatDelay: 0.7 },
+  { xTarget: 20, yTarget: 10, repeatDelay: 1.8 },
+  { xTarget: -18, yTarget: -5, repeatDelay: 0.9 },
+];
+
 export function ConstructionLoader() {
   const [progress, setProgress] = useState(0);
   const [currentWord, setCurrentWord] = useState(0);
@@ -263,8 +271,8 @@ export function ConstructionLoader() {
                     borderRadius: '50%',
                   }}
                   animate={{
-                    x: [0, (Math.random() - 0.5) * 40],
-                    y: [0, (Math.random() - 0.5) * 40],
+                    x: [0, SPARK_ANIMATIONS[i].xTarget],
+                    y: [0, SPARK_ANIMATIONS[i].yTarget],
                     opacity: [1, 0],
                     scale: [1, 0]
                   }}
@@ -272,7 +280,7 @@ export function ConstructionLoader() {
                     duration: 0.6,
                     repeat: Infinity,
                     delay: i * 0.1,
-                    repeatDelay: Math.random() * 2
+                    repeatDelay: SPARK_ANIMATIONS[i].repeatDelay
                   }}
                 />
               ))}
