@@ -16,6 +16,7 @@ type PermItem = {
   key: string
   label: string
   actions: ActionDef[]
+  subItems?: PermItem[]
 }
 
 type PermGroup = {
@@ -23,77 +24,119 @@ type PermGroup = {
   items: PermItem[]
 }
 
-const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  ver: Eye,
-  crear: PlusCircle,
-  editar: Pencil,
-  eliminar: Trash,
-}
+const V = { action: 'ver', label: 'Ver' }
+const C = { action: 'crear', label: 'Crear' }
+const E = { action: 'editar', label: 'Editar' }
+const D = { action: 'eliminar', label: 'Eliminar' }
+const VE = [V, E]
+const VCE = [V, C, E]
+const VCED = [V, C, E, D]
 
-const ACTION_COLORS: Record<string, { active: string; inactive: string; border: string }> = {
-  ver: { active: 'bg-blue-500/15 text-blue-400', inactive: 'bg-white/[0.02] text-gray-600', border: 'border-blue-500/30' },
-  crear: { active: 'bg-emerald-500/15 text-emerald-400', inactive: 'bg-white/[0.02] text-gray-600', border: 'border-emerald-500/30' },
-  editar: { active: 'bg-amber-500/15 text-amber-400', inactive: 'bg-white/[0.02] text-gray-600', border: 'border-amber-500/30' },
-  eliminar: { active: 'bg-red-500/15 text-red-400', inactive: 'bg-white/[0.02] text-gray-600', border: 'border-red-500/30' },
+function getAllItemPerms(item: PermItem): string[] {
+  const own = item.actions.map(a => buildPermission(item.key, a.action))
+  const subs = item.subItems ? item.subItems.flatMap(sub => getAllItemPerms(sub)) : []
+  return [...own, ...subs]
 }
 
 const PERMISSION_TREE: PermGroup[] = [
   {
     title: 'Principal',
     items: [
-      { key: 'dashboard', label: 'Dashboard', actions: [{ action: 'ver', label: 'Ver' }] },
-      { key: 'proyectos', label: 'Proyectos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'lotes', label: 'Gestión de Lotes', actions: [{ action: 'ver', label: 'Ver' }, { action: 'editar', label: 'Editar' }] },
-      { key: 'contratos', label: 'Contratos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }] },
-      { key: 'asesores', label: 'Asesores', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }] },
+      { key: 'dashboard', label: 'Dashboard', actions: [V] },
+      {
+        key: 'proyectos', label: 'Proyectos', actions: VCED,
+        subItems: [
+          { key: 'proyectos', label: 'Todos los Proyectos', actions: VCED },
+          { key: 'lotes', label: 'Gestión de Lotes', actions: VE },
+          { key: 'contratos', label: 'Contratos', actions: VCE },
+          { key: 'asesores', label: 'Asesores', actions: VCE },
+        ]
+      },
     ]
   },
   {
     title: 'Ventas',
     items: [
-      { key: 'pos', label: 'Terminal POS', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'productos', label: 'Productos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'clientes', label: 'Clientes', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }] },
-      { key: 'ajustes', label: 'Ajustes del Comercio', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'cursos', label: 'Cursos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'capacitaciones', label: 'Capacitaciones', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'certificados', label: 'Certificados', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'trading', label: 'Trading', actions: [{ action: 'ver', label: 'Ver' }] },
+      {
+        key: 'pos', label: 'Punto de Venta', actions: VCED,
+        subItems: [
+          { key: 'pos', label: 'Terminal POS', actions: VCED },
+          { key: 'productos', label: 'Productos', actions: VCED },
+          { key: 'clientes', label: 'Clientes', actions: VCE },
+          { key: 'ajustes', label: 'Ajustes del Comercio', actions: VCED },
+        ]
+      },
+      {
+        key: 'cursos', label: 'Academia', actions: VCED,
+        subItems: [
+          { key: 'cursos', label: 'Cursos', actions: VCED },
+          { key: 'capacitaciones', label: 'Capacitaciones', actions: VCED },
+          { key: 'certificados', label: 'Certificados', actions: VCED },
+        ]
+      },
+      { key: 'trading', label: 'Trading', actions: [V] },
     ]
   },
   {
     title: 'Contenido',
     items: [
-      { key: 'templates', label: 'Páginas', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'mails', label: 'Correos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'calendarios', label: 'Calendarios', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'formularios', label: 'Formularios', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'leads', label: 'Leads', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'campanas', label: 'Campañas', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'blog', label: 'Blog', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      {
+        key: 'templates', label: 'Páginas', actions: VCED,
+        subItems: [
+          { key: 'templates', label: 'Todas las Páginas', actions: VCED },
+        ]
+      },
+      {
+        key: 'mails', label: 'Comunicación', actions: VCED,
+        subItems: [
+          { key: 'mails', label: 'Correos', actions: VCED },
+          { key: 'calendarios', label: 'Calendarios', actions: VCED },
+          { key: 'formularios', label: 'Formularios', actions: VCED },
+          { key: 'leads', label: 'Leads', actions: VCED },
+          { key: 'campanas', label: 'Campañas', actions: VCED },
+        ]
+      },
+      {
+        key: 'blog', label: 'Blog', actions: VCED,
+        subItems: [
+          { key: 'blog', label: 'Entradas', actions: VCED },
+          { key: 'blog', label: 'Rutas', actions: VCED },
+        ]
+      },
     ]
   },
   {
     title: 'Sistema',
     items: [
-      { key: 'equipo', label: 'Equipo', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'postulantes', label: 'Postulantes', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'puestos', label: 'Puestos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'preguntas', label: 'Preguntas', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'utilidades', label: 'Utilidades', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'configuracion', label: 'Sitio y Branding', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'api-nube', label: 'APIs y Nube', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'analiticas', label: 'Métricas y SEO', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'roles', label: 'Roles y Niveles', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'empresas', label: 'Empresas', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
-      { key: 'perfil', label: 'Mi Perfil', actions: [{ action: 'ver', label: 'Ver' }, { action: 'editar', label: 'Editar' }] },
+      {
+        key: 'equipo', label: 'Personal', actions: VCED,
+        subItems: [
+          { key: 'equipo', label: 'Equipo', actions: VCED },
+          { key: 'postulantes', label: 'Postulantes', actions: VCED },
+          { key: 'puestos', label: 'Puestos', actions: VCED },
+          { key: 'preguntas', label: 'Preguntas', actions: VCED },
+        ]
+      },
+      { key: 'utilidades', label: 'Utilidades', actions: VCED },
+      {
+        key: 'configuracion', label: 'Configuración', actions: VCED,
+        subItems: [
+          { key: 'configuracion', label: 'Sitio y Branding', actions: VCED },
+          { key: 'api-nube', label: 'APIs y Nube', actions: VCED },
+          { key: 'analiticas', label: 'Métricas y SEO', actions: VCED },
+          { key: 'ajustes', label: 'Comercio', actions: VCED },
+          { key: 'roles', label: 'Roles y Niveles', actions: VCED },
+          { key: 'empresas', label: 'Empresas', actions: VCED },
+        ]
+      },
+      { key: 'perfil', label: 'Mi Perfil', actions: VE },
     ]
   },
   {
     title: 'Panel Cliente',
     items: [
-      { key: 'miembros', label: 'Miembros', actions: [{ action: 'ver', label: 'Ver' }] },
-      { key: 'facturacion', label: 'Facturación', actions: [{ action: 'ver', label: 'Ver' }] },
+      { key: 'miembros', label: 'Miembros', actions: [V] },
+      { key: 'facturacion', label: 'Facturación', actions: [V] },
     ]
   },
 ]
@@ -169,7 +212,7 @@ export default function RolesPage() {
   }
 
   const toggleItemAll = (item: PermItem) => {
-    const allPerms = item.actions.map(a => buildPermission(item.key, a.action))
+    const allPerms = getAllItemPerms(item)
     const allSelected = allPerms.every(p => editPermisos.includes(p))
     if (allSelected) {
       setEditPermisos(prev => prev.filter(p => !allPerms.includes(p)))
@@ -396,9 +439,7 @@ export default function RolesPage() {
                             {/* Permission Tree */}
                             {PERMISSION_TREE.map(group => {
                               const groupOpen = expandedGroups[group.title] !== false
-                              const allGroupPerms = group.items.flatMap(item =>
-                                item.actions.map(a => buildPermission(item.key, a.action))
-                              )
+                              const allGroupPerms = group.items.flatMap(item => getAllItemPerms(item))
                               const groupSelectedCount = allGroupPerms.filter(p => editPermisos.includes(p)).length
 
                               return (
@@ -421,42 +462,82 @@ export default function RolesPage() {
                                   {groupOpen && (
                                     <div className="divide-y divide-white/[0.03]">
                                       {group.items.map(item => {
-                                        const itemPerms = item.actions.map(a => buildPermission(item.key, a.action))
-                                        const itemSelectedCount = itemPerms.filter(p => editPermisos.includes(p)).length
+                                        const hasSubItems = item.subItems && item.subItems.length > 0
+                                        const itemAllPerms = getAllItemPerms(item)
+                                        const itemOwnPerms = item.actions.map(a => buildPermission(item.key, a.action))
+                                        const itemSelectedCount = itemAllPerms.filter(p => editPermisos.includes(p)).length
+                                        const ownSelectedCount = itemOwnPerms.filter(p => editPermisos.includes(p)).length
 
                                         return (
-                                          <div key={item.key} className="px-4 py-3 flex items-center gap-3">
-                                            <div className="flex-1 min-w-0">
-                                              <div className="flex items-center gap-2 mb-2">
-                                                <button
-                                                  onClick={() => toggleItemAll(item)}
-                                                  className={`w-4 h-4 rounded border flex items-center justify-center text-[8px] shrink-0 ${itemPerms.every(p => editPermisos.includes(p)) ? 'bg-blis-red border-blis-red text-white' : itemSelectedCount > 0 ? 'bg-blis-red/20 border-blis-red/40 text-blis-red' : 'border-white/15 bg-transparent'}`}
-                                                >
-                                                  {itemPerms.every(p => editPermisos.includes(p)) ? '✓' : itemSelectedCount > 0 ? '−' : ''}
-                                                </button>
-                                                <span className="text-xs text-white font-bold truncate">{item.label}</span>
-                                                <span className="text-[9px] text-gray-600 shrink-0">{itemSelectedCount}/{item.actions.length}</span>
-                                              </div>
-                                              <div className="flex flex-wrap gap-1.5 ml-6">
-                                                {item.actions.map(actionDef => {
-                                                  const perm = buildPermission(item.key, actionDef.action)
-                                                  const isActive = editPermisos.includes(perm)
-                                                  const colors = ACTION_COLORS[actionDef.action] || ACTION_COLORS.ver
-                                                  const IconComp = ACTION_ICONS[actionDef.action]
-
+                                          <div key={item.label} className="px-4 py-3">
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <button
+                                                onClick={() => toggleItemAll(item)}
+                                                className={`w-4 h-4 rounded border flex items-center justify-center text-[8px] shrink-0 ${itemAllPerms.every(p => editPermisos.includes(p)) ? 'bg-blis-red border-blis-red text-white' : itemSelectedCount > 0 ? 'bg-blis-red/20 border-blis-red/40 text-blis-red' : 'border-white/15 bg-transparent'}`}
+                                              >
+                                                {itemAllPerms.every(p => editPermisos.includes(p)) ? '✓' : itemSelectedCount > 0 ? '−' : ''}
+                                              </button>
+                                              <span className="text-xs text-white font-bold truncate">{item.label}</span>
+                                              <span className="text-[9px] text-gray-600 shrink-0">{itemSelectedCount}/{itemAllPerms.length}</span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-1.5 ml-6">
+                                              {item.actions.map(actionDef => {
+                                                const perm = buildPermission(item.key, actionDef.action)
+                                                const isActive = editPermisos.includes(perm)
+                                                const colors = ACTION_COLORS[actionDef.action] || ACTION_COLORS.ver
+                                                const IconComp = ACTION_ICONS[actionDef.action]
+                                                return (
+                                                  <button
+                                                    key={actionDef.action}
+                                                    onClick={() => togglePerm(item.key, actionDef.action)}
+                                                    className={`text-[9px] px-2 py-1 rounded-lg border transition-all flex items-center gap-1 ${isActive ? `${colors.active} ${colors.border}` : `${colors.inactive} border-white/5 hover:border-white/15`}`}
+                                                  >
+                                                    {IconComp && <IconComp className="w-2.5 h-2.5" />}
+                                                    {actionDef.label}
+                                                  </button>
+                                                )
+                                              })}
+                                            </div>
+                                            {hasSubItems && (
+                                              <div className="ml-6 mt-3 space-y-2 border-l border-white/10 pl-4">
+                                                {item.subItems!.map(sub => {
+                                                  const subPerms = sub.actions.map(a => buildPermission(sub.key, a.action))
+                                                  const subSelectedCount = subPerms.filter(p => editPermisos.includes(p)).length
                                                   return (
-                                                    <button
-                                                      key={actionDef.action}
-                                                      onClick={() => togglePerm(item.key, actionDef.action)}
-                                                      className={`text-[9px] px-2 py-1 rounded-lg border transition-all flex items-center gap-1 ${isActive ? `${colors.active} ${colors.border}` : `${colors.inactive} border-white/5 hover:border-white/15`}`}
-                                                    >
-                                                      {IconComp && <IconComp className="w-2.5 h-2.5" />}
-                                                      {actionDef.label}
-                                                    </button>
+                                                    <div key={sub.label}>
+                                                      <div className="flex items-center gap-2 mb-1.5">
+                                                        <button
+                                                          onClick={() => toggleItemAll(sub)}
+                                                          className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[7px] shrink-0 ${subPerms.every(p => editPermisos.includes(p)) ? 'bg-blis-red border-blis-red text-white' : subSelectedCount > 0 ? 'bg-blis-red/20 border-blis-red/40 text-blis-red' : 'border-white/10 bg-transparent'}`}
+                                                        >
+                                                          {subPerms.every(p => editPermisos.includes(p)) ? '✓' : subSelectedCount > 0 ? '−' : ''}
+                                                        </button>
+                                                        <span className="text-[11px] text-gray-300 font-bold truncate">{sub.label}</span>
+                                                        <span className="text-[8px] text-gray-600 shrink-0">{subSelectedCount}/{sub.actions.length}</span>
+                                                      </div>
+                                                      <div className="flex flex-wrap gap-1 ml-5">
+                                                        {sub.actions.map(actionDef => {
+                                                          const perm = buildPermission(sub.key, actionDef.action)
+                                                          const isActive = editPermisos.includes(perm)
+                                                          const colors = ACTION_COLORS[actionDef.action] || ACTION_COLORS.ver
+                                                          const IconComp = ACTION_ICONS[actionDef.action]
+                                                          return (
+                                                            <button
+                                                              key={actionDef.action}
+                                                              onClick={() => togglePerm(sub.key, actionDef.action)}
+                                                              className={`text-[8px] px-1.5 py-0.5 rounded-md border transition-all flex items-center gap-0.5 ${isActive ? `${colors.active} ${colors.border}` : `${colors.inactive} border-white/5 hover:border-white/15`}`}
+                                                            >
+                                                              {IconComp && <IconComp className="w-2 h-2" />}
+                                                              {actionDef.label}
+                                                            </button>
+                                                          )
+                                                        })}
+                                                      </div>
+                                                    </div>
                                                   )
                                                 })}
                                               </div>
-                                            </div>
+                                            )}
                                           </div>
                                         )
                                       })}
