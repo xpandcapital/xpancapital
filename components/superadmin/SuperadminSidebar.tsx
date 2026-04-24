@@ -231,7 +231,7 @@ export function SuperadminSidebar() {
     }, [pathname])
 
     const filteredSections = useMemo(() => {
-        if (isAdmin) return ALL_SECTIONS
+        if (isAdmin && user?.role !== 'empleado') return ALL_SECTIONS
 
         if (permLoading || effectivePermissions === null) {
             return []
