@@ -1,118 +1,137 @@
-// Hook para permisos granulares del usuario
-// Combina el rol del perfil con permisos adicionales y permisos del rol en la BD
 "use client"
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  getEffectivePermissions,
   hasPermission as checkPermission,
   canAccessSection as checkSection,
   isAdminRole as checkIsAdmin,
   getDefaultRouteForRole,
-  PermisosAdicionales,
   SECTION_PERMISSIONS,
   ROLE_CONFIG,
   ROLE_DEFAULTS,
-  UserRole,
-  Permission,
+  type UserRole,
 } from '@/lib/auth/permissions'
 
 export function usePermissions() {
   const { user, loading: authLoading } = useAuth()
-  const [rolePermissions, setRolePermissions] = useState<string[]>([])
-  const [roleRutaInicio, setRoleRutaInicio] = useState<string | null>(null)
+  const [dbPermissions, setDbPermissions] = useState<string[] | null>(null)
+  const [dbRutaInicio, setDbRutaInicio] = useState<string | null>(null)
   const [apiLoading, setApiLoading] = useState(true)
+  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     if (authLoading) return
     if (!user?.id) {
-      setRolePermissions([])
-      setRoleRutaInicio(null)
+      setDbPermissions([])
+      setDbRutaInicio(null)
       setApiLoading(false)
       return
     }
 
-    let cancelled = false
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
 
     async function load() {
       setApiLoading(true)
+      setDbPermissions(null)
       try {
-        const res = await fetch('/api/admin/roles')
+        const res = await fetch(`/api/admin/roles`, {
+          signal: controller.signal,
+        })
         if (!res.ok) throw new Error('Failed to fetch')
         const json = await res.json()
         const rolesArray = Array.isArray(json) ? json : (json.data || [])
-        const roleData = rolesArray.find?.((r: { nombre: string }) => r.nombre === user.role)
-        if (cancelled) return
-        setRolePermissions(roleData?.permisos || [])
-        setRoleRutaInicio(roleData?.ruta_inicio || null)
-      } catch (e) {
+        const roleData = rolesArray.find?.(
+          (r: { nombre: string }) => r.nombre === user.role
+        )
+        setDbPermissions(roleData?.permisos ?? null)
+        setDbRutaInicio(roleData?.ruta_inicio ?? null)
+      } catch (e: any) {
+        if (e.name === 'AbortError') return
         console.error('[usePermissions] fetch error:', e)
-        if (!cancelled) setRolePermissions([])
+        setDbPermissions([])
       } finally {
-        if (!cancelled) setApiLoading(false)
+        setApiLoading(false)
       }
     }
 
     load()
-    return () => { cancelled = true }
+    return () => controller.abort()
   }, [user?.id, user?.role, authLoading])
 
   const rol = (user?.role || 'usuario') as UserRole
-  const permisosAdicionales = user?.permisos_adicionales as PermisosAdicionales | null | undefined
+  const permisosAdicionales = user?.permisos_adicionales as
+    | { extra?: string[]; denied?: string[] }
+    | null
+    | undefined
 
-  const effectivePermissions = !apiLoading && rolePermissions.length > 0
-    ? getEffectivePermissionsFromDB(rol, rolePermissions, permisosAdicionales)
-    : getEffectivePermissions(rol, permisosAdicionales)
+  const effectivePermissions: Set<string> | null =
+    !apiLoading && dbPermissions !== null
+      ? buildEffectivePermissions(rol, dbPermissions, permisosAdicionales)
+      : null
 
   const isAdmin = checkIsAdmin(rol)
-  const defaultRoute = getDefaultRouteForRole(rol, roleRutaInicio)
+  const defaultRoute = getDefaultRouteForRole(rol, dbRutaInicio)
   const roleConfig = ROLE_CONFIG[rol] || ROLE_CONFIG.usuario
+
+  const hasPermission = useCallback(
+    (permission: string): boolean => {
+      if (!effectivePermissions) return false
+      return checkPermission(effectivePermissions, permission)
+    },
+    [effectivePermissions]
+  )
+
+  const canAccessSection = useCallback(
+    (sectionPath: string): boolean => {
+      if (!effectivePermissions) return false
+      return checkSection(effectivePermissions, sectionPath)
+    },
+    [effectivePermissions]
+  )
+
+  const allowedSections = Object.entries(SECTION_PERMISSIONS)
+    .filter(([, perm]) =>
+      effectivePermissions ? checkPermission(effectivePermissions, perm) : false
+    )
+    .map(([section]) => section)
 
   return {
     permissions: effectivePermissions,
     effectivePermissions,
-    hasPermission: useCallback(
-      (permission: string) => checkPermission(effectivePermissions, permission),
-      [effectivePermissions]
-    ),
-    canAccessSection: useCallback(
-      (sectionPath: string) => checkSection(effectivePermissions, sectionPath),
-      [effectivePermissions]
-    ),
+    hasPermission,
+    canAccessSection,
     role: rol,
     isAdmin,
     defaultRoute,
     roleConfig,
-    allowedSections: Object.entries(SECTION_PERMISSIONS)
-      .filter(([, perm]) => checkPermission(effectivePermissions, perm))
-      .map(([section]) => section),
+    allowedSections,
     loading: authLoading || apiLoading,
   }
 }
 
-function getEffectivePermissionsFromDB(
+function buildEffectivePermissions(
   rol: string,
   dbPermissions: string[],
-  permisosAdicionales?: PermisosAdicionales | null
+  permisosAdicionales?: { extra?: string[]; denied?: string[] } | null
 ): Set<string> {
   const defaults = ROLE_DEFAULTS[rol as UserRole] || ROLE_DEFAULTS.usuario
-  const hasWildcardDefault = defaults.includes('*' as any)
-  const base = new Set<string>(dbPermissions.length > 0 ? dbPermissions : defaults)
 
-  if (hasWildcardDefault) {
-    base.add('*')
-  }
+  const base =
+    dbPermissions.length > 0
+      ? new Set<string>(dbPermissions)
+      : new Set<string>(defaults)
 
   if (permisosAdicionales?.extra) {
-    permisosAdicionales.extra.forEach(p => base.add(p))
+    permisosAdicionales.extra.forEach((p) => base.add(p))
   }
-
   if (permisosAdicionales?.denied) {
-    permisosAdicionales.denied.forEach(p => base.delete(p))
+    permisosAdicionales.denied.forEach((p) => base.delete(p))
   }
 
-  if (hasWildcardDefault) {
+  if (base.has('*')) {
     base.add('*')
   }
 
