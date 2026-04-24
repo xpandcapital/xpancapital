@@ -2,47 +2,101 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, ChevronDown, Save, X, Trash2, Plus, ArrowUp, ArrowDown, Edit2, Check, Copy, ClipboardPaste, Home } from 'lucide-react'
+import { Shield, ChevronDown, Save, X, Trash2, Plus, ArrowUp, ArrowDown, Edit2, Check, Copy, ClipboardPaste, Home, Eye, PlusCircle, Pencil, Trash } from 'lucide-react'
 import { CustomRole, useRoles } from './_components/useRoles'
-import { PERMISSIONS, AVAILABLE_ROUTES, ROLE_CONFIG, SECTION_PERMISSIONS } from '@/lib/auth/permissions'
+import { PERMISSIONS, AVAILABLE_ROUTES, ROLE_CONFIG, PERMISSION_ACTIONS, buildPermission } from '@/lib/auth/permissions'
 import { useToast } from '@/components/ui/Toast'
 
 const ROLE_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#6366f1', '#14b8a6', '#6b7280']
 const SYSTEM_ROLES = ['superadmin', 'admin', 'editor', 'cliente', 'usuario']
 
-const PERMISSION_GROUPS: Record<string, string[]> = {
-  'Dashboard': ['dashboard:ver'],
-  'Proyectos': ['proyectos:ver', 'proyectos:crear', 'proyectos:editar', 'proyectos:eliminar'],
-  'Lotes': ['lotes:ver', 'lotes:editar'],
-  'Contratos': ['contratos:ver', 'contratos:crear', 'contratos:editar'],
-  'Asesores': ['asesores:ver', 'asesores:crear', 'asesores:editar'],
-  'POS': ['pos:ver'],
-  'Productos': ['productos:ver', 'productos:crear', 'productos:editar', 'productos:eliminar'],
-  'Clientes': ['clientes:ver', 'clientes:editar'],
-  'Cursos': ['cursos:ver', 'cursos:crear', 'cursos:editar', 'cursos:eliminar'],
-  'Certificados': ['certificados:ver', 'certificados:crear'],
-  'Trading': ['trading:ver'],
-  'Páginas': ['templates:ver', 'templates:editar'],
-  'Correos': ['mails:ver', 'mails:enviar'],
-  'Calendarios': ['calendarios:ver', 'calendarios:editar'],
-  'Formularios': ['formularios:ver', 'formularios:crear'],
-  'Leads': ['leads:ver', 'leads:editar'],
-  'Campañas': ['campanas:ver', 'campanas:crear'],
-  'Blog': ['blog:ver', 'blog:crear', 'blog:editar', 'blog:eliminar'],
-  'Equipo': ['equipo:ver', 'equipo:crear', 'equipo:editar'],
-  'Postulantes': ['postulantes:ver', 'postulantes:editar'],
-  'Capacitaciones': ['capacitaciones:ver', 'capacitaciones:editar'],
-  'Utilidades': ['utilidades:ver'],
-  'Configuración': ['configuracion:ver', 'configuracion:editar'],
-  'APIs y Nube': ['api-nube:ver'],
-  'Analíticas': ['analiticas:ver'],
-  'Ajustes': ['ajustes:ver', 'ajustes:editar'],
-  'Roles': ['roles:ver', 'roles:editar'],
-  'Empresas': ['empresas:ver', 'empresas:editar'],
-  'Miembros': ['miembros:ver'],
-  'Perfil': ['perfil:ver', 'perfil:editar'],
-  'Facturación': ['facturacion:ver'],
+type ActionDef = { action: string; label: string }
+
+type PermItem = {
+  key: string
+  label: string
+  actions: ActionDef[]
 }
+
+type PermGroup = {
+  title: string
+  items: PermItem[]
+}
+
+const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  ver: Eye,
+  crear: PlusCircle,
+  editar: Pencil,
+  eliminar: Trash,
+}
+
+const ACTION_COLORS: Record<string, { active: string; inactive: string; border: string }> = {
+  ver: { active: 'bg-blue-500/15 text-blue-400', inactive: 'bg-white/[0.02] text-gray-600', border: 'border-blue-500/30' },
+  crear: { active: 'bg-emerald-500/15 text-emerald-400', inactive: 'bg-white/[0.02] text-gray-600', border: 'border-emerald-500/30' },
+  editar: { active: 'bg-amber-500/15 text-amber-400', inactive: 'bg-white/[0.02] text-gray-600', border: 'border-amber-500/30' },
+  eliminar: { active: 'bg-red-500/15 text-red-400', inactive: 'bg-white/[0.02] text-gray-600', border: 'border-red-500/30' },
+}
+
+const PERMISSION_TREE: PermGroup[] = [
+  {
+    title: 'Principal',
+    items: [
+      { key: 'dashboard', label: 'Dashboard', actions: [{ action: 'ver', label: 'Ver' }] },
+      { key: 'proyectos', label: 'Proyectos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'lotes', label: 'Gestión de Lotes', actions: [{ action: 'ver', label: 'Ver' }, { action: 'editar', label: 'Editar' }] },
+      { key: 'contratos', label: 'Contratos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }] },
+      { key: 'asesores', label: 'Asesores', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }] },
+    ]
+  },
+  {
+    title: 'Ventas',
+    items: [
+      { key: 'pos', label: 'Terminal POS', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'productos', label: 'Productos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'clientes', label: 'Clientes', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }] },
+      { key: 'ajustes', label: 'Ajustes del Comercio', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'cursos', label: 'Cursos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'capacitaciones', label: 'Capacitaciones', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'certificados', label: 'Certificados', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'trading', label: 'Trading', actions: [{ action: 'ver', label: 'Ver' }] },
+    ]
+  },
+  {
+    title: 'Contenido',
+    items: [
+      { key: 'templates', label: 'Páginas', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'mails', label: 'Correos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'calendarios', label: 'Calendarios', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'formularios', label: 'Formularios', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'leads', label: 'Leads', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'campanas', label: 'Campañas', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'blog', label: 'Blog', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+    ]
+  },
+  {
+    title: 'Sistema',
+    items: [
+      { key: 'equipo', label: 'Equipo', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'postulantes', label: 'Postulantes', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'puestos', label: 'Puestos', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'preguntas', label: 'Preguntas', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'utilidades', label: 'Utilidades', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'configuracion', label: 'Sitio y Branding', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'api-nube', label: 'APIs y Nube', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'analiticas', label: 'Métricas y SEO', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'roles', label: 'Roles y Niveles', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'empresas', label: 'Empresas', actions: [{ action: 'ver', label: 'Ver' }, { action: 'crear', label: 'Crear' }, { action: 'editar', label: 'Editar' }, { action: 'eliminar', label: 'Eliminar' }] },
+      { key: 'perfil', label: 'Mi Perfil', actions: [{ action: 'ver', label: 'Ver' }, { action: 'editar', label: 'Editar' }] },
+    ]
+  },
+  {
+    title: 'Panel Cliente',
+    items: [
+      { key: 'miembros', label: 'Miembros', actions: [{ action: 'ver', label: 'Ver' }] },
+      { key: 'facturacion', label: 'Facturación', actions: [{ action: 'ver', label: 'Ver' }] },
+    ]
+  },
+]
 
 export default function RolesPage() {
   const { showToast } = useToast()
@@ -56,6 +110,7 @@ export default function RolesPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [newRole, setNewRole] = useState({ nombre: '', label: '', descripcion: '', color: '#6b7280' })
   const [editRutaInicio, setEditRutaInicio] = useState<string | null>(null)
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
 
   const getAvailableRoutesForRole = (role: CustomRole) => {
     const isWildcard = role.permisos?.includes('*')
@@ -90,6 +145,36 @@ export default function RolesPage() {
     } else {
       setExpandedId(roleId)
       setEditPermisos(permisos.includes('*') ? Object.keys(PERMISSIONS) : [...permisos])
+      setExpandedGroups({ Principal: true, Ventas: true, Contenido: true, Sistema: true, 'Panel Cliente': true })
+    }
+  }
+
+  const togglePerm = (key: string, action: string) => {
+    const perm = buildPermission(key, action)
+    setEditPermisos(prev =>
+      prev.includes(perm) ? prev.filter(p => p !== perm) : [...prev, perm]
+    )
+  }
+
+  const toggleGroupAll = (group: PermGroup) => {
+    const allPerms = group.items.flatMap(item =>
+      item.actions.map(a => buildPermission(item.key, a.action))
+    )
+    const allSelected = allPerms.every(p => editPermisos.includes(p))
+    if (allSelected) {
+      setEditPermisos(prev => prev.filter(p => !allPerms.includes(p)))
+    } else {
+      setEditPermisos(prev => [...new Set([...prev, ...allPerms])])
+    }
+  }
+
+  const toggleItemAll = (item: PermItem) => {
+    const allPerms = item.actions.map(a => buildPermission(item.key, a.action))
+    const allSelected = allPerms.every(p => editPermisos.includes(p))
+    if (allSelected) {
+      setEditPermisos(prev => prev.filter(p => !allPerms.includes(p)))
+    } else {
+      setEditPermisos(prev => [...new Set([...prev, ...allPerms])])
     }
   }
 
@@ -249,9 +334,9 @@ export default function RolesPage() {
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                      <div className="px-4 pb-4 pt-2 border-t border-white/5">
+                      <div className="px-4 pb-6 pt-2 border-t border-white/5">
                         {/* Página de inicio */}
-                        <div className="mb-4 p-3 bg-white/[0.02] rounded-xl border border-white/5">
+                        <div className="mb-5 p-3 bg-white/[0.02] rounded-xl border border-white/5">
                           <div className="flex items-center gap-2 mb-2">
                             <Home className="w-3.5 h-3.5 text-blis-red" />
                             <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Página de inicio al iniciar sesión</p>
@@ -272,10 +357,11 @@ export default function RolesPage() {
                           <p className="text-[9px] text-gray-600 mt-1.5">Al iniciar sesión, este rol será redirigido a esta página.</p>
                         </div>
 
-                        <div className="flex items-center justify-between mb-3">
+                        {/* Toolbar */}
+                        <div className="flex items-center justify-between mb-4">
                           <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Permisos de <span className="text-white">{role.label || role.nombre}</span></p>
                           <div className="flex gap-2">
-                            <button onClick={() => { setClipboard([...editPermisos]); showToast(`Permisos copiados (${editPermisos.length})`, 'success') }} className="px-3 py-1.5 bg-white/5 rounded-lg text-gray-400 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-colors flex items-center gap-1" title="Copiar permisos de este rol">
+                            <button onClick={() => { setClipboard([...editPermisos]); showToast(`Permisos copiados (${editPermisos.length})`, 'success') }} className="px-3 py-1.5 bg-white/5 rounded-lg text-gray-400 text-[10px] font-bold uppercase tracking-wider hover:bg-white/10 transition-colors flex items-center gap-1" title="Copiar permisos">
                               <Copy className="w-3 h-3" />Copiar
                             </button>
                             {clipboard !== null && (
@@ -300,48 +386,85 @@ export default function RolesPage() {
                             <p className="text-emerald-400/60 text-[11px]">Este rol tiene acceso a todas las secciones del sistema</p>
                           </div>
                         ) : (
-                          <div className="space-y-4">
-                            {Object.entries(PERMISSION_GROUPS).map(([group, permKeys]) => {
-                              const groupChecked = permKeys.filter(p => editPermisos.includes(p))
-                              if (groupChecked.length === 0 && permKeys.length > 2) return null
+                          <div className="space-y-3">
+                            {/* Select all / clear */}
+                            <div className="flex items-center gap-3 pb-3 border-b border-white/5">
+                              <button onClick={() => setEditPermisos(Object.keys(PERMISSIONS))} className="text-[10px] px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold hover:bg-emerald-500/20 transition-colors">Seleccionar todos</button>
+                              <button onClick={() => setEditPermisos([])} className="text-[10px] px-3 py-1 rounded-lg bg-white/5 text-gray-400 font-bold hover:bg-white/10 transition-colors">Limpiar</button>
+                            </div>
+
+                            {/* Permission Tree */}
+                            {PERMISSION_TREE.map(group => {
+                              const groupOpen = expandedGroups[group.title] !== false
+                              const allGroupPerms = group.items.flatMap(item =>
+                                item.actions.map(a => buildPermission(item.key, a.action))
+                              )
+                              const groupSelectedCount = allGroupPerms.filter(p => editPermisos.includes(p)).length
+
                               return (
-                                <div key={group}>
-                                  <div className="flex items-center gap-2 mb-2">
+                                <div key={group.title} className="rounded-xl border border-white/5 overflow-hidden">
+                                  <button
+                                    onClick={() => setExpandedGroups(prev => ({ ...prev, [group.title]: !prev[group.title] }))}
+                                    className="w-full flex items-center gap-3 px-4 py-3 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                                  >
+                                    <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform shrink-0 ${groupOpen ? '' : '-rotate-90'}`} />
+                                    <span className="text-[10px] text-gray-300 uppercase tracking-[0.15em] font-black flex-1 text-left">{group.title}</span>
+                                    <span className="text-[9px] text-gray-600 font-bold">{groupSelectedCount}/{allGroupPerms.length}</span>
                                     <button
-                                      onClick={() => {
-                                        const allSelected = permKeys.every(p => editPermisos.includes(p))
-                                        if (allSelected) {
-                                          setEditPermisos(prev => prev.filter(p => !permKeys.includes(p)))
-                                        } else {
-                                          setEditPermisos(prev => [...new Set([...prev, ...permKeys])])
-                                        }
-                                      }}
-                                      className={`w-4 h-4 rounded border flex items-center justify-center text-[8px] ${permKeys.every(p => editPermisos.includes(p)) ? 'bg-blis-red border-blis-red text-white' : 'border-white/20 bg-transparent'}`}
+                                      onClick={(e) => { e.stopPropagation(); toggleGroupAll(group) }}
+                                      className={`text-[9px] px-2 py-0.5 rounded-md border transition-all ${allGroupPerms.every(p => editPermisos.includes(p)) ? 'bg-blis-red/10 border-blis-red/30 text-blis-red' : 'border-white/10 text-gray-600 hover:text-gray-400'}`}
                                     >
-                                      {permKeys.every(p => editPermisos.includes(p)) && '✓'}
+                                      {allGroupPerms.every(p => editPermisos.includes(p)) ? '✓' : 'Todo'}
                                     </button>
-                                    <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">{group}</p>
-                                  </div>
-                                  <div className="flex flex-wrap gap-1.5 ml-6">
-                                    {permKeys.map(key => (
-                                      <button
-                                        key={key}
-                                        onClick={() => setEditPermisos(prev => prev.includes(key) ? prev.filter(p => p !== key) : [...prev, key])}
-                                        className={`text-[9px] px-2 py-0.5 rounded-full border transition-all ${editPermisos.includes(key) ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-white/[0.02] border-white/5 text-gray-600 hover:border-white/20'}`}
-                                      >
-                                        {PERMISSIONS[key as keyof typeof PERMISSIONS] || key}
-                                      </button>
-                                    ))}
-                                  </div>
+                                  </button>
+
+                                  {groupOpen && (
+                                    <div className="divide-y divide-white/[0.03]">
+                                      {group.items.map(item => {
+                                        const itemPerms = item.actions.map(a => buildPermission(item.key, a.action))
+                                        const itemSelectedCount = itemPerms.filter(p => editPermisos.includes(p)).length
+
+                                        return (
+                                          <div key={item.key} className="px-4 py-3 flex items-center gap-3">
+                                            <div className="flex-1 min-w-0">
+                                              <div className="flex items-center gap-2 mb-2">
+                                                <button
+                                                  onClick={() => toggleItemAll(item)}
+                                                  className={`w-4 h-4 rounded border flex items-center justify-center text-[8px] shrink-0 ${itemPerms.every(p => editPermisos.includes(p)) ? 'bg-blis-red border-blis-red text-white' : itemSelectedCount > 0 ? 'bg-blis-red/20 border-blis-red/40 text-blis-red' : 'border-white/15 bg-transparent'}`}
+                                                >
+                                                  {itemPerms.every(p => editPermisos.includes(p)) ? '✓' : itemSelectedCount > 0 ? '−' : ''}
+                                                </button>
+                                                <span className="text-xs text-white font-bold truncate">{item.label}</span>
+                                                <span className="text-[9px] text-gray-600 shrink-0">{itemSelectedCount}/{item.actions.length}</span>
+                                              </div>
+                                              <div className="flex flex-wrap gap-1.5 ml-6">
+                                                {item.actions.map(actionDef => {
+                                                  const perm = buildPermission(item.key, actionDef.action)
+                                                  const isActive = editPermisos.includes(perm)
+                                                  const colors = ACTION_COLORS[actionDef.action] || ACTION_COLORS.ver
+                                                  const IconComp = ACTION_ICONS[actionDef.action]
+
+                                                  return (
+                                                    <button
+                                                      key={actionDef.action}
+                                                      onClick={() => togglePerm(item.key, actionDef.action)}
+                                                      className={`text-[9px] px-2 py-1 rounded-lg border transition-all flex items-center gap-1 ${isActive ? `${colors.active} ${colors.border}` : `${colors.inactive} border-white/5 hover:border-white/15`}`}
+                                                    >
+                                                      {IconComp && <IconComp className="w-2.5 h-2.5" />}
+                                                      {actionDef.label}
+                                                    </button>
+                                                  )
+                                                })}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )
+                                      })}
+                                    </div>
+                                  )}
                                 </div>
                               )
                             })}
-                            <div className="pt-2 border-t border-white/5">
-                              <div className="flex items-center gap-3">
-                                <button onClick={() => setEditPermisos(Object.keys(PERMISSIONS))} className="text-[10px] px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold hover:bg-emerald-500/20 transition-colors">Seleccionar todos</button>
-                                <button onClick={() => setEditPermisos([])} className="text-[10px] px-3 py-1 rounded-lg bg-white/5 text-gray-400 font-bold hover:bg-white/10 transition-colors">Limpiar</button>
-                              </div>
-                            </div>
                           </div>
                         )}
                       </div>

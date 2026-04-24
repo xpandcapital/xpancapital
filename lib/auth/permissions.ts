@@ -1,160 +1,199 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // BLIS CORP - SISTEMA DE PERMISOS Y ROLES
-// Define permisos granulares, roles por defecto y funciones de resolución
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Tipos de rol del sistema (coinciden con profiles.rol en la BD)
 export type UserRole = 'superadmin' | 'admin' | 'editor' | 'empleado' | 'cliente' | 'usuario'
 
-// Permisos disponibles en el sistema
 export const PERMISSIONS = {
   // Dashboard
   'dashboard:ver': 'Ver Dashboard',
-  // Proyectos
+  // Principal
   'proyectos:ver': 'Ver Proyectos',
   'proyectos:crear': 'Crear Proyectos',
   'proyectos:editar': 'Editar Proyectos',
   'proyectos:eliminar': 'Eliminar Proyectos',
-  // Lotes / Gestión
   'lotes:ver': 'Ver Gestión de Lotes',
   'lotes:editar': 'Editar Lotes',
-  // Contratos
   'contratos:ver': 'Ver Contratos',
   'contratos:crear': 'Crear Contratos',
   'contratos:editar': 'Editar Contratos',
-  // Asesores / Equipo
   'asesores:ver': 'Ver Asesores',
   'asesores:crear': 'Crear Asesores',
   'asesores:editar': 'Editar Asesores',
-  // POS
+  // Ventas
   'pos:ver': 'Ver Terminal POS',
-  // Productos
+  'pos:crear': 'Crear en Terminal POS',
+  'pos:editar': 'Editar en Terminal POS',
+  'pos:eliminar': 'Eliminar en Terminal POS',
   'productos:ver': 'Ver Productos',
   'productos:crear': 'Crear Productos',
   'productos:editar': 'Editar Productos',
   'productos:eliminar': 'Eliminar Productos',
-  // Clientes
   'clientes:ver': 'Ver Clientes',
+  'clientes:crear': 'Crear Clientes',
   'clientes:editar': 'Editar Clientes',
-  // Cursos
+  'ajustes:ver': 'Ver Ajustes del Comercio',
+  'ajustes:crear': 'Crear Ajustes del Comercio',
+  'ajustes:editar': 'Editar Ajustes del Comercio',
+  'ajustes:eliminar': 'Eliminar Ajustes del Comercio',
   'cursos:ver': 'Ver Cursos',
   'cursos:crear': 'Crear Cursos',
   'cursos:editar': 'Editar Cursos',
   'cursos:eliminar': 'Eliminar Cursos',
-  // Certificados
+  'capacitaciones:ver': 'Ver Capacitaciones',
+  'capacitaciones:crear': 'Crear Capacitaciones',
+  'capacitaciones:editar': 'Editar Capacitaciones',
+  'capacitaciones:eliminar': 'Eliminar Capacitaciones',
   'certificados:ver': 'Ver Certificados',
   'certificados:crear': 'Crear Certificados',
-  // Trading
+  'certificados:editar': 'Editar Certificados',
+  'certificados:eliminar': 'Eliminar Certificados',
   'trading:ver': 'Ver Trading',
-  // Templates / Páginas
+  // Contenido
   'templates:ver': 'Ver Páginas',
+  'templates:crear': 'Crear Páginas',
   'templates:editar': 'Editar Páginas',
-  // Correos
+  'templates:eliminar': 'Eliminar Páginas',
   'mails:ver': 'Ver Correos',
-  'mails:enviar': 'Enviar Correos',
-  // Calendarios
+  'mails:crear': 'Crear Correos',
+  'mails:editar': 'Editar Correos',
+  'mails:eliminar': 'Eliminar Correos',
   'calendarios:ver': 'Ver Calendarios',
+  'calendarios:crear': 'Crear Calendarios',
   'calendarios:editar': 'Editar Calendarios',
-  // Formularios
+  'calendarios:eliminar': 'Eliminar Calendarios',
   'formularios:ver': 'Ver Formularios',
   'formularios:crear': 'Crear Formularios',
-  // Leads
+  'formularios:editar': 'Editar Formularios',
+  'formularios:eliminar': 'Eliminar Formularios',
   'leads:ver': 'Ver Leads',
+  'leads:crear': 'Crear Leads',
   'leads:editar': 'Editar Leads',
-  // Campañas
+  'leads:eliminar': 'Eliminar Leads',
   'campanas:ver': 'Ver Campañas',
   'campanas:crear': 'Crear Campañas',
-  // Blog
+  'campanas:editar': 'Editar Campañas',
+  'campanas:eliminar': 'Eliminar Campañas',
   'blog:ver': 'Ver Blog',
-  'blog:crear': 'Crear Entradas',
-  'blog:editar': 'Editar Entradas',
-  'blog:eliminar': 'Eliminar Entradas',
-  // Equipo / Usuarios
-  'equipo:ver': 'Ver Equipo',
-  'equipo:crear': 'Crear Miembros',
-  'equipo:editar': 'Editar Miembros',
-  // Postulantes
+  'blog:crear': 'Crear Blog',
+  'blog:editar': 'Editar Blog',
+  'blog:eliminar': 'Eliminar Blog',
+  // Sistema
+  'equipo:ver': 'Ver Personal',
+  'equipo:crear': 'Crear Miembros del Equipo',
+  'equipo:editar': 'Editar Miembros del Equipo',
+  'equipo:eliminar': 'Eliminar Miembros del Equipo',
   'postulantes:ver': 'Ver Postulantes',
-  'postulantes:editar': 'Evaluar Postulantes',
-  // Capacitaciones
-  'capacitaciones:ver': 'Ver Capacitaciones',
-  'capacitaciones:editar': 'Editar Progreso de Capacitaciones',
-  // Utilidades
+  'postulantes:crear': 'Crear Postulantes',
+  'postulantes:editar': 'Editar Postulantes',
+  'postulantes:eliminar': 'Eliminar Postulantes',
+  'puestos:ver': 'Ver Puestos',
+  'puestos:crear': 'Crear Puestos',
+  'puestos:editar': 'Editar Puestos',
+  'puestos:eliminar': 'Eliminar Puestos',
+  'preguntas:ver': 'Ver Preguntas',
+  'preguntas:crear': 'Crear Preguntas',
+  'preguntas:editar': 'Editar Preguntas',
+  'preguntas:eliminar': 'Eliminar Preguntas',
   'utilidades:ver': 'Ver Utilidades',
-  // Configuración
+  'utilidades:crear': 'Crear Utilidades',
+  'utilidades:editar': 'Editar Utilidades',
+  'utilidades:eliminar': 'Eliminar Utilidades',
   'configuracion:ver': 'Ver Configuración',
+  'configuracion:crear': 'Crear Configuración',
   'configuracion:editar': 'Editar Configuración',
-  // APIs y Nube
+  'configuracion:eliminar': 'Eliminar Configuración',
   'api-nube:ver': 'Ver APIs y Nube',
-  // Analíticas
+  'api-nube:crear': 'Crear APIs y Nube',
+  'api-nube:editar': 'Editar APIs y Nube',
+  'api-nube:eliminar': 'Eliminar APIs y Nube',
   'analiticas:ver': 'Ver Métricas y SEO',
-  // Ajustes comercio
-  'ajustes:ver': 'Ver Ajustes',
-  'ajustes:editar': 'Editar Ajustes',
-  // Roles y niveles
+  'analiticas:crear': 'Crear Métricas y SEO',
+  'analiticas:editar': 'Editar Métricas y SEO',
+  'analiticas:eliminar': 'Eliminar Métricas y SEO',
   'roles:ver': 'Ver Roles y Niveles',
+  'roles:crear': 'Crear Roles y Niveles',
   'roles:editar': 'Editar Roles y Niveles',
-  // Empresas
+  'roles:eliminar': 'Eliminar Roles y Niveles',
   'empresas:ver': 'Ver Empresas',
+  'empresas:crear': 'Crear Empresas',
   'empresas:editar': 'Editar Empresas',
-  // Perfil
+  'empresas:eliminar': 'Eliminar Empresas',
   'perfil:ver': 'Ver Perfil',
   'perfil:editar': 'Editar Perfil',
-  // Miembros (panel de cliente)
-  'miembros:ver': 'Ver Panel de Miembros',
-  // Facturación
+  // Panel Cliente
+  'miembros:ver': 'Ver Miembros',
   'facturacion:ver': 'Ver Facturación',
 } as const
 
 export type Permission = keyof typeof PERMISSIONS
 
-// Permisos por defecto para cada rol
 export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
   superadmin: ['*'] as unknown as Permission[],
   admin: ['*'] as unknown as Permission[],
   editor: [
     'dashboard:ver',
-    'proyectos:ver', 'lotes:ver', 'contratos:ver',
-    'asesores:ver',
-    'productos:ver', 'productos:editar',
-    'clientes:ver',
-    'cursos:ver', 'cursos:editar',
-    'leads:ver',
-    'blog:ver', 'blog:crear',
-    'equipo:ver',
+    'proyectos:ver', 'proyectos:crear', 'proyectos:editar',
+    'lotes:ver', 'lotes:editar',
+    'contratos:ver', 'contratos:crear', 'contratos:editar',
+    'asesores:ver', 'asesores:crear', 'asesores:editar',
+    'pos:ver', 'pos:crear', 'pos:editar',
+    'productos:ver', 'productos:crear', 'productos:editar',
+    'clientes:ver', 'clientes:crear', 'clientes:editar',
+    'ajustes:ver', 'ajustes:crear', 'ajustes:editar',
+    'cursos:ver', 'cursos:crear', 'cursos:editar',
+    'capacitaciones:ver', 'capacitaciones:crear', 'capacitaciones:editar',
+    'certificados:ver', 'certificados:crear', 'certificados:editar',
+    'trading:ver',
+    'templates:ver', 'templates:crear', 'templates:editar',
+    'mails:ver', 'mails:crear', 'mails:editar',
+    'calendarios:ver', 'calendarios:crear', 'calendarios:editar',
+    'formularios:ver', 'formularios:crear', 'formularios:editar',
+    'leads:ver', 'leads:crear', 'leads:editar',
+    'campanas:ver', 'campanas:crear', 'campanas:editar',
+    'blog:ver', 'blog:crear', 'blog:editar',
+    'equipo:ver', 'equipo:crear', 'equipo:editar',
+    'postulantes:ver', 'postulantes:crear', 'postulantes:editar',
+    'configuracion:ver', 'configuracion:crear', 'configuracion:editar',
+    'roles:ver', 'roles:crear', 'roles:editar',
+    'empresas:ver', 'empresas:crear', 'empresas:editar',
     'perfil:ver', 'perfil:editar',
   ],
   empleado: [
     'dashboard:ver',
-    'proyectos:ver', 'lotes:ver',
+    'proyectos:ver',
+    'lotes:ver',
     'asesores:ver',
+    'pos:ver',
     'productos:ver',
     'clientes:ver',
+    'ajustes:ver',
+    'cursos:ver',
     'capacitaciones:ver',
+    'certificados:ver',
+    'templates:ver',
+    'mails:ver',
     'leads:ver',
+    'blog:ver',
     'equipo:ver',
     'postulantes:ver',
     'perfil:ver', 'perfil:editar',
   ],
   cliente: [
     'miembros:ver',
-    'productos:ver',
-    'cursos:ver',
-    'certificados:ver',
-    'perfil:ver', 'perfil:editar',
     'facturacion:ver',
+    'perfil:ver', 'perfil:editar',
   ],
   usuario: [
     'miembros:ver',
-    'productos:ver',
     'perfil:ver', 'perfil:editar',
   ],
 }
 
-// Mapeo de sección de sidebar a permiso requerido
-// La key es el path relativo dentro de /superadmin/
+// Mapeo de rutas a permisos requeridos
 export const SECTION_PERMISSIONS: Record<string, Permission> = {
   '': 'dashboard:ver',
+  'dashboard': 'dashboard:ver',
   'proyectos': 'proyectos:ver',
   'gestion-lotes': 'lotes:ver',
   'contratos': 'contratos:ver',
@@ -162,6 +201,7 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
   'pos': 'pos:ver',
   'productos': 'productos:ver',
   'clientes': 'clientes:ver',
+  'ajustes/comercio': 'ajustes:ver',
   'cursos': 'cursos:ver',
   'certificados': 'certificados:ver',
   'trading': 'trading:ver',
@@ -172,10 +212,11 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
   'leads': 'leads:ver',
   'campanas': 'campanas:ver',
   'blog': 'blog:ver',
+  'blog/rutas': 'blog:ver',
   'usuarios': 'equipo:ver',
   'postulantes': 'postulantes:ver',
-  'postulantes/puestos': 'postulantes:ver',
-  'postulantes/preguntas': 'postulantes:ver',
+  'postulantes/puestos': 'puestos:ver',
+  'postulantes/preguntas': 'preguntas:ver',
   'mis-capacitaciones': 'capacitaciones:ver',
   'utilidades': 'utilidades:ver',
   'configuracion': 'configuracion:ver',
@@ -185,10 +226,183 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
   'ajustes/roles': 'roles:ver',
   'ajustes/empresas': 'empresas:ver',
   'perfil': 'perfil:ver',
-  'dashboard': 'dashboard:ver',
 }
 
-// Colores, labels y ruta de inicio para cada rol
+// Acciones disponibles para cada permiso
+export const PERMISSION_ACTIONS: Record<string, { action: string; label: string; icon: string }[]> = {
+  'dashboard': [{ action: 'ver', label: 'Ver', icon: 'eye' }],
+  'proyectos': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'lotes': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+  ],
+  'contratos': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+  ],
+  'asesores': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+  ],
+  'pos': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'productos': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'clientes': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+  ],
+  'ajustes': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'cursos': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'capacitaciones': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'certificados': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'trading': [{ action: 'ver', label: 'Ver', icon: 'eye' }],
+  'templates': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'mails': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'calendarios': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'formularios': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'leads': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'campanas': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'blog': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'equipo': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'postulantes': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'puestos': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'preguntas': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'utilidades': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'configuracion': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'api-nube': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'analiticas': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'roles': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'empresas': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'crear', label: 'Crear', icon: 'plus' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
+  ],
+  'perfil': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'editar', label: 'Editar', icon: 'pencil' },
+  ],
+  'miembros': [{ action: 'ver', label: 'Ver', icon: 'eye' }],
+  'facturacion': [{ action: 'ver', label: 'Ver', icon: 'eye' }],
+}
+
 export const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bgColor: string; defaultRoute: string }> = {
   superadmin: { label: 'Super Admin', color: 'text-white', bgColor: 'bg-blis-red', defaultRoute: '/superadmin' },
   admin: { label: 'Admin', color: 'text-amber-400', bgColor: 'bg-amber-500/20 border-amber-500/30', defaultRoute: '/superadmin' },
@@ -198,16 +412,11 @@ export const ROLE_CONFIG: Record<UserRole, { label: string; color: string; bgCol
   usuario: { label: 'Usuario', color: 'text-gray-400', bgColor: 'bg-gray-500/20 border-gray-500/30', defaultRoute: '/miembros' },
 }
 
-// Permisos adicionales por usuario (overrides)
 export interface PermisosAdicionales {
   extra?: string[]
   denied?: string[]
 }
 
-// Calcula los permisos efectivos de un usuario combinando:
-// 1. Permisos por defecto del rol
-// 2. Permisos extra individuales (overrides que agregan acceso)
-// 3. Permisos denegados individualmente (quitan acceso del rol)
 export function getEffectivePermissions(
   rol: string,
   permisosAdicionales?: PermisosAdicionales | null
@@ -227,8 +436,6 @@ export function getEffectivePermissions(
   return base
 }
 
-// Verifica si un conjunto de permisos incluye un permiso específico
-// Soporta el wildcard '*' (superadmin/admin tienen acceso total)
 export function hasPermission(
   permissions: Set<string>,
   permission: string
@@ -236,17 +443,15 @@ export function hasPermission(
   return permissions.has('*') || permissions.has(permission)
 }
 
-// Verifica si un usuario puede acceder a una sección del sidebar
 export function canAccessSection(
   permissions: Set<string>,
   sectionPath: string
 ): boolean {
   const required = SECTION_PERMISSIONS[sectionPath]
-  if (!required) return true // Si no hay permiso definido, permitir acceso
+  if (!required) return true
   return hasPermission(permissions, required)
 }
 
-// Rutas disponibles como página de inicio
 export const AVAILABLE_ROUTES: { path: string; label: string; section: string }[] = [
   { path: '/superadmin', label: 'Dashboard', section: 'dashboard' },
   { path: '/superadmin/proyectos', label: 'Proyectos', section: 'proyectos' },
@@ -269,14 +474,23 @@ export const AVAILABLE_ROUTES: { path: string; label: string; section: string }[
   { path: '/superadmin/perfil', label: 'Perfil', section: 'perfil' },
 ]
 
-// Determina la ruta de destino según el rol después del login
 export function getDefaultRouteForRole(rol: string, customRoute?: string | null): string {
   if (customRoute) return customRoute
   const normalizedRol = (rol || 'usuario') as UserRole
   return ROLE_CONFIG[normalizedRol]?.defaultRoute || ROLE_CONFIG.usuario.defaultRoute
 }
 
-// Verifica si un rol tiene acceso al panel de administración
 export function isAdminRole(rol: string): boolean {
   return ['superadmin', 'admin', 'editor', 'empleado'].includes(rol)
+}
+
+// Construir llave de permiso
+export function buildPermission(section: string, action: string): string {
+  return `${section}:${action}`
+}
+
+// Verificar si un set de permisos contiene una acción específica
+export function hasActionPermission(permissions: Set<string>, section: string, action: string): boolean {
+  const permission = buildPermission(section, action)
+  return permissions.has('*') || permissions.has(permission)
 }
