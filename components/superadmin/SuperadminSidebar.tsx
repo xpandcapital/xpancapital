@@ -47,7 +47,6 @@ const ALL_SECTIONS: Section[] = [
             {
                 icon: Building2,
                 label: "Proyectos",
-                permission: "proyectos:ver",
                 subItems: [
                     { icon: Building2, label: "Todos los Proyectos", href: "/superadmin/proyectos", permission: "proyectos:ver" },
                     { icon: FolderOpen, label: "Gestión de Lotes", href: "/superadmin/gestion-lotes/_none_", permission: "lotes:ver" },
@@ -63,7 +62,6 @@ const ALL_SECTIONS: Section[] = [
             {
                 icon: ShoppingCart,
                 label: "Punto de Venta",
-                permission: "pos:ver",
                 subItems: [
                     { icon: ShoppingCart, label: "Terminal POS", href: "/superadmin/pos", permission: "pos:ver" },
                     { icon: ShoppingBag, label: "Productos", href: "/superadmin/productos", permission: "productos:ver" },
@@ -74,7 +72,6 @@ const ALL_SECTIONS: Section[] = [
             {
                 icon: GraduationCap,
                 label: "Academia",
-                permission: "cursos:ver",
                 subItems: [
                     { icon: GraduationCap, label: "Cursos", href: "/superadmin/cursos", permission: "cursos:ver" },
                     { icon: BookOpenCheck, label: "Capacitaciones", href: "/superadmin/mis-capacitaciones", permission: "capacitaciones:ver" },
@@ -95,7 +92,6 @@ const ALL_SECTIONS: Section[] = [
             {
                 icon: Layout,
                 label: "Páginas",
-                permission: "templates:ver",
                 subItems: [
                     { icon: Layout, label: "Todas las Páginas", href: "/superadmin/templates", permission: "templates:ver" },
                 ]
@@ -103,7 +99,6 @@ const ALL_SECTIONS: Section[] = [
             {
                 icon: Mail,
                 label: "Comunicación",
-                permission: "mails:ver",
                 subItems: [
                     { icon: Mail, label: "Correos", href: "/superadmin/mails", permission: "mails:ver" },
                     { icon: CalendarDays, label: "Calendarios", href: "/superadmin/calendarios", permission: "calendarios:ver" },
@@ -115,7 +110,6 @@ const ALL_SECTIONS: Section[] = [
             {
                 icon: FileText,
                 label: "Blog",
-                permission: "blog:ver",
                 subItems: [
                     { icon: FileText, label: "Entradas", href: "/superadmin/blog", permission: "blog:ver" },
                     { icon: ImageIcon, label: "Rutas", href: "/superadmin/blog/rutas", permission: "blog:ver" },
@@ -129,7 +123,6 @@ const ALL_SECTIONS: Section[] = [
             {
                 icon: Users,
                 label: "Personal",
-                permission: "equipo:ver",
                 subItems: [
                     { icon: Users, label: "Equipo", href: "/superadmin/usuarios", permission: "equipo:ver" },
                     { icon: UserPlus, label: "Postulantes", href: "/superadmin/postulantes", permission: "postulantes:ver" },
@@ -141,7 +134,6 @@ const ALL_SECTIONS: Section[] = [
             {
                 icon: Settings,
                 label: "Configuración",
-                permission: "configuracion:ver",
                 subItems: [
                     { icon: ImageIcon, label: "Sitio y Branding", href: "/superadmin/configuracion", permission: "configuracion:ver" },
                     { icon: Cloud, label: "APIs y Nube", href: "/superadmin/api-nube", permission: "api-nube:ver" },
