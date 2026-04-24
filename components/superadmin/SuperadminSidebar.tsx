@@ -163,15 +163,13 @@ function itemHasAccess(permisos: Set<string> | null, permission: string | undefi
 }
 
 function filterItem(item: NavItem, permisos: Set<string> | null): NavItem | null {
-    if (!itemHasAccess(permisos, item.permission)) return null
-
-    if (item.subItems) {
-        const filteredSubs = item.subItems
-            .filter(sub => itemHasAccess(permisos, sub.permission))
+    if (item.subItems && item.subItems.length > 0) {
+        const filteredSubs = item.subItems.filter(sub => itemHasAccess(permisos, sub.permission))
         if (filteredSubs.length === 0) return null
         return { ...item, subItems: filteredSubs }
     }
 
+    if (!itemHasAccess(permisos, item.permission)) return null
     return item
 }
 
