@@ -425,6 +425,11 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                             <ShieldCheck className="w-4 h-4 text-blis-red" /> SUPER ADMIN
                                                         </button>
                                                     )}
+                                                    {user.role === 'empleado' && (
+                                                        <button onClick={() => handleNavigation('/superadmin/mis-capacitaciones')} className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-white hover:bg-blis-red/10 transition-colors">
+                                                            <ShieldCheck className="w-4 h-4 text-blis-red" /> ÁREA DE COLABORADORES
+                                                        </button>
+                                                    )}
                                                     <div className="h-px bg-white/5 my-1 mx-4"></div>
                                                     <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors">
                                                         <LogOut className="w-4 h-4" /> CERRAR SESIÓN

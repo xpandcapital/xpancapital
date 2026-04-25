@@ -21,6 +21,7 @@ interface User {
   blis_coins?: number
   empresa_id?: string
   permisos_adicionales?: PermisosAdicionales | null
+  ruta_inicio?: string | null
 }
 
 interface AuthContextType {
@@ -54,6 +55,8 @@ async function fetchProfile(userId: string): Promise<User | null> {
       .eq('id', userId)
       .single()
 
+    let rutaInicio: string | null = null
+
     if (error) {
       if (error.code === '406' || error.message?.includes('406') || error.message?.includes('Not Acceptable') || error.code === 'PGRST116') {
         console.warn('[Auth] Profile not found or 406 - retrying and creating if needed.')
@@ -84,6 +87,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
               blis_coins: 0,
               empresa_id: EMPRESA_ID,
               permisos_adicionales: null,
+              ruta_inicio: null,
             }
           }
           return null
@@ -102,6 +106,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
           phone: undefined,
           empresa_id: p.empresa_id || EMPRESA_ID,
           permisos_adicionales: p.permisos_adicionales || null,
+          ruta_inicio: null,
         }
       }
       return null
@@ -138,6 +143,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
       phone: undefined,
       empresa_id: profile.empresa_id || EMPRESA_ID,
       permisos_adicionales: profile.permisos_adicionales || null,
+      ruta_inicio: null,
     }
   } catch {
     return null
@@ -195,7 +201,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return { ...prev, role: rol, empresa_id: session.user.app_metadata?.empresa_id || prev.empresa_id || EMPRESA_ID }
               }
               // No hay cache — crear usuario básico del JWT
-              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID, permisos_adicionales: null }
+              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
             })
           }
         } catch (err) {
@@ -206,7 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (prev && prev.id === session.user.id) {
                 return { ...prev, role: rol }
               }
-              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID, permisos_adicionales: null }
+              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
             })
           }
         }
@@ -284,6 +290,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           blis_coins: 0,
           empresa_id: data.user.app_metadata?.empresa_id || EMPRESA_ID,
           permisos_adicionales: null,
+          ruta_inicio: null,
         })
         return { success: true }
       }
