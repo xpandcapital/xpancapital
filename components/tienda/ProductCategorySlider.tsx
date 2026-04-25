@@ -137,7 +137,7 @@ export function ProductCategorySlider(props: CategorySliderProps) {
 // Factorizamos la lógica de Tarjeta que antes vivía en el Grid (ProductCard)
 function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onTriggerAuth: () => void }) {
     const { user } = useAuth();
-    const { favorites, toggleFavorite, addToCart, blisCoins, redeemBlisCoins } = useShop();
+    const { favorites, toggleFavorite, addToCart, blisCoins, redeemAndCheckout } = useShop();
     const { showToast } = useToast();
     const isLiked = favorites.some(fav => fav.id === product.id);
     const typeStyle = TYPE_STYLES[product.productType];
@@ -254,12 +254,18 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                     {user && (
                         <button
                             onClick={async () => {
-                                const coinPrice = product.price * 10;
-                                const success = await redeemBlisCoins(coinPrice);
-                                if (success) {
-                                    showToast(`¡Éxito! Has canjeado ${product.title} por ${coinPrice} BLISCOINS.`, "success");
+                                const result = await redeemAndCheckout({
+                                    id: product.id,
+                                    title: product.title,
+                                    image: product.image,
+                                    price: product.price,
+                                    productType: product.productType,
+                                    precio_coins: product.precio_coins,
+                                });
+                                if (result.success) {
+                                    showToast(`¡Éxito! Has canjeado ${product.title}. Revisa tu email.`, "success");
                                 } else {
-                                    showToast("No tienes suficientes BLISCOINS para este producto.", "error");
+                                    showToast(result.error || "No tienes suficientes BLISCOINS.", "error");
                                 }
                             }}
                             className="w-full py-4 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center gap-3 hover:bg-emerald-500 hover:text-white transition-all font-black uppercase tracking-widest text-[11px] group/redeem"

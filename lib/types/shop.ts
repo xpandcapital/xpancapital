@@ -17,6 +17,7 @@ export interface ProductDef {
   isHot?: boolean;
   stock?: number;
   isCourse?: boolean;
+  precio_coins?: number;
   reviews?: { name: string; avatar?: string; rating: number; date: string; comment: string }[];
 }
 

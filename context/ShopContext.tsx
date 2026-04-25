@@ -29,6 +29,7 @@ interface ShopContextType {
     clearCart: () => void;
     earnBlisCoins: (amount: number) => Promise<boolean>;
     redeemBlisCoins: (amount: number) => Promise<boolean>;
+    redeemAndCheckout: (product: Product) => Promise<{ success: boolean; error?: string }>;
     getCartTotal: () => number;
     getCartCount: () => number;
     isLoaded: boolean;
@@ -227,6 +228,69 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         }
     }, [user, blisCoins]);
 
+    const redeemAndCheckout = useCallback(async (product: Product): Promise<{ success: boolean; error?: string }> => {
+        if (!user) return { success: false, error: 'Usuario no autenticado' };
+
+        const coinPrice = product.precio_coins || Math.round((product.price || 0) * 10);
+        if (blisCoins < coinPrice) return { success: false, error: 'Saldo insuficiente de BLIS Coins' };
+
+        try {
+            // 1. Llamar checkout con método coins - crea orden, asigna cursos, envía email
+            const res = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    empresa_id: '6186f014-c8c7-4027-9f08-8acf2bae3eae',
+                    user_id: user.id,
+                    nombre: user.name || user.email || '',
+                    email: user.email || '',
+                    telefono: user.phone || '',
+                    productos: [{
+                        producto_id: product.id,
+                        cantidad: 1,
+                        precio_unitario: product.price || 0,
+                        nombre: product.title,
+                        precio_coins: coinPrice,
+                        productType: product.productType,
+                    }],
+                    metodo_pago: 'coins',
+                    monto_coins: coinPrice,
+                    monto_usd: 0,
+                    tiene_fisicos: product.productType === 'pack',
+                    direccion_envio: null,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!data.success) {
+                return { success: false, error: data.error || 'Error en el checkout' };
+            }
+
+            // 2. Deducir coins del perfil
+            await fetch("/api/coins/spend", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    monto: coinPrice,
+                    tipo: "canje",
+                    descripcion: `Canje: ${product.title}`,
+                    referencia_id: data.ordenId,
+                    referencia_tipo: 'compra',
+                }),
+            });
+
+            // 3. Actualizar balance local
+            setBlisCoins((prev) => prev - coinPrice);
+
+            return { success: true };
+        } catch (e) {
+            console.error("Error redeemAndCheckout:", e);
+            return { success: false, error: 'Error interno' };
+        }
+    }, [user, blisCoins]);
+
     const getCartTotal = useCallback(() => {
         return cart.reduce((total, item) => total + (item.price || item.precio_usd || 0), 0);
     }, [cart]);
@@ -250,6 +314,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                 clearCart,
                 earnBlisCoins,
                 redeemBlisCoins,
+                redeemAndCheckout,
                 getCartTotal,
                 getCartCount,
                 isLoaded,
