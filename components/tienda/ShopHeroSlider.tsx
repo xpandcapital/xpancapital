@@ -20,7 +20,7 @@ const HERO_BANNERS = [
         title: "Masterclass: Inteligencia Competitiva en Real Estate",
         subtitle: "Acelerador de ventas corporativas y prospección de Nómadas Digitales por IA.",
         price: "$249",
-        bgImage: "/images/cumbres-1.webp",
+        bgImage: "/images/Cumbres-1.webp",
         tag: "TENDENCIA MUNDIAL",
         accent: "blis-red"
     }
