@@ -427,7 +427,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                     )}
                                                     {user.role === 'empleado' && (
                                                         <button onClick={() => handleNavigation('/superadmin/mis-capacitaciones')} className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-white hover:bg-blis-red/10 transition-colors">
-                                                            <ShieldCheck className="w-4 h-4 text-blis-red" /> ÁREA DE COLABORADORES
+                                                            <ShieldCheck className="w-4 h-4 text-blis-red" /> COLABORADORES
                                                         </button>
                                                     )}
                                                     <div className="h-px bg-white/5 my-1 mx-4"></div>
