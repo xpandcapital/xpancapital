@@ -32,6 +32,20 @@ const VE = [V, E]
 const VCE = [V, C, E]
 const VCED = [V, C, E, D]
 
+const ACTION_COLORS: Record<string, { active: string; border: string; inactive: string }> = {
+  ver: { active: 'bg-blue-500/20', border: 'border-blue-500/40', inactive: 'text-blue-400' },
+  crear: { active: 'bg-emerald-500/20', border: 'border-emerald-500/40', inactive: 'text-emerald-400' },
+  editar: { active: 'bg-amber-500/20', border: 'border-amber-500/40', inactive: 'text-amber-400' },
+  eliminar: { active: 'bg-red-500/20', border: 'border-red-500/40', inactive: 'text-red-400' },
+}
+
+const ACTION_ICONS: Record<string, React.FC<{ className?: string }>> = {
+  ver: Eye,
+  crear: PlusCircle,
+  editar: Pencil,
+  eliminar: Trash,
+}
+
 function getAllItemPerms(item: PermItem): string[] {
   const own = item.actions.map(a => buildPermission(item.key, a.action))
   const subs = item.subItems ? item.subItems.flatMap(sub => getAllItemPerms(sub)) : []
