@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -32,6 +32,32 @@ interface CheckoutForm {
 }
 
 export default function CheckoutPage() {
+    return (
+        <Suspense fallback={<CheckoutLoading />}>
+            <CheckoutContent />
+        </Suspense>
+    );
+}
+
+function CheckoutLoading() {
+    return (
+        <main className="min-h-screen bg-[#050505] text-white">
+            <Header />
+            <div className="max-w-6xl mx-auto px-4 pt-40 pb-20">
+                <div className="flex items-center gap-4 mb-10">
+                    <div className="w-12 h-12 rounded-xl bg-white/5 animate-pulse" />
+                    <div className="space-y-2">
+                        <div className="w-48 h-8 bg-white/5 rounded animate-pulse" />
+                        <div className="w-24 h-4 bg-white/5 rounded animate-pulse" />
+                    </div>
+                </div>
+            </div>
+            <FooterSections />
+        </main>
+    );
+}
+
+function CheckoutContent() {
     const { cart, blisCoins, clearCart, getCartTotal } = useShop();
     const { user } = useAuth();
     const { showToast } = useToast();
