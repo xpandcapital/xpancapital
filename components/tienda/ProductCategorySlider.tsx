@@ -268,6 +268,8 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                                     price: product.price,
                                     productType: product.productType,
                                     precio_coins: product.precio_coins,
+                                    curso_id: product.curso_id,
+                                    slug: product.slug,
                                 });
                                 router.push('/tienda/checkout?redeem=1');
                             }}

@@ -14,6 +14,8 @@ interface Product {
     productType?: string;
     precio_coins?: number;
     precio_usd?: number;
+    curso_id?: string;
+    slug?: string;
 }
 
 interface ShopContextType {

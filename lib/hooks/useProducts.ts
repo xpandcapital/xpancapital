@@ -28,6 +28,7 @@ export interface Producto {
   stock_ilimitado: boolean
   archivo_url?: string
   activo: boolean
+  curso_id?: string
   destacado: boolean
   creado_en: string
   actualizado_en: string

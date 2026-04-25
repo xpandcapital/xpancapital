@@ -216,28 +216,37 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // ── Auto-asignar cursos comprados en la tienda ───────────────────────────
+      // ── Auto-asignar cursos comprados en la tienda ───────────────────────────
     if (finalUserId && email) {
       const cursoProducts = productos.filter((p: any) => p.productType === 'curso' || p.tipo === 'servicio');
       for (const product of cursoProducts) {
         try {
-          let cursoId = product.curso_id || product.id;
-          let cursoExists = false;
-          const { data: cursoData } = await supabase
-            .from('cursos')
-            .select('id')
-            .eq('id', cursoId)
-            .maybeSingle();
-          if (cursoData) {
-            cursoExists = true;
-          } else {
+          // Primero intentar con curso_id directo (vínculo explícito productos→cursos)
+          let cursoId = product.curso_id || null;
+          let cursoExists = !!cursoId;
+
+          // Si no hay curso_id, intentar lookup por slug del producto
+          if (!cursoExists && (product.slug || product.producto_id)) {
             const { data: cursoBySlug } = await supabase
               .from('cursos')
               .select('id')
-              .eq('slug', product.slug || product.id)
+              .eq('slug', product.slug || product.producto_id)
               .maybeSingle();
             if (cursoBySlug) {
               cursoId = cursoBySlug.id;
+              cursoExists = true;
+            }
+          }
+
+          // Si sigue sin existir, buscar por ID directo del producto
+          if (!cursoExists && product.id) {
+            const { data: cursoData } = await supabase
+              .from('cursos')
+              .select('id')
+              .eq('id', product.id)
+              .maybeSingle();
+            if (cursoData) {
+              cursoId = cursoData.id;
               cursoExists = true;
             }
           }

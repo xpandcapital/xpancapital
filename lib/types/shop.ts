@@ -18,6 +18,7 @@ export interface ProductDef {
   stock?: number;
   isCourse?: boolean;
   precio_coins?: number;
+  curso_id?: string;
   reviews?: { name: string; avatar?: string; rating: number; date: string; comment: string }[];
 }
 
@@ -82,6 +83,7 @@ export function mapProductoToProductDef(producto: Producto): ProductDef {
     content: producto.contenido || producto.descripcion || '',
     stock: producto.stock_ilimitado ? 999 : (producto.stock || 0),
     isCourse: producto.tipo === 'servicio' || producto.tipo === 'digital',
-    isHot: producto.destacado || false
+    isHot: producto.destacado || false,
+    curso_id: producto.curso_id,
   };
 }
