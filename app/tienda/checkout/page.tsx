@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     ShoppingCart, Coins, CreditCard, MapPin, User, Mail, Phone,
@@ -35,6 +36,8 @@ export default function CheckoutPage() {
     const { user } = useAuth();
     const { showToast } = useToast();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const isRedeemFlow = searchParams.get('redeem') === '1';
 
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
     const [isProcessing, setIsProcessing] = useState(false);
@@ -69,6 +72,14 @@ export default function CheckoutPage() {
         if (cart.length === 0 && !isComplete) router.push('/tienda');
     }, [cart.length, isComplete, router]);
 
+    // En flujo canje BLISCOINS, redirigir si no hay usuario
+    useEffect(() => {
+        if (isRedeemFlow && !user) {
+            showToast('Inicia sesión para canjear con BLIS Coins.', 'error');
+            router.push('/tienda');
+        }
+    }, [isRedeemFlow, user, showToast, router]);
+
     // Pre-llenar con datos del usuario
     useEffect(() => {
         if (user) {
@@ -81,6 +92,16 @@ export default function CheckoutPage() {
             }));
         }
     }, [user]);
+
+    // Si viene de canje BLISCOINS, seleccionar ese método y validar saldo
+    useEffect(() => {
+        if (isRedeemFlow && blisCoins < totalCoins) {
+            showToast('Saldo de BLIS Coins insuficiente para completar el canje.', 'error');
+            router.push('/tienda');
+        } else if (isRedeemFlow) {
+            setPaymentMethod('coins');
+        }
+    }, [isRedeemFlow, blisCoins, totalCoins, showToast, router]);
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;

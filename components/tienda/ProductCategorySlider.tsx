@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Star, ShoppingCart, ShieldCheck, ChevronLeft, ChevronRight, Heart, Clock } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useShop } from "@/context/ShopContext";
 import { AuthModal } from "@/components/auth/AuthModal";
@@ -137,8 +138,9 @@ export function ProductCategorySlider(props: CategorySliderProps) {
 // Factorizamos la lógica de Tarjeta que antes vivía en el Grid (ProductCard)
 function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onTriggerAuth: () => void }) {
     const { user } = useAuth();
-    const { favorites, toggleFavorite, addToCart, blisCoins, redeemAndCheckout } = useShop();
+    const { favorites, toggleFavorite, addToCart, blisCoins } = useShop();
     const { showToast } = useToast();
+    const router = useRouter();
     const isLiked = favorites.some(fav => fav.id === product.id);
     const typeStyle = TYPE_STYLES[product.productType];
 
@@ -253,8 +255,13 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
 
                     {user && (
                         <button
-                            onClick={async () => {
-                                const result = await redeemAndCheckout({
+                            onClick={() => {
+                                const coinPrice = product.precio_coins || Math.round((product.price || 0) * 10);
+                                if (blisCoins < coinPrice) {
+                                    showToast("No tienes suficientes BLISCOINS para este producto.", "error");
+                                    return;
+                                }
+                                addToCart({
                                     id: product.id,
                                     title: product.title,
                                     image: product.image,
@@ -262,11 +269,7 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                                     productType: product.productType,
                                     precio_coins: product.precio_coins,
                                 });
-                                if (result.success) {
-                                    showToast(`¡Éxito! Has canjeado ${product.title}. Revisa tu email.`, "success");
-                                } else {
-                                    showToast(result.error || "No tienes suficientes BLISCOINS.", "error");
-                                }
+                                router.push('/tienda/checkout?redeem=1');
                             }}
                             className="w-full py-4 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center gap-3 hover:bg-emerald-500 hover:text-white transition-all font-black uppercase tracking-widest text-[11px] group/redeem"
                         >
