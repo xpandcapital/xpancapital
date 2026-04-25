@@ -11,8 +11,7 @@ export default function UserDashboardLayout({
     return (
         <div className="flex bg-black h-[calc(100vh-80px)] mt-20 overflow-hidden selection:bg-blis-red/30 relative">
             <MiembrosSidebar />
-            <div className="flex-1 flex flex-col relative min-w-0 pl-[56px] md:pl-[64px] transition-[padding] duration-300">
-                {/* Background Decor */}
+            <div className="flex-1 flex flex-col relative min-w-0">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(190,11,60,0.05)_0%,transparent_50%)] pointer-events-none" />
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
 
