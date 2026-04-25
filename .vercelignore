@@ -15,9 +15,9 @@ build
 **/*.test.*
 **/*.spec.*
 
-# Large files
-public/images/**/*.*
-public/videos/**/*.*
+# Large files (handled via CDN)
+# public/images/**/*.*
+# public/videos/**/*.*
 
 # Scripts and configs
 scripts/
