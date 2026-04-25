@@ -144,6 +144,10 @@ export default function CheckoutPage() {
                         cantidad: 1,
                         precio_unitario: item.price || (item as any).precio_usd || 0,
                         nombre: item.title,
+                        productType: item.productType,
+                        precio_coins: item.precio_coins,
+                        curso_id: item.curso_id,
+                        slug: item.slug,
                     })),
                     metodo_pago: paymentMethod === 'coins' ? 'coins' : 'card',
                     monto_coins: paymentMethod === 'coins' ? totalCoins : 0,
@@ -162,11 +166,17 @@ export default function CheckoutPage() {
 
             if (!data.success) throw new Error(data.error || 'Error al procesar');
 
+            // Verificar si los cursos fueron asignados
+            if (data.courseAssignmentError) {
+                showToast('Compra OK pero hubo un problema al asignar cursos. Contacta soporte.', 'warning');
+            } else if ((data.coursesAssigned || 0) > 0) {
+                showToast(`¡Compra exitosa! ${data.coursesAssigned} curso(s) asignado(s) a tu cuenta.`, 'success');
+            }
+
             setOrderEmail(form.email);
             setIsNewUser(data.isNewUser || false);
             clearCart();
             setIsComplete(true);
-            showToast('¡Compra exitosa!', 'success');
         } catch (err) {
             console.error('Checkout error:', err);
             showToast('Error al procesar. Intenta de nuevo.', 'error');

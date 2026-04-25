@@ -217,8 +217,12 @@ export async function POST(request: NextRequest) {
     }
 
       // ── Auto-asignar cursos comprados en la tienda ───────────────────────────
+    let coursesAssigned = 0;
+    let courseAssignmentError = null;
     if (finalUserId && email) {
+      console.log('[Checkout] Buscando cursos para asignar, productos:', JSON.stringify(productos, null, 2));
       const cursoProducts = productos.filter((p: any) => p.productType === 'curso' || p.tipo === 'servicio');
+      console.log('[Checkout] Cursos detectados:', cursoProducts.length);
       for (const product of cursoProducts) {
         try {
           // Primero intentar con curso_id directo (vínculo explícito productos→cursos)
@@ -235,6 +239,7 @@ export async function POST(request: NextRequest) {
             if (cursoBySlug) {
               cursoId = cursoBySlug.id;
               cursoExists = true;
+              console.log(`[Checkout] Curso encontrado por slug: ${cursoId}`);
             }
           }
 
@@ -248,8 +253,14 @@ export async function POST(request: NextRequest) {
             if (cursoData) {
               cursoId = cursoData.id;
               cursoExists = true;
+              console.log(`[Checkout] Curso encontrado por ID: ${cursoId}`);
             }
           }
+
+          if (!cursoExists) {
+            console.log(`[Checkout] Curso NO encontrado para producto:`, product);
+          }
+
           if (cursoExists && cursoId) {
             const { data: advisor } = await supabase
               .from('advisors')
@@ -268,9 +279,11 @@ export async function POST(request: NextRequest) {
                 .single();
               if (createAdvError) {
                 console.error('[Checkout] Error creando advisor:', createAdvError);
+                courseAssignmentError = 'No se pudo crear el registro de asesor';
                 continue;
               }
               advisorId = newAdvisor?.id;
+              console.log(`[Checkout] Advisor creado: ${advisorId}`);
             }
             if (advisorId) {
               const { error: assignError } = await supabase
@@ -284,15 +297,22 @@ export async function POST(request: NextRequest) {
                 });
               if (assignError && assignError.code !== '23505') {
                 console.error('[Checkout] Error auto-asignando curso:', assignError);
+                courseAssignmentError = 'Error al asignar el curso';
               } else if (!assignError) {
                 console.log(`[Checkout] Curso ${cursoId} auto-asignado a ${email}`);
+                coursesAssigned++;
+              } else if (assignError?.code === '23505') {
+                console.log(`[Checkout] Curso ${cursoId} ya estaba asignado a ${email}`);
+                coursesAssigned++;
               }
             }
           }
         } catch (e) {
           console.error('[Checkout] Error en auto-asignación de curso:', e);
+          courseAssignmentError = 'Error interno al asignar curso';
         }
       }
+      console.log(`[Checkout] Cursos asignados: ${coursesAssigned}, errores: ${courseAssignmentError}`);
     }
 
     // ── Enviar email ─────────────────────────────────────────────────────────
@@ -336,6 +356,8 @@ export async function POST(request: NextRequest) {
       success: true,
       isNewUser,
       ordenId: orden?.id || null,
+      coursesAssigned,
+      courseAssignmentError,
     });
 
   } catch (err) {
