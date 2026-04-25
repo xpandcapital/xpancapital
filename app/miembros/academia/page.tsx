@@ -1,25 +1,124 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, Clock, Star, Trophy, ChevronRight, Lock, CheckCircle2, Search, ArrowLeft, BookOpen, Loader2 } from "lucide-react";
+import { Play, Clock, Star, Trophy, ChevronRight, Lock, CheckCircle2, Search, ArrowLeft, BookOpen, Loader2, MonitorPlay, FileText, ListChecks } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCursos } from "@/lib/hooks/useCursos";
+
+interface Lesson {
+    id: string;
+    title: string;
+    type: 'video' | 'text' | 'quiz';
+    content: string;
+    videoUrl?: string;
+    attachments?: string[];
+    questions?: { id: string; text: string; options: { id: string; text: string; isCorrect: boolean }[] }[];
+}
+
+interface Module {
+    id: string;
+    title: string;
+    description?: string;
+    lessons: Lesson[];
+}
+
+interface CursoData {
+    id: string;
+    nombre: string;
+    slug: string;
+    descripcion?: string;
+    imagen_principal?: string | null;
+    modulos?: Module[];
+    progreso?: { progreso: number };
+}
+
+const TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
+    video: { icon: MonitorPlay, color: 'text-blue-400', label: 'Video' },
+    text: { icon: FileText, color: 'text-gray-400', label: 'Lectura' },
+    quiz: { icon: ListChecks, color: 'text-amber-400', label: 'Quiz' },
+};
 
 export default function AcademyPage() {
     const { user } = useAuth();
     const { cursos, loading } = useCursos();
-    const [selectedCourse, setSelectedCourse] = useState<any>(null);
-    const [activeLesson, setActiveLesson] = useState<any>(null);
+    const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+    const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
+    const [activeModule, setActiveModule] = useState<string | null>(null);
+    const [openModules, setOpenModules] = useState<Set<string>>(new Set());
+    const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+    const [fullCurso, setFullCurso] = useState<CursoData | null>(null);
+    const [loadingCurso, setLoadingCurso] = useState(false);
 
-    const handleSelectCourse = (course: any) => {
-        setSelectedCourse(course);
-        const firstModule = course.modulos?.[0];
-        const firstLesson = firstModule?.lessons?.[0];
-        if (firstLesson) {
-            setActiveLesson(firstLesson);
+    const fetchCursoCompleto = useCallback(async (slug: string) => {
+        setLoadingCurso(true);
+        try {
+            const url = `/api/cursos?slug=${slug}${user?.id ? `&user_id=${user.id}` : ''}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.success && data.data) {
+                setFullCurso(data.data);
+            }
+        } catch {
+        } finally {
+            setLoadingCurso(false);
         }
+    }, [user?.id]);
+
+    const handleSelectCourse = async (course: any) => {
+        setSelectedSlug(course.slug);
+        setActiveLesson(null);
+        setActiveModule(null);
+        setOpenModules(new Set());
+        setCompletedLessons([]);
+        await fetchCursoCompleto(course.slug);
+    };
+
+    useEffect(() => {
+        if (!fullCurso?.modulos || activeLesson) return;
+        const modulos = fullCurso.modulos as Module[];
+        if (modulos.length > 0) {
+            setActiveModule(modulos[0].id);
+            setOpenModules(new Set([modulos[0].id]));
+            if (modulos[0].lessons?.length > 0) {
+                setActiveLesson(modulos[0].lessons[0]);
+            }
+        }
+    }, [fullCurso]);
+
+    const handleLessonComplete = useCallback((lessonId: string) => {
+        if (!completedLessons.includes(lessonId)) {
+            setCompletedLessons(prev => [...prev, lessonId]);
+            if (fullCurso?.id && user?.id) {
+                fetch('/api/cursos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        curso_id: fullCurso.id,
+                        lesson_id: lessonId,
+                        completed: true
+                    })
+                });
+            }
+        }
+    }, [completedLessons, fullCurso?.id, user?.id]);
+
+    const modules = (fullCurso?.modulos as Module[]) || [];
+    const allLessons = modules.flatMap(m => m.lessons.map(l => ({ lesson: l, moduleId: m.id })));
+    const currentIndex = activeLesson ? allLessons.findIndex(item => item.lesson.id === activeLesson.id) : -1;
+    const hasPrev = currentIndex > 0;
+    const hasNext = currentIndex < allLessons.length - 1;
+
+    const getTotalLessons = () => {
+        return modules.reduce((total, mod) => total + (mod.lessons?.length || 0), 0);
+    };
+
+    const getProgress = () => {
+        const total = getTotalLessons();
+        if (total === 0) return 0;
+        return Math.round((completedLessons.length / total) * 100);
     };
 
     if (loading) {
@@ -52,7 +151,7 @@ export default function AcademyPage() {
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
             <AnimatePresence mode="wait">
-                {!selectedCourse ? (
+                {!selectedSlug ? (
                     <motion.div
                         key="course-list"
                         initial={{ opacity: 0, y: 20 }}
@@ -150,119 +249,166 @@ export default function AcademyPage() {
                         className="space-y-6"
                     >
                         <button
-                            onClick={() => setSelectedCourse(null)}
+                            onClick={() => { setSelectedSlug(null); setFullCurso(null); setActiveLesson(null); }}
                             className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest mb-4 group"
                         >
                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                             Volver a mis cursos
                         </button>
 
-                        <div className="flex flex-col xl:flex-row gap-8">
-                            {/* Video Player Area */}
-                            <div className="flex-1 space-y-6">
-                                <div className="aspect-video bg-zinc-900 rounded-[2.5rem] overflow-hidden border border-white/5 relative group cursor-pointer shadow-2xl">
-                                    {selectedCourse.imagen_principal ? (
-                                        <Image
-                                            src={selectedCourse.imagen_principal}
-                                            alt="Video Thumbnail"
-                                            fill
-                                            className="object-cover opacity-40 group-hover:scale-105 transition-transform duration-1000"
-                                        />
-                                    ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <BookOpen className="w-24 h-24 text-gray-700" />
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <motion.div
-                                            whileHover={{ scale: 1.1 }}
-                                            className="w-24 h-24 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_50px_rgba(190,11,60,0.8)] z-10"
-                                        >
-                                            <Play className="w-10 h-10 text-white fill-white ml-2" />
-                                        </motion.div>
-                                    </div>
-
-                                    <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <div className="flex items-center gap-6 text-white">
-                                            <Play className="w-5 h-5 fill-current" />
-                                            <div className="h-1.5 w-64 bg-white/20 rounded-full overflow-hidden">
-                                                <div className="h-full w-1/3 bg-blis-red" />
-                                            </div>
-                                            <span className="text-[10px] font-mono opacity-60">00:00 / {activeLesson?.duration || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-black/40 border border-white/5 p-8 rounded-[2rem] backdrop-blur-md">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div>
-                                            <span className="text-blis-red font-black uppercase tracking-[0.2em] text-[10px] mb-2 block">Viendo Ahora</span>
-                                            <h1 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4">{activeLesson?.title || 'Selecciona una lección'}</h1>
-                                            <div className="flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                                <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {activeLesson?.duration || 'N/A'}</span>
-                                                <span className="flex items-center gap-1.5 text-emerald-500"><Star className="w-4 h-4 fill-emerald-500" /> Premium</span>
-                                            </div>
-                                        </div>
-                                        <button className="bg-white text-black text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-blis-red hover:text-white transition-all">Siguiente Lección</button>
-                                    </div>
-                                    <p className="text-gray-400 font-medium leading-relaxed max-w-3xl">
-                                        {selectedCourse.descripcion || 'Explora los detalles de este curso. Contenido premium para avanzar en tu carrera.'}
-                                    </p>
-                                </div>
+                        {loadingCurso ? (
+                            <div className="flex items-center justify-center h-96">
+                                <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
                             </div>
-
-                            {/* Playlist / Modules Sidebar */}
-                            <div className="w-full xl:w-[400px] flex flex-col gap-6">
-                                <div className="bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden flex flex-col h-full shadow-xl">
-                                    <div className="p-6 border-b border-white/5 bg-black/40">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <h2 className="text-sm font-black text-white uppercase tracking-widest">Temario: {selectedCourse.nombre}</h2>
-                                            <Trophy className="w-4 h-4 text-amber-500" />
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex-1 h-2 bg-white/5 rounded-full border border-white/5">
-                                                <div className="h-full bg-blis-red" style={{ width: `${selectedCourse.progreso?.progreso || 0}%` }} />
+                        ) : (
+                            <div className="flex flex-col xl:flex-row gap-8">
+                                <div className="flex-1 space-y-6">
+                                    <div className="bg-zinc-900 rounded-[2.5rem] overflow-hidden border border-white/5 relative group shadow-2xl">
+                                        {activeLesson?.type === 'video' && activeLesson.videoUrl ? (
+                                            <div className="aspect-video bg-black w-full">
+                                                {activeLesson.videoUrl.includes('<iframe') || activeLesson.videoUrl.includes('<script') ? (
+                                                    <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: activeLesson.videoUrl.replace(/width=".*?"/g, 'width="100%"').replace(/height=".*?"/g, 'height="100%"') }} />
+                                                ) : (
+                                                    <iframe src={activeLesson.videoUrl} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                                                )}
                                             </div>
-                                            <span className="text-[10px] font-black text-white">{selectedCourse.progreso?.progreso || 0}%</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                                        {(selectedCourse.modulos || []).map((module: any) => (
-                                            <div key={module.id} className="space-y-2">
-                                                <div className="w-full flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
-                                                    <span className="text-[11px] font-black uppercase tracking-tight text-white">{module.title}</span>
-                                                    {!module.isOpen && <Lock className="w-3.5 h-3.5 text-gray-700" />}
-                                                </div>
-
-                                                <div className="space-y-1 pl-2">
-                                                    {(module.lessons || []).map((lesson: any) => (
-                                                        <button
-                                                            key={lesson.id}
-                                                            onClick={() => setActiveLesson(lesson)}
-                                                            className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeLesson?.id === lesson.id ? 'bg-blis-red/20 border border-blis-red/30' : 'hover:bg-white/5'}`}
-                                                        >
-                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lesson.completed ? 'bg-emerald-500/20 text-emerald-500' : 'bg-black/40 text-gray-500'}`}>
-                                                                {lesson.completed ? <CheckCircle2 className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                                                            </div>
-                                                            <div className="min-w-0 flex-1 text-left">
-                                                                <h4 className={`text-xs font-bold truncate ${activeLesson?.id === lesson.id ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>{lesson.title}</h4>
-                                                                <span className="text-[9px] font-mono text-gray-600 block mt-0.5">{lesson.duration}</span>
-                                                            </div>
-                                                            <ChevronRight className={`w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity ${activeLesson?.id === lesson.id ? 'text-white' : 'text-gray-600'}`} />
-                                                        </button>
-                                                    ))}
+                                        ) : activeLesson?.type === 'video' && !activeLesson.videoUrl ? (
+                                            <div className="aspect-video bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center w-full">
+                                                <div className="text-center">
+                                                    <MonitorPlay className="w-16 h-16 text-gray-700 mx-auto mb-3" />
+                                                    <p className="text-gray-500 text-sm font-bold">Video próximo</p>
                                                 </div>
                                             </div>
-                                        ))}
+                                        ) : (
+                                            <div className="aspect-video bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center w-full">
+                                                <div className="text-center">
+                                                    <BookOpen className="w-16 h-16 text-gray-700 mx-auto mb-3" />
+                                                    <p className="text-gray-500 text-sm font-bold">Selecciona una lección</p>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div className="p-4 border-t border-white/5 bg-black/40">
-                                        <button className="w-full py-4 bg-white/5 text-gray-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all">Examen de Certificación</button>
+                                    <div className="bg-black/40 border border-white/5 p-8 rounded-[2rem] backdrop-blur-md">
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div>
+                                                <span className="text-blis-red font-black uppercase tracking-[0.2em] text-[10px] mb-2 block">Viendo Ahora</span>
+                                                <h1 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4">{activeLesson?.title || 'Selecciona una lección'}</h1>
+                                                <div className="flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                                    <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {activeLesson?.duration || activeLesson?.type || 'N/A'}</span>
+                                                    {activeLesson && (
+                                                        <span className={`flex items-center gap-1.5 ${TYPE_CONFIG[activeLesson.type]?.color || 'text-gray-500'}`}>
+                                                            {(() => { const Icon = TYPE_CONFIG[activeLesson.type]?.icon || FileText; return <Icon className="w-4 h-4" />; })()}
+                                                            {TYPE_CONFIG[activeLesson.type]?.label || 'Lección'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => { if (hasPrev) { const prev = allLessons[currentIndex - 1]; setActiveLesson(prev.lesson); setActiveModule(prev.moduleId); setOpenModules(new Set([prev.moduleId])); } }}
+                                                    disabled={!hasPrev}
+                                                    className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                                                >
+                                                    Anterior
+                                                </button>
+                                                <button
+                                                    onClick={() => { if (hasNext) { const next = allLessons[currentIndex + 1]; setActiveLesson(next.lesson); setActiveModule(next.moduleId); setOpenModules(new Set([next.moduleId])); } }}
+                                                    disabled={!hasNext}
+                                                    className="px-4 py-2.5 bg-blis-red rounded-xl text-white text-[10px] font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-blis-red/20"
+                                                >
+                                                    Siguiente
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {activeLesson?.content && (
+                                            <div className="prose prose-invert max-w-none">
+                                                <div className="text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: activeLesson.content }} />
+                                            </div>
+                                        )}
+
+                                        {activeLesson && (
+                                            <button
+                                                onClick={() => handleLessonComplete(activeLesson.id)}
+                                                className={`mt-6 flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${
+                                                    completedLessons.includes(activeLesson.id)
+                                                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                                        : 'bg-blis-red text-white hover:bg-blis-red/80 shadow-lg shadow-blis-red/20'
+                                                }`}
+                                            >
+                                                <CheckCircle2 className="w-4 h-4" />
+                                                {completedLessons.includes(activeLesson.id) ? 'Completado' : 'Marcar como completado'}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="w-full xl:w-[400px] flex flex-col gap-6">
+                                    <div className="bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden flex flex-col h-full shadow-xl">
+                                        <div className="p-6 border-b border-white/5 bg-black/40">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h2 className="text-sm font-black text-white uppercase tracking-widest">Temario: {fullCurso?.nombre}</h2>
+                                                <Trophy className="w-4 h-4 text-amber-500" />
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex-1 h-2 bg-white/5 rounded-full border border-white/5">
+                                                    <div className="h-full bg-blis-red" style={{ width: `${getProgress()}%` }} />
+                                                </div>
+                                                <span className="text-[10px] font-black text-white">{getProgress()}%</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                            {modules.map((module) => (
+                                                <div key={module.id} className="space-y-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            const newSet = new Set(openModules);
+                                                            if (newSet.has(module.id)) newSet.delete(module.id);
+                                                            else newSet.add(module.id);
+                                                            setOpenModules(newSet);
+                                                        }}
+                                                        className="w-full flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-colors"
+                                                    >
+                                                        <span className="text-[11px] font-black uppercase tracking-tight text-white">{module.title}</span>
+                                                        {openModules.has(module.id) ? (
+                                                            <ChevronRight className="w-4 h-4 text-gray-500 rotate-90 transition-transform" />
+                                                        ) : (
+                                                            <ChevronRight className="w-4 h-4 text-gray-500 transition-transform" />
+                                                        )}
+                                                    </button>
+
+                                                    {openModules.has(module.id) && (
+                                                        <div className="space-y-1 pl-2">
+                                                            {(module.lessons || []).map((lesson) => (
+                                                                <button
+                                                                    key={lesson.id}
+                                                                    onClick={() => { setActiveLesson(lesson); setActiveModule(module.id); }}
+                                                                    className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeLesson?.id === lesson.id ? 'bg-blis-red/20 border border-blis-red/30' : 'hover:bg-white/5 border border-transparent'}`}
+                                                                >
+                                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${completedLessons.includes(lesson.id) ? 'bg-emerald-500/20 text-emerald-500' : 'bg-black/40 text-gray-500'}`}>
+                                                                        {completedLessons.includes(lesson.id) ? (
+                                                                            <CheckCircle2 className="w-4 h-4" />
+                                                                        ) : (
+                                                                            <Play className="w-4 h-4 ml-0.5" />
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="min-w-0 flex-1 text-left">
+                                                                        <h4 className={`text-xs font-bold truncate ${activeLesson?.id === lesson.id ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>{lesson.title}</h4>
+                                                                        <span className="text-[9px] font-mono text-gray-600 block mt-0.5">{TYPE_CONFIG[lesson.type]?.label || lesson.type}</span>
+                                                                    </div>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </motion.div>
                 )}
             </AnimatePresence>
