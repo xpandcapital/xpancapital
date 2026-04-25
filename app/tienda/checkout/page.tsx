@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { getSupabase } from "@/lib/supabase";
 import { Header } from "@/components/sections/Header";
 import { FooterSections } from "@/components/sections/Footer";
 import { useShop } from "@/context/ShopContext";
@@ -156,12 +157,22 @@ function CheckoutContent() {
         setIsProcessing(true);
 
         try {
+            // Obtener token de sesión de Supabase
+            const supabase = getSupabase();
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id || user?.id;
+
+            const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+            if (session?.access_token) {
+                headers['Authorization'] = `Bearer ${session.access_token}`;
+            }
+
             const res = await fetch('/api/checkout', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify({
                     empresa_id: DEFAULT_EMPRESA_ID,
-                    user_id: user?.id || null,
+                    user_id: userId,
                     nombre: `${form.nombre} ${form.apellido}`.trim(),
                     email: form.email,
                     telefono: form.telefono,
@@ -175,7 +186,7 @@ function CheckoutContent() {
                         curso_id: item.curso_id,
                         slug: item.slug,
                     })),
-                    metodo_pago: paymentMethod === 'coins' ? 'coins' : 'card',
+                    metodo_pago: paymentMethod === 'coins' ? 'coins' : 'stripe',
                     monto_coins: paymentMethod === 'coins' ? totalCoins : 0,
                     monto_usd: paymentMethod === 'coins' ? 0 : totalUSD,
                     tiene_fisicos: hasPhysicalProducts,

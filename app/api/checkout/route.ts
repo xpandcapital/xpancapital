@@ -2,10 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 
+// Cliente admin (service role - bypass RLS) - se usa para todas las operaciones de BD
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } }
 );
+
+// Función para crear cliente que lee cookies
+function createServerSupabase(request: NextRequest) {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: { headers: { cookie: request.headers.get('cookie') || '' } },
+      cookies: {
+        getAll() { return []; },
+        setAll() {}
+      },
+      auth: { autoRefreshToken: false, persistSession: false }
+    }
+  );
+}
 
 // Genera contraseña aleatoria legible
 function generatePassword(length = 10): string {
@@ -125,6 +143,32 @@ export async function POST(request: NextRequest) {
     let isNewUser = false;
     let tempPassword = '';
 
+    // ── Intentar obtener usuario de la sesión si user_id es null ─────────────
+    if (!finalUserId) {
+      // Intentar obtener de cookies usando cliente con anon key
+      const supabaseWithCookies = createServerSupabase(request);
+      const { data: { user } } = await supabaseWithCookies.auth.getUser();
+      if (user) {
+        finalUserId = user.id;
+        console.log('[CHECKOUT] Usuario obtenido de cookies:', user.id);
+      } else {
+        // Si no funciona, intentar con Authorization header
+        const authHeader = request.headers.get('Authorization');
+        if (authHeader?.startsWith('Bearer ')) {
+          const token = authHeader.substring(7);
+          const supabaseAnon = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          );
+          const { data: sessionData } = await supabaseAnon.auth.getUser(token);
+          if (sessionData?.user) {
+            finalUserId = sessionData.user.id;
+            console.log('[CHECKOUT] Usuario obtenido de token:', sessionData.user.id);
+          }
+        }
+      }
+    }
+
     // ── Si no hay user_id, buscar o crear usuario ────────────────────────────
     if (!finalUserId) {
       // 1. Buscar si ya existe en auth
@@ -169,39 +213,68 @@ export async function POST(request: NextRequest) {
     }
 
     // ── Crear la orden en Supabase ───────────────────────────────────────────
+    const primerProductoId = productos?.[0]?.producto_id || productos?.[0]?.id || null;
+    
+    console.log('[CHECKOUT] Creando orden con:', {
+      empresa_id,
+      user_id: finalUserId,
+      producto_id: primerProductoId,
+      metodo_pago,
+      monto_coins,
+      monto_usd,
+      productosCount: productos?.length
+    });
+    
     const { data: orden, error: ordenError } = await supabase
       .from('compras')
       .insert({
         empresa_id,
         user_id: finalUserId || null,
-        email_cliente: email.toLowerCase(),
-        nombre_cliente: nombre,
-        telefono_cliente: telefono,
-        productos: productos,
+        producto_id: primerProductoId,
         metodo_pago,
         monto_coins: monto_coins || 0,
         monto_usd: monto_usd || 0,
-        estado: 'completada',
-        tiene_fisicos: tiene_fisicos || false,
-        direccion_envio: direccion_envio || null,
+        estado: 'completado',
+        metadata: {
+          productos,
+          email_cliente: email.toLowerCase(),
+          nombre_cliente: nombre,
+          telefono_cliente: telefono,
+          tiene_fisicos: tiene_fisicos || false,
+          direccion_envio: direccion_envio || null,
+        },
         creado_en: new Date().toISOString(),
       })
       .select()
       .single();
 
+    console.log('[CHECKOUT] Resultado de inserción:', { orden, ordenError });
+
     if (ordenError) {
       console.error('Error creando orden:', ordenError);
-      // Intentar con tabla alternativa
-      await supabase.from('pedidos').insert({
-        empresa_id,
-        user_id: finalUserId || null,
-        email_cliente: email.toLowerCase(),
-        nombre_cliente: nombre,
-        productos,
-        metodo_pago,
-        monto_usd: monto_usd || 0,
-        estado: 'completada',
-      });
+      return NextResponse.json({ success: false, error: 'Error al crear la orden' }, { status: 500 });
+    }
+
+    if (!orden) {
+      console.error('[CHECKOUT] No se pudo crear la orden - orden es null');
+      return NextResponse.json({ success: false, error: 'No se pudo crear la orden' }, { status: 500 });
+    }
+
+    // ── Crear registros en compra_items ────────────────────────────────────
+    if (orden && productos?.length > 0) {
+      const items = productos.map((p: any) => ({
+        compra_id: orden.id,
+        producto_id: p.producto_id || p.id,
+        cantidad: p.cantidad || 1,
+        precio_unitario: p.precio_unitario || p.price || 0,
+      })).filter((item: any) => item.producto_id); // Solo items con producto_id válido
+
+      if (items.length > 0) {
+        const { error: itemsError } = await supabase.from('compra_items').insert(items);
+        if (itemsError) {
+          console.error('Error creando items de compra:', itemsError);
+        }
+      }
     }
 
     // ── Si pagó con coins, descontarlos ─────────────────────────────────────
