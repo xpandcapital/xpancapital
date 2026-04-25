@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useActionGuard } from '@/hooks/useActionGuard';
 
 interface BlogPost {
     id: string;
@@ -52,6 +53,8 @@ export default function AdminBlog() {
 
     // Preview modal
     const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
+
+    const { guard } = useActionGuard();
 
     // Load posts from Supabase
     const loadPosts = useCallback(async () => {
@@ -164,6 +167,7 @@ export default function AdminBlog() {
     };
 
     const confirmDelete = () => {
+        if (!guard('blog', 'eliminar')) return;
         if (idsToDelete.length === 0) {
             setDeleteTargetTitle(null);
             return;

@@ -10,10 +10,12 @@ import {
 } from 'lucide-react';
 import { EmployeeModal } from './_components/EmployeeModal';
 import { AssignmentModal } from './_components/AssignmentModal';
+import { useActionGuard } from '@/hooks/useActionGuard'
 
 export default function AsesoresPage() {
   const { advisors, loading, refetch } = useAsesores();
   const { roles } = useRoles();
+  const { guard } = useActionGuard();
   const [searchTerm, setSearchTerm] = useState('');
   const [editingAdvisor, setEditingAdvisor] = useState<Advisor | null>(null);
   const [creatingNew, setCreatingNew] = useState(false);
@@ -51,6 +53,7 @@ export default function AsesoresPage() {
   };
 
   const handleDeleteAdvisor = async () => {
+    if (!guard('asesores', 'eliminar')) return;
     if (!showDeleteConfirm.advisor) return;
     try {
       await fetch(`/api/admin/equipo?id=${showDeleteConfirm.advisor.id}`, { method: 'DELETE' });
@@ -75,7 +78,7 @@ export default function AsesoresPage() {
           <p className="text-gray-400 text-sm mt-1">Gestiona miembros, roles, cursos y permisos del equipo.</p>
         </div>
         <button
-          onClick={() => { setCreatingNew(true); setEditingAdvisor(null); }}
+          onClick={() => { if (!guard('asesores', 'crear')) return; setCreatingNew(true); setEditingAdvisor(null); }}
           className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold uppercase text-xs tracking-widest hover:scale-105 active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-blis-red/30"
         >
           <Plus className="w-4 h-4" /> Nuevo Empleado
@@ -124,10 +127,10 @@ export default function AsesoresPage() {
                 <button onClick={(e) => { e.stopPropagation(); setAssigningAdvisor(advisor); }} className="p-2 bg-blis-red/10 hover:bg-blis-red/20 text-blis-red rounded-lg transition-all" title="Cursos y productos">
                   <BookOpen className="w-4 h-4" />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); setEditingAdvisor(advisor); setCreatingNew(false); }} className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all" title="Editar">
+                <button onClick={(e) => { e.stopPropagation(); if (!guard('asesores', 'editar')) return; setEditingAdvisor(advisor); setCreatingNew(false); }} className="p-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all" title="Editar">
                   <Edit2 className="w-4 h-4" />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm({ isOpen: true, advisor }); }} className="p-2 bg-white/5 hover:bg-blis-red/20 text-gray-400 hover:text-blis-red rounded-lg transition-all" title="Eliminar">
+                <button onClick={(e) => { e.stopPropagation(); if (!guard('asesores', 'eliminar')) return; setShowDeleteConfirm({ isOpen: true, advisor }); }} className="p-2 bg-white/5 hover:bg-blis-red/20 text-gray-400 hover:text-blis-red rounded-lg transition-all" title="Eliminar">
                   <Trash2 className="w-4 h-4" />
                 </button>
                 <button className="p-1 text-gray-600 hover:text-white transition-colors">

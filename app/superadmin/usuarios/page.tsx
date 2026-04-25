@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { UserPlus, Shield, Download, Search, Filter, User, CheckCircle2, X, Loader2, Eye, EyeOff, Copy, KeyRound, Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
+import { useActionGuard } from '@/hooks/useActionGuard';
 
 const ROLE_OPTIONS = [
     { value: 'superadmin', label: 'Super Admin' },
@@ -38,6 +39,7 @@ interface UserProfile {
 export default function AdminUsers() {
     const router = useRouter();
     const { showToast } = useToast();
+    const { guard } = useActionGuard();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newUserName, setNewUserName] = useState('');
     const [newUserEmail, setNewUserEmail] = useState('');
@@ -125,7 +127,7 @@ export default function AdminUsers() {
                         <span className="sm:hidden">Exportar</span>
                     </button>
                     <button
-                        onClick={() => { setIsModalOpen(true); }}
+                        onClick={() => { if (!guard('equipo', 'crear')) return; setIsModalOpen(true); }}
                         className="flex-1 sm:flex-none bg-blis-red text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-wider text-[10px] sm:text-xs hover:bg-white hover:text-black transition-colors flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]"
                     >
                         <UserPlus className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
@@ -230,7 +232,7 @@ export default function AdminUsers() {
                                         </td>
                                         <td className="px-6 py-5">
                                             <button
-                                                onClick={() => router.push(`/superadmin/usuarios/${user.id}`)}
+                                                onClick={() => { if (!guard('equipo', 'editar')) return; router.push(`/superadmin/usuarios/${user.id}`) }}
                                                 className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-all"
                                                 title="Editar usuario"
                                             >

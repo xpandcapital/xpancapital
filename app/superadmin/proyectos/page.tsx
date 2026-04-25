@@ -7,6 +7,7 @@ import { Plus, Search, Edit2, Trash2, Image as ImageIcon, ChevronDown, ChevronUp
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import logger from '@/lib/utils/logger';
+import { useActionGuard } from '@/hooks/useActionGuard';
 
 export type ProjectLot = {
   id: string;
@@ -101,6 +102,7 @@ const getProjectSlug = (name: string) => {
 
 export default function AdminProjects() {
   const router = useRouter();
+  const { guard } = useActionGuard();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -250,6 +252,7 @@ const loadProjects = useCallback(async () => {
   }, [loadProjects]);
 
   const handleSaveProject = async () => {
+    if (!guard('proyectos', editingProject ? 'editar' : 'crear')) return;
     if (!formData.name || !formData.id) return;
 
     try {
@@ -295,6 +298,7 @@ const loadProjects = useCallback(async () => {
   };
 
   const openEditProject = (project: Project) => {
+    if (!guard('proyectos', 'editar')) return;
     setEditingProject(project);
     setFormData({
       name: project.name,
@@ -478,6 +482,7 @@ if (!geminiKey || geminiKey.trim() === '') {
 };
 
   const handleDeleteProject = async (project: Project) => {
+    if (!guard('proyectos', 'eliminar')) return;
     if (!confirm(`¿Eliminar el proyecto "${project.name}"?\n\nEsta acción eliminará también todos sus lotes y no se puede deshacer.`)) return;
     try {
       const res = await fetch(`/api/admin/projects/${project.id}`, { method: 'DELETE' });

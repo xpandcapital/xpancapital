@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useActionGuard } from '@/hooks/useActionGuard';
 import { useRouter } from "next/navigation";
 import {
     Plus, Search, BookOpen, Video, FileText,
@@ -702,6 +703,7 @@ function RichTextEditor({ value, onChange, placeholder }: { value: string; onCha
 }
 
 export default function AdminCourses() {
+    const { guard } = useActionGuard();
     const router = useRouter();
     const [view, setView] = useState<"list" | "editor">("list");
     const [courses, setCourses] = useState<Course[]>([]);
@@ -923,6 +925,7 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
 };
 
     const handleCreateNew = () => {
+        if (!guard('cursos', 'crear')) return;
         const newCourse: Course = {
             id: `new-${Date.now()}`,
             title: "",
@@ -947,6 +950,7 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
     };
 
     const handleDeleteCourse = async (courseId: string) => {
+        if (!guard('cursos', 'eliminar')) return;
         if (!confirm('¿Estás seguro de eliminar este curso?')) return;
         
         try {
@@ -970,6 +974,7 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
         if (!currentCourse) return;
         const newModule: Module = { id: `M${Date.now()}`, title: "Nuevo Módulo", lessons: [], questions: [], isOpen: true };
         setCurrentCourse({ ...currentCourse, modules: [...currentCourse.modules, newModule] });
+        if (!guard('cursos', 'editar')) return;
         setEditingItem({ type: 'module', id: newModule.id });
     };
 
@@ -1034,6 +1039,7 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
             ...currentCourse,
             modules: currentCourse.modules.map(m => m.id === moduleId ? { ...m, lessons: [...m.lessons, newLesson], isOpen: true } : m)
         });
+        if (!guard('cursos', 'editar')) return;
         setEditingItem({ type: 'lesson', id: newLesson.id, moduleId });
     };
 
@@ -1308,7 +1314,7 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <button onClick={(e) => { e.stopPropagation(); addLesson(module.id); }} className="p-1 px-1.5 bg-blis-red/10 text-blis-red rounded-lg hover:bg-blis-red/20 transition-all" title="Nueva Lección"><Plus className="w-3 h-3" /></button>
-                                                <button onClick={(e) => { e.stopPropagation(); setEditingItem({ type: 'module', id: module.id }); scrollToItem(module.id); }} className={`p-1.5 rounded-lg transition-all ${editingItem?.id === module.id ? 'bg-blis-red text-white' : 'hover:bg-white/10 text-gray-600'}`} title="Editar Módulo"><Edit className="w-3.5 h-3.5" /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); if (!guard('cursos', 'editar')) return; setEditingItem({ type: 'module', id: module.id }); scrollToItem(module.id); }} className={`p-1.5 rounded-lg transition-all ${editingItem?.id === module.id ? 'bg-blis-red text-white' : 'hover:bg-white/10 text-gray-600'}`} title="Editar Módulo"><Edit className="w-3.5 h-3.5" /></button>
                                                 <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ type: 'module', id: module.id, title: module.title }); }} className="p-1 px-2 text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
                                             </div>
                                         </div>
@@ -1361,7 +1367,7 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
                                                             </div>
                                                             <p className="text-[10px] font-bold text-gray-300 truncate flex-1">{lesson.title}</p>
                                                             <div className="flex items-center gap-1">
-                                                                <button onClick={(e) => { e.stopPropagation(); setEditingItem({ type: 'lesson', id: lesson.id, moduleId: module.id }); scrollToItem(lesson.id); }} className={`p-1.5 rounded-lg transition-all ${editingItem?.id === lesson.id ? 'bg-blis-red text-white' : 'hover:bg-white/10 text-gray-600'}`} title="Editar Lección"><Edit className="w-3 h-3" /></button>
+                                                                <button onClick={(e) => { e.stopPropagation(); if (!guard('cursos', 'editar')) return; setEditingItem({ type: 'lesson', id: lesson.id, moduleId: module.id }); scrollToItem(lesson.id); }} className={`p-1.5 rounded-lg transition-all ${editingItem?.id === lesson.id ? 'bg-blis-red text-white' : 'hover:bg-white/10 text-gray-600'}`} title="Editar Lección"><Edit className="w-3 h-3" /></button>
                                                                 <button onClick={(e) => { e.stopPropagation(); setConfirmDelete({ type: 'lesson', id: lesson.id, moduleId: module.id, title: lesson.title }); }} className="p-1 text-gray-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><X className="w-3 h-3" /></button>
                                                             </div>
                                                         </div>
@@ -1369,7 +1375,7 @@ const autoSaveRef = useRef<NodeJS.Timeout | null>(null);
 
                                                     {module.questions && module.questions.length > 0 && (
                                                         <div
-                                                            onClick={(e) => { e.stopPropagation(); setEditingItem({ type: 'module', id: module.id }); scrollToItem(module.id); }}
+                                                            onClick={(e) => { e.stopPropagation(); if (!guard('cursos', 'editar')) return; setEditingItem({ type: 'module', id: module.id }); scrollToItem(module.id); }}
                                                             className={`p-3 bg-white/[0.04] border rounded-xl flex items-center gap-3 transition-all cursor-pointer ${editingItem?.id === module.id ? 'border-amber-500/50' : 'border-white/5 hover:border-amber-500/30'} ${!module.isQuizEnabled ? 'opacity-50' : ''}`}
                                                         >
                                                             <div className={`p-1.5 rounded-lg ${module.isQuizEnabled ? 'bg-amber-500/10 text-amber-500' : 'bg-gray-500/10 text-gray-500'}`}>

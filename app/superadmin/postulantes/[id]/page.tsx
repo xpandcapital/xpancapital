@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Upload, FileText, X, Loader2, ChevronDown, Eye, EyeOff, Copy, CheckCircle, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/components/ui/Toast'
+import { useActionGuard } from '@/hooks/useActionGuard'
 import { Postulante, ESTADO_LABELS, ESTADO_COLORS, gruposPreguntas, diccionarioPreguntas } from '../_types'
 import { PuestoCombobox } from './_components/PuestoCombobox'
 
@@ -31,6 +32,7 @@ export default function PostulanteEditPage() {
   const params = useParams()
   const router = useRouter()
   const { showToast } = useToast()
+  const { guard } = useActionGuard()
   const id = params.id as string
 
   const [postulante, setPostulante] = useState<Postulante | null>(null)
@@ -63,6 +65,7 @@ export default function PostulanteEditPage() {
   const upd = (key: string, value: any) => setForm(prev => ({ ...prev, [key]: value }))
 
   const handleSave = async () => {
+    if (!guard('postulantes', 'editar')) return
     if (form.estado === 'aceptado' && !form.correo_corporativo && !form.usuario_creado) {
       setValidationError('El correo corporativo es obligatorio para aceptar un postulante')
       setActiveTab('admin')

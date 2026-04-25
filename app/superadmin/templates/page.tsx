@@ -7,8 +7,10 @@ import { useTemplates, TipoContenido } from "@/lib/hooks/useTemplates";
 import { TemplateGrid } from "@/components/templates/TemplateGrid";
 import { TemplateTypeModal } from "@/components/templates/TemplateTypeModal";
 import { useToast } from "@/components/ui/Toast";
+import { useActionGuard } from '@/hooks/useActionGuard';
 
 export default function TemplatesPage() {
+  const { guard } = useActionGuard();
   const {
     templates,
     loading,
@@ -33,6 +35,7 @@ export default function TemplatesPage() {
   }, [error, showToast]);
 
   const handleCreateNew = (tipo?: TipoContenido) => {
+    if (!guard('templates', 'crear')) return;
     setSelectedTipo(tipo || null);
     setIsModalOpen(true);
   };
@@ -78,6 +81,7 @@ export default function TemplatesPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!guard('templates', 'eliminar')) return;
     try {
       const success = await deleteTemplate(id);
       if (success) {

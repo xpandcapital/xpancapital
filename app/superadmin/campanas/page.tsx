@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useCampanas } from "@/lib/hooks/useCampanas";
 import { useToast } from "@/components/ui/Toast";
+import { useActionGuard } from '@/hooks/useActionGuard'
 import { Plus, Edit2, Trash2, Megaphone, Users, Mail, Phone, X, Check, Settings } from "lucide-react";
 
 export default function CampanasPage() {
   const { campanas, loading, error, create, update, delete: deleteCampana, refetch } = useCampanas();
   const { showToast } = useToast();
+  const { guard } = useActionGuard();
   
   const [showModal, setShowModal] = useState(false);
   const [editingCampana, setEditingCampana] = useState<any>(null);
@@ -27,6 +29,7 @@ export default function CampanasPage() {
 
   const handleOpenModal = (campana?: any) => {
     if (campana) {
+      if (!guard('campanas', 'editar')) return
       setEditingCampana(campana);
       setFormData({
         nombre: campana.nombre || "",
@@ -40,6 +43,7 @@ export default function CampanasPage() {
         notion_sync: campana.notion_sync ?? false
       });
     } else {
+      if (!guard('campanas', 'crear')) return
       setEditingCampana(null);
       setFormData({
         nombre: "",
@@ -85,6 +89,7 @@ export default function CampanasPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!guard('campanas', 'eliminar')) return
     if (!confirm("¿Estás seguro de eliminar esta campaña?")) return;
     
     const success = await deleteCampana(id);

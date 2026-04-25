@@ -8,6 +8,7 @@ import {
     Plus, Trash2, Copy
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+import { useActionGuard } from '@/hooks/useActionGuard';
 
 const ROLE_OPTIONS = [
     { value: 'superadmin', label: 'Super Admin', desc: 'Acceso completo a todas las empresas' },
@@ -69,6 +70,7 @@ export default function EditarUsuarioPage() {
     const params = useParams();
     const router = useRouter();
     const { showToast } = useToast();
+    const { guard } = useActionGuard();
     const userId = params.id as string;
 
     const [user, setUser] = useState<UserProfile | null>(null);
@@ -136,6 +138,7 @@ export default function EditarUsuarioPage() {
     };
 
     const handleSave = async () => {
+        if (!guard('equipo', 'editar')) return;
         setSaving(true);
         try {
             const res = await fetch('/api/admin/users', {
@@ -214,6 +217,7 @@ export default function EditarUsuarioPage() {
     };
 
     const handleRemoveCourse = async (equipoCursoId: string) => {
+        if (!guard('equipo', 'eliminar')) return;
         setRemoving(equipoCursoId);
         try {
             const res = await fetch(`/api/equipo-cursos?id=${equipoCursoId}`, { method: 'DELETE' });

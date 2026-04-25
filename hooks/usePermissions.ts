@@ -92,6 +92,15 @@ export function usePermissions() {
     [effectivePermissions]
   )
 
+  const canDoAction = useCallback(
+    (section: string, action: string): boolean => {
+      if (!effectivePermissions) return false
+      if (effectivePermissions.has('*')) return true
+      return effectivePermissions.has(`${section}:${action}`)
+    },
+    [effectivePermissions]
+  )
+
   const allowedSections = Object.entries(SECTION_PERMISSIONS)
     .filter(([, perm]) =>
       effectivePermissions ? checkPermission(effectivePermissions, perm) : false
@@ -103,6 +112,7 @@ export function usePermissions() {
     effectivePermissions,
     hasPermission,
     canAccessSection,
+    canDoAction,
     role: rol,
     isAdmin,
     defaultRoute,

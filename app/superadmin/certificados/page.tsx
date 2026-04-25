@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useActionGuard } from '@/hooks/useActionGuard';
 import {
     Plus, Search, Award, FileText, Save, Eye, Trash2,
     X, CheckCircle2, QrCode, Upload, Loader2,
@@ -154,6 +155,7 @@ export default function CertificateEngine() {
     const [view, setView] = useState<"list" | "editor">("list");
     const [currentTemplate, setCurrentTemplate] = useState<CertificateTemplate | null>(null);
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const { guard } = useActionGuard();
 
     const canvasRef = useRef<HTMLDivElement>(null);
     const [canvasBounds, setCanvasBounds] = useState({ left: 0, top: 0, width: 0, height: 0 });
@@ -193,6 +195,7 @@ export default function CertificateEngine() {
     }, [view, syncBounds]);
 
     const handleCreateNew = () => {
+        if (!guard('certificados', 'crear')) return;
         const newTemplate: CertificateTemplate = {
             id: 'new',
             title: 'Nueva Plantilla',
@@ -211,12 +214,14 @@ export default function CertificateEngine() {
     };
 
     const handleEditTemplate = (template: CertificateTemplate) => {
+        if (!guard('certificados', 'editar')) return;
         setCurrentTemplate(template);
         setSelectedId(null);
         setView("editor");
     };
 
     const handleDeleteTemplate = async (id: string) => {
+        if (!guard('certificados', 'eliminar')) return;
         if (!confirm('¿Estás seguro de eliminar esta plantilla?')) return;
         
         try {

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useActionGuard } from '@/hooks/useActionGuard'
 import { motion, AnimatePresence } from "framer-motion"
 import { createPortal } from "react-dom"
 import { Trash2, CheckCircle2, Package } from "lucide-react"
@@ -34,6 +35,7 @@ import type { ViewMode } from "./_types"
 
 function AdminProductsContent() {
   const { settings } = useBusinessSettings()
+  const { guard } = useActionGuard()
   const { categories: contextCategories } = useCategories()
   const { statuses: contextStatuses } = useStatuses()
   const { skuPatterns } = useSku()
@@ -74,6 +76,11 @@ function AdminProductsContent() {
   const statusOptions = contextStatuses.map(s => s.name)
 
   const handleOpenModal = (product: Product | null = null) => {
+    if (product) {
+      if (!guard('productos', 'editar')) return
+    } else {
+      if (!guard('productos', 'crear')) return
+    }
     setEditingProduct(product)
     setIsModalOpen(true)
   }
@@ -84,6 +91,7 @@ function AdminProductsContent() {
   }
 
   const handleDelete = async () => {
+    if (!guard('productos', 'eliminar')) return
     const idsToDelete = showDeleteConfirm.productId === 'bulk' ? selectedProducts : [showDeleteConfirm.productId]
     await deleteProducts(idsToDelete)
     clearSelection()

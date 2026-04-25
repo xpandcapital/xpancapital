@@ -16,6 +16,7 @@ import { useToast } from "@/components/ui/Toast";
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { MapEditor } from "@/components/editor/MapEditor";
 import { supabase } from "@/lib/supabaseClient";
+import { useActionGuard } from '@/hooks/useActionGuard';
 
 interface SectionConfig {
   key: string;
@@ -278,6 +279,7 @@ function VisibilityToggle({ section, isVisible, onToggle }: { section: string; i
 export default function TemplateEditorPage() {
   const params = useParams();
   const { showToast } = useToast();
+  const { guard } = useActionGuard();
   const { getTemplate, updateTemplate } = useTemplates();
   const { campanas, loading: loadingCampanas } = useCampanas();
   const { asesores, loading: loadingAsesores } = useAsesores();
@@ -351,6 +353,7 @@ export default function TemplateEditorPage() {
   }, [params.id, getTemplate]);
 
   const handleSave = async () => {
+    if (!guard('templates', 'editar')) return;
     if (!template) return;
     setSaving(true);
     try {

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Trash2, RefreshCw, ExternalLink, Loader2, Upload, X, Plus, Globe, MapPin, Sparkles, FolderOpen } from 'lucide-react'
+import { useActionGuard } from '@/hooks/useActionGuard'
 
 const STATUS_OPTIONS = ['EN PLANOS', 'PREVENTA', 'VENTA CON ESCRITURA', 'VENTA FINALIZADA', 'PROYECTO ENTREGADO']
 
@@ -21,6 +22,7 @@ type Project = {
 export default function ProjectDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { guard } = useActionGuard()
   const projectId = params.id as string
 
   const [project, setProject] = useState<Project | null>(null)
@@ -62,6 +64,7 @@ export default function ProjectDetailPage() {
   useEffect(() => { loadProject() }, [loadProject])
 
   const handleSave = async () => {
+    if (!guard('proyectos', 'editar')) return
     setSaving(true)
     try {
       const projectData: Record<string, any> = {
@@ -88,6 +91,7 @@ export default function ProjectDetailPage() {
   }
 
   const handleDelete = async () => {
+    if (!guard('proyectos', 'eliminar')) return
     if (!project) return
     if (!confirm(`¿Eliminar "${project.name}"? Esta acción eliminará también todos sus lotes y no se puede deshacer.`)) return
     try {

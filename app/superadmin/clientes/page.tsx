@@ -24,6 +24,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { fetchDniData, fetchRucData } from "@/lib/peru-apis";
 import { fetchEcuadorData } from "@/lib/ecuador-apis";
+import { useActionGuard } from '@/hooks/useActionGuard';
 
 interface DbProfile {id: string;
     empresa_id: string;
@@ -388,6 +389,7 @@ const CustomDatePicker = ({ value, label, onChange }: { value: string; label: st
 
 export default function AdminClientes() {
     const { showToast } = useToast();
+    const { guard } = useActionGuard();
     const [searchTerm, setSearchTerm] = useState("");
     const [activityFilter, setActivityFilter] = useState("Todos");
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -450,6 +452,7 @@ export default function AdminClientes() {
     });
 
     const handleUpdateClient = async (fields: Partial<Client>, silent = true) => {
+        if (!guard('clientes', 'editar')) return;
         if (!selectedClient) return;
         const updated = { ...selectedClient, ...fields };
         setClients(prev => prev.map(c => c.id === selectedClient.id ? updated : c));
@@ -610,6 +613,7 @@ export default function AdminClientes() {
     };
 
     const handleAddAddress = () => {
+        if (!guard('clientes', 'crear')) return;
         if (!selectedClient || !newAddress.address) return;
         handleUpdateClient({ addresses: [{ id: `AD-${Date.now()}`, ...newAddress } as Address, ...selectedClient.addresses] }, false);
         setIsAddingAddress(false);
@@ -621,6 +625,7 @@ export default function AdminClientes() {
     };
 
     const deleteAccount = () => {
+        if (!guard('clientes', 'eliminar')) return;
         if (!selectedClient) return;
         setConfirmationModal({
             isOpen: true, title: 'Eliminar Socio', message: '¿Confirmas la eliminacion definitiva?', type: 'danger',

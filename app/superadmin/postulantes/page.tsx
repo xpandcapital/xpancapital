@@ -9,6 +9,7 @@ import {
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/components/ui/Toast"
+import { useActionGuard } from '@/hooks/useActionGuard'
 import { Postulante, EMPRESA_ID, ESTADOS, ESTADO_LABELS, ESTADO_COLORS, diccionarioPreguntas } from "./_types"
 import { PostulanteDetailModal } from "./_components/PostulanteDetailModal"
 import { PostulanteFormModal } from "./_components/PostulanteFormModal"
@@ -28,6 +29,7 @@ const emptyForm: FormField = {
 
 export default function AdminPostulantes() {
   const { showToast } = useToast()
+  const { guard } = useActionGuard()
   const router = useRouter()
   const [postulantes, setPostulantes] = useState<Postulante[]>([])
   const [loading, setLoading] = useState(true)
@@ -52,10 +54,12 @@ export default function AdminPostulantes() {
   }
 
   const openCreateModal = () => {
+    if (!guard('postulantes', 'crear')) return
     setEditingPostulante(null); setForm(emptyForm); setIsModalOpen(true)
   }
 
   const openEditModal = (p: Postulante) => {
+    if (!guard('postulantes', 'editar')) return
     setEditingPostulante(p)
     setForm({
       nombre_completo: p.nombre_completo, correo_contacto: p.correo_contacto,
@@ -87,6 +91,7 @@ export default function AdminPostulantes() {
   }
 
   const handleDelete = async (id: string) => {
+    if (!guard('postulantes', 'eliminar')) return
     try {
       const res = await fetch("/api/postulantes", {
         method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }),
