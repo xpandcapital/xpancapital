@@ -169,6 +169,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ── Verificar si el usuario ya tiene alguno de estos productos ──────────────
+    let alreadyPurchased: string[] = [];
+    if (finalUserId && productos?.length > 0) {
+      const productoIds = productos.map((p: any) => p.producto_id || p.id).filter(Boolean);
+      if (productoIds.length > 0) {
+        const { data: existingPurchases } = await supabase
+          .from('compra_items')
+          .select(`
+            producto_id,
+            producto:productos(nombre)
+          `)
+          .eq('user_id', finalUserId)
+          .in('producto_id', productoIds);
+
+        if (existingPurchases && existingPurchases.length > 0) {
+          alreadyPurchased = existingPurchases.map((p: any) => p.producto?.nombre || p.producto_id);
+          console.log('[CHECKOUT] Productos ya comprados:', alreadyPurchased);
+        }
+      }
+    }
+
     // ── Si no hay user_id, buscar o crear usuario ────────────────────────────
     if (!finalUserId) {
       // 1. Buscar si ya existe en auth
@@ -432,6 +453,7 @@ export async function POST(request: NextRequest) {
       ordenId: orden?.id || null,
       coursesAssigned,
       courseAssignmentError,
+      alreadyPurchased,
     });
 
   } catch (err) {

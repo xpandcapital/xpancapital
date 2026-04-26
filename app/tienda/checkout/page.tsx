@@ -203,6 +203,11 @@ function CheckoutContent() {
 
             if (!data.success) throw new Error(data.error || 'Error al procesar');
 
+            // Verificar si el usuario ya tenía estos productos
+            if (data.alreadyPurchased && data.alreadyPurchased.length > 0) {
+                showToast(`Ya tenías estos productos: ${data.alreadyPurchased.join(', ')}`, 'warning');
+            }
+
             // Verificar si los cursos fueron asignados
             if (data.courseAssignmentError) {
                 showToast('Compra OK pero hubo un problema al asignar cursos. Contacta soporte.', 'warning');
