@@ -58,7 +58,8 @@ export default function ProductsPage() {
                 'suscripcion': 'Mentoría'
             };
             const tipo = item.product_type || item.producto?.tipo || 'digital';
-            const categoryLabel = tipoMapping[tipo] || 'Producto';
+            const rawCategory = item.producto?.categoria?.nombre || '';
+            const categoryLabel = rawCategory || tipoMapping[tipo] || 'Producto';
             return {
                 id: item.producto?.id || c.id,
                 title: item.producto?.nombre || 'Producto',
