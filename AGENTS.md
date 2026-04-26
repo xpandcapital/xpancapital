@@ -322,6 +322,58 @@ SUPABASE_SERVICE_KEY=
 
 ---
 
+## ⚠️ REGLAS CRÍTICAS DE DATOS
+
+### ❌ NUNCA USAR `tipo` PARA MOSTRAR CATEGORÍA
+
+El campo `tipo` en productos (digital/fisico/servicio/suscripcion) es un campo interno de CLASIFICACIÓN, NO una categoría real. **NUNCA** debe usarse para mostrar al usuario.
+
+**❌ INCORRECTO:**
+```typescript
+// Esto muestra etiquetas genéricas inventadas
+<span>{product.tipo === 'servicio' ? 'Curso' : 'Ebook'}</span>
+```
+
+**✅ CORRECTO:**
+```typescript
+// Usar la categoría real del producto
+<span>{product.categoria?.nombre || 'Producto'}</span>
+```
+
+### 🏷️ CATEGORÍA vs TIPO
+
+| Campo | Tabla | Valores | Uso |
+|-------|-------|---------|-----|
+| `tipo` | `productos` | digital, fisico, servicio, suscripcion | Clasificación interna |
+| `categoria` | `producto_categorias` | Cursos, Ebooks, Kits, etc. | Mostrar al usuario |
+
+### 📦 Estructura de Datos
+
+```sql
+-- Tabla producto_categorias
+producto_categorias (id, empresa_id, nombre, slug, sku_prefix, ...)
+
+-- Tabla productos  
+productos (id, empresa_id, nombre, ..., tipo, categoria_id REFERENCES producto_categorias)
+```
+
+### 🔗 Relaciones en API de Compras
+
+```typescript
+// API de compras debe incluir la relación categoria
+supabase
+  .from('compras')
+  .select(`
+    *,
+    items:compra_items(
+      ...,
+      producto:productos(..., categoria:producto_categorias(nombre))
+    )
+  `)
+```
+
+---
+
 ## 📝 Convenciones de Código
 
 ### Naming
