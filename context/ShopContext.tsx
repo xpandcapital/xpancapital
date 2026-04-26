@@ -332,6 +332,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             value={{
                 cart,
                 favorites,
+                purchasedProducts,
                 blisCoins,
                 isCartOpen,
                 openCart,
@@ -346,6 +347,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                 getCartTotal,
                 getCartCount,
                 isLoaded,
+                fetchPurchasedProducts,
             }}
         >
             {children}
