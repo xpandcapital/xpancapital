@@ -20,6 +20,7 @@ export interface Product {
   isAutoSku: boolean
   name: string
   category: string
+  tipo?: 'digital' | 'fisico' | 'servicio' | 'suscripcion'
   price: number
   originalPrice: number
   discountPercentage: number
