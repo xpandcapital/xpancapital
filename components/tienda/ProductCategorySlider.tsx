@@ -162,10 +162,6 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
 
                 <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent pointer-events-none" />
 
-                <div className={`absolute top-4 left-4 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border-2 backdrop-blur-md z-10 ${typeStyle.color}`}>
-                    {typeStyle.label}
-                </div>
-
                 {isPurchased && (
                     <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.6)] z-10">
                         ✓ Ya Comprado
@@ -191,7 +187,9 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
 
             <div className="p-6 flex flex-col flex-1 bg-[#050505] relative">
                 <div className="flex items-center justify-between mb-3">
-                    <p className="text-gray-500 font-black uppercase tracking-[0.2em] text-[9px]">{product.category}</p>
+                    <span className={`inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full border ${typeStyle.color}`}>
+                        {typeStyle.label}
+                    </span>
                     <div className="flex items-center bg-white/5 px-2 py-0.5 rounded text-emerald-400 text-[9px] font-black border border-white/10">
                         <Star className="w-3 h-3 fill-current mr-1 text-[8px]" />
                         {product.rating}
