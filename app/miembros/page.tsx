@@ -61,8 +61,10 @@ export default function UserDashboard() {
         .filter(c => c.estado === 'completado')
         .slice(0, 3)
         .flatMap(c => (c.items || []).map(item => ({
+            id: item.producto?.id || c.id,
             name: item.producto?.nombre || 'Producto',
-            size: 'N/A',
+            type: item.product_type || item.producto?.tipo || 'digital',
+            image: item.producto?.imagen_principal || '',
             date: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
         })));
 
@@ -142,6 +144,52 @@ export default function UserDashboard() {
                     </motion.div>
                 ))}
             </div>
+
+            {/* Mis Compras Section */}
+            {recentDownloads.length > 0 && (
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-black text-white uppercase tracking-widest flex items-center gap-3">
+                            Mis Compras
+                            <span className="h-px bg-white/10 flex-1 hidden md:block w-32" />
+                        </h2>
+                        <a href="/miembros/productos" className="text-xs text-blis-red font-black uppercase tracking-widest hover:text-white transition-colors">Ver Todo</a>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {recentDownloads.map((item, i) => (
+                            <div key={item.id || i} className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                                <div className="aspect-square relative overflow-hidden bg-zinc-900">
+                                    {item.image ? (
+                                        <Image
+                                            src={item.image}
+                                            alt={item.name}
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <Package className="w-16 h-16 text-gray-700" />
+                                        </div>
+                                    )}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+                                    <div className="absolute top-4 left-4">
+                                        <span className="bg-blis-red/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                                            {item.type === 'servicio' ? 'Curso' : item.type === 'digital' ? 'Ebook' : item.type === 'fisico' ? 'Kit' : 'Mentoría'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="p-4 flex-1 flex flex-col justify-between">
+                                    <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{item.name}</h4>
+                                    <div className="flex items-center gap-2 text-[8px] text-gray-500 font-bold uppercase tracking-widest">
+                                        <Clock className="w-2.5 h-2.5" />
+                                        <span>{item.date}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content: Courses Progress */}

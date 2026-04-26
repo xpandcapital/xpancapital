@@ -51,20 +51,10 @@ export default function ProductsPage() {
     const purchasedProducts = compras
         .filter(c => c.estado === 'completado')
         .flatMap(c => (c.items || []).map(item => {
-            const tipoMapping: Record<string, string> = {
-                'digital': 'Ebook',
-                'fisico': 'Kit',
-                'servicio': 'Curso',
-                'suscripcion': 'Mentoría'
-            };
             const tipo = item.product_type || item.producto?.tipo || 'digital';
-            const rawCategory = item.producto?.categoria?.nombre || '';
-            const categoryLabel = rawCategory || tipoMapping[tipo] || 'Producto';
             return {
                 id: item.producto?.id || c.id,
                 title: item.producto?.nombre || 'Producto',
-                category: categoryLabel,
-                type: categoryLabel,
                 tipoOriginal: tipo,
                 image: item.producto?.imagen_principal || '',
                 archivoUrl: item.producto?.archivo_url || '',
@@ -72,7 +62,8 @@ export default function ProductsPage() {
                 status: 'Disponible',
                 accent: 'orange'
             };
-        }));
+        }))
+        .filter(p => p.tipoOriginal === 'servicio');
 
     if (comprasLoading || productsLoading) {
         return (
@@ -147,7 +138,7 @@ export default function ProductsPage() {
 
                                 <div className="absolute top-4 left-4">
                                     <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full border border-white/10">
-                                        {product.type}
+                                        {product.tipoOriginal === 'servicio' ? 'Curso' : product.tipoOriginal === 'digital' ? 'Ebook' : product.tipoOriginal === 'fisico' ? 'Kit' : 'Mentoría'}
                                     </span>
                                 </div>
 
@@ -160,14 +151,14 @@ export default function ProductsPage() {
                                         {downloadingId === product.id ? (
                                             <Loader2 className="w-5 h-5 text-white animate-spin" />
                                         ) : (
-                                            product.type === "Curso" ? <Play className="w-5 h-5 text-white fill-white ml-1" /> : <Download className="w-5 h-5 text-white" />
+                                            <Play className="w-5 h-5 text-white fill-white ml-1" />
                                         )}
                                     </button>
                                 </div>
                             </div>
 
                             <div className="p-6 flex-1 flex flex-col">
-                                <p className="text-blis-red font-black uppercase tracking-widest text-[10px] mb-2">{product.category}</p>
+                                <p className="text-blis-red font-black uppercase tracking-widest text-[10px] mb-2">Curso</p>
                                 <h3 className="text-lg font-black text-white uppercase tracking-tight mb-4 leading-tight group-hover:text-blis-red transition-colors min-h-[50px]">
                                     {product.title}
                                 </h3>
@@ -187,7 +178,7 @@ export default function ProductsPage() {
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <>
-                                                {product.type === "Curso" ? "Continuar Lección" : "Descargar Archivos"}
+                                                Continuar Lección
                                                 <ExternalLink className="w-4 h-4" />
                                             </>
                                         )}
