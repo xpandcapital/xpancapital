@@ -58,11 +58,35 @@ export default function ProductsPage() {
                 'suscripcion': 'Mentoría'
             };
             const tipo = item.product_type || item.producto?.tipo || 'digital';
+            const rawCategory = item.producto?.categoria?.nombre || '';
+            const categoryMapping: Record<string, string> = {
+                'capacitaciones': 'Curso',
+                'cursos': 'Curso',
+                'curso': 'Curso',
+                'ebooks': 'Ebook',
+                'ebook': 'Ebook',
+                'libros': 'Ebook',
+                'contratos': 'Contrato',
+                'contrato': 'Contrato',
+                'legal': 'Contrato',
+                'kits': 'Kit',
+                'kit': 'Kit',
+                'plantillas': 'Kit',
+                'pack': 'Pack',
+                'paquete': 'Pack',
+                'desarrolladores': 'Herramienta',
+                'mentoría': 'Mentoría',
+                'mentoria': 'Mentoría',
+                'membresias': 'Mentoría',
+                'membresía': 'Mentoría'
+            };
+            const categoryKey = rawCategory.toLowerCase();
+            const categoryLabel = categoryMapping[categoryKey] || tipoMapping[tipo] || 'Producto';
             return {
                 id: item.producto?.id || c.id,
                 title: item.producto?.nombre || 'Producto',
-                category: tipoMapping[tipo] || 'Kit',
-                type: tipoMapping[tipo] || 'Kit',
+                category: categoryLabel,
+                type: categoryLabel,
                 tipoOriginal: tipo,
                 image: item.producto?.imagen_principal || '',
                 archivoUrl: item.producto?.archivo_url || '',
