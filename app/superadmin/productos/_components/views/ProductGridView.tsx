@@ -94,13 +94,13 @@ export function ProductGridView({
                   </div>
 
                   {!isBulkEditing && (
-                    <span
-                      className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-white/5 shrink-0"
-                      style={{ backgroundColor: `${statusColor}15`, color: statusColor }}
-                    >
-                      {product.status}
-                    </span>
-                  )}
+                      <span
+                        className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-white/5 shrink-0"
+                        style={{ backgroundColor: `${statusColor}15`, color: statusColor }}
+                      >
+                        {product.status}
+                      </span>
+                    )}
                 </div>
 
                 {!isBulkEditing && (

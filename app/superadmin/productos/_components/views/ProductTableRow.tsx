@@ -45,10 +45,10 @@ export function ProductTableRow({
     return statusObj?.color || (product.status === 'Disponible' ? '#10b981' : product.status === 'Bajo Stock' ? '#f59e0b' : '#ef4444')
   }
 
-  const currency = getCurrency(product.currencyCode || selectedCurrency.code)
-  const statusColor = getStatusColor(product)
+const currency = getCurrency(product.currencyCode || selectedCurrency.code)
+const statusColor = getStatusColor(product)
 
-  return (
+return (
     <tr className={`group hover:bg-white/[0.02] transition-colors ${isSelected ? 'bg-white/[0.03]' : ''}`}>
       <td className="px-4 py-6 align-middle w-12 text-center cursor-pointer" onClick={(e) => onToggleSelection(product.id, e)}>
         <div className={`p-1.5 rounded-lg transition-all inline-flex ${isSelected ? 'bg-blis-red text-white' : 'bg-white/5 text-gray-400 hover:text-white'}`}>
