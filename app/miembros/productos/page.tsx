@@ -62,8 +62,7 @@ export default function ProductsPage() {
                 status: 'Disponible',
                 accent: 'orange'
             };
-        }))
-        .filter(p => p.tipoOriginal === 'servicio');
+        }));
 
     if (comprasLoading || productsLoading) {
         return (
@@ -158,7 +157,9 @@ export default function ProductsPage() {
                             </div>
 
                             <div className="p-6 flex-1 flex flex-col">
-                                <p className="text-blis-red font-black uppercase tracking-widest text-[10px] mb-2">Curso</p>
+                                <p className="text-blis-red font-black uppercase tracking-widest text-[10px] mb-2">
+                                    {product.tipoOriginal === 'servicio' ? 'Curso' : product.tipoOriginal === 'digital' ? 'Ebook' : product.tipoOriginal === 'fisico' ? 'Kit' : 'Mentoría'}
+                                </p>
                                 <h3 className="text-lg font-black text-white uppercase tracking-tight mb-4 leading-tight group-hover:text-blis-red transition-colors min-h-[50px]">
                                     {product.title}
                                 </h3>
@@ -178,7 +179,7 @@ export default function ProductsPage() {
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <>
-                                                Continuar Lección
+                                                {product.tipoOriginal === 'servicio' ? 'Continuar Lección' : 'Descargar Archivos'}
                                                 <ExternalLink className="w-4 h-4" />
                                             </>
                                         )}
