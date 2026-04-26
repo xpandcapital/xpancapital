@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserStats } from "@/lib/hooks/useUserStats";
 import { useCursos, useUserCursos } from "@/lib/hooks/useCursos";
 import { useCompras } from "@/lib/hooks/useCompras";
+import { useEffect } from "react";
 
 export default function UserDashboard() {
     const { user } = useAuth();
@@ -67,6 +68,12 @@ export default function UserDashboard() {
             image: item.producto?.imagen_principal || '',
             date: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
         })));
+
+    useEffect(() => {
+        if (user?.id) {
+            fetchUserPurchases(user.id);
+        }
+    }, [user?.id, fetchUserPurchases]);
 
     if (statsLoading || cursosLoading) {
         return (
