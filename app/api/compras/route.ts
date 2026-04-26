@@ -168,7 +168,8 @@ export async function GET(request: NextRequest) {
         items:compra_items(
           cantidad,
           precio_unitario,
-          producto:productos(id, nombre, imagen_principal)
+          product_type,
+          producto:productos(id, nombre, imagen_principal, tipo, archivo_url)
         )
       `)
       .eq('user_id', user_id)

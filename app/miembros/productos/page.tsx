@@ -7,12 +7,15 @@ import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompras } from "@/lib/hooks/useCompras";
 import { useProducts } from "@/lib/hooks/useProducts";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { useToast } from "@/components/ui/Toast";
 
 export default function ProductsPage() {
     const { user } = useAuth();
     const { compras, loading: comprasLoading, fetchUserPurchases } = useCompras();
     const { products, loading: productsLoading, fetchProducts } = useProducts();
+    const { showToast } = useToast();
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     useEffect(() => {
         if (user?.id) {
@@ -21,18 +24,53 @@ export default function ProductsPage() {
         fetchProducts();
     }, [user?.id, fetchUserPurchases, fetchProducts]);
 
+    const handleDownload = async (product: typeof purchasedProducts[0]) => {
+        if (!product.archivoUrl) {
+            showToast('URL de descarga no disponible', 'error');
+            return;
+        }
+        setDownloadingId(product.id);
+        try {
+            window.open(product.archivoUrl, '_blank');
+            showToast('Descarga iniciada', 'success');
+        } catch {
+            showToast('Error al iniciar la descarga', 'error');
+        } finally {
+            setDownloadingId(null);
+        }
+    };
+
+    const handleAccederCurso = (product: typeof purchasedProducts[0]) => {
+        if (product.tipoOriginal === 'servicio') {
+            window.location.href = `/miembros/academia`;
+        } else {
+            handleDownload(product);
+        }
+    };
+
     const purchasedProducts = compras
         .filter(c => c.estado === 'completado')
-        .flatMap(c => (c.items || []).map(item => ({
-            id: item.producto?.id || c.id,
-            title: item.producto?.nombre || 'Producto',
-            category: 'Producto',
-            type: 'Kit',
-            image: item.producto?.imagen_principal || '',
-            purchaseDate: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
-            status: 'Disponible',
-            accent: 'orange'
-        })));
+        .flatMap(c => (c.items || []).map(item => {
+            const tipoMapping: Record<string, string> = {
+                'digital': 'Ebook',
+                'fisico': 'Kit',
+                'servicio': 'Curso',
+                'suscripcion': 'Mentoría'
+            };
+            const tipo = item.product_type || item.producto?.tipo || 'digital';
+            return {
+                id: item.producto?.id || c.id,
+                title: item.producto?.nombre || 'Producto',
+                category: 'Producto',
+                type: tipoMapping[tipo] || 'Kit',
+                tipoOriginal: tipo,
+                image: item.producto?.imagen_principal || '',
+                archivoUrl: item.producto?.archivo_url || '',
+                purchaseDate: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }),
+                status: 'Disponible',
+                accent: 'orange'
+            };
+        }));
 
     if (comprasLoading || productsLoading) {
         return (
@@ -112,8 +150,16 @@ export default function ProductsPage() {
                                 </div>
 
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button className="w-14 h-14 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
-                                        {product.type === "Curso" ? <Play className="w-5 h-5 text-white fill-white ml-1" /> : <Download className="w-5 h-5 text-white" />}
+                                    <button
+                                        onClick={() => handleAccederCurso(product)}
+                                        disabled={downloadingId === product.id}
+                                        className="w-14 h-14 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)] disabled:opacity-50"
+                                    >
+                                        {downloadingId === product.id ? (
+                                            <Loader2 className="w-5 h-5 text-white animate-spin" />
+                                        ) : (
+                                            product.type === "Curso" ? <Play className="w-5 h-5 text-white fill-white ml-1" /> : <Download className="w-5 h-5 text-white" />
+                                        )}
                                     </button>
                                 </div>
                             </div>
@@ -130,9 +176,19 @@ export default function ProductsPage() {
                                         <span className="text-white">{product.status}</span>
                                     </div>
 
-                                    <button className="w-full py-4 bg-white/5 hover:bg-white/10 border border-white/5 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2">
-                                        {product.type === "Curso" ? "Continuar Lección" : "Descargar Archivos"}
-                                        <ExternalLink className="w-4 h-4" />
+                                    <button
+                                        onClick={() => handleAccederCurso(product)}
+                                        disabled={downloadingId === product.id}
+                                        className="w-full py-4 bg-white/5 hover:bg-white/10 border border-white/5 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    >
+                                        {downloadingId === product.id ? (
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                            <>
+                                                {product.type === "Curso" ? "Continuar Lección" : "Descargar Archivos"}
+                                                <ExternalLink className="w-4 h-4" />
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </div>

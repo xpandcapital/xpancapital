@@ -267,6 +267,7 @@ export async function POST(request: NextRequest) {
         producto_id: p.producto_id || p.id,
         cantidad: p.cantidad || 1,
         precio_unitario: p.precio_unitario || p.price || 0,
+        product_type: p.productType || 'digital',
       })).filter((item: any) => item.producto_id); // Solo items con producto_id válido
 
       if (items.length > 0) {
