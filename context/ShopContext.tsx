@@ -21,6 +21,7 @@ interface Product {
 interface ShopContextType {
     cart: Product[];
     favorites: Product[];
+    purchasedProducts: Product[];
     blisCoins: number;
     isCartOpen: boolean;
     openCart: () => void;
@@ -35,6 +36,7 @@ interface ShopContextType {
     getCartTotal: () => number;
     getCartCount: () => number;
     isLoaded: boolean;
+    fetchPurchasedProducts: () => Promise<void>;
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
@@ -42,6 +44,7 @@ const ShopContext = createContext<ShopContextType | undefined>(undefined);
 export function ShopProvider({ children }: { children: ReactNode }) {
     const [cart, setCart] = useState<Product[]>([]);
     const [favorites, setFavorites] = useState<Product[]>([]);
+    const [purchasedProducts, setPurchasedProducts] = useState<Product[]>([]);
     const [blisCoins, setBlisCoins] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -51,6 +54,28 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const { showToast } = useToast();
     const userRef = useRef(user);
     const syncInProgress = useRef(false);
+
+    const fetchPurchasedProducts = useCallback(async () => {
+        if (!userRef.current || authLoading) return;
+        try {
+            const response = await fetch(`/api/compras?user_id=${userRef.current.id}`);
+            if (response.ok) {
+                const data = await response.json();
+                const purchases = data.data || [];
+                const purchased = purchases
+                    .filter((c: any) => c.estado === 'completado')
+                    .flatMap((c: any) => (c.items || []).map((item: any) => ({
+                        id: item.producto?.id || c.id,
+                        title: item.producto?.nombre || 'Producto',
+                        image: item.producto?.imagen_principal || '',
+                        price: item.precio_unitario || 0,
+                    })));
+                setPurchasedProducts(purchased);
+            }
+        } catch {
+            // Silent fail
+        }
+    }, [authLoading]);
 
     // Keep user ref updated
     useEffect(() => {
@@ -111,8 +136,9 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (user) {
             setBlisCoins(user.blis_coins || 0);
+            fetchPurchasedProducts();
         }
-    }, [user]);
+    }, [user, fetchPurchasedProducts]);
 
     // Sync cart to localStorage and Supabase (debounced)
     const cartSyncTimer = useRef<NodeJS.Timeout | null>(null);

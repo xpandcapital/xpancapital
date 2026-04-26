@@ -50,7 +50,6 @@ export function ProductFormModal({
         name: editingProduct.name,
         description: editingProduct.description || '',
         category: editingProduct.category,
-        tipo: editingProduct.tipo || 'digital',
         price: editingProduct.price,
         originalPrice: editingProduct.originalPrice || 0,
         bliscoins: editingProduct.bliscoins || 0,
@@ -68,7 +67,6 @@ export function ProductFormModal({
       name: '',
       description: '',
       category: categories[0]?.name ?? '',
-      tipo: 'digital',
       price: 0,
       originalPrice: 0,
       bliscoins: 0,
@@ -108,7 +106,7 @@ export function ProductFormModal({
       metodo_pago: 'ambos' as const,
       precio_usd: formData.price,
       precio_coins: formData.bliscoins,
-      tipo: formData.tipo as 'digital' | 'fisico' | 'servicio' | 'suscripcion',
+      tipo: 'digital' as const,
       categoria_id: category?.id ?? null,
       imagen_principal: formData.image,
       stock: isUnlimitedStock ? 0 : formData.stock,
@@ -202,10 +200,11 @@ export function ProductFormModal({
                 isGeneratingAI={isGeneratingAI}
                 onCancelAIGenerate={() => setIsGeneratingAI(false)}
               />
-            </div>
+</div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Categoría</label>
+              <div className="flex justify-between items-center pb-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Categoría</label>
               {categories.length === 0 && (
                 <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-3">
                   <p className="text-[10px] font-bold text-amber-500">⚠️ No hay categorías disponibles. Crea una categoría primero.</p>
@@ -221,21 +220,6 @@ export function ProductFormModal({
               >
                 {categories.length === 0 && <option value="" className="bg-zinc-900">-- Sin categoría --</option>}
                 {categories.map(c => <option key={c.id} value={c.name} className="bg-zinc-900">{c.name} ({c.skuPrefix})</option>)}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tipo de Producto</label>
-              <select
-                name="tipo"
-                value={formData.tipo}
-                onChange={(e) => setFormData(prev => ({ ...prev, tipo: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-blis-red transition-all appearance-none"
-              >
-                <option value="digital" className="bg-zinc-900">📄 Digital (Ebook)</option>
-                <option value="fisico" className="bg-zinc-900">📦 Físico (Kit)</option>
-                <option value="servicio" className="bg-zinc-900">🎓 Servicio (Curso)</option>
-                <option value="suscripcion" className="bg-zinc-900">⭐ Suscripción (Mentoría)</option>
               </select>
             </div>
 

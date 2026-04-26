@@ -13,12 +13,13 @@ import Link from "next/link";
 import { ProductDef } from "@/lib/types/shop";
 
 const TYPE_STYLES: Record<string, { label: string; color: string }> = {
-    curso: { label: "Curso", color: "bg-sky-500/20 text-sky-400 border-sky-500/30" },
+    cursos: { label: "Curso", color: "bg-sky-500/20 text-sky-400 border-sky-500/30" },
     ebook: { label: "Ebook", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
     contratos: { label: "Contrato", color: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
-    pack: { label: "Pack", color: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
-    kit: { label: "Kit", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
+    kits: { label: "Kit", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
+    packs: { label: "Pack", color: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
     mentoría: { label: "Mentoría", color: "bg-blis-red/20 text-blis-red border-blis-red/30" },
+    general: { label: "Producto", color: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
 };
 
 interface CategorySliderProps {
@@ -138,11 +139,13 @@ export function ProductCategorySlider(props: CategorySliderProps) {
 // Factorizamos la lógica de Tarjeta que antes vivía en el Grid (ProductCard)
 function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onTriggerAuth: () => void }) {
     const { user } = useAuth();
-    const { favorites, toggleFavorite, addToCart, blisCoins } = useShop();
+    const { favorites, toggleFavorite, addToCart, blisCoins, purchasedProducts } = useShop();
     const { showToast } = useToast();
     const router = useRouter();
     const isLiked = favorites.some(fav => fav.id === product.id);
-    const typeStyle = TYPE_STYLES[product.productType];
+    const isPurchased = purchasedProducts.some(p => p.id === product.id);
+    const categoryKey = product.category?.toLowerCase() || 'general';
+    const typeStyle = TYPE_STYLES[categoryKey] || TYPE_STYLES['general'];
 
     return (
         <div className="flex flex-col flex-1">
@@ -163,7 +166,13 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                     {typeStyle.label}
                 </div>
 
-                {product.isHot && (
+                {isPurchased && (
+                    <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.6)] z-10">
+                        ✓ Ya Comprado
+                    </div>
+                )}
+
+                {product.isHot && !isPurchased && (
                     <div className="absolute top-4 right-4 bg-blis-red text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(190,11,60,0.6)] animate-pulse z-10">
                         Top Vendedor
                     </div>
@@ -239,21 +248,28 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                             </button>
 
                             <button
-                                onClick={() => addToCart({
-                                    id: product.id,
-                                    title: product.title,
-                                    image: product.image,
-                                    price: product.price
-                                })}
-                                className="w-14 h-14 rounded-2xl bg-white text-black flex items-center justify-center hover:bg-blis-red hover:text-white transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-90 group/cart"
-                                title="Añadir al Carrito"
+                                onClick={() => {
+                                    if (isPurchased) {
+                                        showToast("Ya has comprado este producto.", "info");
+                                        return;
+                                    }
+                                    addToCart({
+                                        id: product.id,
+                                        title: product.title,
+                                        image: product.image,
+                                        price: product.price
+                                    })
+                                }}
+                                disabled={isPurchased}
+                                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-90 group/cart ${isPurchased ? 'bg-gray-500/20 text-gray-500 cursor-not-allowed' : 'bg-white text-black hover:bg-blis-red hover:text-white'}`}
+                                title={isPurchased ? "Ya comprado" : "Añadir al Carrito"}
                             >
                                 <ShoppingCart className="w-6 h-6 group-hover/cart:scale-110 transition-transform" />
                             </button>
                         </div>
                     </div>
 
-                    {user && (
+                    {user && !isPurchased && (
                         <button
                             onClick={() => {
                                 const coinPrice = product.precio_coins || Math.round((product.price || 0) * 10);
