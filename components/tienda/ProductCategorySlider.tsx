@@ -145,7 +145,7 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
     const isLiked = favorites.some(fav => fav.id === product.id);
     const isPurchased = purchasedProducts.some(p => p.id === product.id);
     const categoryKey = product.category?.toLowerCase() || 'general';
-    const typeStyle = TYPE_STYLES[categoryKey] || TYPE_STYLES['general'];
+    const typeStyle = TYPE_STYLES[categoryKey] || { label: product.category || 'Producto', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
 
     return (
         <div className="flex flex-col flex-1">

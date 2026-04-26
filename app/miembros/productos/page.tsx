@@ -61,7 +61,7 @@ export default function ProductsPage() {
             return {
                 id: item.producto?.id || c.id,
                 title: item.producto?.nombre || 'Producto',
-                category: 'Producto',
+                category: tipoMapping[tipo] || 'Kit',
                 type: tipoMapping[tipo] || 'Kit',
                 tipoOriginal: tipo,
                 image: item.producto?.imagen_principal || '',
