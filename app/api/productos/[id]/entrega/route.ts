@@ -23,40 +23,37 @@ export async function GET(
 
     const productoId = params.id
 
-    const { data: compra, error: compraError } = await supabase
-      .from('compras')
+    const { data: compraItems, error: itemsError } = await supabase
+      .from('compra_items')
       .select(`
         id,
-        estado,
-        items:compra_items(
+        cantidad,
+        precio_unitario,
+        producto:productos(
           id,
-          cantidad,
-          precio_unitario,
-          producto:productos(
-            id,
-            nombre,
-            descripcion,
-            descripcion_entrega,
-            imagen_principal,
-            tipo,
-            archivo_url,
-            categoria:producto_categorias(nombre)
-          )
+          nombre,
+          descripcion,
+          descripcion_entrega,
+          imagen_principal,
+          tipo,
+          archivo_url,
+          categoria:producto_categorias(nombre)
+        ),
+        compra:compras(
+          id,
+          user_id,
+          estado
         )
       `)
-      .eq('user_id', userId)
-      .eq('estado', 'completado')
-      .contains('items.producto.id', [productoId])
-      .single()
+      .eq('producto_id', productoId)
+      .eq('compra.estado', 'completado')
+      .eq('compra.user_id', userId)
 
-    if (compraError || !compra) {
+    if (itemsError || !compraItems || compraItems.length === 0) {
       return NextResponse.json({ error: 'Producto no encontrado en tus compras' }, { status: 404 })
     }
 
-    const item = (compra.items || []).find((i: any) => i.producto?.id === productoId)
-    if (!item) {
-      return NextResponse.json({ error: 'Producto no encontrado en esta compra' }, { status: 404 })
-    }
+    const item = compraItems[0]
 
     const { data: videos } = await supabase
       .from('producto_videos')
@@ -76,7 +73,7 @@ export async function GET(
         producto: item.producto,
         videos: videos || [],
         archivos: archivos || [],
-        compra_id: compra.id
+        compra_id: item.compra?.id
       }
     })
   } catch (error) {
