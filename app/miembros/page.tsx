@@ -58,6 +58,16 @@ export default function UserDashboard() {
             : 'N/A'
     }));
 
+    const purchasedCourses = compras
+        .filter(c => c.estado === 'completado')
+        .flatMap(c => (c.items || []).filter(item => item.product_type === 'servicio' || item.producto?.tipo === 'servicio').map(item => ({
+            id: item.producto?.id || c.id,
+            title: item.producto?.nombre || 'Curso',
+            progress: 0,
+            image: item.producto?.imagen_principal || '',
+            lastAccessed: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+        })));
+
     const recentDownloads = compras
         .filter(c => c.estado === 'completado')
         .slice(0, 4)
@@ -206,19 +216,11 @@ export default function UserDashboard() {
                         <a href="/miembros/academia" className="text-xs text-blis-red font-black uppercase tracking-widest hover:text-white transition-colors">Ver Todo</a>
                     </div>
 
-                    {myCourses.length === 0 ? (
-                        <div className="bg-black/40 border border-white/5 rounded-[2rem] p-8 text-center">
-                            <BookOpen className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                            <h3 className="text-lg font-bold text-white mb-2">No tienes cursos inscritos</h3>
-                            <p className="text-gray-500 mb-6">Explora nuestra academia y comienza tu aprendizaje.</p>
-                            <a href="/miembros/academia" className="inline-block px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
-                                Explorar Academia
-                            </a>
-                        </div>
-                    ) : (
+                    {/* Continuar Aprendiendo + Cursos Comprados */}
+                    {(myCourses.length > 0 || purchasedCourses.length > 0) ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                             {myCourses.map((course, i) => (
-                                <div key={course.id || i} className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                                <div key={`enrolled-${course.id || i}`} className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
                                     <div className="aspect-square relative overflow-hidden bg-zinc-900">
                                         {course.image ? (
                                             <Image
@@ -261,6 +263,48 @@ export default function UserDashboard() {
                                     </div>
                                 </div>
                             ))}
+                            {purchasedCourses.map((course, i) => (
+                                <div key={`purchased-${course.id || i}`} className="group cursor-pointer bg-black/40 border border-blis-red/20 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                                    <div className="aspect-square relative overflow-hidden bg-zinc-900">
+                                        {course.image ? (
+                                            <Image
+                                                src={course.image}
+                                                alt={course.title}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <BookOpen className="w-16 h-16 text-gray-700" />
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+                                        <div className="absolute top-4 left-4">
+                                            <span className="bg-blis-red/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full">Nuevo</span>
+                                        </div>
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
+                                                <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-4 flex-1 flex flex-col justify-between">
+                                        <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{course.title}</h4>
+                                        <div className="flex items-center gap-2 text-[8px] text-emerald-500 font-bold uppercase tracking-widest">
+                                            <span>✓ Comprado</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-black/40 border border-white/5 rounded-[2rem] p-8 text-center">
+                            <BookOpen className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                            <h3 className="text-lg font-bold text-white mb-2">No tienes cursos inscritos</h3>
+                            <p className="text-gray-500 mb-6">Explora nuestra academia y comienza tu aprendizaje.</p>
+                            <a href="/miembros/academia" className="inline-block px-6 py-3 bg-blis-red text-white rounded-xl font-bold">
+                                Explorar Academia
+                            </a>
                         </div>
                     )}
                 </div>
