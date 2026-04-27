@@ -169,7 +169,7 @@ export async function GET(request: NextRequest) {
           cantidad,
           precio_unitario,
           product_type,
-          producto:productos(id, nombre, imagen_principal, tipo, archivo_url)
+          producto:productos(id, nombre, imagen_principal, tipo, archivo_url, categoria:producto_categorias(nombre))
         )
       `)
       .eq('user_id', user_id)

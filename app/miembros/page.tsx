@@ -60,11 +60,11 @@ export default function UserDashboard() {
 
     const recentDownloads = compras
         .filter(c => c.estado === 'completado')
-        .slice(0, 3)
+        .slice(0, 4)
         .flatMap(c => (c.items || []).map(item => ({
             id: item.producto?.id || c.id,
             name: item.producto?.nombre || 'Producto',
-            type: item.product_type || item.producto?.tipo || 'digital',
+            category: item.producto?.categoria?.nombre || (item.product_type === 'servicio' ? 'Curso' : item.product_type === 'digital' ? 'Ebook' : item.product_type === 'fisico' ? 'Kit' : item.product_type === 'suscripcion' ? 'Mentoría' : 'Producto'),
             image: item.producto?.imagen_principal || '',
             date: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
         })));
@@ -181,7 +181,7 @@ export default function UserDashboard() {
                                         </div>
                                     )}
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] font-black text-blis-red uppercase tracking-widest mb-1">{item.type === 'servicio' ? 'Curso' : item.type === 'digital' ? 'Ebook' : item.type === 'fisico' ? 'Kit' : 'Mentoría'}</p>
+                                        <p className="text-[10px] font-black text-blis-red uppercase tracking-widest mb-1">{item.category}</p>
                                         <h4 className="text-white font-black text-xs uppercase tracking-tight leading-tight line-clamp-2">{item.name}</h4>
                                     </div>
                                 </div>
