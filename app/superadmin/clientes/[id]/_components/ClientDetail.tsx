@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import type { Client } from '../../_types';
+import type { Client, Transaction, Order, AuditLog, PrivateEvent, AcademicCourse, Certificate, Referral } from '../../_types';
 import { ClientSidebar } from './ClientSidebar';
 import { ProfileTab } from './tabs/ProfileTab';
 import { EconomyTab } from './tabs/EconomyTab';
@@ -16,28 +16,49 @@ import { HistoryTab } from './tabs/HistoryTab';
 
 interface ClientDetailProps {
     client: Client;
+    orders: Order[];
+    transactions: Transaction[];
+    history: AuditLog[];
+    events: PrivateEvent[];
+    insights: any[];
+    automations: any[];
+    referrals: Referral[];
+    academicData: { progress: AcademicCourse[]; certificates: Certificate[] };
     onUpdate: (fields: Partial<Client>, showToast?: boolean) => void;
     onAdjustCoins: (amount: number, reason: string) => void;
     onClose?: () => void;
 }
 
-export function ClientDetail({ client, onUpdate, onAdjustCoins, onClose }: ClientDetailProps) {
+export function ClientDetail({
+    client,
+    orders,
+    transactions,
+    history,
+    events,
+    insights,
+    automations,
+    referrals,
+    academicData,
+    onUpdate,
+    onAdjustCoins,
+    onClose
+}: ClientDetailProps) {
     const [activeTab, setActiveTab] = useState('profile');
 
     const renderTab = () => {
-        const props = { client, onUpdate, onAdjustCoins };
+        const baseProps = { client, onUpdate, onAdjustCoins };
         switch (activeTab) {
-            case 'profile': return <ProfileTab {...props} />;
-            case 'economy': return <EconomyTab {...props} />;
-            case 'sales': return <SalesTab {...props} />;
-            case 'addresses': return <AddressesTab {...props} />;
-            case 'academia': return <AcademiaTab {...props} />;
-            case 'referrals': return <ReferralsTab {...props} />;
-            case 'comms': return <CommsTab {...props} />;
-            case 'ai': return <AiInsightsTab {...props} />;
-            case 'automations': return <AutomationsTab {...props} />;
-            case 'history': return <HistoryTab {...props} />;
-            default: return <ProfileTab {...props} />;
+            case 'profile': return <ProfileTab {...baseProps} />;
+            case 'economy': return <EconomyTab {...baseProps} transactions={transactions} />;
+            case 'sales': return <SalesTab {...baseProps} orders={orders} />;
+            case 'addresses': return <AddressesTab {...baseProps} />;
+            case 'academia': return <AcademiaTab {...baseProps} academicData={academicData} />;
+            case 'referrals': return <ReferralsTab {...baseProps} referrals={referrals} />;
+            case 'comms': return <CommsTab {...baseProps} events={events} />;
+            case 'ai': return <AiInsightsTab {...baseProps} insights={insights} />;
+            case 'automations': return <AutomationsTab {...baseProps} automations={automations} />;
+            case 'history': return <HistoryTab {...baseProps} history={history} />;
+            default: return <ProfileTab {...baseProps} />;
         }
     };
 

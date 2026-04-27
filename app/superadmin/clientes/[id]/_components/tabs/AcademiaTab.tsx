@@ -1,30 +1,14 @@
 "use client";
 
 import { GraduationCap, Award, Download, Trash2, Unlock } from 'lucide-react';
-import type { Client } from '../../../_types';
+import type { AcademicCourse, Certificate } from '../../../_types';
 import { motion } from 'framer-motion';
-import { useToast } from '@/components/ui/Toast';
 
 interface AcademiaTabProps {
-    client: Client;
-    onUpdate: (fields: Partial<Client>) => void;
+    academicData: { progress: AcademicCourse[]; certificates: Certificate[] };
 }
 
-export function AcademiaTab({ client, onUpdate }: AcademiaTabProps) {
-    const { showToast } = useToast();
-
-    const handleReleaseExam = (courseName: string) => {
-        const newProgress = client.academicProgress.map(p =>
-            p.course === courseName ? { ...p, attempts: 0, examStatus: 'open' as const } : p
-        );
-        onUpdate({ academicProgress: newProgress });
-        showToast('Examen liberado', 'success');
-    };
-
-    const handleDeleteCertificate = (id: string) => {
-        onUpdate({ certificates: client.certificates.filter(c => c.id !== id) });
-        showToast('Certificado eliminado', 'success');
-    };
+export function AcademiaTab({ academicData }: AcademiaTabProps) {
 
     return (
         <div className="space-y-10">
@@ -35,48 +19,54 @@ export function AcademiaTab({ client, onUpdate }: AcademiaTabProps) {
                         <GraduationCap className="w-5 h-5 text-indigo-500" />
                     </div>
                     <div className="space-y-4">
-                        {client.academicProgress.map((course, idx) => (
-                            <div key={idx} className="p-6 bg-zinc-900 border border-white/5 rounded-3xl space-y-3">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex flex-col">
-                                        <span className="text-[11px] font-black uppercase leading-tight max-w-[200px]">{course.course}</span>
-                                        <span className="text-[9px] text-gray-500">Nota Final: {course.grade || 'Pendiente'}</span>
-                                    </div>
-                                    {course.examStatus === 'failed_blocked' && (
-                                        <button
-                                            onClick={() => handleReleaseExam(course.course)}
-                                            className="px-3 py-1 bg-rose-500 text-black text-[8px] font-black uppercase rounded-lg hover:bg-rose-600 transition-all flex items-center gap-1"
-                                        >
-                                            <Unlock className="w-2.5 h-2.5" /> Liberar
-                                        </button>
-                                    )}
-                                </div>
-                                <div className="w-full h-2 bg-black rounded-full overflow-hidden flex">
-                                    <motion.div
-                                        initial={{ width: 0 }}
-                                        animate={{ width: `${course.progress}%` }}
-                                        className={`h-full ${course.progress === 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`}
-                                    />
-                                </div>
-                                <div className="flex justify-between text-[8px] font-black uppercase text-gray-600">
-                                    <span>{course.progress}% Completado</span>
-                                    <span>{course.attempts}/{course.maxAttempts} Intentos</span>
-                                </div>
+                        {academicData.progress.length === 0 ? (
+                            <div className="p-12 border-2 border-dashed border-white/5 rounded-[2.5rem] text-center opacity-20">
+                                <GraduationCap className="w-12 h-12 mx-auto mb-2" />
+                                <span className="text-[10px] font-black uppercase">Sin cursos en progreso</span>
                             </div>
-                        ))}
+                        ) : (
+                            academicData.progress.map((course, idx) => (
+                                <div key={idx} className="p-6 bg-zinc-900 border border-white/5 rounded-3xl space-y-3">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex flex-col">
+                                            <span className="text-[11px] font-black uppercase leading-tight max-w-[200px]">{course.course}</span>
+                                            <span className="text-[9px] text-gray-500">Nota Final: {course.grade || 'Pendiente'}</span>
+                                        </div>
+                                        {course.examStatus === 'failed_blocked' && (
+                                            <button
+                                                className="px-3 py-1 bg-rose-500 text-black text-[8px] font-black uppercase rounded-lg hover:bg-rose-600 transition-all flex items-center gap-1"
+                                            >
+                                                <Unlock className="w-2.5 h-2.5" /> Liberar
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="w-full h-2 bg-black rounded-full overflow-hidden flex">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${course.progress}%` }}
+                                            className={`h-full ${course.progress === 100 ? 'bg-emerald-500' : 'bg-indigo-500'}`}
+                                        />
+                                    </div>
+                                    <div className="flex justify-between text-[8px] font-black uppercase text-gray-600">
+                                        <span>{course.progress}% Completado</span>
+                                        <span>{course.attempts}/{course.maxAttempts} Intentos</span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
 
                 <div className="space-y-6">
                     <h3 className="text-sm font-black uppercase">Certificaciones</h3>
                     <div className="grid grid-cols-1 gap-4">
-                        {client.certificates.length === 0 ? (
+                        {academicData.certificates.length === 0 ? (
                             <div className="p-12 border-2 border-dashed border-white/5 rounded-[2.5rem] text-center opacity-20">
                                 <Award className="w-12 h-12 mx-auto mb-2" />
                                 <span className="text-[10px] font-black uppercase">Sin certificados</span>
                             </div>
                         ) : (
-                            client.certificates.map(cert => (
+                            academicData.certificates.map(cert => (
                                 <div key={cert.id} className="p-5 bg-zinc-900 border border-emerald-500/20 rounded-2xl flex justify-between items-center group">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500">

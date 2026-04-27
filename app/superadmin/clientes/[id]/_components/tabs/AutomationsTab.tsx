@@ -1,22 +1,22 @@
 "use client";
 
 import { Zap, Clock, CheckCircle, XCircle, Play, Pause } from 'lucide-react';
-import type { Client } from '../../../_types';
 import { motion } from 'framer-motion';
 
-interface AutomationsTabProps {
-    client: Client;
-    onUpdate: (fields: Partial<Client>) => void;
+interface Automation {
+    id: string;
+    name: string;
+    description: string;
+    trigger: string;
+    status: 'active' | 'paused';
+    last_run?: string;
 }
 
-export function AutomationsTab({ client }: AutomationsTabProps) {
-    const automations = [
-        { id: 'welcome', name: 'Secuencia de Bienvenida', description: 'Email de bienvenida + regalo de 50 BC', trigger: 'Al registrarse', status: 'active', lastRun: 'Hace 2 horas' },
-        { id: 'churn', name: 'Alerta de Inactividad', description: 'Notificación cuando hay 30 días sin compra', trigger: '30 días inactivo', status: 'active', lastRun: 'Ayer' },
-        { id: 'birthday', name: 'Feliz Cumpleaños', description: 'Envío automático en su fecha de cumpleaños', trigger: 'Fecha de cumpleaños', status: 'paused', lastRun: 'Hace 14 días' },
-        { id: 'upsell', name: 'Upsell Cursos', description: 'Recomendación de curso avanzado al completar uno', trigger: 'Al completar curso', status: 'active', lastRun: 'Hace 5 días' },
-        { id: 'referral', name: 'Recompensa de Referido', description: 'Notificación al referido que completa primera compra', trigger: 'Primera compra referido', status: 'active', lastRun: 'Hace 1 semana' },
-    ];
+interface AutomationsTabProps {
+    automations: Automation[];
+}
+
+export function AutomationsTab({ automations }: AutomationsTabProps) {
 
     return (
         <div className="space-y-6">
@@ -49,7 +49,7 @@ export function AutomationsTab({ client }: AutomationsTabProps) {
                                 <span className="text-[9px] text-gray-500 mt-0.5">{auto.description}</span>
                                 <div className="flex items-center gap-2 mt-2">
                                     <Clock className="w-3 h-3 text-gray-600" />
-                                    <span className="text-[8px] text-gray-600 font-black uppercase">Última: {auto.lastRun}</span>
+                                    <span className="text-[8px] text-gray-600 font-black uppercase">Última: {auto.last_run || 'N/A'}</span>
                                 </div>
                             </div>
                         </div>

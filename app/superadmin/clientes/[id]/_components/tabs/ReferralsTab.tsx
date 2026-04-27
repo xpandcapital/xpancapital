@@ -2,19 +2,17 @@
 
 import { useState } from 'react';
 import {
-    Users, UserCircle, Link2, ShoppingBag,
-    ChevronRight
+    Users, UserCircle, Link2, ShoppingBag
 } from 'lucide-react';
-import type { Client, Referral } from '../../../_types';
+import type { Referral } from '../../../_types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/components/ui/Toast';
 
 interface ReferralsTabProps {
-    client: Client;
-    onUpdate: (fields: Partial<Client>) => void;
+    referrals: Referral[];
 }
 
-export function ReferralsTab({ client, onUpdate }: ReferralsTabProps) {
+export function ReferralsTab({ referrals }: ReferralsTabProps) {
     const { showToast } = useToast();
     const [selectedReferral, setSelectedReferral] = useState<Referral | null>(null);
 
@@ -23,7 +21,7 @@ export function ReferralsTab({ client, onUpdate }: ReferralsTabProps) {
             <div className="p-10 bg-indigo-600/10 border border-indigo-500/20 rounded-[3rem] text-center space-y-3 shadow-2xl">
                 <div className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em]">Red de Referidos</div>
                 <div className="text-6xl font-black text-white">
-                    {client.referralCount} <span className="text-2xl text-indigo-500">Socios</span>
+                    {referrals.length} <span className="text-2xl text-indigo-500">Socios</span>
                 </div>
                 <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Contribuidores directos</p>
             </div>
@@ -33,13 +31,13 @@ export function ReferralsTab({ client, onUpdate }: ReferralsTabProps) {
                     <Users className="w-4 h-4 text-indigo-500" /> Socios Referidos
                 </h4>
 
-                {client.referrals.length === 0 ? (
+                {referrals.length === 0 ? (
                     <div className="p-12 border-2 border-dashed border-white/5 rounded-[2.5rem] text-center opacity-20">
                         <UserCircle className="w-12 h-12 mx-auto mb-2" />
                         <span className="text-[10px] font-black uppercase">Sin referidos directos</span>
                     </div>
                 ) : (
-                    client.referrals.map(ref => (
+                    referrals.map(ref => (
                         <div
                             key={ref.id}
                             onClick={() => setSelectedReferral(selectedReferral?.id === ref.id ? null : ref)}

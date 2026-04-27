@@ -5,16 +5,17 @@ import {
     Lock, BadgeDollarSign, Calendar, History, DollarSign,
     ArrowRightLeft as ArrowRightLeftIcon
 } from 'lucide-react';
-import type { Client } from '../../../_types';
+import type { Client, Transaction } from '../../../_types';
 import { useToast } from '@/components/ui/Toast';
 
 interface EconomyTabProps {
     client: Client;
+    transactions: Transaction[];
     onUpdate: (fields: Partial<Client>) => void;
     onAdjustCoins: (amount: number, reason: string) => void;
 }
 
-export function EconomyTab({ client, onUpdate, onAdjustCoins }: EconomyTabProps) {
+export function EconomyTab({ client, transactions, onUpdate, onAdjustCoins }: EconomyTabProps) {
     const { showToast } = useToast();
     const [coinAmount, setCoinAmount] = useState('0');
     const [coinReason, setCoinReason] = useState('');
@@ -146,13 +147,13 @@ export function EconomyTab({ client, onUpdate, onAdjustCoins }: EconomyTabProps)
                         </div>
                     </div>
                     <div className="space-y-4 overflow-y-auto scrollbar-hide flex-1 pr-1 pb-4">
-                        {client.transactions.length === 0 ? (
+                        {transactions.length === 0 ? (
                             <div className="flex flex-col items-center justify-center p-16 opacity-10 border-2 border-dashed border-white/5 rounded-[2.5rem]">
                                 <History className="w-16 h-16 mb-4" />
                                 <span className="text-[10px] font-black uppercase">Sin actividad</span>
                             </div>
                         ) : (
-                            client.transactions.map(tx => (
+                            transactions.map(tx => (
                                 <div
                                     key={tx.id}
                                     className="p-5 bg-black/40 border border-white/5 rounded-[1.8rem] flex justify-between items-center group hover:border-amber-500/30 hover:bg-white/[0.05] transition-all shrink-0"

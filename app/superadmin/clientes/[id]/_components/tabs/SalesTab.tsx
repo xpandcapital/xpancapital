@@ -11,10 +11,11 @@ import { useToast } from '@/components/ui/Toast';
 
 interface SalesTabProps {
     client: Client;
+    orders: Order[];
     onUpdate: (fields: Partial<Client>) => void;
 }
 
-export function SalesTab({ client, onUpdate }: SalesTabProps) {
+export function SalesTab({ client, orders, onUpdate }: SalesTabProps) {
     const { showToast } = useToast();
     const [viewMode, setViewMode] = useState<'Venta' | 'Cotizacion'>('Venta');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -109,13 +110,13 @@ export function SalesTab({ client, onUpdate }: SalesTabProps) {
             )}
 
             <div className="grid grid-cols-1 gap-4">
-                {client.orders.filter(o => o.type === viewMode).length === 0 ? (
+                {orders.filter(o => o.type === viewMode).length === 0 ? (
                     <div className="p-12 text-center border-2 border-dashed border-white/5 rounded-[2.5rem] opacity-30 flex flex-col items-center">
                         <FileText className="w-12 h-12 mb-4" />
                         <span className="text-[10px] font-black uppercase">No se hallaron registros</span>
                     </div>
                 ) : (
-                    client.orders.filter(o => o.type === viewMode).map(order => (
+                    orders.filter(o => o.type === viewMode).map(order => (
                         <div
                             key={order.id}
                             onClick={() => setSelectedOrder(order)}

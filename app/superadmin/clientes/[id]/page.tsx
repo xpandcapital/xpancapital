@@ -8,7 +8,20 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 export default function ClientDetailPage() {
     const params = useParams();
     const router = useRouter();
-    const { client, loading, updateClient, adjustCoins } = useClientDetail(params.id as string);
+    const {
+        client,
+        loading,
+        orders,
+        transactions,
+        history,
+        events,
+        insights,
+        automations,
+        referrals,
+        academicData,
+        updateClient,
+        adjustCoins
+    } = useClientDetail(params.id as string);
 
     if (loading) {
         return (
@@ -44,6 +57,14 @@ export default function ClientDetailPage() {
             </div>
             <ClientDetailComponent
                 client={client}
+                orders={orders}
+                transactions={transactions}
+                history={history}
+                events={events}
+                insights={insights}
+                automations={automations}
+                referrals={referrals}
+                academicData={academicData}
                 onUpdate={updateClient}
                 onAdjustCoins={adjustCoins}
                 onClose={() => router.push('/superadmin/clientes')}
