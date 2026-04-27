@@ -23,11 +23,9 @@ import { useUserStats } from "@/lib/hooks/useUserStats";
 import { useCursos, useUserCursos } from "@/lib/hooks/useCursos";
 import { useCompras } from "@/lib/hooks/useCompras";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 export default function UserDashboard() {
     const { user } = useAuth();
-    const router = useRouter();
     const { stats, loading: statsLoading, fetchUserStats } = useUserStats();
     const { cursos, loading: cursosLoading } = useCursos();
     const { userCursos, loading: userCursosLoading, refetch: refetchUserCursos } = useUserCursos(user?.id || null);
@@ -276,12 +274,9 @@ export default function UserDashboard() {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div
+                                    <Link
                                         key={`purchased-${course.id || i}`}
-                                        onClick={() => {
-                                            sessionStorage.setItem('openCourseId', course.cursoId || course.id);
-                                            router.push('/miembros/academia');
-                                        }}
+                                        href="/miembros/academia"
                                         className="group cursor-pointer bg-black/40 border border-blis-red/20 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col"
                                     >
                                         <div className="aspect-square relative overflow-hidden bg-zinc-900">
@@ -313,7 +308,7 @@ export default function UserDashboard() {
                                                 <span>✓ Comprado</span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                 )
                             ))}
                         </div>
