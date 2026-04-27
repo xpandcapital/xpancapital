@@ -17,10 +17,10 @@ export async function GET(
     const userId = params.id
 
     const { data, error } = await supabase
-      .from('audit_log')
-      .select('id, accion, detalle, modulo, created_at')
+      .from('auditoria_log')
+      .select('id, accion, detalle, modulo, tabla, creado_en')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('creado_en', { ascending: false })
       .limit(50)
 
     if (error) {
@@ -29,10 +29,10 @@ export async function GET(
 
     const history = (data || []).map((h: any) => ({
       id: h.id,
-      action: h.accion || h.action || 'Unknown',
-      details: h.detalle || h.detalles || h.details || '',
-      user: h.modulo || h.module || '',
-      date: h.created_at
+      action: h.accion || 'Unknown',
+      details: h.detalle || '',
+      user: h.tabla || '',
+      date: h.creado_en
     }))
 
     return NextResponse.json({ success: true, data: history })
