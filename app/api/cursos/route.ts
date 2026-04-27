@@ -14,16 +14,22 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabase()
     const { searchParams } = new URL(request.url)
     const slug = searchParams.get('slug')
+    const id = searchParams.get('id')
     const userId = searchParams.get('user_id')
 
-    if (slug) {
+    if (slug || id) {
       const teamMember = searchParams.get('team_member') === 'true'
       let query = supabase
         .from('cursos')
         .select('*')
         .eq('empresa_id', DEFAULT_EMPRESA_ID)
-        .eq('slug', slug)
         .eq('activo', true)
+
+      if (slug) {
+        query = query.eq('slug', slug)
+      } else if (id) {
+        query = query.eq('id', id)
+      }
 
       if (!teamMember) {
         query = query.neq('para_equipo', true)
@@ -43,7 +49,7 @@ export async function GET(request: NextRequest) {
           .eq('user_id', userId)
           .eq('curso_id', curso.id)
           .single()
-        
+
         progreso = progressData
       }
 

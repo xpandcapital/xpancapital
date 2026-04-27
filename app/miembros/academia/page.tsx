@@ -54,10 +54,11 @@ export default function AcademyPage() {
     const [purchasedCourses, setPurchasedCourses] = useState<any[]>([]);
     const [loadingPurchased, setLoadingPurchased] = useState(false);
 
-    const fetchCursoCompleto = useCallback(async (slug: string) => {
+    const fetchCursoCompleto = useCallback(async (slugOrId: string, useId: boolean = false) => {
         setLoadingCurso(true);
         try {
-            const url = `/api/cursos?slug=${slug}${user?.id ? `&user_id=${user.id}` : ''}`;
+            const param = useId ? 'id' : 'slug';
+            const url = `/api/cursos?${param}=${slugOrId}${user?.id ? `&user_id=${user.id}` : ''}`;
             const res = await fetch(url);
             const data = await res.json();
             if (data.success && data.data) {
@@ -70,12 +71,16 @@ export default function AcademyPage() {
     }, [user?.id]);
 
     const handleSelectCourse = async (course: any) => {
-        setSelectedSlug(course.slug);
+        setSelectedSlug(course.slug || course.id);
         setActiveLesson(null);
         setActiveModule(null);
         setOpenModules(new Set());
         setCompletedLessons([]);
-        await fetchCursoCompleto(course.slug);
+        if (course.slug) {
+            await fetchCursoCompleto(course.slug);
+        } else if (course.cursoId || course.id) {
+            await fetchCursoCompleto(course.cursoId || course.id, true);
+        }
     };
 
     useEffect(() => {
@@ -185,6 +190,18 @@ export default function AcademyPage() {
     const enrolledIds = new Set(coursesWithProgress.map(c => c.id));
     const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.id));
     const allAcademyCourses = [...coursesWithProgress, ...newPurchasedCourses];
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const cursoParam = params.get('curso');
+        if (cursoParam && allAcademyCourses.length > 0) {
+            const course = allAcademyCourses.find(c => c.id === cursoParam || c.cursoId === cursoParam);
+            if (course) {
+                handleSelectCourse(course);
+                window.history.replaceState({}, '', '/miembros/academia');
+            }
+        }
+    }, [allAcademyCourses]);
 
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
