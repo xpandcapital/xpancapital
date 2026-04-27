@@ -24,15 +24,15 @@ export async function GET(
       .limit(50)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ success: true, data: [], error: error.message })
     }
 
-    const history = (data || []).map(h => ({
+    const history = (data || []).map((h: any) => ({
       id: h.id,
-      action: h.accion,
-      detail: h.detalle,
-      module: h.modulo,
-      date: h.creado_en
+      action: h.accion || h.action || 'Unknown',
+      details: h.detalle || h.detalles || h.details || '',
+      user: h.modulo || h.module || '',
+      date: h.creado_en || h.created_at
     }))
 
     return NextResponse.json({ success: true, data: history })

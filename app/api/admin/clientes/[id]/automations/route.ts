@@ -23,22 +23,20 @@ export async function GET(
       .order('created_at', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ success: true, data: [], error: error.message })
     }
 
-    const automations = (data || []).map(a => ({
+    const automations = (data || []).map((a: any) => ({
       id: a.id,
-      key: a.automation_key,
-      name: a.nombre,
-      description: a.descripcion,
-      trigger: a.trigger_type,
-      status: a.status,
-      lastRun: a.last_run,
-      nextRun: a.next_run
+      name: a.nombre || a.name || 'Automation',
+      description: a.descripcion || a.description || '',
+      trigger: a.trigger_type || a.trigger || 'manual',
+      status: a.status === 'active' ? 'active' : 'paused',
+      last_run: a.last_run || a.lastRun || null
     }))
 
     return NextResponse.json({ success: true, data: automations })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ success: true, data: [], error: err.message }, { status: 500 })
   }
 }

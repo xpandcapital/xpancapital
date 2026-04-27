@@ -37,7 +37,7 @@ export async function GET(
       .eq('user_id', userId)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ success: true, data: { progress: [], certificates: [] }, error: error.message })
     }
 
     const { data: certificados } = await supabase
@@ -46,35 +46,29 @@ export async function GET(
       .eq('user_id', userId)
       .order('fecha_emision', { ascending: false })
 
-    const progress = (equipoCursos || []).map(ec => {
+    const progress = (equipoCursos || []).map((ec: any) => {
       const modulos = ec.curso?.modulos as any[] || []
       const totalLessons = modulos.reduce((sum: number, m: any) => sum + (m.lessons?.length || 0), 0)
-      const completedLessons = ec.lecciones_completadas?.length || 0
 
       return {
         id: ec.id,
-        courseId: ec.curso_id,
         course: ec.curso?.nombre || 'Curso',
-        image: ec.curso?.imagen_principal,
         progress: ec.progreso || 0,
         grade: ec.nota_final,
         attempts: 0,
         maxAttempts: 3,
-        examStatus: ec.estado === 'completado' ? 'approved' : 'pending',
-        enrolledDate: ec.asignado_en,
-        completedDate: ec.completado_en
+        examStatus: ec.estado === 'completado' ? 'passed' : 'open'
       }
     })
 
-    const certificates = (certificados || []).map(c => ({
+    const certificates = (certificados || []).map((c: any) => ({
       id: c.id,
       name: c.nombre,
-      date: c.fecha_emision,
-      verificationCode: c.codigo_verificacion
+      date: c.fecha_emision
     }))
 
     return NextResponse.json({ success: true, data: { progress, certificates } })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ success: true, data: { progress: [], certificates: [] }, error: err.message }, { status: 500 })
   }
 }

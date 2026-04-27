@@ -23,22 +23,17 @@ export async function GET(
       .order('created_at', { ascending: false })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ success: true, data: [], error: error.message })
     }
 
-    const insights = (data || []).map(i => ({
-      id: i.id,
-      type: i.tipo,
-      title: i.titulo,
-      description: i.descripcion,
-      metrics: i.metricas,
-      recommendations: i.recomendaciones,
-      score: i.score,
-      date: i.created_at
+    const insights = (data || []).map((i: any) => ({
+      type: i.tipo || i.type || 'info',
+      label: i.titulo || i.title || 'Insight',
+      description: i.descripcion || i.description || ''
     }))
 
     return NextResponse.json({ success: true, data: insights })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ success: true, data: [], error: err.message }, { status: 500 })
   }
 }

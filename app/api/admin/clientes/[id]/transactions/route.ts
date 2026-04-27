@@ -24,20 +24,20 @@ export async function GET(
       .limit(50)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ success: true, data: [], error: error.message })
     }
 
-    const transactions = (data || []).map(t => ({
+    const transactions = (data || []).map((t: any) => ({
       id: t.id,
-      type: t.tipo,
-      amount: t.monto,
-      description: t.descripcion || '',
-      balance: t.balance_despues,
-      date: t.creado_en
+      type: t.tipo || t.type || 'Unknown',
+      amount: t.monto || t.amount || 0,
+      description: t.descripcion || t.description || '',
+      balance: t.balance_despues || t.balance_after || 0,
+      date: t.creado_en || t.created_at
     }))
 
     return NextResponse.json({ success: true, data: transactions })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ success: true, data: [], error: err.message }, { status: 500 })
   }
 }

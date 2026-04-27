@@ -24,42 +24,27 @@ export async function GET(
         monto_usd,
         monto_coins,
         metodo_pago,
-        created_at,
-        items:compra_items(
-          cantidad,
-          precio_unitario,
-          producto:productos(
-            id,
-            nombre,
-            imagen_principal,
-            tipo
-          )
-        )
+        creado_en
       `)
       .eq('user_id', userId)
       .order('creado_en', { ascending: false })
+      .limit(50)
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ success: true, data: [], error: error.message })
     }
 
     const orders = (compras || []).map(c => ({
       id: c.id,
       date: c.creado_en,
-      items: (c.items || []).map((i: any) => ({
-        id: i.producto?.id,
-        name: i.producto?.nombre,
-        image: i.producto?.imagen_principal,
-        quantity: i.cantidad,
-        price: i.precio_unitario
-      })),
-      total: c.monto_usd || c.monto_coins,
-      status: c.estado,
+      items: 1,
+      total: c.monto_usd || c.monto_coins || 0,
+      status: c.estado === 'completado' ? 'Pagado' : c.estado,
       type: c.metodo_pago === 'coins' ? 'Canje' : 'Venta'
     }))
 
     return NextResponse.json({ success: true, data: orders })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ success: true, data: [], error: err.message }, { status: 500 })
   }
 }

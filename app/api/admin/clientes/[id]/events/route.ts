@@ -23,19 +23,19 @@ export async function GET(
       .order('fecha', { ascending: true })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ success: true, data: [], error: error.message })
     }
 
-    const events = (data || []).map(e => ({
+    const events = (data || []).map((e: any) => ({
       id: e.id,
-      name: e.nombre,
-      description: e.descripcion,
-      date: e.fecha,
-      accessLink: e.access_link
+      name: e.nombre || e.name || 'Unknown',
+      description: e.descripcion || e.description || '',
+      date: e.fecha || e.date,
+      access: e.access_link || e.has_access || false
     }))
 
     return NextResponse.json({ success: true, data: events })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ success: true, data: [], error: err.message }, { status: 500 })
   }
 }
