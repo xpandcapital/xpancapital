@@ -24,7 +24,17 @@ export async function GET(
         monto_usd,
         monto_coins,
         metodo_pago,
-        creado_en
+        creado_en,
+        items:compra_items(
+          cantidad,
+          precio_unitario,
+          producto:productos(
+            id,
+            nombre,
+            imagen_principal,
+            tipo
+          )
+        )
       `)
       .eq('user_id', userId)
       .order('creado_en', { ascending: false })
@@ -34,14 +44,25 @@ export async function GET(
       return NextResponse.json({ success: true, data: [], error: error.message })
     }
 
-    const orders = (compras || []).map(c => ({
-      id: c.id,
-      date: c.creado_en,
-      items: 1,
-      total: c.monto_usd || c.monto_coins || 0,
-      status: c.estado === 'completado' ? 'Pagado' : c.estado,
-      type: 'Venta' as const
-    }))
+    const orders = (compras || []).map(c => {
+      const itemsList = c.items || [];
+      const totalItems = itemsList.length || 1;
+      const products = itemsList.map((i: any) => ({
+        name: i.producto?.nombre || 'Producto',
+        quantity: i.cantidad,
+        price: i.precio_unitario
+      }));
+
+      return {
+        id: c.id,
+        date: c.creado_en,
+        items: totalItems,
+        total: c.monto_usd || c.monto_coins || 0,
+        status: c.estado === 'completado' ? 'Pagado' : c.estado,
+        type: 'Venta' as const,
+        products
+      };
+    })
 
     return NextResponse.json({ success: true, data: orders })
   } catch (err: any) {
