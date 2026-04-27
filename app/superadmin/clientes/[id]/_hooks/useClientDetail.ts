@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Client, DbProfile } from '../../_types';
 import { mapDbToClient } from '../../_utils/mapDbToClient';
 import { useToast } from '@/components/ui/Toast';
@@ -28,6 +28,10 @@ export function useClientDetail(clientId: string) {
             setLoading(false);
         }
     }, [clientId, showToast]);
+
+    useEffect(() => {
+        fetchClient();
+    }, [fetchClient]);
 
     const updateClient = useCallback(async (fields: Partial<Client>, silent = true) => {
         if (!guard('clientes', 'editar')) return;
