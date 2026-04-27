@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, Clock, Star, Trophy, ChevronRight, Lock, CheckCircle2, Search, ArrowLeft, BookOpen, Loader2, MonitorPlay, FileText, ListChecks } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCursos } from "@/lib/hooks/useCursos";
@@ -42,7 +42,7 @@ const TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> =
     quiz: { icon: ListChecks, color: 'text-amber-400', label: 'Quiz' },
 };
 
-export default function AcademyPage() {
+function AcademyContent() {
     const { user } = useAuth();
     const { cursos, loading } = useCursos();
     const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
@@ -522,5 +522,17 @@ export default function AcademyPage() {
                 )}
             </AnimatePresence>
         </div>
+);
+}
+
+export default function AcademyPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
+            </div>
+        }>
+            <AcademyContent />
+        </Suspense>
     );
 }
