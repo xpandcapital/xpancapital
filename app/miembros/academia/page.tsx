@@ -230,13 +230,14 @@ function AcademyContent() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                 {allAcademyCourses.map((course, i) => (
                                     course.isPurchased ? (
-                                        <Link key={`purchased-${course.id}`} href={`/miembros/academia?curso=${course.cursoId}`}>
-                                            <motion.div
-                                                initial={{ opacity: 0, scale: 0.95 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ delay: i * 0.1 }}
-                                                className="group cursor-pointer bg-zinc-950 border border-blis-red/20 rounded-[2rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col h-full shadow-xl"
-                                            >
+                                        <motion.div
+                                            key={`purchased-${course.id}`}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: i * 0.1 }}
+                                            onClick={() => handleSelectCourse(course)}
+                                            className="group cursor-pointer bg-zinc-950 border border-blis-red/20 rounded-[2rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col h-full shadow-xl"
+                                        >
                                                 <div className="relative w-full pb-[100%] overflow-hidden bg-black">
                                                     {course.imagen_principal ? (
                                                         <div className="absolute inset-0">
@@ -273,7 +274,6 @@ function AcademyContent() {
                                                     </div>
                                                 </div>
                                             </motion.div>
-                                        </Link>
                                     ) : (
                                         <motion.div
                                             key={course.id}
