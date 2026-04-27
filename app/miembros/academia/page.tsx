@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, Clock, Star, Trophy, ChevronRight, Lock, CheckCircle2, Search, ArrowLeft, BookOpen, Loader2, MonitorPlay, FileText, ListChecks } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCursos } from "@/lib/hooks/useCursos";
@@ -50,6 +51,8 @@ export default function AcademyPage() {
     const [completedLessons, setCompletedLessons] = useState<string[]>([]);
     const [fullCurso, setFullCurso] = useState<CursoData | null>(null);
     const [loadingCurso, setLoadingCurso] = useState(false);
+    const [purchasedCourses, setPurchasedCourses] = useState<any[]>([]);
+    const [loadingPurchased, setLoadingPurchased] = useState(false);
 
     const fetchCursoCompleto = useCallback(async (slug: string) => {
         setLoadingCurso(true);
@@ -86,6 +89,37 @@ export default function AcademyPage() {
             }
         }
     }, [fullCurso]);
+
+    useEffect(() => {
+        const fetchPurchasedCourses = async () => {
+            if (!user?.id) return;
+            setLoadingPurchased(true);
+            try {
+                const res = await fetch(`/api/compras?user_id=${user.id}`);
+                const data = await res.json();
+                if (data.success) {
+                    const purchased = (data.data || [])
+                        .filter((c: any) => c.estado === 'completado')
+                        .flatMap((c: any) => (c.items || [])
+                            .filter((item: any) => item.product_type === 'servicio' || item.producto?.tipo === 'servicio')
+                            .map((item: any) => ({
+                                id: item.producto?.id || c.id,
+                                cursoId: item.producto?.curso_id || item.producto?.id || '',
+                                nombre: item.producto?.nombre || 'Curso',
+                                slug: item.producto?.slug || '',
+                                imagen_principal: item.producto?.imagen_principal || '',
+                                progreso: { progreso: 0 },
+                                isPurchased: true
+                            })));
+                    setPurchasedCourses(purchased);
+                }
+            } catch {
+            } finally {
+                setLoadingPurchased(false);
+            }
+        };
+        fetchPurchasedCourses();
+    }, [user?.id]);
 
     const handleLessonComplete = useCallback((lessonId: string) => {
         if (!completedLessons.includes(lessonId)) {
@@ -148,6 +182,10 @@ export default function AcademyPage() {
         progreso: curso.progreso || { progreso: 0 }
     }));
 
+    const enrolledIds = new Set(coursesWithProgress.map(c => c.id));
+    const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.id));
+    const allAcademyCourses = [...coursesWithProgress, ...newPurchasedCourses];
+
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
             <AnimatePresence mode="wait">
@@ -174,7 +212,7 @@ export default function AcademyPage() {
                             </div>
                         </div>
 
-                        {coursesWithProgress.length === 0 ? (
+                        {allAcademyCourses.length === 0 ? (
                             <div className="bg-black/40 border border-white/5 rounded-[2rem] p-12 text-center">
                                 <BookOpen className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                                 <h2 className="text-xl font-bold text-white mb-2">No tienes cursos inscritos</h2>
@@ -185,57 +223,104 @@ export default function AcademyPage() {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {coursesWithProgress.map((course, i) => (
-                                    <motion.div
-                                        key={course.id}
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: i * 0.1 }}
-                                        onClick={() => handleSelectCourse(course)}
-                                        className="group cursor-pointer bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col h-full shadow-xl"
-                                    >
-                                        <div className="relative w-full pb-[100%] overflow-hidden bg-black">
-                                            {course.imagen_principal ? (
-                                                <div className="absolute inset-0">
-                                                    <Image
-                                                        src={course.imagen_principal}
-                                                        alt={course.nombre}
-                                                        fill
-                                                        className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-700"
-                                                    />
+                                {allAcademyCourses.map((course, i) => (
+                                    course.isPurchased ? (
+                                        <Link key={`purchased-${course.id}`} href={`/miembros/academia?curso=${course.cursoId}`}>
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ delay: i * 0.1 }}
+                                                className="group cursor-pointer bg-zinc-950 border border-blis-red/20 rounded-[2rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col h-full shadow-xl"
+                                            >
+                                                <div className="relative w-full pb-[100%] overflow-hidden bg-black">
+                                                    {course.imagen_principal ? (
+                                                        <div className="absolute inset-0">
+                                                            <Image
+                                                                src={course.imagen_principal}
+                                                                alt={course.nombre}
+                                                                fill
+                                                                className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-700"
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <BookOpen className="w-16 h-16 text-gray-700" />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+                                                    <div className="absolute top-4 left-4">
+                                                        <span className="bg-emerald-500/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">Nuevo</span>
+                                                    </div>
+                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(190,11,60,0.6)]">
+                                                            <Play className="w-6 h-6 text-white fill-white ml-1" />
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            ) : (
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <BookOpen className="w-16 h-16 text-gray-700" />
+                                                <div className="p-6 flex-1 flex flex-col">
+                                                    <p className="text-blis-red font-black uppercase tracking-widest text-[9px] mb-2">Curso</p>
+                                                    <h3 className="text-white font-black uppercase tracking-tight text-lg mb-4 leading-tight group-hover:text-blis-red transition-colors line-clamp-2">
+                                                        {course.nombre}
+                                                    </h3>
+                                                    <div className="mt-auto flex items-center gap-2 text-[10px] text-emerald-500 font-bold uppercase tracking-widest">
+                                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                                        <span>Comprado - Iniciar</span>
+                                                    </div>
                                                 </div>
-                                            )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(190,11,60,0.6)]">
-                                                    <Play className="w-6 h-6 text-white fill-white ml-1" />
+                                            </motion.div>
+                                        </Link>
+                                    ) : (
+                                        <motion.div
+                                            key={course.id}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ delay: i * 0.1 }}
+                                            onClick={() => handleSelectCourse(course)}
+                                            className="group cursor-pointer bg-zinc-950 border border-white/5 rounded-[2rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col h-full shadow-xl"
+                                        >
+                                            <div className="relative w-full pb-[100%] overflow-hidden bg-black">
+                                                {course.imagen_principal ? (
+                                                    <div className="absolute inset-0">
+                                                        <Image
+                                                            src={course.imagen_principal}
+                                                            alt={course.nombre}
+                                                            fill
+                                                            className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-700"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <BookOpen className="w-16 h-16 text-gray-700" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(190,11,60,0.6)]">
+                                                        <Play className="w-6 h-6 text-white fill-white ml-1" />
+                                                    </div>
+                                                </div>
+                                                <div className="absolute bottom-4 left-6 right-6">
+                                                    <div className="flex justify-between items-center text-[10px] font-black text-white uppercase tracking-widest mb-2">
+                                                        <span>Progreso</span>
+                                                        <span>{course.progreso?.progreso || 0}%</span>
+                                                    </div>
+                                                    <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                                                        <div className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]" style={{ width: `${course.progreso?.progreso || 0}%` }} />
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="absolute bottom-4 left-6 right-6">
-                                                <div className="flex justify-between items-center text-[10px] font-black text-white uppercase tracking-widest mb-2">
-                                                    <span>Progreso</span>
-                                                    <span>{course.progreso?.progreso || 0}%</span>
-                                                </div>
-                                                <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]" style={{ width: `${course.progreso?.progreso || 0}%` }} />
+                                            <div className="p-6 flex-1 flex flex-col">
+                                                <p className="text-blis-red font-black uppercase tracking-widest text-[9px] mb-2">Curso</p>
+                                                <h3 className="text-white font-black uppercase tracking-tight text-lg mb-4 leading-tight group-hover:text-blis-red transition-colors line-clamp-2">
+                                                    {course.nombre}
+                                                </h3>
+                                                <div className="mt-auto flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                                                    <Trophy className="w-3.5 h-3.5" />
+                                                    <span>Blis Expert Team</span>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div className="p-6 flex-1 flex flex-col">
-                                            <p className="text-blis-red font-black uppercase tracking-widest text-[9px] mb-2">Curso</p>
-                                            <h3 className="text-white font-black uppercase tracking-tight text-lg mb-4 leading-tight group-hover:text-blis-red transition-colors line-clamp-2">
-                                                {course.nombre}
-                                            </h3>
-                                            <div className="mt-auto flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                                                <Trophy className="w-3.5 h-3.5" />
-                                                <span>Blis Expert Team</span>
-                                            </div>
-                                        </div>
-                                    </motion.div>
+                                        </motion.div>
+                                    )
                                 ))}
                             </div>
                         )}

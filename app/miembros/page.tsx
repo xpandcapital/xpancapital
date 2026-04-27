@@ -49,14 +49,16 @@ export default function UserDashboard() {
         { title: "Nivel de Inversor", value: stats.nivelInversor, icon: Zap, color: "text-blis-red", bg: "bg-blis-red/10" },
     ] : staticStats;
 
-    const myCourses = userCursos.slice(0, 3).map(curso => ({
+    const enrolledCourses = userCursos.map(curso => ({
         id: curso.id,
+        cursoId: curso.id,
         title: curso.nombre,
         progress: curso.progreso?.progreso || 0,
         image: curso.imagen_principal || '',
-        lastAccessed: curso.progreso?.actualizado_en 
+        lastAccessed: curso.progreso?.actualizado_en
             ? new Date(curso.progreso.actualizado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
-            : 'N/A'
+            : 'N/A',
+        isEnrolled: true
     }));
 
     const purchasedCourses = compras
@@ -67,8 +69,14 @@ export default function UserDashboard() {
             title: item.producto?.nombre || 'Curso',
             progress: 0,
             image: item.producto?.imagen_principal || '',
-            lastAccessed: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+            lastAccessed: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }),
+            isEnrolled: false
         })));
+
+    const enrolledIds = new Set(enrolledCourses.map(c => c.id));
+    const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.id));
+
+    const allCourses = [...enrolledCourses, ...newPurchasedCourses].slice(0, 6);
 
     const recentDownloads = compras
         .filter(c => c.estado === 'completado')
@@ -122,8 +130,8 @@ export default function UserDashboard() {
                         Bienvenido, <span className="text-blis-red">{user.name || 'Usuario'}</span>
                     </h1>
                     <p className="text-gray-400 font-medium text-xs sm:text-sm max-w-xl">
-                        {myCourses.length > 0 
-                            ? `Tienes ${myCourses.filter(c => c.progress < 100).length} cursos pendientes por terminar.`
+                        {allCourses.length > 0
+                            ? `Tienes ${allCourses.filter(c => c.progress < 100).length} cursos pendientes por terminar.`
                             : 'Explora nuestros cursos y productos disponibles.'}
                     </p>
                 </motion.div>
@@ -219,55 +227,11 @@ export default function UserDashboard() {
                     </div>
 
                     {/* Continuar Aprendiendo + Cursos Comprados */}
-                    {(myCourses.length > 0 || purchasedCourses.length > 0) ? (
+                    {allCourses.length > 0 ? (
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                            {myCourses.map((course, i) => (
-                                <div key={`enrolled-${course.id || i}`} className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
-                                    <div className="aspect-square relative overflow-hidden bg-zinc-900">
-                                        {course.image ? (
-                                            <Image
-                                                src={course.image}
-                                                alt={course.title}
-                                                fill
-                                                className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <BookOpen className="w-16 h-16 text-gray-700" />
-                                            </div>
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
-                                                <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                                            </div>
-                                        </div>
-                                        <div className="absolute bottom-4 left-4 right-4">
-                                            <div className="flex justify-between items-center text-[8px] font-black text-white uppercase tracking-widest mb-1.5">
-                                                <span>Progreso</span>
-                                                <span>{course.progress}%</span>
-                                            </div>
-                                            <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${course.progress}%` }}
-                                                    className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 flex-1 flex flex-col justify-between">
-                                        <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{course.title}</h4>
-                                        <div className="flex items-center gap-2 text-[8px] text-gray-500 font-bold uppercase tracking-widest">
-                                            <Clock className="w-2.5 h-2.5" />
-                                            <span>{course.lastAccessed}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                            {purchasedCourses.map((course, i) => (
-                                <Link key={`purchased-${course.id || i}`} href={`/miembros/academia?curso=${course.cursoId}`}>
-                                    <div className="group cursor-pointer bg-black/40 border border-blis-red/20 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                            {allCourses.map((course, i) => (
+                                course.isEnrolled ? (
+                                    <div key={`enrolled-${course.id || i}`} className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
                                         <div className="aspect-square relative overflow-hidden bg-zinc-900">
                                             {course.image ? (
                                                 <Image
@@ -282,23 +246,68 @@ export default function UserDashboard() {
                                                 </div>
                                             )}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                                            <div className="absolute top-4 left-4">
-                                                <span className="bg-blis-red/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full">Nuevo</span>
-                                            </div>
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
                                                     <Play className="w-5 h-5 text-white fill-white ml-0.5" />
                                                 </div>
                                             </div>
+                                            <div className="absolute bottom-4 left-4 right-4">
+                                                <div className="flex justify-between items-center text-[8px] font-black text-white uppercase tracking-widest mb-1.5">
+                                                    <span>Progreso</span>
+                                                    <span>{course.progress}%</span>
+                                                </div>
+                                                <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${course.progress}%` }}
+                                                        className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                         <div className="p-4 flex-1 flex flex-col justify-between">
                                             <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{course.title}</h4>
-                                            <div className="flex items-center gap-2 text-[8px] text-emerald-500 font-bold uppercase tracking-widest">
-                                                <span>✓ Comprado</span>
+                                            <div className="flex items-center gap-2 text-[8px] text-gray-500 font-bold uppercase tracking-widest">
+                                                <Clock className="w-2.5 h-2.5" />
+                                                <span>{course.lastAccessed}</span>
                                             </div>
                                         </div>
                                     </div>
-                                </Link>
+                                ) : (
+                                    <Link key={`purchased-${course.id || i}`} href={`/miembros/academia?curso=${course.cursoId}`}>
+                                        <div className="group cursor-pointer bg-black/40 border border-blis-red/20 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                                            <div className="aspect-square relative overflow-hidden bg-zinc-900">
+                                                {course.image ? (
+                                                    <Image
+                                                        src={course.image}
+                                                        alt={course.title}
+                                                        fill
+                                                        className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <BookOpen className="w-16 h-16 text-gray-700" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+                                                <div className="absolute top-4 left-4">
+                                                    <span className="bg-blis-red/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full">Nuevo</span>
+                                                </div>
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
+                                                        <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="p-4 flex-1 flex flex-col justify-between">
+                                                <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{course.title}</h4>
+                                                <div className="flex items-center gap-2 text-[8px] text-emerald-500 font-bold uppercase tracking-widest">
+                                                    <span>✓ Comprado</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                )
                             ))}
                         </div>
                     ) : (
