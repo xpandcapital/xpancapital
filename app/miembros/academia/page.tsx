@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Play, Clock, Star, Trophy, ChevronRight, Lock, CheckCircle2, Search, ArrowLeft, BookOpen, Loader2, MonitorPlay, FileText, ListChecks } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCursos } from "@/lib/hooks/useCursos";
@@ -193,7 +193,7 @@ function AcademyContent() {
 
     const enrolledIds = new Set(coursesWithProgress.map(c => c.id));
     const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.id));
-    const allAcademyCourses = useMemo(() => [...coursesWithProgress, ...newPurchasedCourses], [coursesWithProgress, newPurchasedCourses]);
+    const allAcademyCourses = [...coursesWithProgress, ...newPurchasedCourses];
 
     useEffect(() => {
         if (initialCursoParam && allAcademyCourses.length > 0 && !selectedSlug) {
@@ -208,7 +208,7 @@ function AcademyContent() {
                 fetchCursoCompleto(slugToUse, !!course.slug);
             }
         }
-    }, [initialCursoParam, allAcademyCourses, selectedSlug, searchParams]);
+    }, [initialCursoParam, allAcademyCourses, selectedSlug]);
 
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
