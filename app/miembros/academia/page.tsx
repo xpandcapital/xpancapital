@@ -191,6 +191,19 @@ function AcademyContent() {
     const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.id));
     const allAcademyCourses = [...coursesWithProgress, ...newPurchasedCourses];
 
+    useEffect(() => {
+        const courseId = sessionStorage.getItem('openCourseId');
+        if (courseId) {
+            sessionStorage.removeItem('openCourseId');
+            setSelectedSlug(courseId);
+            setActiveLesson(null);
+            setActiveModule(null);
+            setOpenModules(new Set());
+            setCompletedLessons([]);
+            fetchCursoCompleto(courseId, true);
+        }
+    }, []);
+
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
             <AnimatePresence mode="wait">

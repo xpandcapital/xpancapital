@@ -23,9 +23,11 @@ import { useUserStats } from "@/lib/hooks/useUserStats";
 import { useCursos, useUserCursos } from "@/lib/hooks/useCursos";
 import { useCompras } from "@/lib/hooks/useCompras";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function UserDashboard() {
     const { user } = useAuth();
+    const router = useRouter();
     const { stats, loading: statsLoading, fetchUserStats } = useUserStats();
     const { cursos, loading: cursosLoading } = useCursos();
     const { userCursos, loading: userCursosLoading, refetch: refetchUserCursos } = useUserCursos(user?.id || null);
@@ -274,39 +276,44 @@ export default function UserDashboard() {
                                         </div>
                                     </div>
                                 ) : (
-                                    <Link key={`purchased-${course.id || i}`} href={`/miembros/academia?curso=${course.cursoId}`}>
-                                        <div className="group cursor-pointer bg-black/40 border border-blis-red/20 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
-                                            <div className="aspect-square relative overflow-hidden bg-zinc-900">
-                                                {course.image ? (
-                                                    <Image
-                                                        src={course.image}
-                                                        alt={course.title}
-                                                        fill
-                                                        className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center">
-                                                        <BookOpen className="w-16 h-16 text-gray-700" />
-                                                    </div>
-                                                )}
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                                                <div className="absolute top-4 left-4">
-                                                    <span className="bg-blis-red/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full">Nuevo</span>
+                                    <div
+                                        key={`purchased-${course.id || i}`}
+                                        onClick={() => {
+                                            sessionStorage.setItem('openCourseId', course.cursoId || course.id);
+                                            router.push('/miembros/academia');
+                                        }}
+                                        className="group cursor-pointer bg-black/40 border border-blis-red/20 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col"
+                                    >
+                                        <div className="aspect-square relative overflow-hidden bg-zinc-900">
+                                            {course.image ? (
+                                                <Image
+                                                    src={course.image}
+                                                    alt={course.title}
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <BookOpen className="w-16 h-16 text-gray-700" />
                                                 </div>
-                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
-                                                        <Play className="w-5 h-5 text-white fill-white ml-0.5" />
-                                                    </div>
-                                                </div>
+                                            )}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+                                            <div className="absolute top-4 left-4">
+                                                <span className="bg-blis-red/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full">Nuevo</span>
                                             </div>
-                                            <div className="p-4 flex-1 flex flex-col justify-between">
-                                                <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{course.title}</h4>
-                                                <div className="flex items-center gap-2 text-[8px] text-emerald-500 font-bold uppercase tracking-widest">
-                                                    <span>✓ Comprado</span>
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
+                                                    <Play className="w-5 h-5 text-white fill-white ml-0.5" />
                                                 </div>
                                             </div>
                                         </div>
-                                    </Link>
+                                        <div className="p-4 flex-1 flex flex-col justify-between">
+                                            <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{course.title}</h4>
+                                            <div className="flex items-center gap-2 text-[8px] text-emerald-500 font-bold uppercase tracking-widest">
+                                                <span>✓ Comprado</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 )
                             ))}
                         </div>
