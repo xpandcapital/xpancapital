@@ -63,6 +63,7 @@ export default function UserDashboard() {
         .filter(c => c.estado === 'completado')
         .flatMap(c => (c.items || []).filter(item => item.product_type === 'servicio' || item.producto?.tipo === 'servicio').map(item => ({
             id: item.producto?.id || c.id,
+            cursoId: item.producto?.curso_id || item.producto?.id || '',
             title: item.producto?.nombre || 'Curso',
             progress: 0,
             image: item.producto?.imagen_principal || '',
@@ -265,7 +266,7 @@ export default function UserDashboard() {
                                 </div>
                             ))}
                             {purchasedCourses.map((course, i) => (
-                                <Link key={`purchased-${course.id || i}`} href="/miembros/academia">
+                                <Link key={`purchased-${course.id || i}`} href={`/miembros/academia?curso=${course.cursoId}`}>
                                     <div className="group cursor-pointer bg-black/40 border border-blis-red/20 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
                                         <div className="aspect-square relative overflow-hidden bg-zinc-900">
                                             {course.image ? (
