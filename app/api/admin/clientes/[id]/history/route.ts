@@ -20,7 +20,7 @@ export async function GET(
       .from('audit_log')
       .select('*')
       .eq('user_id', userId)
-      .order('creado_en', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(50)
 
     if (error) {
@@ -32,7 +32,7 @@ export async function GET(
       action: h.accion || h.action || 'Unknown',
       details: h.detalle || h.detalles || h.details || '',
       user: h.modulo || h.module || '',
-      date: h.creado_en || h.created_at
+      date: h.created_at
     }))
 
     return NextResponse.json({ success: true, data: history })
