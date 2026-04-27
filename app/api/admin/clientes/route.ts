@@ -13,13 +13,51 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const { searchParams } = new URL(request.url)
-    
+
+    const id = searchParams.get('id')
     const page = parseInt(searchParams.get('page') || '1')
     const perPage = parseInt(searchParams.get('per_page') || '20')
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') || ''
     const tier = searchParams.get('tier') || ''
-    
+
+    if (id) {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,empresa_id,email,nombre,apellido,avatar_url,telefono,rol,blis_coins,total_compras,total_gastado_usd,total_referidos,creado_en,
+          pais,region,ciudad,
+          tipo_cuenta,empresa_nombre,empresa_ruc,empresa_rep_legal,
+          tipo_documento,numero_documento,fecha_nacimiento,
+          estado_civil,profesion,educacion,
+          verificado,verificado_en,
+          nivel_id,
+          coins_totales_ganados,coins_totales_gastados,coins_expiran,
+          ha_comprado,
+          recibir_newsletter,recibir_push,idioma,tema,courier_preferido,codigo_referido,referido_por,
+          notas_internas,es_caso_dificil,
+          cumpleanos_auto_regalo,recordatorio_inactividad,
+          cuenta_congelada,cuenta_fusionada_con,
+          ultimo_login
+        `)
+        .eq('id', id)
+        .single()
+
+      if (error || !profile) {
+        return NextResponse.json({ error: 'Cliente no encontrado' }, { status: 404 })
+      }
+
+      const { data: addresses } = await supabase
+        .from('direcciones')
+        .select('*')
+        .eq('user_id', profile.id)
+
+      return NextResponse.json({
+        success: true,
+        data: { ...profile, addresses: addresses || [] }
+      })
+    }
+
     let query = supabase
       .from('profiles')
       .select(`
