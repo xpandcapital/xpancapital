@@ -154,7 +154,7 @@ export default function UserDashboard() {
 
             {/* Mis Compras Section */}
             {recentDownloads.length > 0 && (
-                <div className="space-y-6">
+                <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-black text-white uppercase tracking-widest flex items-center gap-3">
                             Mis Compras
@@ -162,35 +162,32 @@ export default function UserDashboard() {
                         </h2>
                         <a href="/miembros/productos" className="text-xs text-blis-red font-black uppercase tracking-widest hover:text-white transition-colors">Ver Todo</a>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible md:grid md:grid-cols-2 lg:grid-cols-4">
                         {recentDownloads.map((item, i) => (
-                            <div key={item.id || i} className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
-                                <div className="aspect-square relative overflow-hidden bg-zinc-900">
+                            <div key={item.id || i} className="group cursor-pointer shrink-0 w-48 md:w-auto bg-black/40 border border-white/5 rounded-2xl overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                                <div className="flex items-center gap-3 p-3 bg-zinc-900/50">
                                     {item.image ? (
-                                        <Image
-                                            src={item.image}
-                                            alt={item.name}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
-                                        />
+                                        <div className="w-12 h-12 rounded-xl overflow-hidden relative flex-shrink-0">
+                                            <Image
+                                                src={item.image}
+                                                alt={item.name}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        </div>
                                     ) : (
-                                        <div className="w-full h-full flex items-center justify-center">
-                                            <Package className="w-16 h-16 text-gray-700" />
+                                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
+                                            <Package className="w-6 h-6 text-gray-600" />
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                                    <div className="absolute top-4 left-4">
-                                        <span className="bg-blis-red/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
-                                            {item.type === 'servicio' ? 'Curso' : item.type === 'digital' ? 'Ebook' : item.type === 'fisico' ? 'Kit' : 'Mentoría'}
-                                        </span>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-black text-blis-red uppercase tracking-widest mb-1">{item.type === 'servicio' ? 'Curso' : item.type === 'digital' ? 'Ebook' : item.type === 'fisico' ? 'Kit' : 'Mentoría'}</p>
+                                        <h4 className="text-white font-black text-xs uppercase tracking-tight leading-tight line-clamp-2">{item.name}</h4>
                                     </div>
                                 </div>
-                                <div className="p-4 flex-1 flex flex-col justify-between">
-                                    <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{item.name}</h4>
-                                    <div className="flex items-center gap-2 text-[8px] text-gray-500 font-bold uppercase tracking-widest">
-                                        <Clock className="w-2.5 h-2.5" />
-                                        <span>{item.date}</span>
-                                    </div>
+                                <div className="px-3 py-2 flex items-center justify-between bg-zinc-900/30">
+                                    <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{item.date}</span>
+                                    <span className="text-[9px] text-emerald-500 font-black uppercase">✓ Adquirido</span>
                                 </div>
                             </div>
                         ))}
