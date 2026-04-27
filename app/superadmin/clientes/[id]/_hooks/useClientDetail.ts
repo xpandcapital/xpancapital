@@ -193,24 +193,35 @@ export function useClientDetail(clientId: string) {
         if (!silent) showToast('Cambios guardados', 'success');
     }, [client, guard, showToast]);
 
-    const adjustCoins = useCallback((amount: number, reason: string) => {
+    const adjustCoins = useCallback(async (amount: number, reason: string) => {
         if (!client || !reason) {
             showToast('Falta razón del ajuste', 'error');
             return;
         }
-        updateClient({
-            blisCoins: client.blisCoins + amount,
-            transactions: [{
-                id: `TX-${Date.now()}`,
-                date: new Date().toLocaleDateString(),
-                amount,
-                type: 'Ajuste' as const,
-                description: 'Ajuste de Saldo',
-                reason
-            }, ...client.transactions]
-        }, false);
-        showToast('Saldo actualizado', 'success');
-    }, [client, updateClient, showToast]);
+
+        try {
+            const res = await fetch(`/api/admin/clientes/${client.id}/adjust-coins`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount, reason })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setClient(prev => prev ? {
+                    ...prev,
+                    blisCoins: data.newBalance,
+                    transactions: [data.transaction, ...(prev.transactions || [])]
+                } : null);
+                fetchTransactions();
+                showToast('Saldo actualizado', 'success');
+            } else {
+                showToast(data.error || 'Error al ajustar', 'error');
+            }
+        } catch {
+            showToast('Error al ajustar saldo', 'error');
+        }
+    }, [client, fetchTransactions, showToast]);
 
     return {
         client,
