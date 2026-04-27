@@ -44,7 +44,7 @@ export default function ProductsPage() {
         if (product.tipoOriginal === 'servicio') {
             window.location.href = `/miembros/academia`;
         } else {
-            handleDownload(product);
+            window.location.href = `/miembros/productos/${product.id}`;
         }
     };
 
@@ -179,7 +179,7 @@ export default function ProductsPage() {
                                             <Loader2 className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <>
-                                                {product.tipoOriginal === 'servicio' ? 'Continuar Lección' : 'Descargar Archivos'}
+                                                {product.tipoOriginal === 'servicio' ? 'Continuar Lección' : 'Ver Producto'}
                                                 <ExternalLink className="w-4 h-4" />
                                             </>
                                         )}

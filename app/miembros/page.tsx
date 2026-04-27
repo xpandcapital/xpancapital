@@ -220,7 +220,7 @@ export default function UserDashboard() {
                                     </div>
                                 </Link>
                             ) : (
-                                <div key={item.id || i} className="group cursor-pointer shrink-0 w-48 md:w-auto bg-black/40 border border-white/5 rounded-2xl overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                                <Link key={item.id || i} href={`/miembros/productos/${item.id}`} className="group cursor-pointer shrink-0 w-48 md:w-auto bg-black/40 border border-white/5 rounded-2xl overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
                                     <div className="flex items-center gap-3 p-3 bg-zinc-900/50">
                                         {item.image ? (
                                             <div className="w-12 h-12 rounded-xl overflow-hidden relative flex-shrink-0">
@@ -243,13 +243,9 @@ export default function UserDashboard() {
                                     </div>
                                     <div className="px-3 py-2 flex items-center justify-between bg-zinc-900/30">
                                         <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{item.date}</span>
-                                        {item.isDownloadable ? (
-                                            <span className="text-[9px] text-blue-400 font-black uppercase">↓ Descargar</span>
-                                        ) : (
-                                            <span className="text-[9px] text-emerald-500 font-black uppercase">✓ Adquirido</span>
-                                        )}
+                                        <span className="text-[9px] text-blis-red font-black uppercase">→ Ver</span>
                                     </div>
-                                </div>
+                                </Link>
                             )
                         ))}
                     </div>
