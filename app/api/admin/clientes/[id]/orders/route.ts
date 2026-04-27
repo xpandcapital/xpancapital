@@ -40,7 +40,7 @@ export async function GET(
       items: 1,
       total: c.monto_usd || c.monto_coins || 0,
       status: c.estado === 'completado' ? 'Pagado' : c.estado,
-      type: c.metodo_pago === 'coins' ? 'Canje' : 'Venta'
+      type: 'Venta' as const
     }))
 
     return NextResponse.json({ success: true, data: orders })
