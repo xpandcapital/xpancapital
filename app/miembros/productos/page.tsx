@@ -51,7 +51,7 @@ export default function ProductsPage() {
     const purchasedProducts = compras
         .filter(c => c.estado === 'completado')
         .flatMap(c => (c.items || []).map(item => {
-            const tipo = item.product_type || item.producto?.tipo || 'digital';
+            const tipo = item.producto?.tipo || item.product_type || 'digital';
             return {
                 id: item.producto?.id || c.id,
                 title: item.producto?.nombre || 'Producto',

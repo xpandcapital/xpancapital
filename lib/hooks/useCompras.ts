@@ -20,10 +20,14 @@ export interface CompraWithItems extends Compra {
   items?: Array<{
     cantidad: number
     precio_unitario: number
+    product_type?: string
     producto: {
       id: string
       nombre: string
       imagen_principal?: string
+      tipo?: string
+      archivo_url?: string
+      categoria?: { nombre: string }
     }
   }>
 }

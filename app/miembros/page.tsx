@@ -82,13 +82,14 @@ export default function UserDashboard() {
         .filter(c => c.estado === 'completado')
         .slice(0, 4)
         .flatMap(c => (c.items || []).map(item => {
-            const isService = item.product_type === 'servicio' || item.producto?.tipo === 'servicio';
-            const isDigital = item.product_type === 'digital' || item.producto?.tipo === 'digital';
-            const hasDownload = item.producto?.archivo_url || item.producto?.tipo === 'digital';
+            const tipo = item.producto?.tipo || item.product_type || 'digital';
+            const isService = tipo === 'servicio';
+            const isDigital = tipo === 'digital';
+            const hasDownload = item.producto?.archivo_url || isDigital;
             return {
                 id: item.producto?.id || c.id,
                 name: item.producto?.nombre || 'Producto',
-                category: item.producto?.categoria?.nombre || (isService ? 'Curso' : isDigital ? 'Ebook' : item.product_type === 'fisico' ? 'Kit' : item.product_type === 'suscripcion' ? 'Mentoría' : 'Producto'),
+                category: item.producto?.categoria?.nombre || (isService ? 'Curso' : isDigital ? 'Ebook' : tipo === 'fisico' ? 'Kit' : tipo === 'suscripcion' ? 'Mentoría' : 'Producto'),
                 image: item.producto?.imagen_principal || '',
                 date: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }),
                 isCourse: isService,
