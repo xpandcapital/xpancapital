@@ -5,7 +5,6 @@ import { Play, Clock, Star, Trophy, ChevronRight, Lock, CheckCircle2, Search, Ar
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useCursos } from "@/lib/hooks/useCursos";
 
@@ -54,7 +53,6 @@ function AcademyContent() {
     const [loadingCurso, setLoadingCurso] = useState(false);
     const [purchasedCourses, setPurchasedCourses] = useState<any[]>([]);
     const [loadingPurchased, setLoadingPurchased] = useState(false);
-    const searchParams = useSearchParams();
 
     const fetchCursoCompleto = useCallback(async (slugOrId: string, useId: boolean = false) => {
         setLoadingCurso(true);
@@ -183,8 +181,6 @@ function AcademyContent() {
         );
     }
 
-    const initialCursoParam = searchParams.get('curso');
-
     const coursesWithProgress = cursos.map((curso: any) => ({
         ...curso,
         modulos: curso.modulos || [{ id: 'm1', title: 'Módulo 1', lessons: [] }],
@@ -194,21 +190,6 @@ function AcademyContent() {
     const enrolledIds = new Set(coursesWithProgress.map(c => c.id));
     const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.id));
     const allAcademyCourses = [...coursesWithProgress, ...newPurchasedCourses];
-
-    useEffect(() => {
-        if (initialCursoParam && allAcademyCourses.length > 0 && !selectedSlug) {
-            const course = allAcademyCourses.find(c => c.id === initialCursoParam || c.cursoId === initialCursoParam);
-            if (course) {
-                const slugToUse = course.slug || course.cursoId || course.id;
-                setSelectedSlug(slugToUse);
-                setActiveLesson(null);
-                setActiveModule(null);
-                setOpenModules(new Set());
-                setCompletedLessons([]);
-                fetchCursoCompleto(slugToUse, !!course.slug);
-            }
-        }
-    }, [initialCursoParam, allAcademyCourses, selectedSlug]);
 
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
