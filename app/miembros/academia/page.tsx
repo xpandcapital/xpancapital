@@ -54,6 +54,7 @@ export default function AcademyPage() {
     const [loadingCurso, setLoadingCurso] = useState(false);
     const [purchasedCourses, setPurchasedCourses] = useState<any[]>([]);
     const [loadingPurchased, setLoadingPurchased] = useState(false);
+    const searchParams = useSearchParams();
 
     const fetchCursoCompleto = useCallback(async (slugOrId: string, useId: boolean = false) => {
         setLoadingCurso(true);
@@ -182,7 +183,6 @@ export default function AcademyPage() {
         );
     }
 
-    const searchParams = useSearchParams();
     const initialCursoParam = searchParams.get('curso');
 
     const coursesWithProgress = cursos.map((curso: any) => ({
@@ -208,7 +208,7 @@ export default function AcademyPage() {
                 fetchCursoCompleto(slugToUse, !!course.slug);
             }
         }
-    }, [initialCursoParam, allAcademyCourses, selectedSlug]);
+    }, [initialCursoParam, allAcademyCourses, selectedSlug, searchParams]);
 
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
