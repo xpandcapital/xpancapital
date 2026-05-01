@@ -19,7 +19,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <ProjectProvider value={{ projects, activeProjectId, activeProjectName, activeProjectLogo, slug }}>
-      <div className="min-h-full bg-black pt-24">
+      <div className="flex-1 flex flex-col bg-black pt-24">
         <style>{`
           .color-invert::-webkit-calendar-picker-indicator { filter: invert(1); }
           .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -36,7 +36,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           activeProjectId={activeProjectId || ''}
         />
 
-        <main className="p-4 md:p-6 pb-32">
+        <main className="flex-1 p-4 md:p-6 pb-32">
           {children}
         </main>
       </div>
