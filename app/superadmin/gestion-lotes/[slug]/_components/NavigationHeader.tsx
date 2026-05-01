@@ -50,7 +50,7 @@ export function NavigationHeader({
 
   return (
     <header className="sticky top-20 z-40 mx-4 mt-4">
-      <div className="max-w-7xl mx-auto bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl shadow-sm">
+      <div className="max-w-7xl mx-auto bg-black/95 backdrop-blur-xl border border-white/[0.06] rounded-2xl">
         <div className="px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
           {/* Left: Logo + Title + Project Selector */}
           <div className="flex items-center gap-3 w-full md:w-auto">
@@ -95,7 +95,7 @@ export function NavigationHeader({
           </div>
 
           {/* Desktop Tabs */}
-          <nav className="hidden md:flex bg-white/[0.03] p-1 rounded-xl border border-white/[0.06] gap-1">
+          <nav className="hidden md:flex bg-black/60 p-1 rounded-xl border border-white/[0.06] gap-1">
             {tabs.map(tab => (
               <Link
                 key={tab.path}
