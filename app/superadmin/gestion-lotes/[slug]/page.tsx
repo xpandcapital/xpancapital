@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useLotes } from './_hooks/useLotes';
 import { useProject } from './_hooks/ProjectContext';
 import { DashboardStats } from './_components/DashboardStats';
