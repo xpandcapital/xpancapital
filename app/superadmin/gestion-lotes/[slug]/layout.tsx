@@ -19,7 +19,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <ProjectProvider value={{ projects, activeProjectId, activeProjectName, activeProjectLogo, slug }}>
-      <div className="h-full bg-black overflow-auto pt-4">
+      <div className="h-full bg-black overflow-auto pt-6">
         <style>{`
           .color-invert::-webkit-calendar-picker-indicator { filter: invert(1); }
           .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
