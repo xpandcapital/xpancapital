@@ -536,14 +536,14 @@ if (!geminiKey || geminiKey.trim() === '') {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="w-12 h-12 border-2 border-white/10 border-t-white rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505]">
+    <div className="min-h-screen bg-black">
       <div className="max-w-[1800px] mx-auto px-6 py-10">
         {/* Header */}
         <div className="mb-8">

@@ -11,7 +11,7 @@ export default function AdminLayout({
     return (
         <div className="flex bg-black min-h-[calc(100dvh-80px)]">
             <SuperadminSidebar />
-            <div className="flex-1 pt-24 pl-[56px] md:pl-0">
+            <div className="flex-1 pt-24 pl-16">
                 <div className="max-w-[1600px] mx-auto w-full pb-20">
                     <SuperadminGuard>
                         {children}
