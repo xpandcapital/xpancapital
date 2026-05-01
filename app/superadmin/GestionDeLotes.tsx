@@ -534,6 +534,7 @@ const App = ({ initialProjectId, initialProjectName, initialProjectLogo, project
     
     setActiveProjectId(newId);
     setView('upload');
+    // NOTA: No navegamos con onProjectChange aquí porque es un proyecto nuevo sin slug en BD
   };
 
   const renameProject = () => {
@@ -557,7 +558,11 @@ const App = ({ initialProjectId, initialProjectName, initialProjectLogo, project
         localStorage.removeItem(`inmo_proj_config_meta_${activeProjectId}`);
         localStorage.removeItem(`inmo_proj_config_img_${activeProjectId}`);
       } catch(e) {}
-      setActiveProjectId(newList[0].id);
+      if (onProjectChange) {
+        onProjectChange(newList[0].id);
+      } else {
+        setActiveProjectId(newList[0].id);
+      }
       setView('dashboard');
     });
   };
