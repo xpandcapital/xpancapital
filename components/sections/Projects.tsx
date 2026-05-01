@@ -54,9 +54,15 @@ export function Projects() {
   const [direction, setDirection] = useState(0);
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     async function fetchProjects() {
       try {
-        // Fetch projects without lots relation (simpler query)
+        setLoading(true);
+        
+        const controller = new AbortController();
+        timeoutId = setTimeout(() => controller.abort(), 10000);
+
         const { data, error } = await supabase
           .from("projects")
           .select("id, name, status, website, location, description, cover_image, gallery_images, logo_url, primary_color, secondary_color, start_date, end_date, order_index, is_active")
@@ -64,9 +70,12 @@ export function Projects() {
           .order("order_index", { ascending: true, nullsFirst: false })
           .order("created_at", { ascending: false });
 
+        clearTimeout(timeoutId);
+
         if (error) {
           logger.error("Supabase query error:", error);
-          throw error;
+          setProjects([]);
+          return;
         }
 
         if (!data || data.length === 0) {
@@ -106,18 +115,20 @@ export function Projects() {
         });
 
         logger.debug("Loaded projects:", formattedProjects.length);
-        formattedProjects.forEach(p => {
-          logger.debug(`Project ${p.name}: cover_image=${p.cover_image}, gallery=${p.carouselImages?.slice(0, 2)}`);
-        });
         setProjects(formattedProjects);
       } catch (err) {
         logger.error("Error loading projects:", err);
+        setProjects([]);
       } finally {
         setLoading(false);
       }
     }
 
     fetchProjects();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   useEffect(() => {
