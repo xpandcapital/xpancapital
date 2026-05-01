@@ -120,57 +120,41 @@ const App = ({ initialProjectId, initialProjectName, initialProjectLogo, project
 
   const preventDefault = (e: React.DragEvent | React.ChangeEvent<HTMLInputElement>) => { e.preventDefault(); e.stopPropagation(); };
 
-  // Initialize states with defaults, load from localStorage after mount
-  const [projectList, setProjectList] = useState([{ id: 'proj_default', name: 'Mi Primer Proyecto' }]);
-  const [activeProjectId, setActiveProjectId] = useState('proj_default');
+  // ── Proyectos: usa props del hook como fuente de verdad, localStorage como fallback ──
+  const [projectList, setProjectList] = useState(() => {
+    if (projects.length > 0) return projects;
+    try {
+      const saved = localStorage.getItem('inmo_project_list');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
 
-  // Cargar proyectos desde Supabase (fuente de verdad)
+  const [activeProjectId, setActiveProjectId] = useState(() => {
+    if (initialProjectId) return initialProjectId;
+    try {
+      return localStorage.getItem('inmo_active_project') || '';
+    } catch { return ''; }
+  });
+
+  // Sincronizar projectList cuando los props del hook cambian
   useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        const { data: projects } = await supabase
-          .from('projects')
-          .select('id, name, status')
-          .order('name');
+    if (projects.length > 0) {
+      setProjectList(projects);
+      localStorage.setItem('inmo_project_list', JSON.stringify(projects));
+    }
+  }, [projects]);
 
-        if (projects && projects.length > 0) {
-          const list = projects.map(p => ({ id: p.id, name: p.name, status: p.status }));
-          setProjectList(list);
-          localStorage.setItem('inmo_project_list', JSON.stringify(list));
+  // Sincronizar activeProjectId cuando cambia el prop del hook
+  useEffect(() => {
+    if (initialProjectId) {
+      setActiveProjectId(initialProjectId);
+      localStorage.setItem('inmo_active_project', initialProjectId);
+    }
+  }, [initialProjectId]);
 
-          // Determinar proyecto activo - PRIORIZAR props del hook (URL)
-          const validIds = list.map((p: any) => p.id);
-          if (initialProjectId && validIds.includes(initialProjectId)) {
-            setActiveProjectId(initialProjectId);
-            localStorage.setItem('inmo_active_project', initialProjectId);
-          } else {
-            const savedActive = localStorage.getItem('inmo_active_project');
-            if (savedActive && validIds.includes(savedActive)) {
-              setActiveProjectId(savedActive);
-            } else {
-              setActiveProjectId(list[0].id);
-              localStorage.setItem('inmo_active_project', list[0].id);
-            }
-          }
-        } else {
-          // Fallback a localStorage si Supabase falla
-          const saved = localStorage.getItem('inmo_project_list');
-          if (saved) setProjectList(JSON.parse(saved));
-          const savedActive = localStorage.getItem('inmo_active_project');
-          if (savedActive) setActiveProjectId(savedActive);
-        }
-      } catch (e) {
-        console.warn("Error loading projects from Supabase, using localStorage", e);
-        try {
-          const saved = localStorage.getItem('inmo_project_list');
-          if (saved) setProjectList(JSON.parse(saved));
-          const savedActive = localStorage.getItem('inmo_active_project');
-          if (savedActive) setActiveProjectId(savedActive);
-        } catch {}
-      }
-      setIsMounted(true);
-    };
-    loadProjects();
+  // Marcar como montado cuando los datos del hook ya estén disponibles
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
   // Cargar lotes directamente desde Supabase
@@ -3027,9 +3011,9 @@ return (
                 }}
                 className="bg-black border border-zinc-700 text-zinc-300 text-[10px] font-bold uppercase tracking-wider outline-none cursor-pointer hover:border-zinc-500 hover:text-white transition-all px-2 py-1.5 rounded-lg mt-1 max-w-[200px]"
               >
-                {(projects.length > 0 ? projects : projectList).map(p => <option key={p.id} value={p.id} className="bg-black text-white">{p.name}</option>)}
+                {projectList.map(p => <option key={p.id} value={p.id} className="bg-black text-white">{p.name}</option>)}
               </select>
-              <span className="text-[8px] text-zinc-600 mt-0.5">{(projects.length > 0 ? projects : projectList).length} proyecto{(projects.length > 0 ? projects : projectList).length !== 1 ? 's' : ''}</span>
+              <span className="text-[8px] text-zinc-600 mt-0.5">{projectList.length} proyecto{projectList.length !== 1 ? 's' : ''}</span>
             </div>
           </div>
           
