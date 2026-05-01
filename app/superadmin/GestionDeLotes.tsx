@@ -86,10 +86,11 @@ interface GestionDeLotesAppProps {
   initialProjectId?: string;
   initialProjectName?: string | null;
   initialProjectLogo?: string | null;
+  projects?: { id: string; name: string }[];
   onProjectChange?: (projectId: string) => void;
 }
 
-const App = ({ initialProjectId, initialProjectName, initialProjectLogo, onProjectChange }: GestionDeLotesAppProps) => {
+const App = ({ initialProjectId, initialProjectName, initialProjectLogo, projects = [], onProjectChange }: GestionDeLotesAppProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [view, setView] = useState('dashboard');
   const [showDesistidos, setShowDesistidos] = useState(false);
@@ -3024,10 +3025,11 @@ return (
                   }
                   setView('dashboard');
                 }}
-                className="bg-transparent text-zinc-500 text-[9px] font-bold uppercase tracking-wider outline-none cursor-pointer hover:text-white transition-colors max-w-[180px] truncate mt-0.5"
+                className="bg-black border border-zinc-700 text-zinc-300 text-[10px] font-bold uppercase tracking-wider outline-none cursor-pointer hover:border-zinc-500 hover:text-white transition-all px-2 py-1.5 rounded-lg mt-1 max-w-[200px]"
               >
-                {projectList.map(p => <option key={p.id} value={p.id} className="text-zinc-900">{p.name}</option>)}
+                {(projects.length > 0 ? projects : projectList).map(p => <option key={p.id} value={p.id} className="bg-black text-white">{p.name}</option>)}
               </select>
+              <span className="text-[8px] text-zinc-600 mt-0.5">{(projects.length > 0 ? projects : projectList).length} proyecto{(projects.length > 0 ? projects : projectList).length !== 1 ? 's' : ''}</span>
             </div>
           </div>
           

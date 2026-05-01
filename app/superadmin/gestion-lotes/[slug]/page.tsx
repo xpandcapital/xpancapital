@@ -49,6 +49,7 @@ function GestionLotesContent() {
       initialProjectId={activeProjectId}
       initialProjectName={activeProjectName}
       initialProjectLogo={activeProjectLogo}
+      projects={projects}
       onProjectChange={handleProjectChange}
     />
   )
