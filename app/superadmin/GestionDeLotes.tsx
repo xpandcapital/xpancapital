@@ -86,9 +86,10 @@ interface GestionDeLotesAppProps {
   initialProjectId?: string;
   initialProjectName?: string | null;
   initialProjectLogo?: string | null;
+  onProjectChange?: (projectId: string) => void;
 }
 
-const App = ({ initialProjectId, initialProjectName, initialProjectLogo }: GestionDeLotesAppProps) => {
+const App = ({ initialProjectId, initialProjectName, initialProjectLogo, onProjectChange }: GestionDeLotesAppProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [view, setView] = useState('dashboard');
   const [showDesistidos, setShowDesistidos] = useState(false);
@@ -3016,7 +3017,11 @@ return (
               <select
                 value={activeProjectId}
                 onChange={(e) => {
-                  setActiveProjectId(e.target.value);
+                  if (onProjectChange) {
+                    onProjectChange(e.target.value);
+                  } else {
+                    setActiveProjectId(e.target.value);
+                  }
                   setView('dashboard');
                 }}
                 className="bg-transparent text-zinc-500 text-[9px] font-bold uppercase tracking-wider outline-none cursor-pointer hover:text-white transition-colors max-w-[180px] truncate mt-0.5"
