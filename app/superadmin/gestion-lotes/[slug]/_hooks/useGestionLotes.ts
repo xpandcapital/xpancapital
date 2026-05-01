@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Project } from '../_types';
 
@@ -12,10 +12,20 @@ export function useGestionLotes(slug: string) {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [projectNotFound, setProjectNotFound] = useState(false);
 
+  const activeProjectName = useMemo(() => {
+    const project = projects.find(p => p.id === activeProjectId);
+    return project?.name || null;
+  }, [projects, activeProjectId]);
+
+  const activeProjectLogo = useMemo(() => {
+    const project = projects.find(p => p.id === activeProjectId);
+    return (project as any)?.logo_url || null;
+  }, [projects, activeProjectId]);
+
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        const res = await fetch('/api/admin/projects?fields=id,name,status')
+        const res = await fetch('/api/admin/projects?fields=id,name,status,logo_url')
         const json = await res.json()
         if (!json.success) throw new Error(json.error || 'Error loading projects')
 
@@ -70,6 +80,8 @@ export function useGestionLotes(slug: string) {
     isLoading,
     projects,
     activeProjectId,
+    activeProjectName,
+    activeProjectLogo,
     projectNotFound,
     handleProjectChange,
   }

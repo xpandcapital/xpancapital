@@ -15,6 +15,8 @@ function GestionLotesContent() {
     isLoading,
     projects,
     activeProjectId,
+    activeProjectName,
+    activeProjectLogo,
     projectNotFound,
     handleProjectChange,
   } = useGestionLotes(slug)
@@ -42,7 +44,13 @@ function GestionLotesContent() {
     )
   }
 
-  return <GestionDeLotesApp />
+  return (
+    <GestionDeLotesApp
+      initialProjectId={activeProjectId}
+      initialProjectName={activeProjectName}
+      initialProjectLogo={activeProjectLogo}
+    />
+  )
 }
 
 export default function GestionLotesPage() {

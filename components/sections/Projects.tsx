@@ -54,31 +54,32 @@ export function Projects() {
   const [direction, setDirection] = useState(0);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let isCancelled = false;
 
     async function fetchProjects() {
       try {
         setLoading(true);
-        
+
         const controller = new AbortController();
-        timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
 
         const { data, error } = await supabase
           .from("projects")
-          .select("id, name, status, website, location, description, cover_image, gallery_images, logo_url, primary_color, secondary_color, start_date, end_date, order_index, is_active")
+          .select("id, name, status, website, location, description, cover_image, gallery_images, logo_url, primary_color, secondary_color, start_date, end_date, order_index")
           .order("order_index", { ascending: true, nullsFirst: false })
-          .order("created_at", { ascending: false });
+          .limit(50);
 
         clearTimeout(timeoutId);
 
+        if (isCancelled) return;
+
         if (error) {
-          logger.error("Supabase query error:", error);
+          console.error("Supabase query error:", error);
           setProjects([]);
           return;
         }
 
         if (!data || data.length === 0) {
-          logger.debug("No active projects found");
           setProjects([]);
           return;
         }
@@ -94,7 +95,7 @@ export function Projects() {
           }
 
           const galleryImages = project.gallery_images || [];
-          
+
           return {
             ...project,
             totalLots: 0,
@@ -103,30 +104,31 @@ export function Projects() {
             details: duration || "Proyecto",
             color: `from-[${color}]/80 to-[${color}]/40`,
             glowColor: `${color}35`,
-            carouselImages: galleryImages.length > 0 
-              ? galleryImages 
-              : project.cover_image 
-                ? [project.cover_image] 
+            carouselImages: galleryImages.length > 0
+              ? galleryImages
+              : project.cover_image
+                ? [project.cover_image]
                 : ["/images/arkadia-1.webp"],
             fullDescription: project.description || "Proyecto inmobiliario de alta calidad.",
             webLink: project.website || "#",
           };
         });
 
-        logger.debug("Loaded projects:", formattedProjects.length);
         setProjects(formattedProjects);
       } catch (err) {
-        logger.error("Error loading projects:", err);
-        setProjects([]);
+        if (!isCancelled) {
+          console.error("Error loading projects:", err);
+          setProjects([]);
+        }
       } finally {
-        setLoading(false);
+        if (!isCancelled) setLoading(false);
       }
     }
 
     fetchProjects();
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      isCancelled = true;
     };
   }, []);
 

@@ -82,10 +82,16 @@ const fallbackCopyTextToClipboard = (text: string): void => {
   document.body.removeChild(textArea);
 };
 
-const App = () => {
+interface GestionDeLotesAppProps {
+  initialProjectId?: string;
+  initialProjectName?: string | null;
+  initialProjectLogo?: string | null;
+}
+
+const App = ({ initialProjectId, initialProjectName, initialProjectLogo }: GestionDeLotesAppProps) => {
   const [isMounted, setIsMounted] = useState(false);
   const [view, setView] = useState('dashboard');
-  const [showDesistidos, setShowDesistidos] = useState(false); 
+  const [showDesistidos, setShowDesistidos] = useState(false);
   const [dashboardViewMode, setDashboardViewMode] = useState<'table' | 'grid'>('table');
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState({ current: 0, total: 0, status: '' });
@@ -93,7 +99,8 @@ const App = () => {
   const logEndRef = useRef(null);
 
   const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
-  const [messageTone, setMessageTone] = useState('Administraci├│n'); 
+  const [messageTone, setMessageTone] = useState('Administración');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
   const [isProcessingSingleLot, setIsProcessingSingleLot] = useState(false);
   
   const [isDragUpload, setIsDragUpload] = useState(false);
@@ -129,14 +136,19 @@ const App = () => {
           setProjectList(list);
           localStorage.setItem('inmo_project_list', JSON.stringify(list));
 
-          // Determinar proyecto activo
-          const savedActive = localStorage.getItem('inmo_active_project');
+          // Determinar proyecto activo - PRIORIZAR props del hook (URL)
           const validIds = list.map((p: any) => p.id);
-          if (savedActive && validIds.includes(savedActive)) {
-            setActiveProjectId(savedActive);
+          if (initialProjectId && validIds.includes(initialProjectId)) {
+            setActiveProjectId(initialProjectId);
+            localStorage.setItem('inmo_active_project', initialProjectId);
           } else {
-            setActiveProjectId(list[0].id);
-            localStorage.setItem('inmo_active_project', list[0].id);
+            const savedActive = localStorage.getItem('inmo_active_project');
+            if (savedActive && validIds.includes(savedActive)) {
+              setActiveProjectId(savedActive);
+            } else {
+              setActiveProjectId(list[0].id);
+              localStorage.setItem('inmo_active_project', list[0].id);
+            }
           }
         } else {
           // Fallback a localStorage si Supabase falla
@@ -548,10 +560,10 @@ const App = () => {
 
   const deleteCurrentProject = () => {
     if (projectList.length === 1) {
-      showAlert('Acci├│n Bloqueada', 'No puedes eliminar tu ├║nico proyecto. Crea uno nuevo primero si deseas borrar este.');
+      showAlert('Acción Bloqueada', 'No puedes eliminar tu único proyecto. Crea uno nuevo primero si deseas borrar este.');
       return;
     }
-    showConfirm('Eliminar Proyecto', `┬┐Est├ís seguro de eliminar el proyecto "${activeProjectName}" y TODOS sus lotes asociados?`, () => {
+    showConfirm('Eliminar Proyecto', `¿Estás seguro de eliminar el proyecto "${activeProjectName}" y TODOS sus lotes asociados?`, () => {
       const newList = projectList.filter(p => p.id !== activeProjectId);
       setProjectList(newList);
       try {
@@ -643,7 +655,7 @@ const App = () => {
         setLots(migratedLots);
         setView('dashboard');
       } catch (error) {
-        showAlert('Error', 'No se pudo leer el archivo. Aseg├║rate de que sea un respaldo v├ílido.');
+        showAlert('Error', 'No se pudo leer el archivo. Asegúrate de que sea un respaldo válido.');
       }
     };
     reader.readAsText(file);
@@ -652,10 +664,10 @@ const App = () => {
 
   const exportToCSV = () => {
     const headers = [
-      'Estado', 'Lote', 'Propietarios', 'Identificaciones', 'Contacto Alterno', '├ürea m2', 'Asesor', 'Precio Total', 'Total Entrada/Reserva (Pagado)', 
-      'Cuotas Pagadas (Hist├│rico)', 'Descuentos/Canjes', 'Deuda Iniciales', 'Deuda Cuotas Atrasadas', 
-      'Intereses Mora', 'TOTAL A COBRAR AHORA', 
-      'Cuotas Futuras (Total $)', 'Saldo a Escritura', 'Estado Comisi├│n', 'Monto Comisi├│n', 'Monto Devuelto', 'Participa Sorteo', 'Observaciones'
+      'Estado', 'Lote', 'Propietarios', 'Identificaciones', 'Contacto Alterno', 'Área m2', 'Asesor', 'Precio Total', 'Total Entrada/Reserva (Pagado)',
+      'Cuotas Pagadas (Histórico)', 'Descuentos/Canjes', 'Deuda Iniciales', 'Deuda Cuotas Atrasadas',
+      'Intereses Mora', 'TOTAL A COBRAR AHORA',
+      'Cuotas Futuras (Total $)', 'Saldo a Escritura', 'Estado Comisión', 'Monto Comisión', 'Monto Devuelto', 'Participa Sorteo', 'Observaciones'
     ];
 
     const rows = sortedLots.map(lot => {
@@ -1389,7 +1401,7 @@ const handleMassiveUpload = async (e) => {
   const executeRaffle = () => {
     const participants = lots.filter(l => l.entersRaffle && l.status === 'Activo');
     if (participants.length === 0) {
-      return showAlert('Acci├│n no permitida', 'No hay clientes marcados para participar en el sorteo. Activa la casilla "Participa en Sorteo" en los expedientes que apliquen.');
+      return showAlert('Acción no permitida', 'No hay clientes marcados para participar en el sorteo. Activa la casilla "Participa en Sorteo" en los expedientes que apliquen.');
     }
 
     const array = new Uint32Array(1);
@@ -1863,61 +1875,61 @@ const handleMassiveUpload = async (e) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
-        <div className="bg-[#0a0a0a] p-6 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-zinc-500/5 blur-2xl rounded-full" />
-          <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.3em] mb-2 relative z-10">Lotes Activos</p>
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div className="bg-[#0f0f0f] p-5 rounded-xl border border-gray-800 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-zinc-500/5 blur-2xl rounded-full" />
+          <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-2 relative z-10">Lotes Activos</p>
           <div className="flex items-baseline gap-2 mt-1 relative z-10">
-<p className="text-3xl font-black text-white tracking-tighter">{dashboardStats.activeLotsCount}</p>
-{desistidoLots.length > 0 && <p className="text-[10px] text-rose-500 font-black">({desistidoLots.length} desistidos)</p>}
+            <p className="text-2xl font-black text-white tracking-tight">{dashboardStats.activeLotsCount}</p>
+            {desistidoLots.length > 0 && <p className="text-[10px] text-rose-500 font-bold">({desistidoLots.length} desistidos)</p>}
           </div>
         </div>
-        <div className="bg-[#0a0a0a] p-6 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 blur-2xl rounded-full" />
-          <p className="text-[9px] font-black text-emerald-500/60 uppercase tracking-[0.3em] mb-2 relative z-10">Recaudado (Empresa)</p>
-          <p className="text-2xl font-black text-white tracking-tighter mt-1 relative z-10">{formatCurrency(dashboardStats.totalCollectedSoFar)}</p>
+        <div className="bg-[#0f0f0f] p-5 rounded-xl border border-gray-800 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/5 blur-2xl rounded-full" />
+          <p className="text-[9px] font-bold text-emerald-500/60 uppercase tracking-widest mb-2 relative z-10">Recaudado</p>
+          <p className="text-xl font-black text-white tracking-tight mt-1 relative z-10">{formatCurrency(dashboardStats.totalCollectedSoFar)}</p>
         </div>
-        <div className="bg-[#0a0a0a] p-6 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 blur-2xl rounded-full" />
-          <p className="text-[9px] font-black text-rose-500/60 uppercase tracking-[0.3em] mb-2 relative z-10">A Cobrar Promesa</p>
-          <p className="text-2xl font-black text-white tracking-tighter mt-1 relative z-10">{formatCurrency(dashboardStats.totalToCollectNow)}</p>
+        <div className="bg-[#0f0f0f] p-5 rounded-xl border border-gray-800 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-rose-500/5 blur-2xl rounded-full" />
+          <p className="text-[9px] font-bold text-rose-500/60 uppercase tracking-widest mb-2 relative z-10">A Cobrar</p>
+          <p className="text-xl font-black text-white tracking-tight mt-1 relative z-10">{formatCurrency(dashboardStats.totalToCollectNow)}</p>
         </div>
-        <div className="bg-[#0a0a0a] p-6 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 blur-2xl rounded-full" />
-          <p className="text-[9px] font-black text-cyan-500/60 uppercase tracking-[0.3em] mb-2 relative z-10">Cuotas Futuras</p>
-          <p className="text-2xl font-black text-white tracking-tighter mt-1 relative z-10">{formatCurrency(dashboardStats.totalFutureQuotas)}</p>
+        <div className="bg-[#0f0f0f] p-5 rounded-xl border border-gray-800 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-cyan-500/5 blur-2xl rounded-full" />
+          <p className="text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest mb-2 relative z-10">Cuotas Futuras</p>
+          <p className="text-xl font-black text-white tracking-tight mt-1 relative z-10">{formatCurrency(dashboardStats.totalFutureQuotas)}</p>
         </div>
-        <div className="bg-[#0a0a0a] p-6 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 blur-2xl rounded-full" />
-          <p className="text-[9px] font-black text-amber-500/60 uppercase tracking-[0.3em] mb-2 relative z-10">Saldo a Escrituras</p>
-          <p className="text-2xl font-black text-white tracking-tighter mt-1 relative z-10">{formatCurrency(dashboardStats.totalSaldoEscritura)}</p>
+        <div className="bg-[#0f0f0f] p-5 rounded-xl border border-gray-800 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 blur-2xl rounded-full" />
+          <p className="text-[9px] font-bold text-amber-500/60 uppercase tracking-widest mb-2 relative z-10">Saldo Escrituras</p>
+          <p className="text-xl font-black text-white tracking-tight mt-1 relative z-10">{formatCurrency(dashboardStats.totalSaldoEscritura)}</p>
         </div>
       </div>
 
-      <div className="bg-[#0a0a0a] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
-        <div className="p-6 border-b border-white/5 bg-black/40">
-          <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Resumen Detallado por Lote</h3>
+      <div className="bg-[#0f0f0f] rounded-xl border border-gray-800 overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-800 bg-black/40">
+          <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Resumen Detallado por Lote</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
-              <tr className="bg-black/60 text-zinc-500 text-[9px] uppercase tracking-[0.2em] border-b border-white/5">
-                <th className="p-5 font-black">Lote / Cliente</th>
-                <th className="p-5 font-black text-center">Docs</th>
-                <th className="p-5 font-black">Pagado Hist├│rico</th>
-                <th className="p-5 font-black text-rose-500">A Cobrar (Promesa)</th>
-                <th className="p-5 font-black text-cyan-500">Cuotas Futuras</th>
-                <th className="p-5 font-black text-amber-500">Saldo Escritura</th>
-                <th className="p-5 font-black text-right">Acci├│n</th>
+              <tr className="bg-black/60 text-zinc-500 text-[9px] uppercase tracking-wider border-b border-gray-800">
+                <th className="p-4 font-bold">Lote / Cliente</th>
+                <th className="p-4 font-bold text-center">Docs</th>
+                <th className="p-4 font-bold">Pagado Histórico</th>
+                <th className="p-4 font-bold text-rose-500">A Cobrar</th>
+                <th className="p-4 font-bold text-cyan-500">Cuotas Futuras</th>
+                <th className="p-4 font-bold text-amber-500">Saldo Escritura</th>
+                <th className="p-4 font-bold text-right">Acción</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-gray-800">
               {sortedLots.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="p-20 text-center bg-[#0a0a0a]">
-                    <FolderOpen className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
-                    <p className="text-zinc-400 font-black text-lg uppercase tracking-wider">A├║n no hay lotes procesados</p>
-                    <p className="text-[10px] text-zinc-600 mt-3 font-bold uppercase tracking-[0.2em]">Haz clic en el bot├│n "Configurar" para comenzar</p>
+                  <td colSpan="7" className="p-12 text-center">
+                    <FolderOpen className="w-12 h-12 text-zinc-700 mx-auto mb-3" />
+                    <p className="text-zinc-400 font-bold text-sm uppercase tracking-wider">Aún no hay lotes procesados</p>
+                    <p className="text-[10px] text-zinc-600 mt-2 font-bold uppercase tracking-wider">Haz clic en "Configurar" para comenzar</p>
                   </td>
                 </tr>
               )}
@@ -2967,57 +2979,81 @@ const handleMassiveUpload = async (e) => {
   };
 
 return (
-    <div className="min-h-[calc(100vh-80px)] font-sans text-zinc-100 relative bg-[#050505] overflow-hidden">
+    <div className="min-h-[calc(100vh-80px)] font-sans text-zinc-100 relative bg-[#0f0f0f] overflow-auto">
       {/* GLOBAL STYLES FOR FONTS & SCROLLBAR */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-        body {
-          font-family: 'Outfit', sans-serif;
-          background-color: #050505;
-          color: #f4f4f5;
-        }
         .color-invert::-webkit-calendar-picker-indicator {
           filter: invert(1);
         }
         .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-        .scrollbar-thin::-webkit-scrollbar-track { background: #050505; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: #0f0f0f; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
 
-      {/* MENÚ SUPERIOR MULTI-PROYECTO */}
-      <div className="bg-[#0a0a0a] rounded-2xl border border-white/5 shadow-2xl sticky top-20 z-40 mx-4 mt-4 mb-0">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-5">
-            <div className="p-4 bg-rose-500/20 rounded-2xl border border-rose-500/20">
-              <Calculator className="w-8 h-8 text-rose-500" />
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-xl font-black uppercase tracking-tighter italic text-white">Gesti├│n de Lotes <span className="text-rose-500">Pro</span></h1>
-              <div className="flex items-center mt-1.5">
-                <select
-                  value={activeProjectId}
-                  onChange={(e) => {
-                    setActiveProjectId(e.target.value);
-                    setView('dashboard');
-                  }}
-                  className="bg-transparent text-zinc-500 text-[9px] font-black uppercase tracking-[0.3em] outline-none cursor-pointer hover:text-white transition-colors max-w-[200px] truncate"
-                >
-                  {projectList.map(p => <option key={p.id} value={p.id} className="text-zinc-900">{p.name}</option>)}
-                </select>
+{/* MENÚ SUPERIOR UNIFICADO */}
+      <div className="bg-[#0f0f0f] rounded-xl border border-gray-800 shadow-xl sticky top-20 z-40 mx-4 mt-4 mb-0">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+          {/* Header izquierdo: Logo + Titulo + Proyecto */}
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            {/* Logo o Icono */}
+            {initialProjectLogo ? (
+              <img src={initialProjectLogo} alt="Logo" className="w-10 h-10 rounded-xl object-contain bg-white/10 p-1.5" />
+            ) : (
+              <div className="p-2.5 bg-rose-500/20 rounded-xl border border-rose-500/30">
+                <Calculator className="w-6 h-6 text-rose-500" />
               </div>
+            )}
+            
+            {/* Titulo y Proyecto */}
+            <div className="flex flex-col min-w-0 flex-1">
+              <h1 className="text-sm md:text-base font-black text-white truncate">
+                Gestión de Lotes <span className="text-rose-500">|</span>{" "}
+                <span className="text-zinc-400">{initialProjectName || activeProjectName}</span>
+              </h1>
+              <select
+                value={activeProjectId}
+                onChange={(e) => {
+                  setActiveProjectId(e.target.value);
+                  setView('dashboard');
+                }}
+                className="bg-transparent text-zinc-500 text-[9px] font-bold uppercase tracking-wider outline-none cursor-pointer hover:text-white transition-colors max-w-[180px] truncate mt-0.5"
+              >
+                {projectList.map(p => <option key={p.id} value={p.id} className="text-zinc-900">{p.name}</option>)}
+              </select>
             </div>
           </div>
           
-          <div className="flex bg-black p-1.5 rounded-2xl border border-white/5 overflow-x-auto hide-scrollbar">
-            <button onClick={() => setView('dashboard')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap ${view === 'dashboard' ? 'bg-rose-500 text-white shadow-lg' : 'text-zinc-600 hover:text-white'}`}>Dashboard</button>
-            <button onClick={() => setView('calendar')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap flex items-center gap-1 ${view === 'calendar' ? 'bg-rose-500 text-white shadow-lg' : 'text-zinc-600 hover:text-white'}`}><CalendarIcon className="w-3 h-3"/> Calendario</button>
-            <button onClick={() => setView('masterplan')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap flex items-center gap-1 ${view === 'masterplan' ? 'bg-rose-500 text-white shadow-lg' : 'text-zinc-600 hover:text-white'}`}><MapIcon className="w-3 h-3"/> Masterplan</button>
-            <button onClick={() => setView('raffle')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap flex items-center gap-1 ${view === 'raffle' ? 'bg-amber-500 text-black shadow-lg' : 'text-amber-500 hover:text-amber-400'}`}><Trophy className="w-3 h-3"/> Sorteos</button>
-            <button onClick={() => setView('upload')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap ${view === 'upload' ? 'bg-rose-500 text-white shadow-lg' : 'text-zinc-600 hover:text-white'}`}>Configuraci├│n</button>
+          {/* Menu de navegacion - Desktop */}
+          <div className="hidden md:flex bg-black p-1 rounded-xl border border-gray-800 gap-1">
+            <button onClick={() => setView('dashboard')} className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${view === 'dashboard' ? 'bg-rose-500 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}>Dashboard</button>
+            <button onClick={() => setView('calendar')} className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${view === 'calendar' ? 'bg-rose-500 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}><CalendarIcon className="w-3 h-3 inline mr-1"/>Calendario</button>
+            <button onClick={() => setView('masterplan')} className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${view === 'masterplan' ? 'bg-rose-500 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}><MapIcon className="w-3 h-3 inline mr-1"/>Masterplan</button>
+            <button onClick={() => setView('raffle')} className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${view === 'raffle' ? 'bg-amber-500 text-black' : 'text-amber-500 hover:text-amber-400 hover:bg-zinc-800'}`}><Trophy className="w-3 h-3 inline mr-1"/>Sorteos</button>
+            <button onClick={() => setView('upload')} className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${view === 'upload' ? 'bg-rose-500 text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}>Configuración</button>
           </div>
+          
+          {/* Menu hamburguesa - Mobile */}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 bg-zinc-800 rounded-xl border border-gray-700"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
+        
+        {/* Menu desplegable mobile */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-800 px-4 py-3 space-y-1">
+            <button onClick={() => { setView('dashboard'); setMobileMenuOpen(false); }} className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${view === 'dashboard' ? 'bg-rose-500 text-white' : 'text-zinc-400 hover:bg-zinc-800'}`}>Dashboard</button>
+            <button onClick={() => { setView('calendar'); setMobileMenuOpen(false); }} className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${view === 'calendar' ? 'bg-rose-500 text-white' : 'text-zinc-400 hover:bg-zinc-800'}`}>Calendario</button>
+            <button onClick={() => { setView('masterplan'); setMobileMenuOpen(false); }} className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${view === 'masterplan' ? 'bg-rose-500 text-white' : 'text-zinc-400 hover:bg-zinc-800'}`}>Masterplan</button>
+            <button onClick={() => { setView('raffle'); setMobileMenuOpen(false); }} className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${view === 'raffle' ? 'bg-amber-500 text-black' : 'text-amber-500 hover:bg-zinc-800'}`}>Sorteos</button>
+            <button onClick={() => { setView('upload'); setMobileMenuOpen(false); }} className={`w-full text-left px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${view === 'upload' ? 'bg-rose-500 text-white' : 'text-zinc-400 hover:bg-zinc-800'}`}>Configuración</button>
+          </div>
+        )}
       </div>
 
       {modalConfig.isOpen && (
@@ -3058,14 +3094,14 @@ return (
                 }} 
                 className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-lg ${modalConfig.type === 'confirm' ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/20' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/20'}`}
               >
-                {modalConfig.type === 'confirm' ? 'S├¡, continuar' : (modalConfig.type === 'prompt' ? 'Guardar' : 'Entendido')}
+                {modalConfig.type === 'confirm' ? 'Sí, continuar' : (modalConfig.type === 'prompt' ? 'Guardar' : 'Entendido')}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="p-4 md:p-6 pb-24">
+      <div className="p-4 md:p-6 pb-32">
         {view === 'upload' && renderUploadView()}
         {view === 'dashboard' && renderDashboardView()}
         {view === 'detail' && renderDetailView()}
