@@ -69,7 +69,7 @@ export default function LoteDetailPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden">
+    <div className="max-w-6xl mx-auto mt-4 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden">
       <LoteHeader lot={lot} projectSlug={slug} />
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">

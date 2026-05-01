@@ -4,14 +4,13 @@ import { formatMonthYear } from '../_utils/months';
 import { formatCurrency } from '../_utils/formatters';
 import { Lote } from '../_types';
 import Link from 'next/link';
-import { CheckCircle2 } from 'lucide-react';
+import { Eye, CheckCircle2 } from 'lucide-react';
 
 interface Props {
   lots: Lote[];
   signatureMonth: string;
   projectSlug: string;
   viewMode: 'table' | 'grid';
-  onDelete?: (id: string) => void;
 }
 
 export function DashboardTable({ lots, signatureMonth, projectSlug, viewMode }: Props) {
@@ -39,30 +38,29 @@ export function DashboardTable({ lots, signatureMonth, projectSlug, viewMode }: 
           const isAlDia = toPayNow === 0 && !isDesistido;
 
           return (
-            <Link
-              key={lot.id}
-              href={`/superadmin/gestion-lotes/${projectSlug}/lote/${lot.id}`}
-              className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5 hover:bg-white/[0.05] transition-all"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-black text-white uppercase tracking-wider">Lote {lot.loteNumber}</span>
-                <span className="bg-black/60 border border-white/[0.06] px-2 py-0.5 rounded-lg text-[9px] font-bold text-zinc-500">{lot.documents?.length || 0} docs</span>
-              </div>
-              <p className="text-sm font-bold text-zinc-300 truncate">{lot.owners?.map(o => o.name).filter(Boolean).join(' y ') || lot.clientName}</p>
-              <div className="mt-3 flex items-end justify-between">
+            <Link key={lot.id} href={`/superadmin/gestion-lotes/${projectSlug}/lote/${lot.id}`} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5 hover:bg-white/[0.05] transition-all group">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-1.5 bg-white/[0.03] rounded-lg border border-white/[0.06] group-hover:border-rose-500/30 transition-colors">
+                  <Eye className="w-3.5 h-3.5 text-zinc-500 group-hover:text-rose-400 transition-colors" />
+                </div>
                 <div>
-                  <p className="text-[9px] font-bold text-zinc-500 uppercase">Proximo pago</p>
+                  <span className="text-xs font-black text-white uppercase tracking-wider">Lote {lot.loteNumber}</span>
+                  <p className="text-[10px] text-zinc-500 truncate">{lot.owners?.map(o => o.name).filter(Boolean).join(' y ') || lot.clientName}</p>
+                </div>
+              </div>
+              <div className="flex items-end justify-between">
+                <div>
                   {isDesistido ? (
-                    <span className="text-zinc-600 text-sm font-bold">Desistido</span>
+                    <span className="text-zinc-600 text-xs font-bold">Desistido</span>
                   ) : isAlDia ? (
-                    <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg text-[10px] font-black inline-flex items-center gap-1">
+                    <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg text-[9px] font-black inline-flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Al dia
                     </span>
                   ) : (
-                    <span className="text-rose-500 text-sm font-black">{formatCurrency(toPayNow)}</span>
+                    <span className="text-rose-400 text-sm font-black">{formatCurrency(toPayNow)}</span>
                   )}
                 </div>
-                <span className="text-[8px] font-bold text-zinc-600 uppercase">{formatMonthYear(sigMonth)}</span>
+                <span className="text-[8px] font-bold text-zinc-600">{formatMonthYear(sigMonth)}</span>
               </div>
             </Link>
           );
@@ -77,13 +75,13 @@ export function DashboardTable({ lots, signatureMonth, projectSlug, viewMode }: 
         <table className="w-full text-left border-collapse whitespace-nowrap">
           <thead>
             <tr className="bg-white/[0.02] text-zinc-500 text-[9px] uppercase tracking-wider border-b border-white/[0.06]">
+              <th className="p-4 font-bold w-10"></th>
               <th className="p-4 font-bold">Lote / Cliente</th>
               <th className="p-4 font-bold text-center">Docs</th>
               <th className="p-4 font-bold">Pagado Historico</th>
               <th className="p-4 font-bold text-rose-400">A Cobrar</th>
               <th className="p-4 font-bold text-cyan-400">Cuotas Futuras</th>
               <th className="p-4 font-bold text-amber-400">Saldo Escritura</th>
-              <th className="p-4 font-bold text-right">Accion</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.04]">
@@ -101,11 +99,16 @@ export function DashboardTable({ lots, signatureMonth, projectSlug, viewMode }: 
               const saldoEscritura = Math.max(0, lot.totalPrice - totalInitialPaid - totalQuotasPaid - (lot.tradeInValue || 0) - toPayNow - futureQuotasTotal);
 
               return (
-                <tr key={lot.id} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={lot.id} className="hover:bg-white/[0.02] transition-colors group">
                   <td className="p-4">
-                    <Link href={`/superadmin/gestion-lotes/${projectSlug}/lote/${lot.id}`} className="group">
+                    <Link href={`/superadmin/gestion-lotes/${projectSlug}/lote/${lot.id}`} className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.06] group-hover:border-rose-500/30 group-hover:bg-rose-500/10 transition-all">
+                      <Eye className="w-3.5 h-3.5 text-zinc-500 group-hover:text-rose-400 transition-colors" />
+                    </Link>
+                  </td>
+                  <td className="p-4">
+                    <Link href={`/superadmin/gestion-lotes/${projectSlug}/lote/${lot.id}`} className="group/link">
                       <span className="text-[10px] font-black text-white uppercase tracking-wider">{lot.loteNumber}</span>
-                      <p className="text-xs text-zinc-400 mt-0.5 group-hover:text-zinc-300 transition-colors">
+                      <p className="text-xs text-zinc-400 mt-0.5 group-hover/link:text-zinc-300 transition-colors">
                         {lot.owners?.map(o => o.name).filter(Boolean).join(' y ') || lot.clientName}
                       </p>
                     </Link>
@@ -119,14 +122,6 @@ export function DashboardTable({ lots, signatureMonth, projectSlug, viewMode }: 
                   </td>
                   <td className="p-4 text-xs font-bold text-cyan-400">{formatCurrency(futureQuotasTotal)}</td>
                   <td className="p-4 text-xs font-bold text-amber-400">{formatCurrency(saldoEscritura)}</td>
-                  <td className="p-4 text-right">
-                    <Link
-                      href={`/superadmin/gestion-lotes/${projectSlug}/lote/${lot.id}`}
-                      className="text-[10px] font-bold uppercase tracking-wider text-rose-400 hover:text-rose-300 transition-colors"
-                    >
-                      Auditar
-                    </Link>
-                  </td>
                 </tr>
               );
             })}
