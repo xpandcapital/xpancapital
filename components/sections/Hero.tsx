@@ -68,8 +68,8 @@ export function Hero() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0, y: [-10, 10, -10] }}
                 transition={{
-                    opacity: { duration: 1 },
-                    x: { duration: 1 },
+                    opacity: { duration: 0.4 },
+                    x: { duration: 0.4 },
                     y: { repeat: Infinity, duration: 7, ease: "easeInOut" }
                 }}
                 className="absolute top-[10%] left-[2%] sm:left-[8%] xl:left-[15%] flex flex-col gap-2 glass-card p-3 sm:p-4 rounded-2xl w-40 sm:w-44 md:w-40 xl:w-52 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl opacity-80 sm:opacity-100"
@@ -96,9 +96,9 @@ export function Hero() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0, y: [-12, 12, -12] }}
                 transition={{
-                    opacity: { duration: 1, delay: 0.8 },
-                    x: { duration: 1, delay: 0.8 },
-                    y: { repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.8 }
+                    opacity: { duration: 0.4, delay: 0.15 },
+                    x: { duration: 0.4, delay: 0.15 },
+                    y: { repeat: Infinity, duration: 9, ease: "easeInOut", delay: 0.15 }
                 }}
                 className="absolute top-[10%] right-[2%] sm:right-[8%] xl:right-[15%] flex items-center gap-3 sm:gap-4 glass-card p-3 sm:p-4 rounded-2xl w-40 sm:w-52 md:w-48 lg:w-52 xl:w-56 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl opacity-80 sm:opacity-100"
             >
@@ -121,9 +121,9 @@ export function Hero() {
                 animate={{ opacity: 1, x: 0, y: [-15, 15, -15] }}
                 onDoubleClick={() => window.location.href = '/superadmin/trading'}
                 transition={{
-                    opacity: { duration: 1, delay: 0.3 },
-                    x: { duration: 1, delay: 0.3 },
-                    y: { repeat: Infinity, duration: 6, ease: "easeInOut", delay: 0.3 }
+                    opacity: { duration: 0.4, delay: 0.08 },
+                    x: { duration: 0.4, delay: 0.08 },
+                    y: { repeat: Infinity, duration: 6, ease: "easeInOut", delay: 0.08 }
                 }}
                 className="absolute bottom-[22%] left-[2%] sm:left-[5%] xl:left-[10%] flex flex-col gap-2.5 sm:gap-4 glass-card p-4 sm:p-5 rounded-2xl w-44 md:w-52 lg:w-60 xl:w-64 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-xl bg-black/60 sm:bg-[#0a0a0a] opacity-80 sm:opacity-100"
             >
@@ -146,9 +146,9 @@ export function Hero() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0, y: [-15, 15, -15] }}
                 transition={{
-                    opacity: { duration: 1, delay: 0.5 },
-                    x: { duration: 1, delay: 0.5 },
-                    y: { repeat: Infinity, duration: 8, ease: "easeInOut", delay: 0.5 }
+                    opacity: { duration: 0.4, delay: 0.12 },
+                    x: { duration: 0.4, delay: 0.12 },
+                    y: { repeat: Infinity, duration: 8, ease: "easeInOut", delay: 0.12 }
                 }}
                 className="absolute bottom-[18%] right-[1%] sm:right-[5%] xl:right-[10%] flex flex-col gap-1.5 sm:gap-2 glass-card p-4 sm:p-5 rounded-2xl w-40 sm:w-56 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.5)] bg-black/60 backdrop-blur-xl opacity-80 sm:opacity-100"
             >
@@ -182,7 +182,7 @@ export function Hero() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9, y: 30 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                     className="flex flex-col items-center w-full max-w-5xl pointer-events-auto"
                 >
                     <span className="text-blis-red font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase mb-3 md:mb-5 text-xs sm:text-[8px] md:text-[9px] xl:text-sm [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[11px] [@media(min-width:1024px)_and_(max-width:1366px)]:!px-[1.2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!py-[0.5rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[1.2rem] bg-black/50 px-3 py-1.5 sm:px-5 sm:py-2 rounded-full border border-blis-red/30 backdrop-blur-xl shadow-[0_0_20px_rgba(190,11,60,0.2)]">
