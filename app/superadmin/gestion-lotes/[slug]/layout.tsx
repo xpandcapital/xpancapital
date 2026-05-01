@@ -19,11 +19,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <ProjectProvider value={{ projects, activeProjectId, activeProjectName, activeProjectLogo, slug }}>
-      <div className="h-full bg-[#0a0a0a] overflow-auto">
+      <div className="h-full bg-black overflow-auto">
         <style>{`
           .color-invert::-webkit-calendar-picker-indicator { filter: invert(1); }
           .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-          .scrollbar-thin::-webkit-scrollbar-track { background: #0a0a0a; }
+          .scrollbar-thin::-webkit-scrollbar-track { background: #000; }
           .scrollbar-thin::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
           .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
         `}</style>

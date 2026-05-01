@@ -22,11 +22,33 @@ export function useLotes(activeProjectId: string) {
   // Load lots from Supabase when project changes
   useEffect(() => {
     if (!activeProjectId) return;
+    let cancelled = false;
     setIsSyncing(true);
-    loadLotsFromSupabase(activeProjectId).then(data => {
-      setLots(data);
-      setIsSyncing(false);
-    });
+    
+    // Timeout safety: if Supabase takes >15s, bail out
+    const timeout = setTimeout(() => {
+      if (!cancelled) {
+        console.error('[useLotes] Timeout loading lots for project:', activeProjectId);
+        setIsSyncing(false);
+      }
+    }, 15000);
+
+    loadLotsFromSupabase(activeProjectId)
+      .then(data => {
+        if (!cancelled) {
+          setLots(data);
+          setIsSyncing(false);
+        }
+      })
+      .catch(err => {
+        if (!cancelled) {
+          console.error('[useLotes] Error loading lots:', err);
+          setIsSyncing(false);
+        }
+      })
+      .finally(() => clearTimeout(timeout));
+
+    return () => { cancelled = true; clearTimeout(timeout); };
   }, [activeProjectId]);
 
   // Lazy sync to Supabase (debounced)
