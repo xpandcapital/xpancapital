@@ -2987,7 +2987,7 @@ return (
       `}</style>
 
       {/* MENÚ SUPERIOR MULTI-PROYECTO */}
-      <div className="bg-[#0a0a0a] rounded-2xl border border-white/5 shadow-2xl sticky top-0 z-40 mx-4 mt-4 mb-0">
+      <div className="bg-[#0a0a0a] rounded-2xl border border-white/5 shadow-2xl sticky top-20 z-40 mx-4 mt-4 mb-0">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-5">
             <div className="p-4 bg-rose-500/20 rounded-2xl border border-rose-500/20">
