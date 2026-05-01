@@ -8,6 +8,7 @@ import { loadLotsFromSupabase, syncLotToSupabase } from '../_utils/supabase-lots
 export function useLotes(activeProjectId: string) {
   const [lots, setLots] = useState<Lote[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -24,14 +25,16 @@ export function useLotes(activeProjectId: string) {
     if (!activeProjectId) return;
     let cancelled = false;
     setIsSyncing(true);
+    setLoadError(null);
     
-    // Timeout safety: if Supabase takes >15s, bail out
+    // Timeout safety: if Supabase takes >8s, bail out
     const timeout = setTimeout(() => {
       if (!cancelled) {
         console.error('[useLotes] Timeout loading lots for project:', activeProjectId);
+        setLoadError('La conexion con Supabase esta tardando demasiado. Verifica tu conexion o intenta recargar.');
         setIsSyncing(false);
       }
-    }, 15000);
+    }, 8000);
 
     loadLotsFromSupabase(activeProjectId)
       .then(data => {
@@ -43,6 +46,7 @@ export function useLotes(activeProjectId: string) {
       .catch(err => {
         if (!cancelled) {
           console.error('[useLotes] Error loading lots:', err);
+          setLoadError('Error al cargar los lotes. Verifica la consola para mas detalles.');
           setIsSyncing(false);
         }
       })
@@ -227,6 +231,7 @@ export function useLotes(activeProjectId: string) {
     lots,
     setLots,
     isSyncing,
+    loadError,
     selectedLotId,
     setSelectedLotId,
     activeLots,

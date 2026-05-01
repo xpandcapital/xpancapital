@@ -4,17 +4,25 @@ import { Lote } from '../_types';
 export async function loadLotsFromSupabase(projectId: string): Promise<Lote[]> {
   if (!projectId) return [];
 
-  const { data, error } = await supabase
-    .from('project_lots')
-    .select('*')
-    .eq('project_id', projectId);
+  try {
+    const { data, error } = await supabase
+      .from('project_lots')
+      .select('*')
+      .eq('project_id', projectId);
 
-  if (error || !data) {
-    console.error('[SupabaseLots] Error loading lots:', error);
-    return [];
-  }
+    if (error) {
+      console.error('[SupabaseLots] Error loading lots:', error.message, error.code);
+      return [];
+    }
 
-  return data.map((sl: any) => ({
+    if (!data || data.length === 0) {
+      console.log('[SupabaseLots] No lots found for project:', projectId);
+      return [];
+    }
+
+    console.log('[SupabaseLots] Loaded', data.length, 'lots for project:', projectId);
+
+    return data.map((sl: any) => ({
     id: sl.id,
     loteNumber: sl.lot_number || '',
     lotArea: sl.lot_area || 0,
@@ -44,6 +52,10 @@ export async function loadLotsFromSupabase(projectId: string): Promise<Lote[]> {
     refundAmount: Number(sl.refund_amount) || 0,
     generatedMessage: sl.generated_message || undefined,
   }));
+  } catch (err) {
+    console.error('[SupabaseLots] Unexpected error loading lots:', err);
+    return [];
+  }
 }
 
 export async function syncLotToSupabase(lot: Lote, projectId: string): Promise<void> {
