@@ -482,7 +482,7 @@ export default function TemplateEditorPage() {
   return (
     <div className="flex min-h-screen bg-black">
       {/* Sidebar */}
-      <div className="w-56 bg-zinc-950 border-r border-white/5 fixed h-screen overflow-y-auto">
+      <div className="w-56 bg-zinc-950 border-r border-white/5 fixed h-screen overflow-y-auto z-50">
         <div className="p-4 border-b border-white/5">
           <Link href="/superadmin/templates" className="flex items-center gap-2 text-gray-400 hover:text-white text-sm">
             <ArrowLeft className="w-4 h-4" />
@@ -515,24 +515,24 @@ export default function TemplateEditorPage() {
             const isActive = activeSection === key;
             
             return (
-              <div key={key} className={`group flex items-center gap-1 rounded-lg mb-0.5 ${isActive ? 'bg-blis-red/20' : 'hover:bg-white/5'}`}>
+              <div key={key} className="flex items-center gap-1 rounded-lg mb-0.5">
                 <button
                   onClick={() => setActiveSection(key)}
-                  className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                  className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm transition-colors min-w-0 ${
                     isActive ? 'text-white' : !isVisible ? 'text-gray-600 line-through' : 'text-gray-400'
                   }`}
                 >
                   {config.icon}
-                  <span className="flex-1 text-left truncate">{config.label}</span>
+                  <span className="truncate">{config.label}</span>
                 </button>
-                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity pr-1">
+                <div className="flex items-center gap-0.5 pr-1">
                   <button onClick={() => moveSectionUp(key)} disabled={index === 0} className="p-1 hover:bg-white/10 rounded disabled:opacity-30">
                     <ChevronUp className="w-3 h-3" />
                   </button>
                   <button onClick={() => moveSectionDown(key)} disabled={index === sectionOrder.length - 1} className="p-1 hover:bg-white/10 rounded disabled:opacity-30">
                     <ChevronDown className="w-3 h-3" />
                   </button>
-                  <button onClick={() => toggleSectionVisibility(key)} className={`p-1 hover:bg-white/10 rounded ${!isVisible ? 'text-red-400' : ''}`}>
+                  <button onClick={() => toggleSectionVisibility(key)} className={`p-1 hover:bg-white/10 rounded ${!isVisible ? 'text-red-400' : 'text-gray-400'}`}>
                     {isVisible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
                   </button>
                 </div>
