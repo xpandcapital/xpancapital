@@ -56,14 +56,14 @@ const formatMonthYear = (yyyy_mm: string): string => {
 };
 
 const COUNTRY_CODES = [
-  { code: '+593', flag: '­ƒç¬­ƒç¿', name: 'Ecuador' },
-  { code: '+1', flag: '­ƒç║­ƒç©', name: 'USA' },
-  { code: '+34', flag: '­ƒç¬­ƒç©', name: 'Espa├▒a' },
-  { code: '+57', flag: '­ƒç¿­ƒç┤', name: 'Colombia' },
-  { code: '+51', flag: '­ƒçÁ­ƒç¬', name: 'Per├║' },
-  { code: '+52', flag: '­ƒç▓­ƒç¢', name: 'M├®xico' },
-  { code: '+54', flag: '­ƒçª­ƒçÀ', name: 'Argentina' },
-  { code: '+56', flag: '­ƒç¿­ƒç▒', name: 'Chile' },
+  { code: '+593', flag: '🇪🇨', name: 'Ecuador' },
+  { code: '+1', flag: '🇺🇸', name: 'USA' },
+  { code: '+34', flag: '🇪🇸', name: 'España' },
+  { code: '+57', flag: '🇨🇴', name: 'Colombia' },
+  { code: '+51', flag: '🇵🇪', name: 'Perú' },
+  { code: '+52', flag: '🇲🇽', name: 'México' },
+  { code: '+54', flag: '🇦🇷', name: 'Argentina' },
+  { code: '+56', flag: '🇨🇱', name: 'Chile' },
 ];
 
 const fallbackCopyTextToClipboard = (text: string): void => {
@@ -93,7 +93,7 @@ const App = () => {
   const logEndRef = useRef(null);
 
   const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
-  const [messageTone, setMessageTone] = useState('Administraci├│n'); 
+  const [messageTone, setMessageTone] = useState('Administración'); 
   const [isProcessingSingleLot, setIsProcessingSingleLot] = useState(false);
   
   const [isDragUpload, setIsDragUpload] = useState(false);
@@ -189,7 +189,7 @@ const App = () => {
           startMonth: supabaseLot.start_month || '2025-04',
           signatureMonth: supabaseLot.signature_month || '2026-04',
           escrituraMonth: supabaseLot.escritura_month || '2027-01',
-          // Mapear Disponible -> Activo para compatibilidad con Gesti├│n de Lotes
+          // Mapear Disponible -> Activo para compatibilidad con Gestión de Lotes
           status: supabaseLot.status === 'Disponible' ? 'Activo' : supabaseLot.status || 'Activo',
           specialObservations: supabaseLot.special_observations || '',
           reminders: supabaseLot.reminders || [],
@@ -207,7 +207,7 @@ const App = () => {
         }));
         
         setLots(transformedLots);
-        // Actualizar cach├® de localStorage
+        // Actualizar caché de localStorage
         try {
           localStorage.setItem(`inmo_proj_lots_${projectId}`, JSON.stringify(transformedLots));
 } catch (e) {
@@ -277,7 +277,7 @@ const App = () => {
             if (l.entersRaffle === undefined) l.entersRaffle = false;
             if (l.lateFees === undefined) l.lateFees = 0;
 
-            // MIGRACI├ôN: Eliminar signaturePaymentExpected y pasarlo a initialPayments si existe
+            // MIGRACIÓN: Eliminar signaturePaymentExpected y pasarlo a initialPayments si existe
             if (l.signaturePaymentExpected && l.signaturePaymentExpected > 0) {
               l.initialPayments.push({
                  id: crypto.randomUUID(),
@@ -303,10 +303,10 @@ const App = () => {
 
     loadLots();
 
-    // Tambi├®n cargar desde Supabase para asegurarnos de tener los datos m├ís recientes
+    // También cargar desde Supabase para asegurarnos de tener los datos más recientes
     loadLotsFromSupabase(activeProjectId);
 
-    // Escuchar cambios en localStorage de otras pesta├▒as/p├íginas
+    // Escuchar cambios en localStorage de otras pestañas/páginas
     const handleStorageChange = (e) => {
       if (e.key === `inmo_proj_lots_${activeProjectId}` || e.key === 'inmo_data_updated') {
         logger.debug('[GestionDeLotes] Detected external data update, reloading...');
@@ -338,7 +338,7 @@ const App = () => {
     selectLotFromUrl();
   }, [lots]);
 
-  // Efecto separado para sincronizaci├│n con Supabase
+  // Efecto separado para sincronización con Supabase
   useEffect(() => {
     if (!activeProjectId) return;
     
@@ -369,7 +369,7 @@ const App = () => {
     
     logger.debug(`[GestionDeLotes] Syncing ${lotsData.length} lots for project ${activeProjectId}...`);
     
-    // Funci├│n para normalizar estados: Activo -> Disponible para sincronizar con Proyectos
+    // Función para normalizar estados: Activo -> Disponible para sincronizar con Proyectos
     const normalizeStatus = (status) => {
       if (status === 'Activo') return 'Disponible';
       if (status === 'Disponible') return 'Disponible';
@@ -381,7 +381,7 @@ const App = () => {
     
     for (const lot of lotsData) {
       try {
-        // Funci├│n para convertir "YYYY-MM" a "YYYY-MM-01" para fechas v├ílidas
+        // Función para convertir "YYYY-MM" a "YYYY-MM-01" para fechas válidas
         const toDate = (val) => {
           if (!val) return null;
           if (typeof val === 'string' && val.match(/^\d{4}-\d{2}$/)) {
@@ -548,10 +548,10 @@ const App = () => {
 
   const deleteCurrentProject = () => {
     if (projectList.length === 1) {
-      showAlert('Acci├│n Bloqueada', 'No puedes eliminar tu ├║nico proyecto. Crea uno nuevo primero si deseas borrar este.');
+      showAlert('Acción Bloqueada', 'No puedes eliminar tu único proyecto. Crea uno nuevo primero si deseas borrar este.');
       return;
     }
-    showConfirm('Eliminar Proyecto', `┬┐Est├ís seguro de eliminar el proyecto "${activeProjectName}" y TODOS sus lotes asociados?`, () => {
+    showConfirm('Eliminar Proyecto', `¿Estás seguro de eliminar el proyecto "${activeProjectName}" y TODOS sus lotes asociados?`, () => {
       const newList = projectList.filter(p => p.id !== activeProjectId);
       setProjectList(newList);
       try {
@@ -643,7 +643,7 @@ const App = () => {
         setLots(migratedLots);
         setView('dashboard');
       } catch (error) {
-        showAlert('Error', 'No se pudo leer el archivo. Aseg├║rate de que sea un respaldo v├ílido.');
+        showAlert('Error', 'No se pudo leer el archivo. Asegúrate de que sea un respaldo válido.');
       }
     };
     reader.readAsText(file);
@@ -652,10 +652,10 @@ const App = () => {
 
   const exportToCSV = () => {
     const headers = [
-      'Estado', 'Lote', 'Propietarios', 'Identificaciones', 'Contacto Alterno', '├ürea m2', 'Asesor', 'Precio Total', 'Total Entrada/Reserva (Pagado)', 
-      'Cuotas Pagadas (Hist├│rico)', 'Descuentos/Canjes', 'Deuda Iniciales', 'Deuda Cuotas Atrasadas', 
+      'Estado', 'Lote', 'Propietarios', 'Identificaciones', 'Contacto Alterno', 'Área m2', 'Asesor', 'Precio Total', 'Total Entrada/Reserva (Pagado)', 
+      'Cuotas Pagadas (Histórico)', 'Descuentos/Canjes', 'Deuda Iniciales', 'Deuda Cuotas Atrasadas', 
       'Intereses Mora', 'TOTAL A COBRAR AHORA', 
-      'Cuotas Futuras (Total $)', 'Saldo a Escritura', 'Estado Comisi├│n', 'Monto Comisi├│n', 'Monto Devuelto', 'Participa Sorteo', 'Observaciones'
+      'Cuotas Futuras (Total $)', 'Saldo a Escritura', 'Estado Comisión', 'Monto Comisión', 'Monto Devuelto', 'Participa Sorteo', 'Observaciones'
     ];
 
     const rows = sortedLots.map(lot => {
@@ -710,30 +710,30 @@ const App = () => {
     document.body.removeChild(link);
   };
 
-  // --- 2. L├ôGICA DE EXTRACCI├ôN CON IA ---
+  // --- 2. LÓGICA DE EXTRACCIÓN CON IA ---
 const generateAIPromptText = (validMonths) => {
     return `Eres un analista contable inmobiliario super avanzado. Analiza exhaustivamente estos documentos (promesas de compraventa y recibos).
 Cada documento viene precedido por la etiqueta "--- DOCUMENTO: [nombre_del_archivo] ---".
-DEBES CLASIFICAR la informaci├│n en CONTRATOS (documentos legales que definen due├▒os, ├íreas y precios) y RECIBOS (comprobantes de pago o transferencias).
+DEBES CLASIFICAR la información en CONTRATOS (documentos legales que definen dueños, áreas y precios) y RECIBOS (comprobantes de pago o transferencias).
 
 Devuelve un JSON estricto con esta estructura:
 {
   "contratosEncontrados": [
     {
       "loteNumber": "Identificador del lote (Ej: Lote 01, Lote 02)",
-      "lotArea": "├ürea o medidas del lote en m2 (solo n├║mero, 0 si no hay)",
+      "lotArea": "Área o medidas del lote en m2 (solo número, 0 si no hay)",
       "owners": [
-         {"name": "Nombre completo del COMPRADOR", "documentId": "C├®dula o Pasaporte si aparece", "email": "Correo si aparece", "phone": "Celular si aparece"}
+         {"name": "Nombre completo del COMPRADOR", "documentId": "Cédula o Pasaporte si aparece", "email": "Correo si aparece", "phone": "Celular si aparece"}
       ],
       "alternateContact": {
-         "name": "Si el contrato menciona a un apoderado o persona designada, pon su nombre aqu├¡.",
-         "phone": "Tel├®fono del contacto alterno si lo hay"
+         "name": "Si el contrato menciona a un apoderado o persona designada, pon su nombre aquí.",
+         "phone": "Teléfono del contacto alterno si lo hay"
       },
-      "startMonthOverride": "Si el contrato indica explicitamente en qu├® mes empiezan las 'cuotas mensuales' (ej. 'agosto de 2025'), devuelve el mes en formato YYYY-MM (ej. '2025-08'). Si no lo dice claro, devuelve null",
-      "totalPrice": "Precio total de venta (solo n├║mero, 0 si no hay)",
-      "expectedQuota": "Cuota mensual pactada regular predominante (solo n├║mero, 0 si no hay)",
+      "startMonthOverride": "Si el contrato indica explicitamente en qué mes empiezan las 'cuotas mensuales' (ej. 'agosto de 2025'), devuelve el mes en formato YYYY-MM (ej. '2025-08'). Si no lo dice claro, devuelve null",
+      "totalPrice": "Precio total de venta (solo número, 0 si no hay)",
+      "expectedQuota": "Cuota mensual pactada regular predominante (solo número, 0 si no hay)",
       "tradeInValue": "Valor de descuentos, bonos, o canjes. 0 si no hay.",
-      "specialObservations": "Extrae notas importantes o inusuales como: 'Sorteo de veh├¡culo', 'Pago con comisiones de asesor', 'Penalidades especiales', 'Letras de cambio', renegociaciones, etc. Si aparece el nombre del asesor comercial, incl├║yelo aqu├¡ con prefijo '[ASESOR]: '.",
+      "specialObservations": "Extrae notas importantes o inusuales como: 'Sorteo de vehículo', 'Pago con comisiones de asesor', 'Penalidades especiales', 'Letras de cambio', renegociaciones, etc. Si aparece el nombre del asesor comercial, inclúyelo aquí con prefijo '[ASESOR]: '.",
       "initialPaymentsStructure": [
          {"description": "Concepto (Ej: Reserva, Abono Promesa, Completar Entrada)", "expected": "Monto numerico", "date": "Fecha del pago si se menciona"}
       ],
@@ -751,17 +751,17 @@ Devuelve un JSON estricto con esta estructura:
   ]
 }
 
-IMPORTANTE - DISTINCI├ôN COMPRADOR vs VENDEDOR/ASESOR:
+IMPORTANTE - DISTINCIÓN COMPRADOR vs VENDEDOR/ASESOR:
 - COMPRADOR: La persona que COMPRA el lote. Aparece como "El comprador", "Los compradores", "El/los adquirente(s)". Este va en el campo "owners".
 - VENDEDOR/ASESOR: La persona que VENDE o el asesor comercial. Aparece como "El vendedor", "La empresa", "La promotora", o como asesor individual. NO lo pongas en "owners" - ponlo en specialObservations con prefijo '[ASESOR]: '.
 - NUNCA pongas al vendedor/empresa en "owners" - SOLO los compradores.
 
 Reglas adicionales:
-1. Si hay VARIOS compradores, a├▒├ídelos a TODOS en el array de 'owners'.
+1. Si hay VARIOS compradores, añádelos a TODOS en el array de 'owners'.
 2. En "initialPaymentsStructure" incluye TODO PAGO FUERTE O AISLADO que deba hacerse ANTES de que comiencen las cuotas regulares mensuales, INCLUYENDO ABONOS PARA LA PROMESA DE COMPRA VENTA.
-3. Extrae SOLO el monto pagado para los recibos e ignora los saldos restantes de las im├ígenes.
-4. Si en un documento imagen hay recibos de VARIOS lotes, crea un objeto en "recibosEncontrados" por cada pago y asigna correctamente a qu├® "loteNumber" pertenece.
-5. Es VITAL que en "archivoOrigen" copies exactamente el nombre del documento de donde extrajiste la informaci├│n.`;
+3. Extrae SOLO el monto pagado para los recibos e ignora los saldos restantes de las imágenes.
+4. Si en un documento imagen hay recibos de VARIOS lotes, crea un objeto en "recibosEncontrados" por cada pago y asigna correctamente a qué "loteNumber" pertenece.
+5. Es VITAL que en "archivoOrigen" copies exactamente el nombre del documento de donde extrajiste la información.`;
   };
 
   const handleSingleLotUpload = async (e) => {
@@ -772,7 +772,7 @@ Reglas adicionales:
     if (!lot) return;
 
     setIsProcessingSingleLot(true);
-    setProcessingLog([`Iniciando an├ílisis de ${files.length} archivo(s) para el Lote ${lot.loteNumber}...`]);
+    setProcessingLog([`Iniciando análisis de ${files.length} archivo(s) para el Lote ${lot.loteNumber}...`]);
 
     const fileToBase64 = (file) => new Promise((resolve) => {
       const reader = new FileReader();
@@ -870,7 +870,7 @@ Reglas adicionales:
         }
 
         if (aiData.recibosEncontrados && Array.isArray(aiData.recibosEncontrados)) {
-          setProcessingLog(prev => [...prev, `Se encontraron ${aiData.recibosEncontrados.length} recibos. Asign├índolos a cuotas...`]);
+          setProcessingLog(prev => [...prev, `Se encontraron ${aiData.recibosEncontrados.length} recibos. Asignándolos a cuotas...`]);
           aiData.recibosEncontrados.forEach(r => {
             if (r.esAbonoInicial) {
               const emptyInit = updatedLot.initialPayments?.find(ip => ip.actual === 0);
@@ -907,12 +907,12 @@ Reglas adicionales:
         updatedLot.documents = newDocsList;
 
         updateSelectedLot(updatedLot);
-        setProcessingLog(prev => [...prev, `┬íProceso finalizado exitosamente!`]);
-        setTimeout(() => showAlert('├ëxito', 'Documentos procesados e integrados correctamente al expediente.'), 500);
+        setProcessingLog(prev => [...prev, `¡Proceso finalizado exitosamente!`]);
+        setTimeout(() => showAlert('Éxito', 'Documentos procesados e integrados correctamente al expediente.'), 500);
       }
     } catch (error) {
       console.error(error);
-      setProcessingLog(prev => [...prev, `ÔØî Error: Hubo un problema al comunicarse con la IA.`]);
+      setProcessingLog(prev => [...prev, `❌ Error: Hubo un problema al comunicarse con la IA.`]);
       showAlert('Error', 'Hubo un problema al procesar los documentos con la IA.');
     } finally {
       setIsProcessingSingleLot(false);
@@ -926,7 +926,7 @@ const handleMassiveUpload = async (e) => {
 
     setIsProcessing(true);
     setProcessingProgress({ current: 0, total: files.length, status: 'Iniciando lectura IA...' });
-    setProcessingLog([`Iniciando an├ílisis masivo de ${files.length} documentos...`]);
+    setProcessingLog([`Iniciando análisis masivo de ${files.length} documentos...`]);
 
     const fileToBase64 = (file) => new Promise((resolve) => {
       const reader = new FileReader();
@@ -936,18 +936,18 @@ const handleMassiveUpload = async (e) => {
 
     const CHUNK_SIZE = 3; 
     
-    // Crear un mapa con n├║meros de lote normalizados para mejor coincidencia
+    // Crear un mapa con números de lote normalizados para mejor coincidencia
     // LOTE-01, LOTE--01, Lote 01, L01, LOTE 1 deben coincidir todos
     const normalizeLotNumber = (num) => {
       if (!num) return '';
       const str = num.toString().toUpperCase().trim();
-      // Extraer solo el n├║mero
+      // Extraer solo el número
       const match = str.match(/(\d+)/);
       if (match) {
         const number = match[1].padStart(2, '0'); // Rellenar con ceros: 1 -> 01, 2 -> 02
         return `LOTE${number}`;
       }
-      // Alternativa: eliminar todos los no alfanum├®ricos y convertir a may├║sculas
+      // Alternativa: eliminar todos los no alfanuméricos y convertir a mayúsculas
       return str.replace(/[^A-Z0-9]/g, '');
     };
     
@@ -992,7 +992,7 @@ const handleMassiveUpload = async (e) => {
         if (!result.error) {
           const aiData = JSON.parse(result.text);
           
-          setProcessingLog(prev => [...prev, `Ô£à An├ílisis completado. Contratos encontrados: ${aiData.contratosEncontrados?.length || 0}. Recibos detectados: ${aiData.recibosEncontrados?.length || 0}.`]);
+          setProcessingLog(prev => [...prev, `✅ Análisis completado. Contratos encontrados: ${aiData.contratosEncontrados?.length || 0}. Recibos detectados: ${aiData.recibosEncontrados?.length || 0}.`]);
 
           if (aiData.contratosEncontrados && Array.isArray(aiData.contratosEncontrados)) {
             aiData.contratosEncontrados.forEach(extracted => {
@@ -1005,7 +1005,7 @@ const handleMassiveUpload = async (e) => {
               
               if (!existingLot) {
                 const normalizedLoteNumber = normalizeLotNumber(lId);
-                setProcessingLog(prev => [...prev, `Ô£¿ Creando nuevo expediente para el Lote ${normalizedLoteNumber}...`]);
+                setProcessingLog(prev => [...prev, `✨ Creando nuevo expediente para el Lote ${normalizedLoteNumber}...`]);
                 existingLot = {
                   id: crypto.randomUUID(),
                   loteNumber: normalizedLoteNumber,
@@ -1055,7 +1055,7 @@ const handleMassiveUpload = async (e) => {
                    existingLot.initialPayments = [{ id: crypto.randomUUID(), description: 'Entrada Inicial', expected: 0, actual: 0, paymentDate: '', receiptAttached: null }];
                 }
               } else {
-                setProcessingLog(prev => [...prev, `­ƒöä Actualizando informaci├│n del contrato existente para el Lote ${lId}...`]);
+                setProcessingLog(prev => [...prev, `🔄 Actualizando información del contrato existente para el Lote ${lId}...`]);
                 if (extracted.owners && extracted.owners.length > 0) {
                   existingLot.owners = extracted.owners.map(o => ({ id: crypto.randomUUID(), name: o.name || '', documentId: o.documentId || '', email: o.email || '', phoneCode: '+593', phone: o.phone || '' }));
                   existingLot.clientName = existingLot.owners.map(o => o.name).join(' y ');
@@ -1103,11 +1103,11 @@ const handleMassiveUpload = async (e) => {
         }
       } catch (error) {
         console.error(`Error procesando documentos:`, error);
-        setProcessingLog(prev => [...prev, `ÔØî Error cr├¡tico al analizar el paquete de documentos.`]);
+        setProcessingLog(prev => [...prev, `❌ Error crítico al analizar el paquete de documentos.`]);
       }
     }
 
-    setProcessingLog(prev => [...prev, `­ƒÆ│ Clasificando y enlazando ${pendingReceipts.length} recibos con sus respectivos contratos...`]);
+    setProcessingLog(prev => [...prev, `💳 Clasificando y enlazando ${pendingReceipts.length} recibos con sus respectivos contratos...`]);
     
     pendingReceipts.forEach(recibo => {
       const lId = recibo.loteNumber;
@@ -1144,12 +1144,12 @@ const handleMassiveUpload = async (e) => {
         }
       } else {
         missingContractLots.add(lId);
-        setProcessingLog(prev => [...prev, `ÔÜá´©Å Recibo detectado para Lote ${lId} ignorado porque no existe su contrato base.`]);
+        setProcessingLog(prev => [...prev, `⚠️ Recibo detectado para Lote ${lId} ignorado porque no existe su contrato base.`]);
       }
     });
 
     setLots(Array.from(currentLotsMap.values()));
-    setProcessingLog(prev => [...prev, `┬íFinalizado con ├®xito! Redirigiendo al Dashboard...`]);
+    setProcessingLog(prev => [...prev, `¡Finalizado con éxito! Redirigiendo al Dashboard...`]);
     
     setTimeout(() => {
       setIsProcessing(false);
@@ -1157,14 +1157,14 @@ const handleMassiveUpload = async (e) => {
       if (missingContractLots.size > 0) {
         const lotesFaltantes = Array.from(missingContractLots).join(', ');
         showAlert(
-          'ÔÜá´©Å Contratos Faltantes', 
-          `La IA encontr├│ recibos para: ${lotesFaltantes}. \nSin embargo, NO se ha subido el Contrato principal de estos lotes. S├║belos para asociarlos correctamente.`
+          '⚠️ Contratos Faltantes', 
+          `La IA encontró recibos para: ${lotesFaltantes}. \nSin embargo, NO se ha subido el Contrato principal de estos lotes. Súbelos para asociarlos correctamente.`
         );
       }
     }, 1500);
   };
 
-  // --- 3. C├üLCULOS GLOBALES Y ORDENAMIENTO ---
+  // --- 3. CÁLCULOS GLOBALES Y ORDENAMIENTO ---
   
   // Primero separar lotes activos y desistidos
   const { activeLots, desistidoLots } = useMemo(() => {
@@ -1188,7 +1188,7 @@ const handleMassiveUpload = async (e) => {
     return { activeLots: active, desistidoLots: desistido };
   }, [lots]);
 
-  // Luego calcular estad├¡sticas solo con lotes activos
+  // Luego calcular estadísticas solo con lotes activos
   const dashboardStats = useMemo(() => {
     let totalToCollectNow = 0;
     let totalCollectedSoFar = 0;
@@ -1256,7 +1256,7 @@ const handleMassiveUpload = async (e) => {
     });
   }, [desistidoLots]);
 
-  // --- 4. FUNCIONES DE ACTUALIZACI├ôN ---
+  // --- 4. FUNCIONES DE ACTUALIZACIÓN ---
   const updateSelectedLot = (updates) => {
     setLots(prev => prev.map(l => l.id === selectedLotId ? { ...l, ...updates } : l));
   };
@@ -1269,7 +1269,7 @@ const handleMassiveUpload = async (e) => {
     const nextStatus = statusCycle[nextIndex];
     
     if (nextStatus === 'Desistido') {
-      showPrompt('Desistir Lote', '┬┐Cu├ínto dinero se le va a devolver al cliente por este desistimiento? (Pon 0 si la penalidad es del 100% o si no pag├│ nada).', '0', (val) => {
+      showPrompt('Desistir Lote', '¿Cuánto dinero se le va a devolver al cliente por este desistimiento? (Pon 0 si la penalidad es del 100% o si no pagó nada).', '0', (val) => {
         updateSelectedLot({ status: nextStatus, refundAmount: Number(val) || 0 });
       });
     } else {
@@ -1294,14 +1294,14 @@ const handleMassiveUpload = async (e) => {
   };
 
   const deleteLot = (id) => {
-    showConfirm('Eliminar Expediente', '┬┐Est├ís seguro de eliminar este expediente? Esta acci├│n no se puede deshacer.', () => {
+    showConfirm('Eliminar Expediente', '¿Estás seguro de eliminar este expediente? Esta acción no se puede deshacer.', () => {
       setLots(prev => prev.filter(l => l.id !== id));
       if (selectedLotId === id) setView('dashboard');
     });
   };
 
   const clearAllPayments = () => {
-    showConfirm('Limpiar Todo', '┬┐Deseas vaciar todos los abonos y fechas ingresadas de este cliente?', () => {
+    showConfirm('Limpiar Todo', '¿Deseas vaciar todos los abonos y fechas ingresadas de este cliente?', () => {
       setLots(prev => prev.map(l => {
         if (l.id !== selectedLotId) return l;
         return {
@@ -1385,11 +1385,11 @@ const handleMassiveUpload = async (e) => {
     return new Intl.NumberFormat('es-EC', { style: 'currency', currency: 'USD' }).format(amount);
   };
 
-  // --- 5. SORTEO CRIPTOGR├üFICO ---
+  // --- 5. SORTEO CRIPTOGRÁFICO ---
   const executeRaffle = () => {
     const participants = lots.filter(l => l.entersRaffle && l.status === 'Activo');
     if (participants.length === 0) {
-      return showAlert('Acci├│n no permitida', 'No hay clientes marcados para participar en el sorteo. Activa la casilla "Participa en Sorteo" en los expedientes que apliquen.');
+      return showAlert('Acción no permitida', 'No hay clientes marcados para participar en el sorteo. Activa la casilla "Participa en Sorteo" en los expedientes que apliquen.');
     }
 
     const array = new Uint32Array(1);
@@ -1454,15 +1454,15 @@ const handleMassiveUpload = async (e) => {
             <h1>Certificado Oficial de Sorteo</h1>
             <h2>Proyecto Inmobiliario: <strong>${activeProjectName}</strong></h2>
             
-            <p style="font-size: 18px;">Se certifica legal y p├║blicamente que el ganador es:</p>
+            <p style="font-size: 18px;">Se certifica legal y públicamente que el ganador es:</p>
             
             <div class="winner-box">
               <p class="winner-name">${raffleState.winner.clientName}</p>
-              <p class="winner-lote">Adquiriente del Lote N┬░ ${raffleState.winner.loteNumber}</p>
+              <p class="winner-lote">Adquiriente del Lote N° ${raffleState.winner.loteNumber}</p>
             </div>
             
             <div class="audit-info">
-              <p style="text-align: center; font-weight: bold; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">DATOS DE AUDITOR├ìA CRIPTOGR├üFICA</p>
+              <p style="text-align: center; font-weight: bold; margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">DATOS DE AUDITORÍA CRIPTOGRÁFICA</p>
               <strong>Fecha y Hora Exacta:</strong> ${new Date(raffleState.audit.timestamp).toLocaleString('es-EC')}<br/>
               <strong>Algoritmo Utilizado:</strong> ${raffleState.audit.algorithm}<br/>
               <strong>Participantes Validados:</strong> ${raffleState.audit.totalParticipants}<br/>
@@ -1471,8 +1471,8 @@ const handleMassiveUpload = async (e) => {
             </div>
             
             <div class="footer">
-              Este documento garantiza que la selecci├│n fue realizada mediante un generador de n├║meros pseudoaleatorios seguro,<br/> 
-              asegurando total imparcialidad, equidad y sin intervenci├│n humana.
+              Este documento garantiza que la selección fue realizada mediante un generador de números pseudoaleatorios seguro,<br/> 
+              asegurando total imparcialidad, equidad y sin intervención humana.
             </div>
           </div>
         </body>
@@ -1483,13 +1483,13 @@ const handleMassiveUpload = async (e) => {
     setTimeout(() => { printWindow.print(); }, 500);
   };
 
-  // --- 6. COMUNICACI├ôN (WHATSAPP, CORREO, PDF) Y MENSAJES ---
+  // --- 6. COMUNICACIÓN (WHATSAPP, CORREO, PDF) Y MENSAJES ---
   const generateMessageForClient = async () => {
     const lot = lots.find(c => c.id === selectedLotId);
     if (!lot) return;
 
     if (lot.status === 'Desistido') {
-      showAlert('Atenci├│n', 'Este lote est├í marcado como Desistido. El comunicado generado se enfocar├í en la formalizaci├│n de la resoluci├│n del contrato.');
+      showAlert('Atención', 'Este lote está marcado como Desistido. El comunicado generado se enfocará en la formalización de la resolución del contrato.');
     }
 
     const sigMonth = lot.signatureMonth || projectConfig.signatureMonth;
@@ -1517,20 +1517,20 @@ const handleMassiveUpload = async (e) => {
     let toneInstructions = "";
 
     if (lot.status === 'Desistido') {
-        roleInstruction = "Act├║a como el Departamento Legal del proyecto.";
-        toneInstructions = `El cliente ha desistido del contrato. Redacta un documento formal indicando la resoluci├│n del contrato de reserva. Menciona que se ha procedido a la liberaci├│n del lote y que se le devolver├í un monto de $${lot.refundAmount || 0} por concepto de liquidaci├│n final, dando por terminada la relaci├│n comercial.`;
+        roleInstruction = "Actúa como el Departamento Legal del proyecto.";
+        toneInstructions = `El cliente ha desistido del contrato. Redacta un documento formal indicando la resolución del contrato de reserva. Menciona que se ha procedido a la liberación del lote y que se le devolverá un monto de $${lot.refundAmount || 0} por concepto de liquidación final, dando por terminada la relación comercial.`;
     } else if (messageTone === 'Asesor Comercial') {
-        roleInstruction = "Act├║a como el Asesor Comercial personal del cliente.";
-        toneInstructions = "Tono muy cercano, entusiasta y servicial. Enf├│cate en el sue├▒o de tener su nuevo hogar. Minimiza la fricci├│n llamando a la deuda 'saldos pendientes para poder avanzar con tu firma'. Usa lenguaje optimista.";
+        roleInstruction = "Actúa como el Asesor Comercial personal del cliente.";
+        toneInstructions = "Tono muy cercano, entusiasta y servicial. Enfócate en el sueño de tener su nuevo hogar. Minimiza la fricción llamando a la deuda 'saldos pendientes para poder avanzar con tu firma'. Usa lenguaje optimista.";
     } else if (messageTone === 'Departamento Legal') {
-        roleInstruction = "Act├║a como el Departamento Legal de la constructora/inmobiliaria.";
-        toneInstructions = "Tono estricto, muy formal y riguroso. Usa t├®rminos como 'obligaciones contractuales', 'deuda', 'vencimiento', 'requerimiento' y 'regularizaci├│n inmediata'. Menciona que el pago es requisito indispensable para no incurrir en incumplimientos.";
+        roleInstruction = "Actúa como el Departamento Legal de la constructora/inmobiliaria.";
+        toneInstructions = "Tono estricto, muy formal y riguroso. Usa términos como 'obligaciones contractuales', 'deuda', 'vencimiento', 'requerimiento' y 'regularización inmediata'. Menciona que el pago es requisito indispensable para no incurrir en incumplimientos.";
     } else if (messageTone === 'Gerente General') {
-        roleInstruction = "Act├║a como el Gerente General del proyecto inmobiliario.";
-        toneInstructions = "Tono institucional, de alto nivel, agradecido pero asertivo y firme. Habla del compromiso mutuo, el gran avance del proyecto y la importancia de su aporte financiero para el ├®xito colectivo de la urbanizaci├│n.";
+        roleInstruction = "Actúa como el Gerente General del proyecto inmobiliario.";
+        toneInstructions = "Tono institucional, de alto nivel, agradecido pero asertivo y firme. Habla del compromiso mutuo, el gran avance del proyecto y la importancia de su aporte financiero para el éxito colectivo de la urbanización.";
     } else {
-        roleInstruction = "Act├║a como el Departamento de Administraci├│n del proyecto.";
-        toneInstructions = "Tono amigable, formal y colaborativo. Si tuvo retenci├│n autorizada, pide la 'liberaci├│n de los fondos retenidos' para continuar el desarrollo. Si no, pide la integraci├│n de cuotas pendientes de forma cordial, sin usar la palabra deuda excesivamente.";
+        roleInstruction = "Actúa como el Departamento de Administración del proyecto.";
+        toneInstructions = "Tono amigable, formal y colaborativo. Si tuvo retención autorizada, pide la 'liberación de los fondos retenidos' para continuar el desarrollo. Si no, pide la integración de cuotas pendientes de forma cordial, sin usar la palabra deuda excesivamente.";
     }
 
     const ownersNames = lot.owners.map(o => o.name).join(' y ');
@@ -1539,32 +1539,32 @@ const handleMassiveUpload = async (e) => {
       ${roleInstruction}
       Redacta un mensaje a ${ownersNames}, adquiriente(s) del lote ${lot.loteNumber}.
       
-      Datos financieros exactos de este cliente (Si est├í desistido, ignora los pagos futuros):
+      Datos financieros exactos de este cliente (Si está desistido, ignora los pagos futuros):
       - Deuda por Reservas/Entrada inicial/Firma de promesa: $${pastDueInitial}
       - Cuotas atrasadas/retenidas: $${pastDueQuotas}
       - Intereses por mora aplicados: $${lateFees}
       - TOTAL A INTEGRAR AHORA: $${totalToPayNow}
       - Saldo proyectado a la firma de escritura (${lotEscrituraName}): $${saldoEscritura}
-      - ┬┐Tuvo retenci├│n de cuotas autorizada previamente por demoras?: ${lot.conditions.authorizedHold ? 'S├¡' : 'No'}
+      - ¿Tuvo retención de cuotas autorizada previamente por demoras?: ${lot.conditions.authorizedHold ? 'Sí' : 'No'}
 
-      Instrucciones de Redacci├│n:
+      Instrucciones de Redacción:
       1. ${toneInstructions}
-      2. Dir├¡gete a todos los propietarios mencionados de forma plural si son varios.
+      2. Dirígete a todos los propietarios mencionados de forma plural si son varios.
       3. ${lot.status === 'Activo' ? `Desglosa los valores claramente si son mayores a 0 (Valores iniciales: $${pastDueInitial}, Cuotas: $${pastDueQuotas}, Mora: $${lateFees}). Indica que el TOTAL a integrar para la firma de promesa es de $${totalToPayNow}.` : ''}
-      4. ${lot.status === 'Activo' ? `Menciona que su saldo proyectado para la escritura definitiva en ${lotEscrituraName} ser├í de $${saldoEscritura} (tras el pago de cuotas futuras).` : ''}
-      5. M├íximo 3 p├írrafos.
+      4. ${lot.status === 'Activo' ? `Menciona que su saldo proyectado para la escritura definitiva en ${lotEscrituraName} será de $${saldoEscritura} (tras el pago de cuotas futuras).` : ''}
+      5. Máximo 3 párrafos.
     `;
 
     try {
       const result = await aiChat({
         model: 'gemini-flash',
         prompt: promptText,
-        systemPrompt: "Eres un redactor profesional experto en comunicaci├│n inmobiliaria y cobranzas. Siempre redacta en espa├▒ol de Ecuador."
+        systemPrompt: "Eres un redactor profesional experto en comunicación inmobiliaria y cobranzas. Siempre redacta en español de Ecuador."
       });
       const text = result.error ? "No se pudo generar el mensaje." : (result.text || "No se pudo generar el mensaje.");
       updateSelectedLot({ generatedMessage: text });
     } catch (error) {
-      showAlert('Error', 'Error de conexi├│n con la IA. Por favor, intente nuevamente.');
+      showAlert('Error', 'Error de conexión con la IA. Por favor, intente nuevamente.');
     } finally {
       setIsGeneratingMessage(false);
     }
@@ -1572,7 +1572,7 @@ const handleMassiveUpload = async (e) => {
 
   const handleSendWhatsApp = (lot) => {
     if (!lot.owners || lot.owners.length === 0 || !lot.owners[0].phone) {
-      return showAlert('Error', 'El propietario principal no tiene un n├║mero de tel├®fono registrado.');
+      return showAlert('Error', 'El propietario principal no tiene un número de teléfono registrado.');
     }
     const phone = `${lot.owners[0].phoneCode.replace('+', '')}${lot.owners[0].phone.replace(/\D/g, '')}`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(lot.generatedMessage)}`;
@@ -1581,9 +1581,9 @@ const handleMassiveUpload = async (e) => {
 
   const handleSendEmail = (lot) => {
     if (!lot.owners || lot.owners.length === 0 || !lot.owners[0].email) {
-      return showAlert('Error', 'El propietario principal no tiene un correo electr├│nico registrado.');
+      return showAlert('Error', 'El propietario principal no tiene un correo electrónico registrado.');
     }
-    const url = `mailto:${lot.owners[0].email}?subject=Notificaci├│n Inmobiliaria - ${lot.loteNumber}&body=${encodeURIComponent(lot.generatedMessage)}`;
+    const url = `mailto:${lot.owners[0].email}?subject=Notificación Inmobiliaria - ${lot.loteNumber}&body=${encodeURIComponent(lot.generatedMessage)}`;
     window.open(url, '_blank');
   };
 
@@ -1606,20 +1606,20 @@ const handleMassiveUpload = async (e) => {
         </head>
         <body>
           <h1>CONTRATO DE RESERVA DE LOTE DE TERRENO - ${activeProjectName}</h1>
-          <p>En la ciudad de residencia, a la fecha de suscripci├│n, comparecen para celebrar de manera libre y voluntaria el presente Contrato de Reserva de Lote de Terreno, las siguientes partes:</p>
+          <p>En la ciudad de residencia, a la fecha de suscripción, comparecen para celebrar de manera libre y voluntaria el presente Contrato de Reserva de Lote de Terreno, las siguientes partes:</p>
           <p><strong>Por una parte:</strong> El PROMOTOR / INMOBILIARIA, en calidad de representante legal y propietario del proyecto <strong>${activeProjectName}</strong>.</p>
           <p><strong>Por otra parte:</strong> ${ownersText}, en calidad de COMPRADOR(ES), actuando en ejercicio de sus propios derechos.</p>
           
-          <h2>CL├üUSULA PRIMERA: OBJETO DEL CONTRATO</h2>
-          <p>El(Los) comprador(es) reserva(n) para s├¡ el lote <strong>${lot.loteNumber}</strong>, con un ├írea de <strong>${lot.lotArea} m2</strong>, dentro del proyecto mencionado.</p>
+          <h2>CLÁUSULA PRIMERA: OBJETO DEL CONTRATO</h2>
+          <p>El(Los) comprador(es) reserva(n) para sí el lote <strong>${lot.loteNumber}</strong>, con un área de <strong>${lot.lotArea} m2</strong>, dentro del proyecto mencionado.</p>
           
-          <h2>CL├üUSULA SEGUNDA: PRECIO Y FORMA DE PAGO</h2>
-          <p>Las partes acuerdan que el precio total del lote es de <strong>${formatCurrency(lot.totalPrice)}</strong>, el cual ser├í pagado de la siguiente manera:</p>
+          <h2>CLÁUSULA SEGUNDA: PRECIO Y FORMA DE PAGO</h2>
+          <p>Las partes acuerdan que el precio total del lote es de <strong>${formatCurrency(lot.totalPrice)}</strong>, el cual será pagado de la siguiente manera:</p>
           <ul>
             <li><strong>Cuota Mensual Acordada:</strong> ${formatCurrency(lot.expectedQuota)}</li>
           </ul>
           
-          <h2>CL├üUSULA TERCERA: CONDICIONES ESPECIALES</h2>
+          <h2>CLÁUSULA TERCERA: CONDICIONES ESPECIALES</h2>
           <p>${lot.specialObservations || 'Sin condiciones especiales adicionales registradas.'}</p>
           
           <div class="footer">
@@ -1675,7 +1675,7 @@ const handleMassiveUpload = async (e) => {
           localStorage.removeItem('test_quota');
           setProjectConfig(prev => ({...prev, masterplanImage: compressedBase64}));
         } catch(err) {
-          showAlert('Memoria Llena', 'La imagen es demasiado pesada para la memoria local del navegador. Por favor, rec├│rtala o intenta con una imagen de menor resoluci├│n.');
+          showAlert('Memoria Llena', 'La imagen es demasiado pesada para la memoria local del navegador. Por favor, recórtala o intenta con una imagen de menor resolución.');
         }
       };
       img.src = event.target.result;
@@ -1689,10 +1689,10 @@ const handleMassiveUpload = async (e) => {
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-    showPrompt('Asignar Lote', 'Ingresa S├ôLO el n├║mero del lote (Ej: 1, 14, 32) para colocar el pin:', '', (loteNum) => {
+    showPrompt('Asignar Lote', 'Ingresa SÓLO el número del lote (Ej: 1, 14, 32) para colocar el pin:', '', (loteNum) => {
       if (loteNum) {
         const cleanNum = String(loteNum).replace(/\D/g, '');
-        if(!cleanNum) return showAlert('Error', 'Ingresa un n├║mero v├ílido.');
+        if(!cleanNum) return showAlert('Error', 'Ingresa un número válido.');
         
         const lotExists = lots.find(l => String(l.loteNumber).replace(/\D/g, '') === cleanNum);
         if (!lotExists) {
@@ -1701,7 +1701,7 @@ const handleMassiveUpload = async (e) => {
 
         const alreadyPinned = projectConfig.lotPins?.find(p => String(p.loteNumber).replace(/\D/g, '') === cleanNum);
         if (alreadyPinned) {
-          return showAlert('Lote ya mapeado', `El lote ${cleanNum} ya se encuentra ubicado en el mapa. Si deseas moverlo, b├│rralo de la lista lateral y vuelve a asignarlo.`);
+          return showAlert('Lote ya mapeado', `El lote ${cleanNum} ya se encuentra ubicado en el mapa. Si deseas moverlo, bórralo de la lista lateral y vuelve a asignarlo.`);
         }
 
         setProjectConfig(prev => ({
@@ -1754,7 +1754,7 @@ const handleMassiveUpload = async (e) => {
         <>
           <div className="bg-zinc-950/50 p-6 rounded-2xl shadow-sm border border-zinc-800 mb-8 text-left">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Settings className="w-5 h-5 text-rose-500"/> Configuraci├│n de Fechas de este Proyecto
+              <Settings className="w-5 h-5 text-rose-500"/> Configuración de Fechas de este Proyecto
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -1770,7 +1770,7 @@ const handleMassiveUpload = async (e) => {
                 <input type="month" value={projectConfig.escrituraMonth} onChange={(e) => handleConfigChange('escrituraMonth', e.target.value)} className="w-full p-2 bg-emerald-950/20 border border-emerald-900/50 rounded-md font-medium text-emerald-400 outline-none focus:border-emerald-500" />
               </div>
             </div>
-            <p className="text-[11px] text-zinc-500 mt-3 text-center italic">Estas fechas aplican por defecto. Podr├ís modificar fechas espec├¡ficas para cada cliente m├ís adelante.</p>
+            <p className="text-[11px] text-zinc-500 mt-3 text-center italic">Estas fechas aplican por defecto. Podrás modificar fechas específicas para cada cliente más adelante.</p>
           </div>
 
           <label 
@@ -1781,8 +1781,8 @@ const handleMassiveUpload = async (e) => {
               ${isDragUpload ? 'border-rose-500 bg-rose-950/20 scale-[1.02] shadow-lg shadow-rose-900/20' : 'border-zinc-700 bg-zinc-950/50 hover:bg-zinc-900'}`}
           >
             <Upload className={`w-16 h-16 mb-4 transition-colors ${isDragUpload ? 'text-rose-400' : 'text-zinc-500'}`} />
-            <span className="text-lg font-semibold text-white">Arrastra o Sube PDFs e Im├ígenes aqu├¡</span>
-            <span className="text-sm text-zinc-400 mt-2">Nuestra IA analizar├í los documentos y agrupar├í m├║ltiples recibos en sus respectivos lotes.</span>
+            <span className="text-lg font-semibold text-white">Arrastra o Sube PDFs e Imágenes aquí</span>
+            <span className="text-sm text-zinc-400 mt-2">Nuestra IA analizará los documentos y agrupará múltiples recibos en sus respectivos lotes.</span>
             <input type="file" multiple accept=".pdf,image/*" className="hidden" onChange={handleMassiveUpload} />
           </label>
           
@@ -1904,11 +1904,11 @@ const handleMassiveUpload = async (e) => {
               <tr className="bg-black/60 text-zinc-500 text-[9px] uppercase tracking-[0.2em] border-b border-white/5">
                 <th className="p-5 font-black">Lote / Cliente</th>
                 <th className="p-5 font-black text-center">Docs</th>
-                <th className="p-5 font-black">Pagado Hist├│rico</th>
+                <th className="p-5 font-black">Pagado Histórico</th>
                 <th className="p-5 font-black text-rose-500">A Cobrar (Promesa)</th>
                 <th className="p-5 font-black text-cyan-500">Cuotas Futuras</th>
                 <th className="p-5 font-black text-amber-500">Saldo Escritura</th>
-                <th className="p-5 font-black text-right">Acci├│n</th>
+                <th className="p-5 font-black text-right">Acción</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
@@ -1916,8 +1916,8 @@ const handleMassiveUpload = async (e) => {
                 <tr>
                   <td colSpan="7" className="p-20 text-center bg-[#0a0a0a]">
                     <FolderOpen className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
-                    <p className="text-zinc-400 font-black text-lg uppercase tracking-wider">A├║n no hay lotes procesados</p>
-                    <p className="text-[10px] text-zinc-600 mt-3 font-bold uppercase tracking-[0.2em]">Haz clic en el bot├│n "Configurar" para comenzar</p>
+                    <p className="text-zinc-400 font-black text-lg uppercase tracking-wider">Aún no hay lotes procesados</p>
+                    <p className="text-[10px] text-zinc-600 mt-3 font-bold uppercase tracking-[0.2em]">Haz clic en el botón "Configurar" para comenzar</p>
                   </td>
                 </tr>
               )}
@@ -1966,7 +1966,7 @@ const handleMassiveUpload = async (e) => {
                       ) : formatCurrency(paid)}
                     </td>
                     <td className="p-5 font-black text-sm">
-                      {isDesistido ? <span className="text-zinc-600">-</span> : (toPayNow > 0 ? <span className="text-rose-500">{formatCurrency(toPayNow)} <br/><span className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">En {formatMonthYear(sigMonth)}</span></span> : <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider"><CheckCircle2 className="w-3 h-3 inline mr-1"/> Al d├¡a</span>)}
+                      {isDesistido ? <span className="text-zinc-600">-</span> : (toPayNow > 0 ? <span className="text-rose-500">{formatCurrency(toPayNow)} <br/><span className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">En {formatMonthYear(sigMonth)}</span></span> : <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider"><CheckCircle2 className="w-3 h-3 inline mr-1"/> Al día</span>)}
                     </td>
                     <td className="p-5 font-black text-cyan-500 text-sm">
                       {isDesistido ? <span className="text-zinc-600">-</span> : <>{formatCurrency(futureQuotasTotal)} <span className="text-[9px] font-bold text-cyan-900/50">({lotFutureMonths}m)</span></>}
@@ -1997,7 +1997,7 @@ const handleMassiveUpload = async (e) => {
         </div>
       </div>
 
-      {/* Secci├│n de Lotes Desistidos */}
+      {/* Sección de Lotes Desistidos */}
       {desistidoLots.length > 0 && (
         <div className="bg-[#0a0a0a] rounded-3xl border border-white/5 overflow-hidden shadow-2xl mt-6">
           <button 
@@ -2027,8 +2027,8 @@ const handleMassiveUpload = async (e) => {
                     <th className="p-4 font-black">Cliente</th>
                     <th className="p-4 font-black">Precio</th>
                     <th className="p-4 font-black">Pagado</th>
-                    <th className="p-4 font-black">Devoluci├│n</th>
-                    <th className="p-4 font-black text-right">Acci├│n</th>
+                    <th className="p-4 font-black">Devolución</th>
+                    <th className="p-4 font-black text-right">Acción</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -2046,7 +2046,7 @@ const handleMassiveUpload = async (e) => {
                         <td className="p-4 text-zinc-400">{formatCurrency(totalPaid)}</td>
                         <td className="p-4">
                           <span className={netKept > 0 ? 'text-emerald-400' : 'text-zinc-500'}>
-                            {netKept > 0 ? `+${formatCurrency(netKept)} (retenido)` : 'Sin retenci├│n'}
+                            {netKept > 0 ? `+${formatCurrency(netKept)} (retenido)` : 'Sin retención'}
                           </span>
                         </td>
                         <td className="p-4 text-right">
@@ -2075,7 +2075,7 @@ const handleMassiveUpload = async (e) => {
 
     const isDesistido = lot.status === 'Desistido';
 
-    // Funci├│n para convertir fechas "YYYY-MM-DD" a "YYYY-MM" para inputs tipo month
+    // Función para convertir fechas "YYYY-MM-DD" a "YYYY-MM" para inputs tipo month
     const toMonth = (val) => {
       if (!val) return val;
       if (typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}$/)) {
@@ -2117,7 +2117,7 @@ const handleMassiveUpload = async (e) => {
         {/* ESTADO DESISTIDO BANNER */}
         {isDesistido && (
           <div className="bg-rose-900/80 text-white p-4 text-center font-black flex items-center justify-center gap-2 border-b border-rose-950 text-[10px] uppercase tracking-[0.3em]">
-            <ShieldAlert className="w-5 h-5"/> LOTE LIBERADO - EL CLIENTE DESISTI├ô DE LA COMPRA
+            <ShieldAlert className="w-5 h-5"/> LOTE LIBERADO - EL CLIENTE DESISTIÓ DE LA COMPRA
           </div>
         )}
 
@@ -2143,13 +2143,13 @@ const handleMassiveUpload = async (e) => {
                {lot.status === 'Reservado' && 'Reservado'}
                {lot.status === 'Vendido' && 'Vendido'}
                {lot.status === 'Desistido' && <><RotateCcw className="w-3 h-3"/> Reactivar</>}
-               {lot.status !== 'Desistido' && ' ÔåÆ'}
+               {lot.status !== 'Desistido' && ' →'}
              </button>
              {!isDesistido && (
                <div>
                  <div className="text-sm text-zinc-500 uppercase font-bold">A Cobrar ({lotSignatureName})</div>
                  <div className={`text-2xl font-bold ${totalToPayNow > 0 ? 'text-rose-500' : 'text-emerald-400'}`}>
-                    {totalToPayNow > 0 ? formatCurrency(totalToPayNow) : 'AL D├ìA'}
+                    {totalToPayNow > 0 ? formatCurrency(totalToPayNow) : 'AL DÍA'}
                  </div>
                </div>
              )}
@@ -2183,12 +2183,12 @@ const handleMassiveUpload = async (e) => {
                           <label className="text-[9px] font-bold text-zinc-500 uppercase block mb-0.5">C.I. / Pasaporte</label>
                           <div className="flex items-center bg-zinc-950 border border-zinc-800 rounded px-2 focus-within:border-rose-500">
                             <CreditCard className="w-3 h-3 text-zinc-500 mr-1" />
-                            <input type="text" value={owner.documentId || ''} onChange={(e) => updateOwner(owner.id, 'documentId', e.target.value)} className="w-full p-1 text-xs outline-none uppercase bg-transparent text-white" placeholder="N├║mero de Identidad" />
+                            <input type="text" value={owner.documentId || ''} onChange={(e) => updateOwner(owner.id, 'documentId', e.target.value)} className="w-full p-1 text-xs outline-none uppercase bg-transparent text-white" placeholder="Número de Identidad" />
                           </div>
                         </div>
                         <div className="flex gap-2">
                            <div className="flex-1">
-                              <label className="text-[9px] font-bold text-zinc-500 uppercase block mb-0.5">Tel├®fono</label>
+                              <label className="text-[9px] font-bold text-zinc-500 uppercase block mb-0.5">Teléfono</label>
                               <div className="flex bg-zinc-950 border border-zinc-800 rounded overflow-hidden focus-within:border-rose-500">
                                 <select value={owner.phoneCode} onChange={(e) => updateOwner(owner.id, 'phoneCode', e.target.value)} className="bg-zinc-900 border-r border-zinc-800 text-xs px-1 outline-none w-16 text-zinc-300">
                                   {COUNTRY_CODES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
@@ -2201,7 +2201,7 @@ const handleMassiveUpload = async (e) => {
                            </div>
                         </div>
                         <div>
-                          <label className="text-[9px] font-bold text-zinc-500 uppercase block mb-0.5">Correo Electr├│nico</label>
+                          <label className="text-[9px] font-bold text-zinc-500 uppercase block mb-0.5">Correo Electrónico</label>
                           <div className="flex items-center bg-zinc-950 border border-zinc-800 rounded px-2 focus-within:border-rose-500">
                             <Mail className="w-3 h-3 text-zinc-500 mr-1" />
                             <input type="email" value={owner.email} onChange={(e) => updateOwner(owner.id, 'email', e.target.value)} className="w-full p-1 text-xs outline-none bg-transparent text-white" placeholder="correo@ejemplo.com" />
@@ -2211,7 +2211,7 @@ const handleMassiveUpload = async (e) => {
                     </div>
                   ))}
                   <button onClick={addOwner} className="flex items-center gap-1 text-xs font-bold text-rose-400 hover:text-rose-300 transition-colors w-full justify-center border border-dashed border-zinc-700 rounded p-2 hover:bg-zinc-800">
-                    <PlusCircle className="w-4 h-4" /> A├▒adir otro titular
+                    <PlusCircle className="w-4 h-4" /> Añadir otro titular
                   </button>
                   
                   <div className="pt-3 border-t border-zinc-800 mt-3">
@@ -2222,7 +2222,7 @@ const handleMassiveUpload = async (e) => {
                         <select value={lot.alternateContact?.phoneCode || '+593'} onChange={(e) => updateSelectedLot({ alternateContact: { ...lot.alternateContact, phoneCode: e.target.value } })} className="bg-zinc-950 border-r border-zinc-800 text-xs px-1 outline-none w-16 text-zinc-300">
                           {COUNTRY_CODES.map(c => <option key={c.code} value={c.code}>{c.flag} {c.code}</option>)}
                         </select>
-                        <input type="tel" value={lot.alternateContact?.phone || ''} onChange={(e) => updateSelectedLot({ alternateContact: { ...lot.alternateContact, phone: e.target.value } })} className="w-full p-1.5 text-xs bg-transparent outline-none text-white placeholder-zinc-600" placeholder="Tel├®fono (Opcional)" />
+                        <input type="tel" value={lot.alternateContact?.phone || ''} onChange={(e) => updateSelectedLot({ alternateContact: { ...lot.alternateContact, phone: e.target.value } })} className="w-full p-1.5 text-xs bg-transparent outline-none text-white placeholder-zinc-600" placeholder="Teléfono (Opcional)" />
                       </div>
                     </div>
                   </div>
@@ -2240,7 +2240,7 @@ const handleMassiveUpload = async (e) => {
                       <input type="number" value={lot.totalPrice} onChange={(e) => updateSelectedLot({ totalPrice: Number(e.target.value) })} className="w-full p-2 border border-zinc-700 rounded-md bg-zinc-900 font-bold text-white focus:border-rose-500 outline-none" />
                     </div>
                     <div className="w-1/3">
-                      <label className="text-[11px] font-bold text-zinc-500 uppercase">├ürea ($m^2$)</label>
+                      <label className="text-[11px] font-bold text-zinc-500 uppercase">Área ($m^2$)</label>
                       <div className="relative">
                         <Ruler className="w-4 h-4 text-zinc-500 absolute left-2 top-2.5" />
                         <input type="number" value={lot.lotArea || ''} onChange={(e) => updateSelectedLot({ lotArea: Number(e.target.value) })} className="w-full p-2 pl-8 border border-zinc-700 rounded-md bg-zinc-900 font-bold text-white focus:border-rose-500 outline-none" placeholder="0" />
@@ -2260,14 +2260,14 @@ const handleMassiveUpload = async (e) => {
                   <div className="pt-3 border-t border-zinc-800">
                     <label className="text-[11px] font-bold text-purple-400 uppercase flex items-center gap-1"><Gift className="w-3 h-3"/> Descuentos / Canjes ($)</label>
                     <input type="number" value={lot.tradeInValue || ''} onChange={(e) => updateSelectedLot({ tradeInValue: Number(e.target.value) })} className="w-full p-2 border border-purple-900/50 rounded-md bg-purple-950/20 font-bold text-purple-400 focus:border-purple-500 outline-none" placeholder="0" />
-                    <p className="text-[9px] text-zinc-500 mt-1">Se resta del saldo a escriturar. ├Ütil para bonos o comisiones pagadas con el lote.</p>
+                    <p className="text-[9px] text-zinc-500 mt-1">Se resta del saldo a escriturar. Útil para bonos o comisiones pagadas con el lote.</p>
                   </div>
                 </div>
               </div>
 
               <div className="bg-emerald-950/10 p-5 rounded-xl border border-emerald-900/30 shadow-sm">
                 <h3 className="font-semibold text-emerald-400 border-b border-emerald-900/50 pb-2 mb-4 flex items-center gap-2">
-                  <Briefcase className="w-5 h-5" /> M├│dulo Comercial (Asesor)
+                  <Briefcase className="w-5 h-5" /> Módulo Comercial (Asesor)
                 </h3>
                 <div className="space-y-3">
                   <div>
@@ -2277,7 +2277,7 @@ const handleMassiveUpload = async (e) => {
                   
                   <div className="flex gap-2 items-end">
                     <div className="flex-1">
-                      <label className="text-[10px] font-bold text-emerald-600 uppercase block mb-1">Comisi├│n a pagar</label>
+                      <label className="text-[10px] font-bold text-emerald-600 uppercase block mb-1">Comisión a pagar</label>
                       <div className="flex bg-zinc-950 border border-emerald-900/50 rounded overflow-hidden focus-within:border-emerald-500">
                         <select value={lot.commissionType} onChange={(e) => updateSelectedLot({ commissionType: e.target.value })} className="bg-emerald-950/50 border-r border-emerald-900/50 text-xs px-1 outline-none font-bold text-emerald-500 w-12">
                           <option value="percentage">%</option>
@@ -2309,9 +2309,9 @@ const handleMassiveUpload = async (e) => {
                           Pago Asesor: {lot.commissionType === 'percentage' ? formatCurrency(lot.totalPrice * ((lot.commissionValue || 0)/100)) : formatCurrency(lot.commissionValue || 0)}
                         </span>
                         {isCommissionReady ? (
-                          <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded uppercase font-bold">Ô£ô Liberada</span>
+                          <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded uppercase font-bold">✓ Liberada</span>
                         ) : (
-                          <span className="text-[10px] bg-amber-500/20 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded uppercase font-bold">ÔÅ│ Pendiente</span>
+                          <span className="text-[10px] bg-amber-500/20 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded uppercase font-bold">⏳ Pendiente</span>
                         )}
                       </div>
                     </div>
@@ -2382,17 +2382,17 @@ const handleMassiveUpload = async (e) => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800 flex flex-col justify-between shadow-sm">
                     <div className="mb-3">
-                      <h4 className="font-semibold text-white flex items-center gap-2 mb-1"><MessageSquare className="w-4 h-4 text-rose-500" /> Bit├ícora y Observaciones Legales</h4>
+                      <h4 className="font-semibold text-white flex items-center gap-2 mb-1"><MessageSquare className="w-4 h-4 text-rose-500" /> Bitácora y Observaciones Legales</h4>
                     </div>
                     <textarea 
                       value={lot.specialObservations || ''} 
                       onChange={(e) => updateSelectedLot({ specialObservations: e.target.value })}
-                      placeholder="Anota aqu├¡ las renegociaciones, si dejar├ín de pagar un mes y acumular├ín en otro, promesas de p├│lizas, etc."
+                      placeholder="Anota aquí las renegociaciones, si dejarán de pagar un mes y acumularán en otro, promesas de pólizas, etc."
                       className="w-full h-full min-h-[80px] p-3 text-xs border border-zinc-800 rounded outline-none resize-none bg-zinc-900 text-zinc-300 focus:border-rose-500 focus:bg-zinc-950 placeholder-zinc-600 transition-colors"
                     ></textarea>
 
                     <div className="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between">
-                      <span className="text-xs font-bold text-zinc-400">­ƒÄ½ Participa en Sorteo Especial</span>
+                      <span className="text-xs font-bold text-zinc-400">🎫 Participa en Sorteo Especial</span>
                       <button 
                         onClick={() => updateSelectedLot({ entersRaffle: !lot.entersRaffle })}
                         className={`w-10 h-5 rounded-full relative transition-colors ${lot.entersRaffle ? 'bg-amber-500' : 'bg-zinc-700'}`}
@@ -2416,7 +2416,7 @@ const handleMassiveUpload = async (e) => {
                           {rem.completed ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 text-zinc-600" />}
                         </button>
                         <div className="flex-1 flex flex-col gap-1">
-                          <input type="text" value={rem.text} onChange={(e) => updateReminder(rem.id, 'text', e.target.value)} placeholder="Ej: Llamar para cobro de p├│liza" className={`text-xs w-full outline-none bg-transparent ${rem.completed ? 'line-through text-zinc-600' : 'text-zinc-200 font-medium'}`} />
+                          <input type="text" value={rem.text} onChange={(e) => updateReminder(rem.id, 'text', e.target.value)} placeholder="Ej: Llamar para cobro de póliza" className={`text-xs w-full outline-none bg-transparent ${rem.completed ? 'line-through text-zinc-600' : 'text-zinc-200 font-medium'}`} />
                           <div className="flex items-center gap-1">
                             <CalendarDays className="w-3 h-3 text-zinc-600" />
                             <input type="date" value={rem.date} onChange={(e) => updateReminder(rem.id, 'date', e.target.value)} className="text-[9px] text-zinc-500 outline-none bg-transparent cursor-pointer color-invert" />
@@ -2432,7 +2432,7 @@ const handleMassiveUpload = async (e) => {
                 </div>
               </div>
 
-              {/* SECCI├ôN 1: ABONOS INICIALES / RESERVA */}
+              {/* SECCIÓN 1: ABONOS INICIALES / RESERVA */}
               <div className="bg-zinc-950/50 p-5 rounded-xl border border-zinc-800 shadow-sm">
                 <div className="flex justify-between items-center border-b border-zinc-800 pb-3 mb-4">
                   <h3 className="font-semibold text-white flex items-center gap-2">
@@ -2462,7 +2462,7 @@ const handleMassiveUpload = async (e) => {
                       <div className="w-full md:w-1/4 flex flex-col gap-1">
                          <input type="date" value={ip.paymentDate || ''} onChange={(e) => updateInitialPayment(ip.id, 'paymentDate', e.target.value)} className="w-full text-[10px] text-zinc-300 bg-zinc-950 border border-zinc-700 rounded p-1 outline-none cursor-pointer color-invert" />
                          <label className="cursor-pointer text-[9px] font-bold bg-zinc-800 text-zinc-300 border border-zinc-700 px-2 py-1 rounded hover:bg-zinc-700 transition-colors text-center truncate" title={ip.receiptAttached}>
-                           {ip.receiptAttached ? `Ô£ô ${ip.receiptAttached}` : '­ƒôÄ Subir Comp.'}
+                           {ip.receiptAttached ? `✓ ${ip.receiptAttached}` : '📎 Subir Comp.'}
                            <input type="file" accept=".pdf,image/*" className="hidden" onChange={(e) => {
                               if(e.target.files[0]) updateInitialPayment(ip.id, 'receiptAttached', e.target.files[0].name);
                            }} />
@@ -2480,7 +2480,7 @@ const handleMassiveUpload = async (e) => {
                 </div>
               </div>
 
-              {/* SECCI├ôN 2: HIST├ôRICO DE CUOTAS (COLAPSABLE) */}
+              {/* SECCIÓN 2: HISTÓRICO DE CUOTAS (COLAPSABLE) */}
               <div className="bg-zinc-950/50 rounded-xl border border-zinc-800 shadow-sm overflow-hidden">
                 <div 
                   className={`flex justify-between items-center p-5 cursor-pointer hover:bg-zinc-900 transition-colors ${lot.showQuotas ? 'border-b border-zinc-800' : ''}`}
@@ -2488,7 +2488,7 @@ const handleMassiveUpload = async (e) => {
                 >
                   <div className="flex items-center gap-3">
                     <h3 className="font-semibold text-white flex items-center gap-2">
-                      <CalendarIcon className="w-5 h-5 text-cyan-500"/> 2. Hist├│rico de Cuotas
+                      <CalendarIcon className="w-5 h-5 text-cyan-500"/> 2. Histórico de Cuotas
                     </h3>
                     <span className="text-[10px] bg-zinc-800 text-zinc-300 border border-zinc-700 px-2 py-0.5 rounded-full font-bold">
                       {lot.showQuotas ? 'Ocultar' : 'Ver Detalle'}
@@ -2558,7 +2558,7 @@ const handleMassiveUpload = async (e) => {
                             <div className="mt-auto border-t border-zinc-800/60 pt-2 space-y-2">
                                <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-1 text-[10px] text-zinc-500">
-                                     <CalendarDays className="w-3 h-3" /> D├¡a:
+                                     <CalendarDays className="w-3 h-3" /> Día:
                                   </div>
                                   <input 
                                      type="date" 
@@ -2583,7 +2583,7 @@ const handleMassiveUpload = async (e) => {
                                </div>
                                {payment.receiptAttached && (
                                   <div className="text-[9px] text-emerald-400 font-medium truncate mt-1 bg-emerald-950/30 p-1 rounded border border-emerald-900/50" title={payment.receiptAttached}>
-                                     Ô£ô {payment.receiptAttached}
+                                     ✓ {payment.receiptAttached}
                                   </div>
                                )}
                             </div>
@@ -2603,7 +2603,7 @@ const handleMassiveUpload = async (e) => {
             <div className={`p-6 rounded-2xl flex flex-col justify-center border border-zinc-800 ${isDesistido ? 'bg-zinc-950 opacity-50' : (totalToPayNow > 0 ? 'bg-rose-950/10 border-rose-900/30' : 'bg-emerald-950/10 border-emerald-900/30')}`}>
               <div className="flex justify-between items-center mb-4">
                 <h4 className={`text-sm font-bold uppercase tracking-wider ${isDesistido ? 'text-zinc-500' : (totalToPayNow > 0 ? 'text-rose-500' : 'text-emerald-500')}`}>
-                  Liquidaci├│n (Firma de Promesa)
+                  Liquidación (Firma de Promesa)
                 </h4>
                 {/* NUEVO: Campo Intereses por Mora */}
                 {!isDesistido && (
@@ -2643,7 +2643,7 @@ const handleMassiveUpload = async (e) => {
 
             <div className={`bg-black text-white rounded-2xl p-6 relative overflow-hidden shadow-lg border border-zinc-800 ${isDesistido ? 'opacity-80' : ''}`}>
               <Calculator className="absolute -right-6 -bottom-6 w-32 h-32 text-zinc-800 opacity-30" />
-              <h3 className="text-sm font-bold uppercase tracking-wider mb-4 text-zinc-400 relative z-10">Matem├ítica del Contrato</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider mb-4 text-zinc-400 relative z-10">Matemática del Contrato</h3>
               
               <div className="space-y-1 text-sm text-zinc-300 relative z-10 font-mono">
                 <div className="flex justify-between"><span>Precio de Venta:</span> <span className="text-white">{formatCurrency(lot.totalPrice)}</span></div>
@@ -2653,8 +2653,8 @@ const handleMassiveUpload = async (e) => {
                 
                 {isDesistido ? (
                   <>
-                    <div className="flex justify-between text-rose-400 border-b border-zinc-800 pb-2 mt-2"><span>(+) Devoluci├│n al Cliente:</span> <span>{formatCurrency(lot.refundAmount || 0)}</span></div>
-                    <div className="flex justify-between pt-2 text-amber-500"><span>Retenci├│n de Penalidad:</span> <span>{formatCurrency((totalInitialPaid + totalQuotasPaid) - (lot.refundAmount || 0))}</span></div>
+                    <div className="flex justify-between text-rose-400 border-b border-zinc-800 pb-2 mt-2"><span>(+) Devolución al Cliente:</span> <span>{formatCurrency(lot.refundAmount || 0)}</span></div>
+                    <div className="flex justify-between pt-2 text-amber-500"><span>Retención de Penalidad:</span> <span>{formatCurrency((totalInitialPaid + totalQuotasPaid) - (lot.refundAmount || 0))}</span></div>
                   </>
                 ) : (
                   <>
@@ -2678,14 +2678,14 @@ const handleMassiveUpload = async (e) => {
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-3">
                   <Sparkles className="w-5 h-5 text-rose-500" />
-                  {isDesistido ? 'Generar Documento de Resoluci├│n' : 'Redactar Notificaci├│n de Cobro'}
+                  {isDesistido ? 'Generar Documento de Resolución' : 'Redactar Notificación de Cobro'}
                 </h3>
                 
                 {!isDesistido && (
                   <>
                     <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">Tono del Mensaje / Remitente</label>
                     <div className="flex flex-wrap gap-2">
-                      {['Administraci├│n', 'Asesor Comercial', 'Gerente General', 'Departamento Legal'].map(tone => (
+                      {['Administración', 'Asesor Comercial', 'Gerente General', 'Departamento Legal'].map(tone => (
                         <button
                           key={tone}
                           onClick={() => setMessageTone(tone)}
@@ -2721,7 +2721,7 @@ const handleMassiveUpload = async (e) => {
                 <div className="bg-zinc-950/80 border-b border-zinc-800 px-4 py-3 flex flex-wrap gap-2 justify-between items-center">
                   <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Borrador Final {isDesistido ? '(Legal)' : `(${messageTone})`}</span>
                   <div className="flex flex-wrap gap-2">
-                    <button onClick={() => { fallbackCopyTextToClipboard(lot.generatedMessage); showAlert('├ëxito', '┬íCopiado al portapapeles!'); }} className="px-3 py-1.5 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white border border-zinc-700 rounded text-xs font-bold transition-colors">Copiar Texto</button>
+                    <button onClick={() => { fallbackCopyTextToClipboard(lot.generatedMessage); showAlert('Éxito', '¡Copiado al portapapeles!'); }} className="px-3 py-1.5 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white border border-zinc-700 rounded text-xs font-bold transition-colors">Copiar Texto</button>
                     {!isDesistido && (
                       <>
                         <button onClick={() => handleSendWhatsApp(lot)} className="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-500 rounded text-xs font-bold transition-colors flex items-center gap-1 shadow-md shadow-emerald-900/20"><MessageCircle className="w-3 h-3"/> WhatsApp</button>
@@ -2754,7 +2754,7 @@ const handleMassiveUpload = async (e) => {
             <h2 className="text-3xl font-black text-rose-500 flex items-center gap-3">
               <Trophy className="w-8 h-8" /> Sorteos Especiales
             </h2>
-            <p className="text-zinc-400 mt-1">Realiza sorteos aleatorios criptogr├íficamente seguros para tus clientes calificados.</p>
+            <p className="text-zinc-400 mt-1">Realiza sorteos aleatorios criptográficamente seguros para tus clientes calificados.</p>
           </div>
           <button onClick={() => setView('dashboard')} className="text-zinc-400 hover:text-white font-bold text-sm flex items-center gap-1 transition-colors">
             <ChevronLeft className="w-4 h-4"/> Volver al Dashboard
@@ -2770,11 +2770,11 @@ const handleMassiveUpload = async (e) => {
                 {raffleState.status === 'idle' && (
                   <div className="text-center">
                     <Dices className="w-24 h-24 text-rose-500/50 mx-auto mb-6" />
-                    <h3 className="text-2xl font-bold text-white mb-2">┬┐Listo para el sorteo?</h3>
-                    <p className="text-zinc-400 mb-6 max-w-md mx-auto">Hay <strong>{participants.length}</strong> clientes activos marcados con un ticket de participaci├│n.</p>
+                    <h3 className="text-2xl font-bold text-white mb-2">¿Listo para el sorteo?</h3>
+                    <p className="text-zinc-400 mb-6 max-w-md mx-auto">Hay <strong>{participants.length}</strong> clientes activos marcados con un ticket de participación.</p>
                     
                     <div className="mb-8 flex items-center justify-center gap-3">
-                      <label className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Duraci├│n del Sorteo:</label>
+                      <label className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Duración del Sorteo:</label>
                       <select 
                         value={raffleState.duration} 
                         onChange={(e) => setRaffleState(prev => ({...prev, duration: Number(e.target.value)}))}
@@ -2791,7 +2791,7 @@ const handleMassiveUpload = async (e) => {
                       onClick={executeRaffle}
                       className="bg-rose-600 hover:bg-rose-500 text-white text-xl font-black px-10 py-4 rounded-full shadow-lg shadow-rose-900/50 transform hover:scale-105 transition-all"
                     >
-                      ┬íINICIAR SORTEO!
+                      ¡INICIAR SORTEO!
                     </button>
                   </div>
                 )}
@@ -2808,7 +2808,7 @@ const handleMassiveUpload = async (e) => {
                 {raffleState.status === 'finished' && raffleState.winner && (
                   <div className="text-center w-full animate-bounce-short">
                     <div className="inline-block bg-rose-950/50 text-rose-400 px-4 py-1 rounded-full font-bold text-sm uppercase tracking-widest mb-6 border border-rose-900/50">
-                      ┬íTenemos un Ganador!
+                      ¡Tenemos un Ganador!
                     </div>
                     <div className="bg-gradient-to-r from-rose-600 to-pink-600 shadow-2xl shadow-rose-900/50 rounded-2xl p-1">
                       <div className="bg-zinc-950 rounded-xl p-8">
@@ -2840,7 +2840,7 @@ const handleMassiveUpload = async (e) => {
             </div>
             <div className="p-2 overflow-y-auto flex-1 scrollbar-thin">
               {participants.length === 0 ? (
-                <div className="text-center p-8 text-zinc-500 text-sm">No hay participantes habilitados. Entra a "Auditar" en un lote y marca la opci├│n de sorteo.</div>
+                <div className="text-center p-8 text-zinc-500 text-sm">No hay participantes habilitados. Entra a "Auditar" en un lote y marca la opción de sorteo.</div>
               ) : (
                 <ul className="space-y-1">
                   {participants.map(p => (
@@ -2877,9 +2877,9 @@ const handleMassiveUpload = async (e) => {
             <button onClick={() => {
               const dummyCode = `<iframe src="https://tu-dominio.com/masterplan-embed/${activeProjectId}" width="100%" height="600px" style="border:none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.5);"></iframe>`;
               fallbackCopyTextToClipboard(dummyCode);
-              showAlert('C├│digo Copiado', 'Se ha copiado un c├│digo HTML iFrame al portapapeles. Entr├®gaselo a tu desarrollador web para incrustar este mapa en la p├ígina p├║blica del proyecto.');
+              showAlert('Código Copiado', 'Se ha copiado un código HTML iFrame al portapapeles. Entrégaselo a tu desarrollador web para incrustar este mapa en la página pública del proyecto.');
             }} className="text-rose-400 bg-zinc-900 border border-zinc-800 hover:border-rose-500/50 hover:bg-zinc-800 font-bold text-sm px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-              <Code className="w-4 h-4"/> Obtener C├│digo Web
+              <Code className="w-4 h-4"/> Obtener Código Web
             </button>
           </div>
         </div>
@@ -2891,8 +2891,8 @@ const handleMassiveUpload = async (e) => {
           <div className="flex items-center gap-2 text-zinc-300"><span className="w-3 h-3 rounded-full bg-zinc-600 shadow-[0_0_8px_rgba(82,82,91,0.8)]"></span> Desistido</div>
         </div>
 
-<div className="flex flex-col lg:flex-row gap-6">
-          <div className="bg-black rounded-2xl shadow-xl overflow-hidden border border-zinc-800 relative max-h-[calc(100vh-280px)] flex items-center justify-center flex-1">
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="bg-black rounded-2xl shadow-xl overflow-hidden border border-zinc-800 relative min-h-[500px] flex items-center justify-center flex-1">
             {!projectConfig.masterplanImage ? (
               <label className="flex flex-col items-center justify-center p-12 cursor-pointer hover:scale-105 transition-transform group">
                 <div className="bg-zinc-900 p-6 rounded-full mb-4 border border-zinc-800 group-hover:border-rose-500/50 transition-colors">
@@ -2902,9 +2902,9 @@ const handleMassiveUpload = async (e) => {
                 <input type="file" accept="image/*" className="hidden" onChange={handleMasterplanUpload} />
               </label>
             ) : (
-              <div className="relative w-full h-full flex items-center justify-center p-4 overflow-auto">
-                 <img src={projectConfig.masterplanImage} alt="Masterplan" className="max-w-full max-h-[calc(100vh-320px)] object-contain cursor-crosshair relative z-0" onClick={handleMapClick} />
-                  
+              <div className="relative w-full max-w-full overflow-auto">
+                 <img src={projectConfig.masterplanImage} alt="Masterplan" className="w-full h-auto cursor-crosshair relative z-0" onClick={handleMapClick} />
+                 
                  {projectConfig.lotPins?.map(pin => {
                     const colorClass = getPinColor(pin.loteNumber);
                     return (
@@ -2918,7 +2918,7 @@ const handleMassiveUpload = async (e) => {
                           const cleanPinNum = String(pin.loteNumber).replace(/\D/g, '');
                           const lot = lots.find(l => String(l.loteNumber).replace(/\D/g, '') === cleanPinNum && cleanPinNum !== '');
                           if(lot) { setSelectedLotId(lot.id); setView('detail'); }
-                          else showAlert('Lote Libre', `El lote ${pin.loteNumber} no tiene un expediente de venta creado a├║n en el sistema.`);
+                          else showAlert('Lote Libre', `El lote ${pin.loteNumber} no tiene un expediente de venta creado aún en el sistema.`);
                         }}
                       >
                         {pin.loteNumber.replace(/\D/g, '')}
@@ -2935,11 +2935,11 @@ const handleMassiveUpload = async (e) => {
           
           {/* PANEL LATERAL DE PINES */}
           {projectConfig.masterplanImage && (
-            <div className="w-full lg:w-64 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col max-h-[calc(100vh-280px)]">
-              <h3 className="font-bold text-white mb-2 text-sm border-b border-zinc-800 pb-2">­ƒôì Lotes Hu├®rfanos</h3>
-              <p className="text-[10px] text-zinc-400 mb-3">Haz clic en el mapa y escribe el n├║mero de uno de estos lotes para mapearlos.</p>
+            <div className="w-full lg:w-64 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col h-[500px]">
+              <h3 className="font-bold text-white mb-2 text-sm border-b border-zinc-800 pb-2">📍 Lotes Huérfanos</h3>
+              <p className="text-[10px] text-zinc-400 mb-3">Haz clic en el mapa y escribe el número de uno de estos lotes para mapearlos.</p>
               <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto mb-4 scrollbar-thin">
-                {unmappedLots.length === 0 ? <span className="text-emerald-400 font-bold text-xs mt-1">┬íTodos mapeados!</span> : 
+                {unmappedLots.length === 0 ? <span className="text-emerald-400 font-bold text-xs mt-1">¡Todos mapeados!</span> : 
                   unmappedLots.map(l => (
                     <span key={l.id} className="bg-zinc-800 text-zinc-300 px-2 py-1 rounded text-[10px] font-bold border border-zinc-700">
                       {l.loteNumber}
@@ -2948,7 +2948,7 @@ const handleMassiveUpload = async (e) => {
                 }
               </div>
               
-              <h3 className="font-bold text-white mb-2 text-sm border-b border-zinc-800 pb-2 mt-2">­ƒôî Pines Colocados</h3>
+              <h3 className="font-bold text-white mb-2 text-sm border-b border-zinc-800 pb-2 mt-2">📌 Pines Colocados</h3>
               <div className="flex-1 overflow-y-auto scrollbar-thin space-y-1 pr-1">
                 {projectConfig.lotPins?.length === 0 ? <span className="text-zinc-500 text-xs">No hay pines en el mapa.</span> :
                   projectConfig.lotPins?.map(pin => (
@@ -2966,8 +2966,8 @@ const handleMassiveUpload = async (e) => {
     );
   };
 
-return (
-    <div className="min-h-[calc(100vh-80px)] font-sans text-zinc-100 relative bg-[#050505] overflow-hidden">
+  return (
+    <div className="min-h-screen font-sans text-zinc-100 relative bg-[#050505]">
       {/* GLOBAL STYLES FOR FONTS & SCROLLBAR */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
@@ -2987,14 +2987,14 @@ return (
       `}</style>
 
       {/* MENÚ SUPERIOR MULTI-PROYECTO */}
-      <div className="bg-[#0a0a0a] rounded-2xl border border-white/5 shadow-2xl sticky top-0 z-40 mx-4 mt-4 mb-0">
+      <div className="bg-[#0a0a0a] rounded-3xl border border-white/5 shadow-2xl sticky top-4 z-40 mx-4 mt-4">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-5">
             <div className="p-4 bg-rose-500/20 rounded-2xl border border-rose-500/20">
               <Calculator className="w-8 h-8 text-rose-500" />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-xl font-black uppercase tracking-tighter italic text-white">Gesti├│n de Lotes <span className="text-rose-500">Pro</span></h1>
+              <h1 className="text-xl font-black uppercase tracking-tighter italic text-white">Gestión de Lotes <span className="text-rose-500">Pro</span></h1>
               <div className="flex items-center mt-1.5">
                 <select
                   value={activeProjectId}
@@ -3015,7 +3015,7 @@ return (
             <button onClick={() => setView('calendar')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap flex items-center gap-1 ${view === 'calendar' ? 'bg-rose-500 text-white shadow-lg' : 'text-zinc-600 hover:text-white'}`}><CalendarIcon className="w-3 h-3"/> Calendario</button>
             <button onClick={() => setView('masterplan')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap flex items-center gap-1 ${view === 'masterplan' ? 'bg-rose-500 text-white shadow-lg' : 'text-zinc-600 hover:text-white'}`}><MapIcon className="w-3 h-3"/> Masterplan</button>
             <button onClick={() => setView('raffle')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap flex items-center gap-1 ${view === 'raffle' ? 'bg-amber-500 text-black shadow-lg' : 'text-amber-500 hover:text-amber-400'}`}><Trophy className="w-3 h-3"/> Sorteos</button>
-            <button onClick={() => setView('upload')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap ${view === 'upload' ? 'bg-rose-500 text-white shadow-lg' : 'text-zinc-600 hover:text-white'}`}>Configuraci├│n</button>
+            <button onClick={() => setView('upload')} className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase transition-all tracking-[0.2em] whitespace-nowrap ${view === 'upload' ? 'bg-rose-500 text-white shadow-lg' : 'text-zinc-600 hover:text-white'}`}>Configuración</button>
           </div>
         </div>
       </div>
@@ -3058,18 +3058,19 @@ return (
                 }} 
                 className={`px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all shadow-lg ${modalConfig.type === 'confirm' ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/20' : 'bg-rose-600 hover:bg-rose-700 shadow-rose-500/20'}`}
               >
-                {modalConfig.type === 'confirm' ? 'S├¡, continuar' : (modalConfig.type === 'prompt' ? 'Guardar' : 'Entendido')}
+                {modalConfig.type === 'confirm' ? 'Sí, continuar' : (modalConfig.type === 'prompt' ? 'Guardar' : 'Entendido')}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="p-4 md:p-6 pb-24">
+      <div className="p-4 md:p-8">
         {view === 'upload' && renderUploadView()}
         {view === 'dashboard' && renderDashboardView()}
         {view === 'detail' && renderDetailView()}
         {view === 'raffle' && renderRaffleView()}
+        {view === 'calendar' && renderCalendarView()}
         {view === 'masterplan' && renderMasterplanView()}
       </div>
     </div>
