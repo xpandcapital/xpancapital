@@ -5,15 +5,17 @@ export async function loadLotsFromSupabase(projectId: string): Promise<Lote[]> {
   if (!projectId) return [];
 
   try {
-    const { data, error } = await supabase
-      .from('project_lots')
-      .select('*')
-      .eq('project_id', projectId);
+    // Usar API del servidor para bypassear RLS
+    const res = await fetch(`/api/admin/projects/${projectId}`);
+    const json = await res.json();
 
-    if (error) {
-      console.error('[SupabaseLots] Error loading lots:', error.message, error.code);
+    if (!json.success) {
+      console.error('[SupabaseLots] API error:', json.error);
       return [];
     }
+
+    const project = json.data;
+    const data = project?.lots || [];
 
     if (!data || data.length === 0) {
       console.log('[SupabaseLots] No lots found for project:', projectId);
