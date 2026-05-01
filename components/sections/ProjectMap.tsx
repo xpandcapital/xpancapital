@@ -72,50 +72,55 @@ export function ProjectMap() {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                            className="relative h-[460px] sm:h-[520px] lg:h-auto lg:aspect-video bg-black/40 rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)] antigravity"
+                            className={`relative h-[460px] sm:h-[520px] lg:h-auto lg:aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)] antigravity ${backgroundImage ? 'bg-cover' : 'bg-black/40'}`}
                             style={{
                                 backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
                                 backgroundSize: 'cover',
                                 backgroundPosition: 'center'
                             }}
                         >
-                            {/* Radar rings background */}
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] border border-white/5 rounded-full animate-[spin_60s_linear_infinite]" />
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] border border-white/5 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] border border-white/10 rounded-full animate-[spin_20s_linear_infinite]" />
+                            {/* Solo mostrar elementos decorativos si NO hay imagen de fondo personalizada */}
+                            {!backgroundImage && (
+                                <>
+                                    {/* Radar rings background */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] border border-white/5 rounded-full animate-[spin_60s_linear_infinite]" />
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140%] h-[140%] border border-white/5 rounded-full animate-[spin_40s_linear_infinite_reverse]" />
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] border border-white/10 rounded-full animate-[spin_20s_linear_infinite]" />
 
-                            {/* Contour dot grid */}
-                            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-radial-gradient(circle at center, transparent 0, transparent 20px, rgba(255,255,255,0.8) 21px, transparent 22px)' }} />
+                                    {/* Contour dot grid */}
+                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-radial-gradient(circle at center, transparent 0, transparent 20px, rgba(255,255,255,0.8) 21px, transparent 22px)' }} />
 
-                            {/* Stylized Ecuador Abstract Graphic - Landscape Bounds 16:9 to preserve font ratios */}
-                            <svg className="absolute inset-0 w-full h-full opacity-[0.4]" viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-                                {/* Ecuador Label - safely bounded */}
-                                <text x="30" y="20" fill="#ffffff" fontSize="6" fontWeight="bold" fontFamily="monospace" opacity="0.8" style={{ letterSpacing: '1px' }}>ECUADOR</text>
-                                <path d="M 30,22 L 50,22" stroke="#ffffff" strokeWidth="0.5" opacity="0.6" />
+                                    {/* Stylized Ecuador Abstract Graphic - Landscape Bounds 16:9 to preserve font ratios */}
+                                    <svg className="absolute inset-0 w-full h-full opacity-[0.4]" viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                                        {/* Ecuador Label - safely bounded */}
+                                        <text x="30" y="20" fill="#ffffff" fontSize="6" fontWeight="bold" fontFamily="monospace" opacity="0.8" style={{ letterSpacing: '1px' }}>ECUADOR</text>
+                                        <path d="M 30,22 L 50,22" stroke="#ffffff" strokeWidth="0.5" opacity="0.6" />
 
-                                {/* Pichincha Region */}
-                                <path d="M 60,15 L 75,5 L 100,3 L 125,5 L 135,15 L 140,30 L 100,35 L 75,25 Z" fill="#ffffff" fillOpacity="0.05" stroke="#ffffff" strokeWidth="0.3" strokeDasharray="1,1" />
-                                <text x="85" y="17" fill="#ffffff" fontSize="3" fontFamily="monospace" opacity="0.6">PICHINCHA</text>
-                                <text x="85" y="20" fill="#ffffff" fontSize="2.5" fontFamily="monospace" opacity="0.8">Quito</text>
+                                        {/* Pichincha Region */}
+                                        <path d="M 60,15 L 75,5 L 100,3 L 125,5 L 135,15 L 140,30 L 100,35 L 75,25 Z" fill="#ffffff" fillOpacity="0.05" stroke="#ffffff" strokeWidth="0.3" strokeDasharray="1,1" />
+                                        <text x="85" y="17" fill="#ffffff" fontSize="3" fontFamily="monospace" opacity="0.6">PICHINCHA</text>
+                                        <text x="85" y="20" fill="#ffffff" fontSize="2.5" fontFamily="monospace" opacity="0.8">Quito</text>
 
-                                {/* Cotopaxi Region */}
-                                <path d="M 40,35 L 115,35 L 150,38 L 135,60 L 85,65 L 55,60 L 30,45 Z" fill="#ffffff" fillOpacity="0.08" stroke="#ffffff" strokeWidth="0.4" />
-                                <text x="45" y="45" fill="#ffffff" fontSize="3" fontFamily="monospace" opacity="0.6">COTOPAXI</text>
-                                <text x="45" y="48" fill="#ffffff" fontSize="2.5" fontFamily="monospace" opacity="0.8">Pujilí</text>
-                                <text x="110" y="45" fill="#ffffff" fontSize="2.5" fontFamily="monospace" opacity="0.8">Latacunga</text>
+                                        {/* Cotopaxi Region */}
+                                        <path d="M 40,35 L 115,35 L 150,38 L 135,60 L 85,65 L 55,60 L 30,45 Z" fill="#ffffff" fillOpacity="0.08" stroke="#ffffff" strokeWidth="0.4" />
+                                        <text x="45" y="45" fill="#ffffff" fontSize="3" fontFamily="monospace" opacity="0.6">COTOPAXI</text>
+                                        <text x="45" y="48" fill="#ffffff" fontSize="2.5" fontFamily="monospace" opacity="0.8">Pujilí</text>
+                                        <text x="110" y="45" fill="#ffffff" fontSize="2.5" fontFamily="monospace" opacity="0.8">Latacunga</text>
 
-                                {/* Tungurahua Region */}
-                                <path d="M 65,65 L 130,60 L 150,75 L 125,85 L 60,80 Z" fill="#ffffff" fillOpacity="0.05" stroke="#ffffff" strokeWidth="0.3" strokeDasharray="1,1" />
-                                <text x="115" y="70" fill="#ffffff" fontSize="3" fontFamily="monospace" opacity="0.6">TUNGURAHUA</text>
-                                <text x="115" y="73" fill="#ffffff" fontSize="2.5" fontFamily="monospace" opacity="0.8">Ambato</text>
+                                        {/* Tungurahua Region */}
+                                        <path d="M 65,65 L 130,60 L 150,75 L 125,85 L 60,80 Z" fill="#ffffff" fillOpacity="0.05" stroke="#ffffff" strokeWidth="0.3" strokeDasharray="1,1" />
+                                        <text x="115" y="70" fill="#ffffff" fontSize="3" fontFamily="monospace" opacity="0.6">TUNGURAHUA</text>
+                                        <text x="115" y="73" fill="#ffffff" fontSize="2.5" fontFamily="monospace" opacity="0.8">Ambato</text>
 
-                                {/* Connection Lines */}
-                                <path d="M 90,30 L 75,50 L 95,65" fill="none" stroke="#ffffff" strokeWidth="0.2" strokeDasharray="2,2" opacity="0.5" />
-                            </svg>
+                                        {/* Connection Lines */}
+                                        <path d="M 90,30 L 75,50 L 95,65" fill="none" stroke="#ffffff" strokeWidth="0.2" strokeDasharray="2,2" opacity="0.5" />
+                                    </svg>
 
-                            {/* Fade edges - softened to reveal outer edge texts */}
-                            <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/40 via-transparent to-[#0a0a0a]/80 pointer-events-none" />
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/40 via-transparent to-[#0a0a0a]/40 pointer-events-none" />
+                                    {/* Fade edges - softened to reveal outer edge texts */}
+                                    <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a]/40 via-transparent to-[#0a0a0a]/80 pointer-events-none" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a]/40 via-transparent to-[#0a0a0a]/40 pointer-events-none" />
+                                </>
+                            )}
 
                             {/* City Pins */}
                             {locations.map((loc, idx) => (
