@@ -56,6 +56,59 @@ function canAccess(rol: string, pathname: string): boolean {
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
+  const { pathname } = request.nextUrl
+
+  const publicPaths = [
+    '/', '/blog', '/tienda', '/cursos', '/proyectos',
+    '/verificar', '/gracias', '/f', '/formulario', '/embudo',
+    '/calendario', '/certificado', '/login', '/embed',
+  ]
+  const isPublic = publicPaths.some(p =>
+    pathname === p || pathname.startsWith(p + '/')
+  )
+  const isPublicApi = pathname.startsWith('/api/') && (
+    pathname.startsWith('/api/leads') ||
+    pathname.startsWith('/api/calendarios/public') ||
+    pathname.startsWith('/api/formularios/public') ||
+    pathname.startsWith('/api/templates/landing') ||
+    pathname.startsWith('/api/templates/slug') ||
+    pathname.startsWith('/api/templates/tipo') ||
+    pathname.startsWith('/api/products') ||
+    pathname.startsWith('/api/site-config') ||
+    pathname.startsWith('/api/context') ||
+    pathname.startsWith('/api/blog') ||
+    pathname.startsWith('/api/cursos') ||
+    pathname.startsWith('/api/asesores') ||
+    pathname.startsWith('/api/campanas') ||
+    pathname.startsWith('/api/verificar') ||
+    pathname.startsWith('/api/upload') ||
+    pathname.startsWith('/api/images') ||
+    pathname.startsWith('/api/sync-media') ||
+    pathname.startsWith('/api/storage') ||
+    pathname.startsWith('/api/envato') ||
+    pathname.startsWith('/api/postulantes/public') ||
+    pathname.startsWith('/api/postulantes/puestos/by-slug') ||
+    pathname.startsWith('/api/postulantes/upload') ||
+    pathname.startsWith('/api/postulantes/puestos') ||
+    pathname.startsWith('/api/cms/landing')
+  )
+
+  // Early return: rutas públicas sin cookies de sesión → omitir getUser()
+  const isSuperadmin = pathname.startsWith('/superadmin')
+  const isMiembros = pathname.startsWith('/miembros')
+  const isAdmin = pathname.startsWith('/admin')
+  const isLogin = pathname === '/login'
+  const isProtected = isSuperadmin || isMiembros || isAdmin || isLogin
+
+  if (!isProtected && (isPublic || isPublicApi)) {
+    const hasSupabaseCookie = request.cookies.getAll().some(
+      c => c.name.startsWith('sb-')
+    )
+    if (!hasSupabaseCookie) {
+      return NextResponse.next()
+    }
+  }
+
   let user: any = null
   let profileRol: string | null = null
 
@@ -95,48 +148,6 @@ export async function updateSession(request: NextRequest) {
   } catch (error) {
     console.error('[Middleware] Error al verificar sesión:', error)
   }
-
-  const { pathname } = request.nextUrl
-
-  const publicPaths = [
-    '/', '/blog', '/tienda', '/cursos', '/proyectos',
-    '/verificar', '/gracias', '/f', '/formulario', '/embudo',
-    '/calendario', '/certificado', '/login', '/embed',
-  ]
-  const isPublic = publicPaths.some(p =>
-    pathname === p || pathname.startsWith(p + '/')
-  )
-  const isPublicApi = pathname.startsWith('/api/') && (
-    pathname.startsWith('/api/leads') ||
-    pathname.startsWith('/api/calendarios/public') ||
-    pathname.startsWith('/api/formularios/public') ||
-    pathname.startsWith('/api/templates/landing') ||
-    pathname.startsWith('/api/templates/slug') ||
-    pathname.startsWith('/api/templates/tipo') ||
-    pathname.startsWith('/api/products') ||
-    pathname.startsWith('/api/site-config') ||
-    pathname.startsWith('/api/context') ||
-    pathname.startsWith('/api/blog') ||
-    pathname.startsWith('/api/cursos') ||
-    pathname.startsWith('/api/asesores') ||
-    pathname.startsWith('/api/campanas') ||
-    pathname.startsWith('/api/verificar') ||
-    pathname.startsWith('/api/upload') ||
-    pathname.startsWith('/api/images') ||
-    pathname.startsWith('/api/sync-media') ||
-    pathname.startsWith('/api/storage') ||
-    pathname.startsWith('/api/envato') ||
-    pathname.startsWith('/api/postulantes/public') ||
-    pathname.startsWith('/api/postulantes/puestos/by-slug') ||
-    pathname.startsWith('/api/postulantes/upload') ||
-    pathname.startsWith('/api/postulantes/puestos') ||
-    pathname.startsWith('/api/cms/landing')
-  )
-
-  const isSuperadmin = pathname.startsWith('/superadmin')
-  const isMiembros = pathname.startsWith('/miembros')
-  const isAdmin = pathname.startsWith('/admin')
-  const isLogin = pathname === '/login'
 
   // 1. No autenticado → redirigir a login
   if (!user && (isSuperadmin || isMiembros || isAdmin)) {

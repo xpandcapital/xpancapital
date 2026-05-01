@@ -154,7 +154,16 @@ const CACHE_KEY = 'blis_auth_user'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Si hay cache en localStorage, iniciar sin loading para evitar skeleton/flash
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY)
+        if (cached) return false
+      } catch {}
+    }
+    return true
+  })
 
   useEffect(() => {
     try {

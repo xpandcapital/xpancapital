@@ -1,15 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/sections/Header";
-import { CursorWrapper } from "@/components/ui/CursorWrapper";
-import { AuthProvider } from "@/hooks/useAuth";
-import { ShopProvider } from "@/context/ShopContext";
-import { SalesProvider } from "@/context/SalesContext";
-import { ToastProvider } from "@/components/ui/Toast";
-import { LandingCMSProvider } from "@/context/LandingCMSContext";
-import { PWARegistrar } from "@/components/utils/PWARegistrar";
-import { DynamicMetadata } from "@/components/utils/DynamicMetadata";
+import { LayoutShell } from "@/components/layout/LayoutShell";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -38,21 +30,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <body className={`${montserrat.variable} font-sans antialiased bg-black text-white selection:bg-blis-red/30 selection:text-white`}>
-<LandingCMSProvider>
-          <DynamicMetadata />
-          <AuthProvider>
-            <ToastProvider>
-              <ShopProvider>
-                <SalesProvider>
-                  <CursorWrapper />
-                  <PWARegistrar />
-                  <Header />
-                  {children}
-                </SalesProvider>
-              </ShopProvider>
-            </ToastProvider>
-          </AuthProvider>
-        </LandingCMSProvider>
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );

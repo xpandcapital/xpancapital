@@ -1,6 +1,6 @@
 "use client";
 
-import { useLandingTemplate } from "@/lib/hooks/useLandingTemplate";
+import { useLandingCMS } from "@/context/LandingCMSContext";
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { VideoShowcase } from "@/components/sections/VideoShowcase";
@@ -136,11 +136,13 @@ export function DynamicSections({
   sectionVisibility: externalVisibility,
   sections: externalSections
 }: DynamicSectionsProps) {
-  const { loading, isSectionVisible: isLandingSectionVisible, getSectionOrder, getSectionData } = useLandingTemplate();
+  const { loading, isSectionVisible: contextIsSectionVisible, sectionOrder: contextOrder, templateData } = useLandingCMS();
 
-  // Don't show default content while loading - wait for real data
-  if (loading && !externalOrder && !externalSections) {
-    return null; // Return nothing while loading to avoid flash of default text
+  const hasExternalData = !!(externalOrder && externalOrder.length > 0) || !!externalSections;
+
+  // Solo mostrar skeleton si no hay datos externos (SSR) y el contexto aún está cargando
+  if (loading && !hasExternalData) {
+    return <ConstructionLoader />;
   }
 
   // Validate that the external order contains sections valid for this templateType
@@ -156,8 +158,8 @@ export function DynamicSections({
     // Make sure at least one section matches the expected type-specific sections
     externalOrder.some(key => defaultOrderForType.includes(key));
 
-  const sectionOrder = (externalOrderIsValid ? externalOrder : null) || 
-    (templateType === 'landing' ? getSectionOrder() : null) || 
+  const sectionOrder = (externalOrderIsValid ? externalOrder : null) ||
+    (templateType === 'landing' ? contextOrder : null) ||
     defaultOrderForType;
 
   const checkVisibility = (sectionKey: string): boolean => {
@@ -165,7 +167,7 @@ export function DynamicSections({
       return externalVisibility[sectionKey] !== false;
     }
     if (templateType === 'landing') {
-      return isLandingSectionVisible(sectionKey);
+      return contextIsSectionVisible(sectionKey);
     }
     return true;
   };
@@ -174,8 +176,9 @@ export function DynamicSections({
     if (externalSections) {
       return (externalSections[sectionKey] as SectionData) || null;
     }
-    if (templateType === 'landing') {
-      return getSectionData(sectionKey);
+    if (templateType === 'landing' && templateData?.secciones) {
+      const section = templateData.secciones[sectionKey as keyof typeof templateData.secciones];
+      return section ? (section as unknown as SectionData) : null;
     }
     return null;
   };

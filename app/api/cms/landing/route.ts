@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { revalidateTag } from 'next/cache'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -126,6 +127,8 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ success: false, error: updateError.message }, { status: 500 })
       }
     }
+
+    revalidateTag('landing-template')
 
     return NextResponse.json({ success: true, message: 'CMS actualizado correctamente' })
   } catch {

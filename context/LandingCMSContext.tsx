@@ -478,19 +478,55 @@ const DEFAULT_SECTION_ORDER = [
     'faq', 'blog', 'footer'
 ];
 
-export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [cmsData, setCmsData] = useState<LandingCMSData>(DEFAULT_CMS_DATA);
-    const [templateData, setTemplateData] = useState<TemplateData | null>(null);
-    const [siteConfig, setSiteConfig] = useState(DEFAULT_SITE_CONFIG);
-    const [loading, setLoading] = useState(true);
+interface LandingCMSProviderProps {
+  children: React.ReactNode
+  initialData?: {
+    templateData?: TemplateData | null
+  }
+}
+
+export const LandingCMSProvider: React.FC<LandingCMSProviderProps> = ({ children, initialData }) => {
+    const [cmsData, setCmsData] = useState<LandingCMSData>(() => {
+      if (initialData?.templateData?.secciones) {
+        const merged = { ...DEFAULT_CMS_DATA }
+        for (const key in initialData.templateData.secciones) {
+          const sectionKey = key as keyof LandingCMSData
+          const newValue = initialData.templateData.secciones[sectionKey as keyof typeof initialData.templateData.secciones]
+          if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
+            ;(merged as Record<string, unknown>)[sectionKey] = { ...merged[sectionKey], ...newValue as object }
+          } else {
+            ;(merged as Record<string, unknown>)[sectionKey] = newValue
+          }
+        }
+        return merged
+      }
+      return DEFAULT_CMS_DATA
+    })
+    const [templateData, setTemplateData] = useState<TemplateData | null>(initialData?.templateData as TemplateData | null || null)
+    const [siteConfig, setSiteConfig] = useState(DEFAULT_SITE_CONFIG)
+    const [loading, setLoading] = useState(!initialData)
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     useEffect(() => {
+        // Si ya tenemos datos iniciales del servidor, no hacer fetch
+        if (initialData) {
+          setLoading(false)
+          return
+        }
+
         async function loadCMSData() {
             try {
-                // Load site config
-                const siteConfigRes = await fetch('/api/site-config');
-                const siteConfigData = await siteConfigRes.json();
+                // Ejecutar site-config y templates/landing en PARALELO
+                const [siteConfigRes, templateRes] = await Promise.all([
+                  fetch('/api/site-config'),
+                  fetch('/api/templates/landing'),
+                ])
+
+                const siteConfigJson = await siteConfigRes.json()
+                const templateJson = await templateRes.json()
+
+                // Procesar site config
+                const siteConfigData = siteConfigJson
                 if (siteConfigData.success && siteConfigData.data) {
                     setSiteConfig(prev => ({
                         ...prev,
@@ -524,40 +560,17 @@ export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                     }));
                 }
 
-                const response = await fetch('/api/cms/landing');
-                const result = await response.json();
-                
-                if (result.success && result.data) {
-                    setCmsData(prev => {
-                        const merged = { ...prev };
-                        for (const key in result.data) {
-                            const sectionKey = key as keyof LandingCMSData;
-                            const newValue = result.data[sectionKey as keyof typeof result.data];
-                            if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
-                                (merged as Record<string, unknown>)[sectionKey] = { ...prev[sectionKey], ...newValue };
-                            } else {
-                                (merged as Record<string, unknown>)[sectionKey] = newValue;
-                            }
-                        }
-                        return merged;
-                    });
-                }
-                
-                const templateResponse = await fetch('/api/templates/landing');
-                const templateResult = await templateResponse.json();
-                
-                if (templateResult.success && templateResult.data) {
-                    setTemplateData(templateResult.data);
-                    if (templateResult.data.secciones) {
+                // Procesar template
+                if (templateJson.success && templateJson.data) {
+                    setTemplateData(templateJson.data);
+                    if (templateJson.data.secciones) {
                         setCmsData(prev => {
                             const merged = { ...prev };
-                            for (const key in templateResult.data.secciones) {
+                            for (const key in templateJson.data.secciones) {
                                 const sectionKey = key as keyof LandingCMSData;
-                                const newValue = templateResult.data.secciones[sectionKey as keyof typeof templateResult.data.secciones];
+                                const newValue = templateJson.data.secciones[sectionKey as keyof typeof templateJson.data.secciones];
                                 if (newValue && typeof newValue === 'object' && !Array.isArray(newValue)) {
-                                    (merged as Record<string, unknown>)[sectionKey] = { ...prev[sectionKey], ...newValue };
-                                } else {
-                                    (merged as Record<string, unknown>)[sectionKey] = newValue;
+                                    (merged as Record<string, unknown>)[sectionKey] = { ...prev[sectionKey], ...newValue as object };
                                 }
                             }
                             return merged;
@@ -566,8 +579,12 @@ export const LandingCMSProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 } else {
                     const saved = localStorage.getItem("blis_cms_data");
                     if (saved) {
-                        const parsed = JSON.parse(saved);
-                        setCmsData(prev => ({ ...prev, ...parsed }));
+                        try {
+                            const parsed = JSON.parse(saved);
+                            setCmsData(prev => ({ ...prev, ...parsed }));
+                        } catch {
+                            console.warn("Could not parse saved CMS data");
+                        }
                     }
                 }
             } catch {
