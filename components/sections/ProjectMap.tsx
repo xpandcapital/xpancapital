@@ -6,7 +6,7 @@ import { useLandingCMS } from "@/context/LandingCMSContext";
 
 export function ProjectMap() {
     const { cmsData } = useLandingCMS();
-    const { locations, description, title, subtitle } = cmsData.map;
+    const { locations, description, title, subtitle, backgroundImage } = cmsData.map;
 
     return (
         <section className="pt-10 md:pt-32 pb-32 bg-zinc-950 relative overflow-hidden">
@@ -73,6 +73,11 @@ export function ProjectMap() {
                             viewport={{ once: true }}
                             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
                             className="relative h-[460px] sm:h-[520px] lg:h-auto lg:aspect-video bg-black/40 rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)] antigravity"
+                            style={{
+                                backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                            }}
                         >
                             {/* Radar rings background */}
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] border border-white/5 rounded-full animate-[spin_60s_linear_infinite]" />
