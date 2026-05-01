@@ -9,7 +9,7 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex bg-black h-[calc(100vh-80px)] md:h-auto mt-20 overflow-hidden md:overflow-visible selection:bg-blis-red/30 relative">
+        <div className="flex bg-black h-[calc(100vh-80px)] overflow-hidden relative">
             <SuperadminSidebar />
             <div className="flex-1 flex flex-col relative z-50 min-w-0 pl-[56px] md:pl-0 transition-[padding] duration-300">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,#209f89_0%,transparent_50%)] opacity-[0.03] pointer-events-none" />
