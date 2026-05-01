@@ -66,7 +66,6 @@ export function Projects() {
         const { data, error } = await supabase
           .from("projects")
           .select("id, name, status, website, location, description, cover_image, gallery_images, logo_url, primary_color, secondary_color, start_date, end_date, order_index, is_active")
-          .eq("is_active", true)
           .order("order_index", { ascending: true, nullsFirst: false })
           .order("created_at", { ascending: false });
 
