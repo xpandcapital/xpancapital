@@ -1823,7 +1823,7 @@ const handleMassiveUpload = async (e) => {
 
   const renderDashboardView = () => (
     <div className="max-w-7xl mx-auto mt-8 space-y-8 animate-fadeIn">
-      <div className="bg-[#0a0a0a] rounded-3xl border border-white/5 p-6 flex flex-col md:flex-row justify-between md:items-center gap-4">
+      <div className="bg-[#0f0f0f] rounded-3xl border border-white/5 p-6 flex flex-col md:flex-row justify-between md:items-center gap-4">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-rose-500/10 rounded-2xl border border-rose-500/20">
             <LayoutDashboard className="w-6 h-6 text-rose-500" />
@@ -2002,7 +2002,7 @@ const handleMassiveUpload = async (e) => {
 
       {/* Sección de Lotes Desistidos */}
       {desistidoLots.length > 0 && (
-        <div className="bg-[#0a0a0a] rounded-3xl border border-white/5 overflow-hidden shadow-2xl mt-6">
+        <div className="bg-[#0f0f0f] rounded-3xl border border-white/5 overflow-hidden shadow-2xl mt-6">
           <button 
             onClick={() => setShowDesistidos(!showDesistidos)}
             className="w-full p-6 border-b border-white/5 bg-black/40 flex items-center justify-between hover:bg-black/60 transition-all"
@@ -2115,7 +2115,7 @@ const handleMassiveUpload = async (e) => {
     const isCommissionReady = paidPercentage >= (lot.commissionTriggerPercent || 30);
 
     return (
-      <div className="max-w-6xl mx-auto mt-8 bg-[#0a0a0a] border border-white/5 rounded-3xl shadow-2xl overflow-hidden animate-fadeIn pb-8">
+      <div className="max-w-6xl mx-auto mt-8 bg-[#0f0f0f] border border-white/5 rounded-3xl shadow-2xl overflow-hidden animate-fadeIn pb-8">
         
         {/* ESTADO DESISTIDO BANNER */}
         {isDesistido && (
@@ -2971,7 +2971,7 @@ const handleMassiveUpload = async (e) => {
 
 return (
     <div className="min-h-[calc(100vh-80px)] font-sans text-zinc-100 relative bg-[#0f0f0f] overflow-auto">
-      {/* GLOBAL STYLES FOR FONTS & SCROLLBAR */}
+      {/* GLOBAL STYLES FOR FONTS, SCROLLBAR & SELECT */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
         .color-invert::-webkit-calendar-picker-indicator {
@@ -2982,6 +2982,31 @@ return (
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
+        /* Custom select styles to remove browser defaults */
+        .custom-select {
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 8px center;
+          padding-right: 24px;
+        }
+        .custom-select:focus {
+          outline: none;
+          border-color: #3f3f46;
+          box-shadow: 0 0 0 1px #3f3f46;
+        }
+        .custom-select option {
+          background: #000;
+          color: #fff;
+          padding: 8px;
+        }
+        /* Firefox specific */
+        .custom-select:-moz-focusring {
+          color: transparent;
+          text-shadow: 0 0 0 #fff;
+        }
       `}</style>
 
 {/* MENÚ SUPERIOR UNIFICADO */}
@@ -3014,7 +3039,7 @@ return (
                   }
                   setView('dashboard');
                 }}
-                className="bg-black border border-zinc-700 text-zinc-300 text-[10px] font-bold uppercase tracking-wider outline-none cursor-pointer hover:border-zinc-500 hover:text-white transition-all px-2 py-1.5 rounded-lg mt-1 max-w-[200px]"
+                className="custom-select bg-black border border-zinc-700 text-zinc-300 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:border-zinc-500 hover:text-white transition-all px-2 py-1.5 rounded-lg mt-1 max-w-[200px]"
               >
                 {projectList.map(p => <option key={p.id} value={p.id} className="bg-black text-white">{p.name}</option>)}
               </select>
@@ -3054,7 +3079,7 @@ return (
 
       {modalConfig.isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
-          <div className="bg-[#0a0a0a] border border-white/5 rounded-3xl shadow-2xl p-8 w-full max-w-sm animate-fadeIn">
+          <div className="bg-[#0f0f0f] border border-white/5 rounded-3xl shadow-2xl p-8 w-full max-w-sm animate-fadeIn">
             <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
               <h3 className="text-lg font-black text-white uppercase tracking-tighter italic">{modalConfig.title}</h3>
               <button onClick={closeModal} className="text-zinc-500 hover:text-rose-500 transition-colors"><X className="w-5 h-5"/></button>
