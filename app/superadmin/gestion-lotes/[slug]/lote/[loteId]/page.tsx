@@ -8,7 +8,7 @@ import { useAIProcessing } from '../../_hooks/useAIProcessing';
 import {
   LoteHeader, LoteOwners, LoteContractual, LoteComercial, LoteTimeline,
   LoteDocuments, LoteInitialPayments, LotePayments, LoteReminders,
-  LoteObservations, LoteLiquidacion, LoteMath, LoteAIComposer,
+  LoteObservations, LoteSorteo, LoteLiquidacion, LoteMath, LoteAIComposer,
 } from '../../_components/LoteDetail';
 import { ConfirmAction } from '../../_components/shared/ConfirmAction';
 import { generateMonthList } from '../../_utils/months';
@@ -34,9 +34,7 @@ export default function LoteDetailPage() {
     return (
       <div className="max-w-2xl mx-auto mt-12 text-center">
         <p className="text-zinc-400 font-bold uppercase">Lote no encontrado</p>
-        <button onClick={() => router.push(`/superadmin/gestion-lotes/${slug}`)} className="mt-4 text-rose-400 hover:text-rose-300 text-xs font-bold uppercase">
-          Volver al Dashboard
-        </button>
+        <button onClick={() => router.push(`/superadmin/gestion-lotes/${slug}`)} className="mt-4 text-rose-400 hover:text-rose-300 text-xs font-bold uppercase">Volver al Dashboard</button>
       </div>
     );
   }
@@ -60,8 +58,7 @@ export default function LoteDetailPage() {
   };
 
   const handleDragDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDrag(false);
+    e.preventDefault(); setIsDrag(false);
     const files = Array.from(e.dataTransfer.files || []);
     if (files.length === 0) return;
     const updated = await processSingleLot(files, lot);
@@ -69,9 +66,16 @@ export default function LoteDetailPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto mt-4 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden">
+    <div className="max-w-7xl mx-auto mt-4 bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] rounded-2xl overflow-hidden">
       <LoteHeader lot={lot} projectSlug={slug} />
       <div className="p-6 space-y-6">
+        {/* Top row: wide components */}
+        <div className="space-y-6">
+          <LoteObservations lot={lot} onChange={(f, v) => lotes.updateLotField(lot.id, f, v)} />
+          <LoteSorteo lot={lot} onChange={(f, v) => lotes.updateLotField(lot.id, f, v)} />
+        </div>
+
+        {/* Main grid */}
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
           <div className="lg:col-span-4 space-y-6">
             <LoteOwners lot={lot} onAddOwner={() => lotes.addOwner(lot.id)} onUpdateOwner={(ownerId, f, v) => lotes.updateOwner(lot.id, ownerId, f, v)} onRemoveOwner={(ownerId) => lotes.removeOwner(lot.id, ownerId)} />
@@ -81,7 +85,6 @@ export default function LoteDetailPage() {
             <LoteDocuments lot={lot} isDrag={isDrag} onDragEnter={(e) => { e.preventDefault(); setIsDrag(true); }} onDragLeave={(e) => { e.preventDefault(); setIsDrag(false); }} onDragOver={(e) => { e.preventDefault(); }} onDrop={handleDragDrop} onFileInput={handleSingleFileUpload} />
           </div>
           <div className="lg:col-span-3 space-y-6">
-            <LoteObservations lot={lot} onChange={(f, v) => lotes.updateLotField(lot.id, f, v)} />
             <LoteReminders lot={lot} onAdd={() => lotes.addReminder(lot.id)} onUpdate={(id, f, v) => lotes.updateReminder(lot.id, id, f, v)} onRemove={(id) => lotes.removeReminder(lot.id, id)} />
             <LoteInitialPayments lot={lot} onAdd={() => lotes.addInitialPayment(lot.id)} onUpdate={(id, f, v) => lotes.updateInitialPayment(lot.id, id, f, v)} onRemove={(id) => lotes.removeInitialPayment(lot.id, id)} />
           </div>

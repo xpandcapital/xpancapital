@@ -51,20 +51,24 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Action bar */}
-      <div className="flex flex-wrap items-center gap-2">
-        <button onClick={() => setViewMode(viewMode === 'table' ? 'grid' : 'table')} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
-          {viewMode === 'table' ? <><LayoutGrid className="w-3 h-3" /> Grilla</> : <><List className="w-3 h-3" /> Lista</>}
-        </button>
-        <button onClick={() => exportToCSV(sortedLots, { startMonth: '', signatureMonth: '', escrituraMonth: '', masterplanImage: null, lotPins: [] }, '')} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
-          <FileSpreadsheet className="w-3 h-3" /> Excel
-        </button>
-        <button onClick={() => exportToJSON(sortedLots, { startMonth: '', signatureMonth: '', escrituraMonth: '', masterplanImage: null, lotPins: [] }, '')} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
-          <Download className="w-3 h-3" /> JSON
-        </button>
+      <DashboardStats stats={dashboardStats} desistidosCount={desistidoLots.length} />
+
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-wider">{sortedLots.length + sortedDesistidoLots.length} lotes</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <button onClick={() => setViewMode(viewMode === 'table' ? 'grid' : 'table')} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
+            {viewMode === 'table' ? <><LayoutGrid className="w-3 h-3" /> Grilla</> : <><List className="w-3 h-3" /> Lista</>}
+          </button>
+          <button onClick={() => exportToCSV(sortedLots, { startMonth: '', signatureMonth: '', escrituraMonth: '', masterplanImage: null, lotPins: [] }, '')} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
+            <FileSpreadsheet className="w-3 h-3" /> Excel
+          </button>
+          <button onClick={() => exportToJSON(sortedLots, { startMonth: '', signatureMonth: '', escrituraMonth: '', masterplanImage: null, lotPins: [] }, '')} className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.06] text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5">
+            <Download className="w-3 h-3" /> JSON
+          </button>
+        </div>
       </div>
 
-      <DashboardStats stats={dashboardStats} desistidosCount={desistidoLots.length} />
       <DashboardTable lots={sortedLots} signatureMonth="" projectSlug={slug} viewMode={viewMode} />
       <DesistidosTable lots={sortedDesistidoLots} projectSlug={slug} />
     </div>

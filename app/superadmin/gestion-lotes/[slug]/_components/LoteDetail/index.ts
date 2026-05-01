@@ -8,6 +8,7 @@ export { LoteInitialPayments } from './LoteInitialPayments';
 export { LotePayments } from './LotePayments';
 export { LoteReminders } from './LoteReminders';
 export { LoteObservations } from './LoteObservations';
+export { LoteSorteo } from './LoteSorteo';
 export { LoteLiquidacion } from './LoteLiquidacion';
 export { LoteMath } from './LoteMath';
 export { LoteAIComposer } from './LoteAIComposer';
