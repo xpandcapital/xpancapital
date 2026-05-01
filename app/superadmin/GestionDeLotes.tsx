@@ -2892,7 +2892,7 @@ const handleMassiveUpload = async (e) => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          <div className="bg-black rounded-2xl shadow-xl overflow-hidden border border-zinc-800 relative min-h-[500px] flex items-center justify-center flex-1">
+          <div className="bg-black rounded-2xl shadow-xl overflow-hidden border border-zinc-800 relative min-h-[400px] max-h-[calc(100vh-250px)] flex items-center justify-center flex-1">
             {!projectConfig.masterplanImage ? (
               <label className="flex flex-col items-center justify-center p-12 cursor-pointer hover:scale-105 transition-transform group">
                 <div className="bg-zinc-900 p-6 rounded-full mb-4 border border-zinc-800 group-hover:border-rose-500/50 transition-colors">
@@ -2902,8 +2902,9 @@ const handleMassiveUpload = async (e) => {
                 <input type="file" accept="image/*" className="hidden" onChange={handleMasterplanUpload} />
               </label>
             ) : (
-              <div className="relative w-full max-w-full overflow-auto">
-                 <img src={projectConfig.masterplanImage} alt="Masterplan" className="w-full h-auto cursor-crosshair relative z-0" onClick={handleMapClick} />
+              <div className="relative w-full h-full flex items-center justify-center p-4">
+                 <div className="relative inline-block">
+                   <img src={projectConfig.masterplanImage} alt="Masterplan" className="max-w-full max-h-[calc(100vh-350px)] object-contain cursor-crosshair relative z-0" onClick={handleMapClick} />
                  
                  {projectConfig.lotPins?.map(pin => {
                     const colorClass = getPinColor(pin.loteNumber);
@@ -2935,7 +2936,7 @@ const handleMassiveUpload = async (e) => {
           
           {/* PANEL LATERAL DE PINES */}
           {projectConfig.masterplanImage && (
-            <div className="w-full lg:w-64 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col h-[500px]">
+            <div className="w-full lg:w-64 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col h-[calc(100vh-220px)]">
               <h3 className="font-bold text-white mb-2 text-sm border-b border-zinc-800 pb-2">📍 Lotes Huérfanos</h3>
               <p className="text-[10px] text-zinc-400 mb-3">Haz clic en el mapa y escribe el número de uno de estos lotes para mapearlos.</p>
               <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto mb-4 scrollbar-thin">
@@ -2967,7 +2968,7 @@ const handleMassiveUpload = async (e) => {
   };
 
   return (
-    <div className="min-h-screen font-sans text-zinc-100 relative bg-[#050505]">
+    <div className="min-h-[calc(100vh-80px)] font-sans text-zinc-100 relative bg-[#050505] overflow-hidden">
       {/* GLOBAL STYLES FOR FONTS & SCROLLBAR */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
@@ -2987,7 +2988,7 @@ const handleMassiveUpload = async (e) => {
       `}</style>
 
       {/* MENÚ SUPERIOR MULTI-PROYECTO */}
-      <div className="bg-[#0a0a0a] rounded-3xl border border-white/5 shadow-2xl sticky top-4 z-40 mx-4 mt-4">
+      <div className="bg-[#0a0a0a] rounded-2xl border border-white/5 shadow-2xl sticky top-0 z-40 mx-4 mt-4 mb-0">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-5">
             <div className="p-4 bg-rose-500/20 rounded-2xl border border-rose-500/20">
@@ -3065,7 +3066,7 @@ const handleMassiveUpload = async (e) => {
         </div>
       )}
 
-      <div className="p-4 md:p-8">
+      <div className="p-4 md:p-6 pb-24">
         {view === 'upload' && renderUploadView()}
         {view === 'dashboard' && renderDashboardView()}
         {view === 'detail' && renderDetailView()}
