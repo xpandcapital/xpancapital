@@ -186,14 +186,22 @@ export function MapEditor({ backgroundImage, locations, onChange, projects = [] 
     setSelectedLocation(newLocations.length - 1);
   };
 
-  const addFromProject = (project: { id: string; name: string; primary_color?: string }) => {
+  const addFromProject = (project: { id: string; name: string; primary_color?: string; status?: string }) => {
+    const statusMap: Record<string, string> = {
+      'EN PLANOS': 'En Planos',
+      'PREVENTA': 'Preventa',
+      'VENTA CON ESCRITURA': 'Con Escritura',
+      'VENTA FINALIZADA': 'Culminado',
+      'PROYECTO ENTREGADO': 'Entregado'
+    };
+    
     const newLocation: MapLocation = {
       name: project.name,
       fullName: project.name,
       city: '',
       province: '',
       coordinates: { top: '50%', left: '50%' },
-      status: 'Preventa',
+      status: statusMap[project.status || ''] || 'Preventa',
       dotColor: project.primary_color || '#be0b3c'
     };
     const newLocations = [...(localLocations || []), newLocation];

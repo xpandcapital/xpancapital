@@ -290,7 +290,7 @@ export default function TemplateEditorPage() {
   const [activeSection, setActiveSection] = useState('config');
   const [sectionOrder, setSectionOrder] = useState<string[]>([]);
   const [sectionVisibility, setSectionVisibility] = useState<Record<string, boolean>>({});
-  const [projects, setProjects] = useState<Array<{ id: string; name: string; primary_color?: string }>>([]);
+  const [projects, setProjects] = useState<Array<{ id: string; name: string; primary_color?: string; status?: string }>>([]);
   const [templateConfig, setTemplateConfig] = useState<TemplateData['config']>({
     showHeader: true,
     showFooter: true,
@@ -316,7 +316,7 @@ export default function TemplateEditorPage() {
     try {
       const { data, error } = await supabase
         .from('projects')
-        .select('id, name, primary_color')
+        .select('id, name, primary_color, status')
         .eq('is_active', true)
         .order('order_index', { ascending: true, nullsFirst: false });
       
