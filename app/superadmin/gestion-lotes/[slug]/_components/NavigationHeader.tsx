@@ -49,7 +49,7 @@ export function NavigationHeader({
   const getSlug = (name: string) => name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
 
   return (
-    <header className="z-40 mx-4 mt-4">
+    <header className="z-50 mx-4 mt-6">
       <div className="max-w-7xl mx-auto bg-black/95 backdrop-blur-xl border border-white/[0.06] rounded-2xl">
         <div className="px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
           {/* Left: Logo + Title + Project Selector */}
