@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Search as SearchIcon, Instagram, Youtube, Facebook, Music2, ShoppingCart, Bell, Heart, LogOut, LayoutDashboard, User, ShieldCheck, ChevronDown } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
-import Image from "next/image"
+import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"
 import { useShop } from "@/context/ShopContext"
 import { useLandingCMS } from "@/context/LandingCMSContext"
@@ -97,7 +97,28 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                 window.scrollTo({ top: offsetTop, behavior: "smooth" })
             }
         } else {
-            window.location.href = href
+            router.push(href)
+        }
+    }
+
+    const handleLinkClick = (e: React.MouseEvent, href: string) => {
+        setMobileMenuOpen(false)
+        if (href.startsWith('#') && pathname === '/') {
+            e.preventDefault()
+            const id = href.substring(1)
+            const element = document.getElementById(id) || document.querySelector(`#${id}`)
+            if (element) {
+                const offsetTop = element.getBoundingClientRect().top + window.scrollY - 80
+                window.scrollTo({ top: offsetTop, behavior: "smooth" })
+            }
+        } else if (href.startsWith('/#') && pathname === '/') {
+            e.preventDefault()
+            const id = href.substring(2)
+            const element = document.getElementById(id) || document.querySelector(`#${id}`)
+            if (element) {
+                const offsetTop = element.getBoundingClientRect().top + window.scrollY - 80
+                window.scrollTo({ top: offsetTop, behavior: "smooth" })
+            }
         }
     }
 
@@ -150,9 +171,10 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                             {navLinks.map((link) => {
                                 const active = isActiveLink(link.href);
                                 return (
-                                    <button
+                                    <Link
                                         key={link.name}
-                                        onClick={() => handleNavigation(link.href)}
+                                        href={link.href}
+                                        onClick={(e) => handleLinkClick(e, link.href)}
                                         className={`text-[9px] lg:text-[10px] xl:text-xs 2xl:text-base [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[11px] font-black tracking-tighter xl:tracking-widest uppercase transition-all duration-300 relative group
                                             ${active
                                                 ? 'text-blis-red drop-shadow-[0_0_8px_rgba(190,11,60,0.8)]'
@@ -163,7 +185,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         <span className={`absolute -bottom-2 left-0 h-0.5 bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)] transition-all duration-300 
                                             ${active ? 'w-full' : 'w-0 group-hover:w-full'}`}
                                         />
-                                    </button>
+                                    </Link>
                                 );
                             })}
                         </nav>
@@ -640,23 +662,28 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                     {navLinks.map((link, i) => {
                                         const active = isActiveLink(link.href);
                                         return (
-                                            <motion.button
+                                            <motion.div
                                                 key={link.name}
                                                 initial={{ opacity: 0, x: 20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: i * 0.04 }}
-                                                onClick={() => handleNavigation(link.href)}
-                                                className={`w-full rounded-lg tracking-wide transition-all duration-300 flex items-center justify-center gap-3 group relative
+                                                className={`w-full rounded-lg tracking-wide transition-all duration-300 group relative
                                             ${user ? 'px-3 py-2 text-[15px] font-bold' : 'px-4 py-3 text-base font-black'}
                                             ${active
                                                         ? 'text-blis-red bg-blis-red/10 border border-blis-red/20'
                                                         : 'text-gray-200 hover:text-white hover:bg-white/5'
                                                     }`}
                                             >
-                                                <span>{link.name}</span>
-                                                {active && <span className="absolute right-4 w-1.5 h-1.5 rounded-full bg-blis-red shadow-[0_0_8px_rgba(190,11,60,0.8)]" />}
-                                                {active && <span className="absolute left-4 w-1.5 h-1.5 rounded-full bg-blis-red shadow-[0_0_8px_rgba(190,11,60,0.8)]" />}
-                                            </motion.button>
+                                                <Link
+                                                    href={link.href}
+                                                    onClick={(e) => handleLinkClick(e, link.href)}
+                                                    className="w-full flex items-center justify-center gap-3"
+                                                >
+                                                    <span>{link.name}</span>
+                                                    {active && <span className="absolute right-4 w-1.5 h-1.5 rounded-full bg-blis-red shadow-[0_0_8px_rgba(190,11,60,0.8)]" />}
+                                                    {active && <span className="absolute left-4 w-1.5 h-1.5 rounded-full bg-blis-red shadow-[0_0_8px_rgba(190,11,60,0.8)]" />}
+                                                </Link>
+                                            </motion.div>
                                         );
                                     })}
                                 </nav>
