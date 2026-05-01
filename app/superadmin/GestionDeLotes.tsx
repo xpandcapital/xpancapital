@@ -58,10 +58,10 @@ const formatMonthYear = (yyyy_mm: string): string => {
 const COUNTRY_CODES = [
   { code: '+593', flag: '­ƒç¬­ƒç¿', name: 'Ecuador' },
   { code: '+1', flag: '­ƒç║­ƒç©', name: 'USA' },
-  { code: '+34', flag: '­ƒç¬­ƒç©', name: 'Espa├▒a' },
+  { code: '+34', flag: '­ƒç¬­ƒç©', name: 'España' },
   { code: '+57', flag: '­ƒç¿­ƒç┤', name: 'Colombia' },
-  { code: '+51', flag: '­ƒçÁ­ƒç¬', name: 'Per├║' },
-  { code: '+52', flag: '­ƒç▓­ƒç¢', name: 'M├®xico' },
+  { code: '+51', flag: '­ƒçÁ­ƒç¬', name: 'Perú' },
+  { code: '+52', flag: '­ƒç▓­ƒç¢', name: 'México' },
   { code: '+54', flag: '­ƒçª­ƒçÀ', name: 'Argentina' },
   { code: '+56', flag: '­ƒç¿­ƒç▒', name: 'Chile' },
 ];
@@ -920,7 +920,7 @@ Reglas adicionales:
 
         updateSelectedLot(updatedLot);
         setProcessingLog(prev => [...prev, `┬íProceso finalizado exitosamente!`]);
-        setTimeout(() => showAlert('├ëxito', 'Documentos procesados e integrados correctamente al expediente.'), 500);
+        setTimeout(() => showAlert('Éxito', 'Documentos procesados e integrados correctamente al expediente.'), 500);
       }
     } catch (error) {
       console.error(error);
@@ -1281,7 +1281,7 @@ const handleMassiveUpload = async (e) => {
     const nextStatus = statusCycle[nextIndex];
     
     if (nextStatus === 'Desistido') {
-      showPrompt('Desistir Lote', '┬┐Cu├ínto dinero se le va a devolver al cliente por este desistimiento? (Pon 0 si la penalidad es del 100% o si no pag├│ nada).', '0', (val) => {
+      showPrompt('Desistir Lote', '¿Cuánto dinero se le va a devolver al cliente por este desistimiento? (Pon 0 si la penalidad es del 100% o si no pagó nada).', '0', (val) => {
         updateSelectedLot({ status: nextStatus, refundAmount: Number(val) || 0 });
       });
     } else {
@@ -1306,14 +1306,14 @@ const handleMassiveUpload = async (e) => {
   };
 
   const deleteLot = (id) => {
-    showConfirm('Eliminar Expediente', '┬┐Est├ís seguro de eliminar este expediente? Esta acci├│n no se puede deshacer.', () => {
+    showConfirm('Eliminar Expediente', '¿Estás seguro de eliminar este expediente? Esta acción no se puede deshacer.', () => {
       setLots(prev => prev.filter(l => l.id !== id));
       if (selectedLotId === id) setView('dashboard');
     });
   };
 
   const clearAllPayments = () => {
-    showConfirm('Limpiar Todo', '┬┐Deseas vaciar todos los abonos y fechas ingresadas de este cliente?', () => {
+    showConfirm('Limpiar Todo', '¿Deseas vaciar todos los abonos y fechas ingresadas de este cliente?', () => {
       setLots(prev => prev.map(l => {
         if (l.id !== selectedLotId) return l;
         return {
@@ -1466,7 +1466,7 @@ const handleMassiveUpload = async (e) => {
             <h1>Certificado Oficial de Sorteo</h1>
             <h2>Proyecto Inmobiliario: <strong>${activeProjectName}</strong></h2>
             
-            <p style="font-size: 18px;">Se certifica legal y p├║blicamente que el ganador es:</p>
+            <p style="font-size: 18px;">Se certifica legal y públicamente que el ganador es:</p>
             
             <div class="winner-box">
               <p class="winner-name">${raffleState.winner.clientName}</p>
@@ -1483,8 +1483,8 @@ const handleMassiveUpload = async (e) => {
             </div>
             
             <div class="footer">
-              Este documento garantiza que la selecci├│n fue realizada mediante un generador de n├║meros pseudoaleatorios seguro,<br/> 
-              asegurando total imparcialidad, equidad y sin intervenci├│n humana.
+              Este documento garantiza que la selección fue realizada mediante un generador de números pseudoaleatorios seguro,<br/>
+              asegurando total imparcialidad, equidad y sin intervención humana.
             </div>
           </div>
         </body>
@@ -1501,7 +1501,7 @@ const handleMassiveUpload = async (e) => {
     if (!lot) return;
 
     if (lot.status === 'Desistido') {
-      showAlert('Atenci├│n', 'Este lote est├í marcado como Desistido. El comunicado generado se enfocar├í en la formalizaci├│n de la resoluci├│n del contrato.');
+      showAlert('Atención', 'Este lote está marcado como Desistido. El comunicado generado se enfocará en la formalización de la resolución del contrato.');
     }
 
     const sigMonth = lot.signatureMonth || projectConfig.signatureMonth;
@@ -1576,7 +1576,7 @@ const handleMassiveUpload = async (e) => {
       const text = result.error ? "No se pudo generar el mensaje." : (result.text || "No se pudo generar el mensaje.");
       updateSelectedLot({ generatedMessage: text });
     } catch (error) {
-      showAlert('Error', 'Error de conexi├│n con la IA. Por favor, intente nuevamente.');
+      showAlert('Error', 'Error de conexión con la IA. Por favor, intente nuevamente.');
     } finally {
       setIsGeneratingMessage(false);
     }
@@ -1584,7 +1584,7 @@ const handleMassiveUpload = async (e) => {
 
   const handleSendWhatsApp = (lot) => {
     if (!lot.owners || lot.owners.length === 0 || !lot.owners[0].phone) {
-      return showAlert('Error', 'El propietario principal no tiene un n├║mero de tel├®fono registrado.');
+      return showAlert('Error', 'El propietario principal no tiene un número de teléfono registrado.');
     }
     const phone = `${lot.owners[0].phoneCode.replace('+', '')}${lot.owners[0].phone.replace(/\D/g, '')}`;
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(lot.generatedMessage)}`;
@@ -1593,7 +1593,7 @@ const handleMassiveUpload = async (e) => {
 
   const handleSendEmail = (lot) => {
     if (!lot.owners || lot.owners.length === 0 || !lot.owners[0].email) {
-      return showAlert('Error', 'El propietario principal no tiene un correo electr├│nico registrado.');
+      return showAlert('Error', 'El propietario principal no tiene un correo electrónico registrado.');
     }
     const url = `mailto:${lot.owners[0].email}?subject=Notificaci├│n Inmobiliaria - ${lot.loteNumber}&body=${encodeURIComponent(lot.generatedMessage)}`;
     window.open(url, '_blank');
@@ -1687,7 +1687,7 @@ const handleMassiveUpload = async (e) => {
           localStorage.removeItem('test_quota');
           setProjectConfig(prev => ({...prev, masterplanImage: compressedBase64}));
         } catch(err) {
-          showAlert('Memoria Llena', 'La imagen es demasiado pesada para la memoria local del navegador. Por favor, rec├│rtala o intenta con una imagen de menor resoluci├│n.');
+          showAlert('Memoria Llena', 'La imagen es demasiado pesada para la memoria local del navegador. Por favor, recórtala o intenta con una imagen de menor resolución.');
         }
       };
       img.src = event.target.result;
@@ -1701,10 +1701,10 @@ const handleMassiveUpload = async (e) => {
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-    showPrompt('Asignar Lote', 'Ingresa S├ôLO el n├║mero del lote (Ej: 1, 14, 32) para colocar el pin:', '', (loteNum) => {
+    showPrompt('Asignar Lote', 'Ingresa SÓLO el número del lote (Ej: 1, 14, 32) para colocar el pin:', '', (loteNum) => {
       if (loteNum) {
         const cleanNum = String(loteNum).replace(/\D/g, '');
-        if(!cleanNum) return showAlert('Error', 'Ingresa un n├║mero v├ílido.');
+        if(!cleanNum) return showAlert('Error', 'Ingresa un número válido.');
         
         const lotExists = lots.find(l => String(l.loteNumber).replace(/\D/g, '') === cleanNum);
         if (!lotExists) {
@@ -1713,7 +1713,7 @@ const handleMassiveUpload = async (e) => {
 
         const alreadyPinned = projectConfig.lotPins?.find(p => String(p.loteNumber).replace(/\D/g, '') === cleanNum);
         if (alreadyPinned) {
-          return showAlert('Lote ya mapeado', `El lote ${cleanNum} ya se encuentra ubicado en el mapa. Si deseas moverlo, b├│rralo de la lista lateral y vuelve a asignarlo.`);
+          return showAlert('Lote ya mapeado', `El lote ${cleanNum} ya se encuentra ubicado en el mapa. Si deseas moverlo, bórralo de la lista lateral y vuelve a asignarlo.`);
         }
 
         setProjectConfig(prev => ({
@@ -1766,7 +1766,7 @@ const handleMassiveUpload = async (e) => {
         <>
           <div className="bg-zinc-950/50 p-6 rounded-2xl shadow-sm border border-zinc-800 mb-8 text-left">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Settings className="w-5 h-5 text-rose-500"/> Configuraci├│n de Fechas de este Proyecto
+              <Settings className="w-5 h-5 text-rose-500"/> Configuración de Fechas de este Proyecto
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -1782,7 +1782,7 @@ const handleMassiveUpload = async (e) => {
                 <input type="month" value={projectConfig.escrituraMonth} onChange={(e) => handleConfigChange('escrituraMonth', e.target.value)} className="w-full p-2 bg-emerald-950/20 border border-emerald-900/50 rounded-md font-medium text-emerald-400 outline-none focus:border-emerald-500" />
               </div>
             </div>
-            <p className="text-[11px] text-zinc-500 mt-3 text-center italic">Estas fechas aplican por defecto. Podr├ís modificar fechas espec├¡ficas para cada cliente m├ís adelante.</p>
+            <p className="text-[11px] text-zinc-500 mt-3 text-center italic">Estas fechas aplican por defecto. Podrás modificar fechas específicas para cada cliente más adelante.</p>
           </div>
 
           <label 
@@ -1793,8 +1793,8 @@ const handleMassiveUpload = async (e) => {
               ${isDragUpload ? 'border-rose-500 bg-rose-950/20 scale-[1.02] shadow-lg shadow-rose-900/20' : 'border-zinc-700 bg-zinc-950/50 hover:bg-zinc-900'}`}
           >
             <Upload className={`w-16 h-16 mb-4 transition-colors ${isDragUpload ? 'text-rose-400' : 'text-zinc-500'}`} />
-            <span className="text-lg font-semibold text-white">Arrastra o Sube PDFs e Im├ígenes aqu├¡</span>
-            <span className="text-sm text-zinc-400 mt-2">Nuestra IA analizar├í los documentos y agrupar├í m├║ltiples recibos en sus respectivos lotes.</span>
+            <span className="text-lg font-semibold text-white">Arrastra o Sube PDFs e Imágenes aquí</span>
+            <span className="text-sm text-zinc-400 mt-2">Nuestra IA analizará los documentos y agrupará múltiples recibos en sus respectivos lotes.</span>
             <input type="file" multiple accept=".pdf,image/*" className="hidden" onChange={handleMassiveUpload} />
           </label>
           
@@ -1978,7 +1978,7 @@ const handleMassiveUpload = async (e) => {
                       ) : formatCurrency(paid)}
                     </td>
                     <td className="p-5 font-black text-sm">
-                      {isDesistido ? <span className="text-zinc-600">-</span> : (toPayNow > 0 ? <span className="text-rose-500">{formatCurrency(toPayNow)} <br/><span className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">En {formatMonthYear(sigMonth)}</span></span> : <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider"><CheckCircle2 className="w-3 h-3 inline mr-1"/> Al d├¡a</span>)}
+                      {isDesistido ? <span className="text-zinc-600">-</span> : (toPayNow > 0 ? <span className="text-rose-500">{formatCurrency(toPayNow)} <br/><span className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">En {formatMonthYear(sigMonth)}</span></span> : <span className="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider"><CheckCircle2 className="w-3 h-3 inline mr-1"/> Al día</span>)}
                     </td>
                     <td className="p-5 font-black text-cyan-500 text-sm">
                       {isDesistido ? <span className="text-zinc-600">-</span> : <>{formatCurrency(futureQuotasTotal)} <span className="text-[9px] font-bold text-cyan-900/50">({lotFutureMonths}m)</span></>}
@@ -2009,7 +2009,7 @@ const handleMassiveUpload = async (e) => {
         </div>
       </div>
 
-      {/* Secci├│n de Lotes Desistidos */}
+      {/* Sección de Lotes Desistidos */}
       {desistidoLots.length > 0 && (
         <div className="bg-[#0a0a0a] rounded-3xl border border-white/5 overflow-hidden shadow-2xl mt-6">
           <button 
@@ -2039,8 +2039,8 @@ const handleMassiveUpload = async (e) => {
                     <th className="p-4 font-black">Cliente</th>
                     <th className="p-4 font-black">Precio</th>
                     <th className="p-4 font-black">Pagado</th>
-                    <th className="p-4 font-black">Devoluci├│n</th>
-                    <th className="p-4 font-black text-right">Acci├│n</th>
+                    <th className="p-4 font-black">Devolución</th>
+                    <th className="p-4 font-black text-right">Acción</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -2058,7 +2058,7 @@ const handleMassiveUpload = async (e) => {
                         <td className="p-4 text-zinc-400">{formatCurrency(totalPaid)}</td>
                         <td className="p-4">
                           <span className={netKept > 0 ? 'text-emerald-400' : 'text-zinc-500'}>
-                            {netKept > 0 ? `+${formatCurrency(netKept)} (retenido)` : 'Sin retenci├│n'}
+                            {netKept > 0 ? `+${formatCurrency(netKept)} (retenido)` : 'Sin retención'}
                           </span>
                         </td>
                         <td className="p-4 text-right">
@@ -2195,7 +2195,7 @@ const handleMassiveUpload = async (e) => {
                           <label className="text-[9px] font-bold text-zinc-500 uppercase block mb-0.5">C.I. / Pasaporte</label>
                           <div className="flex items-center bg-zinc-950 border border-zinc-800 rounded px-2 focus-within:border-rose-500">
                             <CreditCard className="w-3 h-3 text-zinc-500 mr-1" />
-                            <input type="text" value={owner.documentId || ''} onChange={(e) => updateOwner(owner.id, 'documentId', e.target.value)} className="w-full p-1 text-xs outline-none uppercase bg-transparent text-white" placeholder="N├║mero de Identidad" />
+                            <input type="text" value={owner.documentId || ''} onChange={(e) => updateOwner(owner.id, 'documentId', e.target.value)} className="w-full p-1 text-xs outline-none uppercase bg-transparent text-white" placeholder="Número de Identidad" />
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -2213,7 +2213,7 @@ const handleMassiveUpload = async (e) => {
                            </div>
                         </div>
                         <div>
-                          <label className="text-[9px] font-bold text-zinc-500 uppercase block mb-0.5">Correo Electr├│nico</label>
+                          <label className="text-[9px] font-bold text-zinc-500 uppercase block mb-0.5">Correo Electrónico</label>
                           <div className="flex items-center bg-zinc-950 border border-zinc-800 rounded px-2 focus-within:border-rose-500">
                             <Mail className="w-3 h-3 text-zinc-500 mr-1" />
                             <input type="email" value={owner.email} onChange={(e) => updateOwner(owner.id, 'email', e.target.value)} className="w-full p-1 text-xs outline-none bg-transparent text-white" placeholder="correo@ejemplo.com" />
@@ -2272,14 +2272,14 @@ const handleMassiveUpload = async (e) => {
                   <div className="pt-3 border-t border-zinc-800">
                     <label className="text-[11px] font-bold text-purple-400 uppercase flex items-center gap-1"><Gift className="w-3 h-3"/> Descuentos / Canjes ($)</label>
                     <input type="number" value={lot.tradeInValue || ''} onChange={(e) => updateSelectedLot({ tradeInValue: Number(e.target.value) })} className="w-full p-2 border border-purple-900/50 rounded-md bg-purple-950/20 font-bold text-purple-400 focus:border-purple-500 outline-none" placeholder="0" />
-                    <p className="text-[9px] text-zinc-500 mt-1">Se resta del saldo a escriturar. ├Ütil para bonos o comisiones pagadas con el lote.</p>
+                    <p className="text-[9px] text-zinc-500 mt-1">Se resta del saldo a escriturar. Útil para bonos o comisiones pagadas con el lote.</p>
                   </div>
                 </div>
               </div>
 
               <div className="bg-emerald-950/10 p-5 rounded-xl border border-emerald-900/30 shadow-sm">
                 <h3 className="font-semibold text-emerald-400 border-b border-emerald-900/50 pb-2 mb-4 flex items-center gap-2">
-                  <Briefcase className="w-5 h-5" /> M├│dulo Comercial (Asesor)
+                  <Briefcase className="w-5 h-5" /> Módulo Comercial (Asesor)
                 </h3>
                 <div className="space-y-3">
                   <div>
@@ -2289,7 +2289,7 @@ const handleMassiveUpload = async (e) => {
                   
                   <div className="flex gap-2 items-end">
                     <div className="flex-1">
-                      <label className="text-[10px] font-bold text-emerald-600 uppercase block mb-1">Comisi├│n a pagar</label>
+                      <label className="text-[10px] font-bold text-emerald-600 uppercase block mb-1">Comisión a pagar</label>
                       <div className="flex bg-zinc-950 border border-emerald-900/50 rounded overflow-hidden focus-within:border-emerald-500">
                         <select value={lot.commissionType} onChange={(e) => updateSelectedLot({ commissionType: e.target.value })} className="bg-emerald-950/50 border-r border-emerald-900/50 text-xs px-1 outline-none font-bold text-emerald-500 w-12">
                           <option value="percentage">%</option>
@@ -2399,7 +2399,7 @@ const handleMassiveUpload = async (e) => {
                     <textarea 
                       value={lot.specialObservations || ''} 
                       onChange={(e) => updateSelectedLot({ specialObservations: e.target.value })}
-                      placeholder="Anota aqu├¡ las renegociaciones, si dejar├ín de pagar un mes y acumular├ín en otro, promesas de p├│lizas, etc."
+                      placeholder="Anota aquí las renegociaciones, si dejarán de pagar un mes y acumularán en otro, promesas de pólizas, etc."
                       className="w-full h-full min-h-[80px] p-3 text-xs border border-zinc-800 rounded outline-none resize-none bg-zinc-900 text-zinc-300 focus:border-rose-500 focus:bg-zinc-950 placeholder-zinc-600 transition-colors"
                     ></textarea>
 
@@ -2428,7 +2428,7 @@ const handleMassiveUpload = async (e) => {
                           {rem.completed ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4 text-zinc-600" />}
                         </button>
                         <div className="flex-1 flex flex-col gap-1">
-                          <input type="text" value={rem.text} onChange={(e) => updateReminder(rem.id, 'text', e.target.value)} placeholder="Ej: Llamar para cobro de p├│liza" className={`text-xs w-full outline-none bg-transparent ${rem.completed ? 'line-through text-zinc-600' : 'text-zinc-200 font-medium'}`} />
+                          <input type="text" value={rem.text} onChange={(e) => updateReminder(rem.id, 'text', e.target.value)} placeholder="Ej: Llamar para cobro de póliza" className={`text-xs w-full outline-none bg-transparent ${rem.completed ? 'line-through text-zinc-600' : 'text-zinc-200 font-medium'}`} />
                           <div className="flex items-center gap-1">
                             <CalendarDays className="w-3 h-3 text-zinc-600" />
                             <input type="date" value={rem.date} onChange={(e) => updateReminder(rem.id, 'date', e.target.value)} className="text-[9px] text-zinc-500 outline-none bg-transparent cursor-pointer color-invert" />
@@ -2500,7 +2500,7 @@ const handleMassiveUpload = async (e) => {
                 >
                   <div className="flex items-center gap-3">
                     <h3 className="font-semibold text-white flex items-center gap-2">
-                      <CalendarIcon className="w-5 h-5 text-cyan-500"/> 2. Hist├│rico de Cuotas
+                      <CalendarIcon className="w-5 h-5 text-cyan-500"/> 2. Histórico de Cuotas
                     </h3>
                     <span className="text-[10px] bg-zinc-800 text-zinc-300 border border-zinc-700 px-2 py-0.5 rounded-full font-bold">
                       {lot.showQuotas ? 'Ocultar' : 'Ver Detalle'}
@@ -2570,7 +2570,7 @@ const handleMassiveUpload = async (e) => {
                             <div className="mt-auto border-t border-zinc-800/60 pt-2 space-y-2">
                                <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-1 text-[10px] text-zinc-500">
-                                     <CalendarDays className="w-3 h-3" /> D├¡a:
+                                     <CalendarDays className="w-3 h-3" /> Día:
                                   </div>
                                   <input 
                                      type="date" 
@@ -2615,7 +2615,7 @@ const handleMassiveUpload = async (e) => {
             <div className={`p-6 rounded-2xl flex flex-col justify-center border border-zinc-800 ${isDesistido ? 'bg-zinc-950 opacity-50' : (totalToPayNow > 0 ? 'bg-rose-950/10 border-rose-900/30' : 'bg-emerald-950/10 border-emerald-900/30')}`}>
               <div className="flex justify-between items-center mb-4">
                 <h4 className={`text-sm font-bold uppercase tracking-wider ${isDesistido ? 'text-zinc-500' : (totalToPayNow > 0 ? 'text-rose-500' : 'text-emerald-500')}`}>
-                  Liquidaci├│n (Firma de Promesa)
+                  Liquidación (Firma de Promesa)
                 </h4>
                 {/* NUEVO: Campo Intereses por Mora */}
                 {!isDesistido && (
@@ -2665,8 +2665,8 @@ const handleMassiveUpload = async (e) => {
                 
                 {isDesistido ? (
                   <>
-                    <div className="flex justify-between text-rose-400 border-b border-zinc-800 pb-2 mt-2"><span>(+) Devoluci├│n al Cliente:</span> <span>{formatCurrency(lot.refundAmount || 0)}</span></div>
-                    <div className="flex justify-between pt-2 text-amber-500"><span>Retenci├│n de Penalidad:</span> <span>{formatCurrency((totalInitialPaid + totalQuotasPaid) - (lot.refundAmount || 0))}</span></div>
+                    <div className="flex justify-between text-rose-400 border-b border-zinc-800 pb-2 mt-2"><span>(+) Devolución al Cliente:</span> <span>{formatCurrency(lot.refundAmount || 0)}</span></div>
+                    <div className="flex justify-between pt-2 text-amber-500"><span>Retención de Penalidad:</span> <span>{formatCurrency((totalInitialPaid + totalQuotasPaid) - (lot.refundAmount || 0))}</span></div>
                   </>
                 ) : (
                   <>
@@ -2690,14 +2690,14 @@ const handleMassiveUpload = async (e) => {
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-3">
                   <Sparkles className="w-5 h-5 text-rose-500" />
-                  {isDesistido ? 'Generar Documento de Resoluci├│n' : 'Redactar Notificaci├│n de Cobro'}
+                  {isDesistido ? 'Generar Documento de Resolución' : 'Redactar Notificación de Cobro'}
                 </h3>
                 
                 {!isDesistido && (
                   <>
                     <label className="text-[10px] font-bold text-zinc-500 uppercase mb-2 block">Tono del Mensaje / Remitente</label>
                     <div className="flex flex-wrap gap-2">
-                      {['Administraci├│n', 'Asesor Comercial', 'Gerente General', 'Departamento Legal'].map(tone => (
+                      {['Administración', 'Asesor Comercial', 'Gerente General', 'Departamento Legal'].map(tone => (
                         <button
                           key={tone}
                           onClick={() => setMessageTone(tone)}
@@ -2733,7 +2733,7 @@ const handleMassiveUpload = async (e) => {
                 <div className="bg-zinc-950/80 border-b border-zinc-800 px-4 py-3 flex flex-wrap gap-2 justify-between items-center">
                   <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Borrador Final {isDesistido ? '(Legal)' : `(${messageTone})`}</span>
                   <div className="flex flex-wrap gap-2">
-                    <button onClick={() => { fallbackCopyTextToClipboard(lot.generatedMessage); showAlert('├ëxito', '┬íCopiado al portapapeles!'); }} className="px-3 py-1.5 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white border border-zinc-700 rounded text-xs font-bold transition-colors">Copiar Texto</button>
+                    <button onClick={() => { fallbackCopyTextToClipboard(lot.generatedMessage); showAlert('Éxito', '¡Copiado al portapapeles!'); }} className="px-3 py-1.5 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white border border-zinc-700 rounded text-xs font-bold transition-colors">Copiar Texto</button>
                     {!isDesistido && (
                       <>
                         <button onClick={() => handleSendWhatsApp(lot)} className="px-3 py-1.5 bg-emerald-600 text-white hover:bg-emerald-500 rounded text-xs font-bold transition-colors flex items-center gap-1 shadow-md shadow-emerald-900/20"><MessageCircle className="w-3 h-3"/> WhatsApp</button>
@@ -2783,10 +2783,10 @@ const handleMassiveUpload = async (e) => {
                   <div className="text-center">
                     <Dices className="w-24 h-24 text-rose-500/50 mx-auto mb-6" />
                     <h3 className="text-2xl font-bold text-white mb-2">┬┐Listo para el sorteo?</h3>
-                    <p className="text-zinc-400 mb-6 max-w-md mx-auto">Hay <strong>{participants.length}</strong> clientes activos marcados con un ticket de participaci├│n.</p>
+                    <p className="text-zinc-400 mb-6 max-w-md mx-auto">Hay <strong>{participants.length}</strong> clientes activos marcados con un ticket de participación.</p>
                     
                     <div className="mb-8 flex items-center justify-center gap-3">
-                      <label className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Duraci├│n del Sorteo:</label>
+                      <label className="text-sm font-bold text-zinc-500 uppercase tracking-widest">Duración del Sorteo:</label>
                       <select 
                         value={raffleState.duration} 
                         onChange={(e) => setRaffleState(prev => ({...prev, duration: Number(e.target.value)}))}
@@ -2852,7 +2852,7 @@ const handleMassiveUpload = async (e) => {
             </div>
             <div className="p-2 overflow-y-auto flex-1 scrollbar-thin">
               {participants.length === 0 ? (
-                <div className="text-center p-8 text-zinc-500 text-sm">No hay participantes habilitados. Entra a "Auditar" en un lote y marca la opci├│n de sorteo.</div>
+                <div className="text-center p-8 text-zinc-500 text-sm">No hay participantes habilitados. Entra a "Auditar" en un lote y marca la opción de sorteo.</div>
               ) : (
                 <ul className="space-y-1">
                   {participants.map(p => (
@@ -2889,9 +2889,9 @@ const handleMassiveUpload = async (e) => {
             <button onClick={() => {
               const dummyCode = `<iframe src="https://tu-dominio.com/masterplan-embed/${activeProjectId}" width="100%" height="600px" style="border:none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.5);"></iframe>`;
               fallbackCopyTextToClipboard(dummyCode);
-              showAlert('C├│digo Copiado', 'Se ha copiado un c├│digo HTML iFrame al portapapeles. Entr├®gaselo a tu desarrollador web para incrustar este mapa en la p├ígina p├║blica del proyecto.');
+              showAlert('Código Copiado', 'Se ha copiado un código HTML iFrame al portapapeles. Entrégaselo a tu desarrollador web para incrustar este mapa en la página pública del proyecto.');
             }} className="text-rose-400 bg-zinc-900 border border-zinc-800 hover:border-rose-500/50 hover:bg-zinc-800 font-bold text-sm px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-              <Code className="w-4 h-4"/> Obtener C├│digo Web
+              <Code className="w-4 h-4"/> Obtener Código Web
             </button>
           </div>
         </div>
@@ -2930,7 +2930,7 @@ const handleMassiveUpload = async (e) => {
                           const cleanPinNum = String(pin.loteNumber).replace(/\D/g, '');
                           const lot = lots.find(l => String(l.loteNumber).replace(/\D/g, '') === cleanPinNum && cleanPinNum !== '');
                           if(lot) { setSelectedLotId(lot.id); setView('detail'); }
-                          else showAlert('Lote Libre', `El lote ${pin.loteNumber} no tiene un expediente de venta creado a├║n en el sistema.`);
+                          else showAlert('Lote Libre', `El lote ${pin.loteNumber} no tiene un expediente de venta creado aún en el sistema.`);
                         }}
                       >
                         {pin.loteNumber.replace(/\D/g, '')}
@@ -2949,7 +2949,7 @@ const handleMassiveUpload = async (e) => {
           {projectConfig.masterplanImage && (
             <div className="w-full lg:w-64 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 flex flex-col max-h-[calc(100vh-280px)]">
               <h3 className="font-bold text-white mb-2 text-sm border-b border-zinc-800 pb-2">­ƒôì Lotes Hu├®rfanos</h3>
-              <p className="text-[10px] text-zinc-400 mb-3">Haz clic en el mapa y escribe el n├║mero de uno de estos lotes para mapearlos.</p>
+              <p className="text-[10px] text-zinc-400 mb-3">Haz clic en el mapa y escribe el número de uno de estos lotes para mapearlos.</p>
               <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto mb-4 scrollbar-thin">
                 {unmappedLots.length === 0 ? <span className="text-emerald-400 font-bold text-xs mt-1">┬íTodos mapeados!</span> : 
                   unmappedLots.map(l => (
