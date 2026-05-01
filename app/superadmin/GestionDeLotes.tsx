@@ -13,7 +13,7 @@ import {
   Phone, Mail, CheckSquare, Square, Building, Briefcase, Ruler, Percent,
   CreditCard, UserCheck, Gift, MessageSquare, ShieldAlert, RotateCcw,
   Trophy, Dices, Scale, Ticket, Map as MapIcon, Printer, MessageCircle, Code, List,
-  RefreshCw
+  RefreshCw, Menu
 } from 'lucide-react';
 
 // --- FUNCIONES AUXILIARES ---
