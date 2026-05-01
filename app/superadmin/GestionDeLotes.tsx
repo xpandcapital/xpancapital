@@ -102,8 +102,21 @@ const App = ({ initialProjectId, initialProjectName, initialProjectLogo, project
 
   const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
   const [messageTone, setMessageTone] = useState('Administración');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [projectDropdownOpen, setProjectDropdownOpen] = useState(false);
+  const projectDropdownRef = useRef<HTMLDivElement>(null);
   const [isProcessingSingleLot, setIsProcessingSingleLot] = useState(false);
+
+  // Cerrar dropdown al clickear fuera
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (projectDropdownRef.current && !projectDropdownRef.current.contains(e.target as Node)) {
+        setProjectDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   
   const [isDragUpload, setIsDragUpload] = useState(false);
   const [isDragSingle, setIsDragSingle] = useState(false);
@@ -2970,7 +2983,7 @@ const handleMassiveUpload = async (e) => {
   };
 
 return (
-    <div className="min-h-[calc(100vh-80px)] font-sans text-zinc-100 relative bg-[#0f0f0f] overflow-auto">
+    <div className="h-full font-sans text-zinc-100 relative bg-[#0f0f0f] overflow-auto">
       {/* GLOBAL STYLES FOR FONTS, SCROLLBAR & SELECT */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
@@ -2982,31 +2995,6 @@ return (
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
         .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        /* Custom select styles to remove browser defaults */
-        .custom-select {
-          -webkit-appearance: none;
-          -moz-appearance: none;
-          appearance: none;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-          background-repeat: no-repeat;
-          background-position: right 8px center;
-          padding-right: 24px;
-        }
-        .custom-select:focus {
-          outline: none;
-          border-color: #3f3f46;
-          box-shadow: 0 0 0 1px #3f3f46;
-        }
-        .custom-select option {
-          background: #000;
-          color: #fff;
-          padding: 8px;
-        }
-        /* Firefox specific */
-        .custom-select:-moz-focusring {
-          color: transparent;
-          text-shadow: 0 0 0 #fff;
-        }
       `}</style>
 
 {/* MENÚ SUPERIOR UNIFICADO */}
@@ -3029,20 +3017,43 @@ return (
                 Gestión de Lotes <span className="text-rose-500">|</span>{" "}
                 <span className="text-zinc-400">{initialProjectName || activeProjectName}</span>
               </h1>
-              <select
-                value={activeProjectId}
-                onChange={(e) => {
-                  if (onProjectChange) {
-                    onProjectChange(e.target.value);
-                  } else {
-                    setActiveProjectId(e.target.value);
-                  }
-                  setView('dashboard');
-                }}
-                className="custom-select bg-black border border-zinc-700 text-zinc-300 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:border-zinc-500 hover:text-white transition-all px-2 py-1.5 rounded-lg mt-1 max-w-[200px]"
-              >
-                {projectList.map(p => <option key={p.id} value={p.id} className="bg-black text-white">{p.name}</option>)}
-              </select>
+              
+              {/* Dropdown Custom de Proyectos */}
+              <div ref={projectDropdownRef} className="relative mt-1 max-w-[220px]">
+                <button
+                  onClick={() => setProjectDropdownOpen(!projectDropdownOpen)}
+                  className="w-full flex items-center justify-between gap-2 bg-black border border-zinc-700 text-zinc-300 text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:border-zinc-500 hover:text-white transition-all px-3 py-2 rounded-lg"
+                >
+                  <span className="truncate">{activeProjectName || 'Seleccionar proyecto'}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform flex-shrink-0 ${projectDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {projectDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-black border border-zinc-700 rounded-lg shadow-2xl z-50 overflow-hidden animate-fadeIn">
+                    {projectList.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          if (onProjectChange) {
+                            onProjectChange(p.id);
+                          } else {
+                            setActiveProjectId(p.id);
+                          }
+                          setProjectDropdownOpen(false);
+                          setView('dashboard');
+                        }}
+                        className={`w-full text-left px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors truncate ${
+                          p.id === activeProjectId
+                            ? 'bg-rose-500 text-white'
+                            : 'text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                        }`}
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
               <span className="text-[8px] text-zinc-600 mt-0.5">{projectList.length} proyecto{projectList.length !== 1 ? 's' : ''}</span>
             </div>
           </div>
