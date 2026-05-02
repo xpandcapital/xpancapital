@@ -34,7 +34,8 @@ export function Catalog() {
         if (visibleCategories.length > 0) {
             const isActiveVisible = visibleCategories.some(c => c.id === activeCategoryId);
             if (!isActiveVisible) {
-                setActiveCategoryId(visibleCategories[0].id);
+                const defaultCat = visibleCategories.find(c => c.nombre.toLowerCase().includes('curso')) || visibleCategories[0];
+                setActiveCategoryId(defaultCat.id);
                 setCurrentIndex(0);
             }
         }
