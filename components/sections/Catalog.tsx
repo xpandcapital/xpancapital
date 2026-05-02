@@ -64,7 +64,7 @@ export function Catalog() {
         return p.categoria_id === activeCategoryId;
     });
 
-    const filteredProducts = rawProducts.slice(0, 8).map(p => ({
+    const filteredProducts = rawProducts.slice(0, 4).map(p => ({
         id: p.id,
         slug: p.slug || p.id,
         type: p.categoria?.nombre || activeCategory?.nombre || 'Producto',
@@ -78,29 +78,7 @@ export function Catalog() {
 
     const displayProducts = filteredProducts;
     const ctaItem = { __isCTA: true as const, id: '__cta__', slug: '', type: '', name: '', price: '', image: '', bliscoins: 0, rating: '0', reviews: 0 };
-    const itemsWithCTA = [...displayProducts, ctaItem];
-    const totalBaseItems = itemsWithCTA.length;
-    const displayItems = [...itemsWithCTA, ...itemsWithCTA, ...itemsWithCTA];
-
-    const syncIndexOnScroll = () => {
-        if (!scrollContainerRef.current || isScrollingRef.current) return;
-        const container = scrollContainerRef.current;
-        const scrollLeft = container.scrollLeft;
-        const cardElement = container.querySelector('[data-card]') as HTMLElement;
-        if (cardElement) {
-            const width = cardElement.offsetWidth + 24;
-            const internalIndex = Math.round(scrollLeft / width);
-            const activeIdx = internalIndex % totalBaseItems;
-            if (activeIdx !== currentIndex) {
-                setCurrentIndex(activeIdx);
-            }
-            if (internalIndex < totalBaseItems) {
-                container.scrollLeft = scrollLeft + (totalBaseItems * width);
-            } else if (internalIndex >= totalBaseItems * 2) {
-                container.scrollLeft = scrollLeft - (totalBaseItems * width);
-            }
-        }
-    };
+    const displayItems = [...displayProducts, ctaItem];
 
     const [isInView, setIsInView] = useState(false);
     const sectionRef = useRef<HTMLElement>(null);
@@ -130,22 +108,15 @@ export function Catalog() {
             });
         }, refreshRate);
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
-    }, [isInView, activeCategoryId, visibleCategories, isAsesoria, nextCategory]);
+    }, [isInView, activeCategoryId, visibleCategories, nextCategory]);
 
     // Reset scroll al cambiar categoría
     useEffect(() => {
         setProgress(0);
         if (scrollContainerRef.current && !isAsesoria && displayProducts.length > 0) {
             const container = scrollContainerRef.current;
-            const timer = setTimeout(() => {
-                const cardElement = container.querySelector('[data-card]') as HTMLElement;
-                if (cardElement) {
-                    const width = cardElement.offsetWidth + 24;
-                    container.scrollLeft = totalBaseItems * width;
-                    setCurrentIndex(0);
-                }
-            }, 100);
-            return () => clearTimeout(timer);
+            container.scrollLeft = 0;
+            setCurrentIndex(0);
         }
     }, [activeCategoryId]);
 
@@ -300,7 +271,6 @@ export function Catalog() {
                     <div className="relative group/slider">
                         <div
                             ref={scrollContainerRef}
-                            onScroll={syncIndexOnScroll}
                             className="flex gap-3 md:gap-4 lg:gap-4 overflow-x-auto pb-8 hide-scrollbar snap-x snap-mandatory px-2 md:px-0"
                         >
                             <style jsx global>{`
