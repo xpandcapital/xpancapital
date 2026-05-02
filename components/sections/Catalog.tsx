@@ -77,7 +77,7 @@ export function Catalog() {
     }));
 
     const displayProducts = filteredProducts;
-    const baseItems = [...displayProducts, { id: "cta", isCTA: true }];
+    const baseItems = [...displayProducts];
     const totalBaseItems = baseItems.length;
     const displayItems = [...baseItems, ...baseItems, ...baseItems];
 
@@ -116,7 +116,7 @@ export function Catalog() {
     // Auto-scroll entre categorías con progreso por categoría
     const catScrollMs = 4500;
     useEffect(() => {
-        if (!isInView || visibleCategories.length <= 1 || isAsesoria) return;
+        if (!isInView || visibleCategories.length <= 1) return;
         const refreshRate = 50;
         const step = (refreshRate / catScrollMs) * 100;
         timerRef.current = setInterval(() => {
@@ -307,23 +307,6 @@ export function Catalog() {
                             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                         `}</style>
                             {displayItems.map((item: any, idx: number) => (
-                                'isCTA' in item ? (
-                                    <motion.a
-                                        key={`cta-${idx}`}
-                                        href="/tienda"
-                                        data-card
-                                        className={`w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] rounded-2xl overflow-hidden relative group snap-center snap-always border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-10 flex-shrink-0 opacity-100`}
-                                    >
-                                        <div className="w-14 h-14 md:w-24 md:h-24 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center mb-3 md:mb-8 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
-                                            <ShoppingCart className="text-blis-red group-hover:text-white w-7 h-7 md:w-10 md:h-10 transition-colors" />
-                                        </div>
-                                        <h4 className="text-xl md:text-3xl font-black text-white uppercase mb-1 md:mb-4 tracking-tighter">Explora la Tienda</h4>
-                                        <p className="text-gray-400 text-xs md:text-base font-medium mb-5 md:mb-10 max-w-[200px]">Accede a más de 50 herramientas exclusivas.</p>
-                                        <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-6 md:px-10 py-3.5 md:py-5 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95">
-                                            Tienda Completa <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                                        </div>
-                                    </motion.a>
-                                ) : (
                                     <Link
                                         key={`${item.id}-${idx}`}
                                         href={`/tienda/producto/${item.slug || item.id}`}
@@ -374,8 +357,21 @@ export function Catalog() {
                                             </div>
                                         </div>
                                     </Link>
-                                )
                             ))}
+                            {/* CTA Card fija al final en todas las categorías */}
+                            <motion.a
+                                href="/tienda"
+                                className="w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] rounded-2xl overflow-hidden relative group snap-center border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-10 flex-shrink-0"
+                            >
+                                <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center mb-3 md:mb-6 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
+                                    <ShoppingCart className="text-blis-red group-hover:text-white w-7 h-7 md:w-8 md:h-8 transition-colors" />
+                                </div>
+                                <h4 className="text-lg md:text-xl font-black text-white uppercase mb-1 md:mb-2 tracking-tighter">Explora la Tienda</h4>
+                                <p className="text-gray-400 text-[10px] md:text-xs font-medium mb-4 md:mb-6 max-w-[180px]">Accede a más de 50 herramientas exclusivas.</p>
+                                <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-5 md:px-8 py-3 md:py-4 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95">
+                                    Tienda Completa <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
+                                </div>
+                            </motion.a>
                         </div>
 
                         <div className="absolute top-[35%] -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none px-4 z-20 md:hidden">
@@ -403,7 +399,7 @@ export function Catalog() {
                                 <motion.div
                                     className="absolute inset-0 bg-blis-red rounded-full shadow-[0_0_20px_rgba(190,11,60,0.6)]"
                                     initial={{ width: "0%" }}
-                                    animate={{ width: `${isAsesoria ? 0 : progress}%` }}
+                                    animate={{ width: `${progress}%` }}
                                     transition={{ duration: 0.1, ease: "linear" }}
                                 />
                             )}
