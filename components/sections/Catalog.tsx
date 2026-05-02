@@ -77,8 +77,7 @@ export function Catalog() {
     }));
 
     const displayProducts = filteredProducts;
-    const ctaItem = { __isCTA: true as const, id: '__cta__', slug: '', type: '', name: '', price: '', image: '', bliscoins: 0, rating: '0', reviews: 0 };
-    const displayItems = [...displayProducts, ctaItem];
+    const displayItems = displayProducts;
 
     const [isInView, setIsInView] = useState(false);
     const sectionRef = useRef<HTMLElement>(null);
@@ -267,42 +266,22 @@ export function Catalog() {
                         </Link>
                     </div>
                 ) : (
-                    /* Slider normal con productos + CTA */
-                    <div className="relative group/slider">
+                    /* Productos + CTA separada siempre visible */
+                    <div className="flex flex-col gap-4 md:gap-6">
+                        {/* Productos - scrollable en móvil, sin overflow en desktop */}
                         <div
                             ref={scrollContainerRef}
-                            className="flex gap-3 md:gap-4 lg:gap-4 overflow-x-auto pb-8 hide-scrollbar snap-x snap-mandatory px-2 md:px-0"
+                            className="flex gap-3 md:gap-4 overflow-x-auto md:overflow-visible pb-2 hide-scrollbar snap-x px-2 md:px-0 md:justify-center"
                         >
                             <style jsx global>{`
                             .hide-scrollbar::-webkit-scrollbar { display: none; }
                             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                         `}</style>
-                            {displayItems.map((item: any, idx: number) => {
-                                if (item.__isCTA) {
-                                    return (
-                                        <Link
-                                            key={`cta-${idx}`}
-                                            href="/tienda"
-                                            data-card
-                                            className="w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] rounded-2xl overflow-hidden relative group snap-center border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-10 flex-shrink-0"
-                                        >
-                                            <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center mb-3 md:mb-6 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
-                                                <ShoppingCart className="text-blis-red group-hover:text-white w-7 h-7 md:w-8 md:h-8 transition-colors" />
-                                            </div>
-                                            <h4 className="text-lg md:text-xl font-black text-white uppercase mb-1 md:mb-2 tracking-tighter">Explora la Tienda</h4>
-                                            <p className="text-gray-400 text-[10px] md:text-xs font-medium mb-4 md:mb-6 max-w-[180px]">Accede a más de 50 herramientas exclusivas.</p>
-                                            <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-5 md:px-8 py-3 md:py-4 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95">
-                                                Tienda Completa <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
-                                            </div>
-                                        </Link>
-                                    );
-                                }
-                                return (
+                            {displayItems.map((item: any, idx: number) => (
                                     <Link
                                         key={`${item.id}-${idx}`}
                                         href={`/tienda/producto/${item.slug || item.id}`}
-                                        data-card
-                                        className={`w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] glass-card transition-all duration-500 rounded-2xl overflow-hidden relative group snap-center snap-always border border-white/5 block flex-shrink-0 opacity-100`}
+                                        className={`w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] glass-card transition-all duration-500 rounded-2xl overflow-hidden relative group snap-center border border-white/5 block flex-shrink-0 opacity-100`}
                                     >
                                         <div className="aspect-square w-full relative overflow-hidden bg-black">
                                             <div
@@ -348,18 +327,37 @@ export function Catalog() {
                                             </div>
                                         </div>
                                     </Link>
-                                );
-                            })}
+                            ))}
                         </div>
 
-                        <div className="absolute top-[35%] -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none px-4 z-20 md:hidden">
-                            <button onClick={prevCategory} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center pointer-events-auto active:scale-90 transition-transform shadow-lg">
-                                <ChevronLeft className="w-6 h-6 text-white" />
+                        {/* Flechas categoría móvil */}
+                        <div className="md:hidden flex justify-center gap-4">
+                            <button onClick={prevCategory} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-transform">
+                                <ChevronLeft className="w-5 h-5 text-white" />
                             </button>
-                            <button onClick={nextCategory} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center pointer-events-auto active:scale-90 transition-transform shadow-lg">
-                                <ChevronRight className="w-6 h-6 text-white" />
+                            <button onClick={nextCategory} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-transform">
+                                <ChevronRight className="w-5 h-5 text-white" />
                             </button>
                         </div>
+
+                        {/* CTA Explora la Tienda - siempre visible debajo */}
+                        <Link
+                            href="/tienda"
+                            className="w-full rounded-2xl overflow-hidden relative group border-2 border-dashed border-blis-red/20 bg-gradient-to-r from-blis-red/5 via-transparent to-blis-red/5 hover:border-blis-red/40 transition-all duration-500 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left p-5 md:p-6 gap-4"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center flex-shrink-0 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
+                                    <ShoppingCart className="text-blis-red group-hover:text-white w-5 h-5 md:w-6 md:h-6 transition-colors" />
+                                </div>
+                                <div>
+                                    <h4 className="text-base md:text-xl font-black text-white uppercase tracking-tighter">Explora la Tienda</h4>
+                                    <p className="text-gray-400 text-[10px] md:text-xs font-medium">Accede a más de 50 herramientas exclusivas.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-5 md:px-8 py-3 md:py-4 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95 flex-shrink-0">
+                                Tienda Completa <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
+                            </div>
+                        </Link>
                     </div>
                 )}
 
