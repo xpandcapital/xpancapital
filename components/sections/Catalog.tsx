@@ -295,7 +295,7 @@ export function Catalog() {
                                         key={`cta-${idx}`}
                                         href="/tienda"
                                         data-card
-                                        className={`min-w-[260px] w-[75vw] md:w-auto md:min-w-[380px] rounded-2xl overflow-hidden relative group snap-center snap-always border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-12 flex-shrink-0 ${currentIndex === (idx % totalBaseItems) ? "opacity-100 ring-2 ring-blis-red/40 shadow-[0_20px_50px_rgba(190,11,60,0.2)]" : "opacity-40 scale-95"}`}
+                                        className={`min-w-[260px] w-[75vw] md:w-auto md:min-w-[380px] rounded-2xl overflow-hidden relative group snap-center snap-always border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-12 flex-shrink-0 opacity-100`}
                                     >
                                         <div className="w-14 h-14 md:w-24 md:h-24 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center mb-3 md:mb-8 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
                                             <ShoppingCart className="text-blis-red group-hover:text-white w-7 h-7 md:w-10 md:h-10 transition-colors" />
@@ -311,7 +311,7 @@ export function Catalog() {
                                         key={`${item.id}-${idx}`}
                                         href={`/tienda/producto/${item.slug || item.id}`}
                                         data-card
-                                        className={`min-w-[260px] w-[75vw] md:w-auto md:min-w-[380px] max-h-[60vh] md:max-h-none glass-card transition-all duration-500 rounded-2xl overflow-hidden relative group snap-center snap-always border border-white/5 block flex-shrink-0 ${currentIndex === (idx % totalBaseItems) ? "ring-2 ring-blis-red/40 opacity-100 shadow-[0_20px_50px_rgba(0,0,0,0.5)]" : "opacity-50 grayscale-[0.5] hover:opacity-100 hover:grayscale-0"}`}
+                                        className={`min-w-[260px] w-[75vw] md:w-auto md:min-w-[380px] max-h-[60vh] md:max-h-none glass-card transition-all duration-500 rounded-2xl overflow-hidden relative group snap-center snap-always border border-white/5 block flex-shrink-0 opacity-100`}
                                     >
                                         <div className="aspect-square w-full relative overflow-hidden bg-black border-b border-white/5">
                                             <div
