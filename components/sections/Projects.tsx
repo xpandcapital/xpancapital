@@ -211,7 +211,7 @@ export function Projects() {
 
   if (loading) {
     return (
-      <section className="pt-12 md:pt-10 pb-24 bg-zinc-950 relative">
+      <section className="pt-12 md:pt-10 pb-24 bg-black relative">
         <div className="container mx-auto px-6 flex items-center justify-center min-h-[400px]">
           <Loader2 className="w-8 h-8 text-white/40 animate-spin" />
         </div>
@@ -220,7 +220,7 @@ export function Projects() {
   }
 
   return (
-    <section className="pt-12 md:pt-10 pb-24 bg-zinc-950 relative">
+    <section className="pt-12 md:pt-10 pb-24 bg-black relative">
       <div className="container mx-auto px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-20">
           <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-wider">
@@ -311,7 +311,7 @@ export function Projects() {
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.9, y: 50, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden max-w-[1200px] w-full max-h-[90vh] overflow-y-auto flex flex-col md:flex-row cyber-texture relative"
+              className="bg-black border border-white/10 rounded-2xl overflow-hidden max-w-[1200px] w-full max-h-[90vh] overflow-y-auto flex flex-col md:flex-row cyber-texture relative"
               style={{
                 boxShadow: `0px 0px 100px 10px ${selectedProject.glowColor}, inset 0px 0px 30px 2px ${selectedProject.glowColor}`,
               }}

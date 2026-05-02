@@ -9,7 +9,7 @@ export function ProjectMap() {
     const { locations, description, title, subtitle, backgroundImage } = cmsData.map;
 
     return (
-        <section className="pt-10 md:pt-32 pb-32 bg-zinc-950 relative overflow-hidden">
+        <section className="pt-10 md:pt-32 pb-32 bg-black relative overflow-hidden">
             {/* Background Texture & Glow */}
             <div className="absolute inset-0 cyber-texture opacity-50 pointer-events-none" />
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-white/5 rounded-full blur-[150px] pointer-events-none" />

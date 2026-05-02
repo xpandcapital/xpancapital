@@ -221,7 +221,7 @@ export function Catalog() {
     // Show empty state if no products
     if (loading) {
         return (
-            <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-zinc-950 relative">
+            <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-black relative">
                 <div className="container mx-auto px-6 text-center">
                     <Loader2 className="w-8 h-8 animate-spin text-blis-red mx-auto" />
                 </div>
@@ -231,7 +231,7 @@ export function Catalog() {
 
     if (coursesData.length === 0 && shopProductsData.length === 0) {
         return (
-            <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-zinc-950 relative">
+            <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-black relative">
                 <div className="container mx-auto px-6 flex flex-col items-center justify-center h-[400px]">
                     <Package className="w-16 h-16 text-gray-600 mb-4" />
                     <h3 className="text-xl font-bold text-white mb-2">No hay productos disponibles</h3>
@@ -242,7 +242,7 @@ export function Catalog() {
     }
 
     return (
-        <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-zinc-950 relative">
+        <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-black relative">
             <div className="container mx-auto px-6 relative flex flex-col justify-center h-full max-h-[900px]">
                 <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-4 md:mb-8 gap-4 md:gap-6">
                     <motion.div
@@ -328,7 +328,7 @@ export function Catalog() {
                                     data-card
                                     className={`min-w-[260px] w-[75vw] md:w-auto md:min-w-[380px] max-h-[60vh] md:max-h-none glass-card transition-all duration-500 rounded-2xl overflow-hidden relative group snap-center snap-always border border-white/5 block ${currentIndex === (idx % totalBaseItems) ? "ring-2 ring-blis-red/40 opacity-100 shadow-[0_20px_50px_rgba(0,0,0,0.5)]" : "opacity-50 grayscale-[0.5] hover:opacity-100 hover:grayscale-0"}`}
                                 >
-                                    <div className="aspect-square w-full relative overflow-hidden bg-zinc-900 border-b border-white/5">
+                                    <div className="aspect-square w-full relative overflow-hidden bg-black border-b border-white/5">
                                         <div
                                             className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
                                             style={{ backgroundImage: `url('${item.image}')` }}

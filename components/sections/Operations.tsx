@@ -14,6 +14,7 @@ export function Operations() {
     const [progress, setProgress] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         setIsMounted(true);
@@ -22,6 +23,15 @@ export function Operations() {
         window.addEventListener('resize', check);
         return () => window.removeEventListener('resize', check);
     }, []);
+
+    useEffect(() => {
+        images.forEach((url, index) => {
+            if (!url) return
+            const img = new Image()
+            img.onload = () => setLoadedImages(prev => new Set(prev).add(index))
+            img.src = url
+        })
+    }, [images])
 
     const nextSlide = useCallback(() => {
         if (images.length === 0) return;
@@ -112,7 +122,7 @@ export function Operations() {
                                 className="absolute inset-0"
                             >
                                 <div
-                                    className="w-full h-full bg-cover bg-center"
+                                    className={`w-full h-full bg-cover bg-center transition-all duration-700 ${!loadedImages.has(currentIndex) ? 'blur-sm scale-105' : ''}`}
                                     style={{ backgroundImage: images[currentIndex] ? `url(${images[currentIndex]})` : 'none' }}
                                 />
                                 {/* Scanning Lines Aesthetic Overlay */}

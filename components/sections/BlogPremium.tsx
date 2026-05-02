@@ -53,7 +53,7 @@ export function BlogPremium() {
         : fallbackArticles;
 
     return (
-        <section className="pt-10 md:pt-20 pb-24 bg-zinc-950 relative overflow-hidden">
+        <section className="pt-10 md:pt-20 pb-24 bg-black relative overflow-hidden">
             {/* Floating Icons */}
             {floatingIcons.map(({ icon: Icon, style, size, delay }, i) => (
                 <motion.div
@@ -91,9 +91,9 @@ export function BlogPremium() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {[1, 2, 3].map((i) => (
                             <div key={i} className="animate-pulse">
-                                <div className="h-60 bg-zinc-800 rounded-2xl mb-4" />
-                                <div className="h-4 bg-zinc-800 rounded mb-2" />
-                                <div className="h-4 bg-zinc-800 rounded w-2/3" />
+                                <div className="h-60 bg-white/5 rounded-2xl mb-4" />
+                                <div className="h-4 bg-white/5 rounded mb-2" />
+                                <div className="h-4 bg-white/5 rounded w-2/3" />
                             </div>
                         ))}
                     </div>
