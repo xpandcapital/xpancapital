@@ -7,8 +7,6 @@ import { useLandingCMS } from "@/context/LandingCMSContext";
 import { useProducts } from "@/lib/hooks/useProducts";
 import Link from "next/link";
 
-const MotionLink = motion(Link);
-
 export function Catalog() {
     const { cmsData } = useLandingCMS();
     const { products: dbProducts, categories, loading, fetchProducts, fetchCategories } = useProducts();
@@ -282,7 +280,7 @@ export function Catalog() {
                             </div>
                         </Link>
                         {/* CTA al lado */}
-                        <MotionLink
+                        <Link
                             href="/tienda"
                             className="md:w-[380px] md:min-w-[320px] w-full rounded-2xl overflow-hidden relative group border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-8 md:p-12 min-h-[320px]"
                         >
@@ -294,7 +292,7 @@ export function Catalog() {
                             <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-6 md:px-10 py-3.5 md:py-5 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95">
                                 Tienda Completa <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             </div>
-                        </MotionLink>
+                        </Link>
                     </div>
                 ) : (
                     /* Slider normal con productos + CTA */
@@ -361,7 +359,7 @@ export function Catalog() {
                                     </Link>
                             ))}
                             {/* CTA Card fija al final en todas las categorías */}
-                            <MotionLink
+                            <Link
                                 href="/tienda"
                                 className="w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] rounded-2xl overflow-hidden relative group snap-center border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-10 flex-shrink-0"
                             >
@@ -373,7 +371,7 @@ export function Catalog() {
                                 <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-5 md:px-8 py-3 md:py-4 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95">
                                     Tienda Completa <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
                                 </div>
-                            </MotionLink>
+                            </Link>
                         </div>
 
                         <div className="absolute top-[35%] -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none px-4 z-20 md:hidden">
