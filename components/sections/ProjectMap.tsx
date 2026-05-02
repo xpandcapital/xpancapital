@@ -15,7 +15,7 @@ export function ProjectMap() {
             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-white/5 rounded-full blur-[150px] pointer-events-none" />
 
             <div className="container mx-auto px-6 relative z-10">
-                <div className="flex flex-col lg:flex-row gap-16 items-start">
+                <div className="flex flex-col md:flex-row gap-16 items-start">
 
                     {/* Left: Text & List */}
                     <div className="lg:w-1/3">
@@ -72,7 +72,7 @@ export function ProjectMap() {
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                            className={`relative h-[460px] sm:h-[520px] lg:min-h-[520px] lg:aspect-video w-full rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)] antigravity ${backgroundImage ? 'bg-cover' : 'bg-black/40'}`}
+                            className={`relative h-[300px] sm:h-[400px] lg:min-h-[520px] lg:aspect-video w-full rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(255,255,255,0.05)] antigravity ${backgroundImage ? 'bg-cover' : 'bg-black/40'}`}
                             style={{
                                 backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
                                 backgroundSize: 'cover',

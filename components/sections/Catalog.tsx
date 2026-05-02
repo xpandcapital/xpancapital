@@ -77,9 +77,10 @@ export function Catalog() {
     }));
 
     const displayProducts = filteredProducts;
-    const baseItems = [...displayProducts];
-    const totalBaseItems = baseItems.length;
-    const displayItems = [...baseItems, ...baseItems, ...baseItems];
+    const ctaItem = { __isCTA: true as const, id: '__cta__', slug: '', type: '', name: '', price: '', image: '', bliscoins: 0, rating: '0', reviews: 0 };
+    const itemsWithCTA = [...displayProducts, ctaItem];
+    const totalBaseItems = itemsWithCTA.length;
+    const displayItems = [...itemsWithCTA, ...itemsWithCTA, ...itemsWithCTA];
 
     const syncIndexOnScroll = () => {
         if (!scrollContainerRef.current || isScrollingRef.current) return;
@@ -306,7 +307,27 @@ export function Catalog() {
                             .hide-scrollbar::-webkit-scrollbar { display: none; }
                             .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                         `}</style>
-                            {displayItems.map((item: any, idx: number) => (
+                            {displayItems.map((item: any, idx: number) => {
+                                if (item.__isCTA) {
+                                    return (
+                                        <Link
+                                            key={`cta-${idx}`}
+                                            href="/tienda"
+                                            data-card
+                                            className="w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] rounded-2xl overflow-hidden relative group snap-center border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-10 flex-shrink-0"
+                                        >
+                                            <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center mb-3 md:mb-6 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
+                                                <ShoppingCart className="text-blis-red group-hover:text-white w-7 h-7 md:w-8 md:h-8 transition-colors" />
+                                            </div>
+                                            <h4 className="text-lg md:text-xl font-black text-white uppercase mb-1 md:mb-2 tracking-tighter">Explora la Tienda</h4>
+                                            <p className="text-gray-400 text-[10px] md:text-xs font-medium mb-4 md:mb-6 max-w-[180px]">Accede a más de 50 herramientas exclusivas.</p>
+                                            <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-5 md:px-8 py-3 md:py-4 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95">
+                                                Tienda Completa <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
+                                            </div>
+                                        </Link>
+                                    );
+                                }
+                                return (
                                     <Link
                                         key={`${item.id}-${idx}`}
                                         href={`/tienda/producto/${item.slug || item.id}`}
@@ -357,21 +378,8 @@ export function Catalog() {
                                             </div>
                                         </div>
                                     </Link>
-                            ))}
-                            {/* CTA Card fija al final en todas las categorías */}
-                            <Link
-                                href="/tienda"
-                                className="w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] rounded-2xl overflow-hidden relative group snap-center border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-10 flex-shrink-0"
-                            >
-                                <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center mb-3 md:mb-6 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
-                                    <ShoppingCart className="text-blis-red group-hover:text-white w-7 h-7 md:w-8 md:h-8 transition-colors" />
-                                </div>
-                                <h4 className="text-lg md:text-xl font-black text-white uppercase mb-1 md:mb-2 tracking-tighter">Explora la Tienda</h4>
-                                <p className="text-gray-400 text-[10px] md:text-xs font-medium mb-4 md:mb-6 max-w-[180px]">Accede a más de 50 herramientas exclusivas.</p>
-                                <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-5 md:px-8 py-3 md:py-4 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95">
-                                    Tienda Completa <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
-                                </div>
-                            </Link>
+                                );
+                            })}
                         </div>
 
                         <div className="absolute top-[35%] -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none px-4 z-20 md:hidden">
