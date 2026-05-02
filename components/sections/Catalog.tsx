@@ -283,7 +283,7 @@ export function Catalog() {
                         <div
                             ref={scrollContainerRef}
                             onScroll={syncIndexOnScroll}
-                            className="flex gap-4 md:gap-6 overflow-x-auto pb-8 hide-scrollbar snap-x snap-mandatory px-2 md:px-0"
+                            className="flex gap-3 md:gap-4 lg:gap-4 overflow-x-auto pb-8 hide-scrollbar snap-x snap-mandatory px-2 md:px-0"
                         >
                             <style jsx global>{`
                             .hide-scrollbar::-webkit-scrollbar { display: none; }
@@ -295,7 +295,7 @@ export function Catalog() {
                                         key={`cta-${idx}`}
                                         href="/tienda"
                                         data-card
-                                        className={`w-[280px] sm:w-[320px] md:w-[380px] rounded-2xl overflow-hidden relative group snap-center snap-always border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-12 flex-shrink-0 opacity-100`}
+                                        className={`w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] rounded-2xl overflow-hidden relative group snap-center snap-always border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-6 md:p-10 flex-shrink-0 opacity-100`}
                                     >
                                         <div className="w-14 h-14 md:w-24 md:h-24 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center mb-3 md:mb-8 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
                                             <ShoppingCart className="text-blis-red group-hover:text-white w-7 h-7 md:w-10 md:h-10 transition-colors" />
@@ -311,9 +311,9 @@ export function Catalog() {
                                         key={`${item.id}-${idx}`}
                                         href={`/tienda/producto/${item.slug || item.id}`}
                                         data-card
-                                        className={`w-[280px] sm:w-[320px] md:w-[380px] glass-card transition-all duration-500 rounded-2xl overflow-hidden relative group snap-center snap-always border border-white/5 block flex-shrink-0 opacity-100`}
+                                        className={`w-[280px] sm:w-[280px] md:w-[280px] lg:w-[300px] xl:w-[290px] glass-card transition-all duration-500 rounded-2xl overflow-hidden relative group snap-center snap-always border border-white/5 block flex-shrink-0 opacity-100`}
                                     >
-                                        <div className="aspect-[4/5] w-full relative overflow-hidden bg-black border-b border-white/5">
+                                        <div className="aspect-[3/4] w-full relative overflow-hidden bg-black border-b border-white/5">
                                             <div
                                                 className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
                                                 style={{ backgroundImage: `url('${item.image}')` }}
