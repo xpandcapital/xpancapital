@@ -71,6 +71,7 @@ export function Catalog() {
         name: p.nombre,
         price: `$${p.precio_usd || 0}`,
         image: p.imagen_principal || '',
+        bliscoins: p.precio_coins || 0,
         rating: ((p.id.charCodeAt(0) % 10) / 20 + 4.3).toFixed(1),
         reviews: (p.id.charCodeAt(1) % 200) + 50,
     }));
@@ -244,7 +245,10 @@ export function Catalog() {
                             </div>
                             <div className="flex-1 p-4 md:p-6 flex flex-col justify-between">
                                 <div>
-                                    <div className="flex items-center gap-1.5 mb-2">
+                                    <span className="inline-block text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-blis-red bg-blis-red/10 px-2 py-0.5 rounded mb-2">
+                                        {filteredProducts[0].type}
+                                    </span>
+                                    <div className="flex items-center gap-1 mb-1.5">
                                         <div className="flex items-center gap-0.5">
                                             {[1, 2, 3, 4, 5].map((star) => (
                                                 <Star
@@ -256,22 +260,21 @@ export function Catalog() {
                                         <span className="text-[10px] font-bold text-amber-400">{filteredProducts[0].rating}</span>
                                         <span className="text-[10px] text-gray-500">({filteredProducts[0].reviews})</span>
                                     </div>
-                                    <div className="mb-2">
-                                        <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-white bg-blis-red/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-blis-red/30">
-                                            {filteredProducts[0].type}
-                                        </span>
-                                    </div>
                                     <h4 className="text-lg md:text-2xl font-black text-white uppercase mb-2 md:mb-4 leading-tight group-hover:text-blis-red transition-colors tracking-tight">
                                         {filteredProducts[0].name}
                                     </h4>
                                 </div>
-                                <div className="flex items-center justify-between border-t border-white/5 pt-3 md:pt-6 mt-2">
-                                    <div className="flex flex-col">
-                                        <span className="text-[8px] md:text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-0.5 md:mb-1">Precio</span>
-                                        <span className="text-lg md:text-2xl font-black text-white">{filteredProducts[0].price}</span>
+                                <div className="flex items-end justify-between border-t border-white/5 pt-3 mt-2">
+                                    <div>
+                                        <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">Desde</span>
+                                        <div className="flex items-baseline gap-1.5 mb-0.5">
+                                            <span className="text-base font-black text-emerald-400">⚡{filteredProducts[0].bliscoins}</span>
+                                            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">BlisCoins</span>
+                                        </div>
+                                        <span className="text-lg font-black text-white">{filteredProducts[0].price}</span>
                                     </div>
-                                    <span className="flex items-center gap-1.5 md:gap-3 px-3.5 md:px-6 py-2 md:py-3 rounded-full bg-white/5 group-hover:bg-blis-red text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest transition-all shadow-lg">
-                                        Ver Detalles <ArrowRight className="w-3 md:w-4 h-3 md:h-4" />
+                                    <span className="flex items-center gap-1.5 px-3.5 md:px-5 py-2 rounded-full bg-white/5 group-hover:bg-blis-red text-[9px] font-black text-white uppercase tracking-widest transition-all shadow-lg">
+                                        Ver Detalles <ArrowRight className="w-3 h-3" />
                                     </span>
                                 </div>
                             </div>
@@ -332,16 +335,14 @@ export function Catalog() {
                                                 className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
                                                 style={{ backgroundImage: `url('${item.image}')` }}
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                                            <div className="absolute top-3 left-3">
-                                                <span className="text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-white bg-blis-red/80 backdrop-blur-md px-2.5 py-1 rounded-lg border border-blis-red/30 shadow-[0_0_15px_rgba(190,11,60,0.2)]">
-                                                    {item.type}
-                                                </span>
-                                            </div>
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                                         </div>
-                                        <div className="p-4 md:p-5">
-                                            {/* Rating stars */}
-                                            <div className="flex items-center gap-1.5 mb-2">
+                                        <div className="p-3 md:p-4">
+                                            <span className="inline-block text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-blis-red bg-blis-red/10 px-2 py-0.5 rounded mb-2">
+                                                {item.type}
+                                            </span>
+
+                                            <div className="flex items-center gap-1 mb-1.5">
                                                 <div className="flex items-center gap-0.5">
                                                     {[1, 2, 3, 4, 5].map((star) => (
                                                         <Star
@@ -354,16 +355,20 @@ export function Catalog() {
                                                 <span className="text-[10px] text-gray-500">({item.reviews})</span>
                                             </div>
 
-                                            <h4 className="text-sm md:text-base font-bold text-white mb-3 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 tracking-tight">
+                                            <h4 className="text-sm md:text-[15px] font-bold text-white leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.4rem] tracking-tight">
                                                 {item.name}
                                             </h4>
 
-                                            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                                            <div className="flex items-end justify-between pt-3 mt-2 border-t border-white/5">
                                                 <div>
-                                                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">Precio</span>
+                                                    <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">Desde</span>
+                                                    <div className="flex items-baseline gap-1.5">
+                                                        <span className="text-base md:text-lg font-black text-emerald-400">⚡{item.bliscoins || 0}</span>
+                                                        <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">BlisCoins</span>
+                                                    </div>
                                                     <span className="text-lg md:text-xl font-black text-white">{item.price}</span>
                                                 </div>
-                                                <span className="flex items-center gap-1.5 px-3.5 md:px-5 py-2 rounded-full bg-white/5 group-hover:bg-blis-red text-[9px] font-black text-white uppercase tracking-widest transition-all shadow-lg">
+                                                <span className="flex items-center gap-1 px-3 md:px-4 py-2 rounded-full bg-white/5 group-hover:bg-blis-red text-[9px] font-black text-white uppercase tracking-widest transition-all shadow-lg">
                                                     Ver <ArrowRight className="w-3 h-3" />
                                                 </span>
                                             </div>
