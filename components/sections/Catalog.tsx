@@ -64,7 +64,7 @@ export function Catalog() {
         return p.categoria_id === activeCategoryId;
     });
 
-    const filteredProducts = rawProducts.slice(0, 4).map(p => ({
+    const filteredProducts = rawProducts.slice(0, 5).map(p => ({
         id: p.id,
         slug: p.slug || p.id,
         type: p.categoria?.nombre || activeCategory?.nombre || 'Producto',
