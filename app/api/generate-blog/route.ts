@@ -2,7 +2,51 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 import { getApiKey } from '@/lib/api-keys'
 import { createClient } from '@/lib/supabase/server'
-import { cleanJsonResponse } from '@/lib/json-parser'
+
+/**
+ * Extrae campos de una respuesta JSON potencialmente malformada de Gemini.
+ * Usa regex para extraer cada campo individualmente, tolerante a errores.
+ */
+function extractFields(text: string): any {
+  const extract = (key: string): string | null => {
+    // Buscar "key": "value" o "key":"value"
+    const patterns = [
+      new RegExp(`"${key}"\\s*:\\s*"(.*?)"\\s*[,}]`, 's'),
+      new RegExp(`"${key}"\\s*:\\s*"(.*)"`, 's'),
+    ]
+    for (const p of patterns) {
+      const m = text.match(p)
+      if (m) return m[1]
+    }
+    return null
+  }
+
+  const extractArray = (key: string): string[] => {
+    const p = new RegExp(`"${key}"\\s*:\\s*\\[([^\\]]*)\\]`, 's')
+    const m = text.match(p)
+    if (!m) return []
+    const items = m[1].match(/"([^"]*)"/g)
+    return (items || []).map(s => s.replace(/^"|"$/g, ''))
+  }
+
+  // Extraer content — el campo más problemático por el HTML
+  let content = extract('content')
+  if (!content) {
+    // Intentar extraer desde "content":" hasta el final antes de }
+    const cm = text.match(/"content"\s*:\s*"([\s\S]*?)"\s*\}/)
+    if (cm) content = cm[1]
+  }
+
+  return {
+    title: extract('title') || '',
+    seoTitle: extract('seoTitle') || '',
+    seoDescription: extract('seoDescription') || '',
+    excerpt: extract('excerpt') || '',
+    category: extract('category') || '',
+    tags: extractArray('tags'),
+    content: content || '',
+  }
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -94,10 +138,10 @@ Idea Principal de lo que debe tratar el blog: ${idea}
                         const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
                         if (responseText) {
                             try {
-                                resultJSON = JSON.parse(cleanJsonResponse(responseText));
-                            } catch (jsonErr: any) {
-                                lastError = `Gemini JSON: ${jsonErr.message}`;
-                                console.error('[generate-blog] Gemini JSON parse error:', responseText.substring(0, 500));
+                                resultJSON = JSON.parse(responseText)
+                            } catch {
+                                // Si falla, extraer campos con regex tolerante a errores
+                                resultJSON = extractFields(responseText)
                             }
                         }
                     } else {
