@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     // Verificar si ya existe una key con ese nombre
     const { data: existing } = await supabase
       .from('api_keys')
-      .select('key_name, is_global, user_id')
+      .select('id, key_name, is_global, user_id')
       .eq('empresa_id', auth.empresaId)
       .eq('key_name', key_name)
       .maybeSingle()
@@ -104,20 +104,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No puedes editar una API de otro usuario' }, { status: 403 })
     }
 
-    const { data, error } = await supabase
-      .from('api_keys')
-      .upsert({
-        key_name,
-        key_value: encryptedValue,
-        empresa_id: auth.empresaId,
-        user_id: wantGlobal ? null : auth.userId,
-        is_global: wantGlobal,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: wantGlobal ? 'key_name,empresa_id' : 'key_name,empresa_id,user_id' })
-      .select()
-      .single()
+    const rowData = {
+      key_name,
+      key_value: encryptedValue,
+      empresa_id: auth.empresaId,
+      user_id: wantGlobal ? null : auth.userId,
+      is_global: wantGlobal,
+      updated_at: new Date().toISOString(),
+    }
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    let data, error
+    if (existing) {
+      const res = await supabase
+        .from('api_keys')
+        .update(rowData)
+        .eq('id', existing.id)
+        .select()
+        .single()
+      data = res.data
+      error = res.error
+    } else {
+      const res = await supabase
+        .from('api_keys')
+        .insert(rowData)
+        .select()
+        .single()
+      data = res.data
+      error = res.error
+    }
+
+    if (error) {
+      console.error(`[API Keys] POST error for ${key_name}:`, error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true, key: { key_name: data.key_name, has_value: !!(key_value) } })
   } catch (error) {
@@ -159,7 +178,7 @@ export async function PUT(request: NextRequest) {
       // Verificar existencia y permisos
       const { data: existing } = await supabase
         .from('api_keys')
-        .select('key_name, is_global, user_id')
+        .select('id, key_name, is_global, user_id')
         .eq('empresa_id', auth.empresaId)
         .eq('key_name', key_name)
         .maybeSingle()
@@ -174,19 +193,37 @@ export async function PUT(request: NextRequest) {
         continue
       }
 
-      const { error } = await supabase
-        .from('api_keys')
-        .upsert({
-          key_name,
-          key_value: encryptedValue,
-          empresa_id: auth.empresaId,
-          user_id: wantGlobal ? null : auth.userId,
-          is_global: wantGlobal,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: wantGlobal ? 'key_name,empresa_id' : 'key_name,empresa_id,user_id' })
+      const rowData = {
+        key_name,
+        key_value: encryptedValue,
+        empresa_id: auth.empresaId,
+        user_id: wantGlobal ? null : auth.userId,
+        is_global: wantGlobal,
+        updated_at: new Date().toISOString(),
+      }
 
-      if (error) errors++
-      else saved++
+      let error = null
+      if (existing) {
+        // UPDATE existing row
+        const { error: updateErr } = await supabase
+          .from('api_keys')
+          .update(rowData)
+          .eq('id', existing.id)
+        error = updateErr
+      } else {
+        // INSERT new row
+        const { error: insertErr } = await supabase
+          .from('api_keys')
+          .insert(rowData)
+        error = insertErr
+      }
+
+      if (error) {
+        console.error(`[API Keys] PUT error for ${key_name}:`, error)
+        errors++
+      } else {
+        saved++
+      }
     }
 
     return NextResponse.json({ success: true, saved, errors })

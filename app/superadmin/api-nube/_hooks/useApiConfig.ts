@@ -335,10 +335,12 @@ export function useApiConfig() {
       })
       const result = await response.json()
 
-      if (result.success) {
+      if (result.success && result.errors === 0) {
         setAppScopes(prev => ({ ...prev, [appId]: isGlobal ? 'global' : 'personal' }))
         window.dispatchEvent(new CustomEvent('blis_config_updated'))
         alert(`✅ ${appId} guardado correctamente`)
+      } else if (result.success && result.errors > 0) {
+        throw new Error(`${result.saved} guardadas, ${result.errors} errores`)
       } else {
         throw new Error(result.error || 'Error al guardar')
       }
@@ -371,9 +373,11 @@ export function useApiConfig() {
       })
       const result = await response.json()
 
-      if (result.success) {
+      if (result.success && result.errors === 0) {
         window.dispatchEvent(new CustomEvent('blis_config_updated'))
         alert(`✅ ${result.saved} claves guardadas correctamente`)
+      } else if (result.success && result.errors > 0) {
+        throw new Error(`${result.saved} guardadas, ${result.errors} errores`)
       } else {
         throw new Error(result.error || 'Error al guardar')
       }
