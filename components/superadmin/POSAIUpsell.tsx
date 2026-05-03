@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Plus, Loader2, Lightbulb, PackagePlus, ArrowRight } from 'lucide-react';
 import { aiChat } from '@/lib/ai-client';
+import { safeJsonParse } from '@/lib/json-parser';
 
 interface Suggestion {
     id?: string;
@@ -53,7 +54,7 @@ Responde SOLO con JSON:
                 setSuggestions({ catalog_suggestions: [], ideal_suggestions: [], error: result.error } as any);
             } else {
                 try {
-                    const data = JSON.parse(result.text.replace(/```json|```/gi, '').trim());
+                    const data = safeJsonParse(result.text);
                     setSuggestions(data);
                 } catch {
                     setSuggestions({ catalog_suggestions: [], ideal_suggestions: [], error: 'No se pudieron procesar las sugerencias' } as any);

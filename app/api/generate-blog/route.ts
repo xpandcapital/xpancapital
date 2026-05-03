@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 import { getApiKey } from '@/lib/api-keys'
 import { createClient } from '@/lib/supabase/server'
+import { cleanJsonResponse } from '@/lib/json-parser'
 
 export async function POST(request: NextRequest) {
     try {
@@ -91,8 +92,12 @@ Idea Principal de lo que debe tratar el blog: ${idea}
                     if (response.ok) {
                         const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
                         if (responseText) {
-                            const cleanText = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
-                            resultJSON = JSON.parse(cleanText);
+                            try {
+                                resultJSON = JSON.parse(cleanJsonResponse(responseText));
+                            } catch (jsonErr: any) {
+                                lastError = `Gemini JSON: ${jsonErr.message}`;
+                                console.error('[generate-blog] Gemini JSON parse error:', responseText.substring(0, 500));
+                            }
                         }
                     } else {
                         lastError = `Gemini: ${data.error?.message || response.status}`;
