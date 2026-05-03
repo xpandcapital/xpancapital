@@ -3,6 +3,8 @@
  * Sincroniza lotes de Notion con la base de datos de Supabase
  */
 import { createClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient } from './supabase/server';
+import { getApiKey } from './api-keys';
 import { parseFormaDePago } from './parse-forma-pago';
 
 const supabase = createClient(
@@ -10,7 +12,18 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-async function getNotionToken(): Promise<string> {
+async function getNotionToken(userId?: string, empresaId?: string): Promise<string> {
+  // Si hay userId, usar helper con fallback personal → global
+  if (userId && empresaId) {
+    const supabaseClient = createSupabaseClient();
+    const token = await getApiKey(supabaseClient, 'notion_api_key', userId, empresaId);
+    if (token) return token;
+    const token2 = await getApiKey(supabaseClient, 'notion_token', userId, empresaId);
+    if (token2) return token2;
+    return '';
+  }
+
+  // Fallback: comportamiento anterior (sin auth)
   const { data } = await supabase.from('api_keys').select('key_name, key_value');
   const keys: Record<string, string> = {};
   data?.forEach((k: any) => { keys[k.key_name] = k.key_value || ''; });
@@ -18,8 +31,8 @@ async function getNotionToken(): Promise<string> {
 }
 
 // ── Llamada base a la API de Notion ──────────────────────────────────────────
-export async function notionFetch(path: string, options: RequestInit = {}) {
-  const token = await getNotionToken();
+export async function notionFetch(path: string, options: RequestInit = {}, userId?: string, empresaId?: string) {
+  const token = await getNotionToken(userId, empresaId);
   if (!token) throw new Error('Token de Notion no configurado. Ve a Configuración → API Keys y agrega notion_token.');
 
   const res = await fetch(`https://api.notion.com/v1${path}`, {

@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import crypto from 'crypto';
+import { getAuthUser } from '@/lib/supabase/api-auth';
+import { getApiKey } from '@/lib/api-keys';
+import { createClient } from '@/lib/supabase/server';
 
 const ALLOWED_PUBLIC = [
     '/api/v3/ticker/price', '/api/v3/ticker/24hr', '/api/v3/klines',
@@ -19,7 +23,7 @@ const ALLOWED_PRIVATE = [
 
 const isAllowedEndpoint = (ep: string, list: string[]) => list.some(a => ep.startsWith(a));
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const { endpoint, method, params, apiKey: receivedApiKey, apiSecret: receivedApiSecret } = body;
@@ -35,12 +39,26 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Endpoint no permitido' }, { status: 403 });
         }
 
-        if (isPrivateEndpoint && (!receivedApiKey || !receivedApiSecret)) {
-            return NextResponse.json({ error: 'API Keys de Binance faltantes. Conecta tus llaves en la sección API Nube.' }, { status: 401 });
+        let apiKey = (receivedApiKey || "").trim();
+        let apiSecret = (receivedApiSecret || "").trim();
+
+        // Si no recibimos keys del frontend, buscar en BD con fallback personal → global
+        if (isPrivateEndpoint && (!apiKey || !apiSecret)) {
+            const auth = await getAuthUser(req);
+            if (auth) {
+                const supabase = createClient();
+                const [key, secret] = await Promise.all([
+                    getApiKey(supabase, 'binance_api_key', auth.userId, auth.empresaId),
+                    getApiKey(supabase, 'binance_secret_key', auth.userId, auth.empresaId),
+                ]);
+                if (key) apiKey = key;
+                if (secret) apiSecret = secret;
+            }
         }
 
-        const apiKey = (receivedApiKey || "").trim();
-        const apiSecret = (receivedApiSecret || "").trim();
+        if (isPrivateEndpoint && (!apiKey || !apiSecret)) {
+            return NextResponse.json({ error: 'API Keys de Binance faltantes. Conecta tus llaves en la sección API Nube.' }, { status: 401 });
+        }
 
         // Clean empty params
         const cleanParams: any = {};

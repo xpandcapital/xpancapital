@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { logger } from '@/lib/utils/logger';
+import { getAuthUser } from '@/lib/supabase/api-auth';
+import { getApiKeys as getApiKeysWithFallback } from '@/lib/api-keys';
+import { createClient as createSupabaseClient } from '@/lib/supabase/server';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,30 +12,49 @@ const supabase = createClient(
 
 // ============ OBTENER API KEYS ============
 
-async function getApiKeys() {
-  const { data: keys, error } = await supabase
-    .from('api_keys')
-    .select('key_name, key_value');
+async function getApiKeys(request: NextRequest) {
+  const auth = await getAuthUser(request);
+  if (!auth) {
+    logger.warn('Usuario no autenticado en /api/images, usando keys globales');
+    // Fallback a lectura directa sin filtro (comportamiento anterior)
+    const { data: keys, error } = await supabase
+      .from('api_keys')
+      .select('key_name, key_value');
 
-  if (error) {
-    logger.error('Error fetching API keys:', error);
+    if (error) {
+      logger.error('Error fetching API keys:', error);
+    }
+
+    const apiKeys: Record<string, string> = {};
+    keys?.forEach((k: any) => {
+      apiKeys[k.key_name] = k.key_value || '';
+    });
+
+    return {
+      unsplash: apiKeys.unsplash_access_key || apiKeys.unsplash_api_key || '',
+      pexels: apiKeys.pexels_api_key || '',
+      pixabay: apiKeys.pixabay_api_key || '',
+      freepik: apiKeys.freepik_key || apiKeys.freepik_api_key || '',
+      envato: apiKeys.envato_personal_token || apiKeys.envato_api_key || '',
+      openai: apiKeys.openai_key || '',
+      gemini: apiKeys.gemini_key || '',
+      stability: apiKeys.stability_key || apiKeys.stability_api_key || '',
+      replicate: apiKeys.replicate_key || apiKeys.replicate_api_key || '',
+      xai: apiKeys.xai_api_key || '',
+      brandfetch: apiKeys.brandfetch_api_key || ''
+    };
   }
 
-  const apiKeys: Record<string, string> = {};
-  keys?.forEach((k: any) => {
-    apiKeys[k.key_name] = k.key_value || '';
-  });
+  // Usar helper con fallback personal → global
+  const supabaseClient = createSupabaseClient();
+  const keyNames = [
+    'unsplash_access_key', 'unsplash_api_key', 'pexels_api_key', 'pixabay_api_key',
+    'freepik_key', 'freepik_api_key', 'envato_personal_token', 'envato_api_key',
+    'openai_key', 'gemini_key', 'stability_key', 'stability_api_key',
+    'replicate_key', 'replicate_api_key', 'xai_api_key', 'brandfetch_api_key'
+  ];
 
-  logger.debug('API Keys loaded:', {
-    unsplash: !!apiKeys.unsplash_access_key || !!apiKeys.unsplash_api_key,
-    pexels: !!apiKeys.pexels_api_key,
-    pixabay: !!apiKeys.pixabay_api_key,
-    freepik: !!apiKeys.freepik_key || !!apiKeys.freepik_api_key,
-    envato_key: !!apiKeys.envato_personal_token,
-    envato_fallback: !!apiKeys.envato_api_key,
-    openai: !!apiKeys.openai_key,
-    brandfetch: !!apiKeys.brandfetch_api_key
-  });
+  const apiKeys = await getApiKeysWithFallback(supabaseClient, keyNames, auth.userId, auth.empresaId);
 
   return {
     unsplash: apiKeys.unsplash_access_key || apiKeys.unsplash_api_key || '',
@@ -600,7 +622,7 @@ export async function GET(request: NextRequest) {
     const generator = searchParams.get('generator') || 'auto';
     const size = searchParams.get('size') || 'square';
 
-    const apiKeys = await getApiKeys();
+    const apiKeys = await getApiKeys(request);
 
     // STATUS
     if (action === 'status') {

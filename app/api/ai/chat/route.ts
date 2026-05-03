@@ -1,22 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-
-const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
-
-async function getApiKey(supabase: ReturnType<typeof createClient>, keyName: string): Promise<string | null> {
-  const { data, error } = await supabase
-    .from('api_keys')
-    .select('key_value')
-    .eq('key_name', keyName)
-    .eq('empresa_id', EMPRESA_ID)
-    .single()
-
-  if (error || !data?.key_value) return null
-  return data.key_value
-}
+import { getAuthUser } from '@/lib/supabase/api-auth'
+import { getApiKey } from '@/lib/api-keys'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await getAuthUser(request)
+    if (!auth) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    }
+
     const supabase = createClient()
     const body = await request.json()
     const { model, prompt, systemPrompt, maxTokens, temperature, images } = body
@@ -28,7 +21,7 @@ export async function POST(request: NextRequest) {
     const modelProvider = model || 'gemini'
 
     if (modelProvider === 'gemini' || modelProvider === 'gemini-pro' || modelProvider === 'gemini-flash') {
-      const apiKey = await getApiKey(supabase, 'gemini_key')
+      const apiKey = await getApiKey(supabase, 'gemini_key', auth.userId, auth.empresaId)
       if (!apiKey) {
         return NextResponse.json({ error: 'Gemini API key no configurada. Configúrala en API Nube.' }, { status: 400 })
       }
@@ -81,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (modelProvider === 'openai' || modelProvider === 'gpt-4' || modelProvider === 'gpt-4o' || modelProvider === 'chatgpt') {
-      const apiKey = await getApiKey(supabase, 'openai_key')
+      const apiKey = await getApiKey(supabase, 'openai_key', auth.userId, auth.empresaId)
       if (!apiKey) {
         return NextResponse.json({ error: 'OpenAI API key no configurada. Configúrala en API Nube.' }, { status: 400 })
       }
@@ -126,7 +119,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (modelProvider === 'groq') {
-      const apiKey = await getApiKey(supabase, 'groq_key')
+      const apiKey = await getApiKey(supabase, 'groq_key', auth.userId, auth.empresaId)
       if (!apiKey) {
         return NextResponse.json({ error: 'Groq API key no configurada. Configúrala en API Nube.' }, { status: 400 })
       }
