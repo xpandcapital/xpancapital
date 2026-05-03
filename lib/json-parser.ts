@@ -4,29 +4,76 @@
 export function cleanJsonResponse(text: string): string {
   if (!text) return ''
 
-  let cleaned = text.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim()
+  let cleaned = text
+    .replace(/```json\s*/gi, '')
+    .replace(/```\s*/g, '')
+    .trim()
 
-  // Extraer solo el objeto JSON si hay texto alrededor
-  const jsonMatch = cleaned.match(/\{(?:[^{}]|{(?:[^{}]|{[^{}]*})*})*}/s)
-  if (jsonMatch && jsonMatch[0].length > cleaned.length * 0.5) {
-    cleaned = jsonMatch[0]
-  }
+  // Intentar extraer el primer objeto JSON completo
+  const firstBrace = cleaned.indexOf('{')
+  if (firstBrace < 0) return cleaned
 
-  // Remover BOM
-  cleaned = cleaned.replace(/^\uFEFF/, '')
+  // Contar profundidad de llaves para encontrar el cierre correcto
+  let depth = 0
+  let inString = false
+  let escaped = false
+  let endIdx = -1
 
-  // Fix: strings no terminados — cerrar el último string abierto
-  // Buscar el último " que no tiene cierre
-  if (cleaned.trimEnd().endsWith('"')) {
-    // Parece correcto
-  } else if ((cleaned.match(/"/g) || []).length % 2 !== 0) {
-    // Hay un número impar de comillas — el último string no está cerrado
-    // Agregar cierre antes de la última llave
-    cleaned = cleaned.trimEnd()
-    if (!cleaned.endsWith('"') && !cleaned.endsWith('\\"')) {
-      cleaned = cleaned.substring(0, cleaned.lastIndexOf('}')) + '"}'
+  for (let i = firstBrace; i < cleaned.length; i++) {
+    const ch = cleaned[i]
+    if (escaped) {
+      escaped = false
+      continue
+    }
+    if (ch === '\\') {
+      escaped = true
+      continue
+    }
+    if (ch === '"') {
+      inString = !inString
+      continue
+    }
+    if (inString) continue
+    if (ch === '{') depth++
+    else if (ch === '}') {
+      depth--
+      if (depth === 0) {
+        endIdx = i + 1
+        break
+      }
     }
   }
+
+  if (endIdx > 0) {
+    cleaned = cleaned.substring(firstBrace, endIdx)
+  } else {
+    // Si no se encontró cierre, intentar con el substring desde la primera llave
+    cleaned = cleaned.substring(firstBrace)
+  }
+
+  // Fix: escapar saltos de línea dentro de strings JSON
+  cleaned = cleaned.replace(/"([^"\\]*(\\.[^"\\]*)*)"/g, (match) => {
+    // Ya está en un string JSON, no modificar
+    return match
+  })
+
+  // Fix: si el JSON está incompleto, intentar cerrarlo
+  let openBraces = 0
+  let openBrackets = 0
+  for (const ch of cleaned) {
+    if (ch === '{') openBraces++
+    else if (ch === '}') openBraces--
+    else if (ch === '[') openBrackets++
+    else if (ch === ']') openBrackets--
+  }
+  
+  // Cerrar arrays pendientes
+  while (openBrackets > 0) { cleaned += ']'; openBrackets-- }
+  // Cerrar objetos pendientes  
+  while (openBraces > 0) { cleaned += '}'; openBraces-- }
+
+  // Fix: remover caracteres de control excepto \n \r \t (pero no dentro de strings)
+  cleaned = cleaned.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
 
   return cleaned
 }
@@ -44,17 +91,15 @@ export function safeJsonParse(text: string): any {
   const cleaned = cleanJsonResponse(text)
   try { return JSON.parse(cleaned) } catch {}
 
-  // Strategy 3: Intentar extraer con diferentes patrones de regex
-  const patterns = [
-    /\{[\s\S]*\}/,
-    /\[[\s\S]*\]/,
-  ]
-  for (const pattern of patterns) {
-    const match = cleaned.match(pattern)
-    if (match) {
-      try { return JSON.parse(match[0]) } catch {}
-    }
+  // Strategy 3: Intentar extraer JSON con regex greedy
+  const match = cleaned.match(/\{[\s\S]*\}/)
+  if (match) {
+    try { return JSON.parse(match[0]) } catch {}
   }
+
+  // Strategy 4: Remover todos los saltos de línea (pueden romper el parse)
+  const noNewlines = cleaned.replace(/\n/g, '\\n').replace(/\r/g, '\\r')
+  try { return JSON.parse(noNewlines) } catch {}
 
   throw new Error(`JSON inválido después de múltiples intentos. Respuesta: ${text.substring(0, 200)}...`)
 }
