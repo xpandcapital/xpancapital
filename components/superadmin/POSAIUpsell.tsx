@@ -29,22 +29,29 @@ export const POSAIUpsell = ({ cart, catalog, onAddProduct }: POSAIUpsellProps) =
 
         setIsGenerating(true);
         try {
-            const catalogInfo = catalog.map(p => `ID:${p.id}|${p.name}|$${p.price}`).join('\n');
+            const catalogInfo = catalog.map((p: any) => `ID:${p.id} | ${p.name} | ${p.category || 'General'} | $${p.price}`).join('\n');
             const cartInfo = cart.map(c => `${c.name} ($${c.price})`).join(', ');
-            const prompt = `Eres un asistente de ventas inteligente para un punto de venta. Analiza el carrito y catálogo para sugerir productos adicionales (upsell/cross-sell).
+            const prompt = `Eres un asistente de ventas de Blis Corp. Tu tarea es analizar el catálogo REAL y el contexto del cliente para sugerir productos.
 
-Carrito actual: ${cartInfo || 'Vacío'}
-Contexto del cliente: ${context || 'Sin contexto adicional'}
-Catálogo disponible:
+${cart.length > 0 ? `CARRITO ACTUAL: ${cartInfo}` : 'CLIENTE NO HA AGREGADO PRODUCTOS AÚN.'}
+CONTEXTO DEL CLIENTE (lo que quiere lograr): "${context || 'Sin contexto adicional'}"
+
+CATÁLOGO DISPONIBLE (estos productos existen realmente):
 ${catalogInfo}
 
-Responde SOLO con JSON:
+INSTRUCCIONES:
+1. Busca en el catálogo productos que le sirvan al cliente según su contexto. Aunque el carrito esté vacío, sugiere productos del catálogo que se relacionen con lo que quiere.
+2. Siempre incluye mínimo 3 productos del catálogo en catalog_suggestions.
+3. El campo "id" DEBE ser EXACTAMENTE el ID que aparece en el catálogo, cópialo textualmente.
+4. En ideal_suggestions sugiere productos que NO están en el catálogo pero serían ideales.
+
+Responde SOLO con este JSON:
 {
   "catalog_suggestions": [
-    {"id": "product_id_from_catalog", "title": "nombre del producto", "reason": "por qué combinaría con el carrito", "estimated_price": precio_numero}
+    {"id": "ID_EXACTO_DEL_CATALOGO", "title": "nombre del producto", "reason": "por qué le sirve al cliente", "estimated_price": precio_numero}
   ],
   "ideal_suggestions": [
-    {"title": "producto ideal no en catálogo", "reason": "por qué sería útil al cliente", "estimated_price": precio_estimado}
+    {"title": "producto ideal no en catálogo", "reason": "por qué sería útil", "estimated_price": precio_estimado}
   ]
 }`;
 
