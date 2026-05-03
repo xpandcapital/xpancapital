@@ -518,6 +518,19 @@ export function ApiCloudPage() {
                                                                         >
                                                                             {state.copiedId && state.copiedId === app.fields[0]?.id ? <Check className="w-3.5 h-3.5 md:w-4 md:h-4" /> : <Copy className="w-3.5 h-3.5 md:w-4 md:h-4" />}
                                                                         </button>
+                                                                        {/* Scope badge */}
+                                                                        {(() => {
+                                                                            const scope = config.appScopes[app.id] || 'global'
+                                                                            return (
+                                                                                <span className={`text-[9px] md:text-xs font-bold uppercase px-1.5 py-0.5 md:px-2 md:py-0.5 rounded whitespace-nowrap ${
+                                                                                    scope === 'global' 
+                                                                                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' 
+                                                                                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                                                                }`}>
+                                                                                    {scope === 'global' ? 'Global' : 'Mi API'}
+                                                                                </span>
+                                                                            )
+                                                                        })()}
                                                                         <button
                                                                             type="button"
                                                                             onClick={(e) => { e.stopPropagation(); app.fields.forEach(f => runTest(f)); }}
@@ -525,6 +538,19 @@ export function ApiCloudPage() {
                                                                             title="Probar conexión"
                                                                         >
                                                                             <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => { 
+                                                                                e.stopPropagation(); 
+                                                                                const scope = config.appScopes[app.id] || 'global'
+                                                                                config.handleSaveApp(app.id, app.fields.map(f => f.id), scope === 'global')
+                                                                            }}
+                                                                            disabled={config.isSavingApp === app.id}
+                                                                            className="p-1.5 md:p-2 rounded-lg text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors disabled:opacity-50"
+                                                                            title="Guardar esta API"
+                                                                        >
+                                                                            {config.isSavingApp === app.id ? <Loader2 className="w-3.5 h-3.5 md:w-4 md:h-4 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4" />}
                                                                         </button>
                                                                         <div
                                                                             onClick={(e) => { e.stopPropagation(); state.openIdeasModal(app.id, app.name); }}
@@ -555,6 +581,29 @@ export function ApiCloudPage() {
                                                                         >
                                                                             <Globe className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                                                         </a>
+                                                                        {/* Toggle Global / Personal */}
+                                                                        {(() => {
+                                                                            const scope = config.appScopes[app.id] || 'global'
+                                                                            const canToggle = true // Todos pueden cambiar su propia vista
+                                                                            return (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation()
+                                                                                        const newScope = scope === 'global' ? 'personal' : 'global'
+                                                                                        config.setAppScopes(prev => ({ ...prev, [app.id]: newScope }))
+                                                                                    }}
+                                                                                    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] md:text-xs font-bold uppercase transition-all ${
+                                                                                        scope === 'global'
+                                                                                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20'
+                                                                                            : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20'
+                                                                                    }`}
+                                                                                    title={scope === 'global' ? 'Cambiar a Mi API' : 'Cambiar a Global'}
+                                                                                >
+                                                                                    {scope === 'global' ? 'Global' : 'Mi API'}
+                                                                                </button>
+                                                                            )
+                                                                        })()}
                                                                         <button
                                                                             type="button"
                                                                             onClick={() => state.toggleApp(app.id)}

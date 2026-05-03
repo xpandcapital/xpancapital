@@ -211,8 +211,12 @@ export function useApiConfig() {
   const [environment, setEnvironment] = useState<Environment>('production')
   const [lastUpdated, setLastUpdated] = useState<Record<string, string>>({})
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({})
+  const [appScopes, setAppScopes] = useState<Record<string, 'global' | 'personal'>>({})
+  const [userRole, setUserRole] = useState<string>('viewer')
+  const [currentUserId, setCurrentUserId] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isSavingApp, setIsSavingApp] = useState<string | null>(null)
 
   useEffect(() => {
     loadApiKeys()
@@ -238,16 +242,43 @@ export function useApiConfig() {
       if (result.success && result.keys) {
         const newValues = { ...apiValues }
         const newUpdated: Record<string, string> = {}
-        result.keys.forEach((row: { key_name: string; key_value: string; has_value: boolean; updated_at?: string }) => {
+        const newScopes: Record<string, 'global' | 'personal'> = {}
+        
+        // Track which apps have global vs personal keys
+        const appScopeMap: Record<string, { global: number; personal: number }> = {}
+        
+        result.keys.forEach((row: { 
+          key_name: string; 
+          key_value: string; 
+          has_value: boolean; 
+          is_global: boolean;
+          user_id: string | null;
+          updated_at?: string 
+        }) => {
           if (row.key_name in newValues) {
             if (row.key_value) {
               (newValues as Record<string, string>)[row.key_name] = row.key_value
             }
           }
           if (row.updated_at) newUpdated[row.key_name] = row.updated_at
+          
+          // Determine app scope from key prefix (e.g., "gemini_key" → "gemini")
+          const appId = row.key_name.split('_')[0]
+          if (appId) {
+            if (!appScopeMap[appId]) appScopeMap[appId] = { global: 0, personal: 0 }
+            if (row.is_global) appScopeMap[appId].global++
+            else appScopeMap[appId].personal++
+          }
         })
+        
+        // Determine final scope for each app (global wins if any global key exists)
+        Object.entries(appScopeMap).forEach(([appId, counts]) => {
+          newScopes[appId] = counts.global > 0 ? 'global' : 'personal'
+        })
+        
         setApiValues(newValues)
         setLastUpdated(prev => ({ ...prev, ...newUpdated }))
+        setAppScopes(newScopes)
       }
     } catch {
       const newValues = { ...apiValues }
@@ -279,20 +310,64 @@ export function useApiConfig() {
     reader.readAsDataURL(file)
   }, [])
 
+  const handleSaveApp = async (appId: string, fieldIds: string[], isGlobal: boolean) => {
+    setIsSavingApp(appId)
+    try {
+      const keysToSave: Record<string, { value: string; is_global: boolean }> = {}
+      
+      fieldIds.forEach(fieldId => {
+        const value = apiValues[fieldId] || ''
+        // Solo guardar si tiene valor o si ya existía (para borrar)
+        if (value !== DEFAULT_VALUES[fieldId as keyof typeof DEFAULT_VALUES]) {
+          keysToSave[fieldId] = { value, is_global: isGlobal }
+        }
+      })
+
+      if (Object.keys(keysToSave).length === 0) {
+        alert('No hay cambios para guardar')
+        return
+      }
+
+      const response = await fetch('/api/admin/api-keys', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keys: keysToSave }),
+      })
+      const result = await response.json()
+
+      if (result.success) {
+        setAppScopes(prev => ({ ...prev, [appId]: isGlobal ? 'global' : 'personal' }))
+        window.dispatchEvent(new CustomEvent('blis_config_updated'))
+        alert(`✅ ${appId} guardado correctamente`)
+      } else {
+        throw new Error(result.error || 'Error al guardar')
+      }
+    } catch (err: any) {
+      Object.entries(apiValues).forEach(([k, v]) => localStorage.setItem(k, v))
+      alert(`⚠️ Guardado en localStorage (error: ${err.message})`)
+    } finally {
+      setIsSavingApp(null)
+    }
+  }
+
   const handleSaveAll = async () => {
     setIsSaving(true)
     try {
-      const changedEntries: Record<string, string> = {}
+      const keysToSave: Record<string, { value: string; is_global: boolean }> = {}
+      
       Object.entries(apiValues).forEach(([k, v]) => {
         if (v !== DEFAULT_VALUES[k as keyof typeof DEFAULT_VALUES] || lastUpdated[k]) {
-          changedEntries[k] = v || ''
+          // Determinar si es global o personal basado en el app scope
+          const appId = k.split('_')[0]
+          const isGlobal = appScopes[appId] === 'global'
+          keysToSave[k] = { value: v || '', is_global: isGlobal }
         }
       })
 
       const response = await fetch('/api/admin/api-keys', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ keys: changedEntries }),
+        body: JSON.stringify({ keys: keysToSave }),
       })
       const result = await response.json()
 
@@ -416,16 +491,24 @@ export function useApiConfig() {
     environment,
     lastUpdated,
     showKeys,
+    appScopes,
+    userRole,
+    currentUserId,
     isLoading,
     isSaving,
+    isSavingApp,
     setApiValues,
     setApiNotes,
     setFavorites,
     setApiStatus,
     setEnvironment,
     setShowKeys,
+    setAppScopes,
+    setUserRole,
+    setCurrentUserId,
     handleKeyChange,
     handleFileChange,
+    handleSaveApp,
     handleSaveAll,
     toggleFavorite,
     saveNote,

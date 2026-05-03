@@ -1,20 +1,32 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { encryptApiKey, decryptApiKey, maskKey } from '@/lib/api-crypto'
-
-const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
+import { getAuthUser, isAdmin } from '@/lib/supabase/api-auth'
 
 export async function GET(request: NextRequest) {
   try {
+    const auth = await getAuthUser(request)
+    if (!auth) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    }
+
     const supabase = createClient()
     const { searchParams } = new URL(request.url)
     const service = searchParams.get('service')
     const unmasked = searchParams.get('unmasked') === 'true'
 
+    // Construir query base
     let query = supabase
       .from('api_keys')
-      .select('key_name, key_value, created_at, updated_at')
-      .eq('empresa_id', EMPRESA_ID)
+      .select('key_name, key_value, is_global, user_id, created_at, updated_at')
+      .eq('empresa_id', auth.empresaId)
+
+    // Filtrar por visibilidad:
+    // - Superadmin ve TODO (globales + personales de todos)
+    // - Otros usuarios ven globales + sus propias personales
+    if (!isAdmin(auth)) {
+      query = query.or(`is_global.eq.true,user_id.eq.${auth.userId}`)
+    }
 
     if (service) {
       query = query.ilike('key_name', `${service}%`)
@@ -38,6 +50,8 @@ export async function GET(request: NextRequest) {
       key_name: row.key_name,
       key_value: unmasked ? decryptApiKey(row.key_value || '') : maskKey(decryptApiKey(row.key_value || '')),
       has_value: !!(row.key_value && row.key_value.length > 0 && row.key_value !== ''),
+      is_global: row.is_global,
+      user_id: row.user_id,
       created_at: row.created_at,
       updated_at: row.updated_at,
     }))
@@ -51,24 +65,55 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await getAuthUser(request)
+    if (!auth) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    }
+
     const supabase = createClient()
     const body = await request.json()
-    const { key_name, key_value } = body
+    const { key_name, key_value, is_global } = body
 
     if (!key_name) {
       return NextResponse.json({ error: 'key_name es requerido' }, { status: 400 })
     }
 
+    // Validar permisos para crear/editar globales
+    const wantGlobal = is_global === true
+    if (wantGlobal && !isAdmin(auth)) {
+      return NextResponse.json({ error: 'Solo admin puede crear/editar APIs globales' }, { status: 403 })
+    }
+
     const encryptedValue = encryptApiKey(key_value || '')
+
+    // Verificar si ya existe una key con ese nombre
+    const { data: existing } = await supabase
+      .from('api_keys')
+      .select('key_name, is_global, user_id')
+      .eq('empresa_id', auth.empresaId)
+      .eq('key_name', key_name)
+      .maybeSingle()
+
+    // Si existe y es global, solo admin puede editar
+    if (existing && existing.is_global && !isAdmin(auth)) {
+      return NextResponse.json({ error: 'No puedes editar una API global' }, { status: 403 })
+    }
+
+    // Si existe y es personal de otro usuario, no puede editar
+    if (existing && !existing.is_global && existing.user_id !== auth.userId) {
+      return NextResponse.json({ error: 'No puedes editar una API de otro usuario' }, { status: 403 })
+    }
 
     const { data, error } = await supabase
       .from('api_keys')
       .upsert({
         key_name,
         key_value: encryptedValue,
-        empresa_id: EMPRESA_ID,
+        empresa_id: auth.empresaId,
+        user_id: wantGlobal ? null : auth.userId,
+        is_global: wantGlobal,
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'key_name,empresa_id' })
+      }, { onConflict: wantGlobal ? 'key_name,empresa_id' : 'key_name,empresa_id,user_id' })
       .select()
       .single()
 
@@ -83,9 +128,14 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await getAuthUser(request)
+    if (!auth) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    }
+
     const supabase = createClient()
     const body = await request.json()
-    const { keys } = body as { keys: Record<string, string> }
+    const { keys } = body as { keys: Record<string, { value: string; is_global?: boolean }> }
 
     if (!keys || typeof keys !== 'object') {
       return NextResponse.json({ error: 'keys object es requerido' }, { status: 400 })
@@ -94,16 +144,46 @@ export async function PUT(request: NextRequest) {
     let saved = 0
     let errors = 0
 
-    for (const [key_name, key_value] of Object.entries(keys)) {
-      const encryptedValue = encryptApiKey(key_value || '')
+    for (const [key_name, config] of Object.entries(keys)) {
+      const key_value = config.value || ''
+      const wantGlobal = config.is_global === true
+
+      // Validar permisos
+      if (wantGlobal && !isAdmin(auth)) {
+        errors++
+        continue
+      }
+
+      const encryptedValue = encryptApiKey(key_value)
+
+      // Verificar existencia y permisos
+      const { data: existing } = await supabase
+        .from('api_keys')
+        .select('key_name, is_global, user_id')
+        .eq('empresa_id', auth.empresaId)
+        .eq('key_name', key_name)
+        .maybeSingle()
+
+      if (existing && existing.is_global && !isAdmin(auth)) {
+        errors++
+        continue
+      }
+
+      if (existing && !existing.is_global && existing.user_id !== auth.userId) {
+        errors++
+        continue
+      }
+
       const { error } = await supabase
         .from('api_keys')
         .upsert({
           key_name,
           key_value: encryptedValue,
-          empresa_id: EMPRESA_ID,
+          empresa_id: auth.empresaId,
+          user_id: wantGlobal ? null : auth.userId,
+          is_global: wantGlobal,
           updated_at: new Date().toISOString(),
-        }, { onConflict: 'key_name,empresa_id' })
+        }, { onConflict: wantGlobal ? 'key_name,empresa_id' : 'key_name,empresa_id,user_id' })
 
       if (error) errors++
       else saved++
@@ -118,6 +198,11 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await getAuthUser(request)
+    if (!auth) {
+      return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
+    }
+
     const supabase = createClient()
     const { searchParams } = new URL(request.url)
     const key_name = searchParams.get('key_name')
@@ -126,11 +211,31 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'key_name es requerido' }, { status: 400 })
     }
 
+    // Verificar existencia y permisos antes de borrar
+    const { data: existing } = await supabase
+      .from('api_keys')
+      .select('is_global, user_id')
+      .eq('empresa_id', auth.empresaId)
+      .eq('key_name', key_name)
+      .maybeSingle()
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Key no encontrada' }, { status: 404 })
+    }
+
+    if (existing.is_global && !isAdmin(auth)) {
+      return NextResponse.json({ error: 'Solo admin puede borrar APIs globales' }, { status: 403 })
+    }
+
+    if (!existing.is_global && existing.user_id !== auth.userId) {
+      return NextResponse.json({ error: 'No puedes borrar una API de otro usuario' }, { status: 403 })
+    }
+
     const { error } = await supabase
       .from('api_keys')
       .delete()
       .eq('key_name', key_name)
-      .eq('empresa_id', EMPRESA_ID)
+      .eq('empresa_id', auth.empresaId)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

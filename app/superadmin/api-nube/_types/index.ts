@@ -37,6 +37,7 @@ export interface ApiApp {
   docsUrl?: string
   fields: ApiField[]
   fallbackGroup?: string
+  scope?: 'global' | 'personal'
 }
 
 export interface ApiCategory {
