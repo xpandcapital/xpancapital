@@ -43,6 +43,7 @@ Debes devolver un JSON exacto:
 {
   "title": "Un título magnético e informativo",
   "seoTitle": "Título SEO para Blis Corp",
+  "seoDescription": "Meta description de máximo 160 caracteres, atractiva para Google",
   "excerpt": "Cliffhanger con emojis",
   "category": "Categoría",
   "tags": ["Tag1", "Tag2", "Tag3", "Tag4", "Tag5"],

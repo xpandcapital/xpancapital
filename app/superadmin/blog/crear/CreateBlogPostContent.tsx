@@ -222,6 +222,18 @@ export default function CreateBlogPostContent() {
       });
       const data = await res.json();
       if (data.title) {
+        // Hacer match de categoría por nombre (case-insensitive)
+        let matchedCategoryId = ''
+        if (data.category && categories.length > 0) {
+          const catLower = data.category.toLowerCase().trim()
+          const match = categories.find(c => 
+            c.nombre.toLowerCase() === catLower || 
+            c.nombre.toLowerCase().includes(catLower) ||
+            catLower.includes(c.nombre.toLowerCase())
+          )
+          if (match) matchedCategoryId = match.id
+        }
+
         setPost(prev => ({
           ...prev,
           titulo: data.title || prev.titulo,
@@ -232,6 +244,7 @@ export default function CreateBlogPostContent() {
           tags: data.tags || prev.tags,
           seo_title: data.seoTitle || prev.seo_title,
           seo_description: data.seoDescription || prev.seo_description,
+          categoria_id: matchedCategoryId || prev.categoria_id,
         }));
         setMessage({ text: '¡Artículo generado con IA!', type: 'success' });
       } else if (data.error) {
