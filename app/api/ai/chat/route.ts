@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Gemini API key no configurada. Configúrala en API Nube.' }, { status: 400 })
       }
 
-      const modelName = modelProvider === 'gemini-flash' ? 'gemini-2.0-flash' : 'gemini-2.5-pro-preview-06-05'
+      const modelName = modelProvider === 'gemini-flash' ? 'gemini-1.5-flash-latest' : 'gemini-1.5-pro-latest'
 
       const geminiContents: any[] = []
 

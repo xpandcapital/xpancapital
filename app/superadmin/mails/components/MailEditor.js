@@ -9,7 +9,7 @@ function AIGenerator({ blockId, currentText, onGenerate }) {
   const handleAI = async () => {
     setLoading(true);
     try {
-      const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: `Reescribe de forma profesional y persuasiva para un email marketing: "${currentText}". Responde solo con el texto mejorado.` }] }] }) });
+      const resp = await fetch('/api/ai/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gemini-flash', prompt: `Reescribe de forma profesional y persuasiva para un email marketing: "${currentText}". Responde solo con el texto mejorado.`, temperature: 0.7 }) });
       const data = await resp.json();
       const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (txt) onGenerate(txt.trim());

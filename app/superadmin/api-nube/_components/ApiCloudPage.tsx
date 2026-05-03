@@ -518,19 +518,6 @@ export function ApiCloudPage() {
                                                                         >
                                                                             {state.copiedId && state.copiedId === app.fields[0]?.id ? <Check className="w-3.5 h-3.5 md:w-4 md:h-4" /> : <Copy className="w-3.5 h-3.5 md:w-4 md:h-4" />}
                                                                         </button>
-                                                                        {/* Scope badge */}
-                                                                        {(() => {
-                                                                            const scope = config.appScopes[app.id] || 'global'
-                                                                            return (
-                                                                                <span className={`text-[9px] md:text-xs font-bold uppercase px-1.5 py-0.5 md:px-2 md:py-0.5 rounded whitespace-nowrap ${
-                                                                                    scope === 'global' 
-                                                                                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' 
-                                                                                        : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                                                                }`}>
-                                                                                    {scope === 'global' ? 'Global' : 'Mi API'}
-                                                                                </span>
-                                                                            )
-                                                                        })()}
                                                                         <button
                                                                             type="button"
                                                                             onClick={(e) => { e.stopPropagation(); app.fields.forEach(f => runTest(f)); }}
