@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="scroll-smooth">
+    <html lang="es" className="scroll-smooth" suppressHydrationWarning>
       <body className={`${montserrat.variable} font-sans antialiased bg-black text-white selection:bg-blis-red/30 selection:text-white`}>
         <LayoutShell>{children}</LayoutShell>
       </body>

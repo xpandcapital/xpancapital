@@ -191,6 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true
     const supabase = getSupabaseClient()
+    if (!supabase) return
 
     // Obtener sesión inicial — si ya tenemos cache, actualizar en background
     supabase.auth.getSession().then(async ({ data: { session } }) => {
