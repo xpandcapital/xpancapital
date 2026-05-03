@@ -48,7 +48,7 @@ Responde SOLO con JSON:
   ]
 }`;
 
-            const result = await aiChat({ model: 'gemini-flash', prompt, systemPrompt: 'Eres un experto en estrategias de ventas y upsell. Responde siempre en JSON válido.', temperature: 0.7 });
+            const result = await aiChat({ model: 'gemini-flash', prompt, systemPrompt: 'Eres un experto en estrategias de ventas y upsell. Responde siempre en JSON válido.', temperature: 0.7, responseMimeType: 'application/json' });
             
             if (result.error) {
                 setSuggestions({ catalog_suggestions: [], ideal_suggestions: [], error: result.error } as any);

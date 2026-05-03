@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient()
     const body = await request.json()
-    const { model, prompt, systemPrompt, maxTokens, temperature, images } = body
+    const { model, prompt, systemPrompt, maxTokens, temperature, images, responseMimeType } = body
 
     if (!prompt) {
       return NextResponse.json({ error: 'prompt es requerido' }, { status: 400 })
@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
             generationConfig: {
               maxOutputTokens: maxTokens || 2048,
               temperature: temperature || 0.7,
+              ...(responseMimeType ? { responseMimeType } : {}),
             },
           }),
         }

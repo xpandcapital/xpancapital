@@ -5,6 +5,7 @@ interface ChatOptions {
   maxTokens?: number
   temperature?: number
   images?: Array<{ mimeType: string; data: string }>
+  responseMimeType?: string  // Para forzar JSON en Gemini (ej: "application/json")
 }
 
 interface ChatResponse {
