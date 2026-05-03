@@ -8,15 +8,29 @@ import { createClient } from '@/lib/supabase/server'
  * Usa regex para extraer cada campo individualmente, tolerante a errores.
  */
 function extractFields(text: string): any {
+  // Convertir escapes JSON (\\n, \\t, \\\", \\\\) en sus valores reales
+  const unescape = (str: string): string => {
+    return str
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '\t')
+      .replace(/\\r/g, '\r')
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, '\\')
+  }
+
   const extract = (key: string): string | null => {
-    // Buscar "key": "value" o "key":"value"
     const patterns = [
       new RegExp(`"${key}"\\s*:\\s*"(.*?)"\\s*[,}]`, 's'),
-      new RegExp(`"${key}"\\s*:\\s*"(.*)"`, 's'),
+      new RegExp(`"${key}"\\s*:\\s*"(.*)`, 's'),
     ]
     for (const p of patterns) {
       const m = text.match(p)
-      if (m) return m[1]
+      if (m) {
+        let val = m[1]
+        // Remover comillas de cierre al final si quedan
+        if (val.endsWith('"')) val = val.slice(0, -1)
+        return unescape(val)
+      }
     }
     return null
   }
@@ -26,15 +40,14 @@ function extractFields(text: string): any {
     const m = text.match(p)
     if (!m) return []
     const items = m[1].match(/"([^"]*)"/g)
-    return (items || []).map(s => s.replace(/^"|"$/g, ''))
+    return (items || []).map(s => unescape(s.replace(/^"|"$/g, '')))
   }
 
   // Extraer content — el campo más problemático por el HTML
   let content = extract('content')
   if (!content) {
-    // Intentar extraer desde "content":" hasta el final antes de }
     const cm = text.match(/"content"\s*:\s*"([\s\S]*?)"\s*\}/)
-    if (cm) content = cm[1]
+    if (cm) content = unescape(cm[1])
   }
 
   return {
