@@ -67,7 +67,7 @@ Idea Principal de lo que debe tratar el blog: ${idea}
                         || modelsData.models?.find((m: any) => m.name.includes('flash') && m.name.includes('3.1'))?.name
                         || modelsData.models?.find((m: any) => m.name.includes('flash') && m.name.includes('1.5'))?.name
                         || modelsData.models?.find((m: any) => m.name.includes('flash'))?.name
-                        || 'models/gemini-pro';
+                        || 'models/gemini-2.5-pro';
 
                     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/${flashModel}:generateContent?key=${activeKey}`;
                     const response = await fetch(geminiUrl, {
