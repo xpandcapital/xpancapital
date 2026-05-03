@@ -222,6 +222,18 @@ export default function CreateBlogPostContent() {
       });
       const data = await res.json();
       if (data.title) {
+        // Fix: cerrar blockquotes no cerrados
+        let fixedContent = data.content || ''
+        if (fixedContent) {
+          const openBq = (fixedContent.match(/<blockquote[^>]*>/gi) || []).length
+          const closeBq = (fixedContent.match(/<\/blockquote>/gi) || []).length
+          if (openBq > closeBq) {
+            for (let i = closeBq; i < openBq; i++) {
+              fixedContent += '</blockquote>'
+            }
+          }
+        }
+
         // Hacer match de categoría por nombre (case-insensitive)
         let matchedCategoryId = ''
         if (data.category && categories.length > 0) {
@@ -238,7 +250,7 @@ export default function CreateBlogPostContent() {
           ...prev,
           titulo: data.title || prev.titulo,
           slug: generateSlug(data.title || prev.titulo),
-          contenido: data.content || prev.contenido,
+          contenido: fixedContent || prev.contenido,
           extracto: data.excerpt || prev.extracto,
           imagen_portada: data.coverImage || prev.imagen_portada,
           tags: data.tags || prev.tags,
