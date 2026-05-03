@@ -69,7 +69,26 @@ Responde SOLO con JSON:
     };
 
     const handleQuickAdd = (suggestion: Suggestion) => {
-        const fullProduct = catalog.find(p => p.id === suggestion.id);
+        // Intentar match exacto por ID
+        let fullProduct = catalog.find((p: any) => p.id === suggestion.id);
+        
+        // Si no hay match exacto, intentar por nombre (case-insensitive)
+        if (!fullProduct && suggestion.id) {
+            fullProduct = catalog.find((p: any) => 
+                p.name?.toLowerCase() === suggestion.id.toLowerCase() ||
+                p.name?.toLowerCase().includes(suggestion.id.toLowerCase())
+            );
+        }
+        
+        // Si no hay match, intentar por el título de la sugerencia
+        if (!fullProduct && suggestion.title) {
+            fullProduct = catalog.find((p: any) => 
+                p.name?.toLowerCase() === suggestion.title.toLowerCase() ||
+                p.name?.toLowerCase().includes(suggestion.title.toLowerCase()) ||
+                suggestion.title.toLowerCase().includes(p.name?.toLowerCase() || '')
+            );
+        }
+        
         if (fullProduct) {
             onAddProduct(fullProduct);
         }

@@ -83,7 +83,7 @@ Idea Principal de lo que debe tratar el blog: ${idea}
                         body: JSON.stringify({
                             systemInstruction: { parts: [{ text: systemInstruction }] },
                             contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-                            generationConfig: { temperature: 0.8, responseMimeType: "application/json", maxOutputTokens: 8192 }
+                            generationConfig: { temperature: 0.8, responseMimeType: "application/json", maxOutputTokens: 16384 }
                         }),
                         signal: AbortSignal.timeout(60000)
                     });
