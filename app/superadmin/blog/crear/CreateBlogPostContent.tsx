@@ -3,7 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Send, Sparkles, Loader2, Image as ImageIcon, Tag, Eye } from 'lucide-react';
+import {
+  ArrowLeft, Save, Send, Sparkles, Loader2, Image as ImageIcon,
+  Tag, Eye, Trash2, RotateCcw, CheckCircle2
+} from 'lucide-react';
+import RichTextEditor from '@/components/superadmin/RichTextEditor';
 
 interface Category {
   id: string;
@@ -23,6 +27,8 @@ interface BlogPost {
   estado: string;
   es_premium: boolean;
   precio_coins: number;
+  seo_title?: string;
+  seo_description?: string;
   tags?: string[];
 }
 
@@ -35,8 +41,9 @@ export default function CreateBlogPostContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const [post, setPost] = useState<BlogPost>({
     id: '',
@@ -50,10 +57,13 @@ export default function CreateBlogPostContent() {
     estado: 'borrador',
     es_premium: false,
     precio_coins: 0,
+    seo_title: '',
+    seo_description: '',
     tags: [],
   });
 
   const [tagInput, setTagInput] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
 
   // Load empresa and categories
   useEffect(() => {
@@ -89,6 +99,8 @@ export default function CreateBlogPostContent() {
                 estado: p.estado || 'borrador',
                 es_premium: p.es_premium || false,
                 precio_coins: p.precio_coins || 0,
+                seo_title: p.seo_title || '',
+                seo_description: p.seo_description || '',
                 tags: p.tags?.map((t: any) => t.nombre) || [],
               });
             }
@@ -121,6 +133,7 @@ export default function CreateBlogPostContent() {
       ...prev,
       titulo: title,
       slug: prev.slug && !editId ? generateSlug(title) : prev.slug,
+      seo_title: prev.seo_title || title,
     }));
   };
 
@@ -137,15 +150,15 @@ export default function CreateBlogPostContent() {
 
   const handleSave = async (publish = false) => {
     if (!post.titulo || !post.contenido) {
-      setMessage('Título y contenido son obligatorios');
+      setMessage({ text: 'Título y contenido son obligatorios', type: 'error' });
       return;
     }
     if (!empresaId) {
-      setMessage('Error: no se pudo obtener empresa_id');
+      setMessage({ text: 'Error: no se pudo obtener empresa_id', type: 'error' });
       return;
     }
 
-    setSaving(true);
+    if (publish) setPublishing(true); else setSaving(true);
     setMessage(null);
 
     try {
@@ -154,7 +167,9 @@ export default function CreateBlogPostContent() {
         titulo: post.titulo,
         slug: post.slug || generateSlug(post.titulo),
         contenido: post.contenido,
-        extracto: post.extracto || post.contenido.substring(0, 200),
+        extracto: post.extracto || post.contenido.replace(/<[^>]+>/g, '').substring(0, 200),
+        seo_title: post.seo_title || post.titulo,
+        seo_description: post.seo_description || post.extracto || post.contenido.replace(/<[^>]+>/g, '').substring(0, 160),
         imagen_portada: post.imagen_portada,
         imagen_alt: post.imagen_alt,
         categoria_id: post.categoria_id || null,
@@ -181,51 +196,61 @@ export default function CreateBlogPostContent() {
 
       const data = await res.json();
       if (data.success) {
-        setMessage(publish ? '¡Artículo publicado!' : 'Borrador guardado');
+        setMessage({ text: publish ? '¡Artículo publicado!' : 'Borrador guardado', type: 'success' });
         if (!editId && data.data?.id) {
           router.replace(`/superadmin/blog/crear?id=${data.data.id}`);
         }
       } else {
-        setMessage(data.error || 'Error al guardar');
+        setMessage({ text: data.error || 'Error al guardar', type: 'error' });
       }
     } catch (err) {
-      setMessage('Error de red al guardar');
+      setMessage({ text: 'Error de red al guardar', type: 'error' });
     } finally {
       setSaving(false);
+      setPublishing(false);
     }
   };
 
-  const handleGenerate = async () => {
-    if (!post.titulo) {
-      setMessage('Escribe un título primero para generar contenido');
-      return;
-    }
+  const handleAIGenerate = useCallback(async (title: string, idea: string) => {
     setGenerating(true);
     setMessage(null);
     try {
-      const res = await fetch('/api/ai/chat', {
+      const res = await fetch('/api/generate-blog', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'gemini-flash',
-          prompt: `Escribe un artículo de blog completo y bien estructurado sobre: "${post.titulo}". ${post.extracto ? 'Contexto: ' + post.extracto : ''}
-
-Devuelve SOLO el contenido en HTML simple (usa <h2>, <h3>, <p>, <ul>, <li>, <strong>). No incluyas explicaciones adicionales.`,
-          temperature: 0.8,
-        }),
+        body: JSON.stringify({ title, idea }),
       });
       const data = await res.json();
-      if (data.text) {
-        setPost(prev => ({ ...prev, contenido: data.text }));
-        setMessage('Contenido generado con éxito');
-      } else {
-        setMessage(data.error || 'Error generando contenido');
+      if (data.title) {
+        setPost(prev => ({
+          ...prev,
+          titulo: data.title || prev.titulo,
+          slug: generateSlug(data.title || prev.titulo),
+          contenido: data.content || prev.contenido,
+          extracto: data.excerpt || prev.extracto,
+          imagen_portada: data.coverImage || prev.imagen_portada,
+          tags: data.tags || prev.tags,
+          seo_title: data.seoTitle || prev.seo_title,
+          seo_description: data.seoDescription || prev.seo_description,
+        }));
+        setMessage({ text: '¡Artículo generado con IA!', type: 'success' });
+      } else if (data.error) {
+        setMessage({ text: data.error, type: 'error' });
       }
     } catch (err) {
-      setMessage('Error de red al generar');
+      setMessage({ text: 'Error generando contenido con IA', type: 'error' });
     } finally {
       setGenerating(false);
     }
+  }, []);
+
+  const handleCancelAIGenerate = () => {
+    setGenerating(false);
+  };
+
+  const handleImageSearch = () => {
+    // Open image search modal or redirect to image search
+    window.open('/superadmin/utilidades?tab=imagenes', '_blank');
   };
 
   if (loading) {
@@ -238,19 +263,31 @@ Devuelve SOLO el contenido en HTML simple (usa <h2>, <h3>, <p>, <ul>, <li>, <str
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div className="flex items-center gap-4">
             <Link href="/superadmin/blog" className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-2xl font-bold">{editId ? 'Editar artículo' : 'Nuevo artículo'}</h1>
+            <div>
+              <h1 className="text-2xl font-bold">{editId ? 'Editar artículo' : 'Nuevo artículo'}</h1>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mt-1">
+                {post.estado === 'publicado' ? 'Publicado' : 'Borrador'}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-bold transition-colors"
+            >
+              <Eye className="w-4 h-4" />
+              {showPreview ? 'Editar' : 'Vista previa'}
+            </button>
             <button
               onClick={() => handleSave(false)}
-              disabled={saving}
+              disabled={saving || publishing}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white text-sm font-bold transition-colors disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -258,118 +295,158 @@ Devuelve SOLO el contenido en HTML simple (usa <h2>, <h3>, <p>, <ul>, <li>, <str
             </button>
             <button
               onClick={() => handleSave(true)}
-              disabled={saving}
+              disabled={saving || publishing}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-black hover:bg-gray-200 text-sm font-bold transition-colors disabled:opacity-50"
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {publishing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               Publicar
             </button>
           </div>
         </div>
 
         {message && (
-          <div className={`mb-6 p-4 rounded-lg text-sm font-bold ${message.includes('Error') || message.includes('error') ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
-            {message}
+          <div className={`mb-6 p-4 rounded-lg text-sm font-bold ${message.type === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
+            {message.text}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Main content */}
-          <div className="lg:col-span-2 space-y-6">
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Título</label>
-              <input
-                type="text"
-                value={post.titulo}
-                onChange={e => handleTitleChange(e.target.value)}
-                placeholder="Título del artículo"
-                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-lg font-bold"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Slug</label>
-              <input
-                type="text"
-                value={post.slug}
-                onChange={e => updateField('slug', e.target.value)}
-                placeholder="url-amigable-del-articulo"
-                className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Extracto</label>
-              <textarea
-                value={post.extracto}
-                onChange={e => updateField('extracto', e.target.value)}
-                placeholder="Breve descripción del artículo (aparece en listados)"
-                rows={3}
-                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm resize-none"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Contenido</label>
-                <button
-                  onClick={handleGenerate}
-                  disabled={generating}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 text-xs font-bold transition-colors disabled:opacity-50"
-                >
-                  {generating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                  Generar con IA
-                </button>
-              </div>
-              <textarea
-                value={post.contenido}
-                onChange={e => updateField('contenido', e.target.value)}
-                placeholder="Escribe el contenido del artículo aquí... Puedes usar HTML básico."
-                rows={20}
-                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm resize-y font-mono"
-              />
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-                <Eye className="w-4 h-4 text-gray-400" />
-                Configuración
-              </h3>
-
-              <div className="space-y-4">
+          <div className="xl:col-span-2 space-y-6">
+            {!showPreview ? (
+              <>
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Categoría</label>
-                  <select
-                    value={post.categoria_id || ''}
-                    onChange={e => updateField('categoria_id', e.target.value || null)}
-                    className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/30"
-                  >
-                    <option value="" className="bg-[#1a1a1a]">Sin categoría</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id} className="bg-[#1a1a1a]">{cat.nombre}</option>
-                    ))}
-                  </select>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Título</label>
+                  <input
+                    type="text"
+                    value={post.titulo}
+                    onChange={e => handleTitleChange(e.target.value)}
+                    placeholder="Título del artículo"
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-lg font-bold"
+                  />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Imagen de portada (URL)</label>
-                  <div className="flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-gray-500" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Slug</label>
                     <input
                       type="text"
-                      value={post.imagen_portada || ''}
-                      onChange={e => updateField('imagen_portada', e.target.value)}
-                      placeholder="https://..."
-                      className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm"
+                      value={post.slug}
+                      onChange={e => updateField('slug', e.target.value)}
+                      placeholder="url-amigable-del-articulo"
+                      className="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm font-mono"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Categoría</label>
+                    <select
+                      value={post.categoria_id || ''}
+                      onChange={e => updateField('categoria_id', e.target.value || null)}
+                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/30"
+                    >
+                      <option value="" className="bg-[#1a1a1a]">Sin categoría</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id} className="bg-[#1a1a1a]">{cat.nombre}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Alt text imagen</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Extracto</label>
+                  <textarea
+                    value={post.extracto}
+                    onChange={e => updateField('extracto', e.target.value)}
+                    placeholder="Breve descripción del artículo (aparece en listados)"
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contenido</label>
+                  <RichTextEditor
+                    value={post.contenido}
+                    onChange={(val) => updateField('contenido', val)}
+                    placeholder="Escribe el contenido de tu artículo aquí..."
+                    onAIGenerate={handleAIGenerate}
+                    isGeneratingAI={generating}
+                    onCancelAIGenerate={handleCancelAIGenerate}
+                    onImageSearch={handleImageSearch}
+                    minHeight="500px"
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-8 min-h-[500px]">
+                <h1 className="text-3xl font-black text-white mb-4">{post.titulo || 'Sin título'}</h1>
+                {post.imagen_portada && (
+                  <img src={post.imagen_portada} alt={post.imagen_alt || post.titulo} className="w-full h-64 object-cover rounded-2xl mb-6" />
+                )}
+                <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: post.contenido || '<p class="text-gray-500">Sin contenido</p>' }} />
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* SEO */}
+            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
+              <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                <Eye className="w-4 h-4 text-gray-400" />
+                SEO
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SEO Title</label>
+                  <input
+                    type="text"
+                    value={post.seo_title || ''}
+                    onChange={e => updateField('seo_title', e.target.value)}
+                    placeholder="Título para buscadores"
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SEO Description</label>
+                  <textarea
+                    value={post.seo_description || ''}
+                    onChange={e => updateField('seo_description', e.target.value)}
+                    placeholder="Descripción para buscadores"
+                    rows={3}
+                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Portada */}
+            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
+              <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-gray-400" />
+                Imagen de portada
+              </h3>
+              <div className="space-y-4">
+                {post.imagen_portada && (
+                  <div className="relative rounded-xl overflow-hidden border border-white/10">
+                    <img src={post.imagen_portada} alt="Portada" className="w-full h-40 object-cover" />
+                    <button
+                      onClick={() => updateField('imagen_portada', '')}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/40 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+                <input
+                  type="text"
+                  value={post.imagen_portada || ''}
+                  onChange={e => updateField('imagen_portada', e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm"
+                />
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Alt text</label>
                   <input
                     type="text"
                     value={post.imagen_alt || ''}
@@ -378,8 +455,14 @@ Devuelve SOLO el contenido en HTML simple (usa <h2>, <h3>, <p>, <ul>, <li>, <str
                     className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm"
                   />
                 </div>
+              </div>
+            </div>
 
-                <div className="flex items-center gap-3 pt-2">
+            {/* Configuración */}
+            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
+              <h3 className="text-sm font-bold mb-4">Configuración</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="es_premium"
@@ -401,9 +484,29 @@ Devuelve SOLO el contenido en HTML simple (usa <h2>, <h3>, <p>, <ul>, <li>, <str
                     />
                   </div>
                 )}
+
+                <div className="pt-2 border-t border-white/5">
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Estado</label>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                      post.estado === 'publicado' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-yellow-500/10 text-yellow-400'
+                    }`}>
+                      {post.estado === 'publicado' ? 'Publicado' : 'Borrador'}
+                    </span>
+                    {post.estado === 'publicado' && (
+                      <button
+                        onClick={() => updateField('estado', 'borrador')}
+                        className="text-xs text-gray-500 hover:text-white transition-colors"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
+            {/* Tags */}
             <div className="p-5 rounded-xl bg-white/5 border border-white/10">
               <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
                 <Tag className="w-4 h-4 text-gray-400" />
@@ -433,15 +536,6 @@ Devuelve SOLO el contenido en HTML simple (usa <h2>, <h3>, <p>, <ul>, <li>, <str
                   </span>
                 ))}
               </div>
-            </div>
-
-            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-bold mb-2">Estado actual</h3>
-              <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                post.estado === 'publicado' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-yellow-500/10 text-yellow-400'
-              }`}>
-                {post.estado === 'publicado' ? 'Publicado' : 'Borrador'}
-              </span>
             </div>
           </div>
         </div>
