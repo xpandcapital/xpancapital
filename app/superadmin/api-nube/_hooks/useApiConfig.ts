@@ -340,15 +340,32 @@ export function useApiConfig() {
     }
   }, [])
 
-  const testApiConnection = useCallback(async (fieldId: string, value: string) => {
+  const testApiConnection = useCallback(async (fieldId: string, value: string, extraValues?: Record<string, string>) => {
     if (!value) {
       setApiStatus(prev => ({ ...prev, [fieldId]: 'error' }))
       return 'error'
     }
 
     setApiStatus(prev => ({ ...prev, [fieldId]: 'testing' }))
-    setApiStatus(prev => ({ ...prev, [fieldId]: 'success' }))
-    return 'success'
+
+    try {
+      const res = await fetch('/api/admin/api-keys/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fieldId, value, extraValues }),
+      })
+      const data = await res.json()
+      if (data.valid) {
+        setApiStatus(prev => ({ ...prev, [fieldId]: 'success' }))
+        return 'success'
+      } else {
+        setApiStatus(prev => ({ ...prev, [fieldId]: 'error' }))
+        return 'error'
+      }
+    } catch {
+      setApiStatus(prev => ({ ...prev, [fieldId]: 'error' }))
+      return 'error'
+    }
   }, [])
 
   const exportConfig = useCallback(() => {

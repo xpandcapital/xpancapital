@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { decryptApiKey } from '@/lib/api-crypto'
 
 const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Key not found', value: null }, { status: 404 })
     }
 
-    return NextResponse.json({ value: data.key_value })
+    return NextResponse.json({ value: decryptApiKey(data.key_value) })
   } catch (error) {
     console.error('[API Keys Value] GET error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

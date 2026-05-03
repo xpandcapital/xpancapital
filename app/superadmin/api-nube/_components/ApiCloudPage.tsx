@@ -31,47 +31,24 @@ export function ApiCloudPage() {
         state.initCategoryOrder(categories.length)
     }, [])
 
-    const testApiConnection = async (app: ApiApp, field: ApiField) => {
-        const key = config.environment === 'production' ? field.id : `${field.id}_dev`
-        const value = config.apiValues[key] || config.apiValues[field.id]
-
+    const runTest = async (field: ApiField) => {
+        const value = config.apiValues[field.id]
         if (!value) {
-            config.setApiStatus(prev => ({ ...prev, [key]: 'error' }))
+            config.setApiStatus(prev => ({ ...prev, [field.id]: 'error' }))
             return
         }
-
-        config.setApiStatus(prev => ({ ...prev, [key]: 'testing' }))
-
-        try {
-            if (field.testEndpoint) {
-                const headers: Record<string, string> = {
-                    'Content-Type': 'application/json',
-                }
-
-                if (field.id.includes('key') || field.id.includes('token') || field.id.includes('secret')) {
-                    headers['Authorization'] = `Bearer ${value}`
-                } else {
-                    headers['X-API-Key'] = value
-                }
-
-                const response = await fetch(field.testEndpoint, {
-                    method: field.testMethod || 'GET',
-                    headers,
-                })
-
-                if (response.ok) {
-                    config.setApiStatus(prev => ({ ...prev, [key]: 'success' }))
-                } else if (response.status === 429) {
-                    config.setApiStatus(prev => ({ ...prev, [key]: 'limit' }))
-                } else {
-                    config.setApiStatus(prev => ({ ...prev, [key]: 'error' }))
-                }
-            } else {
-                config.setApiStatus(prev => ({ ...prev, [key]: 'success' }))
+        let extraValues: Record<string, string> | undefined
+        if (field.id === 'cloudinary_api_key') {
+            extraValues = {
+                cloudinary_api_secret: config.apiValues['cloudinary_api_secret'] || '',
+                cloudinary_cloud_name: config.apiValues['cloudinary_cloud_name'] || '',
             }
-        } catch {
-            config.setApiStatus(prev => ({ ...prev, [key]: 'error' }))
+        } else if (field.id === 'supabase_url') {
+            extraValues = {
+                supabase_anon_key: config.apiValues['supabase_anon_key'] || '',
+            }
         }
+        await config.testApiConnection(field.id, value, extraValues)
     }
 
     const copyToClipboard = async (id: string, value: string) => {
@@ -543,7 +520,7 @@ export function ApiCloudPage() {
                                                                         </button>
                                                                         <button
                                                                             type="button"
-                                                                            onClick={(e) => { e.stopPropagation(); app.fields.forEach(f => testApiConnection(app, f)); }}
+                                                                            onClick={(e) => { e.stopPropagation(); app.fields.forEach(f => runTest(f)); }}
                                                                             className="p-1.5 md:p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
                                                                             title="Probar conexión"
                                                                         >
@@ -611,7 +588,7 @@ export function ApiCloudPage() {
                                                                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                                                                                     <div className="flex items-center gap-2 w-full sm:w-auto">
                                                                                         <button
-                                                                                            onClick={() => app.fields.forEach(f => testApiConnection(app, f))}
+                                                                                            onClick={() => app.fields.forEach(f => runTest(f))}
                                                                                             className="flex-1 sm:flex-none flex justify-center items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-emerald-400 text-xs md:text-sm font-bold transition-all"
                                                                                         >
                                                                                             <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -670,7 +647,7 @@ export function ApiCloudPage() {
                                                                                                     )}
                                                                                                     <button
                                                                                                         type="button"
-                                                                                                        onClick={() => testApiConnection(app, field)}
+                                                                                                        onClick={() => runTest(field)}
                                                                                                         disabled={fieldStatus === 'testing' || !hasValue}
                                                                                                         className="p-1 md:p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
                                                                                                         title="Probar conexión"
