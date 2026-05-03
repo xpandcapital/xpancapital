@@ -1,32 +1,54 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { getAuthUser } from '@/lib/supabase/api-auth'
+import { getApiKey } from '@/lib/api-keys'
+import { createClient } from '@/lib/supabase/server'
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
         const { service, key, token_vimeo, url_cloudinary, merchant_id } = await req.json();
 
         // 1. Priorizamos Headers por si acaso
         const hKey = req.headers.get('x-api-key');
-        const activeKey = key || hKey;
+        let activeKey = key || hKey;
+
+        // 2. Si no hay key, intentar obtenerla de API Nube
+        if (!activeKey) {
+            const auth = await getAuthUser(req)
+            if (auth) {
+                const supabase = createClient()
+                const serviceKeyMap: Record<string, string> = {
+                    'ai-gemini': 'gemini_key',
+                    'ai-openai': 'openai_key',
+                    'ai-groq': 'groq_key',
+                    'resend': 'resend_key',
+                    'email': 'resend_key',
+                }
+                const keyName = serviceKeyMap[service] || service
+                const dbKey = await getApiKey(supabase, keyName, auth.userId, auth.empresaId)
+                if (dbKey) activeKey = dbKey
+            }
+        }
 
         if (!service) return NextResponse.json({ ok: false, msg: 'Falta servicio' }, { status: 400 });
 
         // --- AI: Gemini ---
         if (service === 'ai-gemini') {
+            if (!activeKey) return NextResponse.json({ ok: false, msg: 'Gemini: Sin Key. Agréga tu gemini_key en API Nube.' })
             const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${activeKey}`, { next: { revalidate: 0 } });
-            if (!r.ok) return NextResponse.json({ ok: false, msg: 'Gemini: Key Inválida' });
-            return NextResponse.json({ ok: true, msg: 'Gemini Activo (Proxy)' });
+            if (!r.ok) return NextResponse.json({ ok: false, msg: 'Gemini: Key Inválida o sin acceso' });
+            return NextResponse.json({ ok: true, msg: 'Gemini Activo' });
         }
 
         // --- AI: OpenAI ---
         if (service === 'ai-openai') {
+            if (!activeKey) return NextResponse.json({ ok: false, msg: 'OpenAI: Sin Key. Agréga tu openai_key en API Nube.' })
             const r = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${activeKey}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ model: 'gpt-4o', messages: [{ role: 'user', content: 'id' }], max_tokens: 1 }),
-                next: { revalidate: 0 }
             });
             if (r.status === 401) return NextResponse.json({ ok: false, msg: 'OpenAI: Key Inválida' });
-            return NextResponse.json({ ok: r.ok, msg: r.ok ? 'OpenAI Listo (Proxy)' : `OpenAI Error: ${r.status}` });
+            return NextResponse.json({ ok: r.ok, msg: r.ok ? 'OpenAI Listo' : `OpenAI Error: ${r.status}` });
         }
 
         // --- Email: Resend ---
@@ -50,15 +72,14 @@ export async function POST(req: Request) {
 
         // --- AI: Groq ---
         if (service === 'ai-groq') {
-            if (!activeKey) return NextResponse.json({ ok: false, msg: 'Groq: Sin Key' });
+            if (!activeKey) return NextResponse.json({ ok: false, msg: 'Groq: Sin Key. Agréga tu groq_key en API Nube.' })
             const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${activeKey}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: 'id' }], max_tokens: 1 }),
-                next: { revalidate: 0 }
             });
             if (r.status === 401) return NextResponse.json({ ok: false, msg: 'Groq: Key Inválida' });
-            return NextResponse.json({ ok: r.ok, msg: r.ok ? 'Groq Listo (Proxy)' : `Groq Error: ${r.status}` });
+            return NextResponse.json({ ok: r.ok, msg: r.ok ? 'Groq Listo' : `Groq Error: ${r.status}` });
         }
 
         // --- Video: YouTube ---

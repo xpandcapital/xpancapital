@@ -11,8 +11,7 @@ function AIGenerator({ blockId, currentText, onGenerate }) {
     try {
       const resp = await fetch('/api/ai/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: 'gemini-flash', prompt: `Reescribe de forma profesional y persuasiva para un email marketing: "${currentText}". Responde solo con el texto mejorado.`, temperature: 0.7 }) });
       const data = await resp.json();
-      const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (txt) onGenerate(txt.trim());
+      if (data.text) onGenerate(data.text.trim());
     } catch (e) { console.error(e); }
     setLoading(false);
   };

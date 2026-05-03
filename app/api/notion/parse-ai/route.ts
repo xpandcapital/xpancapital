@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { logger } from '@/lib/utils/logger';
+import { getAuthUser } from '@/lib/supabase/api-auth';
+import { getApiKey } from '@/lib/api-keys';
+import { createClient as createSupabaseClient } from '@/lib/supabase/server';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -81,9 +84,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!gemini_api_key) {
+    // Obtener key: prioridad al body (compatibilidad), fallback a API Nube
+    let finalKey = gemini_api_key || ''
+    if (!finalKey) {
+      const auth = await getAuthUser(request)
+      if (auth) {
+        const supabaseClient = createSupabaseClient()
+        finalKey = await getApiKey(supabaseClient, 'gemini_key', auth.userId, auth.empresaId) || ''
+      }
+    }
+
+    if (!finalKey) {
       return NextResponse.json(
-        { success: false, error: 'Se requiere Gemini API Key' },
+        { success: false, error: 'Se requiere Gemini API Key. Agréga tu key en API Nube.' },
         { status: 400 }
       );
     }
@@ -134,7 +147,7 @@ export async function POST(request: NextRequest) {
         logger.debug(`[Notion AI] Analizando lote ${lot.lot_number} con Gemini...`);
 
         // Llamar a Gemini
-        const parsed = await parseWithGemini(formaPagoText, gemini_api_key);
+        const parsed = await parseWithGemini(formaPagoText, finalKey);
         logger.debug(`[Notion AI] Resultado:`, JSON.stringify(parsed, null, 2));
 
         // Obtener los initial_payments ACTUALES para mantener los `actual`

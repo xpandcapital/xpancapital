@@ -1,21 +1,27 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server'
+import { getAuthUser } from '@/lib/supabase/api-auth'
+import { getApiKey } from '@/lib/api-keys'
+import { createClient } from '@/lib/supabase/server'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
-        const { title, idea, apiKey: bodyApiKey, gptKey: bodyGptKey, groqKey: bodyGroqKey } = await request.json();
+        const { title, idea } = await request.json()
 
-        // 1. Priorizamos Headers (enviados desde el Dashboard)
-        const headerGemini = request.headers.get('x-gemini-key');
-        const headerOpenAI = request.headers.get('x-openai-key');
-        const headerGroq = request.headers.get('x-groq-key');
+        // Obtener usuario autenticado y sus API keys desde API Nube
+        const auth = await getAuthUser(request)
+        if (!auth) {
+            return NextResponse.json({ error: "Usuario no autenticado" }, { status: 401 })
+        }
 
-        // 2. Usamos Body o Env como fallback
-        const activeKey = headerGemini || bodyApiKey || process.env.GEMINI_API_KEY;
-        const activeGptKey = headerOpenAI || bodyGptKey || process.env.OPENAI_API_KEY;
-        const activeGroqKey = headerGroq || bodyGroqKey || process.env.GROQ_API_KEY;
+        const supabase = createClient()
+        const [activeKey, activeGptKey, activeGroqKey] = await Promise.all([
+            getApiKey(supabase, 'gemini_key', auth.userId, auth.empresaId),
+            getApiKey(supabase, 'openai_key', auth.userId, auth.empresaId),
+            getApiKey(supabase, 'groq_key', auth.userId, auth.empresaId),
+        ])
 
         if (!activeKey && !activeGptKey && !activeGroqKey) {
-            return NextResponse.json({ error: "No se configuraron llaves de IA (Gemini, GPT ni Groq)" }, { status: 500 });
+            return NextResponse.json({ error: "No se configuraron llaves de IA (Gemini, GPT ni Groq). Agrégalas en API Nube." }, { status: 500 });
         }
 
         const systemInstruction = `

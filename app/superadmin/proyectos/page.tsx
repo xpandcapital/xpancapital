@@ -418,40 +418,6 @@ setNotionSyncing(false);
 const handleAIParse = async () => {
   if (!notionModal) return;
   
-  // Obtener API key de múltiples fuentes
-  let geminiKey = localStorage.getItem('gemini_key');
-  
-  if (!geminiKey) {
-    const configStr = localStorage.getItem('blis_ai_config');
-    if (configStr) {
-      try {
-        const config = JSON.parse(configStr);
-        geminiKey = config.gemini_key || config.gemini || null;
-      } catch {}
-    }
-  }
-  
-  // También intentar desde blis_config (formato usado en api-nube)
-  if (!geminiKey) {
-    const configStr = localStorage.getItem('blis_config');
-    if (configStr) {
-      try {
-        const config = JSON.parse(configStr);
-        geminiKey = config.gemini_key || null;
-      } catch {}
-    }
-  }
-  
-if (!geminiKey || geminiKey.trim() === '') {
-     setAiParseResult({ 
-       success: false, 
-       error: 'No tienes configurada una API Key de Gemini. Ve a Configuración → API Keys → Gemini, ingresa tu key y guarda.' 
-     });
-     return;
-   }
-   
-   logger.debug('[AI Parse] Usando API key:', geminiKey.substring(0, 15) + '...');
-  
   setAiParsing(true);
   setAiParseResult(null);
   
@@ -461,7 +427,6 @@ if (!geminiKey || geminiKey.trim() === '') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         project_id: notionModal.id,
-        gemini_api_key: geminiKey
       }),
 });
      
