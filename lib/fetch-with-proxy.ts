@@ -6,8 +6,10 @@ function getProxyAgent(): HttpsProxyAgent<string> | undefined {
   if (_agent === undefined) {
     const url = process.env.FIXIE_URL
     if (url) {
+      console.log('[Fixie] Proxy configurado:', url.replace(/\/\/.*@/, '//***@'))
       _agent = new HttpsProxyAgent(url)
     } else {
+      console.log('[Fixie] FIXIE_URL no configurada')
       _agent = null
     }
   }
@@ -27,9 +29,10 @@ export function fetchProxied(
   const urlStr = typeof input === 'string' ? input : input instanceof URL ? input.toString() : (input as Request).url
 
   if (shouldProxy(urlStr)) {
-    const agent = getProxyAgent()
-    if (agent) {
-      return fetch(input, { ...init, agent } as any)
+    const dispatcher = getProxyAgent()
+    if (dispatcher) {
+      console.log('[Fixie] Enrutando por proxy:', urlStr.substring(0, 80))
+      return fetch(input, { ...init, dispatcher } as any)
     }
   }
   return fetch(input, init)
