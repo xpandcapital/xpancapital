@@ -214,13 +214,6 @@ export const POSManager = () => {
         ruc: country === 'PE' ? 'RUC' : (country === 'MX' ? 'RFC' : (country === 'CO' ? 'NIT' : (country === 'CL' || country === 'EC' ? 'RUC' : 'ID Fiscal'))),
     };
 
-    useEffect(() => {
-        const override = typeof window !== 'undefined' ? localStorage.getItem('blis_pos_country') : null
-        if (!override && country === 'EC') {
-            setCountry('PE')
-        }
-    }, [country, setCountry]);
-
     const [searchQuery, setSearchQuery] = useState('');
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [view, setView] = useState<'pos' | 'history'>('pos');

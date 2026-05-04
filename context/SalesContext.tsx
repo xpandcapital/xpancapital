@@ -159,16 +159,14 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     const { cmsData } = useLandingCMS();
 
-    // Fix país en montaje inicial — antes de que cmsData cargue 'EC'
+    // País: localStorage manda. Si no hay nada guardado, default PE.
     useEffect(() => {
         if (typeof window === 'undefined') return
-        const override = localStorage.getItem('blis_pos_country')
-        if (!override) {
-            handleSetCountry('PE')
-        }
+        const saved = localStorage.getItem('blis_pos_country')
+        if (saved) setCountry(saved)
     }, [])
 
-    // Load localization from CMS
+    // Moneda / impuesto desde CMS (no afectan país)
     useEffect(() => {
         if (cmsData?.commercial) {
             const currMap: Record<string, string> = {
@@ -179,13 +177,9 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 'COP': '$',
                 'CLP': '$'
             };
-            
             setCurrency(currMap[cmsData.commercial.currency] || cmsData.commercial.currency);
             setTaxName(cmsData.commercial.taxName || 'IGV');
             setTaxRate(cmsData.commercial.taxRate || 18);
-            // Prioriza override manual sobre CMS
-            const override = typeof window !== 'undefined' ? localStorage.getItem('blis_pos_country') : null
-            setCountry(override || cmsData.commercial.country || 'PE');
         }
     }, [cmsData]);
 
