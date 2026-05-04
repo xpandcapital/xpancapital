@@ -75,6 +75,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
 
+    console.log('[EcuadorAPI] Firmando comprobante...')
     const response = await fetch('https://apiconsult.zampisoft.com/api/firmar', {
       method: 'POST',
       headers: {
@@ -86,7 +87,11 @@ export async function POST(request: Request) {
     })
 
     const data = await response.json()
-    return NextResponse.json(data)
+    if (!response.ok) {
+      console.error('[EcuadorAPI] Error firmar:', response.status, data.error || data.message)
+      return NextResponse.json({ success: false, message: data.error || data.message || `Error HTTP ${response.status}` }, { status: response.status })
+    }
+    return NextResponse.json({ success: true, ...data })
   } catch (error: any) {
     console.error('Ecuador API Sign Error:', error)
     return NextResponse.json({ success: false, message: 'Fallo la comunicación con el firmador (Ecuador)' }, { status: 500 })
