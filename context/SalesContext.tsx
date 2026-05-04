@@ -159,6 +159,15 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     const { cmsData } = useLandingCMS();
 
+    // Fix país en montaje inicial — antes de que cmsData cargue 'EC'
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+        const override = localStorage.getItem('blis_pos_country')
+        if (!override) {
+            handleSetCountry('PE')
+        }
+    }, [])
+
     // Load localization from CMS
     useEffect(() => {
         if (cmsData?.commercial) {

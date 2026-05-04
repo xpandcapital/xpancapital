@@ -47,7 +47,8 @@ export async function GET() {
     }
 
     return NextResponse.json({ success: true, data: data.secciones })
-  } catch {
+  } catch (e: any) {
+    console.error('[CMS Landing] Error en PUT:', e.message, e.stack)
     return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
   }
 }
@@ -131,7 +132,8 @@ export async function PUT(request: NextRequest) {
     revalidateTag('landing-template')
 
     return NextResponse.json({ success: true, message: 'CMS actualizado correctamente' })
-  } catch {
+  } catch (e: any) {
+    console.error('[CMS Landing] Error en PUT:', e.message, e.stack)
     return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
   }
 }
