@@ -158,7 +158,7 @@ export function CategoryManager() {
                                             {/* Toggle visibilidad */}
                                             <button
                                                 type="button"
-                                                onClick={async () => { await toggleActive(category.id, !category.activo); await fetchCategories(); }}
+                                                onClick={async () => { await toggleActive(category.id, !category.activo); await fetchCategories(true); }}
                                                 title={category.activo ? 'Ocultar categoría de la tienda' : 'Mostrar categoría en la tienda'}
                                                 className={`p-2 rounded-xl transition-all ${
                                                     category.activo
