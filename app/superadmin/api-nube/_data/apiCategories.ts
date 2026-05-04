@@ -3,7 +3,8 @@ import {
     Building2, CreditCard, TrendingUp, BarChart3, Megaphone,
     Coins, Globe, MapPin, FileText, Database,
     Calendar, Zap, MessageSquare, Bell, Palette,
-    FileCheck, Users, Briefcase, Link2, Sparkles
+    FileCheck, Users, Briefcase, Link2, Sparkles,
+    CloudSun, Flag
 } from 'lucide-react'
 import type { ApiCategory } from '../_types'
 
@@ -146,6 +147,54 @@ export const categories: ApiCategory[] = [
                 website: "nominatim.openstreetmap.org",
                 fields: [
                     { id: "openstreetmap_endpoint", label: "API Endpoint", type: "text", description: "URL base de Nominatim. Por defecto: https://nominatim.openstreetmap.org", getFrom: "Usar endpoint público o instalar tu propia instancia", accessType: "Pública", cost: "gratis" },
+                ]
+            },
+        ]
+    },
+    {
+        id: "clima_geo",
+        title: "Clima y Geografía",
+        icon: CloudSun,
+        color: "text-sky-400",
+        description: "Clima, pronóstico, geolocalización y datos de países. APIs 100% gratuitas y sin autenticación.",
+        apps: [
+            {
+                id: "open_meteo",
+                name: "Open-Meteo",
+                icon: Cloud,
+                color: "text-sky-400",
+                bg: "bg-sky-500/10",
+                description: "API gratuita de pronóstico del clima. Sin API key, sin límites. Temperatura, viento, lluvia.",
+                website: "open-meteo.com",
+                fields: [
+                    { id: "openmeteo_endpoint", label: "API Endpoint", type: "text", description: "URL base. Por defecto: https://api.open-meteo.com/v1/forecast", getFrom: "open-meteo.com → API Docs", accessType: "Pública", cost: "gratis" },
+                    { id: "openmeteo_lat", label: "Latitud Default", type: "text", description: "Latitud por defecto (ej: -12.046 para Lima)", getFrom: "Obtener de Google Maps o Nominatim", accessType: "Pública", cost: "gratis" },
+                    { id: "openmeteo_lon", label: "Longitud Default", type: "text", description: "Longitud por defecto (ej: -77.042 para Lima)", getFrom: "Obtener de Google Maps o Nominatim", accessType: "Pública", cost: "gratis" },
+                ]
+            },
+            {
+                id: "countries_api",
+                name: "REST Countries",
+                icon: Flag,
+                color: "text-indigo-400",
+                bg: "bg-indigo-500/10",
+                description: "Info de todos los países: banderas, monedas, idiomas, población, códigos ISO. Gratis.",
+                website: "restcountries.com",
+                fields: [
+                    { id: "countries_endpoint", label: "API Endpoint", type: "text", description: "URL base. Por defecto: https://restcountries.com/v3.1", getFrom: "restcountries.com → Docs", accessType: "Pública", cost: "gratis" },
+                ]
+            },
+            {
+                id: "tipo_cambio_publico",
+                name: "Tipo de Cambio Público",
+                icon: TrendingUp,
+                color: "text-green-400",
+                bg: "bg-green-500/10",
+                description: "Tipo de cambio gratuito SUNAT (Perú) y exchangerate-api (global). Sin token.",
+                website: "exchangerate-api.com",
+                fields: [
+                    { id: "tipocambio_sunat_endpoint", label: "Endpoint SUNAT (PE)", type: "text", description: "URL SUNAT. Por defecto: https://api.apis.net.pe/v1/tipo-cambio-sunat", getFrom: "Pública y gratuita", accessType: "Pública", cost: "gratis" },
+                    { id: "tipocambio_global_endpoint", label: "Endpoint Global", type: "text", description: "URL exchangerate-api. Por defecto: https://api.exchangerate-api.com/v4/latest/USD", getFrom: "exchangerate-api.com → Docs", accessType: "Pública", cost: "gratis" },
                 ]
             },
         ]

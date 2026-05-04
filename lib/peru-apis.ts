@@ -174,7 +174,14 @@ export const fetchExchangeRate = async (country?: string): Promise<{ success: bo
     }
 
     // Fallback: API pública gratuita SUNAT
-    const res = await fetch(`/api/public/tipo-cambio?country=${country || 'PE'}`)
+    const headers: Record<string, string> = {}
+    if (typeof window !== 'undefined') {
+      const sunatUrl = localStorage.getItem('tipocambio_sunat_endpoint')
+      const globalUrl = localStorage.getItem('tipocambio_global_endpoint')
+      if (sunatUrl) headers['x-tipocambio-sunat-endpoint'] = sunatUrl
+      if (globalUrl) headers['x-tipocambio-global-endpoint'] = globalUrl
+    }
+    const res = await fetch(`/api/public/tipo-cambio?country=${country || 'PE'}`, { headers })
     const publicData = await res.json()
     if (publicData.success) {
       return {

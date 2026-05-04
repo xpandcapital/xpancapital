@@ -65,7 +65,7 @@ const getAppIdeas = (appId: string) => {
         'replicate': 'ia_llm', 'stability': 'ia_llm', 'elevenlabs': 'ia_llm', 'freepik': 'ia_llm', 'huggingface': 'ia_llm',
         'stripe': 'pagos_tarjeta', 'mercadopago': 'pagos_tarjeta', 'paypal': 'pagos_tarjeta', 'payu_col': 'pagos_tarjeta', 'epayco': 'pagos_tarjeta', 'wompi': 'pagos_tarjeta', 'bancolombia': 'pagos_tarjeta', 'izipay': 'pagos_tarjeta', 'culqi': 'pagos_tarjeta', 'paymentez': 'pagos_tarjeta', 'placetopay': 'pagos_tarjeta',
         'yape_plin': 'pagos_qr',
-        'google_maps': 'mapas', 'mapbox': 'mapas', 'locationiq': 'mapas', 'openstreetmap': 'mapas',
+        'google_maps': 'mapas', 'mapbox': 'mapas', 'locationiq': 'mapas',         'openstreetmap': 'mapas', 'open_meteo': 'clima', 'countries_api': 'clima', 'tipo_cambio_publico': 'clima',
         'decolecta': 'identidad', 'reniec': 'identidad', 'registro_civil_ec': 'identidad', 'datauno': 'identidad',
         'apisunat': 'facturacion', 'sri': 'facturacion', 'dian': 'facturacion', 'apiconsult': 'facturacion',
         'olva': 'logistica', 'serpost': 'logistica',
