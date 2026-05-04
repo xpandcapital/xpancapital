@@ -13,6 +13,7 @@ import { Copy, AlertCircle,
 import { useSales } from '@/context/SalesContext';
 import { fetchDniData, fetchRucData } from '@/lib/peru-apis';
 import { fetchEcuadorData, mapCartToEcuadorInvoice } from '@/lib/ecuador-apis';
+import { stripHtml } from '@/lib/strip-html';
 import { POSAIUpsell } from './POSAIUpsell';
 import { useProducts, Producto } from '@/lib/hooks/useProducts';
 
@@ -251,7 +252,7 @@ export const POSManager = () => {
     const handleQuickAdd = (p: any) => {
         addToCart({
             id: p.id,
-            name: p.nombre || p.title,
+            name: stripHtml(p.nombre || p.title),
             price: p.precio_usd || p.price,
             image: p.imagen_principal || p.image || '/images/placeholder-product.jpg',
             sku: p.id,
@@ -570,7 +571,7 @@ export const POSManager = () => {
                                                             <img src={p.imagen_principal || p.image || '/images/placeholder-product.jpg'} className="w-full h-full object-cover" />
                                                         </div>
                                                         <div className="flex-1">
-                                                            <div className="text-[11px] font-black uppercase tracking-tighter mb-1">{p.nombre || p.title}</div>
+                                                            <div className="text-[11px] font-black uppercase tracking-tighter mb-1">{stripHtml(p.nombre || p.title)}</div>
                                                             <div className="flex gap-4">
                                                                 <span className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">SKU: {p.id.substring(0, 8)}</span>
                                                             </div>
@@ -619,7 +620,7 @@ export const POSManager = () => {
                                                         {item.image && <img src={item.image} className="w-full h-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all" />}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <div className="text-[10px] font-black uppercase tracking-tighter truncate leading-tight mb-0.5">{item.name}</div>
+                                                        <div className="text-[10px] font-black uppercase tracking-tighter truncate leading-tight mb-0.5">{stripHtml(item.name)}</div>
                                                         <div className="text-[8px] font-bold text-gray-600 uppercase tracking-widest leading-none">${(item.price || 0).toLocaleString()}</div>
                                                     </div>
                                                 </div>
@@ -680,7 +681,7 @@ export const POSManager = () => {
                                             </div>
                                             <div>
                                                 <div className="text-[10px] text-gray-600 font-bold uppercase tracking-widest mb-1">{(tx.date || "").split('T')[0]} - {tx.id}</div>
-                                                <div className="text-lg font-black uppercase tracking-tighter">{tx.customer?.name || 'Venta de Pasillo'}</div>
+                                                <div className="text-lg font-black uppercase tracking-tighter">{stripHtml(tx.customer?.name) || 'Venta de Pasillo'}</div>
                                                 <div className="flex gap-4 mt-1">
                                                     <span className={`text-[9px] font-black uppercase px-3 py-1 rounded-full ${tx.type === 'venta' ? 'bg-emerald-500 text-black' : 'bg-amber-500 text-black'}`}>{tx.type}</span>
                                                     <span className="text-[9px] font-black uppercase border border-white/10 px-3 py-1 rounded-full text-gray-400">{tx.docType}</span>
@@ -1331,7 +1332,7 @@ export const POSManager = () => {
                                         <div className="flex gap-4 mt-2 items-center">
                                             <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Doc: {documentType}</span>
                                             <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">|</span>
-                                            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cliente: {customer?.name || 'Venta General'}</span>
+                                            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cliente: {stripHtml(customer?.name) || 'Venta General'}</span>
 
                                             <button 
                                                 onClick={() => {
@@ -1528,9 +1529,9 @@ export const POSManager = () => {
             {/* --- IMPRESIÓN --- */}
             <div className="hidden print:block fixed inset-0 bg-white font-mono text-black text-[10px] p-4 leading-relaxed tracking-tight z-[9999999] overflow-visible break-inside-avoid">
                 <div className="w-[80mm] mx-auto break-inside-avoid">
-                    <div className="text-center font-black mb-1 leading-none text-xl">{typeof window !== 'undefined' ? (localStorage.getItem('blis_store_name') || 'BLIS CORP') : 'BLIS CORP'}</div>
-                    <div className="text-center text-[7px] mb-0.5 leading-none">RUC: {typeof window !== 'undefined' ? (localStorage.getItem('blis_store_ruc') || '20000000001') : '20000000001'}</div>
-                    <div className="text-center text-[7px] mb-2 leading-tight uppercase max-w-[80%] mx-auto">{typeof window !== 'undefined' ? (localStorage.getItem('blis_store_address') || 'LIMA - PERÚ') : 'LIMA - PERÚ'}</div>
+                    <div className="text-center font-black mb-1 leading-none text-xl">{typeof window !== 'undefined' ? stripHtml(localStorage.getItem('blis_store_name')) || 'BLIS CORP' : 'BLIS CORP'}</div>
+                    <div className="text-center text-[7px] mb-0.5 leading-none">RUC: {typeof window !== 'undefined' ? stripHtml(localStorage.getItem('blis_store_ruc')) || '20000000001' : '20000000001'}</div>
+                    <div className="text-center text-[7px] mb-2 leading-tight uppercase max-w-[80%] mx-auto">{typeof window !== 'undefined' ? stripHtml(localStorage.getItem('blis_store_address')) || 'LIMA - PERÚ' : 'LIMA - PERÚ'}</div>
                     <div className="border-t border-dashed border-black my-2"></div>
                     <div className="text-center font-black text-sm uppercase leading-none tracking-widest">{docLabels.ruc} / {docLabels.dni} - ELECTRÓNICA</div>
                     <div className="text-center text-[8px] mt-0.5 leading-none">{documentType === 'factura' ? 'FACTURA' : (documentType === 'boleta' ? 'BOLETA' : 'TICKET COMPROBANTE')}</div>
@@ -1543,7 +1544,7 @@ export const POSManager = () => {
                         </div>
                         <div className="flex justify-between">
                             <span className="font-bold">CLIENTE:</span>
-                            <span className="text-right ml-2 line-clamp-1">{customer?.name || 'Venta General'}</span>
+                            <span className="text-right ml-2 line-clamp-1">{stripHtml(customer?.name) || 'Venta General'}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="font-bold">{(customer?.id?.length || 0) > 8 ? docLabels.ruc : docLabels.dni}:</span>
@@ -1558,7 +1559,7 @@ export const POSManager = () => {
                         {(cart || []).map((item, idx) => (
                             <div key={idx} className="flex justify-between items-start leading-tight">
                                 <div className="flex-1 pr-2">
-                                    <div className="font-bold uppercase break-words line-clamp-2">{item.name}</div>
+                                    <div className="font-bold uppercase break-words line-clamp-2">{stripHtml(item.name)}</div>
                                     <div className="text-[8px] text-gray-500">
                                         {item.quantity} x {currency}{item.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         {item.discount && item.discount > 0 && ` (-${item.discount}${item.discountType === 'percent' ? '%' : ''})`}

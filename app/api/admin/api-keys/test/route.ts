@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchProxied } from '@/lib/fetch-with-proxy'
 
+export const runtime = 'nodejs'
+
 // ─── Helpers de Conexión ───────────────────────────────────────────
 
 async function testGemini(key: string): Promise<{ valid: boolean; error?: string }> {

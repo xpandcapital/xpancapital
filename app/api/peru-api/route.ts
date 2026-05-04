@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { fetchProxied } from '@/lib/fetch-with-proxy'
 
+export const runtime = 'nodejs'
+
 const API_BASE_URL = 'https://peruapi.com/api';
 const API_TOKEN = process.env.NEXT_PUBLIC_PERU_API_TOKEN || '';
 

@@ -4,6 +4,8 @@ import { getApiKey } from '@/lib/api-keys'
 import { createClient } from '@/lib/supabase/server'
 import { fetchProxied } from '@/lib/fetch-with-proxy'
 
+export const runtime = 'nodejs'
+
 export async function POST(req: NextRequest) {
     try {
         const { service, key, token_vimeo, url_cloudinary, merchant_id } = await req.json();
