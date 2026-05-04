@@ -78,13 +78,13 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (findError && findError.code !== 'PGRST116') {
+      console.error('[CMS Landing] Find error:', findError.message, findError.code, findError.details)
       return NextResponse.json({ success: false, error: findError.message }, { status: 500 })
     }
 
-    let templateId: string
-
     if (!template) {
-      const { data: newTemplate, error: createError } = await supabase
+      // No existe template → crear uno
+      const { error: createError } = await supabase
         .from('templates')
         .insert({
           empresa_id: DEFAULT_EMPRESA_ID,
@@ -99,35 +99,23 @@ export async function PUT(request: NextRequest) {
           creado_en: new Date().toISOString(),
           actualizado_en: new Date().toISOString()
         })
-        .select()
-        .single()
 
       if (createError) {
+        console.error('[CMS Landing] Insert error:', createError.message, createError.details)
         return NextResponse.json({ success: false, error: createError.message }, { status: 500 })
       }
-
-      templateId = newTemplate.id
-
-      await supabase
-        .from('template_versiones')
-        .insert({
-          template_id: templateId,
-          version: 1,
-          secciones,
-          notas: 'Versión inicial'
-        })
     } else {
-      templateId = template.id
-
+      // Template existe → actualizar secciones
       const { error: updateError } = await supabase
         .from('templates')
         .update({
           secciones,
           actualizado_en: new Date().toISOString()
         })
-        .eq('id', templateId)
+        .eq('id', template.id)
 
       if (updateError) {
+        console.error('[CMS Landing] Update error:', updateError.message, updateError.details)
         return NextResponse.json({ success: false, error: updateError.message }, { status: 500 })
       }
     }
