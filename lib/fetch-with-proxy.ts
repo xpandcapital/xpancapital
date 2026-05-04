@@ -1,6 +1,4 @@
-import { HttpsProxyAgent } from 'https-proxy-agent'
-import https from 'https'
-import http from 'http'
+let _dispatcher: any = undefined
 
 const PROXY_DOMAINS = ['peruapi.com']
 
@@ -8,66 +6,36 @@ function shouldProxy(url: string): boolean {
   return PROXY_DOMAINS.some(domain => url.includes(domain))
 }
 
-function getProxyAgent(): HttpsProxyAgent<string> | null {
-  const url = process.env.FIXIE_URL
-  if (!url) return null
-  console.log('[Fixie] Proxy activo:', url.replace(/\/\/.*@/, '//***@'))
-  return new HttpsProxyAgent(url)
-}
+function getProxyDispatcher(): any | undefined {
+  if (_dispatcher !== undefined) return _dispatcher
 
-async function fetchViaProxy(
-  url: string,
-  method: string,
-  headers: Record<string, string>
-): Promise<{ status: number; data: any; headers: Record<string, string> }> {
-  const agent = getProxyAgent()
-  if (!agent) throw new Error('FIXIE_URL no configurada')
+  const fixieUrl = process.env.FIXIE_URL
+  if (!fixieUrl) {
+    console.warn('[Fixie] ERROR: FIXIE_URL no está definida en process.env')
+    _dispatcher = null
+    return undefined
+  }
 
-  const parsed = new URL(url)
-  const mod = parsed.protocol === 'https:' ? https : http
+  console.log('[Fixie] FIXIE_URL detectada:', fixieUrl.replace(/\/\/.*@/, '//***@'))
 
-  return new Promise((resolve, reject) => {
-    const req = mod.request(
-      url,
-      {
-        method,
-        headers: { ...headers, 'Accept': 'application/json' },
-        agent,
-      },
-      (res) => {
-        const chunks: Buffer[] = []
-        res.on('data', (chunk: Buffer) => chunks.push(chunk))
-        res.on('end', () => {
-          const body = Buffer.concat(chunks).toString('utf-8')
-          try {
-            resolve({
-              status: res.statusCode || 500,
-              data: JSON.parse(body),
-              headers: res.headers as Record<string, string>,
-            })
-          } catch {
-            resolve({
-              status: res.statusCode || 500,
-              data: body,
-              headers: res.headers as Record<string, string>,
-            })
-          }
-        })
-      }
-    )
+  try {
+    const { ProxyAgent } = require('undici')
+    _dispatcher = new ProxyAgent({ uri: fixieUrl, requestTls: { rejectUnauthorized: false } })
+    console.log('[Fixie] ProxyAgent de undici creado exitosamente')
+  } catch (e: any) {
+    console.error('[Fixie] No se pudo crear ProxyAgent de undici:', e.message)
 
-    req.on('error', (err) => {
-      console.error('[Fixie] Error de conexión:', err.message)
-      reject(err)
-    })
+    try {
+      const { HttpsProxyAgent } = require('https-proxy-agent')
+      _dispatcher = new HttpsProxyAgent(fixieUrl)
+      console.log('[Fixie] Fallback: HttpsProxyAgent creado')
+    } catch (e2: any) {
+      console.error('[Fixie] No se pudo crear HttpsProxyAgent:', e2.message)
+      _dispatcher = null
+    }
+  }
 
-    req.setTimeout(15000, () => {
-      req.destroy()
-      reject(new Error('Timeout de conexión al proxy'))
-    })
-
-    req.end()
-  })
+  return _dispatcher || undefined
 }
 
 export async function fetchProxied(
@@ -80,26 +48,19 @@ export async function fetchProxied(
     return fetch(input, init)
   }
 
-  const method = init?.method || 'GET'
-  const headers = init?.headers
-    ? Object.fromEntries(
-        init.headers instanceof Headers
-          ? (init.headers as any).entries()
-          : Array.isArray(init.headers)
-            ? init.headers
-            : Object.entries(init.headers)
-      )
-    : {}
+  const dispatcher = getProxyDispatcher()
+  if (!dispatcher) {
+    console.error('[Fixie] Sin dispatcher, usando fetch directo (IP de Vercel)')
+    return fetch(input, init)
+  }
 
+  console.log('[Fixie] Enrutando:', url.substring(0, 90))
   try {
-    console.log('[Fixie] Enrutando por proxy:', url.substring(0, 80))
-    const result = await fetchViaProxy(url, method, headers)
-    return new Response(JSON.stringify(result.data), {
-      status: result.status,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    const res = await fetch(input, { ...init, dispatcher } as any)
+    console.log('[Fixie] Respuesta:', res.status, res.statusText)
+    return res
   } catch (e: any) {
-    console.error('[Fixie] Fallo:', e.message)
+    console.error('[Fixie] Error en fetch:', e.message, e.cause)
     throw e
   }
 }
