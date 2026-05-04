@@ -294,6 +294,7 @@ export function useApiConfig() {
 
   const handleKeyChange = useCallback((id: string, value: string) => {
     setApiValues(prev => ({ ...prev, [id]: value }))
+    if (value) localStorage.setItem(id, value)
     const now = new Date().toISOString()
     setLastUpdated(prev => ({ ...prev, [id]: now }))
   }, [])
@@ -336,6 +337,11 @@ export function useApiConfig() {
       const result = await response.json()
 
       if (result.success && result.errors === 0) {
+        // Guardar también en localStorage para que el POS y otros componentes lean el token
+        fieldIds.forEach(fieldId => {
+          const v = apiValues[fieldId]
+          if (v) localStorage.setItem(fieldId, v)
+        })
         setAppScopes(prev => ({ ...prev, [appId]: isGlobal ? 'global' : 'personal' }))
         window.dispatchEvent(new CustomEvent('blis_config_updated'))
         alert(`✅ ${appId} guardado correctamente`)
@@ -374,6 +380,10 @@ export function useApiConfig() {
       const result = await response.json()
 
       if (result.success && result.errors === 0) {
+        // Guardar también en localStorage para que el POS y otros componentes lean el token
+        Object.entries(apiValues).forEach(([k, v]) => {
+          if (v) localStorage.setItem(k, v)
+        })
         window.dispatchEvent(new CustomEvent('blis_config_updated'))
         alert(`✅ ${result.saved} claves guardadas correctamente`)
       } else if (result.success && result.errors > 0) {
