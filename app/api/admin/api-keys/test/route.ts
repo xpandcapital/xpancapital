@@ -182,9 +182,18 @@ const TESTERS: Record<string, (value: string, extra?: Record<string, string>) =>
     'https://api.apis.net.pe/v2/sunat/tipo-cambio', v, 'token'
   ),
 
-  apisunat_token: (v) => testBearer('https://sandbox.apisunat.pe/api/v3/organizations', v),
+  apisunat_token: (v) => testBearer('https://api.apisunat.pe/v1/auth/me', v),
 
   reniec_api_token: (v) => testBearer('https://api.decolecta.com/v1/reniec/dni?numero=00000000', v),
+
+  olva_user: (v, extra) => {
+    if (!extra?.olva_password) return Promise.resolve({ valid: false, error: 'Falta olva_password' })
+    return testBasicAuth('https://olva.com.pe/api/v1/auth', v, extra.olva_password)
+  },
+  olva_password: (v, extra) => {
+    if (!extra?.olva_user) return Promise.resolve({ valid: false, error: 'Falta olva_user' })
+    return testBasicAuth('https://olva.com.pe/api/v1/auth', extra.olva_user, v)
+  },
 
   // ── APIs Ecuador ───────────────────────────────────────────────
 
