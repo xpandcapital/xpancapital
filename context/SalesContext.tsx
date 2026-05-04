@@ -129,6 +129,7 @@ interface SalesContextType {
     taxName: string;
     taxRate: number;
     country: string;
+    setCountry: (c: string) => void;
 }
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
@@ -173,9 +174,18 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             setCurrency(currMap[cmsData.commercial.currency] || cmsData.commercial.currency);
             setTaxName(cmsData.commercial.taxName || 'IGV');
             setTaxRate(cmsData.commercial.taxRate || 18);
-            setCountry(cmsData.commercial.country || 'PE');
+            // Prioriza override manual sobre CMS
+            const override = typeof window !== 'undefined' ? localStorage.getItem('blis_pos_country') : null
+            setCountry(override || cmsData.commercial.country || 'PE');
         }
     }, [cmsData]);
+
+    const handleSetCountry = (c: string) => {
+        setCountry(c)
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('blis_pos_country', c)
+        }
+    }
 
     useEffect(() => {
         // 1. Calculate items total applying item discounts
@@ -323,6 +333,7 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             taxName,
             taxRate,
             country,
+            setCountry: handleSetCountry,
             shippingCost,
             setShippingCost
         }}>

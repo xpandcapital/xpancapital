@@ -437,7 +437,7 @@ const DEFAULT_CMS_DATA: LandingCMSData = {
         videoUrl: "",
         videoThumbnail: ""
     },
-    commercial: { country: "EC", currency: "USD", taxName: "IVA", taxRate: 15 }
+    commercial: { country: "PE", currency: "USD", taxName: "IVA", taxRate: 18 }
 };
 
 const DEFAULT_SITE_CONFIG = {

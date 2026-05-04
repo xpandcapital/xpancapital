@@ -189,6 +189,13 @@ export const POSManager = () => {
         fetchProducts();
     }, [fetchProducts]);
 
+    useEffect(() => {
+        const override = typeof window !== 'undefined' ? localStorage.getItem('blis_pos_country') : null
+        if (!override && country === 'EC') {
+            setCountry('PE')
+        }
+    }, []);
+
     const products = dbProducts || [];
 
     // Safety guard for context
@@ -205,7 +212,7 @@ export const POSManager = () => {
         globalDiscountType, setGlobalDiscountType,
         couponCode, setCouponCode,
         shippingCost, setShippingCost,
-        currency, taxName, taxRate, country
+        currency, taxName, taxRate, country, setCountry
     } = salesContext;
 
     const docLabels = {
