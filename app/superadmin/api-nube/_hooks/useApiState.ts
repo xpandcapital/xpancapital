@@ -68,7 +68,14 @@ export function useApiState() {
   const initCategoryOrder = useCallback((totalCategories: number) => {
     const saved = localStorage.getItem('api_category_order')
     if (saved) {
-      setCategoryOrder(JSON.parse(saved))
+      const parsed = JSON.parse(saved) as number[]
+      // Si hay categorías nuevas que no están en el orden guardado, agregarlas al final
+      const existing = new Set(parsed)
+      for (let i = 0; i < totalCategories; i++) {
+        if (!existing.has(i)) parsed.push(i)
+      }
+      setCategoryOrder(parsed)
+      localStorage.setItem('api_category_order', JSON.stringify(parsed))
     } else {
       setCategoryOrder(Array.from({ length: totalCategories }, (_, i) => i))
     }
