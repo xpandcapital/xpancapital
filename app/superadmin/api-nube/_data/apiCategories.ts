@@ -903,8 +903,8 @@ export const categories: ApiCategory[] = [
                 description: "Pasarela de pago crypto. Acepta tarjetas y criptomonedas. Convierte automáticamente a USDT. Webhooks y facturas.",
                 website: "cryptomus.com",
                 fields: [
-                    { id: "cryptomus_merchant_id", label: "Merchant ID", type: "text", description: "UUID del comerciante. Visible en el dashboard de Cryptomus.", getFrom: "cryptomus.com → Settings → Merchant ID", accessType: "Pública", cost: "pagado" },
-                    { id: "cryptomus_api_key", label: "API Key (Payment)", type: "password", description: "Clave de API para crear facturas y recibir pagos. ⚠️ Solo backend.", getFrom: "cryptomus.com → Settings → API Keys → Payment Key", accessType: "Privada", cost: "pagado" },
+                    { id: "cryptomus_merchant_id", label: "ID del Comerciante (Merchant UUID)", type: "text", description: "UUID de tu comercio en Cryptomus. Visible en el dashboard.", getFrom: "cryptomus.com → Configuración → ID del Comerciante", accessType: "Pública", cost: "pagado" },
+                    { id: "cryptomus_api_key", label: "Clave API para pagos", type: "password", description: "Clave para crear facturas y recibir pagos. Es la misma para todos los comerciantes.", getFrom: "cryptomus.com → Configuración → Clave API para pagos", accessType: "Privada", cost: "pagado" },
                 ]
             },
         ]
