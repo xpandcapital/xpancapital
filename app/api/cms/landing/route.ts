@@ -48,13 +48,16 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: data.secciones })
   } catch (e: any) {
-    console.error('[CMS Landing] Error en PUT:', e.message, e.stack)
-    return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
+    console.error('[CMS Landing] PUT error:', e?.message, e?.stack?.substring(0, 200))
+    return NextResponse.json({ success: false, error: e?.message || 'Error del servidor' }, { status: 500 })
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json({ success: false, error: 'Configuración de Supabase incompleta (SERVICE_ROLE_KEY)' }, { status: 500 })
+    }
     const supabase = getSupabase()
     const body = await request.json()
     const { secciones } = body
@@ -133,7 +136,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, message: 'CMS actualizado correctamente' })
   } catch (e: any) {
-    console.error('[CMS Landing] Error en PUT:', e.message, e.stack)
-    return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
+    console.error('[CMS Landing] PUT error:', e?.message, e?.stack?.substring(0, 200))
+    return NextResponse.json({ success: false, error: e?.message || 'Error del servidor' }, { status: 500 })
   }
 }
