@@ -294,6 +294,28 @@ const TESTERS: Record<string, (value: string, extra?: Record<string, string>) =>
 
   // ── Crypto ─────────────────────────────────────────────────────
 
+  cryptomus_api_key: (v, extra) => {
+    if (!extra?.cryptomus_merchant_id) return Promise.resolve({ valid: false, error: 'Falta cryptomus_merchant_id' })
+    const body = {}
+    const jsonBody = JSON.stringify(body)
+    const crypto = require('crypto')
+    const sign = crypto.createHash('md5').update(Buffer.from(jsonBody).toString('base64') + v).digest('hex')
+    return fetch('https://api.cryptomus.com/v1/payment/services', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        merchant: extra.cryptomus_merchant_id,
+        sign,
+      },
+      body: jsonBody,
+    }).then(async (res) => {
+      const data = await res.json().catch(() => ({}))
+      if (data.state === 0) return { valid: true }
+      if (res.status === 401 || data.state === 1) return { valid: false, error: data.message || 'API key o Merchant ID inválido' }
+      return { valid: false, error: data.message || `HTTP ${res.status}` }
+    }).catch((e: any) => ({ valid: false, error: e.message || 'Error de red' }))
+  },
+
   coinbase_api_key: (v) => testBearer('https://api.coinbase.com/v2/accounts', v),
 
   // ── Trading & Bots ─────────────────────────────────────────────

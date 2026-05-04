@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/Toast";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 
-type PaymentMethod = 'coins' | 'card' | 'transfer';
+type PaymentMethod = 'coins' | 'cryptomus_card' | 'cryptomus_crypto' | 'transfer';
 
 interface CheckoutForm {
     nombre: string;
@@ -66,7 +66,7 @@ function CheckoutContent() {
     const searchParams = useSearchParams();
     const isRedeemFlow = searchParams.get('redeem') === '1';
 
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cryptomus_card');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
     const [orderEmail, setOrderEmail] = useState("");
@@ -157,7 +157,6 @@ function CheckoutContent() {
         setIsProcessing(true);
 
         try {
-            // Obtener token de sesión de Supabase
             const supabase = getSupabase();
             const { data: { session } } = await supabase.auth.getSession();
             const userId = session?.user?.id || user?.id;
@@ -167,35 +166,66 @@ function CheckoutContent() {
                 headers['Authorization'] = `Bearer ${session.access_token}`;
             }
 
+            const productosPayload = cart.map(item => ({
+                producto_id: item.id,
+                cantidad: 1,
+                precio_unitario: item.price || (item as any).precio_usd || 0,
+                nombre: item.title,
+                productType: item.productType,
+                precio_coins: item.precio_coins,
+                curso_id: item.curso_id,
+                slug: item.slug,
+            }));
+
+            const commonPayload = {
+                empresa_id: DEFAULT_EMPRESA_ID,
+                user_id: userId,
+                nombre: `${form.nombre} ${form.apellido}`.trim(),
+                email: form.email,
+                telefono: form.telefono,
+                productos: productosPayload,
+                tiene_fisicos: hasPhysicalProducts,
+                direccion_envio: hasPhysicalProducts ? {
+                    direccion: form.direccion,
+                    ciudad: form.ciudad,
+                    pais: form.pais,
+                    notas: form.notas,
+                } : null,
+            };
+
+            // Flujo Cryptomus (tarjeta o crypto)
+            if (paymentMethod === 'cryptomus_card' || paymentMethod === 'cryptomus_crypto') {
+                const res = await fetch('/api/cryptomus/create-invoice', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({
+                        ...commonPayload,
+                        mode: paymentMethod === 'cryptomus_card' ? 'card' : 'crypto',
+                        monto_usd: totalUSD,
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (!data.success) throw new Error(data.error || 'Error al crear factura');
+
+                setOrderEmail(form.email);
+                clearCart();
+
+                // Redirigir a la página de pago de Cryptomus
+                window.location.href = data.paymentUrl;
+                return;
+            }
+
+            // Flujo BLIS Coins y Transferencia (checkout tradicional)
             const res = await fetch('/api/checkout', {
                 method: 'POST',
                 headers,
                 body: JSON.stringify({
-                    empresa_id: DEFAULT_EMPRESA_ID,
-                    user_id: userId,
-                    nombre: `${form.nombre} ${form.apellido}`.trim(),
-                    email: form.email,
-                    telefono: form.telefono,
-                    productos: cart.map(item => ({
-                        producto_id: item.id,
-                        cantidad: 1,
-                        precio_unitario: item.price || (item as any).precio_usd || 0,
-                        nombre: item.title,
-                        productType: item.productType,
-                        precio_coins: item.precio_coins,
-                        curso_id: item.curso_id,
-                        slug: item.slug,
-                    })),
+                    ...commonPayload,
                     metodo_pago: paymentMethod === 'coins' ? 'coins' : 'stripe',
                     monto_coins: paymentMethod === 'coins' ? totalCoins : 0,
                     monto_usd: paymentMethod === 'coins' ? 0 : totalUSD,
-                    tiene_fisicos: hasPhysicalProducts,
-                    direccion_envio: hasPhysicalProducts ? {
-                        direccion: form.direccion,
-                        ciudad: form.ciudad,
-                        pais: form.pais,
-                        notas: form.notas,
-                    } : null,
                 })
             });
 
@@ -203,12 +233,10 @@ function CheckoutContent() {
 
             if (!data.success) throw new Error(data.error || 'Error al procesar');
 
-            // Verificar si el usuario ya tenía estos productos
             if (data.alreadyPurchased && data.alreadyPurchased.length > 0) {
                 showToast(`Ya tenías estos productos: ${data.alreadyPurchased.join(', ')}`, 'warning');
             }
 
-            // Verificar si los cursos fueron asignados
             if (data.courseAssignmentError) {
                 showToast('Compra OK pero hubo un problema al asignar cursos. Contacta soporte.', 'warning');
             } else if ((data.coursesAssigned || 0) > 0) {
@@ -457,15 +485,28 @@ function CheckoutContent() {
                                     />
                                 )}
 
-                                {/* Tarjeta */}
+                                {/* Cryptomus - Tarjeta */}
                                 <PayOption
-                                    selected={paymentMethod === 'card'}
-                                    onClick={() => setPaymentMethod('card')}
+                                    selected={paymentMethod === 'cryptomus_card'}
+                                    onClick={() => setPaymentMethod('cryptomus_card')}
                                     icon={<CreditCard className="w-5 h-5 text-emerald-400" />}
                                     bg="bg-emerald-500/10 border-emerald-500/40"
                                     label="Tarjeta de Crédito / Débito"
-                                    sublabel="Visa, Mastercard, AMEX — Pago seguro SSL"
+                                    sublabel="Visa, Mastercard, AMEX — Pago seguro vía Cryptomus"
                                     amount={`$${totalUSD.toFixed(2)}`}
+                                    badge="Recibes USDT"
+                                />
+
+                                {/* Cryptomus - Criptomonedas */}
+                                <PayOption
+                                    selected={paymentMethod === 'cryptomus_crypto'}
+                                    onClick={() => setPaymentMethod('cryptomus_crypto')}
+                                    icon={<Coins className="w-5 h-5 text-yellow-400" />}
+                                    bg="bg-yellow-500/10 border-yellow-500/40"
+                                    label="Criptomonedas"
+                                    sublabel="BTC, ETH, USDT, USDC, LTC y más — vía Cryptomus"
+                                    amount={`$${totalUSD.toFixed(2)}`}
+                                    badge="Recibes USDT"
                                 />
 
                                 {/* Transferencia */}
@@ -574,9 +615,9 @@ function CheckoutContent() {
 }
 
 // ── Componente opción de pago ──────────────────────────────────────────────────
-function PayOption({ selected, onClick, icon, bg, label, sublabel, amount }: {
+function PayOption({ selected, onClick, icon, bg, label, sublabel, amount, badge }: {
     selected: boolean; onClick: () => void; icon: React.ReactNode;
-    bg: string; label: string; sublabel: string; amount: string;
+    bg: string; label: string; sublabel: string; amount: string; badge?: string;
 }) {
     return (
         <button
@@ -597,6 +638,9 @@ function PayOption({ selected, onClick, icon, bg, label, sublabel, amount }: {
             </div>
             <div className="text-right flex-shrink-0 ml-4">
                 <p className="font-black text-base text-white">{amount}</p>
+                {badge && (
+                    <p className="text-[9px] font-black text-emerald-400 uppercase mt-0.5 tracking-wider">{badge}</p>
+                )}
             </div>
         </button>
     );

@@ -109,6 +109,8 @@ const DEFAULT_VALUES: Record<string, string> = {
   yape_api: '',
   paymentez_key: '',
   placetopay_key: '',
+  cryptomus_merchant_id: '',
+  cryptomus_api_key: '',
   stripe_public_key: '',
   stripe_secret_key: '',
   stripe_webhook_secret: '',

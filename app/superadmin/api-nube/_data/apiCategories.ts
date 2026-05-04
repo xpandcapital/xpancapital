@@ -894,6 +894,19 @@ export const categories: ApiCategory[] = [
                     { id: "paypal_secret", label: "Client Secret", type: "password", description: "Secreto de tu app PayPal. ⚠️ Solo backend.", getFrom: "developer.paypal.com → Dashboard → My Apps → Tu app → Secret", accessType: "Privada", cost: "pagado" },
                 ]
             },
+            {
+                id: "cryptomus",
+                name: "Cryptomus",
+                icon: Coins,
+                color: "text-yellow-400",
+                bg: "bg-yellow-500/10",
+                description: "Pasarela de pago crypto. Acepta tarjetas y criptomonedas. Convierte automáticamente a USDT. Webhooks y facturas.",
+                website: "cryptomus.com",
+                fields: [
+                    { id: "cryptomus_merchant_id", label: "Merchant ID", type: "text", description: "UUID del comerciante. Visible en el dashboard de Cryptomus.", getFrom: "cryptomus.com → Settings → Merchant ID", accessType: "Pública", cost: "pagado" },
+                    { id: "cryptomus_api_key", label: "API Key (Payment)", type: "password", description: "Clave de API para crear facturas y recibir pagos. ⚠️ Solo backend.", getFrom: "cryptomus.com → Settings → API Keys → Payment Key", accessType: "Privada", cost: "pagado" },
+                ]
+            },
         ]
     },
     {
