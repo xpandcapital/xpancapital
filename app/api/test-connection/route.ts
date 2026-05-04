@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
 
         // --- Ecuador: ApiConsult (Zampisoft) ---
         if (service === 'apiconsult') {
-            const r = await fetch(`https://apiconsult.zampisoft.com/api/consultar?identificacion=0900000000&token=${activeKey}`, {
+            const r = await fetch(`https://apiconsult.zampisoft.com/api/consultar?identificacion=0900000000&token=${encodeURIComponent(activeKey)}`, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' },
                 next: { revalidate: 0 }
@@ -137,11 +137,19 @@ export async function POST(req: NextRequest) {
 
             const data = await r.json().catch(() => ({}));
 
-            if (data.error === 'Token incorrecto') {
+            if (data.error === 'Token incorrecto' || data.error === 'Token Invalido') {
                 return NextResponse.json({ ok: false, msg: 'ApiConsult: Token Inválido o Error de Sesión' });
             }
 
-            return NextResponse.json({ ok: true, msg: 'ApiConsult: Conectado' });
+            if (r.ok && !data.error) {
+                return NextResponse.json({ ok: true, msg: 'ApiConsult: Conectado' });
+            }
+
+            if (!r.ok && r.status !== 200) {
+                return NextResponse.json({ ok: false, msg: `ApiConsult: Error HTTP ${r.status}` });
+            }
+
+            return NextResponse.json({ ok: true, msg: `ApiConsult: Conectado${data.error ? ' (' + data.error + ')' : ''}` });
         }
 
         return NextResponse.json({ ok: false, msg: 'Servicio no soportado en Proxy' }, { status: 400 });

@@ -188,9 +188,17 @@ const TESTERS: Record<string, (value: string, extra?: Record<string, string>) =>
 
   // ── APIs Ecuador ───────────────────────────────────────────────
 
-  apiconsult_token: (v) => testKeyInUrl(
-    'https://apiconsult.zampisoft.com/api/consultar?identificacion=0900000000', v, 'token'
-  ),
+  apiconsult_token: async (v) => {
+    try {
+      const res = await fetch(`https://apiconsult.zampisoft.com/api/consultar?identificacion=0900000000&token=${encodeURIComponent(v)}`)
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && !data.error) return { valid: true }
+      if (data.error === 'Token incorrecto' || data.error === 'Token Invalido') return { valid: false, error: 'Token inválido' }
+      return { valid: true, error: data.error || `HTTP ${res.status}` }
+    } catch (e: any) {
+      return { valid: false, error: e.message || 'Error de red' }
+    }
+  },
 
   sri_api_key: (v) => testKeyInUrl(
     'https://api.sriven.com/api/test', v, 'key'
