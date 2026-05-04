@@ -213,6 +213,7 @@ export const POSManager = () => {
         dni: country === 'PE' ? 'DNI' : (country === 'MX' ? 'CURP' : (country === 'CO' || country === 'EC' ? 'Cédula' : (country === 'CL' ? 'RUT' : 'ID Personal'))),
         ruc: country === 'PE' ? 'RUC' : (country === 'MX' ? 'RFC' : (country === 'CO' ? 'NIT' : (country === 'CL' || country === 'EC' ? 'RUC' : 'ID Fiscal'))),
     };
+    console.log('[POSManager] país actual:', country, 'docLabels:', docLabels)
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
