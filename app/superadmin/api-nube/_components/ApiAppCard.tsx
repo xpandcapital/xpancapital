@@ -76,77 +76,79 @@ export function ApiAppCard({
 
   return (
     <div className="bg-[#0a0a0a] border border-white/5 rounded-xl overflow-hidden">
-      <div className="p-3 md:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 md:gap-4 hover:bg-white/[0.02] transition-colors">
-        <div className="flex items-start sm:items-center gap-2 md:gap-3 w-full">
-          <div className="flex items-center gap-2 mt-1 sm:mt-0">
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
-              className={`transition-colors ${isFavorite ? 'text-purple-400' : 'text-gray-600 hover:text-purple-400'}`}
-            >
-              <Star className={`w-4 h-4 md:w-5 md:h-5 ${isFavorite ? 'fill-current' : ''}`} />
-            </button>
-            <div className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full flex-shrink-0 ${getStatusColor(appStatus)}`} title={`Estado: ${appStatus}`} />
-          </div>
-          
-          <div className={`p-1.5 md:p-2 rounded-lg ${app.bg} flex-shrink-0`}>
-            <app.icon className={`w-4 h-4 md:w-5 md:h-5 ${app.color}`} />
-          </div>
-          
-          <div className="text-left flex-1 min-w-0">
-            <div className="flex items-center gap-1 md:gap-2 flex-wrap">
-              <h3 className="text-sm md:text-base font-bold text-white truncate max-w-[150px] sm:max-w-full">{app.name}</h3>
-              <span className={`text-[9px] md:text-xs font-bold uppercase px-1.5 py-0.5 md:px-2 md:py-0.5 rounded whitespace-nowrap
-                ${costLabel === 'gratis' ? 'bg-emerald-500/10 text-emerald-400' :
-                  costLabel === 'freemium' ? 'bg-amber-500/10 text-amber-400' :
-                  costLabel === 'mixto' ? 'bg-blue-500/10 text-blue-400' :
-                  'bg-red-500/10 text-red-400'}`}>
-                {costLabel}
-              </span>
-              <span className={`text-[9px] md:text-xs font-bold uppercase px-1.5 py-0.5 md:px-2 md:py-0.5 rounded whitespace-nowrap
-                ${accessLabel === 'Pública' ? 'bg-blue-500/10 text-blue-400' :
-                  accessLabel === 'mixto' ? 'bg-purple-500/10 text-purple-400' :
-                  'bg-orange-500/10 text-orange-400'}`}>
-                {accessLabel}
-              </span>
-            </div>
-            <p className="text-xs md:text-sm text-gray-500 line-clamp-2 mt-0.5 md:mt-1">{app.description}</p>
-          </div>
+      <div className="p-3 md:p-4 flex items-center gap-2 md:gap-3 hover:bg-white/[0.02] transition-colors">
+        {/* Left: star + status */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+            className={`transition-colors ${isFavorite ? 'text-purple-400' : 'text-gray-600 hover:text-purple-400'}`}
+          >
+            <Star className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isFavorite ? 'fill-current' : ''}`} />
+          </button>
+          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusColor(appStatus)}`} title={`Estado: ${appStatus}`} />
         </div>
 
-        <div className="flex items-center self-end sm:self-auto gap-1 md:gap-2 bg-black/20 sm:bg-transparent p-1 sm:p-0 rounded-lg">
-          <span className="text-[10px] md:text-sm text-gray-600 bg-white/5 px-1.5 py-0.5 md:px-2 md:py-1 rounded hidden sm:inline-block">
-            {app.fields.length} <span className="hidden lg:inline">campos</span>
+        {/* Icon */}
+        <div className={`p-1.5 md:p-2 rounded-lg ${app.bg} flex-shrink-0`}>
+          <app.icon className={`w-4 h-4 md:w-5 md:h-5 ${app.color}`} />
+        </div>
+
+        {/* Center: name + badges + description */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1 md:gap-1.5 flex-wrap min-w-0">
+            <h3 className="text-sm md:text-base font-bold text-white truncate">{app.name}</h3>
+            <span className={`text-[9px] md:text-[10px] font-bold uppercase px-1.5 py-0.5 md:px-2 md:py-0.5 rounded flex-shrink-0
+              ${costLabel === 'gratis' ? 'bg-emerald-500/10 text-emerald-400' :
+                costLabel === 'freemium' ? 'bg-amber-500/10 text-amber-400' :
+                costLabel === 'mixto' ? 'bg-blue-500/10 text-blue-400' :
+                'bg-red-500/10 text-red-400'}`}>
+              {costLabel}
+            </span>
+            <span className={`text-[9px] md:text-[10px] font-bold uppercase px-1.5 py-0.5 md:px-2 md:py-0.5 rounded flex-shrink-0
+              ${accessLabel === 'Pública' ? 'bg-blue-500/10 text-blue-400' :
+                accessLabel === 'mixto' ? 'bg-purple-500/10 text-purple-400' :
+                'bg-orange-500/10 text-orange-400'}`}>
+              {accessLabel}
+            </span>
+          </div>
+          <p className="text-xs md:text-sm text-gray-500 line-clamp-1 mt-0.5">{app.description}</p>
+        </div>
+
+        {/* Right: action buttons */}
+        <div className="flex items-center gap-0.5 md:gap-1 flex-shrink-0">
+          <span className="text-[10px] md:text-xs text-gray-600 bg-white/5 px-1.5 py-0.5 rounded hidden lg:inline-block flex-shrink-0">
+            {app.fields.length} campos
           </span>
           
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); const firstKey = app.fields[0]?.id; if (firstKey && apiValues[firstKey]) onCopy(firstKey, apiValues[firstKey]); }}
-            className={`p-1.5 md:p-2 rounded-lg transition-colors ${
+            className={`p-1 md:p-1.5 rounded-lg transition-colors flex-shrink-0 ${
               copiedId && copiedId === app.fields[0]?.id
                 ? 'bg-emerald-500/20 text-emerald-400'
                 : 'text-gray-500 hover:text-white hover:bg-white/10'
             }`}
             title="Copiar primer valor"
           >
-            {copiedId && copiedId === app.fields[0]?.id ? <Check className="w-3.5 h-3.5 md:w-4 md:h-4" /> : <Copy className="w-3.5 h-3.5 md:w-4 md:h-4" />}
+            {copiedId && copiedId === app.fields[0]?.id ? <Check className="w-3 h-3 md:w-3.5 md:h-3.5" /> : <Copy className="w-3 h-3 md:w-3.5 md:h-3.5" />}
           </button>
           
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); app.fields.forEach(f => onTest(f.id)); }}
-            className="p-1.5 md:p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1 md:p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors flex-shrink-0"
             title="Probar conexión"
           >
-            <RefreshCw className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <RefreshCw className="w-3 h-3 md:w-3.5 md:h-3.5" />
           </button>
           
           <div
             onClick={(e) => { e.stopPropagation(); onOpenIdeas(); }}
-            className="text-purple-400 hover:text-purple-300 transition-colors p-1.5 md:p-2 cursor-pointer rounded-lg hover:bg-white/10"
+            className="text-purple-400 hover:text-purple-300 transition-colors p-1 md:p-1.5 cursor-pointer rounded-lg hover:bg-white/10 flex-shrink-0"
             title="Ideas de uso"
           >
-            <Brain className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <Brain className="w-3 h-3 md:w-3.5 md:h-3.5" />
           </div>
           
           {app.docsUrl && (
@@ -155,10 +157,10 @@ export function ApiAppCard({
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="text-gray-500 hover:text-white transition-colors p-1.5 md:p-2 rounded-lg hover:bg-white/10"
+              className="text-gray-500 hover:text-white transition-colors p-1 md:p-1.5 rounded-lg hover:bg-white/10 flex-shrink-0"
               title="Documentación"
             >
-              <ExternalLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
+              <ExternalLink className="w-3 h-3 md:w-3.5 md:h-3.5" />
             </a>
           )}
           
@@ -167,18 +169,18 @@ export function ApiAppCard({
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="text-gray-500 hover:text-white transition-colors p-1.5 md:p-2 rounded-lg hover:bg-white/10"
+            className="text-gray-500 hover:text-white transition-colors p-1 md:p-1.5 rounded-lg hover:bg-white/10 flex-shrink-0"
             title="Sitio web"
           >
-            <Globe className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <Globe className="w-3 h-3 md:w-3.5 md:h-3.5" />
           </a>
           
           <button
             type="button"
             onClick={onToggleExpand}
-            className="p-1.5 md:p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="p-1 md:p-1.5 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
           >
-            {isExpanded ? <ChevronUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400" /> : <ChevronDown className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400" />}
+            {isExpanded ? <ChevronUp className="w-3 h-3 md:w-3.5 md:h-3.5 text-gray-400" /> : <ChevronDown className="w-3 h-3 md:w-3.5 md:h-3.5 text-gray-400" />}
           </button>
         </div>
       </div>
