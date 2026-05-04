@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 import { getApiKey } from '@/lib/api-keys'
 import { createClient } from '@/lib/supabase/server'
+import { fetchProxied } from '@/lib/fetch-with-proxy'
 
 export async function POST(req: NextRequest) {
     try {
@@ -64,10 +65,10 @@ export async function POST(req: NextRequest) {
 
         // --- Peru: SUNAT/RENIEC ---
         if (service === 'peru') {
-            const r = await fetch(`https://peruapi.com/api/tipo_cambio?api_token=${activeKey}`, { next: { revalidate: 0 } });
-            const d = await r.json();
-            if (!r.ok) return NextResponse.json({ ok: false, msg: d.message || 'Token Inválido' });
-            return NextResponse.json({ ok: true, msg: `SUNAT/RENIEC OK (TC: ${d.data?.venta || '...'})` });
+            const r = await fetchProxied(`https://peruapi.com/api/tipo_cambio?api_token=${encodeURIComponent(activeKey)}`, { next: { revalidate: 0 } });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) return NextResponse.json({ ok: false, msg: d.mensaje || d.message || `Token Inválido (HTTP ${r.status})` });
+            return NextResponse.json({ ok: true, msg: `SUNAT/RENIEC OK (TC: ${d.data?.venta || d.venta || '...'})` });
         }
 
         // --- AI: Groq ---

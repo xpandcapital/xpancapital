@@ -27,6 +27,7 @@
     "dotenv": "^17.3.1",
     "framer-motion": "^12.34.3",
     "html-to-image": "^1.11.13",
+    "https-proxy-agent": "^9.0.0",
     "jszip": "^3.10.1",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.575.0",
