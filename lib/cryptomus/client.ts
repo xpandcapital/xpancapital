@@ -55,18 +55,36 @@ export async function createInvoice(
 
   const sign = generateSign(body, config.apiKey)
 
-  const response = await fetch(`${CRYPTOMUS_BASE_URL}/v1/payment`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      merchant: config.merchantId,
-      sign,
-    },
-    body: JSON.stringify(body),
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 12000)
 
-  const data = await response.json()
-  return data as CryptomusInvoiceResponse
+  try {
+    const response = await fetch(`${CRYPTOMUS_BASE_URL}/v1/payment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        merchant: config.merchantId,
+        sign,
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    })
+    clearTimeout(timeout)
+    const data = await response.json()
+    return data as CryptomusInvoiceResponse
+  } catch (err: any) {
+    clearTimeout(timeout)
+    if (err.name === 'AbortError') {
+      return {
+        state: 1,
+        message: 'El servicio de pago no responde. Intenta de nuevo en unos minutos.',
+      }
+    }
+    return {
+      state: 1,
+      message: err.message || 'Error de conexión con el servicio de pago',
+    }
+  }
 }
 
 export async function getPaymentInfo(

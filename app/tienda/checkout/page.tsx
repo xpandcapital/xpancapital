@@ -195,24 +195,46 @@ function CheckoutContent() {
 
             // Flujo Cryptomus (tarjeta o crypto)
             if (paymentMethod === 'cryptomus_card' || paymentMethod === 'cryptomus_crypto') {
-                const res = await fetch('/api/cryptomus/create-invoice', {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify({
-                        ...commonPayload,
-                        mode: paymentMethod === 'cryptomus_card' ? 'card' : 'crypto',
-                        monto_usd: totalUSD,
-                    }),
-                });
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+
+                let res: Response;
+                try {
+                    res = await fetch('/api/cryptomus/create-invoice', {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({
+                            ...commonPayload,
+                            mode: paymentMethod === 'cryptomus_card' ? 'card' : 'crypto',
+                            monto_usd: totalUSD,
+                        }),
+                        signal: controller.signal,
+                    });
+                } catch (fetchErr: any) {
+                    clearTimeout(timeout);
+                    if (fetchErr.name === 'AbortError') {
+                        throw new Error('El servicio de pago está tardando demasiado. Intenta de nuevo en unos minutos.');
+                    }
+                    throw new Error('No se pudo conectar con el servicio de pago. Verifica tu conexión.');
+                }
+                clearTimeout(timeout);
 
                 const data = await res.json();
 
-                if (!data.success) throw new Error(data.error || 'Error al crear factura');
+                if (!data.success) {
+                    const errMsg = data.error || '';
+                    if (errMsg.includes('no está configurado') || errMsg.includes('configura')) {
+                        throw new Error('Medio de pago no disponible por el momento. Por favor intenta con otro método.');
+                    }
+                    if (errMsg.includes('forbidden') || errMsg.includes('bloquead')) {
+                        throw new Error('Medio de pago no disponible por el momento. Por favor intenta con otro método.');
+                    }
+                    throw new Error(data.error || 'Error al conectar con el servicio de pago');
+                }
 
                 setOrderEmail(form.email);
                 clearCart();
 
-                // Redirigir a la página de pago de Cryptomus
                 window.location.href = data.paymentUrl;
                 return;
             }
@@ -494,7 +516,6 @@ function CheckoutContent() {
                                     label="Tarjeta de Crédito / Débito"
                                     sublabel="Visa, Mastercard, AMEX — Pago seguro vía Cryptomus"
                                     amount={`$${totalUSD.toFixed(2)}`}
-                                    badge="Recibes USDT"
                                 />
 
                                 {/* Cryptomus - Criptomonedas */}
@@ -506,7 +527,6 @@ function CheckoutContent() {
                                     label="Criptomonedas"
                                     sublabel="BTC, ETH, USDT, USDC, LTC y más — vía Cryptomus"
                                     amount={`$${totalUSD.toFixed(2)}`}
-                                    badge="Recibes USDT"
                                 />
 
                                 {/* Transferencia */}
