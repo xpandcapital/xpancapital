@@ -160,13 +160,11 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     const { cmsData } = useLandingCMS();
 
-    // Cargar país desde CMS + override localStorage
+    // Cargar país desde CMS
     useEffect(() => {
         if (typeof window === 'undefined') return
         if (cmsData?.commercial) {
-            // Si hay override manual, lo respetamos; si no, usamos CMS
-            const override = localStorage.getItem('blis_pos_country')
-            setCountry(override || cmsData.commercial.country || 'PE')
+            setCountry(cmsData.commercial.country || 'PE')
         }
     }, [cmsData])
 
