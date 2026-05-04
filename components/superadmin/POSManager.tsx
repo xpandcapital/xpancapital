@@ -190,13 +190,6 @@ export const POSManager = () => {
         fetchProducts();
     }, [fetchProducts]);
 
-    useEffect(() => {
-        const override = typeof window !== 'undefined' ? localStorage.getItem('blis_pos_country') : null
-        if (!override && country === 'EC') {
-            setCountry('PE')
-        }
-    }, []);
-
     const products = dbProducts || [];
 
     // Safety guard for context
@@ -220,6 +213,13 @@ export const POSManager = () => {
         dni: country === 'PE' ? 'DNI' : (country === 'MX' ? 'CURP' : (country === 'CO' || country === 'EC' ? 'Cédula' : (country === 'CL' ? 'RUT' : 'ID Personal'))),
         ruc: country === 'PE' ? 'RUC' : (country === 'MX' ? 'RFC' : (country === 'CO' ? 'NIT' : (country === 'CL' || country === 'EC' ? 'RUC' : 'ID Fiscal'))),
     };
+
+    useEffect(() => {
+        const override = typeof window !== 'undefined' ? localStorage.getItem('blis_pos_country') : null
+        if (!override && country === 'EC') {
+            setCountry('PE')
+        }
+    }, [country, setCountry]);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
