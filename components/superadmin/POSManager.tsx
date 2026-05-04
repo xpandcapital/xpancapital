@@ -11,8 +11,8 @@ import { Copy, AlertCircle,
     ShieldCheck
 } from 'lucide-react';
 import { useSales } from '@/context/SalesContext';
-import { fetchDniData, fetchRucData } from '@/lib/peru-apis';
-import { fetchEcuadorData, mapCartToEcuadorInvoice } from '@/lib/ecuador-apis';
+import { fetchDniData, fetchRucData, fetchWhatsAppStatus as fetchWhatsAppPeru } from '@/lib/peru-apis';
+import { fetchEcuadorData, mapCartToEcuadorInvoice, fetchWhatsAppStatus } from '@/lib/ecuador-apis';
 import { stripHtml } from '@/lib/strip-html';
 import { POSAIUpsell } from './POSAIUpsell';
 import { useProducts, Producto } from '@/lib/hooks/useProducts';
@@ -348,6 +348,16 @@ export const POSManager = () => {
                     localStorage.setItem('blis_customers_cache', JSON.stringify(savedCustomers));
                 } catch (e) {
                     console.error('Error saving cache', e);
+                }
+
+                // Verificar WhatsApp si hay teléfono (para ambos países)
+                if (result.phone || result.cellphone) {
+                    const checker = isPeru ? fetchWhatsAppPeru : fetchWhatsAppStatus
+                    checker(result.cellphone || result.phone).then(r => {
+                        if (r.success && r.hasWhatsApp !== undefined) {
+                            updateCustomerFields({ hasWhatsApp: r.hasWhatsApp } as any)
+                        }
+                    }).catch(() => {})
                 }
 
                 // Colapsar vista al encontrar
@@ -855,6 +865,8 @@ export const POSManager = () => {
                                 <div className="space-y-1 relative group">
                                     <div className="text-[8px] text-gray-600 font-black uppercase tracking-widest flex items-center gap-2">
                                         <MessageSquare className="w-3 h-3 text-emerald-500" /> WhatsApp
+                                        {customer?.hasWhatsApp === true && <span className="text-emerald-400 text-[7px]">✓ ACTIVO</span>}
+                                        {customer?.hasWhatsApp === false && <span className="text-gray-600 text-[7px]">✗ Sin WhatsApp</span>}
                                     </div>
                                     <input
                                         type="text"

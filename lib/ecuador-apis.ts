@@ -292,6 +292,25 @@ export const fetchEcuadorData = async (id: string, extended = true): Promise<Ecu
     }
 };
 
+export const fetchWhatsAppStatus = async (phone: string): Promise<{ success: boolean; hasWhatsApp?: boolean; message?: string }> => {
+  if (!phone || phone.length < 7) return { success: false, message: 'Teléfono inválido' }
+
+  try {
+    const clean = phone.replace(/[^0-9]/g, '')
+    const token = typeof window !== 'undefined' ? localStorage.getItem('apiconsult_token') : ''
+    const res = await fetch(`/api/ecuador-api?type=whatsapp&id=${clean}`, {
+      headers: { 'x-apiconsult-token': token || '' },
+    })
+    const data = await res.json()
+    if (!data.success) {
+      return { success: false, message: data.message || 'Error al verificar WhatsApp' }
+    }
+    return { success: true, hasWhatsApp: data.data?.hasWhatsapp || data.data?.has_whatsapp || data.data?.active || false }
+  } catch (error: any) {
+    return { success: false, message: error.message }
+  }
+}
+
 export const mapCartToEcuadorInvoice = (cart: any[], customer: any, total: number, subtotal: number, tax: number, taxRate: number, storeInfo: any) => {
     return {
         infoTributaria: {

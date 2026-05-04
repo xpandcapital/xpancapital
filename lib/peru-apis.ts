@@ -169,7 +169,27 @@ export const fetchExchangeRate = async (): Promise<{ success: boolean; buy: numb
       buy: parseFloat(r.buy_price || r.compra) || 3.75,
       sell: parseFloat(r.sell_price || r.venta) || 3.80,
     }
-  } catch (error: any) {
+    } catch (error: any) {
     return { success: false, buy: 3.75, sell: 3.80, message: error.message }
+  }
+}
+
+export const fetchWhatsAppStatus = async (phone: string): Promise<{ success: boolean; hasWhatsApp?: boolean; message?: string }> => {
+  if (!phone || phone.length < 7) return { success: false, message: 'Teléfono inválido' }
+
+  try {
+    const clean = phone.replace(/[^0-9]/g, '')
+    const token = typeof window !== 'undefined' ? localStorage.getItem('peru_api_token') : ''
+    // WhatsApp check usa el mismo endpoint de ApiConsult (es universal)
+    const res = await fetch(`/api/ecuador-api?type=whatsapp&id=${clean}`, {
+      headers: { 'x-apiconsult-token': token || '' },
+    })
+    const data = await res.json()
+    if (!data.success) {
+      return { success: false, message: data.message || 'Error al verificar WhatsApp' }
+    }
+    return { success: true, hasWhatsApp: data.data?.hasWhatsapp || data.data?.has_whatsapp || data.data?.active || false }
+  } catch (error: any) {
+    return { success: false, message: error.message }
   }
 }

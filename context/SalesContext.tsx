@@ -74,6 +74,8 @@ export interface Customer {
     conadisCard?: string;
     // Driver's license
     licencia?: LicenciaConducir;
+    // WhatsApp
+    hasWhatsApp?: boolean;
 }
 
 export type TransactionType = 'venta' | 'cotizacion';

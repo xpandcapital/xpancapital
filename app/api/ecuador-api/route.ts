@@ -6,15 +6,38 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
   const full = searchParams.get('full') === 'true'
+  const type = searchParams.get('type')
 
   const ACTIVE_TOKEN = request.headers.get('x-apiconsult-token')
 
-  if (!id) {
-    return NextResponse.json({ success: false, message: 'ID (Cédula/RUC) es requerido' }, { status: 400 })
-  }
-
   if (!ACTIVE_TOKEN) {
     return NextResponse.json({ success: false, message: 'ApiConsult Token no configurado' }, { status: 500 })
+  }
+
+  // WhatsApp Check (gratis, universal)
+  if (type === 'whatsapp') {
+    if (!id) {
+      return NextResponse.json({ success: false, message: 'Número de teléfono requerido' }, { status: 400 })
+    }
+    try {
+      const clean = id.replace(/[^0-9]/g, '')
+      const res = await fetch(`https://apiconsult.zampisoft.com/api/check-phone?phone=${clean}&token=${encodeURIComponent(ACTIVE_TOKEN)}`, {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        return NextResponse.json({ success: false, message: data.error || `Error HTTP ${res.status}` }, { status: res.status })
+      }
+      return NextResponse.json({ success: true, data })
+    } catch (error: any) {
+      console.error('[EcuadorAPI] WhatsApp check error:', error)
+      return NextResponse.json({ success: false, message: 'Fallo la verificación de WhatsApp' }, { status: 500 })
+    }
+  }
+
+  if (!id) {
+    return NextResponse.json({ success: false, message: 'ID (Cédula/RUC) es requerido' }, { status: 400 })
   }
 
   const isCedula = id.length === 10
