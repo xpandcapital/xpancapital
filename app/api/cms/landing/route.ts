@@ -71,7 +71,7 @@ export async function PUT(request: NextRequest) {
 
     const { data: template, error: findError } = await supabase
       .from('templates')
-      .select('id, version')
+      .select('id')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .eq('tipo_contenido', 'landing')
       .eq('es_principal', true)
