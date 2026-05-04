@@ -17,6 +17,7 @@ export async function GET() {
       .from('producto_categorias')
       .select('*')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
+      .eq('activo', true)
       .order('orden', { ascending: true })
 
     if (error) {

@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Plus, Trash2, Edit2, ChevronUp, ChevronDown, Check, X, Tag, Move } from "lucide-react";
+import { Plus, Trash2, Edit2, ChevronUp, ChevronDown, Check, X, Tag, Move, Eye, EyeOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCategories } from "@/context/CategoryContext";
 import { createPortal } from "react-dom";
 
 export function CategoryManager() {
-    const { categories, addCategory, deleteCategory, renameCategory, reorderCategories, fetchCategories } = useCategories();
+    const { categories, addCategory, deleteCategory, renameCategory, reorderCategories, fetchCategories, toggleActive } = useCategories();
     const [isOpen, setIsOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState("");
@@ -16,6 +16,7 @@ export function CategoryManager() {
 
     useEffect(() => {
         setMounted(true);
+        fetchCategories(true);
         return () => setMounted(false);
     }, []);
 
@@ -25,7 +26,7 @@ export function CategoryManager() {
             const result = await addCategory(newCategoryName.trim());
             if (result.success) {
                 setNewCategoryName("");
-                await fetchCategories(); // Force refresh
+                await fetchCategories(true);
             }
         }
     };
@@ -38,7 +39,7 @@ export function CategoryManager() {
     const saveEdit = async (id: string) => {
         if (editText.trim()) {
             await renameCategory(id, editText.trim());
-            await fetchCategories(); // Force refresh
+            await fetchCategories(true);
             setEditingId(null);
         }
     };
@@ -49,7 +50,7 @@ export function CategoryManager() {
         if (targetIndex >= 0 && targetIndex < newCategories.length) {
             [newCategories[index], newCategories[targetIndex]] = [newCategories[targetIndex], newCategories[index]];
             await reorderCategories(newCategories);
-            await fetchCategories(); // Force refresh
+            await fetchCategories(true);
         }
     };
 
@@ -144,11 +145,26 @@ export function CategoryManager() {
                                                     className="w-full bg-white/10 border-none rounded-xl px-3 py-2 text-sm text-white focus:ring-2 focus:ring-blis-red/40 outline-none"
                                                 />
                                             ) : (
-                                                <span className="text-xs font-black text-gray-400 group-hover:text-white transition-colors uppercase tracking-widest">
+                                                <span className={`text-xs font-black group-hover:text-white transition-colors uppercase tracking-widest ${category.activo ? 'text-gray-400' : 'text-gray-700 line-through'}`}>
                                                     {category.name}
                                                 </span>
                                             )}
                                         </div>
+
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            {/* Toggle visibilidad */}
+                                            <button
+                                                type="button"
+                                                onClick={async () => { await toggleActive(category.id, !category.activo); await fetchCategories(); }}
+                                                title={category.activo ? 'Ocultar categoría de la tienda' : 'Mostrar categoría en la tienda'}
+                                                className={`p-2 rounded-xl transition-all ${
+                                                    category.activo
+                                                        ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10'
+                                                        : 'text-gray-700 hover:text-gray-400 hover:bg-white/5'
+                                                }`}
+                                            >
+                                                {category.activo ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                                            </button>
 
                                         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all pr-2 shrink-0">
                                             <button
@@ -162,7 +178,7 @@ export function CategoryManager() {
                                                 type="button"
                                                 onClick={async () => { 
                                                     await deleteCategory(category.id);
-                                                    await fetchCategories(); 
+                                                    await fetchCategories(true); 
                                                 }}
                                                 className="p-2 rounded-xl text-gray-500 hover:text-blis-red hover:bg-blis-red/10 transition-all"
                                             >

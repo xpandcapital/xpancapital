@@ -9,6 +9,7 @@ interface Category {
   name: string
   skuPrefix: string
   order: number
+  activo: boolean
 }
 
 interface CategoryContextType {
@@ -21,6 +22,7 @@ interface CategoryContextType {
   renameCategory: (id: string, newName: string) => Promise<{ success: boolean; error?: string }>
   updateSkuPrefix: (id: string, newPrefix: string) => Promise<{ success: boolean; error?: string }>
   reorderCategories: (newOrder: Category[]) => Promise<{ success: boolean; error?: string }>
+  toggleActive: (id: string, activo: boolean) => Promise<{ success: boolean; error?: string }>
 }
 
 const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
@@ -34,7 +36,8 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
       id: c.id,
       name: c.nombre,
       skuPrefix: c.sku_prefix || '',
-      order: c.orden
+      order: c.orden,
+      activo: c.activo ?? true
     }))
   }, [categorias])
 
@@ -84,6 +87,11 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   }
 
+  const toggleActive = async (id: string, activo: boolean) => {
+    const result = await updateCategoria(id, { activo })
+    return { success: result.success, error: result.error }
+  }
+
   return (
     <CategoryContext.Provider
       value={{
@@ -95,7 +103,8 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
         deleteCategory,
         renameCategory,
         updateSkuPrefix,
-        reorderCategories: handleReorderCategories
+        reorderCategories: handleReorderCategories,
+        toggleActive
       }}
     >
       {children}

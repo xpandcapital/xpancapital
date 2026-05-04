@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,11 +11,19 @@ export async function GET() {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url)
+    const all = searchParams.get('all') === 'true'
+
+    let query = supabase
       .from('producto_categorias')
       .select('*')
       .eq('empresa_id', EMPRESA_ID)
-      .order('orden', { ascending: true })
+
+    if (!all) {
+      query = query.eq('activo', true)
+    }
+
+    const { data, error } = await query.order('orden', { ascending: true })
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
