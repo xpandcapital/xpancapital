@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchProxied } from '@/lib/fetch-with-proxy'
-
-export const runtime = 'nodejs'
 
 // ─── Helpers de Conexión ───────────────────────────────────────────
 
@@ -102,7 +99,7 @@ async function testKeyInUrl(
   paramName: string = 'api_token'
 ): Promise<{ valid: boolean; error?: string }> {
   try {
-    const res = await fetchProxied(`${urlTemplate}?${paramName}=${encodeURIComponent(key)}`)
+    const res = await fetch(`${urlTemplate}?${paramName}=${encodeURIComponent(key)}`)
     if (res.ok) return { valid: true }
     if (res.status === 401) return { valid: false, error: 'Token inválido (401)' }
     if (res.status === 403) return { valid: false, error: 'Acceso denegado (403)' }
@@ -179,7 +176,7 @@ const TESTERS: Record<string, (value: string, extra?: Record<string, string>) =>
 
   // ── APIs Perú ──────────────────────────────────────────────────
 
-  peru_api_token: (v) => testKeyInUrl('https://peruapi.com/api/tipo_cambio', v, 'api_token'),
+  peru_api_token: (v) => testBearer('https://api.decolecta.com/v1/tipo-cambio/sbs/average?currency=USD', v),
 
   tipo_cambio_api: (v) => testKeyInUrl(
     'https://api.apis.net.pe/v2/sunat/tipo-cambio', v, 'token'
@@ -187,7 +184,7 @@ const TESTERS: Record<string, (value: string, extra?: Record<string, string>) =>
 
   apisunat_token: (v) => testBearer('https://sandbox.apisunat.pe/api/v3/organizations', v),
 
-  reniec_api_token: (v) => testKeyInUrl('https://peruapi.com/api/tipo_cambio', v, 'api_token'),
+  reniec_api_token: (v) => testBearer('https://api.decolecta.com/v1/reniec/dni?numero=00000000', v),
 
   // ── APIs Ecuador ───────────────────────────────────────────────
 

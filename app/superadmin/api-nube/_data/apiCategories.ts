@@ -226,15 +226,16 @@ export const categories: ApiCategory[] = [
         description: "SUNAT, RENIEC, tipo de cambio, logística y servicios gubernamentales para Perú.",
         apps: [
             {
-                id: "peruapi",
-                name: "PeruAPI",
+                id: "decolecta",
+                name: "Decolecta API",
                 icon: Key,
                 color: "text-blis-red",
                 bg: "bg-blis-red/10",
-                description: "API para consultar RUC, DNI y datos de empresas/personas directamente de SUNAT y RENIEC. Útil para validar clientes.",
-                website: "peruapis.dev",
+                description: "API para consultar RUC (SUNAT), DNI (RENIEC) y tipo de cambio (SBS). Sin restricción de IP, autenticación vía Bearer Token.",
+                website: "decolecta.com",
+                docsUrl: "https://decolecta.gitbook.io/docs",
                 fields: [
-                    { id: "peru_api_token", label: "Bearer Token", type: "password", description: "Token de autenticación para consultas RUC/DNI. 10 consultas gratis/día en plan gratuito.", getFrom: "peruapis.dev → Registrarse → Dashboard → API Token", accessType: "Privada", cost: "freemium" },
+                    { id: "peru_api_token", label: "Bearer Token", type: "password", description: "Token de autenticación para consultas RUC/DNI/Tipo de Cambio. Se genera en decolecta.com/profile.", getFrom: "decolecta.com → Registrarse → Profile → API Token", accessType: "Privada", cost: "freemium" },
                 ]
             },
             {

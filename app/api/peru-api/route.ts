@@ -1,55 +1,61 @@
 import { NextResponse } from 'next/server'
-import { fetchProxied } from '@/lib/fetch-with-proxy'
 
-export const runtime = 'nodejs'
+const API_BASE_URL = 'https://api.decolecta.com'
+const API_TOKEN = process.env.NEXT_PUBLIC_PERU_API_TOKEN || ''
 
-const API_BASE_URL = 'https://peruapi.com/api';
-const API_TOKEN = process.env.NEXT_PUBLIC_PERU_API_TOKEN || '';
+const TYPE_MAP: Record<string, string> = {
+  ruc: '/v1/sunat/ruc?numero=',
+  dni: '/v1/reniec/dni?numero=',
+  tipo_cambio: '/v1/tipo-cambio/sbs/average?currency=USD',
+}
 
 export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type');
-    const id = searchParams.get('id');
+  const { searchParams } = new URL(request.url)
+  const type = searchParams.get('type')
+  const id = searchParams.get('id')
 
-    // Priorizamos el token enviado desde el cliente (headers o query)
-    const headerToken = request.headers.get('x-peru-api-token');
-    const queryToken = searchParams.get('token');
+  const headerToken = request.headers.get('x-peru-api-token')
+  const queryToken = searchParams.get('token')
 
-    // Si el header está presente (incluso si es vacío), lo usamos para dar control total al Dashboard
-    const ACTIVE_TOKEN = headerToken !== null ? headerToken : (queryToken || API_TOKEN);
+  const ACTIVE_TOKEN = headerToken !== null ? headerToken : (queryToken || API_TOKEN)
 
-    if (!type) {
-        return NextResponse.json({ success: false, message: 'Faltan parámetros' }, { status: 400 });
+  if (!type) {
+    return NextResponse.json({ success: false, message: 'Faltan parámetros' }, { status: 400 })
+  }
+
+  if (!id && type !== 'tipo_cambio') {
+    return NextResponse.json({ success: false, message: 'ID es requerido para este tipo' }, { status: 400 })
+  }
+
+  if (!ACTIVE_TOKEN) {
+    return NextResponse.json({ success: false, message: 'API Token no configurado' }, { status: 500 })
+  }
+
+  const endpoint = TYPE_MAP[type]
+  if (!endpoint) {
+    return NextResponse.json({ success: false, message: `Tipo de consulta no soportado: ${type}` }, { status: 400 })
+  }
+
+  try {
+    const url = id
+      ? `${API_BASE_URL}${endpoint}${encodeURIComponent(id)}`
+      : `${API_BASE_URL}${endpoint}`
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${ACTIVE_TOKEN}`,
+      },
+    })
+
+    const data = await response.json()
+    if (!response.ok) {
+      return NextResponse.json({ success: false, message: data.error || data.message || `Error HTTP ${response.status}` }, { status: response.status })
     }
-
-    if (!id && type !== 'tipo_cambio') {
-        return NextResponse.json({ success: false, message: 'ID es requerido para este tipo' }, { status: 400 });
-    }
-
-    if (!ACTIVE_TOKEN) {
-        return NextResponse.json({ success: false, message: 'API Token no configurado' }, { status: 500 });
-    }
-
-    try {
-        const encodedToken = encodeURIComponent(ACTIVE_TOKEN);
-        const url = id
-            ? `${API_BASE_URL}/${type}/${encodeURIComponent(id)}?api_token=${encodedToken}`
-            : `${API_BASE_URL}/${type}?api_token=${encodedToken}`;
-
-        const response = await fetchProxied(url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-            },
-        });
-
-        const data = await response.json();
-        if (!response.ok) {
-            return NextResponse.json({ success: false, message: data.mensaje || data.message || `Error HTTP ${response.status}` }, { status: response.status });
-        }
-        return NextResponse.json({ success: true, data });
-    } catch (error: any) {
-        console.error('API Proxy Error:', error);
-        return NextResponse.json({ success: false, message: 'Fallo la comunicación con el proveedor' }, { status: 500 });
-    }
+    return NextResponse.json({ success: true, data })
+  } catch (error: any) {
+    console.error('API Proxy Error:', error)
+    return NextResponse.json({ success: false, message: 'Fallo la comunicación con el proveedor' }, { status: 500 })
+  }
 }

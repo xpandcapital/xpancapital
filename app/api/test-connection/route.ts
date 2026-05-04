@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 import { getApiKey } from '@/lib/api-keys'
 import { createClient } from '@/lib/supabase/server'
-import { fetchProxied } from '@/lib/fetch-with-proxy'
-
-export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest) {
     try {
@@ -65,12 +62,16 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: r.ok, msg: r.ok ? 'Resend: Conectado' : `Resend Error: ${r.status}` });
         }
 
-        // --- Peru: SUNAT/RENIEC ---
+        // --- Peru: SUNAT/RENIEC (Decolecta) ---
         if (service === 'peru') {
-            const r = await fetchProxied(`https://peruapi.com/api/tipo_cambio?api_token=${encodeURIComponent(activeKey)}`, { next: { revalidate: 0 } });
+            const r = await fetch('https://api.decolecta.com/v1/tipo-cambio/sbs/average?currency=USD', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${activeKey}`, 'Accept': 'application/json' },
+                next: { revalidate: 0 }
+            });
             const d = await r.json().catch(() => ({}));
-            if (!r.ok) return NextResponse.json({ ok: false, msg: d.mensaje || d.message || `Token Inválido (HTTP ${r.status})` });
-            return NextResponse.json({ ok: true, msg: `SUNAT/RENIEC OK (TC: ${d.data?.venta || d.venta || '...'})` });
+            if (!r.ok) return NextResponse.json({ ok: false, msg: d.error || d.message || `Token Inválido (HTTP ${r.status})` });
+            return NextResponse.json({ ok: true, msg: `SUNAT/RENIEC OK (TC: ${d.buy_price || d.sell_price || '...'})` });
         }
 
         // --- AI: Groq ---
