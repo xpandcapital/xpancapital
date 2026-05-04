@@ -152,24 +152,40 @@ export const fetchRucData = async (ruc: string): Promise<PeruCustomerData> => {
   }
 }
 
-export const fetchExchangeRate = async (): Promise<{ success: boolean; buy: number; sell: number; message?: string }> => {
+export const fetchExchangeRate = async (country?: string): Promise<{ success: boolean; buy: number; sell: number; message?: string }> => {
   try {
-    const response = await fetch(`/api/peru-api?type=tipo_cambio`, {
-      headers: getAuthHeaders(),
-    })
-    const data = await response.json()
-
-    if (!data.success) {
-      return { success: false, buy: 3.75, sell: 3.80, message: data.message || 'No se pudo obtener el TC oficial' }
+    // Intentar con Decolecta (requiere token)
+    const token = typeof window !== 'undefined'
+      ? (localStorage.getItem('peru_api_token') || '')
+      : ''
+    if (token) {
+      const response = await fetch(`/api/peru-api?type=tipo_cambio`, {
+        headers: { 'x-peru-api-token': token },
+      })
+      const data = await response.json()
+      if (data.success) {
+        const r = data.data || data
+        return {
+          success: true,
+          buy: parseFloat(r.buy_price || r.compra) || 3.75,
+          sell: parseFloat(r.sell_price || r.venta) || 3.80,
+        }
+      }
     }
 
-    const r = data.data || data
-    return {
-      success: true,
-      buy: parseFloat(r.buy_price || r.compra) || 3.75,
-      sell: parseFloat(r.sell_price || r.venta) || 3.80,
+    // Fallback: API pública gratuita SUNAT
+    const res = await fetch(`/api/public/tipo-cambio?country=${country || 'PE'}`)
+    const publicData = await res.json()
+    if (publicData.success) {
+      return {
+        success: true,
+        buy: publicData.buy || publicData.usdToPen || 3.75,
+        sell: publicData.sell || publicData.usdToPen || 3.80,
+      }
     }
-    } catch (error: any) {
+
+    return { success: false, buy: 3.75, sell: 3.80, message: publicData.message || 'No disponible' }
+  } catch (error: any) {
     return { success: false, buy: 3.75, sell: 3.80, message: error.message }
   }
 }
