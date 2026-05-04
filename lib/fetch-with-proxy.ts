@@ -1,4 +1,5 @@
-let _dispatcher: any = undefined
+import { HttpsProxyAgent } from 'https-proxy-agent'
+import https from 'https'
 
 const PROXY_DOMAINS = ['peruapi.com']
 
@@ -6,36 +7,55 @@ function shouldProxy(url: string): boolean {
   return PROXY_DOMAINS.some(domain => url.includes(domain))
 }
 
-function getProxyDispatcher(): any | undefined {
-  if (_dispatcher !== undefined) return _dispatcher
-
-  const fixieUrl = process.env.FIXIE_URL
-  if (!fixieUrl) {
-    console.warn('[Fixie] ERROR: FIXIE_URL no está definida en process.env')
-    _dispatcher = null
+function getProxyAgent(): HttpsProxyAgent<string> | undefined {
+  const url = process.env.FIXIE_URL
+  if (!url) {
+    console.warn('[Fixie] FIXIE_URL no definida')
     return undefined
   }
+  return new HttpsProxyAgent(url)
+}
 
-  console.log('[Fixie] FIXIE_URL detectada:', fixieUrl.replace(/\/\/.*@/, '//***@'))
+function fetchWithAgent(
+  url: string,
+  options: { method: string; headers: Record<string, string> }
+): Promise<Response> {
+  const agent = getProxyAgent()
+  if (!agent) return fetch(url, options)
 
-  try {
-    const { ProxyAgent } = require('undici')
-    _dispatcher = new ProxyAgent({ uri: fixieUrl, requestTls: { rejectUnauthorized: false } })
-    console.log('[Fixie] ProxyAgent de undici creado exitosamente')
-  } catch (e: any) {
-    console.error('[Fixie] No se pudo crear ProxyAgent de undici:', e.message)
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      url,
+      {
+        method: options.method,
+        headers: options.headers,
+        agent,
+      },
+      (res) => {
+        const chunks: Buffer[] = []
+        res.on('data', (chunk: Buffer) => chunks.push(chunk))
+        res.on('end', () => {
+          const body = Buffer.concat(chunks).toString()
+          resolve(new Response(body, {
+            status: res.statusCode || 200,
+            statusText: res.statusMessage,
+          }))
+        })
+      }
+    )
 
-    try {
-      const { HttpsProxyAgent } = require('https-proxy-agent')
-      _dispatcher = new HttpsProxyAgent(fixieUrl)
-      console.log('[Fixie] Fallback: HttpsProxyAgent creado')
-    } catch (e2: any) {
-      console.error('[Fixie] No se pudo crear HttpsProxyAgent:', e2.message)
-      _dispatcher = null
-    }
-  }
+    req.on('error', (err) => {
+      console.error('[Fixie] Error:', err.message)
+      reject(err)
+    })
 
-  return _dispatcher || undefined
+    req.setTimeout(15000, () => {
+      req.destroy()
+      reject(new Error('Timeout de conexión'))
+    })
+
+    req.end()
+  })
 }
 
 export async function fetchProxied(
@@ -48,19 +68,27 @@ export async function fetchProxied(
     return fetch(input, init)
   }
 
-  const dispatcher = getProxyDispatcher()
-  if (!dispatcher) {
-    console.error('[Fixie] Sin dispatcher, usando fetch directo (IP de Vercel)')
-    return fetch(input, init)
+  console.log('[Fixie] Enrutando:', url.substring(0, 90))
+
+  const headers: Record<string, string> = {}
+  if (init?.headers) {
+    const h = init.headers
+    if (h instanceof Headers) {
+      h.forEach((v, k) => { headers[k] = v })
+    } else if (Array.isArray(h)) {
+      h.forEach(([k, v]) => { headers[k] = v })
+    } else {
+      Object.assign(headers, h)
+    }
   }
 
-  console.log('[Fixie] Enrutando:', url.substring(0, 90))
   try {
-    const res = await fetch(input, { ...init, dispatcher } as any)
-    console.log('[Fixie] Respuesta:', res.status, res.statusText)
-    return res
+    return await fetchWithAgent(url, {
+      method: init?.method || 'GET',
+      headers,
+    })
   } catch (e: any) {
-    console.error('[Fixie] Error en fetch:', e.message, e.cause)
+    console.error('[Fixie] Fallo:', e.message)
     throw e
   }
 }
