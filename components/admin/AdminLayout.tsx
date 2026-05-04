@@ -10,6 +10,7 @@ import {
     TrendingUp, ShoppingCart, Coins, MessageSquare
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { stripHtml } from "@/lib/strip-html";
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -112,10 +113,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                                     className="flex-1 min-w-0"
                                 >
                                     <p className="text-sm font-medium text-white truncate">
-                                        {user?.name || 'Admin'}
+                                        {stripHtml(user?.name) || 'Admin'}
                                     </p>
                                     <p className="text-xs text-gray-500 truncate">
-                                        {user?.email || 'admin@blis.com'}
+                                        {stripHtml(user?.email) || 'admin@blis.com'}
                                     </p>
                                 </motion.div>
                             )}

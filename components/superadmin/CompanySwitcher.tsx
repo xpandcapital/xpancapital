@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Building2, ChevronDown, Check } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { motion, AnimatePresence } from 'framer-motion'
+import { stripHtml } from '@/lib/strip-html'
 
 interface EmpresaOption {
   id: string
@@ -99,7 +100,7 @@ export function CompanySwitcher() {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-bold text-white truncate">{selected?.nombre || 'Empresa'}</p>
+          <p className="text-[11px] font-bold text-white truncate">{stripHtml(selected?.nombre) || 'Empresa'}</p>
           <p className="text-[9px] text-gray-500 uppercase tracking-wider">Super Admin</p>
         </div>
         <ChevronDown className={`w-3 h-3 text-gray-500 transition-transform flex-shrink-0 ${open ? 'rotate-180' : ''}`} />
@@ -132,7 +133,7 @@ export function CompanySwitcher() {
                       <Building2 className="w-3 h-3 text-white" />
                     )}
                   </div>
-                  <span className="text-xs text-white font-medium truncate flex-1">{empresa.nombre}</span>
+                  <span className="text-xs text-white font-medium truncate flex-1">{stripHtml(empresa.nombre)}</span>
                   {empresa.id === selectedId && <Check className="w-3.5 h-3.5 text-blis-red flex-shrink-0" />}
                 </button>
               ))}

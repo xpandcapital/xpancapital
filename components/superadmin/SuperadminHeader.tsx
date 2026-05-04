@@ -2,6 +2,7 @@
 
 import { Bell, Search } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { stripHtml } from "@/lib/strip-html";
 
 export function SuperadminHeader() {
     const { user } = useAuth()
@@ -33,8 +34,8 @@ export function SuperadminHeader() {
                         {initials}
                     </div>
                     <div className="hidden md:block">
-                        <p className="text-sm font-semibold text-white truncate max-w-[150px]">{firstName}</p>
-                        <p className="text-xs text-gray-500 capitalize">{user?.role || 'Usuario'}</p>
+                        <p className="text-sm font-semibold text-white truncate max-w-[150px]">{stripHtml(firstName)}</p>
+                        <p className="text-xs text-gray-500 capitalize">{stripHtml(user?.role) || 'Usuario'}</p>
                     </div>
                 </div>
             </div>
