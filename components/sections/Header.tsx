@@ -8,6 +8,7 @@ import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"
 import { useShop } from "@/context/ShopContext"
 import { useLandingCMS } from "@/context/LandingCMSContext"
+import { stripHtml } from "@/lib/strip-html"
 
 interface HeaderProps {
     searchProps?: {
@@ -416,7 +417,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         <button className="flex items-center gap-4 text-left group">
                                             <div className="hidden sm:block">
                                                 <p className="text-[13px] font-black text-white uppercase tracking-tighter leading-none mb-0.5 group-hover:text-blis-red transition-colors">
-                                                    {user.name || 'Usuario'}
+                                                    {stripHtml(user.name) || 'Usuario'}
                                                 </p>
                                                 <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -630,7 +631,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         </div>
                                         <div className="text-left overflow-hidden">
                                             <p className="text-sm font-black text-white uppercase tracking-tighter leading-none mb-1 truncate">
-                                                {user?.name || 'Usuario'}
+                                                {stripHtml(user?.name) || 'Usuario'}
                                             </p>
                                             <div className="flex items-center gap-1.5">
                                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>

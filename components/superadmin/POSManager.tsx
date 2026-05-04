@@ -835,7 +835,7 @@ export const POSManager = () => {
                                             <div className="flex justify-between items-start">
                                                 <div>
                                                     <div className="text-[7px] text-gray-500 font-black uppercase">Persona Autorizada</div>
-                                                    <div className="text-[10px] font-black uppercase text-white truncate">{customer.representative.name}</div>
+                                                    <div className="text-[10px] font-black uppercase text-white truncate">{stripHtml(customer.representative?.name)}</div>
                                                     <div className="text-[8px] text-blis-red/60 font-black uppercase">{customer.representative.id}</div>
                                                 </div>
                                                 <button onClick={() => updateCustomerFields({ representative: undefined })} className="p-1 hover:text-rose-500 transition-colors">
