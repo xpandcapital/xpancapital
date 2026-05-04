@@ -160,10 +160,15 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const { cmsData } = useLandingCMS();
 
     // País: localStorage manda. Si no hay nada guardado, default PE.
+    // Si hay 'EC' residual de versión anterior, lo limpiamos.
     useEffect(() => {
         if (typeof window === 'undefined') return
         const saved = localStorage.getItem('blis_pos_country')
-        if (saved) setCountry(saved)
+        if (saved === 'EC') {
+            localStorage.removeItem('blis_pos_country')
+        } else if (saved) {
+            setCountry(saved)
+        }
     }, [])
 
     // Moneda / impuesto desde CMS (no afectan país)

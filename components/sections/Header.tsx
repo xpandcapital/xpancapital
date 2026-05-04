@@ -283,7 +283,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                             <img src={item.image} className="w-full h-full object-cover" alt="" />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="text-[10px] font-bold text-white truncate">{item.title}</p>
+                                                            <p className="text-[10px] font-bold text-white truncate">{stripHtml(item.title)}</p>
                                                             <p className="text-[9px] text-blis-red font-black font-mono">${item.price}</p>
                                                         </div>
                                                     </div>
@@ -329,7 +329,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                             <img src={fav.image} className="w-full h-full object-cover" alt="" />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="text-[10px] font-bold text-white truncate">{fav.title}</p>
+                                                            <p className="text-[10px] font-bold text-white truncate">{stripHtml(fav.title)}</p>
                                                             <p className="text-[9px] text-blis-red font-black font-mono">${fav.price}</p>
                                                         </div>
                                                     </div>
