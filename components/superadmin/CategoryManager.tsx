@@ -16,8 +16,11 @@ export function CategoryManager() {
 
     useEffect(() => {
         setMounted(true);
-        fetchCategories(true);
         return () => setMounted(false);
+    }, []);
+
+    useEffect(() => {
+        fetchCategories(true);
     }, []);
 
     const handleAdd = async (e: React.FormEvent) => {
@@ -184,6 +187,7 @@ export function CategoryManager() {
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
+                                        </div>
                                         </div>
                                     </motion.div>
                                 ))}
