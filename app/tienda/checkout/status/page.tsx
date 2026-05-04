@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -16,9 +16,28 @@ type PaymentState = "loading" | "paid" | "pending" | "failed";
 
 export default function CheckoutStatusPage() {
   return (
+    <Suspense fallback={<CheckoutStatusLoading />}>
+      <CheckoutStatusContent />
+    </Suspense>
+  );
+}
+
+function CheckoutStatusLoading() {
+  return (
     <main className="min-h-screen bg-[#050505] text-white">
       <Header />
-      <CheckoutStatusContent />
+      <div className="max-w-2xl mx-auto px-4 pt-40 pb-20 text-center">
+        <div className="space-y-8">
+          <div className="w-28 h-28 mx-auto bg-amber-500/10 border border-amber-500/30 rounded-3xl flex items-center justify-center">
+            <Loader2 className="w-14 h-14 text-amber-400 animate-spin" />
+          </div>
+          <div className="space-y-4">
+            <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight">
+              Cargando...
+            </h1>
+          </div>
+        </div>
+      </div>
       <FooterSections />
     </main>
   );
