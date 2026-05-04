@@ -19,41 +19,6 @@ function getProxyConfig(): { host: string; port: number; auth: string } | null {
   }
 }
 
-function connectViaProxy(proxy: { host: string; port: number; auth: string }, targetHost: string, targetPort: number): Promise<http.IncomingMessage & { socket: any }> {
-  return new Promise((resolve, reject) => {
-    const req = http.request({
-      host: proxy.host,
-      port: proxy.port,
-      method: 'CONNECT',
-      path: `${targetHost}:${targetPort}`,
-      headers: {
-        'Proxy-Authorization': proxy.auth,
-        'Host': `${targetHost}:${targetPort}`,
-      },
-    })
-
-    req.on('connect', (res, socket) => {
-      if (res.statusCode !== 200) {
-        reject(new Error(`Proxy CONNECT falló: ${res.statusCode}`))
-        return
-      }
-      resolve(Object.assign(res, { socket }))
-    })
-
-    req.on('error', (err) => {
-      console.error('[Fixie] Error CONNECT:', err.message)
-      reject(err)
-    })
-
-    req.setTimeout(10000, () => {
-      req.destroy()
-      reject(new Error('Timeout conectando al proxy'))
-    })
-
-    req.end()
-  })
-}
-
 function httpsViaProxy(
   targetUrl: string,
   options: { method: string; headers: Record<string, string> }
@@ -81,7 +46,7 @@ function httpsViaProxy(
     })
 
     proxyReq.on('connect', (_res, socket) => {
-      console.log('[Fixie] Túnel CONNECT establecido, iniciando TLS...')
+      console.log('[Fixie] Túnel CONNECT OK, iniciando TLS...')
 
       const tlsSocket = tls.connect({
         socket,
@@ -89,46 +54,35 @@ function httpsViaProxy(
         rejectUnauthorized: true,
       })
 
-      const reqLines = [
-        `${options.method} ${path} HTTP/1.1`,
-        `Host: ${targetHost}`,
-        ...Object.entries(options.headers).map(([k, v]) => `${k}: ${v}`),
-        'Connection: close',
-        '',
-        '',
-      ]
-
-      tlsSocket.write(reqLines.join('\r\n'))
-
-      const chunks: Buffer[] = []
-      tlsSocket.on('data', (chunk: Buffer) => chunks.push(chunk))
-      tlsSocket.on('end', () => {
-        const raw = Buffer.concat(chunks).toString()
-        const headerEnd = raw.indexOf('\r\n\r\n')
-        if (headerEnd === -1) {
-          reject(new Error('Respuesta malformada'))
-          return
-        }
-
-        const headerText = raw.substring(0, headerEnd)
-        const body = raw.substring(headerEnd + 4)
-
-        const statusLine = headerText.split('\r\n')[0]
-        const statusMatch = statusLine.match(/HTTP\/\d\.\d (\d+)/)
-        const status = statusMatch ? parseInt(statusMatch[1]) : 502
-
-        console.log('[Fixie] Respuesta:', status)
-        resolve(new Response(body, { status }))
+      const req = https.get({
+        host: targetHost,
+        port: targetPort,
+        path,
+        method: options.method,
+        headers: { ...options.headers, Host: targetHost },
+        agent: false,
+        createConnection: () => tlsSocket,
+      }, (res) => {
+        const chunks: Buffer[] = []
+        res.on('data', (chunk: Buffer) => chunks.push(chunk))
+        res.on('end', () => {
+          const body = Buffer.concat(chunks).toString()
+          console.log('[Fixie] Respuesta:', res.statusCode)
+          resolve(new Response(body, {
+            status: res.statusCode || 502,
+            statusText: res.statusMessage,
+          }))
+        })
       })
 
-      tlsSocket.on('error', (err) => {
-        console.error('[Fixie] Error TLS:', err.message)
+      req.on('error', (err) => {
+        console.error('[Fixie] Error HTTP:', err.message)
         reject(err)
       })
 
-      tlsSocket.setTimeout(15000, () => {
-        tlsSocket.destroy()
-        reject(new Error('Timeout TLS'))
+      req.setTimeout(15000, () => {
+        req.destroy()
+        reject(new Error('Timeout HTTP'))
       })
     })
 
