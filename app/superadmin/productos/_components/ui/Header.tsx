@@ -1,8 +1,8 @@
 "use client"
 
 import { ShoppingBag, Plus, X, Settings2 } from 'lucide-react'
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useRef, useEffect } from 'react'
+import { ToolsMenu } from './ToolsMenu'
 
 interface HeaderProps {
   onOpenModal: () => void
@@ -11,6 +11,19 @@ interface HeaderProps {
 }
 
 export function Header({ onOpenModal, showTools, onToggleTools }: HeaderProps) {
+  const toolsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!showTools) return
+    const handleClick = (e: MouseEvent) => {
+      if (toolsRef.current && !toolsRef.current.contains(e.target as Node)) {
+        onToggleTools()
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showTools, onToggleTools])
+
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
       <div className="space-y-1 w-full sm:w-auto">
@@ -27,7 +40,7 @@ export function Header({ onOpenModal, showTools, onToggleTools }: HeaderProps) {
       </div>
 
       <div className="flex items-center w-full sm:w-auto mt-4 sm:mt-0 gap-2 justify-between sm:justify-end relative z-[1000]">
-        <div className="relative">
+        <div ref={toolsRef} className="relative">
           <button
             onClick={(e) => {
               e.preventDefault()
@@ -42,6 +55,7 @@ export function Header({ onOpenModal, showTools, onToggleTools }: HeaderProps) {
           >
             {showTools ? <X className="w-5 h-5" /> : <Settings2 className="w-5 h-5" />}
           </button>
+          <ToolsMenu show={showTools} onClose={onToggleTools} />
         </div>
 
         <button

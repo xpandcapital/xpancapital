@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useActionGuard } from '@/hooks/useActionGuard'
-import { motion, AnimatePresence } from "framer-motion"
-import { createPortal } from "react-dom"
+import { AnimatePresence } from "framer-motion"
 import { Trash2, CheckCircle2, Package } from "lucide-react"
 import { useProducts } from "./_hooks/useProducts"
 import { useProductFilters } from "./_hooks/useProductFilters"
@@ -22,15 +21,6 @@ import { LabelProvider, useLabel } from "@/context/LabelContext"
 import { UnitProvider } from "@/context/UnitContext"
 import { BusinessSettingsProvider, useBusinessSettings } from "@/context/BusinessSettingsContext"
 import { ShippingProvider } from "@/context/ShippingContext"
-import { CategoryManager } from "@/components/superadmin/CategoryManager"
-import { StatusManager } from "@/components/superadmin/StatusManager"
-import { SkuManager } from "@/components/superadmin/SkuManager"
-import { UnitManager } from "@/components/superadmin/UnitManager"
-import { CurrencyManager } from "@/components/superadmin/CurrencyManager"
-import { LabelManager } from "@/components/superadmin/LabelManager"
-import { ViewManager } from "@/components/superadmin/ViewManager"
-import { BusinessEngineManager } from "@/components/superadmin/BusinessEngineManager"
-import { ShippingManager } from "@/components/superadmin/ShippingManager"
 import type { ViewMode } from "./_types"
 
 function AdminProductsContent() {
@@ -208,34 +198,7 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
             onToggleTools={() => setShowTools(!showTools)}
           />
 
-          {typeof document !== 'undefined' && createPortal(
-            <AnimatePresence>
-              {showTools && (
-                <div className="fixed inset-0 z-[999]" onClick={() => setShowTools(false)}>
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="fixed top-28 right-[220px] bg-zinc-950 border border-white/10 rounded-[2.5rem] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[1000] min-w-[280px] backdrop-blur-2xl"
-                  >
-                    <div className="flex flex-col gap-1 p-2">
-                      <CategoryManager />
-                      <StatusManager />
-                      <SkuManager />
-                      <UnitManager />
-                      <CurrencyManager />
-                      <ShippingManager />
-                      <BusinessEngineManager />
-                      <LabelManager />
-                      <ViewManager />
-                    </div>
-                  </motion.div>
-                </div>
-              )}
-            </AnimatePresence>,
-            document.body
-          )}
+
 
           <div className="relative">
             <div className="flex flex-col space-y-4">
