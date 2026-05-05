@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/Toast";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 
-type PaymentMethod = 'coins' | 'cryptomus_card' | 'cryptomus_crypto' | 'transfer';
+type PaymentMethod = 'coins' | 'helio_card' | 'helio_crypto' | 'transfer';
 
 interface CheckoutForm {
     nombre: string;
@@ -66,7 +66,7 @@ function CheckoutContent() {
     const searchParams = useSearchParams();
     const isRedeemFlow = searchParams.get('redeem') === '1';
 
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cryptomus_card');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('helio_card');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
     const [orderEmail, setOrderEmail] = useState("");
@@ -193,14 +193,14 @@ function CheckoutContent() {
                 } : null,
             };
 
-            // Flujo Cryptomus (tarjeta o crypto)
-            if (paymentMethod === 'cryptomus_card' || paymentMethod === 'cryptomus_crypto') {
+            // Flujo Hel.io (tarjeta o crypto)
+            if (paymentMethod === 'helio_card' || paymentMethod === 'helio_crypto') {
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 15000);
 
                 let res: Response;
                 try {
-                    res = await fetch('/api/cryptomus/create-invoice', {
+                    res = await fetch('/api/helio/create-charge', {
                         method: 'POST',
                         headers,
                         body: JSON.stringify({
@@ -507,25 +507,25 @@ function CheckoutContent() {
                                     />
                                 )}
 
-                                {/* Cryptomus - Tarjeta */}
+                                {/* Hel.io - Tarjeta */}
                                 <PayOption
-                                    selected={paymentMethod === 'cryptomus_card'}
-                                    onClick={() => setPaymentMethod('cryptomus_card')}
+                                    selected={paymentMethod === 'helio_card'}
+                                    onClick={() => setPaymentMethod('helio_card')}
                                     icon={<CreditCard className="w-5 h-5 text-emerald-400" />}
                                     bg="bg-emerald-500/10 border-emerald-500/40"
                                     label="Tarjeta de Crédito / Débito"
-                                    sublabel="Visa, Mastercard, AMEX — Pago seguro vía Cryptomus"
+                                    sublabel="Visa, Mastercard, AMEX — Pago seguro vía Hel.io"
                                     amount={`$${totalUSD.toFixed(2)}`}
                                 />
 
-                                {/* Cryptomus - Criptomonedas */}
+                                {/* Hel.io - Criptomonedas */}
                                 <PayOption
-                                    selected={paymentMethod === 'cryptomus_crypto'}
-                                    onClick={() => setPaymentMethod('cryptomus_crypto')}
+                                    selected={paymentMethod === 'helio_crypto'}
+                                    onClick={() => setPaymentMethod('helio_crypto')}
                                     icon={<Coins className="w-5 h-5 text-yellow-400" />}
                                     bg="bg-yellow-500/10 border-yellow-500/40"
                                     label="Criptomonedas"
-                                    sublabel="BTC, ETH, USDT, USDC, LTC y más — vía Cryptomus"
+                                    sublabel="BTC, ETH, USDT, USDC, SOL y más — vía Hel.io"
                                     amount={`$${totalUSD.toFixed(2)}`}
                                 />
 

@@ -224,7 +224,7 @@ export const POSManager = () => {
     const [repDniSearch, setRepDniSearch] = useState('');
     const [isSearchingRep, setIsSearchingRep] = useState(false);
 
-    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'bliscoins' | 'transfer' | 'cryptomus'>('cash');
+    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'bliscoins' | 'transfer' | 'helio'>('cash');
     const [receivedAmount, setReceivedAmount] = useState<string>('');
     const [emitSunat, setEmitSunat] = useState(false);
     const [isIssuingInvoice, setIsIssuingInvoice] = useState(false);
@@ -1361,7 +1361,7 @@ export const POSManager = () => {
                                         {[
                                             { id: 'cash', icon: Banknote, label: 'Efectivo', desc: country === 'EC' ? 'Saldo físico / caja' : 'Pago físico', color: 'emerald' },
                                             { id: 'card', icon: CreditCard, label: 'Tarjeta', desc: country === 'EC' ? 'Datafast / Medianet' : 'IziPay / Niubiz', color: 'blue' },
-                                            { id: 'cryptomus', icon: Coins, label: 'Cryptomus', desc: 'Tarjeta o Crypto → Recibes USDT', color: 'yellow' },
+                                            { id: 'helio', icon: Coins, label: 'Hel.io', desc: 'Tarjeta o Crypto → Recibes USDC', color: 'yellow' },
                                             { id: 'bliscoins', icon: Coins, label: 'BlisCoins', desc: 'Canje de Puntos', color: 'amber' },
                                             { id: 'transfer', icon: ArrowRightLeft, label: country === 'EC' ? 'Deuna / Pichincha' : 'Transferencia', desc: country === 'EC' ? 'Interbancario' : 'Yape / Plin', color: 'purple' }
                                         ].map(method => (

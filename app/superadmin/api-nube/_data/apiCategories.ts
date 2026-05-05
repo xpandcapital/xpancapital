@@ -895,16 +895,17 @@ export const categories: ApiCategory[] = [
                 ]
             },
             {
-                id: "cryptomus",
-                name: "Cryptomus",
+                id: "helio",
+                name: "Hel.io (MoonPay)",
                 icon: Coins,
                 color: "text-yellow-400",
                 bg: "bg-yellow-500/10",
-                description: "Pasarela de pago crypto. Acepta tarjetas y criptomonedas. Convierte automáticamente a USDT. Webhooks y facturas.",
-                website: "cryptomus.com",
+                description: "Pasarela de pago crypto y fiat. Acepta tarjetas y criptomonedas. Convierte automáticamente a USDC. Webhooks y charges.",
+                website: "hel.io",
                 fields: [
-                    { id: "cryptomus_merchant_id", label: "ID del Comerciante (Merchant UUID)", type: "text", description: "UUID de tu comercio en Cryptomus. Visible en el dashboard.", getFrom: "cryptomus.com → Configuración → ID del Comerciante", accessType: "Pública", cost: "pagado" },
-                    { id: "cryptomus_api_key", label: "Clave API para pagos", type: "password", description: "Clave para crear facturas y recibir pagos. Es la misma para todos los comerciantes.", getFrom: "cryptomus.com → Configuración → Clave API para pagos", accessType: "Privada", cost: "pagado" },
+                    { id: "helio_public_key", label: "Public API Key", type: "text", description: "Clave pública de API. Visible en el dashboard de Hel.io.", getFrom: "hel.io → Settings → API Keys → Public Key", accessType: "Pública", cost: "pagado" },
+                    { id: "helio_secret_key", label: "Secret API Key", type: "password", description: "Clave secreta para crear charges. ⚠️ Solo backend.", getFrom: "hel.io → Settings → API Keys → Secret Key", accessType: "Privada", cost: "pagado" },
+                    { id: "helio_paylink_id", label: "Pay Link ID", type: "text", description: "ID del Pay Link base. Se usa para crear charges dinámicos.", getFrom: "hel.io → Pay Links → Tu Pay Link → ID", accessType: "Pública", cost: "pagado" },
                 ]
             },
         ]

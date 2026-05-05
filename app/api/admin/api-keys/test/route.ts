@@ -294,24 +294,19 @@ const TESTERS: Record<string, (value: string, extra?: Record<string, string>) =>
 
   // ── Crypto ─────────────────────────────────────────────────────
 
-  cryptomus_api_key: (v, extra) => {
-    if (!extra?.cryptomus_merchant_id) return Promise.resolve({ valid: false, error: 'Falta cryptomus_merchant_id' })
-    const body = {}
-    const jsonBody = JSON.stringify(body)
-    const crypto = require('crypto')
-    const sign = crypto.createHash('md5').update(Buffer.from(jsonBody).toString('base64') + v).digest('hex')
-    return fetch('https://api.cryptomus.com/v1/payment/services', {
+  helio_secret_key: (v, extra) => {
+    if (!extra?.helio_public_key || !extra?.helio_paylink_id) return Promise.resolve({ valid: false, error: 'Falta helio_public_key o helio_paylink_id' })
+    return fetch(`https://api.hel.io/v1/paylink/get/api-key?apiKey=${encodeURIComponent(extra.helio_public_key)}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        merchant: extra.cryptomus_merchant_id,
-        sign,
+        Authorization: `Bearer ${v}`,
       },
-      body: jsonBody,
+      body: JSON.stringify({ id: extra.helio_paylink_id }),
     }).then(async (res) => {
       const data = await res.json().catch(() => ({}))
-      if (data.state === 0) return { valid: true }
-      if (res.status === 401 || data.state === 1) return { valid: false, error: data.message || 'API key o Merchant ID inválido' }
+      if (data.id) return { valid: true }
+      if (res.status === 401) return { valid: false, error: 'API Key inválida' }
       return { valid: false, error: data.message || `HTTP ${res.status}` }
     }).catch((e: any) => ({ valid: false, error: e.message || 'Error de red' }))
   },
