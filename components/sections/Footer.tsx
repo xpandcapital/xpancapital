@@ -48,13 +48,45 @@ export function FooterSections() {
     const vipButtonText = siteConfig?.footerVipButton || footer.vipButtonText || "Suscribirme";
     const projectsTitle = siteConfig?.footerProjectsTitle || footer.projectsTitle || "Proyectos";
     const legalTitle = siteConfig?.footerLegalTitle || footer.legalTitle || "Legal";
-    const legalLinks = footer.legalLinks || [
+    const legalLinks = (footer.legalLinks && footer.legalLinks.length > 0) ? footer.legalLinks : [
         { text: "Términos", href: "/legal/terminos" },
         { text: "Privacidad", href: "/legal/privacidad" },
         { text: "Reembolsos", href: "/legal/reembolsos" },
         { text: "Cookies", href: "/legal/cookies" },
         { text: "Aviso Legal", href: "/legal/aviso" },
         { text: "Reclamaciones", href: "/legal/reclamaciones" }
+    ];
+
+    // Main navigation links
+    const navLinks = [
+        { text: "Inicio", href: "/" },
+        { text: "Tienda", href: "/tienda" },
+        { text: "Blog", href: "/blog" },
+        { text: "Proyectos", href: "/#projects" },
+        { text: "Academia", href: "/tienda#cursos" },
+    ];
+
+    // Sitemap sections
+    const sitemapSections = [
+        {
+            title: "Explorar",
+            links: [
+                { text: "Tienda", href: "/tienda" },
+                { text: "Cursos", href: "/tienda#cursos" },
+                { text: "Ebooks", href: "/tienda#ebooks" },
+                { text: "Kits", href: "/tienda#kits" },
+                { text: "Mentoría", href: "/tienda#mentoria" },
+            ]
+        },
+        {
+            title: "Empresa",
+            links: [
+                { text: "Nosotros", href: "/#about" },
+                { text: "Proyectos", href: "/#projects" },
+                { text: "Blog", href: "/blog" },
+                { text: "Contacto", href: "/legal/reclamaciones" },
+            ]
+        },
     ];
     const locationText = siteConfig?.footerLocationText || footer.locationText || "Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú";
     const showProjects = siteConfig?.footerShowProjects ?? (footer.showProjects !== false);
@@ -166,7 +198,17 @@ export function FooterSections() {
                             ) : (
                                 <span className="text-2xl font-black text-white tracking-wider mb-4">BLIS CORP</span>
                             )}
-                            <p className="text-gray-500 font-light text-sm max-w-xs mb-6">{description}</p>
+                            <p className="text-gray-500 font-light text-sm max-w-xs mb-4">{description}</p>
+
+                            {/* Navegación principal móvil */}
+                            <div className="flex flex-wrap gap-3 justify-center mb-6">
+                                {navLinks.map((link, i) => (
+                                    <a key={i} href={link.href} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-blis-red transition-colors">
+                                        {link.text}
+                                    </a>
+                                ))}
+                            </div>
+
                             <div className="flex flex-wrap gap-3 justify-center mb-8">
                                 {activeLinks.map((link, i) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" title={link.name}
@@ -178,22 +220,19 @@ export function FooterSections() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-6 mb-10">
-                            {showProjects && projects.length > 0 && (
-                                <div className="text-center">
-                                    <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-4">{projectsTitle}</h4>
+                            {/* Mapa del sitio */}
+                            {sitemapSections.map((section, si) => (
+                                <div key={si} className="text-center">
+                                    <h4 className="text-white font-bold uppercase tracking-widest text-[10px] mb-4">{section.title}</h4>
                                     <ul className="space-y-3 text-gray-500 font-light text-sm">
-                                        {projects.slice(0, 6).map((project) => (
-                                            <li key={project.id}>
-                                                <a href={`/proyectos/${project.id}`} className="hover:text-blis-red transition-colors">
-                                                    {project.name}
-                                                </a>
-                                            </li>
+                                        {section.links.map((link, li) => (
+                                            <li key={li}><a href={link.href} className="hover:text-blis-red transition-colors">{link.text}</a></li>
                                         ))}
                                     </ul>
                                 </div>
-                            )}
+                            ))}
                             <div className="text-center">
-                                <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-4">{legalTitle}</h4>
+                                <h4 className="text-white font-bold uppercase tracking-widest text-[10px] mb-4">{legalTitle}</h4>
                                 <ul className="space-y-3 text-gray-500 font-light text-sm">
                                     {legalLinks.map((link, i) => (
                                         <li key={i}><a href={link.href} className="hover:text-blis-red transition-colors">{link.text}</a></li>
@@ -220,54 +259,83 @@ export function FooterSections() {
                     </div>
 
                     {/* ---- DESKTOP LAYOUT ---- */}
-                    <div className="hidden lg:grid lg:grid-cols-12 gap-12 mb-16">
-                        <div className="lg:col-span-4 flex flex-col items-start pr-4">
+                    <div className="hidden lg:grid lg:grid-cols-12 gap-8 mb-16">
+                        {/* Col 1: Logo + Nav + Socials */}
+                        <div className="lg:col-span-3 flex flex-col items-start">
                             {logoHorizontal ? (
-                                <img src={logoHorizontal} alt="Logo" className="h-32 sm:h-40 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-6" />
+                                <img src={logoHorizontal} alt="Logo" className="h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-4" />
                             ) : (
-                                <span className="text-2xl font-black text-white tracking-wider mb-6">BLIS CORP</span>
+                                <span className="text-xl font-black text-white tracking-wider mb-4">BLIS CORP</span>
                             )}
-                            <p className="text-gray-500 font-light mb-8 max-w-sm">{description}</p>
-                            <div className="flex flex-wrap gap-3">
+                            <p className="text-gray-500 font-light text-xs leading-relaxed mb-5 max-w-[220px]">{description}</p>
+                            {/* Main Nav */}
+                            <div className="flex flex-wrap gap-x-4 gap-y-2 mb-5">
+                                {navLinks.map((link, i) => (
+                                    <a key={i} href={link.href} className="text-[11px] font-bold uppercase tracking-widest text-gray-400 hover:text-blis-red transition-colors">
+                                        {link.text}
+                                    </a>
+                                ))}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
                                 {activeLinks.map((link, i) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" title={link.name}
-                                        className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-gray-400 hover:text-blis-red hover:border-blis-red hover:bg-blis-red/10 transition-all shadow-[0_0_15px_rgba(255,255,255,0.02)] hover:shadow-[0_0_20px_rgba(190,11,60,0.6)]">
-                                        <link.icon className="w-4 h-4" />
+                                        className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-gray-500 hover:text-blis-red hover:border-blis-red/50 hover:bg-blis-red/10 transition-all">
+                                        <link.icon className="w-3.5 h-3.5" />
                                     </a>
                                 ))}
                             </div>
                         </div>
-                        
-                        {showProjects && projects.length > 0 && (
-                            <div className="lg:col-span-2">
-                                <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">{projectsTitle}</h4>
-                                <ul className="space-y-4 text-gray-500 font-light">
-                                    {projects.slice(0, 8).map((project) => (
-                                        <li key={project.id}>
-                                            <a href={`/proyectos/${project.id}`} className="hover:text-blis-red transition-colors">
-                                                {project.name}
+
+                        {/* Col 2-3: Mapa del sitio */}
+                        {sitemapSections.map((section, si) => (
+                            <div key={si} className="lg:col-span-2">
+                                <h4 className="text-white font-bold uppercase tracking-[0.15em] text-[10px] mb-5 flex items-center gap-2">
+                                    <span className="w-1 h-4 rounded-full bg-blis-red/60" />
+                                    {section.title}
+                                </h4>
+                                <ul className="space-y-3 text-gray-500 font-light text-xs">
+                                    {section.links.map((link, li) => (
+                                        <li key={li}>
+                                            <a href={link.href} className="hover:text-blis-red transition-colors flex items-center gap-2 group">
+                                                <span className="w-1 h-1 rounded-full bg-white/20 group-hover:bg-blis-red transition-colors" />
+                                                {link.text}
                                             </a>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
-                        )}
-                        
+                        ))}
+
+                        {/* Col 4: Legal */}
                         <div className="lg:col-span-2">
-                            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">{legalTitle}</h4>
-                            <ul className="space-y-4 text-gray-500 font-light">
+                            <h4 className="text-white font-bold uppercase tracking-[0.15em] text-[10px] mb-5 flex items-center gap-2">
+                                <span className="w-1 h-4 rounded-full bg-amber-500/60" />
+                                {legalTitle}
+                            </h4>
+                            <ul className="space-y-3 text-gray-500 font-light text-xs">
                                 {legalLinks.map((link, i) => (
-                                    <li key={i}><a href={link.href} className="hover:text-blis-red transition-colors">{link.text}</a></li>
+                                    <li key={i}>
+                                        <a href={link.href} className="hover:text-blis-red transition-colors flex items-center gap-2 group">
+                                            <span className="w-1 h-1 rounded-full bg-white/20 group-hover:bg-blis-red transition-colors" />
+                                            {link.text}
+                                        </a>
+                                    </li>
                                 ))}
                             </ul>
                         </div>
-                        
-                        <div className="lg:col-span-4">
-                            <h4 className="text-white font-bold uppercase tracking-widest text-sm mb-6">{vipTitle}</h4>
-                            <p className="text-gray-500 font-light mb-4">{vipDescription}</p>
-                            <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); showToast("Suscripción exitosa.", "success"); }}>
-                                <input type="email" placeholder={vipPlaceholder} className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-blis-red text-white transition-colors" required />
-                                <button type="submit" className="px-4 py-3 bg-blis-red text-white uppercase text-sm font-bold tracking-widest rounded-lg hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)]">{vipButtonText}</button>
+
+                        {/* Col 5: VIP */}
+                        <div className="lg:col-span-3">
+                            <h4 className="text-white font-bold uppercase tracking-[0.15em] text-[10px] mb-5 flex items-center gap-2">
+                                <span className="w-1 h-4 rounded-full bg-emerald-500/60" />
+                                {vipTitle}
+                            </h4>
+                            <p className="text-gray-500 font-light text-xs leading-relaxed mb-4">{vipDescription}</p>
+                            <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); showToast("Suscripción exitosa.", "success"); }}>
+                                <input type="email" placeholder={vipPlaceholder} className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-blis-red text-white text-xs transition-colors" required />
+                                <button type="submit" className="px-5 py-2.5 bg-blis-red text-white uppercase text-[10px] font-bold tracking-widest rounded-xl hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)] whitespace-nowrap">
+                                    {vipButtonText}
+                                </button>
                             </form>
                         </div>
                     </div>

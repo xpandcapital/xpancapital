@@ -15,7 +15,7 @@ export const getCachedLandingTemplate = unstable_cache(
     return data
   },
   ['landing-template'],
-  { revalidate: 86400, tags: ['landing-template'] }
+  { revalidate: 60, tags: ['landing-template'] }
 )
 
 export const getCachedSiteConfig = unstable_cache(

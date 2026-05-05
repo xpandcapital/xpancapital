@@ -67,7 +67,7 @@ component: React.ComponentType<{ data?: any }>;
   testimonials: { component: Testimonials, id: "testimonials", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center" },
   faq: { component: FAQ, id: "faq", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center" },
   blog: { component: BlogPremium, id: "blog", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center" },
-  footer: { component: FooterSections, id: "footer", className: "scroll-mt-36 bg-black relative z-10" },
+  footer: { component: FooterSections, id: "footer", className: "scroll-mt-36 bg-black relative z-10", needsData: true },
   
   thankyou: { component: ThankYouHero, id: "hero", needsData: true },
   thankYouHero: { component: ThankYouHero, id: "hero", needsData: true },
