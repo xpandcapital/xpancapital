@@ -185,7 +185,6 @@ export function CategoryManager() {
                                                 </button>
                                             </div>
                                         </div>
-                                        </div>
                                     </motion.div>
                                 ))}
                             </div>
