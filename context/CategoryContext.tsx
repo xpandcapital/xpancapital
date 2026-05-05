@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode, useMemo } from "react";
+import React, { createContext, useContext, ReactNode, useMemo, useEffect } from "react";
 import { useCategorias } from "@/lib/hooks/useCategorias";
 import type { ProductoCategoria, ProductoCategoriaInput } from "@/lib/types/contexts";
 
@@ -29,6 +29,10 @@ const CategoryContext = createContext<CategoryContextType | undefined>(undefined
 
 export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const {categorias, loading, error, fetchCategorias, addCategoria, updateCategoria, deleteCategoria, reorderCategorias } = useCategorias();
+
+  useEffect(() => {
+    fetchCategorias(true)
+  }, [fetchCategorias])
 
   // Transform to legacy format with `name` property
   const categories = useMemo(() => {

@@ -102,10 +102,6 @@ export function useCategorias() {
     }
   }, [])
 
-  useEffect(() => {
-    fetchCategorias()
-  }, [fetchCategorias])
-
   return {
     categorias,
     loading,

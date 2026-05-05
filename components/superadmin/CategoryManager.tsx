@@ -19,10 +19,6 @@ export function CategoryManager() {
         return () => setMounted(false);
     }, []);
 
-    useEffect(() => {
-        fetchCategories(true);
-    }, []);
-
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newCategoryName.trim()) {
@@ -154,8 +150,8 @@ export function CategoryManager() {
                                             )}
                                         </div>
 
-                                        <div className="flex items-center gap-1 shrink-0">
-                                            {/* Toggle visibilidad */}
+                                        <div className="flex items-center gap-1 shrink-0 pr-2">
+                                            {/* Toggle visibilidad — siempre visible */}
                                             <button
                                                 type="button"
                                                 onClick={async () => { await toggleActive(category.id, !category.activo); await fetchCategories(true); }}
@@ -166,27 +162,28 @@ export function CategoryManager() {
                                                         : 'text-gray-700 hover:text-gray-400 hover:bg-white/5'
                                                 }`}
                                             >
-                                                {category.activo ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                                                {category.activo ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                                             </button>
-
-                                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all pr-2 shrink-0">
-                                            <button
-                                                type="button"
-                                                onClick={() => startEditing(category.id, category.name)}
-                                                className="p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/10 transition-all"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={async () => { 
-                                                    await deleteCategory(category.id);
-                                                    await fetchCategories(true); 
-                                                }}
-                                                className="p-2 rounded-xl text-gray-500 hover:text-blis-red hover:bg-blis-red/10 transition-all"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            {/* Editar / Eliminar — solo al hover */}
+                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => startEditing(category.id, category.name)}
+                                                    className="p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/10 transition-all"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={async () => { 
+                                                        await deleteCategory(category.id);
+                                                        await fetchCategories(true); 
+                                                    }}
+                                                    className="p-2 rounded-xl text-gray-500 hover:text-blis-red hover:bg-blis-red/10 transition-all"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </div>
                                         </div>
                                     </motion.div>
