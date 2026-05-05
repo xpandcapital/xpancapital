@@ -217,7 +217,7 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="fixed top-20 right-4 bg-zinc-950 border border-white/10 rounded-[2.5rem] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[1000] min-w-[280px] backdrop-blur-2xl"
+                    className="fixed top-24 right-6 bg-zinc-950 border border-white/10 rounded-[2.5rem] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[1000] min-w-[280px] backdrop-blur-2xl"
                   >
                     <div className="flex flex-col gap-1 p-2">
                       <CategoryManager />
