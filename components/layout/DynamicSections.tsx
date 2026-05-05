@@ -120,7 +120,8 @@ const DEFAULT_ORDER_BY_TIPO: Record<string, string[]> = {
   funnel: ["funnelHero", "funnelVideo", "funnelBenefits", "stats", "funnelTestimonials", "funnelPricing", "funnelCountdown", "funnelCTA", "footer"],
   captura: ["captureHero", "funnelVideo", "funnelBenefits", "stats", "content", "footer"],
   checkout: ["hero", "summary", "payment", "security", "footer"],
-  thankyou: ["thankYouHero", "thankYouNextSteps", "funnelCTA", "stats", "footer"]
+  thankyou: ["thankYouHero", "thankYouNextSteps", "funnelCTA", "stats", "footer"],
+  legal: ["legalHero", "legalArticles", "legalSidebar", "footer"]
 };
 
 interface DynamicSectionsProps {

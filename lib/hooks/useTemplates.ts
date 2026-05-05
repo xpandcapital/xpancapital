@@ -14,7 +14,8 @@ export type TipoContenido =
   | 'funnel' 
   | 'captura' 
   | 'checkout' 
-  | 'thankyou';
+  | 'thankyou'
+  | 'legal';
 
 export type EstadoTemplate = 'borrador' | 'revision' | 'listo' | 'activo';
 
@@ -122,7 +123,8 @@ const TIPOS_CONTENIDO: Record<TipoContenido, { label: string; icon: string }> = 
   funnel: { label: 'Funnel', icon: 'Funnel' },
   captura: { label: 'Captura', icon: 'Target' },
   checkout: { label: 'Checkout', icon: 'CreditCard' },
-  thankyou: { label: 'Thank You', icon: 'CheckCircle' }
+  thankyou: { label: 'Thank You', icon: 'CheckCircle' },
+  legal: { label: 'Páginas Legales', icon: 'Scale' }
 };
 
 export function useTemplates() {

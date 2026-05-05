@@ -49,10 +49,12 @@ export function FooterSections() {
     const projectsTitle = siteConfig?.footerProjectsTitle || footer.projectsTitle || "Proyectos";
     const legalTitle = siteConfig?.footerLegalTitle || footer.legalTitle || "Legal";
     const legalLinks = footer.legalLinks || [
-        { text: "Privacidad", href: "/privacidad" },
-        { text: "Términos", href: "/terminos" },
-        { text: "Transparencia", href: "/transparencia" },
-        { text: "Reclamaciones", href: "/reclamaciones" }
+        { text: "Términos", href: "/legal/terminos" },
+        { text: "Privacidad", href: "/legal/privacidad" },
+        { text: "Reembolsos", href: "/legal/reembolsos" },
+        { text: "Cookies", href: "/legal/cookies" },
+        { text: "Aviso Legal", href: "/legal/aviso" },
+        { text: "Reclamaciones", href: "/legal/reclamaciones" }
     ];
     const locationText = siteConfig?.footerLocationText || footer.locationText || "Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú";
     const showProjects = siteConfig?.footerShowProjects ?? (footer.showProjects !== false);

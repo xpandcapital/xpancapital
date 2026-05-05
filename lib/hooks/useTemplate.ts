@@ -111,7 +111,8 @@ const DEFAULT_ORDER_BY_TIPO: Record<TipoContenido, string[]> = {
   funnel: ['hero', 'benefits', 'testimonials', 'pricing', 'cta', 'footer'],
   captura: ['hero', 'form', 'benefits', 'footer'],
   checkout: ['header', 'summary', 'payment', 'security', 'footer'],
-  thankyou: ['hero', 'message', 'nextSteps', 'cta', 'footer']
+  thankyou: ['hero', 'message', 'nextSteps', 'cta', 'footer'],
+  legal: ['legalHero', 'legalArticles', 'legalSidebar', 'footer']
 };
 
 export function useTemplate(options: UseTemplateOptions) {
