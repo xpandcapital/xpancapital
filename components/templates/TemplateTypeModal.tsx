@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Layout, FileText, ShoppingBag, Package, GraduationCap, BookOpen, Building2, Funnel, Target, CreditCard, CheckCircle, Check } from "lucide-react";
+import { X, Layout, FileText, ShoppingBag, Package, GraduationCap, BookOpen, Building2, Funnel, Target, CreditCard, CheckCircle, Check, Scale } from "lucide-react";
 import { TipoContenido } from "@/lib/hooks/useTemplates";
 
 interface TemplateTypeModalProps {
@@ -23,6 +23,7 @@ const TIPO_OPTIONS: { tipo: TipoContenido; label: string; icon: React.ComponentT
   { tipo: 'leccion', label: "Detalle de Lección", icon: BookOpen, descripcion: "Página individual de lección" },
   { tipo: 'checkout', label: "Checkout", icon: CreditCard, descripcion: "Página de pago y facturación" },
   { tipo: 'thankyou', label: "Thank You Page", icon: CheckCircle, descripcion: "Página de confirmación post-compra" },
+  { tipo: 'legal', label: "Páginas Legales", icon: Scale, descripcion: "Términos, privacidad, reembolsos, cookies, aviso legal" },
 ];
 
 function slugify(text: string): string {
