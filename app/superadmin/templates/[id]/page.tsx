@@ -2300,7 +2300,7 @@ export default function TemplateEditorPage() {
               </div>
               <p className="text-[10px] text-gray-500">Los proyectos se cargan automáticamente desde la base de datos.</p>
               
-              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Legal</h4>
+               <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Legal</h4>
               <InputField label="Título Sección" value={sections.footer?.legalTitle || ''} onChange={(v) => updateSection('footer', { legalTitle: v })} placeholder="Legal" />
               <div className="space-y-3">
                 <p className="text-[10px] text-gray-500 mb-2">Links legales ({(sections.footer?.legalLinks || []).length})</p>
@@ -2333,6 +2333,18 @@ export default function TemplateEditorPage() {
                 <button onClick={() => updateSection('footer', { legalLinks: [...(sections.footer?.legalLinks || []), { text: '', href: '' }] })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
                   <Plus className="w-3 h-3" /> Agregar Link Legal
                 </button>
+              </div>
+
+              <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Redes Sociales</h4>
+              <p className="text-[10px] text-gray-500 mb-3">Deja vacío para ocultar el ícono. También puedes configurarlas en Ajustes → Configuración del Sitio.</p>
+              <div className="grid grid-cols-2 gap-3">
+                <InputField label="WhatsApp" value={sections.footer?.socials?.whatsapp || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), whatsapp: v } })} placeholder="https://wa.me/51999999999" />
+                <InputField label="Instagram" value={sections.footer?.socials?.instagram || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), instagram: v } })} placeholder="https://instagram.com/bliscorp" />
+                <InputField label="Facebook" value={sections.footer?.socials?.facebook || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), facebook: v } })} placeholder="https://facebook.com/bliscorp" />
+                <InputField label="YouTube" value={sections.footer?.socials?.youtube || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), youtube: v } })} placeholder="https://youtube.com/@bliscorp" />
+                <InputField label="TikTok" value={sections.footer?.socials?.tiktok || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), tiktok: v } })} placeholder="https://tiktok.com/@bliscorp" />
+                <InputField label="LinkedIn" value={sections.footer?.socials?.linkedin || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), linkedin: v } })} placeholder="https://linkedin.com/company/bliscorp" />
+                <InputField label="X (Twitter)" value={sections.footer?.socials?.twitter || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), twitter: v } })} placeholder="https://x.com/bliscorp" />
               </div>
               
               <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Video (Dentro de la Fábrica)</h4>
