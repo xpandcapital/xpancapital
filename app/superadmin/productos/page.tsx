@@ -208,26 +208,31 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
             onToggleTools={() => setShowTools(!showTools)}
           />
 
-          {showTools && typeof document !== 'undefined' && createPortal(
+          {typeof document !== 'undefined' && createPortal(
             <AnimatePresence>
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="fixed top-20 left-4 bg-zinc-950 border border-white/10 rounded-[2.5rem] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[1000] min-w-[280px] backdrop-blur-2xl"
-              >
-                <div className="flex flex-col gap-1 p-2">
-                  <CategoryManager />
-                  <StatusManager />
-                  <SkuManager />
-                  <UnitManager />
-                  <CurrencyManager />
-                  <ShippingManager />
-                  <BusinessEngineManager />
-                  <LabelManager />
-                  <ViewManager />
+              {showTools && (
+                <div className="fixed inset-0 z-[999]" onClick={() => setShowTools(false)}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="fixed top-20 right-4 bg-zinc-950 border border-white/10 rounded-[2.5rem] p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[1000] min-w-[280px] backdrop-blur-2xl"
+                  >
+                    <div className="flex flex-col gap-1 p-2">
+                      <CategoryManager />
+                      <StatusManager />
+                      <SkuManager />
+                      <UnitManager />
+                      <CurrencyManager />
+                      <ShippingManager />
+                      <BusinessEngineManager />
+                      <LabelManager />
+                      <ViewManager />
+                    </div>
+                  </motion.div>
                 </div>
-              </motion.div>
+              )}
             </AnimatePresence>,
             document.body
           )}

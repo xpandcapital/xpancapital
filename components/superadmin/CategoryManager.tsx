@@ -19,6 +19,15 @@ export function CategoryManager() {
         return () => setMounted(false);
     }, []);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsOpen(false);
+        };
+        document.addEventListener('keydown', handleKey);
+        return () => document.removeEventListener('keydown', handleKey);
+    }, [isOpen]);
+
     const handleAdd = async (e: React.FormEvent) => {
         e.preventDefault();
         if (newCategoryName.trim()) {
