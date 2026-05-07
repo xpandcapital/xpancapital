@@ -7,8 +7,9 @@ import {
   Phone, Video, MoreVertical, Clock, CheckCircle2,
   AlertCircle, Loader2, UserPlus, Tag, Archive,
   Search, Pin, Bot, Sparkles, LayoutTemplate,
-  Paperclip,   ArrowRightLeft, LogOut, Volume2, VolumeX,
-  Smile, Check, CheckCheck
+  Paperclip, ArrowRightLeft, LogOut, Volume2, VolumeX,
+  Smile, Check, CheckCheck, Settings, BarChart3,
+  Inbox, Radio, UserCheck, Plus, ChevronRight
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/lib/chat/useChat";
@@ -18,10 +19,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ChatSala, ChatMensaje, ChatVisitante } from "@/lib/chat/types";
 import { CallModal } from "@/components/chat/CallModal";
 
@@ -47,6 +47,7 @@ export default function ChatAdminPage() {
     programarMensaje,
     escribiendoEn,
     setSalaActiva,
+    crearSalaDirecta,
   } = useChat();
 
   const {
@@ -60,10 +61,10 @@ export default function ChatAdminPage() {
     toggleScreenShare,
   } = useWebRTC();
 
+  const [seccionActiva, setSeccionActiva] = useState<"conversaciones" | "visitantes" | "agentes" | "configuracion">("conversaciones");
   const [mensajeInput, setMensajeInput] = useState("");
   const [visitantes, setVisitantes] = useState<ChatVisitante[]>([]);
   const [loadingVisitantes, setLoadingVisitantes] = useState(false);
-  const [tabActiva, setTabActiva] = useState("activos");
   const [mostrarBusqueda, setMostrarBusqueda] = useState(false);
   const [queryBusqueda, setQueryBusqueda] = useState("");
   const [mensajesBuscados, setMensajesBuscados] = useState<ChatMensaje[]>([]);
@@ -77,6 +78,8 @@ export default function ChatAdminPage() {
   const [editInput, setEditInput] = useState("");
   const [menuMensaje, setMenuMensaje] = useState<string | null>(null);
   const [sonidoActivado, setSonidoActivado] = useState(true);
+  const [modalNuevoChat, setModalNuevoChat] = useState(false);
+  const [contactosEmpresa, setContactosEmpresa] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -97,16 +100,15 @@ export default function ChatAdminPage() {
     }
   };
 
-  // Cargar agentes disponibles para transferencia
+  // Cargar agentes disponibles
   const cargarAgentes = async () => {
     const supabase = (await import("@/lib/supabase")).getSupabase();
-    if (!supabase) return;
+    if (!supabase || !user?.empresa_id) return;
     try {
       const { data } = await supabase
         .from("profiles")
-        .select("id, nombre, avatar_url, estado_chat")
-        .eq("empresa_id", user?.empresa_id)
-        .neq("id", user?.id)
+        .select("id, nombre, avatar_url, estado_chat, rol, email")
+        .eq("empresa_id", user.empresa_id)
         .in("rol", ["admin", "editor", "superadmin"]);
       setAgentesDisponibles(data || []);
     } catch (err) {
@@ -114,9 +116,27 @@ export default function ChatAdminPage() {
     }
   };
 
+  // Cargar contactos para nuevo chat
+  const cargarContactosEmpresa = async () => {
+    const supabase = (await import("@/lib/supabase")).getSupabase();
+    if (!supabase || !user?.empresa_id) return;
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, nombre, avatar_url, rol, estado_chat")
+        .eq("empresa_id", user.empresa_id)
+        .neq("id", user.id)
+        .order("nombre", { ascending: true });
+      setContactosEmpresa(data || []);
+    } catch (err) {
+      console.error("Error cargando contactos:", err);
+    }
+  };
+
   useEffect(() => {
     cargarVisitantes();
     cargarAgentes();
+    cargarContactosEmpresa();
     const interval = setInterval(() => {
       cargarVisitantes();
       cargarAgentes();
@@ -131,7 +151,7 @@ export default function ChatAdminPage() {
     }
   }, [mensajes]);
 
-  // Notificaciones de sonido para nuevos mensajes
+  // Notificaciones de sonido
   useEffect(() => {
     if (!sonidoActivado || !salaActiva) return;
     const lastMsg = mensajes[mensajes.length - 1];
@@ -142,37 +162,6 @@ export default function ChatAdminPage() {
       audioRef.current.play().catch(() => {});
     }
   }, [mensajes, salaActiva, sonidoActivado, user?.id]);
-
-  // Escuchar llamadas entrantes
-  useEffect(() => {
-    if (!user) return;
-    const setup = async () => {
-      const supabase = (await import("@/lib/supabase")).getSupabase();
-      if (!supabase) return;
-      const channel = supabase
-        .channel("chat-llamadas-admin")
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "chat_llamadas",
-            filter: `recibida_por=eq.${user.id}`,
-          },
-          (payload) => {
-            const llamada = payload.new as any;
-            if (llamada.estado === "llamando") {
-              setLlamadaEntranteId(llamada.id);
-            }
-          }
-        )
-        .subscribe();
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    };
-    setup();
-  }, [user]);
 
   const handleEnviar = async () => {
     if (!mensajeInput.trim() || !salaActiva) return;
@@ -211,34 +200,21 @@ export default function ChatAdminPage() {
     setSalaActiva(null);
   };
 
-  const handleProgramar = async () => {
-    if (!salaActiva || !mensajeInput.trim() || !programarFecha || !programarHora) return;
-    const fechaHora = new Date(`${programarFecha}T${programarHora}`).toISOString();
-    await programarMensaje(salaActiva.id, mensajeInput, fechaHora);
-    setProgramarModal(false);
-    setMensajeInput("");
-    setProgramarFecha("");
-    setProgramarHora("");
+  const handleNuevoChatContacto = async (contactoId: string) => {
+    const salaId = await crearSalaDirecta(contactoId);
+    if (salaId) {
+      await unirseSala(salaId);
+      setModalNuevoChat(false);
+      setSeccionActiva("conversaciones");
+    }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !salaActiva) return;
-    await subirArchivoChat(salaActiva.id, file);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleAtenderVisitante = async (visitante: ChatVisitante) => {
+    if (!visitante.sala_id) return;
+    // Unirse a la sala del visitante
+    await unirseSala(visitante.sala_id);
+    setSeccionActiva("conversaciones");
   };
-
-  const remoteUserId = salaActiva && miembros.length > 0
-    ? miembros.find((m) => m.user_id !== user?.id)?.user_id
-    : null;
-
-  const salasFiltradas = salas.filter((s) => {
-    if (tabActiva === "activos") return s.estado === "activo" && s.tipo !== "visitante";
-    if (tabActiva === "visitantes") return s.tipo === "visitante" || s.tipo === "soporte";
-    if (tabActiva === "ia") return s.tipo === "ia";
-    if (tabActiva === "archivados") return s.estado === "archivado";
-    return true;
-  });
 
   const renderMensaje = (msg: ChatMensaje, index: number) => {
     const esMio = msg.user_id === user?.id;
@@ -356,16 +332,31 @@ export default function ChatAdminPage() {
     );
   };
 
+  // Stats
+  const stats = {
+    conversacionesActivas: salas.filter((s) => s.estado === "activo").length,
+    visitantesActivos: visitantes.filter((v) => v.estado === "activo").length,
+    agentesOnline: agentesDisponibles.filter((a) => a.estado_chat === "online").length,
+    mensajesHoy: 0, // Would need date filtering
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-7xl mx-auto p-6 h-screen flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between mb-6 flex-shrink-0">
           <div>
-            <h1 className="text-3xl font-black uppercase tracking-tighter">Chat Corporativo</h1>
-            <p className="text-gray-400 text-sm mt-1">Gestiona conversaciones con clientes y miembros</p>
+            <h1 className="text-3xl font-black uppercase tracking-tighter">Centro de Chat</h1>
+            <p className="text-gray-400 text-sm mt-1">Gestiona conversaciones, visitantes y agentes</p>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              onClick={() => { setModalNuevoChat(true); cargarContactosEmpresa(); }}
+              className="bg-blis-red hover:bg-blis-red/90 text-white font-black uppercase tracking-wider text-xs"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nuevo Chat
+            </Button>
             <button
               onClick={() => setSonidoActivado(!sonidoActivado)}
               className={`p-2 rounded-lg transition-colors ${sonidoActivado ? "bg-emerald-500/10 text-emerald-400" : "bg-white/5 text-gray-500"}`}
@@ -379,26 +370,62 @@ export default function ChatAdminPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 bg-zinc-900/50 border border-white/10 rounded-3xl overflow-hidden flex flex-col">
-            <Tabs defaultValue="activos" className="h-full flex flex-col">
-              <TabsList className="w-full bg-transparent border-b border-white/5 p-1">
-                <TabsTrigger value="activos" className="flex-1 data-[state=active]:bg-blis-red/20 data-[state=active]:text-blis-red text-xs font-black uppercase tracking-wider">Activos</TabsTrigger>
-                <TabsTrigger value="visitantes" className="flex-1 data-[state=active]:bg-blis-red/20 data-[state=active]:text-blis-red text-xs font-black uppercase tracking-wider">Visitantes</TabsTrigger>
-                <TabsTrigger value="ia" className="flex-1 data-[state=active]:bg-blis-red/20 data-[state=active]:text-blis-red text-xs font-black uppercase tracking-wider">IA</TabsTrigger>
-              </TabsList>
+        {/* Stats cards */}
+        <div className="grid grid-cols-4 gap-4 mb-6 flex-shrink-0">
+          {[
+            { label: "Conversaciones", value: stats.conversacionesActivas, icon: Inbox, color: "text-blis-red" },
+            { label: "Visitantes", value: stats.visitantesActivos, icon: Users, color: "text-amber-400" },
+            { label: "Agentes Online", value: stats.agentesOnline, icon: UserCheck, color: "text-emerald-400" },
+            { label: "Total Agentes", value: agentesDisponibles.length, icon: Radio, color: "text-blue-400" },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-zinc-900/50 border border-white/10 rounded-2xl p-4">
+              <div className="flex items-center justify-between">
+                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                <span className="text-2xl font-black">{stat.value}</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider">{stat.label}</p>
+            </div>
+          ))}
+        </div>
 
-              <TabsContent value="activos" className="flex-1 m-0 overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
+          {/* Internal Sidebar */}
+          <div className="lg:col-span-1 bg-zinc-900/50 border border-white/10 rounded-3xl overflow-hidden flex flex-col">
+            <div className="p-4 space-y-1">
+              {[
+                { id: "conversaciones" as const, label: "Conversaciones", icon: Inbox, count: salas.filter((s) => s.estado === "activo").length },
+                { id: "visitantes" as const, label: "Visitantes", icon: Users, count: visitantes.filter((v) => v.estado === "activo").length },
+                { id: "agentes" as const, label: "Agentes", icon: UserCheck, count: agentesDisponibles.filter((a) => a.estado_chat === "online").length },
+                { id: "configuracion" as const, label: "Configuración", icon: Settings },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setSeccionActiva(item.id)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
+                    seccionActiva === item.id
+                      ? "bg-blis-red/10 border border-blis-red/20 text-white"
+                      : "hover:bg-white/5 text-gray-400"
+                  }`}
+                >
+                  <item.icon className={`w-5 h-5 ${seccionActiva === item.id ? "text-blis-red" : ""}`} />
+                  <span className="text-sm font-bold flex-1">{item.label}</span>
+                  {"count" in item && item.count > 0 && (
+                    <Badge className="bg-blis-red text-white text-[10px]">{item.count}</Badge>
+                  )}
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              ))}
+            </div>
+
+            {/* Mini list based on section */}
+            <div className="flex-1 overflow-hidden border-t border-white/5">
+              {seccionActiva === "conversaciones" && (
                 <ScrollArea className="h-full">
                   <div className="p-3 space-y-1">
-                    {salasFiltradas.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <MessageCircle className="w-8 h-8 text-gray-600 mb-3" />
-                        <p className="text-sm text-gray-500">No hay chats activos</p>
-                      </div>
+                    {salas.length === 0 ? (
+                      <p className="text-xs text-gray-600 text-center py-8">No hay conversaciones activas</p>
                     ) : (
-                      salasFiltradas.map((sala) => (
+                      salas.map((sala) => (
                         <button
                           key={sala.id}
                           onClick={() => unirseSala(sala.id)}
@@ -406,45 +433,35 @@ export default function ChatAdminPage() {
                             salaActiva?.id === sala.id ? "bg-blis-red/10 border border-blis-red/20" : "hover:bg-white/5"
                           }`}
                         >
-                          <div className="relative">
-                            <Avatar className="w-10 h-10">
-                              <AvatarFallback className="bg-blis-red/20 text-blis-red text-xs font-black">
-                                {sala.nombre?.[0] || "C"}
-                              </AvatarFallback>
-                            </Avatar>
-                            {sala.tipo === "ia" && (
-                              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-zinc-900" />
-                            )}
-                          </div>
+                          <Avatar className="w-10 h-10">
+                            <AvatarFallback className="bg-blis-red/20 text-blis-red text-xs font-black">
+                              {sala.nombre?.[0] || "C"}
+                            </AvatarFallback>
+                          </Avatar>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <h5 className="text-sm font-bold text-white truncate">{sala.nombre || "Chat"}</h5>
-                              <Badge variant="secondary" className="text-[9px] bg-white/5">{sala.tipo}</Badge>
-                            </div>
+                            <h5 className="text-sm font-bold text-white truncate">{sala.nombre || "Chat"}</h5>
                             <p className="text-xs text-gray-500 truncate">{sala.ultimo_mensaje?.contenido || "Sin mensajes"}</p>
                           </div>
+                          <Badge variant="secondary" className="text-[9px] bg-white/5">{sala.tipo}</Badge>
                         </button>
                       ))
                     )}
                   </div>
                 </ScrollArea>
-              </TabsContent>
+              )}
 
-              <TabsContent value="visitantes" className="flex-1 m-0 overflow-hidden">
+              {seccionActiva === "visitantes" && (
                 <ScrollArea className="h-full">
                   <div className="p-3 space-y-1">
                     {loadingVisitantes ? (
                       <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-blis-red" /></div>
                     ) : visitantes.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <Users className="w-8 h-8 text-gray-600 mb-3" />
-                        <p className="text-sm text-gray-500">No hay visitantes activos</p>
-                      </div>
+                      <p className="text-xs text-gray-600 text-center py-8">No hay visitantes activos</p>
                     ) : (
                       visitantes.map((v) => (
                         <button
                           key={v.id}
-                          onClick={() => v.sala_id && unirseSala(v.sala_id)}
+                          onClick={() => handleAtenderVisitante(v)}
                           className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors text-left"
                         >
                           <Avatar className="w-10 h-10">
@@ -452,51 +469,69 @@ export default function ChatAdminPage() {
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <h5 className="text-sm font-bold text-white truncate">{v.nombre}</h5>
-                            <p className="text-xs text-gray-500">{v.pagina_origen || "Página principal"}</p>
+                            <p className="text-xs text-gray-500">{v.pagina_origen || "Web"}</p>
                           </div>
-                          <span className="text-[10px] text-gray-600">{new Date(v.ultima_actividad).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</span>
+                          <span className="text-[10px] bg-blis-red/20 text-blis-red px-2 py-1 rounded-full">Atender</span>
                         </button>
                       ))
                     )}
                   </div>
                 </ScrollArea>
-              </TabsContent>
+              )}
 
-              <TabsContent value="ia" className="flex-1 m-0 overflow-hidden">
+              {seccionActiva === "agentes" && (
                 <ScrollArea className="h-full">
                   <div className="p-3 space-y-1">
-                    {salas.filter((s) => s.tipo === "ia").length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <Bot className="w-8 h-8 text-gray-600 mb-3" />
-                        <p className="text-sm text-gray-500">Sin conversaciones IA</p>
-                      </div>
+                    {agentesDisponibles.length === 0 ? (
+                      <p className="text-xs text-gray-600 text-center py-8">No hay agentes registrados</p>
                     ) : (
-                      salas.filter((s) => s.tipo === "ia").map((sala) => (
-                        <button
-                          key={sala.id}
-                          onClick={() => unirseSala(sala.id)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-2xl transition-colors text-left ${
-                            salaActiva?.id === sala.id ? "bg-emerald-500/10 border border-emerald-500/20" : "hover:bg-white/5"
-                          }`}
-                        >
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback className="bg-emerald-500/20 text-emerald-500 text-xs font-black"><Bot className="w-4 h-4" /></AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <h5 className="text-sm font-bold text-white truncate">{sala.nombre || "Asistente IA"}</h5>
-                            <p className="text-xs text-gray-500 truncate">{sala.ultimo_mensaje?.contenido || "Sin mensajes"}</p>
+                      agentesDisponibles.map((a) => (
+                        <div key={a.id} className="w-full flex items-center gap-3 p-3 rounded-2xl text-left">
+                          <div className="relative">
+                            <Avatar className="w-10 h-10">
+                              <AvatarImage src={a.avatar_url} />
+                              <AvatarFallback className="bg-blis-red/20 text-blis-red text-xs font-black">{a.nombre?.[0]}</AvatarFallback>
+                            </Avatar>
+                            <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-zinc-900 ${
+                              a.estado_chat === "online" ? "bg-emerald-500" : a.estado_chat === "ausente" ? "bg-amber-500" : "bg-gray-600"
+                            }`} />
                           </div>
-                        </button>
+                          <div className="flex-1 min-w-0">
+                            <h5 className="text-sm font-bold text-white truncate">{a.nombre}</h5>
+                            <p className="text-xs text-gray-500 capitalize">{a.rol} • {a.estado_chat || "offline"}</p>
+                          </div>
+                        </div>
                       ))
                     )}
                   </div>
                 </ScrollArea>
-              </TabsContent>
-            </Tabs>
+              )}
+
+              {seccionActiva === "configuracion" && (
+                <div className="p-4 space-y-3">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider font-bold">Configuración del Chat</p>
+                  <div className="space-y-2">
+                    <div className="p-3 rounded-xl bg-white/5">
+                      <p className="text-xs text-gray-400">Mensaje de bienvenida</p>
+                      <p className="text-sm text-white mt-1">¡Hola! Bienvenido a BLIS Corp...</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white/5">
+                      <p className="text-xs text-gray-400">Asignación automática</p>
+                      <p className="text-sm text-white mt-1">Activa — Primer agente online</p>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white/5">
+                      <p className="text-xs text-gray-400">Páginas del widget</p>
+                      <p className="text-sm text-white mt-1">/tienda, /blog, /contacto, /proyectos</p>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-gray-600 mt-4">Configuración avanzada próximamente</p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Chat Area */}
-          <div className="lg:col-span-2 bg-zinc-900/50 border border-white/10 rounded-3xl overflow-hidden flex flex-col">
+          <div className="lg:col-span-3 bg-zinc-900/50 border border-white/10 rounded-3xl overflow-hidden flex flex-col">
             {salaActiva ? (
               <>
                 {/* Chat Header */}
@@ -531,7 +566,7 @@ export default function ChatAdminPage() {
                       </>
                     )}
                     <Dialog open={mostrarTransferir} onOpenChange={setMostrarTransferir}>
-                        <DialogTrigger>
+                      <DialogTrigger>
                         <button className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-white"><ArrowRightLeft className="w-4 h-4" /></button>
                       </DialogTrigger>
                       <DialogContent className="bg-[#111] border-white/10 text-white">
@@ -621,28 +656,8 @@ export default function ChatAdminPage() {
                         </PopoverContent>
                       </Popover>
 
-                      <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" />
+                      <input ref={fileInputRef} type="file" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (!file || !salaActiva) return; subirArchivoChat(salaActiva.id, file); if (fileInputRef.current) fileInputRef.current.value = ""; }} accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip" />
                       <Tooltip><TooltipTrigger><button onClick={() => fileInputRef.current?.click()} className="p-2.5 hover:bg-white/5 rounded-xl transition-colors text-gray-400 hover:text-white"><Paperclip className="w-5 h-5" /></button></TooltipTrigger><TooltipContent>Adjuntar</TooltipContent></Tooltip>
-                      
-                      <Tooltip><TooltipTrigger><button className="p-2.5 hover:bg-white/5 rounded-xl transition-colors text-gray-400 hover:text-white"><Smile className="w-5 h-5" /></button></TooltipTrigger><TooltipContent>Emoji</TooltipContent></Tooltip>
-                      
-                      <Dialog open={programarModal} onOpenChange={setProgramarModal}>
-                        <DialogTrigger>
-                          <button className="p-2.5 hover:bg-white/5 rounded-xl transition-colors text-gray-400 hover:text-white"><Clock className="w-5 h-5" /></button>
-                        </DialogTrigger>
-                        <DialogContent className="bg-[#111] border-white/10 text-white">
-                          <DialogHeader><DialogTitle className="text-sm font-black uppercase tracking-wider">Programar mensaje</DialogTitle></DialogHeader>
-                          <div className="space-y-4 mt-4">
-                            <p className="text-xs text-gray-400">Mensaje: <span className="text-white">{mensajeInput || "(vacío)"}</span></p>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div><label className="text-[10px] text-gray-500 uppercase">Fecha</label><Input type="date" value={programarFecha} onChange={(e) => setProgramarFecha(e.target.value)} className="bg-white/5 border-white/10 text-white" /></div>
-                              <div><label className="text-[10px] text-gray-500 uppercase">Hora</label><Input type="time" value={programarHora} onChange={(e) => setProgramarHora(e.target.value)} className="bg-white/5 border-white/10 text-white" /></div>
-                            </div>
-                            <Button onClick={handleProgramar} disabled={!mensajeInput.trim() || !programarFecha || !programarHora} className="w-full bg-blis-red hover:bg-blis-red/90">Programar envío</Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-
                       <Button onClick={handleEnviar} disabled={!mensajeInput.trim() || enviando} className="bg-blis-red hover:bg-blis-red/90 text-white rounded-xl px-4 py-6">
                         {enviando ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                       </Button>
@@ -654,12 +669,54 @@ export default function ChatAdminPage() {
               <div className="flex flex-col items-center justify-center h-full text-center p-6">
                 <MessageCircle className="w-16 h-16 text-gray-700 mb-4" />
                 <h3 className="text-lg font-black text-white uppercase tracking-wider mb-2">Selecciona una conversación</h3>
-                <p className="text-sm text-gray-500 max-w-sm">Elige un chat de la lista para empezar a conversar con clientes o miembros.</p>
+                <p className="text-sm text-gray-500 max-w-sm">Elige un chat del panel izquierdo o haz clic en "Nuevo Chat" para empezar.</p>
+                <Button
+                  onClick={() => { setModalNuevoChat(true); cargarContactosEmpresa(); }}
+                  className="mt-6 bg-blis-red hover:bg-blis-red/90 text-white font-black uppercase tracking-wider text-xs"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Iniciar Conversación
+                </Button>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Nuevo Chat Modal */}
+      <Dialog open={modalNuevoChat} onOpenChange={setModalNuevoChat}>
+        <DialogContent className="bg-[#111] border-white/10 text-white max-w-md">
+          <DialogHeader><DialogTitle className="text-sm font-black uppercase tracking-wider">Nueva conversación</DialogTitle></DialogHeader>
+          <div className="mt-4 space-y-3 max-h-[400px] overflow-y-auto">
+            {contactosEmpresa.length === 0 ? (
+              <p className="text-xs text-gray-500 text-center py-4">No hay contactos disponibles</p>
+            ) : (
+              contactosEmpresa.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => handleNuevoChatContacto(c.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors text-left"
+                >
+                  <div className="relative">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={c.avatar_url} />
+                      <AvatarFallback className="bg-blis-red/20 text-blis-red text-xs font-black">{c.nombre?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#111] ${
+                      c.estado_chat === "online" ? "bg-emerald-500" : "bg-gray-600"
+                    }`} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-white">{c.nombre}</p>
+                    <p className="text-[10px] text-gray-500 capitalize">{c.rol}</p>
+                  </div>
+                  <MessageCircle className="w-4 h-4 text-gray-600" />
+                </button>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Call Modal */}
       {(callState.estado !== "idle" || llamadaEntranteId) && (

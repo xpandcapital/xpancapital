@@ -49,6 +49,9 @@ export const PERMISSIONS = {
   'certificados:editar': 'Editar Certificados',
   'certificados:eliminar': 'Eliminar Certificados',
   'trading:ver': 'Ver Trading',
+  // Chat
+  'chat:ver': 'Ver Chat',
+  'chat:configurar': 'Configurar Chat',
   // Contenido
   'templates:ver': 'Ver Páginas',
   'templates:crear': 'Crear Páginas',
@@ -147,6 +150,7 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
     'capacitaciones:ver', 'capacitaciones:crear', 'capacitaciones:editar',
     'certificados:ver', 'certificados:crear', 'certificados:editar',
     'trading:ver',
+    'chat:ver', 'chat:configurar',
     'templates:ver', 'templates:crear', 'templates:editar',
     'mails:ver', 'mails:crear', 'mails:editar',
     'calendarios:ver', 'calendarios:crear', 'calendarios:editar',
@@ -174,6 +178,7 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
     'cursos:ver',
     'capacitaciones:ver',
     'certificados:ver',
+    'chat:ver',
     'templates:ver',
     'mails:ver',
     'leads:ver',
@@ -209,6 +214,7 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
   'cursos': 'cursos:ver',
   'certificados': 'certificados:ver',
   'trading': 'trading:ver',
+  'chat': 'chat:ver',
   'templates': 'templates:ver',
   'mails': 'mails:ver',
   'calendarios': 'calendarios:ver',
@@ -236,6 +242,10 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
 // Acciones disponibles para cada permiso
 export const PERMISSION_ACTIONS: Record<string, { action: string; label: string; icon: string }[]> = {
   'dashboard': [{ action: 'ver', label: 'Ver', icon: 'eye' }],
+  'chat': [
+    { action: 'ver', label: 'Ver', icon: 'eye' },
+    { action: 'configurar', label: 'Configurar', icon: 'settings' },
+  ],
   'proyectos': [
     { action: 'ver', label: 'Ver', icon: 'eye' },
     { action: 'crear', label: 'Crear', icon: 'plus' },

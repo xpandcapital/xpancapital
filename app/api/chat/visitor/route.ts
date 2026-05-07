@@ -63,20 +63,27 @@ export async function POST(request: NextRequest) {
     const empresaId = "6186f014-c8c7-4027-9f08-8acf2bae3eae";
 
     let visitorSessionId = session_id || crypto.randomUUID();
-
     let salaId: string;
+    let isNewConversation = false;
 
+    // Verificar si ya existe sesión activa
     if (session_id) {
       const { data: existente } = await supabaseAdmin
         .from("chat_visitantes")
-        .select("sala_id")
+        .select("sala_id, nombre, email")
         .eq("session_id", session_id)
         .eq("estado", "activo")
         .single();
 
-      if (existente) {
+      if (existente?.sala_id) {
         salaId = existente.sala_id;
+        // Actualizar última actividad
+        await supabaseAdmin
+          .from("chat_visitantes")
+          .update({ ultima_actividad: new Date().toISOString() })
+          .eq("session_id", session_id);
       } else {
+        isNewConversation = true;
         const { data: sala, error: salaError } = await supabaseAdmin
           .from("chat_salas")
           .insert({
@@ -91,6 +98,7 @@ export async function POST(request: NextRequest) {
         salaId = sala.id;
       }
     } else {
+      isNewConversation = true;
       const { data: sala, error: salaError } = await supabaseAdmin
         .from("chat_salas")
         .insert({
@@ -105,32 +113,104 @@ export async function POST(request: NextRequest) {
       salaId = sala.id;
     }
 
-    await supabaseAdmin.from("chat_visitantes").upsert({
-      sala_id: salaId,
-      nombre,
-      email: email || null,
-      session_id: visitorSessionId,
-      pagina_origen: pagina_origen || null,
-      utm_source: utm_source || null,
-      utm_medium: utm_medium || null,
-      utm_campaign: utm_campaign || null,
-      estado: "activo",
-    });
+    // Upsert visitante con empresa_id
+    const { error: visitorError } = await supabaseAdmin
+      .from("chat_visitantes")
+      .upsert({
+        sala_id: salaId,
+        empresa_id: empresaId,
+        nombre,
+        email: email || null,
+        session_id: visitorSessionId,
+        pagina_origen: pagina_origen || null,
+        utm_source: utm_source || null,
+        utm_medium: utm_medium || null,
+        utm_campaign: utm_campaign || null,
+        estado: "activo",
+        ultima_actividad: new Date().toISOString(),
+      }, { onConflict: "session_id" });
 
-    const { error: msgError } = await supabaseAdmin.from("chat_mensajes").insert({
-      sala_id: salaId,
-      user_id: null,
-      tipo: "texto",
-      contenido: mensaje,
-      enviado: true,
-    });
+    if (visitorError) {
+      console.error("[chat/visitor] Error upsert visitante:", visitorError);
+      throw visitorError;
+    }
+
+    // Insertar mensaje del visitante
+    const { error: msgError } = await supabaseAdmin
+      .from("chat_mensajes")
+      .insert({
+        sala_id: salaId,
+        user_id: null,
+        tipo: "texto",
+        contenido: mensaje,
+        enviado: true,
+      });
 
     if (msgError) throw msgError;
+
+    // Si es conversación nueva, buscar primer agente online y asignar
+    if (isNewConversation) {
+      const { data: agenteOnline } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("empresa_id", empresaId)
+        .eq("estado_chat", "online")
+        .in("rol", ["admin", "editor", "superadmin"])
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (agenteOnline) {
+        // Agregar agente como admin de la sala
+        await supabaseAdmin.from("chat_miembros").insert({
+          sala_id: salaId,
+          user_id: agenteOnline.id,
+          rol_sala: "admin",
+        });
+
+        // Mensaje de sistema de bienvenida
+        await supabaseAdmin.from("chat_mensajes").insert({
+          sala_id: salaId,
+          user_id: null,
+          tipo: "sistema",
+          contenido: `¡Hola ${nombre}! Bienvenido a BLIS Corp. Un asesor te atenderá en breve. Mientras tanto, cuéntanos en qué podemos ayudarte.`,
+          enviado: true,
+        });
+
+        // Notificar al agente
+        await supabaseAdmin.from("notificaciones").insert({
+          user_id: agenteOnline.id,
+          empresa_id: empresaId,
+          tipo: "sistema",
+          titulo: "Nuevo visitante en chat",
+          mensaje: `${nombre} ha iniciado una conversación desde ${pagina_origen || "la web"}`,
+          link: "/superadmin/chat",
+        });
+      } else {
+        // Sin agentes online: mensaje de fuera de horario
+        await supabaseAdmin.from("chat_mensajes").insert({
+          sala_id: salaId,
+          user_id: null,
+          tipo: "sistema",
+          contenido: `¡Hola ${nombre}! Gracias por contactarnos. En este momento no hay asesores disponibles, pero dejaste tu mensaje y te responderemos lo antes posible.`,
+          enviado: true,
+        });
+      }
+    }
+
+    // Obtener historial de mensajes de esta sala para retornar al visitante
+    const { data: historial } = await supabaseAdmin
+      .from("chat_mensajes")
+      .select("*")
+      .eq("sala_id", salaId)
+      .eq("eliminado", false)
+      .order("creado_en", { ascending: true });
 
     return NextResponse.json({
       success: true,
       session_id: visitorSessionId,
       sala_id: salaId,
+      historial: historial || [],
     });
   } catch (error: any) {
     console.error("[chat/visitor POST] Error:", error);

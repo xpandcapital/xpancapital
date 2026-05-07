@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Minimize2, Send, Paperclip, Smile, Phone, Video,
-  MoreVertical, ArrowLeft, User, Bot, Sparkles, MessageCircle,
+  X, Send, Paperclip, Smile, Phone, Video,
+  ArrowLeft, User, Bot, Sparkles, MessageCircle,
   Clock, Check, CheckCheck, Loader2, LayoutTemplate,
-  Search, Pin, PinOff, Edit3, Trash2, MoreHorizontal, X as XIcon
+  Search, Pin, PinOff, Edit3, Trash2, MoreHorizontal, X as XIcon,
+  Users
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/lib/chat/useChat";
@@ -24,6 +25,22 @@ import { CallModal } from "./CallModal";
 interface ChatPanelProps {
   onClose: () => void;
   onMinimize?: () => void;
+}
+
+interface VisitorMensaje {
+  id: string;
+  tipo: string;
+  contenido: string | null;
+  creado_en: string;
+  user_id?: string | null;
+}
+
+interface ContactoUsuario {
+  id: string;
+  nombre: string;
+  avatar_url: string | null;
+  rol: string;
+  estado_chat?: string;
 }
 
 export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
@@ -62,10 +79,22 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
 
   const [vista, setVista] = useState<"lista" | "chat" | "visitante">("lista");
   const [mensajeInput, setMensajeInput] = useState("");
+
+  // Visitor state with persistence
   const [visitanteNombre, setVisitanteNombre] = useState("");
   const [visitanteEmail, setVisitanteEmail] = useState("");
   const [visitanteMensaje, setVisitanteMensaje] = useState("");
   const [visitanteEnviando, setVisitanteEnviando] = useState(false);
+  const [visitanteHistorial, setVisitanteHistorial] = useState<VisitorMensaje[]>([]);
+  const [visitanteSessionId, setVisitanteSessionId] = useState<string | null>(null);
+  const [visitanteSalaId, setVisitanteSalaId] = useState<string | null>(null);
+  const [visitanteIniciado, setVisitanteIniciado] = useState(false);
+
+  // Member contacts
+  const [tabMiembro, setTabMiembro] = useState<"chats" | "contactos">("chats");
+  const [contactos, setContactos] = useState<ContactoUsuario[]>([]);
+  const [cargandoContactos, setCargandoContactos] = useState(false);
+
   const [llamadaEntranteId, setLlamadaEntranteId] = useState<string | null>(null);
   const [mostrarBusqueda, setMostrarBusqueda] = useState(false);
   const [queryBusqueda, setQueryBusqueda] = useState("");
@@ -77,14 +106,64 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const llamadasChannelId = useRef(`chat-llamadas-${Math.random().toString(36).slice(2)}`);
 
+  // Restore visitor session from localStorage on mount
+  useEffect(() => {
+    if (!user) {
+      const savedSession = localStorage.getItem("blis_chat_session");
+      const savedName = localStorage.getItem("blis_chat_name");
+      const savedEmail = localStorage.getItem("blis_chat_email");
+      if (savedSession && savedName) {
+        setVisitanteSessionId(savedSession);
+        setVisitanteNombre(savedName);
+        if (savedEmail) setVisitanteEmail(savedEmail);
+        setVisitanteIniciado(true);
+        setVista("visitante");
+        // Fetch conversation history
+        fetch(`/api/chat/visitor?session_id=${savedSession}`)
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success && data.historial) {
+              setVisitanteHistorial(data.historial);
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [user]);
+
+  // Load contacts for logged-in users
+  const cargarContactos = useCallback(async () => {
+    if (!user?.empresa_id) return;
+    setCargandoContactos(true);
+    try {
+      const supabase = getSupabase();
+      if (!supabase) return;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, nombre, avatar_url, rol, estado_chat")
+        .eq("empresa_id", user.empresa_id)
+        .neq("id", user.id)
+        .order("nombre", { ascending: true });
+      if (!error) setContactos(data || []);
+    } catch (err) {
+      console.error("Error cargando contactos:", err);
+    } finally {
+      setCargandoContactos(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) cargarContactos();
+  }, [user, cargarContactos]);
+
   // Escuchar llamadas entrantes
   useEffect(() => {
     if (!user) return;
     const supabase = getSupabase();
     if (!supabase) return;
 
-      const channel = supabase
-        .channel(llamadasChannelId.current)
+    const channel = supabase
+      .channel(llamadasChannelId.current)
       .on(
         "postgres_changes",
         {
@@ -117,7 +196,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [mensajes]);
+  }, [mensajes, visitanteHistorial]);
 
   // Cambiar a vista chat cuando se une a una sala
   useEffect(() => {
@@ -135,7 +214,6 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
       setMensajeInput("");
       setEscribiendo(salaActiva.id, false);
 
-      // Si es sala IA, llamar a la API de IA
       if (salaActiva.tipo === "ia") {
         try {
           const contexto = mensajes.slice(-10).map((m) => ({
@@ -203,13 +281,12 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     setMenuMensaje(null);
   };
 
-  // Visitor chat handler
+  // Visitor chat handler with persistence
   const handleVisitanteEnviar = async () => {
     if (!visitanteMensaje.trim() || !visitanteNombre.trim()) return;
     setVisitanteEnviando(true);
 
     try {
-      // Create visitor session and send message via API
       const response = await fetch("/api/chat/visitor", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -217,14 +294,22 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
           nombre: visitanteNombre,
           email: visitanteEmail,
           mensaje: visitanteMensaje,
-          session_id: localStorage.getItem("blis_chat_session") || undefined,
-          pagina_origen: window.location.pathname,
+          session_id: visitanteSessionId || localStorage.getItem("blis_chat_session") || undefined,
+          pagina_origen: typeof window !== "undefined" ? window.location.pathname : "",
         }),
       });
 
       const data = await response.json();
       if (data.success && data.session_id) {
         localStorage.setItem("blis_chat_session", data.session_id);
+        localStorage.setItem("blis_chat_name", visitanteNombre);
+        if (visitanteEmail) localStorage.setItem("blis_chat_email", visitanteEmail);
+        setVisitanteSessionId(data.session_id);
+        setVisitanteSalaId(data.sala_id);
+        setVisitanteIniciado(true);
+        if (data.historial) {
+          setVisitanteHistorial(data.historial);
+        }
         setVisitanteMensaje("");
       }
     } catch (err) {
@@ -234,10 +319,26 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     }
   };
 
+  const iniciarChatVisitante = () => {
+    if (!visitanteNombre.trim()) return;
+    setVisitanteIniciado(true);
+    setVista("visitante");
+    localStorage.setItem("blis_chat_name", visitanteNombre);
+    if (visitanteEmail) localStorage.setItem("blis_chat_email", visitanteEmail);
+  };
+
+  const handleNuevoChatContacto = async (contacto: ContactoUsuario) => {
+    const salaId = await crearSalaDirecta(contacto.id);
+    if (salaId) {
+      await unirseSala(salaId);
+    }
+  };
+
   // Render message bubble
-  const renderMensaje = (msg: ChatMensaje, index: number) => {
-    const esMio = msg.user_id === user?.id;
+  const renderMensaje = (msg: ChatMensaje | VisitorMensaje, index: number) => {
+    const esMio = "user_id" in msg ? msg.user_id === user?.id : false;
     const esSistema = msg.tipo === "sistema" || msg.tipo === "ia";
+    const esVisitante = msg.user_id === null && msg.tipo === "texto";
 
     if (esSistema) {
       return (
@@ -264,152 +365,119 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         className={`flex gap-3 mb-4 ${esMio ? "flex-row-reverse" : "flex-row"}`}
       >
         <Avatar className="w-8 h-8 flex-shrink-0">
-          <AvatarImage src={msg.user?.avatar_url || undefined} />
-          <AvatarFallback className="bg-blis-red/20 text-blis-red text-xs">
-            {msg.user?.nombre?.[0] || "U"}
+          <AvatarImage src={undefined} />
+          <AvatarFallback className={`text-xs ${esVisitante ? "bg-amber-500/20 text-amber-500" : "bg-blis-red/20 text-blis-red"}`}>
+            {esVisitante ? "V" : (esMio ? "T" : "A")}
           </AvatarFallback>
         </Avatar>
 
         <div className={`max-w-[75%] ${esMio ? "items-end" : "items-start"} flex flex-col relative`}>
           {!esMio && (
             <span className="text-[10px] text-gray-500 mb-1 uppercase tracking-wider font-bold">
-              {msg.user?.nombre || "Usuario"}
+              {esVisitante ? visitanteNombre : ("user" in msg ? msg.user?.nombre : "Asesor")}
             </span>
           )}
 
-          {editandoMensaje === msg.id ? (
-            <div className="flex items-center gap-2 w-full">
-              <Input
-                value={editInput}
-                onChange={(e) => setEditInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleEditar(msg.id);
-                  if (e.key === "Escape") {
-                    setEditandoMensaje(null);
-                    setEditInput("");
-                  }
-                }}
-                className="bg-white/5 border-white/10 text-white text-xs h-8"
-                autoFocus
+          <div
+            className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed relative group ${
+              esMio
+                ? "bg-blis-red text-white rounded-br-md"
+                : esVisitante
+                ? "bg-amber-500/10 text-amber-100 border border-amber-500/20 rounded-bl-md"
+                : "bg-white/5 text-gray-200 border border-white/10 rounded-bl-md"
+            }`}
+          >
+            {(msg as ChatMensaje).editado && (
+              <span className="text-[9px] opacity-60 mr-1">(editado)</span>
+            )}
+            {(msg as ChatMensaje).tipo === "imagen" && (msg as ChatMensaje).archivo_url ? (
+              <a href={(msg as ChatMensaje).archivo_url!} target="_blank" rel="noopener noreferrer">
+                <img
+                  src={(msg as ChatMensaje).archivo_url!}
+                  alt={(msg as ChatMensaje).archivo_nombre || "Imagen"}
+                  className="max-w-[200px] max-h-[200px] rounded-lg object-cover"
+                />
+              </a>
+            ) : (msg as ChatMensaje).tipo === "video" && (msg as ChatMensaje).archivo_url ? (
+              <video
+                src={(msg as ChatMensaje).archivo_url!}
+                controls
+                className="max-w-[200px] max-h-[200px] rounded-lg"
               />
-              <button
-                onClick={() => handleEditar(msg.id)}
-                className="p-1.5 bg-blis-red rounded-lg text-white"
+            ) : (msg as ChatMensaje).tipo === "audio" && (msg as ChatMensaje).archivo_url ? (
+              <audio src={(msg as ChatMensaje).archivo_url!} controls className="w-[200px]" />
+            ) : (msg as ChatMensaje).tipo === "archivo" && (msg as ChatMensaje).archivo_url ? (
+              <a
+                href={(msg as ChatMensaje).archivo_url!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 underline"
               >
-                <Check className="w-3 h-3" />
-              </button>
-              <button
-                onClick={() => {
-                  setEditandoMensaje(null);
-                  setEditInput("");
-                }}
-                className="p-1.5 bg-white/10 rounded-lg text-gray-400"
-              >
-                <XIcon className="w-3 h-3" />
-              </button>
-            </div>
-          ) : (
-            <>
-              <div
-                className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed relative group ${
-                  esMio
-                    ? "bg-blis-red text-white rounded-br-md"
-                    : "bg-white/5 text-gray-200 border border-white/10 rounded-bl-md"
-                }`}
-              >
-                {msg.editado && (
-                  <span className="text-[9px] opacity-60 mr-1">(editado)</span>
-                )}
-                {msg.tipo === "imagen" && msg.archivo_url ? (
-                  <a href={msg.archivo_url} target="_blank" rel="noopener noreferrer">
-                    <img
-                      src={msg.archivo_url}
-                      alt={msg.archivo_nombre || "Imagen"}
-                      className="max-w-[200px] max-h-[200px] rounded-lg object-cover"
-                    />
-                  </a>
-                ) : msg.tipo === "video" && msg.archivo_url ? (
-                  <video
-                    src={msg.archivo_url}
-                    controls
-                    className="max-w-[200px] max-h-[200px] rounded-lg"
-                  />
-                ) : msg.tipo === "audio" && msg.archivo_url ? (
-                  <audio src={msg.archivo_url} controls className="w-[200px]" />
-                ) : msg.tipo === "archivo" && msg.archivo_url ? (
-                  <a
-                    href={msg.archivo_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 underline"
-                  >
-                    <Paperclip className="w-4 h-4" />
-                    {msg.archivo_nombre || "Archivo"}
-                  </a>
+                <Paperclip className="w-4 h-4" />
+                {(msg as ChatMensaje).archivo_nombre || "Archivo"}
+              </a>
+            ) : (
+              msg.contenido
+            )}
+
+            {/* Menu contextual */}
+            {esMio && (
+              <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Popover open={menuMensaje === msg.id} onOpenChange={(open) => setMenuMensaje(open ? msg.id : null)}>
+                  <PopoverTrigger>
+                    <button className="p-1 bg-[#1a1a1a] border border-white/10 rounded-full shadow-lg">
+                      <MoreHorizontal className="w-3 h-3 text-gray-400" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-32 p-1 bg-[#111] border-white/10">
+                    <button
+                      onClick={() => {
+                        setEditandoMensaje(msg.id);
+                        setEditInput(msg.contenido || "");
+                        setMenuMensaje(null);
+                      }}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-300 hover:bg-white/5 rounded-md"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleFijar(msg.id, !(msg as ChatMensaje).fijado)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-300 hover:bg-white/5 rounded-md"
+                    >
+                      {(msg as ChatMensaje).fijado ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+                      {(msg as ChatMensaje).fijado ? "Desfijar" : "Fijar"}
+                    </button>
+                    <button
+                      onClick={() => handleEliminar(msg.id)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-red-400 hover:bg-white/5 rounded-md"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Eliminar
+                    </button>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 mt-1">
+            <span className="text-[9px] text-gray-600">
+              {new Date(msg.creado_en).toLocaleTimeString("es-ES", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+            {esMio && (
+              <span className="text-gray-600">
+                {(msg as ChatMensaje).leido_por && (msg as ChatMensaje).leido_por.length > 1 ? (
+                  <CheckCheck className="w-3 h-3 text-emerald-500" />
                 ) : (
-                  msg.contenido
+                  <Check className="w-3 h-3" />
                 )}
-
-                {/* Menu contextual */}
-                {esMio && (
-                  <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Popover open={menuMensaje === msg.id} onOpenChange={(open) => setMenuMensaje(open ? msg.id : null)}>
-                      <PopoverTrigger>
-                        <button className="p-1 bg-[#1a1a1a] border border-white/10 rounded-full shadow-lg">
-                          <MoreHorizontal className="w-3 h-3 text-gray-400" />
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-32 p-1 bg-[#111] border-white/10">
-                        <button
-                          onClick={() => {
-                            setEditandoMensaje(msg.id);
-                            setEditInput(msg.contenido || "");
-                            setMenuMensaje(null);
-                          }}
-                          className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-300 hover:bg-white/5 rounded-md"
-                        >
-                          <Edit3 className="w-3 h-3" />
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleFijar(msg.id, !msg.fijado)}
-                          className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-300 hover:bg-white/5 rounded-md"
-                        >
-                          {msg.fijado ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
-                          {msg.fijado ? "Desfijar" : "Fijar"}
-                        </button>
-                        <button
-                          onClick={() => handleEliminar(msg.id)}
-                          className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-red-400 hover:bg-white/5 rounded-md"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                          Eliminar
-                        </button>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center gap-1 mt-1">
-                <span className="text-[9px] text-gray-600">
-                  {new Date(msg.creado_en).toLocaleTimeString("es-ES", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-                {esMio && (
-                  <span className="text-gray-600">
-                    {msg.leido_por.length > 1 ? (
-                      <CheckCheck className="w-3 h-3 text-emerald-500" />
-                    ) : (
-                      <Check className="w-3 h-3" />
-                    )}
-                  </span>
-                )}
-              </div>
-            </>
-          )}
+              </span>
+            )}
+          </div>
         </div>
       </motion.div>
     );
@@ -420,7 +488,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-[#0a0a0a]/90">
         <div className="flex items-center gap-3">
-          {vista === "chat" && (
+          {(vista === "chat" || vista === "visitante") && (
             <button
               onClick={() => setVista("lista")}
               className="p-1.5 hover:bg-white/5 rounded-lg transition-colors"
@@ -433,6 +501,8 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
             <div className="w-9 h-9 rounded-xl bg-blis-red/20 flex items-center justify-center">
               {vista === "chat" && salaActiva?.tipo === "ia" ? (
                 <Bot className="w-4 h-4 text-emerald-400" />
+              ) : vista === "visitante" ? (
+                <Sparkles className="w-4 h-4 text-amber-400" />
               ) : (
                 <MessageCircle className="w-4 h-4 text-blis-red" />
               )}
@@ -442,7 +512,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                 {vista === "chat" && salaActiva
                   ? salaActiva.nombre || "Chat"
                   : vista === "visitante"
-                  ? "Soporte"
+                  ? "BLIS Chat"
                   : "Mensajes"}
               </h3>
               {vista === "chat" && (
@@ -519,20 +589,20 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="h-full"
+              className="h-full flex flex-col"
             >
               {!user ? (
                 // Visitante - formulario inicial
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-6 flex-1 flex flex-col justify-center">
                   <div className="text-center">
                     <div className="w-16 h-16 rounded-2xl bg-blis-red/20 flex items-center justify-center mx-auto mb-4">
                       <Sparkles className="w-8 h-8 text-blis-red" />
                     </div>
                     <h4 className="text-lg font-black text-white uppercase tracking-wider mb-2">
-                      ¿Necesitas ayuda?
+                      ¡Hola!
                     </h4>
                     <p className="text-sm text-gray-400">
-                      Nuestro equipo está listo para asistirte. Inicia una conversación.
+                      Bienvenido a BLIS Corp. ¿En qué podemos ayudarte hoy?
                     </p>
                   </div>
 
@@ -561,9 +631,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                       />
                     </div>
                     <Button
-                      onClick={() => {
-                        if (visitanteNombre.trim()) setVista("visitante");
-                      }}
+                      onClick={iniciarChatVisitante}
                       disabled={!visitanteNombre.trim()}
                       className="w-full bg-blis-red hover:bg-blis-red/90 text-white font-black uppercase tracking-widest text-xs py-6"
                     >
@@ -575,65 +643,143 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                     Al continuar, aceptas nuestra política de privacidad.
                   </p>
                 </div>
-              ) : salas.length === 0 ? (
-                // Usuario logueado sin conversaciones
-                <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
-                    <MessageCircle className="w-8 h-8 text-gray-600" />
-                  </div>
-                  <h4 className="text-sm font-black text-white uppercase tracking-wider mb-2">
-                    Sin conversaciones
-                  </h4>
-                  <p className="text-xs text-gray-500">
-                    Aún no tienes chats activos. Inicia una conversación con un miembro del equipo.
-                  </p>
-                </div>
               ) : (
-                // Lista de salas
-                <ScrollArea className="h-full">
-                  <div className="p-3 space-y-1">
-                    {salas.map((sala) => (
-                      <button
-                        key={sala.id}
-                        onClick={() => unirseSala(sala.id)}
-                        className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors text-left group"
-                      >
-                        <div className="relative">
-                          <Avatar className="w-12 h-12">
-                            <AvatarFallback className="bg-blis-red/20 text-blis-red font-black">
-                              {sala.nombre?.[0] || "C"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0a0a0a]" />
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <h5 className="text-sm font-bold text-white truncate">
-                              {sala.nombre || "Chat"}
-                            </h5>
-                            <span className="text-[10px] text-gray-600">
-                              {sala.ultima_actividad
-                                ? new Date(sala.ultima_actividad).toLocaleDateString("es-ES", {
-                                    day: "numeric",
-                                    month: "short",
-                                  })
-                                : ""}
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-500 truncate group-hover:text-gray-400 transition-colors">
-                            {sala.ultimo_mensaje?.contenido || "Sin mensajes"}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
+                // Usuario logueado
+                <>
+                  {/* Tabs */}
+                  <div className="flex border-b border-white/5">
+                    <button
+                      onClick={() => setTabMiembro("chats")}
+                      className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition-colors ${
+                        tabMiembro === "chats"
+                          ? "text-blis-red border-b-2 border-blis-red"
+                          : "text-gray-500 hover:text-gray-300"
+                      }`}
+                    >
+                      Chats
+                    </button>
+                    <button
+                      onClick={() => setTabMiembro("contactos")}
+                      className={`flex-1 py-3 text-xs font-black uppercase tracking-wider transition-colors ${
+                        tabMiembro === "contactos"
+                          ? "text-blis-red border-b-2 border-blis-red"
+                          : "text-gray-500 hover:text-gray-300"
+                      }`}
+                    >
+                      Contactos
+                    </button>
                   </div>
-                </ScrollArea>
+
+                  {tabMiembro === "chats" ? (
+                    salas.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center flex-1 p-6 text-center">
+                        <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
+                          <MessageCircle className="w-8 h-8 text-gray-600" />
+                        </div>
+                        <h4 className="text-sm font-black text-white uppercase tracking-wider mb-2">
+                          Sin conversaciones
+                        </h4>
+                        <p className="text-xs text-gray-500">
+                          Aún no tienes chats activos. Ve a la pestaña Contactos para iniciar una conversación.
+                        </p>
+                      </div>
+                    ) : (
+                      <ScrollArea className="flex-1">
+                        <div className="p-3 space-y-1">
+                          {salas.map((sala) => (
+                            <button
+                              key={sala.id}
+                              onClick={() => unirseSala(sala.id)}
+                              className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors text-left group"
+                            >
+                              <div className="relative">
+                                <Avatar className="w-12 h-12">
+                                  <AvatarFallback className="bg-blis-red/20 text-blis-red font-black">
+                                    {sala.nombre?.[0] || "C"}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0a0a0a]" />
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                  <h5 className="text-sm font-bold text-white truncate">
+                                    {sala.nombre || "Chat"}
+                                  </h5>
+                                  <span className="text-[10px] text-gray-600">
+                                    {sala.ultima_actividad
+                                      ? new Date(sala.ultima_actividad).toLocaleDateString("es-ES", {
+                                          day: "numeric",
+                                          month: "short",
+                                        })
+                                      : ""}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-gray-500 truncate group-hover:text-gray-400 transition-colors">
+                                  {sala.ultimo_mensaje?.contenido || "Sin mensajes"}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    )
+                  ) : (
+                    // Contactos tab
+                    <ScrollArea className="flex-1">
+                      <div className="p-3 space-y-1">
+                        {cargandoContactos ? (
+                          <div className="flex items-center justify-center py-12">
+                            <Loader2 className="w-6 h-6 animate-spin text-blis-red" />
+                          </div>
+                        ) : contactos.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <Users className="w-8 h-8 text-gray-600 mb-3" />
+                            <p className="text-sm text-gray-500">No hay contactos disponibles</p>
+                          </div>
+                        ) : (
+                          contactos.map((contacto) => (
+                            <button
+                              key={contacto.id}
+                              onClick={() => handleNuevoChatContacto(contacto)}
+                              className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors text-left group"
+                            >
+                              <div className="relative">
+                                <Avatar className="w-10 h-10">
+                                  <AvatarImage src={contacto.avatar_url || undefined} />
+                                  <AvatarFallback className="bg-blis-red/20 text-blis-red text-xs font-black">
+                                    {contacto.nombre?.[0] || "U"}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span
+                                  className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#0a0a0a] ${
+                                    contacto.estado_chat === "online"
+                                      ? "bg-emerald-500"
+                                      : contacto.estado_chat === "ausente"
+                                      ? "bg-amber-500"
+                                      : "bg-gray-600"
+                                  }`}
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h5 className="text-sm font-bold text-white truncate">
+                                  {contacto.nombre}
+                                </h5>
+                                <p className="text-xs text-gray-500 capitalize">{contacto.rol}</p>
+                              </div>
+                              <MessageCircle className="w-4 h-4 text-gray-600 group-hover:text-blis-red transition-colors" />
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </>
               )}
             </motion.div>
           )}
 
-          {/* Chat activo */}
+          {/* Chat activo (miembros) */}
           {vista === "chat" && salaActiva && (
             <motion.div
               key="chat"
@@ -837,7 +983,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
             </motion.div>
           )}
 
-          {/* Vista visitante */}
+          {/* Vista visitante con historial */}
           {vista === "visitante" && (
             <motion.div
               key="visitante"
@@ -846,15 +992,21 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
               exit={{ opacity: 0, x: 20 }}
               className="h-full flex flex-col"
             >
-              <ScrollArea className="flex-1 px-4 py-4">
-                <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                    <Bot className="w-6 h-6 text-emerald-400" />
+              <ScrollArea className="flex-1 px-4 py-4" ref={scrollRef}>
+                {visitanteHistorial.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                      <Bot className="w-6 h-6 text-emerald-400" />
+                    </div>
+                    <p className="text-sm text-gray-400">
+                      Hola {visitanteNombre}, un asesor te atenderá pronto.
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-400">
-                    Hola {visitanteNombre}, un asesor te atenderá pronto.
-                  </p>
-                </div>
+                ) : (
+                  <div className="space-y-1">
+                    {visitanteHistorial.map((msg, i) => renderMensaje(msg, i))}
+                  </div>
+                )}
               </ScrollArea>
 
               <div className="px-4 py-3 border-t border-white/5">
