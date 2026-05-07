@@ -73,7 +73,7 @@ export function useChat() {
         .from("chat_mensajes")
         .select(`
           *,
-          user:profiles(id, nombre, avatar_url, rol)
+          user:profiles!user_id(id, nombre, avatar_url, rol)
         `)
         .eq("sala_id", salaId)
         .eq("eliminado", false)
@@ -114,7 +114,7 @@ export function useChat() {
         .from("chat_miembros")
         .select(`
           *,
-          user:profiles(id, nombre, avatar_url, rol, estado_chat)
+          user:profiles!user_id(id, nombre, avatar_url, rol, estado_chat)
         `)
         .eq("sala_id", salaId);
 
@@ -491,7 +491,7 @@ export function useChat() {
     try {
       const { data, error } = await supabase
         .from("chat_mensajes")
-        .select(`*, user:profiles(id, nombre, avatar_url, rol)`)
+        .select(`*, user:profiles!user_id(id, nombre, avatar_url, rol)`)
         .eq("sala_id", salaId)
         .eq("eliminado", false)
         .ilike("contenido", `%${query}%`)

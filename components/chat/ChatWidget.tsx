@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Minimize2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,40 +14,21 @@ export function ChatWidget() {
   const { user } = useAuth();
   const { noLeidos } = useChat();
   const widgetRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   const totalNoLeidos = Object.values(noLeidos).reduce((a, b) => a + b, 0);
 
   // Detectar página actual para mostrar/ocultar widget
-  const [mostrarWidget, setMostrarWidget] = useState(false);
+  const mostrarWidget = (() => {
+    if (!pathname) return false;
+    const paginasWidget = ["/tienda", "/blog", "/contacto"];
+    const paginasConIcono = ["/", "/proyectos"];
 
-  useEffect(() => {
-    const checkPage = () => {
-      const path = window.location.pathname;
-      const paginasWidget = ["/tienda", "/blog", "/contacto"];
-      const paginasConIcono = ["/", "/proyectos"];
-
-      // Siempre mostrar en páginas de widget
-      if (paginasWidget.some((p) => path.startsWith(p))) {
-        setMostrarWidget(true);
-      }
-      // En home y proyectos, mostrar como icono (pero el widget puede estar minimizado)
-      else if (paginasConIcono.some((p) => path === p || path.startsWith(p))) {
-        setMostrarWidget(true);
-      }
-      // En dashboard, ocultar (hay panel integrado)
-      else if (path.startsWith("/superadmin") || path.startsWith("/miembros")) {
-        setMostrarWidget(false);
-      }
-      // En otras páginas públicas, mostrar
-      else {
-        setMostrarWidget(true);
-      }
-    };
-
-    checkPage();
-    window.addEventListener("popstate", checkPage);
-    return () => window.removeEventListener("popstate", checkPage);
-  }, []);
+    if (paginasWidget.some((p) => pathname.startsWith(p))) return true;
+    if (paginasConIcono.some((p) => pathname === p || pathname.startsWith(p))) return true;
+    if (pathname.startsWith("/superadmin") || pathname.startsWith("/miembros")) return false;
+    return true;
+  })();
 
   // Cerrar al hacer clic fuera
   useEffect(() => {

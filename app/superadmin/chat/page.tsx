@@ -84,6 +84,11 @@ export default function ChatAdminPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Usuario remoto para llamadas
+  const remoteUserId = salaActiva && miembros.length > 0
+    ? miembros.find((m) => m.user_id !== user?.id)?.user_id
+    : null;
+
   // Cargar visitantes activos
   const cargarVisitantes = async () => {
     setLoadingVisitantes(true);
