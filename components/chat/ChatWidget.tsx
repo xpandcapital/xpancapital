@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Minimize2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,21 +13,38 @@ export function ChatWidget() {
   const { user } = useAuth();
   const { noLeidos } = useChat();
   const widgetRef = useRef<HTMLDivElement>(null);
-  const pathname = usePathname();
 
   const totalNoLeidos = Object.values(noLeidos).reduce((a, b) => a + b, 0);
 
-  // Detectar página actual para mostrar/ocultar widget
-  const mostrarWidget = (() => {
-    if (!pathname) return false;
-    const paginasWidget = ["/tienda", "/blog", "/contacto"];
-    const paginasConIcono = ["/", "/proyectos"];
+  // Detectar página actual para mostrar/ocultar widget - usando window.location directamente
+  const [mostrarWidget, setMostrarWidget] = useState(true);
 
-    if (paginasWidget.some((p) => pathname.startsWith(p))) return true;
-    if (paginasConIcono.some((p) => pathname === p || pathname.startsWith(p))) return true;
-    if (pathname.startsWith("/superadmin") || pathname.startsWith("/miembros")) return false;
-    return true;
-  })();
+  useEffect(() => {
+    const checkPage = () => {
+      const path = window.location.pathname;
+      const paginasWidget = ["/tienda", "/blog", "/contacto"];
+      const paginasConIcono = ["/", "/proyectos"];
+
+      if (path.startsWith("/superadmin") || path.startsWith("/miembros")) {
+        setMostrarWidget(false);
+        return;
+      }
+      if (paginasWidget.some((p) => path.startsWith(p))) {
+        setMostrarWidget(true);
+        return;
+      }
+      if (paginasConIcono.some((p) => path === p || path.startsWith(p))) {
+        setMostrarWidget(true);
+        return;
+      }
+      setMostrarWidget(true);
+    };
+
+    checkPage();
+    // Revisar periódicamente por si hay navegación del cliente
+    const interval = setInterval(checkPage, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Cerrar al hacer clic fuera
   useEffect(() => {

@@ -133,20 +133,31 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
 
   // Load contacts for logged-in users
   const cargarContactos = useCallback(async () => {
-    if (!user?.empresa_id) return;
+    if (!user?.empresa_id) {
+      console.log("[ChatPanel] No empresa_id, skip contactos");
+      return;
+    }
     setCargandoContactos(true);
     try {
       const supabase = getSupabase();
-      if (!supabase) return;
+      if (!supabase) {
+        console.log("[ChatPanel] No supabase client");
+        return;
+      }
       const { data, error } = await supabase
         .from("profiles")
         .select("id, nombre, avatar_url, rol, estado_chat")
         .eq("empresa_id", user.empresa_id)
         .neq("id", user.id)
         .order("nombre", { ascending: true });
-      if (!error) setContactos(data || []);
+      if (error) {
+        console.error("[ChatPanel] Error cargando contactos:", error);
+      } else {
+        console.log("[ChatPanel] Contactos cargados:", data?.length || 0);
+        setContactos(data || []);
+      }
     } catch (err) {
-      console.error("Error cargando contactos:", err);
+      console.error("[ChatPanel] Error cargando contactos:", err);
     } finally {
       setCargandoContactos(false);
     }

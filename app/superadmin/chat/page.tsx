@@ -84,6 +84,13 @@ export default function ChatAdminPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Configuración de chat
+  const [chatConfig, setChatConfig] = useState<any>(null);
+  const [loadingConfig, setLoadingConfig] = useState(false);
+  const [configEditada, setConfigEditada] = useState<any>({});
+  const [guardandoConfig, setGuardandoConfig] = useState(false);
+  const [seccionConfig, setSeccionConfig] = useState<"general" | "ia">("general");
+
   // Usuario remoto para llamadas
   const remoteUserId = salaActiva && miembros.length > 0
     ? miembros.find((m) => m.user_id !== user?.id)?.user_id
@@ -138,10 +145,50 @@ export default function ChatAdminPage() {
     }
   };
 
+  // Cargar configuración de chat
+  const cargarConfiguracion = async () => {
+    setLoadingConfig(true);
+    try {
+      const res = await fetch("/api/chat/config");
+      const data = await res.json();
+      if (data.success) {
+        setChatConfig(data.data);
+        setConfigEditada(data.data);
+      }
+    } catch (err) {
+      console.error("Error cargando configuración:", err);
+    } finally {
+      setLoadingConfig(false);
+    }
+  };
+
+  // Guardar configuración de chat
+  const guardarConfiguracion = async () => {
+    setGuardandoConfig(true);
+    try {
+      const res = await fetch("/api/chat/config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(configEditada),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setChatConfig(data.data);
+        alert("Configuración guardada correctamente");
+      }
+    } catch (err) {
+      console.error("Error guardando configuración:", err);
+      alert("Error al guardar");
+    } finally {
+      setGuardandoConfig(false);
+    }
+  };
+
   useEffect(() => {
     cargarVisitantes();
     cargarAgentes();
     cargarContactosEmpresa();
+    cargarConfiguracion();
     const interval = setInterval(() => {
       cargarVisitantes();
       cargarAgentes();
@@ -513,23 +560,187 @@ export default function ChatAdminPage() {
               )}
 
               {seccionActiva === "configuracion" && (
-                <div className="p-4 space-y-3">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider font-bold">Configuración del Chat</p>
-                  <div className="space-y-2">
-                    <div className="p-3 rounded-xl bg-white/5">
-                      <p className="text-xs text-gray-400">Mensaje de bienvenida</p>
-                      <p className="text-sm text-white mt-1">¡Hola! Bienvenido a BLIS Corp...</p>
+                <div className="p-4 space-y-3 h-full overflow-y-auto">
+                  {loadingConfig ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-6 h-6 animate-spin text-blis-red" />
                     </div>
-                    <div className="p-3 rounded-xl bg-white/5">
-                      <p className="text-xs text-gray-400">Asignación automática</p>
-                      <p className="text-sm text-white mt-1">Activa — Primer agente online</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-white/5">
-                      <p className="text-xs text-gray-400">Páginas del widget</p>
-                      <p className="text-sm text-white mt-1">/tienda, /blog, /contacto, /proyectos</p>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-gray-600 mt-4">Configuración avanzada próximamente</p>
+                  ) : (
+                    <>
+                      {/* Tabs de config */}
+                      <div className="flex border-b border-white/5 mb-4">
+                        <button
+                          onClick={() => setSeccionConfig("general")}
+                          className={`flex-1 py-2 text-xs font-black uppercase tracking-wider transition-colors ${
+                            seccionConfig === "general"
+                              ? "text-blis-red border-b-2 border-blis-red"
+                              : "text-gray-500 hover:text-gray-300"
+                          }`}
+                        >
+                          General
+                        </button>
+                        <button
+                          onClick={() => setSeccionConfig("ia")}
+                          className={`flex-1 py-2 text-xs font-black uppercase tracking-wider transition-colors ${
+                            seccionConfig === "ia"
+                              ? "text-blis-red border-b-2 border-blis-red"
+                              : "text-gray-500 hover:text-gray-300"
+                          }`}
+                        >
+                          Entrenamiento IA
+                        </button>
+                      </div>
+
+                      {seccionConfig === "general" ? (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Mensaje de bienvenida</label>
+                            <textarea
+                              value={configEditada.widget_mensaje_bienvenida || ""}
+                              onChange={(e) => setConfigEditada({ ...configEditada, widget_mensaje_bienvenida: e.target.value })}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 resize-none"
+                              rows={3}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Mensaje fuera de horario</label>
+                            <textarea
+                              value={configEditada.widget_mensaje_fuera_horario || ""}
+                              onChange={(e) => setConfigEditada({ ...configEditada, widget_mensaje_fuera_horario: e.target.value })}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 resize-none"
+                              rows={3}
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                            <div>
+                              <p className="text-sm text-white font-bold">Asignación automática</p>
+                              <p className="text-xs text-gray-400">Asignar primer agente online</p>
+                            </div>
+                            <button
+                              onClick={() => setConfigEditada({ ...configEditada, derivacion_automatica: !configEditada.derivacion_automatica })}
+                              className={`w-12 h-6 rounded-full transition-colors relative ${configEditada.derivacion_automatica ? "bg-blis-red" : "bg-gray-700"}`}
+                            >
+                              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${configEditada.derivacion_automatica ? "translate-x-7" : "translate-x-1"}`} />
+                            </button>
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Derivar después de (mensajes)</label>
+                            <Input
+                              type="number"
+                              value={configEditada.derivacion_despues_mensajes || 3}
+                              onChange={(e) => setConfigEditada({ ...configEditada, derivacion_despues_mensajes: parseInt(e.target.value) })}
+                              className="bg-white/5 border-white/10 text-white"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Palabras clave para derivar (separadas por coma)</label>
+                            <Input
+                              value={Array.isArray(configEditada.palabras_clave_derivacion) ? configEditada.palabras_clave_derivacion.join(", ") : ""}
+                              onChange={(e) => setConfigEditada({ ...configEditada, palabras_clave_derivacion: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) })}
+                              className="bg-white/5 border-white/10 text-white"
+                              placeholder="asesor, agente, humano, persona"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Páginas donde aparece el widget (separadas por coma)</label>
+                            <Input
+                              value={Array.isArray(configEditada.paginas_widget) ? configEditada.paginas_widget.join(", ") : ""}
+                              onChange={(e) => setConfigEditada({ ...configEditada, paginas_widget: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) })}
+                              className="bg-white/5 border-white/10 text-white"
+                              placeholder="/, /tienda, /blog"
+                            />
+                          </div>
+
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                            <div>
+                              <p className="text-sm text-white font-bold">Permitir archivos</p>
+                              <p className="text-xs text-gray-400">Adjuntar imágenes y documentos</p>
+                            </div>
+                            <button
+                              onClick={() => setConfigEditada({ ...configEditada, permitir_archivos: !configEditada.permitir_archivos })}
+                              className={`w-12 h-6 rounded-full transition-colors relative ${configEditada.permitir_archivos ? "bg-blis-red" : "bg-gray-700"}`}
+                            >
+                              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${configEditada.permitir_archivos ? "translate-x-7" : "translate-x-1"}`} />
+                            </button>
+                          </div>
+
+                          <Button
+                            onClick={guardarConfiguracion}
+                            disabled={guardandoConfig}
+                            className="w-full bg-blis-red hover:bg-blis-red/90 text-white font-black uppercase tracking-wider text-xs"
+                          >
+                            {guardandoConfig ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                            Guardar Configuración
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">
+                            <div>
+                              <p className="text-sm text-white font-bold">Bot IA activo</p>
+                              <p className="text-xs text-gray-400">Responder automáticamente con IA</p>
+                            </div>
+                            <button
+                              onClick={() => setConfigEditada({ ...configEditada, ia_activa: !configEditada.ia_activa })}
+                              className={`w-12 h-6 rounded-full transition-colors relative ${configEditada.ia_activa ? "bg-emerald-500" : "bg-gray-700"}`}
+                            >
+                              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${configEditada.ia_activa ? "translate-x-7" : "translate-x-1"}`} />
+                            </button>
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Modelo de IA</label>
+                            <select
+                              value={configEditada.ia_modelo || "gemini-1.5-flash"}
+                              onChange={(e) => setConfigEditada({ ...configEditada, ia_modelo: e.target.value })}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white"
+                            >
+                              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                              <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                              <option value="gpt-4o-mini">GPT-4o Mini</option>
+                              <option value="gpt-4o">GPT-4o</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Prompt del sistema (instrucciones para la IA)</label>
+                            <textarea
+                              value={configEditada.ia_prompt_sistema || ""}
+                              onChange={(e) => setConfigEditada({ ...configEditada, ia_prompt_sistema: e.target.value })}
+                              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 resize-none"
+                              rows={6}
+                              placeholder="Eres un asistente virtual amigable..."
+                            />
+                            <p className="text-[10px] text-gray-500 mt-1">Define la personalidad, conocimientos y reglas de respuesta de la IA.</p>
+                          </div>
+
+                          <div>
+                            <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Máximo de tokens por respuesta</label>
+                            <Input
+                              type="number"
+                              value={configEditada.ia_max_tokens || 1024}
+                              onChange={(e) => setConfigEditada({ ...configEditada, ia_max_tokens: parseInt(e.target.value) })}
+                              className="bg-white/5 border-white/10 text-white"
+                            />
+                          </div>
+
+                          <Button
+                            onClick={guardarConfiguracion}
+                            disabled={guardandoConfig}
+                            className="w-full bg-emerald-600 hover:bg-emerald-600/90 text-white font-black uppercase tracking-wider text-xs"
+                          >
+                            {guardandoConfig ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                            Guardar Entrenamiento IA
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
