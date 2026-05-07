@@ -25,6 +25,7 @@ export function useChat() {
   const channelRef = useRef<any>(null);
   const presenciaChannelRef = useRef<any>(null);
   const salaIdRef = useRef<string | null>(null);
+  const instanceId = useRef(Math.random().toString(36).slice(2));
 
   // Cargar salas del usuario
   const cargarSalas = useCallback(async () => {
@@ -542,7 +543,7 @@ export function useChat() {
     if (!supabase) return;
 
     const channel = supabase
-      .channel("chat-mensajes")
+      .channel(`chat-mensajes-${instanceId.current}`)
       .on(
         "postgres_changes",
         {
@@ -625,7 +626,7 @@ export function useChat() {
     if (!supabase) return;
 
     const channel = supabase
-      .channel("chat-presencia")
+      .channel(`chat-presencia-${instanceId.current}`)
       .on(
         "postgres_changes",
         {

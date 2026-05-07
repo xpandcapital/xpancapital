@@ -75,6 +75,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const [menuMensaje, setMenuMensaje] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const llamadasChannelId = useRef(`chat-llamadas-${Math.random().toString(36).slice(2)}`);
 
   // Escuchar llamadas entrantes
   useEffect(() => {
@@ -82,8 +83,8 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     const supabase = getSupabase();
     if (!supabase) return;
 
-    const channel = supabase
-      .channel("chat-llamadas")
+      const channel = supabase
+        .channel(llamadasChannelId.current)
       .on(
         "postgres_changes",
         {
