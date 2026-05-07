@@ -89,6 +89,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const [visitanteSessionId, setVisitanteSessionId] = useState<string | null>(null);
   const [visitanteSalaId, setVisitanteSalaId] = useState<string | null>(null);
   const [visitanteIniciado, setVisitanteIniciado] = useState(false);
+  const [widgetConfig, setWidgetConfig] = useState<any>(null);
 
   // Member contacts
   const [tabMiembro, setTabMiembro] = useState<"chats" | "contactos">("chats");
@@ -105,6 +106,16 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const llamadasChannelId = useRef(`chat-llamadas-${Math.random().toString(36).slice(2)}`);
+
+  // Load widget config on mount
+  useEffect(() => {
+    fetch("/api/chat/widget-config")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) setWidgetConfig(data.data);
+      })
+      .catch(() => {});
+  }, []);
 
   // Restore visitor session from localStorage on mount
   useEffect(() => {
@@ -1005,12 +1016,12 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
             >
               <ScrollArea className="flex-1 px-4 py-4" ref={scrollRef}>
                 {visitanteHistorial.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+                  <div className="flex flex-col items-center justify-center h-full text-center space-y-4 px-4">
                     <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
                       <Bot className="w-6 h-6 text-emerald-400" />
                     </div>
-                    <p className="text-sm text-gray-400">
-                      Hola {visitanteNombre}, un asesor te atenderá pronto.
+                    <p className="text-sm text-gray-300 leading-relaxed">
+                      {widgetConfig?.widget_mensaje_bienvenida || `¡Hola ${visitanteNombre || ""}! Bienvenido a BLIS Corp. ¿En qué podemos ayudarte hoy?`}
                     </p>
                   </div>
                 ) : (

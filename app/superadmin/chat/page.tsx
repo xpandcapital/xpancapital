@@ -9,7 +9,7 @@ import {
   Search, Pin, Bot, Sparkles, LayoutTemplate,
   Paperclip, ArrowRightLeft, LogOut, Volume2, VolumeX,
   Smile, Check, CheckCheck, Settings, BarChart3,
-  Inbox, Radio, UserCheck, Plus, ChevronRight
+  Inbox, Radio, UserCheck, Plus, ChevronRight, Edit3, Trash2
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/lib/chat/useChat";
@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import type { ChatSala, ChatMensaje, ChatVisitante } from "@/lib/chat/types";
 import { CallModal } from "@/components/chat/CallModal";
 
@@ -79,6 +80,10 @@ export default function ChatAdminPage() {
   const [menuMensaje, setMenuMensaje] = useState<string | null>(null);
   const [sonidoActivado, setSonidoActivado] = useState(true);
   const [modalNuevoChat, setModalNuevoChat] = useState(false);
+  const [modalAsignar, setModalAsignar] = useState(false);
+  const [visitanteSeleccionado, setVisitanteSeleccionado] = useState<ChatVisitante | null>(null);
+  const [tipoAsignacion, setTipoAsignacion] = useState<"soporte" | "ventas" | "info">("info");
+  const [agenteAsignado, setAgenteAsignado] = useState<string>("");
   const [contactosEmpresa, setContactosEmpresa] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -89,7 +94,14 @@ export default function ChatAdminPage() {
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [configEditada, setConfigEditada] = useState<any>({});
   const [guardandoConfig, setGuardandoConfig] = useState(false);
-  const [seccionConfig, setSeccionConfig] = useState<"general" | "ia">("general");
+  const [seccionConfig, setSeccionConfig] = useState<"general" | "ia" | "plantillas">("general");
+
+  // Plantillas state
+  const [listaPlantillas, setListaPlantillas] = useState<any[]>([]);
+  const [loadingPlantillas, setLoadingPlantillas] = useState(false);
+  const [editandoPlantilla, setEditandoPlantilla] = useState<any>(null);
+  const [nuevaPlantilla, setNuevaPlantilla] = useState({ titulo: "", contenido: "", departamento: "general", atajo: "" });
+  const [guardandoPlantilla, setGuardandoPlantilla] = useState(false);
 
   // Usuario remoto para llamadas
   const remoteUserId = salaActiva && miembros.length > 0
@@ -162,6 +174,80 @@ export default function ChatAdminPage() {
     }
   };
 
+  // Cargar plantillas
+  const cargarPlantillasAdmin = async () => {
+    setLoadingPlantillas(true);
+    try {
+      const res = await fetch("/api/chat/templates");
+      const data = await res.json();
+      if (data.success) {
+        setListaPlantillas(data.data || []);
+      }
+    } catch (err) {
+      console.error("Error cargando plantillas:", err);
+    } finally {
+      setLoadingPlantillas(false);
+    }
+  };
+
+  // Crear plantilla
+  const crearPlantilla = async () => {
+    if (!nuevaPlantilla.titulo.trim() || !nuevaPlantilla.contenido.trim()) return;
+    setGuardandoPlantilla(true);
+    try {
+      const res = await fetch("/api/chat/templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(nuevaPlantilla),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNuevaPlantilla({ titulo: "", contenido: "", departamento: "general", atajo: "" });
+        await cargarPlantillasAdmin();
+      }
+    } catch (err) {
+      console.error("Error creando plantilla:", err);
+    } finally {
+      setGuardandoPlantilla(false);
+    }
+  };
+
+  // Actualizar plantilla
+  const actualizarPlantilla = async () => {
+    if (!editandoPlantilla?.id || !editandoPlantilla.titulo.trim() || !editandoPlantilla.contenido.trim()) return;
+    setGuardandoPlantilla(true);
+    try {
+      const res = await fetch("/api/chat/templates", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editandoPlantilla),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEditandoPlantilla(null);
+        await cargarPlantillasAdmin();
+      }
+    } catch (err) {
+      console.error("Error actualizando plantilla:", err);
+    } finally {
+      setGuardandoPlantilla(false);
+    }
+  };
+
+  // Eliminar plantilla
+  const eliminarPlantilla = async (id: string) => {
+    if (!confirm("¿Eliminar esta plantilla?")) return;
+    try {
+      const res = await fetch(`/api/chat/templates?id=${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        await cargarPlantillasAdmin();
+      }
+    } catch (err) {
+      console.error("Error eliminando plantilla:", err);
+    }
+  };
+
   // Guardar configuración de chat
   const guardarConfiguracion = async () => {
     setGuardandoConfig(true);
@@ -189,6 +275,7 @@ export default function ChatAdminPage() {
     cargarAgentes();
     cargarContactosEmpresa();
     cargarConfiguracion();
+    cargarPlantillasAdmin();
     const interval = setInterval(() => {
       cargarVisitantes();
       cargarAgentes();
@@ -263,9 +350,48 @@ export default function ChatAdminPage() {
 
   const handleAtenderVisitante = async (visitante: ChatVisitante) => {
     if (!visitante.sala_id) return;
-    // Unirse a la sala del visitante
-    await unirseSala(visitante.sala_id);
-    setSeccionActiva("conversaciones");
+    setVisitanteSeleccionado(visitante);
+    setTipoAsignacion("info");
+    setAgenteAsignado("");
+    setModalAsignar(true);
+  };
+
+  const confirmarAsignacion = async () => {
+    if (!visitanteSeleccionado?.sala_id || !agenteAsignado) return;
+    const supabase = (await import("@/lib/supabase")).getSupabase();
+    if (!supabase) return;
+
+    try {
+      // 1. Actualizar tipo de sala
+      await supabase
+        .from("chat_salas")
+        .update({ tipo: tipoAsignacion, asignado_a: agenteAsignado })
+        .eq("id", visitanteSeleccionado.sala_id);
+
+      // 2. Agregar agente como miembro admin
+      await supabase.from("chat_miembros").upsert({
+        sala_id: visitanteSeleccionado.sala_id,
+        user_id: agenteAsignado,
+        rol_sala: "admin",
+      }, { onConflict: "sala_id,user_id" });
+
+      // 3. Agregar al admin actual como observador
+      if (user?.id && user.id !== agenteAsignado) {
+        await supabase.from("chat_miembros").upsert({
+          sala_id: visitanteSeleccionado.sala_id,
+          user_id: user.id,
+          rol_sala: "observador",
+        }, { onConflict: "sala_id,user_id" });
+      }
+
+      // 4. Unirse a la sala
+      await unirseSala(visitanteSeleccionado.sala_id);
+      setModalAsignar(false);
+      setSeccionActiva("conversaciones");
+    } catch (err) {
+      console.error("Error asignando visitante:", err);
+      alert("Error al asignar la conversación");
+    }
   };
 
   const renderMensaje = (msg: ChatMensaje, index: number) => {
@@ -589,9 +715,19 @@ export default function ChatAdminPage() {
                         >
                           Entrenamiento IA
                         </button>
+                        <button
+                          onClick={() => setSeccionConfig("plantillas")}
+                          className={`flex-1 py-2 text-xs font-black uppercase tracking-wider transition-colors ${
+                            seccionConfig === "plantillas"
+                              ? "text-blis-red border-b-2 border-blis-red"
+                              : "text-gray-500 hover:text-gray-300"
+                          }`}
+                        >
+                          Plantillas
+                        </button>
                       </div>
 
-                      {seccionConfig === "general" ? (
+                      {seccionConfig === "general" && (
                         <div className="space-y-4">
                           <div>
                             <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Mensaje de bienvenida</label>
@@ -616,14 +752,12 @@ export default function ChatAdminPage() {
                           <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">
                             <div>
                               <p className="text-sm text-white font-bold">Asignación automática</p>
-                              <p className="text-xs text-gray-400">Asignar primer agente online</p>
+                              <p className="text-xs text-gray-400">Asignar primer agente online automáticamente</p>
                             </div>
-                            <button
-                              onClick={() => setConfigEditada({ ...configEditada, derivacion_automatica: !configEditada.derivacion_automatica })}
-                              className={`w-12 h-6 rounded-full transition-colors relative ${configEditada.derivacion_automatica ? "bg-blis-red" : "bg-gray-700"}`}
-                            >
-                              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${configEditada.derivacion_automatica ? "translate-x-7" : "translate-x-1"}`} />
-                            </button>
+                            <Switch
+                              checked={!!configEditada.derivacion_automatica}
+                              onCheckedChange={(v) => setConfigEditada({ ...configEditada, derivacion_automatica: v })}
+                            />
                           </div>
 
                           <div>
@@ -661,12 +795,10 @@ export default function ChatAdminPage() {
                               <p className="text-sm text-white font-bold">Permitir archivos</p>
                               <p className="text-xs text-gray-400">Adjuntar imágenes y documentos</p>
                             </div>
-                            <button
-                              onClick={() => setConfigEditada({ ...configEditada, permitir_archivos: !configEditada.permitir_archivos })}
-                              className={`w-12 h-6 rounded-full transition-colors relative ${configEditada.permitir_archivos ? "bg-blis-red" : "bg-gray-700"}`}
-                            >
-                              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${configEditada.permitir_archivos ? "translate-x-7" : "translate-x-1"}`} />
-                            </button>
+                            <Switch
+                              checked={!!configEditada.permitir_archivos}
+                              onCheckedChange={(v) => setConfigEditada({ ...configEditada, permitir_archivos: v })}
+                            />
                           </div>
 
                           <Button
@@ -678,30 +810,29 @@ export default function ChatAdminPage() {
                             Guardar Configuración
                           </Button>
                         </div>
-                      ) : (
+                      )}
+                      {seccionConfig === "ia" && (
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-3 rounded-xl bg-white/5">
                             <div>
                               <p className="text-sm text-white font-bold">Bot IA activo</p>
                               <p className="text-xs text-gray-400">Responder automáticamente con IA</p>
                             </div>
-                            <button
-                              onClick={() => setConfigEditada({ ...configEditada, ia_activa: !configEditada.ia_activa })}
-                              className={`w-12 h-6 rounded-full transition-colors relative ${configEditada.ia_activa ? "bg-emerald-500" : "bg-gray-700"}`}
-                            >
-                              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${configEditada.ia_activa ? "translate-x-7" : "translate-x-1"}`} />
-                            </button>
+                            <Switch
+                              checked={!!configEditada.ia_activa}
+                              onCheckedChange={(v) => setConfigEditada({ ...configEditada, ia_activa: v })}
+                            />
                           </div>
 
                           <div>
                             <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Modelo de IA</label>
                             <select
-                              value={configEditada.ia_modelo || "gemini-1.5-flash"}
+                              value={configEditada.ia_modelo || "gemini-2.5-flash-preview-05-20"}
                               onChange={(e) => setConfigEditada({ ...configEditada, ia_modelo: e.target.value })}
                               className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white"
                             >
-                              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                              <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                              <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
+                              <option value="gemini-2.5-pro-preview-05-20">Gemini 2.5 Pro</option>
                               <option value="gpt-4o-mini">GPT-4o Mini</option>
                               <option value="gpt-4o">GPT-4o</option>
                             </select>
@@ -737,6 +868,145 @@ export default function ChatAdminPage() {
                             {guardandoConfig ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                             Guardar Entrenamiento IA
                           </Button>
+                        </div>
+                      )}
+                      {seccionConfig === "plantillas" && (
+                        <div className="space-y-4">
+                          {/* Crear nueva plantilla */}
+                          <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                            <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider">
+                              {editandoPlantilla ? "Editar Plantilla" : "Nueva Plantilla"}
+                            </h4>
+                            <Input
+                              value={editandoPlantilla ? editandoPlantilla.titulo : nuevaPlantilla.titulo}
+                              onChange={(e) =>
+                                editandoPlantilla
+                                  ? setEditandoPlantilla({ ...editandoPlantilla, titulo: e.target.value })
+                                  : setNuevaPlantilla({ ...nuevaPlantilla, titulo: e.target.value })
+                              }
+                              placeholder="Título de la plantilla"
+                              className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 text-sm"
+                            />
+                            <textarea
+                              value={editandoPlantilla ? editandoPlantilla.contenido : nuevaPlantilla.contenido}
+                              onChange={(e) =>
+                                editandoPlantilla
+                                  ? setEditandoPlantilla({ ...editandoPlantilla, contenido: e.target.value })
+                                  : setNuevaPlantilla({ ...nuevaPlantilla, contenido: e.target.value })
+                              }
+                              placeholder="Contenido del mensaje..."
+                              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white placeholder:text-gray-600 resize-none"
+                              rows={3}
+                            />
+                            <div className="flex gap-2">
+                              <Input
+                                value={editandoPlantilla ? editandoPlantilla.atajo || "" : nuevaPlantilla.atajo}
+                                onChange={(e) =>
+                                  editandoPlantilla
+                                    ? setEditandoPlantilla({ ...editandoPlantilla, atajo: e.target.value })
+                                    : setNuevaPlantilla({ ...nuevaPlantilla, atajo: e.target.value })
+                                }
+                                placeholder="Atajo (ej: /saludo)"
+                                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 text-sm flex-1"
+                              />
+                              <select
+                                value={editandoPlantilla ? editandoPlantilla.departamento || "general" : nuevaPlantilla.departamento}
+                                onChange={(e) =>
+                                  editandoPlantilla
+                                    ? setEditandoPlantilla({ ...editandoPlantilla, departamento: e.target.value })
+                                    : setNuevaPlantilla({ ...nuevaPlantilla, departamento: e.target.value })
+                                }
+                                className="bg-white/5 border border-white/10 rounded-xl px-3 text-sm text-white"
+                              >
+                                <option value="general">General</option>
+                                <option value="ventas">Ventas</option>
+                                <option value="soporte">Soporte</option>
+                                <option value="onboarding">Onboarding</option>
+                              </select>
+                            </div>
+                            <div className="flex gap-2">
+                              {editandoPlantilla ? (
+                                <>
+                                  <Button
+                                    onClick={actualizarPlantilla}
+                                    disabled={guardandoPlantilla}
+                                    className="flex-1 bg-blis-red hover:bg-blis-red/90 text-white font-black uppercase tracking-wider text-xs"
+                                  >
+                                    {guardandoPlantilla ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                                    Actualizar
+                                  </Button>
+                                  <Button
+                                    onClick={() => setEditandoPlantilla(null)}
+                                    variant="outline"
+                                    className="border-white/10 text-gray-300 hover:bg-white/5"
+                                  >
+                                    Cancelar
+                                  </Button>
+                                </>
+                              ) : (
+                                <Button
+                                  onClick={crearPlantilla}
+                                  disabled={guardandoPlantilla || !nuevaPlantilla.titulo.trim() || !nuevaPlantilla.contenido.trim()}
+                                  className="w-full bg-blis-red hover:bg-blis-red/90 text-white font-black uppercase tracking-wider text-xs"
+                                >
+                                  {guardandoPlantilla ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                                  Crear Plantilla
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Lista de plantillas */}
+                          <div className="space-y-2">
+                            <h4 className="text-xs font-black text-gray-400 uppercase tracking-wider px-1">
+                              Plantillas guardadas ({listaPlantillas.length})
+                            </h4>
+                            {loadingPlantillas ? (
+                              <div className="flex items-center justify-center py-8">
+                                <Loader2 className="w-6 h-6 animate-spin text-blis-red" />
+                              </div>
+                            ) : listaPlantillas.length === 0 ? (
+                              <p className="text-xs text-gray-500 text-center py-8">No hay plantillas guardadas</p>
+                            ) : (
+                              listaPlantillas.map((p) => (
+                                <div
+                                  key={p.id}
+                                  className="bg-white/5 border border-white/10 rounded-xl p-3 group hover:bg-white/[0.07] transition-colors"
+                                >
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <p className="text-sm font-bold text-white truncate">{p.titulo}</p>
+                                        <span className="text-[9px] bg-white/10 text-gray-400 px-1.5 py-0.5 rounded uppercase">
+                                          {p.departamento}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs text-gray-400 line-clamp-2">{p.contenido}</p>
+                                      {p.atajo && (
+                                        <p className="text-[10px] text-gray-500 mt-1">Atajo: {p.atajo}</p>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <button
+                                        onClick={() => setEditandoPlantilla(p)}
+                                        className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white"
+                                        title="Editar"
+                                      >
+                                        <Edit3 className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        onClick={() => eliminarPlantilla(p.id)}
+                                        className="p-1.5 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-400"
+                                        title="Eliminar"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
                         </div>
                       )}
                     </>
@@ -930,6 +1200,80 @@ export default function ChatAdminPage() {
                 </button>
               ))
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Asignar Visitante */}
+      <Dialog open={modalAsignar} onOpenChange={setModalAsignar}>
+        <DialogContent className="bg-[#111] border-white/10 text-white max-w-md">
+          <DialogHeader><DialogTitle className="text-sm font-black uppercase tracking-wider">Asignar conversación</DialogTitle></DialogHeader>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Visitante</label>
+              <p className="text-sm text-white font-bold">{visitanteSeleccionado?.nombre}</p>
+              <p className="text-xs text-gray-500">{visitanteSeleccionado?.pagina_origen || "Web"}</p>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Tipo de conversación</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: "info", label: "Info General" },
+                  { id: "ventas", label: "Ventas" },
+                  { id: "soporte", label: "Soporte" },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTipoAsignacion(t.id as any)}
+                    className={`p-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors ${
+                      tipoAsignacion === t.id
+                        ? "bg-blis-red text-white"
+                        : "bg-white/5 text-gray-400 hover:bg-white/10"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Asignar a agente</label>
+              {agentesDisponibles.length === 0 ? (
+                <p className="text-xs text-gray-500">No hay agentes disponibles</p>
+              ) : (
+                <div className="space-y-1 max-h-48 overflow-y-auto">
+                  {agentesDisponibles.map((a) => (
+                    <button
+                      key={a.id}
+                      onClick={() => setAgenteAsignado(a.id)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors text-left ${
+                        agenteAsignado === a.id ? "bg-blis-red/20 border border-blis-red/30" : "hover:bg-white/5"
+                      }`}
+                    >
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={a.avatar_url} />
+                        <AvatarFallback className="bg-blis-red/20 text-blis-red text-xs font-black">{a.nombre?.[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-white">{a.nombre}</p>
+                        <p className="text-[10px] text-gray-500">{a.estado_chat === "online" ? "En línea" : "Desconectado"}</p>
+                      </div>
+                      {agenteAsignado === a.id && <CheckCircle2 className="w-4 h-4 text-blis-red" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={confirmarAsignacion}
+              disabled={!agenteAsignado}
+              className="w-full bg-blis-red hover:bg-blis-red/90 text-white font-black uppercase tracking-wider text-xs"
+            >
+              Asignar y Atender
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -12,34 +12,38 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
-async function callGemini(prompt: string, systemPrompt: string): Promise<string | null> {
+async function callGemini(prompt: string, systemPrompt: string, model: string, maxTokens: number): Promise<string | null> {
   if (!GEMINI_API_KEY) return null;
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    const response = await fetch(`${url}?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt }] },
         contents: [
-          { role: "user", parts: [{ text: systemPrompt }] },
-          { role: "model", parts: [{ text: "Entendido." }] },
           { role: "user", parts: [{ text: prompt }] },
         ],
         generationConfig: {
-          maxOutputTokens: 500,
+          maxOutputTokens: maxTokens,
           temperature: 0.7,
         },
       }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error("[chat/ai] Gemini error:", await response.text());
+      return null;
+    }
     const data = await response.json();
     return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
-  } catch {
+  } catch (err) {
+    console.error("[chat/ai] Gemini exception:", err);
     return null;
   }
 }
 
-async function callChatGPT(prompt: string, systemPrompt: string): Promise<string | null> {
+async function callChatGPT(prompt: string, systemPrompt: string, model: string, maxTokens: number): Promise<string | null> {
   if (!OPENAI_API_KEY) return null;
   try {
     const response = await fetch(OPENAI_API_URL, {
@@ -49,20 +53,24 @@ async function callChatGPT(prompt: string, systemPrompt: string): Promise<string
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt },
         ],
-        max_tokens: 500,
+        max_tokens: maxTokens,
         temperature: 0.7,
       }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error("[chat/ai] OpenAI error:", await response.text());
+      return null;
+    }
     const data = await response.json();
     return data.choices?.[0]?.message?.content || null;
-  } catch {
+  } catch (err) {
+    console.error("[chat/ai] OpenAI exception:", err);
     return null;
   }
 }
@@ -70,14 +78,41 @@ async function callChatGPT(prompt: string, systemPrompt: string): Promise<string
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { mensaje, sala_id, contexto = [], empresa_id, configuracion_ia } = body;
+    const { mensaje, sala_id, contexto = [], empresa_id } = body;
 
     if (!mensaje) {
       return NextResponse.json({ error: "Mensaje requerido" }, { status: 400 });
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    const config = configuracion_ia || {};
+
+    // Load config from database if empresa_id provided
+    let config: any = {};
+    if (empresa_id) {
+      const { data: dbConfig } = await supabaseAdmin
+        .from("chat_config")
+        .select("*")
+        .eq("empresa_id", empresa_id)
+        .single();
+      if (dbConfig) config = dbConfig;
+    }
+
+    // If IA is disabled, respond with fallback
+    if (config.ia_activa === false) {
+      const fallback = config.widget_mensaje_fuera_horario ||
+        "Gracias por contactarnos. Un asesor te atenderá en breve.";
+      if (sala_id) {
+        await supabaseAdmin.from("chat_mensajes").insert({
+          sala_id,
+          user_id: null,
+          tipo: "sistema",
+          contenido: fallback,
+          enviado: true,
+          metadata: { es_ia: false, motivo: "ia_desactivada" },
+        });
+      }
+      return NextResponse.json({ success: true, respuesta: fallback, necesita_derivacion: true, confianza: 0.1 });
+    }
 
     // Build system prompt
     const systemPrompt = config.ia_prompt_sistema ||
@@ -90,15 +125,32 @@ export async function POST(request: NextRequest) {
 
     const fullPrompt = `${contextText}\nUsuario: ${mensaje}\nAsistente:`;
 
-    // Try Gemini first, then ChatGPT
-    let respuesta = await callGemini(fullPrompt, systemPrompt);
-    if (!respuesta) {
-      respuesta = await callChatGPT(fullPrompt, systemPrompt);
+    const iaModelo = config.ia_modelo || "gemini-2.5-flash-preview-05-20";
+    const maxTokens = config.ia_max_tokens || 1024;
+    const isGemini = iaModelo.startsWith("gemini");
+
+    // Try configured model first, then fallback
+    let respuesta: string | null = null;
+    let modeloUsado = iaModelo;
+
+    if (isGemini) {
+      respuesta = await callGemini(fullPrompt, systemPrompt, iaModelo, maxTokens);
+      if (!respuesta && OPENAI_API_KEY) {
+        respuesta = await callChatGPT(fullPrompt, systemPrompt, "gpt-4o-mini", maxTokens);
+        modeloUsado = "gpt-4o-mini";
+      }
+    } else {
+      respuesta = await callChatGPT(fullPrompt, systemPrompt, iaModelo, maxTokens);
+      if (!respuesta && GEMINI_API_KEY) {
+        respuesta = await callGemini(fullPrompt, systemPrompt, "gemini-1.5-flash", maxTokens);
+        modeloUsado = "gemini-1.5-flash";
+      }
     }
 
     // Fallback if both fail
     if (!respuesta) {
       respuesta = "Lo siento, estoy experimentando dificultades técnicas. Un agente humano te atenderá en breve.";
+      modeloUsado = "fallback";
     }
 
     // Detectar intención de derivación
@@ -117,7 +169,7 @@ export async function POST(request: NextRequest) {
         tipo: "ia",
         contenido: respuesta,
         enviado: true,
-        metadata: { es_ia: true, modelo: respuesta ? "gemini" : "fallback" },
+        metadata: { es_ia: true, modelo: modeloUsado },
       });
     }
 

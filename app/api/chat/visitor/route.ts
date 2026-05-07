@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getAuthUser } from "@/lib/supabase/api-auth";
+import { randomUUID } from "crypto";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const empresaId = "6186f014-c8c7-4027-9f08-8acf2bae3eae";
 
-    let visitorSessionId = session_id || crypto.randomUUID();
+    let visitorSessionId = session_id || randomUUID();
     let salaId: string;
     let isNewConversation = false;
 
@@ -148,54 +149,23 @@ export async function POST(request: NextRequest) {
 
     if (msgError) throw msgError;
 
-    // Si es conversación nueva, buscar primer agente online y asignar
+    // Si es conversación nueva, enviar mensaje de bienvenida configurable
     if (isNewConversation) {
-      const { data: agenteOnline } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
+      const { data: chatConfig } = await supabaseAdmin
+        .from("chat_config")
+        .select("widget_mensaje_bienvenida, widget_mensaje_fuera_horario")
         .eq("empresa_id", empresaId)
-        .eq("estado_chat", "online")
-        .in("rol", ["admin", "editor", "superadmin"])
-        .order("created_at", { ascending: true })
-        .limit(1)
         .single();
 
-      if (agenteOnline) {
-        // Agregar agente como admin de la sala
-        await supabaseAdmin.from("chat_miembros").insert({
-          sala_id: salaId,
-          user_id: agenteOnline.id,
-          rol_sala: "admin",
-        });
+      const mensajeBienvenida = chatConfig?.widget_mensaje_bienvenida || `¡Hola ${nombre}! Bienvenido a BLIS Corp. ¿En qué podemos ayudarte hoy?`;
 
-        // Mensaje de sistema de bienvenida
-        await supabaseAdmin.from("chat_mensajes").insert({
-          sala_id: salaId,
-          user_id: null,
-          tipo: "sistema",
-          contenido: `¡Hola ${nombre}! Bienvenido a BLIS Corp. Un asesor te atenderá en breve. Mientras tanto, cuéntanos en qué podemos ayudarte.`,
-          enviado: true,
-        });
-
-        // Notificar al agente
-        await supabaseAdmin.from("notificaciones").insert({
-          user_id: agenteOnline.id,
-          empresa_id: empresaId,
-          tipo: "sistema",
-          titulo: "Nuevo visitante en chat",
-          mensaje: `${nombre} ha iniciado una conversación desde ${pagina_origen || "la web"}`,
-          link: "/superadmin/chat",
-        });
-      } else {
-        // Sin agentes online: mensaje de fuera de horario
-        await supabaseAdmin.from("chat_mensajes").insert({
-          sala_id: salaId,
-          user_id: null,
-          tipo: "sistema",
-          contenido: `¡Hola ${nombre}! Gracias por contactarnos. En este momento no hay asesores disponibles, pero dejaste tu mensaje y te responderemos lo antes posible.`,
-          enviado: true,
-        });
-      }
+      await supabaseAdmin.from("chat_mensajes").insert({
+        sala_id: salaId,
+        user_id: null,
+        tipo: "sistema",
+        contenido: mensajeBienvenida,
+        enviado: true,
+      });
     }
 
     // Obtener historial de mensajes de esta sala para retornar al visitante
