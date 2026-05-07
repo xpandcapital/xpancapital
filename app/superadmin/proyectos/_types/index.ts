@@ -97,3 +97,41 @@ export const extractNotionId = (input: string): string | null => {
   }
   return null
 }
+
+export const getStatusBadgeColor = (status: string) => {
+  switch (status) {
+    case 'EN PLANOS': return 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+    case 'PREVENTA': return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+    case 'VENTA CON ESCRITURA': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+    case 'VENTA FINALIZADA': return 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+    case 'PROYECTO ENTREGADO': return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+    default: return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+  }
+}
+
+export const getLotStatusBadgeColor = (status: string) => {
+  switch (status) {
+    case 'Vendido': return 'bg-red-500/10 text-red-400 border-red-500/20'
+    case 'Disponible':
+    case 'Activo': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+    case 'Reservado': return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+    case 'Desistido': return 'bg-gray-500/10 text-gray-400 border-gray-500/20'
+    default: return 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
+  }
+}
+
+export type ProjectFormData = {
+  name: string
+  id: string
+  status: string
+  website: string
+  location: string
+  description: string
+  cover_image: string
+  gallery_images: string[]
+  start_date: string
+  end_date: string
+  logo_url: string
+  primary_color: string
+  secondary_color: string
+}

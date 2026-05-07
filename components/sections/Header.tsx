@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { useShop } from "@/context/ShopContext"
 import { useLandingCMS } from "@/context/LandingCMSContext"
 import { stripHtml } from "@/lib/strip-html"
+import { NotificationBell } from "@/components/superadmin/NotificationBell"
 
 interface HeaderProps {
     searchProps?: {
@@ -377,40 +378,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                     </div>
 
                                     {/* Notification Dropdown - Only for logged users */}
-                                    <div className="relative group/notif">
-                                        <button className="relative text-gray-400 hover:text-white transition-colors">
-                                            <Bell className="w-5 h-5" />
-                                            <span className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-blis-red rounded-full border-2 border-black flex items-center justify-center">
-                                                <span className="flex h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_8px_white]"></span>
-                                            </span>
-                                        </button>
-
-                                        {/* Notif Mini-Menu */}
-                                        <div className="absolute top-full right-0 pt-4 w-72 scale-95 opacity-0 pointer-events-none group-hover/notif:scale-100 group-hover/notif:opacity-100 group-hover/notif:pointer-events-auto transition-all duration-300 origin-top-right z-50">
-                                            <div className="bg-[#0A0D11]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
-                                                <div className="p-4 border-b border-white/5">
-                                                    <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Notificaciones</h3>
-                                                </div>
-                                                <div className="p-2 space-y-1">
-                                                    <div className="p-3 rounded-xl bg-blis-red/10 border border-blis-red/20">
-                                                        <p className="text-[10px] font-bold text-white mb-1">Nueva Mentoría</p>
-                                                        <p className="text-[9px] text-gray-400 leading-tight">Tu sesión de mentoría ha sido confirmada para mañana.</p>
-                                                    </div>
-                                                    <div className="p-3 rounded-xl hover:bg-white/5 transition-colors">
-                                                        <p className="text-[10px] font-bold text-gray-300 mb-1">BlisCoins Recibidos</p>
-                                                        <p className="text-[9px] text-gray-500 leading-tight">Has ganado 50 BlisCoins por tu reciente actividad.</p>
-                                                    </div>
-                                                    <div className="p-3 rounded-xl hover:bg-white/5 transition-colors">
-                                                        <p className="text-[10px] font-bold text-gray-300 mb-1">Seguridad</p>
-                                                        <p className="text-[9px] text-gray-500 leading-tight">Inicio de sesión detectado desde un nuevo dispositivo.</p>
-                                                    </div>
-                                                </div>
-                                                <div className="p-3 bg-black/50 border-t border-white/5 text-center">
-                                                    <button className="text-[9px] font-black text-gray-500 uppercase tracking-widest hover:text-white transition-colors">Ver todas</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <NotificationBell />
 
                                     {/* User Profile Dropdown */}
                                     <div className="relative group/user">

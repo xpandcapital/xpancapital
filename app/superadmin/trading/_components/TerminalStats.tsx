@@ -2,35 +2,38 @@
 
 import React from 'react';
 import { TrendingUp, TrendingDown, Brain, Bot, Trash2 } from 'lucide-react';
-import type { TerminalTab } from '../_types';
+import type {
+  TerminalTab, OpenPosition, TradeHistoryEntry, SessionReport, AiKnowledge,
+  TradingMetrics, TradeReplayData, PnlData, ConfirmAction
+} from '../_types';
 
 interface TerminalStatsProps {
   terminalTab: TerminalTab;
-  openPositions: any[];
-  tradeHistory: any[];
+  openPositions: OpenPosition[];
+  tradeHistory: TradeHistoryEntry[];
   historyFilter: 'ALL' | 'REAL' | 'PAPER';
-  historyWindow: any[];
+  historyWindow: TradeHistoryEntry[];
   historyTotal: number;
   historyLoading: boolean;
   hasMoreHistory: boolean;
   tableScrollRef: React.RefObject<HTMLDivElement | null>;
-  savedReports: any[];
-  aiKnowledge: any[];
-  tradingMetrics: any;
+  savedReports: SessionReport[];
+  aiKnowledge: AiKnowledge[];
+  tradingMetrics: TradingMetrics;
   activeSymbol: string;
   currentPriceRef: React.RefObject<number>;
   symbolPricesRef: React.RefObject<Record<string, number>>;
   isTableMaximized: boolean;
   viewMode: string;
-  tradeReplayData: any;
+  tradeReplayData: TradeReplayData | null;
   lastSeenHistoryCount: number;
   lastSeenReportsCount: number;
   isMounted: boolean;
   fmtUsd: (val: number) => string;
-  formatTableTime: (ts: any) => string;
+  formatTableTime: (ts: number) => string;
   formatTimePassed: (ms: number) => string;
-  getPnlData: (pos: any) => any;
-  safeText: (val: any) => string;
+  getPnlData: (pos: OpenPosition) => PnlData;
+  safeText: (val: string | number | null | undefined) => string;
   onSetTerminalTab: (tab: TerminalTab) => void;
   onSetHistoryFilter: (filter: 'ALL' | 'REAL' | 'PAPER') => void;
   onSetHistoryTotal: (n: number) => void;
@@ -38,21 +41,21 @@ interface TerminalStatsProps {
   onSetLastSeenReportsCount: (n: number) => void;
   onSetSelectedPositionId: (id: string | null) => void;
   onSetHoverPositionId: (id: string | null) => void;
-  onSetTradeReplayData: (data: any) => void;
-  onSetConfirmAction: (action: any) => void;
-  onSetAiKnowledge: (knowledge: any[]) => void;
+  onSetTradeReplayData: (data: TradeReplayData | null) => void;
+  onSetConfirmAction: (action: ConfirmAction | null) => void;
+  onSetAiKnowledge: (knowledge: AiKnowledge[]) => void;
   onWipeAllData: () => void;
   onSetIsTableMaximized: (v: boolean) => void;
-  onSetHistoryWindow: (v: any) => void;
+  onSetHistoryWindow: (v: TradeHistoryEntry[]) => void;
   onSetHistoryOffset: (v: number) => void;
   onSetHistoryLoading: (v: boolean) => void;
   onSetHasMoreHistory: (v: boolean) => void;
   onCloseTradeManual: (id: string) => void;
-  supabaseClient: any;
+  supabaseClient: unknown;
   now: number;
 }
 
-export const TerminalStats: React.FC<TerminalStatsProps> = ({
+export const TerminalStats = React.memo(function TerminalStats({
   terminalTab, openPositions, tradeHistory, historyFilter, historyWindow,
   historyTotal, historyLoading, hasMoreHistory, tableScrollRef, savedReports,
   aiKnowledge, tradingMetrics, activeSymbol, currentPriceRef, symbolPricesRef,
@@ -63,7 +66,7 @@ export const TerminalStats: React.FC<TerminalStatsProps> = ({
   onSetHoverPositionId, onSetTradeReplayData, onSetConfirmAction, onSetAiKnowledge,
   onWipeAllData, onSetIsTableMaximized, onSetHistoryWindow, onSetHistoryOffset,
   onSetHistoryLoading, onSetHasMoreHistory, onCloseTradeManual, supabaseClient, now
-}) => {
+}: TerminalStatsProps) {
   if (viewMode !== 'split') return null;
 
   const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -163,7 +166,7 @@ export const TerminalStats: React.FC<TerminalStatsProps> = ({
               </div>
               <div className="flex gap-2">
                 {['ALL', 'REAL', 'PAPER'].map(f => (
-                  <button key={f} onClick={() => onSetHistoryFilter(f as any)} className={`text-[10px] font-black uppercase tracking-wider transition-all ${historyFilter === f ? 'text-white border-b border-white' : 'text-gray-500 hover:text-gray-300'}`}>{f === 'ALL' ? 'Todos' : f}</button>
+                  <button key={f} onClick={() => onSetHistoryFilter(f as 'ALL' | 'REAL' | 'PAPER')} className={`text-[10px] font-black uppercase tracking-wider transition-all ${historyFilter === f ? 'text-white border-b border-white' : 'text-gray-500 hover:text-gray-300'}`}>{f === 'ALL' ? 'Todos' : f}</button>
                 ))}
               </div>
             </div>
@@ -185,7 +188,7 @@ export const TerminalStats: React.FC<TerminalStatsProps> = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {historyWindow.filter(t => historyFilter === 'ALL' || t.tradeMode === historyFilter).map((t: any, i: number) => {
+                  {historyWindow.filter(t => historyFilter === 'ALL' || t.tradeMode === historyFilter).map((t: TradeHistoryEntry, i: number) => {
                     const isWin = t.finalPnl >= 0;
                     const shortId = (t.id || '').toString().slice(-6).toUpperCase();
                     const openTag = t.openedBy === 'IA' ? 'IA' : 'H';
@@ -251,7 +254,7 @@ export const TerminalStats: React.FC<TerminalStatsProps> = ({
                 <div className="py-16 text-center text-gray-600 font-black uppercase tracking-[0.4em] opacity-20">Ninguna heurística registrada.</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {aiKnowledge.map((mem: any, idx: number) => {
+                  {aiKnowledge.map((mem: AiKnowledge, idx: number) => {
                     const isWin = mem.outcome === 'WIN';
                     return (
                       <div key={`mem-${mem.id}-${idx}`} className={`${isWin ? 'bg-emerald-500/5' : 'bg-blis-red/5'} border ${isWin ? 'border-emerald-500/20' : 'border-blis-red/20'} p-5 rounded-2xl flex flex-col gap-2 relative overflow-hidden group hover:border-opacity-50 transition-all`}>
@@ -276,4 +279,4 @@ export const TerminalStats: React.FC<TerminalStatsProps> = ({
       </div>
     </div>
   );
-};
+});

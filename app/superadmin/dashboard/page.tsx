@@ -1,166 +1,388 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-    LayoutDashboard, DollarSign, PieChart, Activity, Home, Calendar,
-    Wallet, FileCheck, AlertCircle, ChevronRight
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  DollarSign, Package, Users, Eye, Contact, Briefcase,
+  ShoppingCart, FileText, TrendingUp, RefreshCw
 } from 'lucide-react';
-import { 
-    PieChart as RePieChart, Pie, Tooltip, ResponsiveContainer, Cell 
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
-import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabaseClient';
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 
-const formatCurrency = (val: number) => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'USD' }).format(val);
+const formatCurrency = (val: number) =>
+  new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'USD' }).format(val);
 
-export default function MontebelloDashboard() {
-    const [data, setData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+const formatNumber = (val: number) => new Intl.NumberFormat('es-PE').format(val);
 
-    const fetchData = async () => {
-        setLoading(true);
-        const { data: results, error } = await supabase
-            .from('contract_reconciliation')
-            .select('*')
-            .order('lot_id', { ascending: true });
-        
-        if (error) console.error("Error fetching:", error);
-        setData(results || []);
-        setLoading(false);
-    };
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-    useEffect(() => { fetchData(); }, []);
+function SkeletonStats() {
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl animate-pulse">
+            <div className="w-10 h-10 bg-white/5 rounded-xl mb-4" />
+            <div className="h-3 w-24 bg-white/5 rounded mb-3" />
+            <div className="h-8 w-20 bg-white/5 rounded" />
+          </div>
+        ))}
+      </div>
 
-    const stats = useMemo(() => {
-        const totalVentas = data.reduce((s, i) => s + (Number(i.total_price) || 0), 0);
-        const totalRecaudado = data.reduce((s, i) => s + (Number(i.actual_paid_amount) || 0), 0);
-        const totalDeudaHoy = data.reduce((s, i) => s + (Number(i.actual_balance_owed) || 0), 0);
-        const totalProyectado = data.reduce((s, i) => s + (Number(i.projected_installments_dec2026) || 0), 0);
-        const totalEscritura = data.reduce((s, i) => s + (Number(i.balance_due_deed) || 0), 0);
-        
-        return { totalVentas, totalRecaudado, totalDeudaHoy, totalProyectado, totalEscritura };
-    }, [data]);
-
-    const chartData = useMemo(() => [
-        { name: 'Recaudado', value: stats.totalRecaudado || 0, color: '#10b981' },
-        { name: 'Deuda Hoy', value: stats.totalDeudaHoy || 0, color: '#f59e0b' },
-        { name: 'Proyectado', value: stats.totalProyectado || 0, color: '#3b82f6' },
-        { name: 'Escritura', value: stats.totalEscritura || 0, color: '#be0b3c' }
-    ], [stats]);
-
-    return (
-        <div className="min-h-screen bg-[#050505] text-white p-8 font-sans">
-            <div className="max-w-[1600px] mx-auto space-y-8">
-                
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-4xl font-black uppercase tracking-tighter italic">Montebello <span className="text-blis-red">Master Panel</span></h1>
-                            <button onClick={fetchData} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-all">
-                                <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                            </button>
-                        </div>
-                        <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
-                            <Activity size={14} className="text-emerald-500" /> Auditoría de Cartera Inmobiliaria v4.1
-                        </p>
-                    </div>
-                    <div className="bg-[#0a0a0a] border border-white/5 p-4 rounded-2xl flex items-center gap-4 shadow-xl">
-                        <div className="p-3 bg-emerald-500/10 rounded-xl"><Wallet size={20} className="text-emerald-500" /></div>
-                        <div>
-                            <p className="text-[9px] font-black text-zinc-600 uppercase">Caja Total (32 Lotes)</p>
-                            <p className="text-xl font-black text-white">{formatCurrency(stats.totalVentas)}</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Grid de Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[
-                        { label: 'Recaudado Real', val: stats.totalRecaudado, icon: FileCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/5' },
-                        { label: 'Deuda Exigible Hoy', val: stats.totalDeudaHoy, icon: AlertCircle, color: 'text-amber-500', bg: 'bg-amber-500/5' },
-                        { label: 'Proyección 2026/27', val: stats.totalProyectado, icon: Calendar, color: 'text-blue-500', bg: 'bg-blue-500/5' },
-                        { label: 'Saldo Escrituras', val: stats.totalEscritura, icon: Home, color: 'text-blis-red', bg: 'bg-blis-red/5' },
-                    ].map((s, i) => (
-                        <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl">
-                            <div className={`absolute top-0 right-0 w-24 h-24 ${s.bg} blur-3xl rounded-full -translate-y-1/2 translate-x-1/2`} />
-                            <s.icon className={`${s.color} mb-4 relative z-10`} size={24} />
-                            <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest relative z-10">{s.label}</p>
-                            <h4 className="text-3xl font-black text-white mt-1 relative z-10">{formatCurrency(s.val)}</h4>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Tabla y Chart */}
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                    
-                    <div className="xl:col-span-2 bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
-                        <div className="p-8 border-b border-white/5 flex items-center justify-between">
-                            <h3 className="text-sm font-black uppercase tracking-[0.3em] flex items-center gap-3">
-                                <LayoutDashboard size={18} className="text-blis-red" /> Detalle por Lote
-                            </h3>
-                            <span className="bg-white/5 text-zinc-500 text-[10px] px-3 py-1 rounded-full font-black">{data.length} EXPEDIENTES</span>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead>
-                                    <tr className="bg-black/40">
-                                        <th className="p-5 text-[9px] font-black text-zinc-600 uppercase">Lote - Cliente</th>
-                                        <th className="p-5 text-[9px] font-black text-zinc-600 uppercase">Recaudado</th>
-                                        <th className="p-5 text-[9px] font-black text-amber-500 uppercase">Deuda Hoy</th>
-                                        <th className="p-5 text-[9px] font-black text-zinc-600 uppercase text-right">Escritura</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/[0.02]">
-                                    {data.map((row, i) => (
-                                        <tr key={i} className="hover:bg-white/[0.02] transition-colors">
-                                            <td className="p-5 font-bold text-xs uppercase">
-                                                <span className="text-blis-red mr-2">[{row.lot_id}]</span> {row.client_name}
-                                            </td>
-                                            <td className="p-5 text-xs font-black text-emerald-500">{formatCurrency(row.actual_paid_amount)}</td>
-                                            <td className="p-5 text-xs font-black text-amber-500">{formatCurrency(row.actual_balance_owed)}</td>
-                                            <td className="p-5 text-xs font-black text-right">{formatCurrency(row.balance_due_deed)}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center">
-                        <h3 className="text-xs font-black uppercase tracking-[0.2em] mb-8 self-start">Distribución de Capital</h3>
-                        <div className="w-full h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <RePieChart>
-                                    <Pie data={chartData} innerRadius={80} outerRadius={120} paddingAngle={5} dataKey="value">
-                                        {chartData.map((entry, index) => (
-                                            <Cell key={index} fill={entry.color} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip contentStyle={{ backgroundColor: '#000', border: 'none' }} />
-                                </RePieChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="w-full space-y-3 mt-8">
-                            {chartData.map((d, i) => (
-                                <div key={i} className="flex justify-between items-center text-[10px] font-black uppercase">
-                                    <span className="flex items-center gap-2 text-zinc-500">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: d.color }} /> {d.name}
-                                    </span>
-                                    <span>{formatCurrency(d.value)}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl flex items-center gap-5 animate-pulse">
+            <div className="w-14 h-14 bg-white/5 rounded-2xl" />
+            <div className="space-y-3">
+              <div className="h-3 w-20 bg-white/5 rounded" />
+              <div className="h-8 w-16 bg-white/5 rounded" />
             </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl animate-pulse">
+          <div className="h-4 w-40 bg-white/5 rounded mb-8" />
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-6 bg-white/5 rounded-lg" style={{ width: `${40 + Math.random() * 50}%` }} />
+            ))}
+          </div>
         </div>
-    );
+        <div className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl animate-pulse">
+          <div className="h-4 w-32 bg-white/5 rounded mb-8" />
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <div className="h-6 w-6 bg-white/5 rounded" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-white/5 rounded w-3/4" />
+                  <div className="h-1.5 bg-white/5 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-6 shadow-2xl animate-pulse">
+            <div className="h-4 w-32 bg-white/5 rounded mb-6" />
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, j) => (
+                <div key={j} className="space-y-2">
+                  <div className="h-4 bg-white/5 rounded w-3/4" />
+                  <div className="h-3 bg-white/5 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
 }
 
-function RefreshCw(props: any) {
+export default function Dashboard() {
+  const [empresa, setEmpresa] = useState<{ nombre: string; id: string }>({ nombre: 'BLIS Corp', id: DEFAULT_EMPRESA_ID });
+  const [productsCount, setProductsCount] = useState(0);
+  const [clientsCount, setClientsCount] = useState(0);
+  const [blogViews, setBlogViews] = useState(0);
+  const [leadsCount, setLeadsCount] = useState(0);
+  const [projectsCount, setProjectsCount] = useState(0);
+  const [compras, setCompras] = useState<any[]>([]);
+  const [topProducts, setTopProducts] = useState<{ nombre: string; ventas: number }[]>([]);
+  const [lastLeads, setLastLeads] = useState<any[]>([]);
+  const [lastCompras, setLastCompras] = useState<any[]>([]);
+  const [lastPosts, setLastPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const empresaId = DEFAULT_EMPRESA_ID;
+
+    const [
+      { data: empresaData },
+      { count: prodCount },
+      { count: cliCount },
+      { data: blogData },
+      { count: leadsTotal },
+      { data: projectsData },
+      { data: comprasData },
+      { data: topProdData },
+      { data: lastLeadsData },
+      { data: lastComprasData },
+      { data: lastPostsData },
+    ] = await Promise.all([
+      supabase.from('empresas').select('id, nombre').eq('id', empresaId).single(),
+      supabase.from('productos').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('activo', true),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
+      supabase.from('blog_posts').select('vistas').eq('empresa_id', empresaId),
+      supabase.from('leads').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
+      supabase.from('projects').select('id').eq('is_active', true),
+      supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('empresa_id', empresaId).eq('estado', 'completado'),
+      supabase.from('compra_items').select('cantidad, compra_id, producto:productos!inner(nombre)').order('compra_id'),
+      supabase.from('leads').select('nombre, email, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
+      supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
+      supabase.from('blog_posts').select('titulo, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
+    ]);
+
+    if (empresaData) setEmpresa({ nombre: empresaData.nombre, id: empresaData.id });
+    setProductsCount(prodCount || 0);
+    setClientsCount(cliCount || 0);
+    setBlogViews((blogData || []).reduce((s: number, p: any) => s + (p.vistas || 0), 0));
+    setLeadsCount(leadsTotal || 0);
+    setProjectsCount((projectsData || []).length);
+    setCompras(comprasData || []);
+    setLastLeads(lastLeadsData || []);
+    setLastCompras(lastComprasData || []);
+    setLastPosts(lastPostsData || []);
+
+    if (comprasData && topProdData) {
+      const completedIds = new Set(comprasData.map((c: any) => c.id));
+      const filtered = (topProdData || []).filter((item: any) => completedIds.has(item.compra_id));
+      const productMap = new Map<string, number>();
+      for (const item of filtered) {
+        const prod = Array.isArray(item.producto) ? item.producto[0] : item.producto;
+        const name = prod?.nombre || 'Sin nombre';
+        productMap.set(name, (productMap.get(name) || 0) + (item.cantidad || 1));
+      }
+      const sorted = [...productMap.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([nombre, ventas]) => ({ nombre, ventas }));
+      setTopProducts(sorted);
+    }
+
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  useEffect(() => {
+    const comprasChannel = supabase
+      .channel('dashboard-compras')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'compras' }, () => { fetchData() })
+      .subscribe()
+
+    const leadsChannel = supabase
+      .channel('dashboard-leads')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, () => { fetchData() })
+      .subscribe()
+
+    const blogChannel = supabase
+      .channel('dashboard-blog')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'blog_posts' }, () => { fetchData() })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_posts' }, () => { fetchData() })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(comprasChannel)
+      supabase.removeChannel(leadsChannel)
+      supabase.removeChannel(blogChannel)
+    }
+  }, [fetchData]);
+
+  const totalVentas = useMemo(() => compras.reduce((s, c) => s + (Number(c.monto_usd) || 0), 0), [compras]);
+
+  const monthlySales = useMemo(() => {
+    const now = new Date();
+    const months: { label: string; ventas: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ label: MESES[d.getMonth()], ventas: 0 });
+    }
+    for (const c of compras) {
+      if (!c.creado_en) continue;
+      const d = new Date(c.creado_en);
+      const key = MESES[d.getMonth()];
+      const entry = months.find(m => m.label === key);
+      if (entry) entry.ventas += Number(c.monto_usd) || 0;
+    }
+    return months;
+  }, [compras]);
+
   return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" ><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
-  )
+    <div className="min-h-screen bg-[#050505] text-white p-8 font-sans">
+      <div className="max-w-[1600px] mx-auto space-y-8">
+
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-4xl font-black uppercase tracking-tighter">
+                {empresa.nombre} <span className="text-blis-red">Panel</span>
+              </h1>
+              <button onClick={fetchData} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-all">
+                <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              </button>
+            </div>
+            <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
+              <TrendingUp size={14} className="text-emerald-500" /> Panel de Control Corporativo
+            </p>
+          </div>
+          <div className="bg-[#0a0a0a] border border-white/5 p-4 rounded-2xl flex items-center gap-4 shadow-xl">
+            <div className="p-3 bg-emerald-500/10 rounded-xl"><DollarSign size={20} className="text-emerald-500" /></div>
+            <div>
+              <p className="text-[9px] font-black text-zinc-600 uppercase">Ventas Totales</p>
+              <p className="text-xl font-black text-white">{formatCurrency(totalVentas)}</p>
+            </div>
+          </div>
+        </div>
+
+        {loading ? (
+          <SkeletonStats />
+        ) : (
+          <>
+        {/* Top Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { label: 'Productos Activos', val: productsCount, icon: Package, color: 'text-emerald-500', bg: 'bg-emerald-500/5', fmt: formatNumber },
+            { label: 'Clientes', val: clientsCount, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/5', fmt: formatNumber },
+            { label: 'Visitas al Blog', val: blogViews, icon: Eye, color: 'text-amber-500', bg: 'bg-amber-500/5', fmt: formatNumber },
+            { label: 'Ventas Totales', val: totalVentas, icon: DollarSign, color: 'text-blis-red', bg: 'bg-blis-red/5', fmt: formatCurrency },
+          ].map((s, i) => (
+            <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl">
+              <div className={`absolute top-0 right-0 w-24 h-24 ${s.bg} blur-3xl rounded-full -translate-y-1/2 translate-x-1/2`} />
+              <s.icon className={`${s.color} mb-4 relative z-10`} size={24} />
+              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest relative z-10">{s.label}</p>
+              <h4 className="text-3xl font-black text-white mt-1 relative z-10">{s.fmt(s.val)}</h4>
+            </div>
+          ))}
+        </div>
+
+        {/* Second Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            { label: 'Leads', val: leadsCount, icon: Contact, color: 'text-purple-500', bg: 'bg-purple-500/5', fmt: formatNumber },
+            { label: 'Proyectos Activos', val: projectsCount, icon: Briefcase, color: 'text-cyan-500', bg: 'bg-cyan-500/5', fmt: formatNumber },
+          ].map((s, i) => (
+            <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl flex items-center gap-5">
+              <div className={`absolute top-0 right-0 w-24 h-24 ${s.bg} blur-3xl rounded-full -translate-y-1/2 translate-x-1/2`} />
+              <div className={`p-4 ${s.bg} rounded-2xl relative z-10`}><s.icon className={s.color} size={28} /></div>
+              <div className="relative z-10">
+                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{s.label}</p>
+                <h4 className="text-4xl font-black text-white mt-1">{s.fmt(s.val)}</h4>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Monthly Sales Bar Chart */}
+          <div className="xl:col-span-2 bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl">
+            <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+              <TrendingUp size={18} className="text-blis-red" /> Ventas Mensuales
+            </h3>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlySales}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" />
+                  <XAxis dataKey="label" stroke="#52525b" tick={{ fontSize: 11, fontWeight: 700 }} />
+                  <YAxis stroke="#52525b" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '1rem' }}
+                    formatter={(value: any) => [formatCurrency(Number(value) || 0), 'Ventas']}
+                    labelStyle={{ color: '#a1a1aa', fontWeight: 700, fontSize: 12 }}
+                  />
+                  <Bar dataKey="ventas" fill="#be0b3c" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Top Products */}
+          <div className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl">
+            <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+              <Package size={18} className="text-emerald-500" /> Top Productos
+            </h3>
+            {topProducts.length === 0 ? (
+              <p className="text-zinc-500 text-xs text-center py-12">Sin datos de ventas</p>
+            ) : (
+              <div className="space-y-4">
+                {topProducts.map((p, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <span className="text-xl font-black text-zinc-700 w-6 text-right">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{p.nombre}</p>
+                      <div className="mt-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 rounded-full"
+                          style={{ width: `${topProducts[0] ? (p.ventas / topProducts[0].ventas) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-zinc-500">{p.ventas} ventas</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Activity Feed */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {[
+            {
+              title: 'Últimos Leads', icon: Contact, color: 'text-purple-500',
+              data: lastLeads, empty: 'Sin leads recientes',
+              render: (item: any) => (
+                <div key={item.id}>
+                  <p className="text-sm font-bold text-white">{item.nombre}</p>
+                  <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
+                    {item.email || 'Sin email'} • {item.estado || 'nuevo'}
+                  </p>
+                </div>
+              )
+            },
+            {
+              title: 'Últimas Compras', icon: ShoppingCart, color: 'text-emerald-500',
+              data: lastCompras, empty: 'Sin compras recientes',
+              render: (item: any) => (
+                <div key={item.id}>
+                  <p className="text-sm font-bold text-white">{formatCurrency(item.monto_usd || 0)}</p>
+                  <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
+                    {item.id?.slice(0, 8)}... • {item.estado || 'pendiente'}
+                  </p>
+                </div>
+              )
+            },
+            {
+              title: 'Últimos Posts', icon: FileText, color: 'text-amber-500',
+              data: lastPosts, empty: 'Sin posts recientes',
+              render: (item: any) => (
+                <div key={item.id}>
+                  <p className="text-sm font-bold text-white truncate">{item.titulo}</p>
+                  <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
+                    {item.estado || 'borrador'} • {item.creado_en ? new Date(item.creado_en).toLocaleDateString('es-PE') : ''}
+                  </p>
+                </div>
+              )
+            },
+          ].map((col, i) => (
+            <div key={i} className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-6 shadow-2xl">
+              <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+                <col.icon size={18} className={col.color} /> {col.title}
+              </h3>
+              <div className="space-y-4">
+                {col.data.length === 0 ? (
+                  <p className="text-zinc-500 text-xs py-8 text-center">{col.empty}</p>
+                ) : (
+                  col.data.map(col.render)
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+          </>
+        )}
+
+      </div>
+    </div>
+  );
 }

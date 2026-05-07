@@ -10,7 +10,7 @@ import {
     ShoppingCart, Boxes, CandlestickChart, Scale, BarChart3,
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
-    CalendarDays, Megaphone, ClipboardList, BookOpenCheck, Package
+    CalendarDays, Megaphone, ClipboardList, BookOpenCheck, Package, Bell
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { LucideProps } from "lucide-react"
@@ -18,6 +18,7 @@ import { usePermissions } from "@/hooks/usePermissions"
 import { useAuth } from "@/hooks/useAuth"
 import { SECTION_PERMISSIONS, hasPermission, type Permission } from "@/lib/auth/permissions"
 import { CompanySwitcher } from "./CompanySwitcher"
+import { NotificationBell } from "./NotificationBell"
 
 type SubItem = {
     icon: React.ComponentType<LucideProps>
@@ -106,6 +107,7 @@ const ALL_SECTIONS: Section[] = [
                     { icon: FileText, label: "Formularios", href: "/superadmin/formularios", permission: "formularios:ver" },
                     { icon: UsersRound, label: "Leads", href: "/superadmin/leads", permission: "leads:ver" },
                     { icon: Megaphone, label: "Campañas", href: "/superadmin/campanas", permission: "campanas:ver" },
+                    { icon: Bell, label: "Notificaciones", href: "/superadmin/notificaciones", permission: "notificaciones:ver" },
                 ]
             },
             {
@@ -265,12 +267,15 @@ export function SuperadminSidebar() {
                             </motion.span>
                         )}
                     </AnimatePresence>
-                    <button
-                        onClick={() => setIsCollapsed(!isCollapsed)}
-                        className={`p-2 hover:bg-white/5 rounded-xl text-gray-400 transition-colors ${isCollapsed ? 'hover:text-blis-red' : ''}`}
-                    >
-                        <ChevronLeft className={`w-5 h-5 transition-transform duration-500 ${isCollapsed ? 'rotate-180' : ''}`} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        {isExpanded && <NotificationBell />}
+                        <button
+                            onClick={() => setIsCollapsed(!isCollapsed)}
+                            className={`p-2 hover:bg-white/5 rounded-xl text-gray-400 transition-colors ${isCollapsed ? 'hover:text-blis-red' : ''}`}
+                        >
+                            <ChevronLeft className={`w-5 h-5 transition-transform duration-500 ${isCollapsed ? 'rotate-180' : ''}`} />
+                        </button>
+                    </div>
                 </div>
 
                 {isExpanded && (

@@ -22,7 +22,7 @@ export function ConfirmationModal({ confirmDelete, onConfirm, onCancel }: Confir
             <div className="space-y-2">
               <h3 className="text-white font-black uppercase text-xs tracking-widest">¿Confirmar Eliminación?</h3>
               <p className="text-gray-400 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                Estás a punto de borrar <span className="text-white">"{confirmDelete.title}"</span>. Esta acción no se puede deshacer.
+                Estás a punto de borrar <span className="text-white">&quot;{confirmDelete.title}&quot;</span>. Esta acción no se puede deshacer.
               </p>
             </div>
             <div className="flex gap-3">

@@ -1,13 +1,4 @@
-/**
- * BLIS Corp — Notion AI Parser (Forma de Pago)
- * Usa Gemini para interpretar inteligentemente el campo "Forma de Pago"
- * Adaptado del sistema de extracción de contratos
- */
-
-import { parseFormaDePago as parseWithRules } from './parse-forma-pago';
-import { logger } from './utils/logger';
-import { aiChat } from './ai-client';
-
+// Types ────────────────────────────────────────────────────────────────────────
 export interface ParsedFormaDePago {
   iniciales: Array<{
     descripcion: string;
@@ -22,10 +13,33 @@ export interface ParsedFormaDePago {
   };
 }
 
-/**
- * Usa Gemini para interpretar el campo "Forma de Pago"
- * Si no hay API key o falla, usa reglas
- */
+interface AIParsedInicial {
+  descripcion?: string;
+  description?: string;
+  monto: number | string;
+  fecha: string | null;
+}
+
+interface AIParsedCuotas {
+  cantidad?: number;
+  monto?: number | null;
+  fecha_inicio?: string | null;
+  dia_pago?: number | null;
+}
+
+interface AIParsedResponse {
+  iniciales: AIParsedInicial[];
+  cuotas: AIParsedCuotas;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Implementation
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import { parseFormaDePago as parseWithRules } from './parse-forma-pago';
+import { logger } from './utils/logger';
+import { aiChat } from './ai-client';
+
 export async function parseFormaDePagoWithAI(
   formaDePago: string,
   _geminiApiKey?: string
@@ -37,7 +51,6 @@ export async function parseFormaDePagoWithAI(
     };
   }
 
-  // Si no hay texto significativo, usar reglas
   if (formaDePago.trim().length < 5) {
     const result = parseWithRules(formaDePago);
     return {
@@ -136,7 +149,7 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin explicaciones):
     }
 
     const cleanJson = text.replace(/```json\n?|\n?```/g, '').trim();
-    const parsed = JSON.parse(cleanJson);
+    const parsed: AIParsedResponse = JSON.parse(cleanJson);
 
     logger.debug('[Notion AI Parser] AI result:', parsed);
 
@@ -145,7 +158,7 @@ Responde ÚNICAMENTE con este JSON exacto (sin markdown, sin explicaciones):
     }
 
     return {
-      iniciales: parsed.iniciales.map((i: any) => ({
+      iniciales: parsed.iniciales.map((i: AIParsedInicial) => ({
         descripcion: i.descripcion || i.description || 'Pago',
         monto: typeof i.monto === 'number' ? i.monto : parseFloat(i.monto) || 0,
         fecha: i.fecha || null

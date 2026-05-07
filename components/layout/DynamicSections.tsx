@@ -111,7 +111,7 @@ const DEFAULT_ORDER_BY_TIPO: Record<string, string[]> = {
   landing: ["hero", "about", "video", "process", "operations", "market", "calculator", "map", "projects", "catalog", "team", "testimonials", "faq", "blog", "footer"],
   blog: ["blogHero", "blogPosts", "footer"],
   blog_post: ["blogHero", "content", "author", "related", "footer"],
-  tienda: ["shopHero", "shopSidebar", "shopProducts", "shopNotifications", "footer"],
+  tienda: ["shopHero", "shopCategories", "shopProducts", "shopUrgency", "shopNotifications", "footer"],
   producto: ["hero", "gallery", "details", "related", "footer"],
 
   curso: ["hero", "modules", "instructor", "footer"],

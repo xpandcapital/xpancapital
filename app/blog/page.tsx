@@ -12,9 +12,10 @@ const getCachedBlogPosts = unstable_cache(
   async () => {
     const { data: posts } = await supabaseAdmin
       .from("blog_posts")
-      .select("id, titulo, slug, extracto, imagen_portada, estado, publicado_en, es_premium, categoria_id")
+      .select("id, titulo, slug, extracto, imagen_portada, estado, publicado_en, es_premium, categoria_id, visibilidad")
       .eq("empresa_id", DEFAULT_EMPRESA_ID)
       .eq("estado", "publicado")
+      .neq("visibilidad", "oculto")
       .order("publicado_en", { ascending: false })
       .limit(100);
 

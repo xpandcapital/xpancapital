@@ -1,1 +1,1 @@
-export { useTemplates, useCanvasEditor } from './useTemplates'
+export { useCertificados } from "./useCertificados";

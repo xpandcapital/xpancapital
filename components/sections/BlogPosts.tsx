@@ -35,7 +35,7 @@ export function BlogPosts({ data = {} }: BlogPostsProps) {
         const postsData = await postsRes.json();
         if (postsData.success && postsData.data && isMounted) {
           const mapped = postsData.data
-            .filter((p: any) => p.estado === 'publicado')
+            .filter((p: any) => p.estado === 'publicado' && p.visibilidad !== 'oculto')
             .map((p: any) => ({
               id: p.id,
               title: p.titulo,

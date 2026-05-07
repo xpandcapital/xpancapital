@@ -2,12 +2,21 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
-import { Camera, Lock, Mail, Phone, Save, ShieldCheck, User as UserIcon, X, RotateCw, FlipHorizontal, Check, Search, ChevronDown, Trash2, Bell } from "lucide-react";
+import { Camera, Lock, Mail, Phone, Save, ShieldCheck, User as UserIcon, X, RotateCw, FlipHorizontal, Check, Search, ChevronDown, Trash2, Bell, ShoppingCart, GraduationCap, FileText, UserPlus, Settings } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isAdminRole, ROLE_CONFIG } from "@/lib/auth/permissions";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
+import { getSupabase } from "@/lib/supabase";
+
+const NOTIFICACION_TIPOS = [
+  { key: "blog", label: "Blog", icon: FileText, color: "text-violet-400" },
+  { key: "leads", label: "Leads", icon: UserPlus, color: "text-emerald-400" },
+  { key: "compras", label: "Compras", icon: ShoppingCart, color: "text-amber-400" },
+  { key: "cursos", label: "Cursos", icon: GraduationCap, color: "text-blue-400" },
+  { key: "sistema", label: "Sistema", icon: Settings, color: "text-gray-400" },
+];
 
 const COUNTRIES = [
     { name: "Ecuador", code: "+593", flag: "🇪🇨" },
@@ -286,6 +295,45 @@ export default function AdminProfile() {
     const [notifications, setNotifications] = useState(true);
     const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 
+    const [notificacionesTipos, setNotificacionesTipos] = useState<Record<string, boolean>>({
+        blog: true,
+        leads: true,
+        compras: true,
+        cursos: true,
+        sistema: true,
+    });
+    const [tiposCargados, setTiposCargados] = useState(false);
+
+    useEffect(() => {
+        if (!user?.id || tiposCargados) return;
+        const loadTipos = async () => {
+            const supabase = getSupabase();
+            if (!supabase) return;
+            const { data } = await supabase
+                .from("profiles")
+                .select("notificaciones_tipos")
+                .eq("id", user.id)
+                .single();
+            if (data?.notificaciones_tipos) {
+                setNotificacionesTipos(data.notificaciones_tipos);
+            }
+            setTiposCargados(true);
+        };
+        loadTipos();
+    }, [user?.id, tiposCargados]);
+
+    const handleToggleTipo = async (key: string, enabled: boolean) => {
+        const nuevos = { ...notificacionesTipos, [key]: enabled };
+        setNotificacionesTipos(nuevos);
+        if (!user?.id) return;
+        const supabase = getSupabase();
+        if (!supabase) return;
+        await supabase
+            .from("profiles")
+            .update({ notificaciones_tipos: nuevos })
+            .eq("id", user.id);
+    };
+
     // Flag para no reiniciar los campos cuando el usuario está editando
     const [formInitialized, setFormInitialized] = useState(false);
 
@@ -523,12 +571,39 @@ export default function AdminProfile() {
                             >
                                 <div className="flex items-center gap-4">
                                     <Bell className="w-5 h-5 text-gray-400 group-hover:text-blis-red transition-colors" />
-                                    <span className="text-sm font-bold text-white uppercase tracking-widest">Notificaciones de Sistema</span>
+                                    <span className="text-sm font-bold text-white uppercase tracking-widest">Notificaciones Push</span>
                                 </div>
                                 <div className={`w-12 h-6 rounded-full relative p-1 transition-colors duration-300 ${notifications ? 'bg-blis-red' : 'bg-zinc-800'}`}>
                                     <motion.div animate={{ x: notifications ? 24 : 0 }} className="w-4 h-4 bg-white rounded-full" />
                                 </div>
                             </button>
+
+                            <div className="p-6 bg-white/[0.02] border border-white/5 rounded-[2rem] space-y-4">
+                                <h3 className="text-xs font-black text-white uppercase tracking-tight flex items-center gap-2">
+                                    <Bell className="w-4 h-4 text-gray-500" />
+                                    Tipos de Notificación
+                                </h3>
+                                <div className="space-y-3">
+                                    {NOTIFICACION_TIPOS.map(({ key, label, icon: IconComp, color }) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => handleToggleTipo(key, !notificacionesTipos[key])}
+                                            className="w-full flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group text-left"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-white/5`}>
+                                                    <IconComp className={`w-4 h-4 ${color}`} />
+                                                </div>
+                                                <span className="text-xs font-bold text-white uppercase tracking-wider">{label}</span>
+                                            </div>
+                                            <div className={`w-10 h-5 rounded-full relative p-0.5 transition-colors duration-300 ${notificacionesTipos[key] ? 'bg-blis-red' : 'bg-zinc-800'}`}>
+                                                <motion.div animate={{ x: notificacionesTipos[key] ? 20 : 0 }} className="w-4 h-4 bg-white rounded-full" />
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="p-6 bg-blis-red/5 border border-blis-red/20 rounded-[2rem] space-y-4">
                                 <h3 className="text-xs font-black text-white uppercase tracking-tight">Cambio de Contraseña</h3>
                                 <p className="text-[10px] text-gray-500 font-medium leading-relaxed uppercase tracking-widest">Por seguridad, recibirás un enlace en tu correo para restablecer tu clave.</p>

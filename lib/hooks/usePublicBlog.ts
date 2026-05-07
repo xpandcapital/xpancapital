@@ -22,6 +22,9 @@ export interface PublicBlogPost {
   recompensa_coins: number
   vistas: number
   tiempo_lectura_minutos: number
+  contrasena?: string
+  visibilidad?: string
+  sin_recompensa?: boolean
   tags?: { id: string; nombre: string; slug: string }[]
   creado_en: string
   actualizado_en: string
@@ -42,7 +45,8 @@ export function usePublicBlog() {
       const data = await response.json()
 
       if (data.success && data.data) {
-        setPosts(data.data)
+        const visiblePosts = data.data.filter((p: PublicBlogPost) => p.visibilidad !== 'oculto');
+        setPosts(visiblePosts)
       } else {
         setError(data.error || 'Error al cargar posts')
       }

@@ -9,6 +9,7 @@ import { Header } from "@/components/sections/Header"
 import { CursorWrapper } from "@/components/ui/CursorWrapper"
 import { PWARegistrar } from "@/components/utils/PWARegistrar"
 import { DynamicMetadata } from "@/components/utils/DynamicMetadata"
+import { FaviconBadge } from "@/components/layout/FaviconBadge"
 
 interface LayoutProvidersProps {
   children: React.ReactNode
@@ -40,6 +41,7 @@ export function LayoutProviders({
             <SalesProvider>
               <CursorWrapper />
               <PWARegistrar />
+              <FaviconBadge />
               <Header
                 logoHorizontal={logoHorizontal}
                 logoVertical={logoVertical}

@@ -1,7 +1,9 @@
 "use client"
 
+import React from "react"
 import { motion } from "framer-motion"
 import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon } from "lucide-react"
+import Image from "next/image"
 import type { Product, Category, Status } from '../../_types'
 
 interface ProductGridViewProps {
@@ -18,7 +20,7 @@ interface ProductGridViewProps {
   isBlisCoinsEnabled: boolean
 }
 
-export function ProductGridView({
+export const ProductGridView = React.memo(function ProductGridView({
   products,
   selectedIds,
   onToggleSelection,
@@ -56,9 +58,13 @@ export function ProductGridView({
             </button>
 
             <div className="aspect-square relative overflow-hidden">
-              <img
+              <Image
                 src={product.image?.startsWith('http') ? product.image : `/images/${product.image}`}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                alt={product.name}
+                fill
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                unoptimized
+                className="object-cover group-hover:scale-110 transition-transform duration-500"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = 'https://placehold.co/400x200/111111/FFFFFF?text=' + product.name
                 }}
@@ -194,4 +200,4 @@ export function ProductGridView({
       })}
     </div>
   )
-}
+})

@@ -1,1 +1,8 @@
 export { InputField, ColorField, SectionCard } from './FormFields'
+export { BrandingPanel } from './BrandingPanel'
+export { SiteInfoPanel } from './SiteInfoPanel'
+export { ColorsPanel } from './ColorsPanel'
+export { SeoPanel } from './SeoPanel'
+export { SocialPanel } from './SocialPanel'
+export { ContactPanel } from './ContactPanel'
+export { FooterPanel } from './FooterPanel'

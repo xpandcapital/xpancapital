@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     Calculator as CalcIcon,
     Table as TableIcon,
@@ -15,6 +16,7 @@ import {
     Sparkles,
     Globe,
     Variable,
+    Link2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TOOL_INDEX } from './tool-index';
@@ -28,19 +30,29 @@ import { UnitConverter } from './UnitConverter';
 import { MiniSpreadsheet } from './MiniSpreadsheet';
 import { FormulaCalc } from './FormulaCalc';
 import { NoteTool } from './NoteTool';
+import { ShortLinkTool } from './ShortLinkTool';
 
-export const SidebarTools = () => {
-    const [activeTool, setActiveTool] = useState<string>('calc');
+export const SidebarTools = ({ initialTool }: { initialTool?: string }) => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const [activeTool, setActiveTool] = useState<string>(initialTool || 'calc');
     const [selectedCountry, setSelectedCountry] = useState('Perú');
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedCats, setExpandedCats] = useState<string[]>([]);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
+    const handleSetTool = (id: string) => {
+        setActiveTool(id);
+        setIsCollapsed(false);
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('tool', id);
+        router.replace(`/superadmin/utilidades?${params.toString()}`, { scroll: false });
+    };
+
     useEffect(() => {
         const handleOpenTool = (e: any) => {
             if (e.detail) {
-                setActiveTool(e.detail);
-                setIsCollapsed(false);
+                handleSetTool(e.detail);
             }
         };
         window.addEventListener('open-blis-tool', handleOpenTool);
@@ -61,6 +73,7 @@ export const SidebarTools = () => {
         { id: 'excel', name: 'Análisis Matriz', icon: TableIcon, component: <MiniSpreadsheet />, cat: 'Favoritos' },
         { id: 'formulas', name: 'Inteligencia', icon: Variable, component: <FormulaCalc />, cat: 'Favoritos' },
         { id: 'wa', name: 'Enlace Rápido', icon: MessageSquare, component: <NoteTool />, cat: 'Favoritos' },
+        { id: 'shortlinks', name: 'Acortador', icon: Link2, component: <ShortLinkTool />, cat: 'Favoritos' },
     ];
 
     const allCategories = ['Favoritos', 'Finanzas', 'Logística', 'Oficina', 'Marketing', 'Técnico', 'Multimedia'];
@@ -144,7 +157,7 @@ export const SidebarTools = () => {
                             {filteredTools.map(t => (
                                 <button
                                     key={t.id}
-                                    onClick={() => { setActiveTool(t.id); setSearchQuery(''); }}
+                                    onClick={() => { handleSetTool(t.id); setSearchQuery(''); }}
                                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-white/5 transition-all text-left group"
                                 >
                                     <t.icon className="w-4 h-4 shrink-0 text-zinc-700 group-hover:text-blis-red" />
@@ -179,7 +192,7 @@ export const SidebarTools = () => {
                                             {(cat === 'Favoritos' ? favorites : TOOL_INDEX.filter(t => t.cat === cat)).map(t => (
                                                 <button
                                                     key={t.id}
-                                                    onClick={() => setActiveTool(t.id)}
+                                                    onClick={() => handleSetTool(t.id)}
                                                     title={isCollapsed ? t.name : ""}
                                                     className={`w-full flex items-center rounded-xl transition-all group relative
                                                         ${isCollapsed ? 'justify-center py-4' : 'gap-4 px-4 py-3'}

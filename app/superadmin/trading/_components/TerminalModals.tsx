@@ -3,45 +3,50 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, TrendingDown, Bot, Brain, Sparkles, Trash2, X, Target, BookOpen } from 'lucide-react';
+import type {
+  MarketTicker, GlobalAlert, ConfirmAction, SessionReport, SimInfoData,
+  OpenPosition, TradeHistoryEntry, TradeReplayData, TickerState, PnlData,
+  DataSource, SimMode, CandleData
+} from '../_types';
 
 interface TerminalModalsProps {
   showSymbolSelector: boolean;
   searchSymbol: string;
-  dataSource: string;
-  simMode: string;
-  marketTickers: any[];
+  dataSource: DataSource;
+  simMode: SimMode;
+  marketTickers: MarketTicker[];
   favoriteSymbols: string[];
   activeSymbol: string;
-  globalAlert: any;
-  confirmAction: any;
-  sessionReport: any;
-  showSimInfo: any;
+  globalAlert: GlobalAlert | string | null;
+  confirmAction: ConfirmAction | null;
+  sessionReport: SessionReport | null;
+  showSimInfo: SimInfoData | null;
   selectedPositionId: string | null;
-  openPositions: any[];
-  tradeHistory: any[];
+  openPositions: OpenPosition[];
+  tradeHistory: TradeHistoryEntry[];
   tradeMode: string;
   activeSymbolRef: React.RefObject<string>;
-  ticker: any;
+  ticker: TickerState;
   currentPriceRef: React.RefObject<number>;
   onSetShowSymbolSelector: (v: boolean) => void;
   onSetSearchSymbol: (v: string) => void;
-  onSetDataSource: (v: any) => void;
+  onSetDataSource: (v: DataSource) => void;
   onSetActiveSymbol: (v: string) => void;
-  onSetSimMode: (v: any) => void;
-  onSetShowSimInfo: (v: any) => void;
+  onSetSimMode: (v: SimMode) => void;
+  onSetShowSimInfo: (v: SimInfoData | null) => void;
   onHandleSymbolChange: (sym: string, force?: boolean) => void;
-  onToggleFavorite: (sym: string, e: any) => void;
-  onSetGlobalAlert: (v: any) => void;
-  onSetConfirmAction: (v: any) => void;
-  onSetSessionReport: (v: any) => void;
+  onToggleFavorite: (sym: string, e: React.MouseEvent) => void;
+  onSetGlobalAlert: (v: GlobalAlert | string | null) => void;
+  onSetConfirmAction: (v: ConfirmAction | null) => void;
+  onSetSessionReport: (v: SessionReport | null) => void;
   onSetSelectedPositionId: (v: string | null) => void;
-  onSetTradeReplayData: (v: any) => void;
-  getPnlData: (pos: any) => any;
+  onSetTradeReplayData: (v: TradeReplayData | null) => void;
+  getPnlData: (pos: OpenPosition) => PnlData;
   fmtUsd: (val: number) => string;
   formatTimePassed: (ms: number) => string;
-  safeText: (val: any) => string;
+  safeText: (val: string | number | null | undefined) => string;
   closeTradeManual: (id: string) => void;
-  candles: any[];
+  candles: CandleData[];
   isMounted: boolean;
 }
 
@@ -127,7 +132,7 @@ export const TerminalModals: React.FC<TerminalModalsProps> = ({
             <div className="p-10 space-y-8">
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-black/40 p-6 rounded-[30px] border border-white/5 text-center"><span className="text-[9px] text-gray-500 font-black block mb-2 uppercase">Win Rate</span><span className="text-3xl font-black text-emerald-400">{sessionReport.winRate}%</span></div>
-                <div className="bg-black/40 p-6 rounded-[30px] border border-white/5 text-center"><span className="text-[9px] text-gray-500 font-black block mb-2 uppercase">Trades</span><span className="text-3xl font-black text-white">{tradeHistory.filter((t: any) => t.sessionId === sessionReport.id).length}</span></div>
+                <div className="bg-black/40 p-6 rounded-[30px] border border-white/5 text-center"><span className="text-[9px] text-gray-500 font-black block mb-2 uppercase">Trades</span><span className="text-3xl font-black text-white">{tradeHistory.filter((t: TradeHistoryEntry) => t.sessionId === sessionReport.id).length}</span></div>
                 <div className="bg-blis-red/20 p-6 rounded-[30px] border border-blis-red/30 text-center"><span className="text-[9px] text-blis-red-neon font-black block mb-2 uppercase">PNL NETO</span><span className={`text-3xl font-black ${sessionReport.totalPnl >= 0 ? 'text-emerald-400' : 'text-blis-red-neon'}`}>${sessionReport.totalPnl.toFixed(1)}</span></div>
               </div>
               <div className="space-y-6">

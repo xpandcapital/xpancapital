@@ -1,123 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-    X, AlertCircle, RotateCw, FlipHorizontal,
-    Bold, Italic, Underline, List, ListOrdered,
-    Heading1, Heading2, Link as LinkBtn, Quote, Code,
-    AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette,
-    Smile, Strikethrough, Trash, Undo, Redo, Eraser,
-    FileCode, Upload, Scissors, GripHorizontal, Sparkles, Image as ImageIcon, Search
+    X, AlertCircle,
+    Link as LinkBtn, FileCode,
+    Scissors, GripHorizontal, Sparkles, Image as ImageIcon,
+    AlignLeft, AlignCenter, AlignRight,
+    RotateCw, FlipHorizontal, Trash
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-export function ImageCropper({ src, onCrop, onCancel }: { src: string; onCrop: (base64: string) => void; onCancel: () => void }) {
-    const [zoom, setZoom] = useState(1);
-    const [rotation, setRotation] = useState(0);
-    const [flipX, setFlipX] = useState(1);
-    const [position, setPosition] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-    const containerRef = useRef<HTMLDivElement>(null);
-    const imageRef = useRef<HTMLImageElement>(null);
-
-    const clampPosition = useCallback((pos: { x: number; y: number }, currentZoom: number, currentRotation: number) => {
-        if (!imageRef.current || !containerRef.current) return pos;
-        const containerW = containerRef.current.offsetWidth;
-        const containerH = containerRef.current.offsetHeight;
-        const img = imageRef.current;
-        let imgW = img.naturalWidth * currentZoom;
-        let imgH = img.naturalHeight * currentZoom;
-        if (currentRotation % 180 !== 0) [imgW, imgH] = [imgH, imgW];
-        const limitX = Math.max(0, (imgW - containerW) / 2);
-        const limitY = Math.max(0, (imgH - containerH) / 2);
-        return { x: Math.min(Math.max(pos.x, -limitX), limitX), y: Math.min(Math.max(pos.y, -limitY), limitY) };
-    }, []);
-
-    const onImageLoad = () => {
-        if (!imageRef.current || !containerRef.current) return;
-        const containerW = containerRef.current.offsetWidth;
-        const containerH = containerRef.current.offsetHeight;
-        const img = imageRef.current;
-        const initialZoom = Math.max(containerW / img.naturalWidth, containerH / img.naturalHeight);
-        setZoom(initialZoom);
-    };
-
-    const handleMouseDown = (e: React.MouseEvent) => {
-        setIsDragging(true);
-        setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-    };
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (isDragging) {
-            const newPos = { x: e.clientX - dragStart.x, y: e.clientY - dragStart.y };
-            setPosition(clampPosition(newPos, zoom, rotation));
-        }
-    };
-
-    const handleMouseUp = () => setIsDragging(false);
-
-    const handleWheel = (e: React.WheelEvent) => {
-        const delta = e.deltaY > 0 ? -0.05 : 0.05;
-        const newZoom = Math.min(Math.max(zoom + delta, 0.01), 10);
-        setZoom(newZoom);
-        setPosition(prev => clampPosition(prev, newZoom, rotation));
-    };
-
-    const rotate = () => setRotation(prev => (prev + 90) % 360);
-    const flip = () => setFlipX(prev => prev * -1);
-
-    const doCrop = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        if (!ctx || !imageRef.current || !containerRef.current) return;
-        const cropWidth = 1200;
-        const cropHeight = 630;
-        canvas.width = cropWidth;
-        canvas.height = cropHeight;
-        const container = containerRef.current;
-        const scaleX = cropWidth / container.offsetWidth;
-        const scaleY = cropHeight / (container.offsetWidth * (630 / 1200));
-
-        ctx.save();
-        ctx.translate(cropWidth / 2, cropHeight / 2);
-        ctx.translate(position.x * scaleX, position.y * scaleY);
-        ctx.rotate((rotation * Math.PI) / 180);
-        ctx.scale(zoom * flipX * scaleX, zoom * scaleY);
-        ctx.drawImage(imageRef.current, -imageRef.current.naturalWidth / 2, -imageRef.current.naturalHeight / 2);
-        ctx.restore();
-        onCrop(canvas.toDataURL("image/jpeg", 0.95));
-    };
-
-    return (
-        <div id="image-cropper-overlay" className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-md p-4" onWheel={handleWheel}>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-zinc-950 border border-white/10 rounded-[3rem] p-10 max-w-2xl w-full space-y-8 shadow-2xl" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-                <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                        <h3 className="text-xs font-black text-white uppercase tracking-widest">Recortar Portada del Artículo</h3>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">Ajusta la imagen al formato panorámico (16:9)</p>
-                    </div>
-                    <button type="button" onClick={onCancel} className="p-3 hover:bg-white/5 rounded-2xl text-gray-500 transition-colors"><X className="w-5 h-5" /></button>
-                </div>
-                <div ref={containerRef} className="aspect-[1200/630] w-full bg-black rounded-[2rem] overflow-hidden border border-white/5 cursor-move relative touch-none flex items-center justify-center" onMouseDown={handleMouseDown}>
-                    <div className="relative" style={{ width: 0, height: 0 }}>
-                        <img ref={imageRef} src={src} crossOrigin="anonymous" onLoad={onImageLoad} alt="Crop" className="max-w-none select-none pointer-events-none" style={{ transform: `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg) scale(${zoom * flipX}, ${zoom})`, transformOrigin: "center center", position: 'absolute', left: -(imageRef.current?.naturalWidth || 0) / 2, top: -(imageRef.current?.naturalHeight || 0) / 2 }} />
-                    </div>
-                    <div className="absolute inset-0 border-2 border-blis-red/40 pointer-events-none" />
-                </div>
-                <div className="flex gap-4">
-                    <button type="button" onClick={rotate} className="flex-1 p-4 bg-white/5 border border-white/5 rounded-2xl text-gray-400 hover:text-white transition-all flex items-center justify-center gap-2"><RotateCw className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-widest">Girar</span></button>
-                    <button type="button" onClick={flip} className="flex-1 p-4 bg-white/5 border border-white/5 rounded-2xl text-gray-400 hover:text-white transition-all flex items-center justify-center gap-2"><FlipHorizontal className="w-4 h-4" /><span className="text-[10px] font-black uppercase tracking-widest">Espejo</span></button>
-                </div>
-                <div className="flex gap-4 pt-2">
-                    <button type="button" onClick={onCancel} className="flex-1 py-5 bg-zinc-900 text-gray-400 font-black uppercase tracking-widest text-[10px] rounded-2xl border border-white/5 transition-all">Cancelar</button>
-                    <button type="button" onClick={doCrop} className="flex-1 py-5 bg-blis-red text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all">Guardar</button>
-                </div>
-            </motion.div>
-        </div>
-    );
-}
+import { ImageCropper } from "./ImageCropper";
+import { ToolbarButtons } from "./ToolbarButtons";
 
 export default function RichTextEditor({
     value,
@@ -156,6 +50,9 @@ export default function RichTextEditor({
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
+    const [selectedColor, setSelectedColor] = useState('#FFFFFF');
+    const [rgb, setRgb] = useState({ r: 255, g: 255, b: 255 });
+
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (isGeneratingAI) {
@@ -177,9 +74,6 @@ export default function RichTextEditor({
             setSavedSelection(sel.getRangeAt(0).cloneRange());
         }
     };
-
-    const [selectedColor, setSelectedColor] = useState('#FFFFFF');
-    const [rgb, setRgb] = useState({ r: 255, g: 255, b: 255 });
 
     useEffect(() => {
         if (value !== localValue && document.activeElement !== editorRef.current) {
@@ -261,6 +155,9 @@ export default function RichTextEditor({
                 case 'foreColor':
                     injection = `<span style="color: ${val}">${selectedText || 'Texto'}</span>`;
                     break;
+                case 'insertImage':
+                    injection = `<img src="${val}" alt="" style="width:100%;display:block;margin:0 auto;" />`;
+                    break;
                 default: return;
             }
 
@@ -279,7 +176,12 @@ export default function RichTextEditor({
         }
 
         if (editorRef.current) {
-            document.execCommand(command, false, val);
+            if (command === 'insertImage') {
+                const html = `<img id="img_${Date.now()}" src="${val}" alt="" style="width:100%;display:block;margin:0 auto;" />`;
+                document.execCommand('insertHTML', false, html);
+            } else {
+                document.execCommand(command, false, val);
+            }
             const newContent = editorRef.current.innerHTML;
             setLocalValue(newContent);
             onChange(newContent);
@@ -307,21 +209,13 @@ export default function RichTextEditor({
             return;
         }
 
-        // Upload to Supabase instead of base64
         try {
             setModal({ type: 'loading', message: 'Subiendo imagen...' });
-            
             const formData = new FormData();
             formData.append('file', file);
             formData.append('folder', 'productos-descripcion');
-            
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
             const data = await res.json();
-            
             if (data.success) {
                 execCommand('insertImage', data.url);
                 setModal(null);
@@ -334,162 +228,6 @@ export default function RichTextEditor({
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
-
-    const Emojis = [
-        '😀', '🤣', '😍', '😎', '🤔', '😴', '🤩', '🥳', '😱', '😡', '🤡', '😇',
-        '🔥', '⭐', '✅', '🚀', '💡', '💎', '🎯', '📍', '📢', '⚠️', '✨', '🎓',
-        '🏆', '💻', '📱', '📈', '🎨', '🛠️', '🧪', '📅', '⏰', '🔒', '🔑', '❤️',
-        '👀', '🙌', '👏', '🤝', '💯', '🌟', '🎈'
-    ];
-
-    const RenderToolbar = () => (
-        <div className="flex flex-wrap items-center gap-1.5 p-3 px-6 bg-zinc-950/80 backdrop-blur-md border-b border-white/5 overflow-visible z-10 w-full rounded-t-3xl">
-            <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/5 items-center px-1 gap-1">
-                <button
-                    type="button"
-                    onClick={() => setIsHtmlMode(!isHtmlMode)}
-                    className={`py-1.5 px-3 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all flex items-center gap-2 ${isHtmlMode ? 'bg-blis-red text-white' : 'bg-transparent text-gray-400 hover:text-white hover:bg-white/5'}`}
-                >
-                    <FileCode className="w-3.5 h-3.5" /> HTML
-                </button>
-
-                <div className="w-px h-4 bg-white/10 mx-1 self-center" />
-
-                <div className="relative">
-                    <button
-                        type="button"
-                        onClick={(e) => { e.preventDefault(); saveSelection(); setShowSizes(!showSizes); setShowColorPicker(false); }}
-                        className="bg-transparent text-gray-400 focus:outline-none hover:text-white cursor-pointer h-[30px] px-3 flex items-center justify-center min-w-max transition-all"
-                        title="Tamaño de Letra"
-                    >
-                        <div className="flex items-baseline font-serif font-black tracking-tighter">
-                            <span className="text-[10px]">a</span>
-                            <span className="text-[14px]">A</span>
-                        </div>
-                    </button>
-                    <AnimatePresence>
-                        {showSizes && (
-                            <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="absolute top-full left-0 mt-2 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl z-[200] w-32 overflow-hidden flex flex-col">
-                                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('fontSize', '3'); setShowSizes(false); }} className="px-4 py-3 text-left hover:bg-white/5 text-[10px] font-bold text-gray-300 uppercase tracking-widest">A Normal</button>
-                                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('fontSize', '1'); setShowSizes(false); }} className="px-4 py-3 text-left hover:bg-white/5 text-[8px] font-bold text-gray-400 uppercase tracking-widest border-t border-white/5">A Pequeño</button>
-                                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('fontSize', '5'); setShowSizes(false); }} className="px-4 py-3 text-left hover:bg-white/5 text-[12px] font-black text-white uppercase tracking-widest border-t border-white/5">A Grande</button>
-                                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('fontSize', '7'); setShowSizes(false); }} className="px-4 py-3 text-left hover:bg-white/5 text-[14px] font-black text-purple-400 uppercase tracking-widest border-t border-white/5">A Enorme</button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
-
-            <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/5">
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('undo'); }} title="Deshacer" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Undo className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('redo'); }} title="Rehacer" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Redo className="w-3.5 h-3.5" /></button>
-            </div>
-
-            <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/5">
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('bold'); }} title="Negrita" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Bold className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('italic'); }} title="Cursiva" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Italic className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('underline'); }} title="Subrayado" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Underline className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('strikeThrough'); }} title="Tachado" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Strikethrough className="w-3.5 h-3.5" /></button>
-                <div className="w-px h-6 bg-white/10 mx-1 self-center" />
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('formatBlock', '<P>'); }} title="Párrafo Normal" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all font-serif font-bold text-xs">P</button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('formatBlock', '<H1>'); }} title="Título H1" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Heading1 className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('formatBlock', '<H2>'); }} title="Subtítulo H2" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Heading2 className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('formatBlock', '<BLOCKQUOTE>'); }} title="Cita Blockquote" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Quote className="w-3.5 h-3.5" /></button>
-                <div className="w-px h-6 bg-white/10 mx-1 self-center" />
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('removeFormat'); }} title="Limpiar Formato" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Eraser className="w-3.5 h-3.5" /></button>
-            </div>
-
-            <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/5">
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('justifyLeft'); }} title="Izquierda" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><AlignLeft className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('justifyCenter'); }} title="Centro" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><AlignCenter className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('justifyRight'); }} title="Derecha" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><AlignRight className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('justifyFull'); }} title="Justificar" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><AlignJustify className="w-3.5 h-3.5" /></button>
-            </div>
-
-            <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/5">
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('insertUnorderedList'); }} title="Lista Puntos" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><List className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); execCommand('insertOrderedList'); }} title="Lista Números" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><ListOrdered className="w-3.5 h-3.5" /></button>
-            </div>
-
-            <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/5">
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); setModal({ type: 'embed' }); }} title="Insertar Código (Iframe/Script)" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><FileCode className="w-3.5 h-3.5" /></button>
-                <button type="button" onMouseDown={(e) => { e.preventDefault(); fileInputRef.current?.click(); }} title="Subir Imagen Local" className="p-2 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg transition-all"><Upload className="w-3.5 h-3.5" /></button>
-                {onImageSearch && (
-                    <button type="button" onMouseDown={(e) => { e.preventDefault(); onImageSearch(); }} title="Buscar Imágenes Premium" className="p-2 hover:bg-purple-500/20 text-purple-400 hover:text-white rounded-lg transition-all"><Search className="w-3.5 h-3.5" /></button>
-                )}
-            </div>
-
-            <div className="relative">
-                <button
-                    type="button"
-                    onMouseDown={(e) => { e.preventDefault(); saveSelection(); setShowColorPicker(!showColorPicker); setShowSizes(false); }}
-                    className="flex bg-white/5 rounded-xl p-0.5 border border-white/5 items-center px-2 hover:border-blis-red/30 transition-all cursor-pointer h-[38px] group"
-                >
-                    <Palette className="w-3.5 h-3.5 text-gray-400 mr-2 group-hover:text-white transition-colors" />
-                    <div className="w-5 h-5 rounded-full border border-white/20 shadow-inner" style={{ backgroundColor: selectedColor }} />
-                </button>
-
-                <AnimatePresence>
-                    {showColorPicker && (
-                        <motion.div initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }} className="absolute top-full left-0 mt-3 p-5 bg-zinc-900 border border-white/10 rounded-[2rem] shadow-2xl z-[100] w-64 space-y-4 ring-1 ring-white/10">
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="text-[9px] font-black uppercase text-gray-500 tracking-widest">Selector Pro</span>
-                                <button onClick={() => setShowColorPicker(false)} className="text-gray-500 hover:text-white transition-colors"><X className="w-3 h-3" /></button>
-                            </div>
-
-                            <div className="grid grid-cols-6 gap-2 mb-4">
-                                {['#FFFFFF', '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#BE0B3C', '#F59E0B', '#10B981', '#3B82F6'].map(color => (
-                                    <button key={color} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { handleColorChange(color); execCommand('foreColor', color); setShowColorPicker(false); }} className="w-full aspect-square rounded-full border border-white/20 shadow-inner hover:scale-125 transition-transform" style={{ backgroundColor: color }} />
-                                ))}
-                            </div>
-
-                            <div className="flex flex-col gap-3 py-3 border-t border-white/10">
-                                <div className="space-y-1 w-full">
-                                    <label className="text-[8px] font-bold text-gray-500 uppercase px-1">Personalizado (Hex)</label>
-                                    <div className="relative w-full flex items-center">
-                                        <div className="absolute left-1.5 z-10 w-6 h-6 rounded-md overflow-hidden border border-white/20">
-                                            <input type="color" value={selectedColor} onChange={(e) => handleColorChange(e.target.value)} className="w-10 h-10 p-0 border-0 absolute -top-2 -left-2 cursor-pointer" />
-                                        </div>
-                                        <input type="text" value={selectedColor} onChange={(e) => handleColorChange(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg pl-10 pr-2 py-2 text-[10px] text-white focus:outline-none focus:border-blis-red font-mono uppercase tracking-widest" />
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-
-            <div className="flex bg-white/5 rounded-xl p-0.5 border border-white/5">
-                <div className="relative">
-                    <button type="button" onClick={() => setShowEmoji(!showEmoji)} title="Emojis" className="p-2 hover:bg-white/10 text-amber-500 rounded-lg transition-all"><Smile className="w-3.5 h-3.5" /></button>
-                    <AnimatePresence>
-                        {showEmoji && (
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="absolute top-full left-0 mt-3 p-4 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl z-[100] grid grid-cols-6 gap-3 w-64 ring-2 ring-black/50">
-                                {Emojis.map(e => (
-                                    <button key={e} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { execCommand('insertText', e); setShowEmoji(false); }} className="text-2xl hover:scale-125 hover:rotate-6 transition-transform active:scale-95 py-1 flex items-center justify-center filter drop-shadow-md">{e}</button>
-                                ))}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
-
-            <div className="flex-1" />
-
-            {onAIGenerate && !showInlineAI && (
-                <button
-                    type="button"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowInlineAI(true); }}
-                    className="flex bg-gradient-to-r from-purple-600/20 to-purple-500/10 border border-purple-500/30 rounded-xl items-center px-4 py-2 hover:from-purple-600/30 hover:to-purple-500/20 transition-all text-[11px] font-black tracking-[0.2em] uppercase text-purple-400 gap-2 shadow-[0_0_15px_rgba(168,85,247,0.15)] whitespace-nowrap w-full md:w-auto justify-center md:justify-start relative overflow-hidden group"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[150%] group-hover:animate-[shimmer_1.5s_infinite]" />
-                    <Sparkles className="w-4 h-4" /> Redactar con IA
-                </button>
-            )}
-
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
-        </div>
-    );
 
     return (
         <div className={`w-full bg-zinc-950 border border-white/10 rounded-3xl overflow-visible transition-all relative shadow-2xl flex flex-col`} style={{ minHeight }}>
@@ -519,8 +257,36 @@ export default function RichTextEditor({
                                     {modal.type !== 'error' && modal.type !== 'loading' && (
                                         <button onClick={() => {
                                             const input = document.getElementById('modal-input') as HTMLTextAreaElement;
-                                            if (modal.type === 'embed') execCommand('insertHTML', input.value);
-                                            else execCommand('createLink', input.value);
+                                            if (!input) { setModal(null); return; }
+                                            if (modal.type === 'embed') {
+                                                if (isHtmlMode) {
+                                                    execCommand('insertHTML', input.value);
+                                                } else if (editorRef.current) {
+                                                    editorRef.current.focus();
+                                                    const sel = window.getSelection();
+                                                    if (sel && savedSelection) {
+                                                        sel.removeAllRanges();
+                                                        sel.addRange(savedSelection);
+                                                    } else if (sel) {
+                                                        const range = document.createRange();
+                                                        range.selectNodeContents(editorRef.current);
+                                                        range.collapse(false);
+                                                        sel.removeAllRanges();
+                                                        sel.addRange(range);
+                                                    }
+                                                    try {
+                                                        document.execCommand('insertHTML', false, input.value);
+                                                        const val = editorRef.current.innerHTML;
+                                                        setLocalValue(val);
+                                                        onChange(val);
+                                                    } catch {
+                                                        editorRef.current.innerHTML += input.value;
+                                                        const val = editorRef.current.innerHTML;
+                                                        setLocalValue(val);
+                                                        onChange(val);
+                                                    }
+                                                }
+                                            } else execCommand('createLink', input.value);
                                             setModal(null);
                                         }} className="flex-1 py-4 bg-blis-red text-white rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] shadow-lg shadow-blis-red/20 hover:scale-[1.02] active:scale-[0.98] transition-all">Aplicar</button>
                                     )}
@@ -532,7 +298,33 @@ export default function RichTextEditor({
                 document.body
             )}
 
-            {RenderToolbar()}
+            <ToolbarButtons
+                isHtmlMode={isHtmlMode}
+                setIsHtmlMode={setIsHtmlMode}
+                execCommand={execCommand}
+                saveSelection={saveSelection}
+                showSizes={showSizes}
+                setShowSizes={setShowSizes}
+                showColorPicker={showColorPicker}
+                setShowColorPicker={setShowColorPicker}
+                selectedColor={selectedColor}
+                handleColorChange={handleColorChange}
+                showEmoji={showEmoji}
+                setShowEmoji={setShowEmoji}
+                fileInputRef={fileInputRef}
+                setModal={setModal}
+                showInlineAI={showInlineAI}
+                setShowInlineAI={setShowInlineAI}
+                inlineTitle={inlineTitle}
+                setInlineTitle={setInlineTitle}
+                inlineIdea={inlineIdea}
+                setInlineIdea={setInlineIdea}
+                elapsedSeconds={elapsedSeconds}
+                onAIGenerate={onAIGenerate}
+                isGeneratingAI={isGeneratingAI}
+                onCancelAIGenerate={onCancelAIGenerate}
+                onImageSearch={onImageSearch}
+            />
 
             <AnimatePresence>
                 {onAIGenerate && showInlineAI && (
@@ -633,6 +425,8 @@ export default function RichTextEditor({
                     <div
                         ref={editorRef}
                         contentEditable
+                        suppressContentEditableWarning
+                        suppressHydrationWarning
                         onClick={(e) => {
                             saveSelection();
                             if ((e.target as HTMLElement).tagName === 'IMG') {
@@ -689,6 +483,8 @@ export default function RichTextEditor({
                 />,
                 document.body
             )}
+
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
         </div>
     );
 }

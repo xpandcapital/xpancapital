@@ -3,3 +3,6 @@ export { TerminalStats } from './TerminalStats';
 export { TerminalChat } from './TerminalChat';
 export { TerminalModals } from './TerminalModals';
 export { TerminalStyles, ChartScrollbar, VerticalSlider, globalStyles } from './TerminalStyles';
+export { ChartCanvas } from './ChartCanvas';
+export { ChartToolbar } from './ChartToolbar';
+export { ChartControls } from './ChartControls';

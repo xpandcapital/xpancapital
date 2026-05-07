@@ -30,7 +30,7 @@ export function BlogHero({ data = {} }: BlogHeroProps) {
         const postsData = await postsRes.json();
         if (postsData.success && postsData.data && isMounted) {
           const mapped = postsData.data
-            .filter((p: any) => p.estado === 'publicado')
+            .filter((p: any) => p.estado === 'publicado' && p.visibilidad !== 'oculto')
             .slice(0, 5)
             .map((p: any) => ({
               id: p.id,

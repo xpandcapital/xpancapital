@@ -38,6 +38,9 @@ export interface Course {
   bliscoins: number
   image: string | null
   certificateTemplateId: string | null
+  paraEquipo: boolean
+  sequentialProgress: boolean
+  requireCompletion: boolean
 }
 
 export interface CertificateTemplate {

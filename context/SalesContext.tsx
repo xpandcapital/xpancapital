@@ -1,8 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useLandingCMS } from './LandingCMSContext';
-
+// Types ────────────────────────────────────────────────────────────────────────
 export interface CartItem {
     id: string;
     name: string;
@@ -32,7 +30,7 @@ export interface LicenciaConducir {
 }
 
 export interface Customer {
-    id: string; // DNI or RUC
+    id: string;
     name: string;
     phone?: string;
     cellphone?: string;
@@ -53,7 +51,6 @@ export interface Customer {
         name: string;
         birthDate?: string;
     };
-    // Extended Ecuador Registro Civil fields
     gender?: string;
     nationality?: string;
     bloodType?: string;
@@ -67,14 +64,11 @@ export interface Customer {
     conditionCedulado?: string;
     cedulaDate?: string;
     deathDate?: string;
-    // Disability
     disability?: string;
     disabilityType?: string;
     disabilityPct?: number;
     conadisCard?: string;
-    // Driver's license
     licencia?: LicenciaConducir;
-    // WhatsApp
     hasWhatsApp?: boolean;
 }
 
@@ -95,9 +89,20 @@ export interface Transaction {
     status: 'completada' | 'pendiente' | 'cancelada';
 }
 
+export interface AddToCartProduct {
+    id: string;
+    name: string;
+    price: number;
+    image?: string;
+    sku?: string;
+    category?: string;
+    discount?: number;
+    discountType?: 'percent' | 'fixed';
+}
+
 interface SalesContextType {
     cart: CartItem[];
-    addToCart: (product: any) => void;
+    addToCart: (product: AddToCartProduct) => void;
     removeFromCart: (productId: string) => void;
     updateQuantity: (productId: string, quantity: number) => void;
     updateItemDiscount: (productId: string, discount: number, type: 'percent' | 'fixed') => void;
@@ -107,7 +112,6 @@ interface SalesContextType {
     tax: number;
     globalDiscount: number;
 
-    // Enterprise features
     customer: Customer | null;
     setCustomer: React.Dispatch<React.SetStateAction<Customer | null>>;
     transactionType: TransactionType;
@@ -126,13 +130,19 @@ interface SalesContextType {
     shippingCost: number;
     setShippingCost: (val: number) => void;
 
-    // Localization
     currency: string;
     taxName: string;
     taxRate: number;
     country: string;
     setCountry: (c: string) => void;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Implementation
+// ═══════════════════════════════════════════════════════════════════════════════
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLandingCMS } from './LandingCMSContext';
 
 const SalesContext = createContext<SalesContextType | undefined>(undefined);
 
@@ -143,7 +153,6 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [documentType, setDocumentType] = useState<DocumentType>('ticket');
     const [history, setHistory] = useState<Transaction[]>([]);
 
-    // Global Discounts
     const [globalDiscountAmount, setGlobalDiscountAmount] = useState(0);
     const [globalDiscountType, setGlobalDiscountType] = useState<'percent' | 'fixed'>('fixed');
     const [couponCode, setCouponCode] = useState('');
@@ -153,31 +162,27 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [subtotal, setSubtotal] = useState(0);
     const [tax, setTax] = useState(0);
 
-    // Localization state
     const [currency, setCurrency] = useState('S/');
     const [taxName, setTaxName] = useState('IGV');
     const [taxRate, setTaxRate] = useState(18);
-    // País: CMS manda. Si hay override manual (localStorage), ese gana.
     const [country, setCountry] = useState('PE');
-    
+
     const { cmsData } = useLandingCMS();
 
-    // Cargar país desde CMS
     useEffect(() => {
-        if (typeof window === 'undefined') return
+        if (typeof window === 'undefined') return;
         if (cmsData?.commercial) {
-            setCountry(cmsData.commercial.country || 'PE')
+            setCountry(cmsData.commercial.country || 'PE');
         }
-    }, [cmsData])
+    }, [cmsData]);
 
-    // Moneda / impuesto desde CMS
     useEffect(() => {
         if (cmsData?.commercial) {
             const currMap: Record<string, string> = {
                 'USD': '$',
                 'PEN': 'S/',
                 'MXN': '$',
-                'EUR': '€',
+                'EUR': '\u20ac',
                 'COP': '$',
                 'CLP': '$'
             };
@@ -188,14 +193,13 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [cmsData]);
 
     const handleSetCountry = (c: string) => {
-        setCountry(c)
+        setCountry(c);
         if (typeof window !== 'undefined') {
-            localStorage.setItem('blis_pos_country', c)
+            localStorage.setItem('blis_pos_country', c);
         }
-    }
+    };
 
     useEffect(() => {
-        // 1. Calculate items total applying item discounts
         let currentSubtotal = cart.reduce((acc, item) => {
             const itemBasePrice = item.price * item.quantity;
             let itemDiscount = 0;
@@ -209,7 +213,6 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             return acc + (itemBasePrice - itemDiscount);
         }, 0);
 
-        // 2. Apply global discount
         let appliedGlobalDiscount = 0;
         if (globalDiscountAmount > 0) {
             if (globalDiscountType === 'percent') {
@@ -221,7 +224,6 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         const finalAmount = Math.max(0, currentSubtotal - appliedGlobalDiscount);
 
-        // 3. Tax & Shipping Logic
         if (documentType === 'ticket') {
             setSubtotal(finalAmount);
             setTax(0);
@@ -235,7 +237,7 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     }, [cart, globalDiscountAmount, globalDiscountType, documentType, taxRate, shippingCost]);
 
-    const addToCart = (product: any) => {
+    const addToCart = (product: AddToCartProduct) => {
         setCart(prev => {
             const existing = prev.find(item => item.id === product.id);
             if (existing) {
@@ -290,7 +292,7 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             items: [...cart],
             subtotal,
             tax,
-            discount: globalDiscountAmount, // and item discounts? maybe just global for history
+            discount: globalDiscountAmount,
             total,
             status: transactionType === 'venta' ? 'completada' : 'pendiente'
         };

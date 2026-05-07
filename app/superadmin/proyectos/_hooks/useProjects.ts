@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { extractNotionId } from '../_types'
 import type { Project, ProjectLot } from '../_types'
 
 export function useProjects() {
@@ -12,26 +13,14 @@ export function useProjects() {
   const loadProjects = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { data: projectsData, error: projectsError } = await supabase
-        .from('projects')
-        .select('*')
-        .order('order_index', { ascending: true, nullsFirst: false })
-        .order('created_at', { ascending: false })
-
-      if (projectsError) throw projectsError
-
-      const projectsWithLots = await Promise.all(
-        (projectsData || []).map(async (project) => {
-          const { data: lots } = await supabase
-            .from('project_lots')
-            .select('*')
-            .eq('project_id', project.id)
-            .order('lot_number')
-          
-          return { ...project, lots: lots || [], gallery_images: project.gallery_images || [] }
-        })
-      )
-
+      const res = await fetch('/api/admin/projects')
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Error loading projects')
+      const projectsWithLots = (json.data || []).map((p: any) => ({
+        ...p,
+        lots: p.lots || [],
+        gallery_images: p.gallery_images || [],
+      }))
       setProjects(projectsWithLots)
       setError(null)
     } catch (err) {
@@ -46,61 +35,15 @@ export function useProjects() {
     loadProjects()
   }, [loadProjects])
 
-  const saveProject = useCallback(async (projectData: Partial<Project>, editingProject: Project | null, existingProjects: Project[]) => {
+  const saveProject = useCallback(async (projectData: Partial<Project>, editingProject: Project | null) => {
     try {
-      if (editingProject) {
-        if (editingProject.id !== projectData.id?.toUpperCase()) {
-          const confirmMsg = `El ID cambió de "${editingProject.id}" a "${projectData.id!.toUpperCase()}". Se creará un nuevo proyecto. ¿Continuar?`
-          if (!confirm(confirmMsg)) return { success: false }
-          
-          const { error: insertError } = await supabase
-            .from('projects')
-            .insert([{
-              id: projectData.id!.toUpperCase(),
-              ...projectData,
-              is_active: true,
-              order_index: editingProject.order_index,
-            }])
-          
-          if (insertError) throw insertError
-          
-          const { error: deleteError } = await supabase
-            .from('projects')
-            .delete()
-            .eq('id', editingProject.id)
-          
-          if (deleteError) throw deleteError
-        } else {
-          const { error } = await supabase
-            .from('projects')
-            .update(projectData)
-            .eq('id', editingProject.id)
-          if (error) throw error
-        }
-      } else {
-        const minOrderIndex = existingProjects.length > 0 
-          ? Math.min(...existingProjects.map(p => p.order_index ?? 0))
-          : 0
-        
-        if (existingProjects.length > 0) {
-          const updatePromises = existingProjects.map(project => {
-            const currentIndex = project.order_index ?? existingProjects.indexOf(project)
-            return supabase.from('projects').update({ order_index: currentIndex + 1 }).eq('id', project.id)
-          })
-          await Promise.all(updatePromises)
-        }
-
-        const { error } = await supabase
-          .from('projects')
-          .insert([{
-            id: projectData.id!.toUpperCase(),
-            ...projectData,
-            is_active: true,
-            order_index: 0,
-          }])
-        if (error) throw error
-      }
-
+      const res = await fetch(`/api/admin/projects${editingProject ? `/${editingProject.id}` : ''}`, {
+        method: editingProject ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(projectData),
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Error al guardar')
       await loadProjects()
       return { success: true }
     } catch (err) {
@@ -111,8 +54,9 @@ export function useProjects() {
 
   const deleteProject = useCallback(async (projectId: string) => {
     try {
-      const { error } = await supabase.from('projects').delete().eq('id', projectId)
-      if (error) throw error
+      const res = await fetch(`/api/admin/projects/${projectId}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error || 'Error al eliminar')
       setProjects(prev => prev.filter(p => p.id !== projectId))
       return { success: true }
     } catch (err) {
@@ -181,17 +125,6 @@ export function useNotionSync() {
     setNotionReceiptsResult(null)
 
     try {
-      // Extract Notion ID
-      const extractNotionId = (input: string): string | null => {
-        let id = input.trim()
-        const idMatch = id.match(/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})|([a-f0-9]{32})/i)
-        if (idMatch) {
-          id = idMatch[0].replace(/-/g, '')
-          return `${id.slice(0,8)}-${id.slice(8,12)}-${id.slice(12,16)}-${id.slice(16,20)}-${id.slice(20)}`
-        }
-        return null
-      }
-
       const dbId = extractNotionId(notionDbId)
       if (!dbId) {
         setNotionResult({ success: false, error: 'ID de base de datos inválido' })
@@ -199,7 +132,6 @@ export function useNotionSync() {
         return { success: false, error: 'ID de base de datos inválido' }
       }
 
-      // Sync lots
       const res = await fetch('/api/notion/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -208,7 +140,6 @@ export function useNotionSync() {
       const data = await res.json()
       setNotionResult(data)
 
-      // Sync receipts if provided
       if (notionReceiptsDbId?.trim()) {
         setNotionResult((prev: any) => ({ ...prev, message: 'Sincronizando recibos...' }))
         const receiptsDbId = extractNotionId(notionReceiptsDbId)
@@ -273,4 +204,38 @@ export function useNotionSync() {
     setNotionReceiptsResult,
     syncWithNotion
   }
+}
+
+export function useAIParse() {
+  const [aiParsing, setAiParsing] = useState(false)
+  const [aiParseResult, setAiParseResult] = useState<any>(null)
+
+  const parseAI = useCallback(async (projectId: string | null, onSuccess?: () => void) => {
+    if (!projectId) return
+
+    setAiParsing(true)
+    setAiParseResult(null)
+
+    try {
+      const res = await fetch('/api/notion/parse-ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: projectId }),
+      })
+
+      const data = await res.json()
+      setAiParseResult(data)
+
+      if (data.success) {
+        onSuccess?.()
+      }
+    } catch (err: any) {
+      console.error('[AI Parse] Error:', err)
+      setAiParseResult({ success: false, error: err.message })
+    }
+
+    setAiParsing(false)
+  }, [])
+
+  return { aiParsing, aiParseResult, setAiParseResult, parseAI }
 }

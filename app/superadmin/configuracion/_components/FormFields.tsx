@@ -61,12 +61,10 @@ export function SectionCard({ title, icon: Icon, children }: {
       className="bg-zinc-900/50 border border-white/5 rounded-2xl overflow-hidden"
     >
       <div className="flex items-center gap-3 px-6 py-4 border-b border-white/5 bg-white/[0.02]">
-        <div className="p-2 bg-blis-red/10 rounded-lg">
-          <Icon className="w-4 h-4 text-blis-red" />
-        </div>
+        <Icon className="w-5 h-5 text-blis-red" />
         <h3 className="text-sm font-bold text-white uppercase tracking-wider">{title}</h3>
       </div>
-      <div className="p-6 space-y-4">
+      <div className="p-6 space-y-5">
         {children}
       </div>
     </motion.div>

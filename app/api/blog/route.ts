@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
     if (slug || id) {
       const queryBuilder = supabase
         .from('blog_posts')
-        .select('*')
+        .select('id, empresa_id, titulo, slug, contenido, extracto, seo_title, seo_description, imagen_portada, imagen_alt, estado, publicado_en, creado_en, es_premium, precio_coins, recompensa_segundos, recompensa_coins, vistas, tiempo_lectura_minutos, categoria_id, contrasena, visibilidad, sin_recompensa')
 
       const { data: post, error: singleError } = slug
         ? await queryBuilder.eq('slug', slug).single()
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
     // Listar posts (sin contenido completo para performance)
     let query = supabase
       .from('blog_posts')
-      .select('id, titulo, slug, extracto, imagen_portada, imagen_alt, estado, publicado_en, es_premium, precio_coins, recompensa_segundos, recompensa_coins, vistas, tiempo_lectura_minutos, creado_en, categoria_id', { count: 'exact' })
+      .select('id, titulo, slug, extracto, imagen_portada, imagen_alt, estado, publicado_en, es_premium, precio_coins, recompensa_segundos, recompensa_coins, vistas, tiempo_lectura_minutos, creado_en, categoria_id, visibilidad, sin_recompensa', { count: 'exact' })
       .order('publicado_en', { ascending: false })
 
     if (empresaId) {
@@ -121,6 +122,9 @@ export async function POST(request: NextRequest) {
       precio_usd,
       recompensa_segundos,
       recompensa_coins,
+      contrasena,
+      visibilidad,
+      sin_recompensa,
       tags
     } = body
 
@@ -154,7 +158,10 @@ export async function POST(request: NextRequest) {
         precio_coins: precio_coins || 0,
         precio_usd: precio_usd || 0,
         recompensa_segundos: recompensa_segundos || 60,
-        recompensa_coins: recompensa_coins || 5
+        recompensa_coins: recompensa_coins || 5,
+        contrasena: contrasena || null,
+        visibilidad: visibilidad || 'publico',
+        sin_recompensa: sin_recompensa || false
       })
       .select()
       .single()
@@ -208,6 +215,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    revalidateTag('blog-posts');
     return NextResponse.json({ success: true, data: post })
   } catch (error) {
     return NextResponse.json({ 
@@ -221,14 +229,14 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, ...updates } = body
+    const { id, tags, empresa_id, ...updates } = body
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'ID requerido' }, { status: 400 })
     }
 
     // Si se actualiza el estado a publicado
-    if (updates.estado === 'publicado') {
+    if (updates.estado === 'publicado' && !updates.publicado_en) {
       updates.publicado_en = new Date().toISOString()
     }
 
@@ -243,6 +251,38 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 400 })
     }
 
+    // Actualizar tags si se enviaron
+    if (tags && Array.isArray(tags) && empresa_id) {
+      // Eliminar relaciones existentes
+      await supabase.from('blog_posts_tags').delete().eq('post_id', id)
+      
+      for (const tagName of tags) {
+        if (!tagName || typeof tagName !== 'string') continue
+        // Buscar o crear tag
+        const { data: existingTag } = await supabase
+          .from('blog_tags')
+          .select('id')
+          .eq('empresa_id', empresa_id)
+          .eq('nombre', tagName)
+          .single()
+
+        let tagId = existingTag?.id
+        if (!tagId) {
+          const tagSlug = tagName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+          const { data: newTag } = await supabase
+            .from('blog_tags')
+            .insert({ empresa_id, nombre: tagName, slug: tagSlug })
+            .select()
+            .single()
+          tagId = newTag?.id
+        }
+        if (tagId) {
+          await supabase.from('blog_posts_tags').insert({ post_id: id, tag_id: tagId })
+        }
+      }
+    }
+
+    revalidateTag('blog-posts');
     return NextResponse.json({ success: true, data })
   } catch (error) {
     return NextResponse.json({ 
@@ -271,6 +311,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 400 })
     }
 
+    revalidateTag('blog-posts');
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json({ 

@@ -4,13 +4,16 @@ import React from 'react';
 import { Bot, Send, TrendingUp, TrendingDown, ChevronUp, ChevronDown, Zap, Brain, Bell, BellOff, Trash2, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { safeText } from '../TerminalComponents';
-import type { ChatMessage, ControlMode } from '../_types';
+import type {
+  ChatMessage, ControlMode, AutoPilotState, ManualStrategy, BacktestResult,
+  MarketSentimentData, ManualChatEntry, AiKnowledge, ConfirmAction, ManualExecStatusData
+} from '../_types';
 
 interface TerminalChatProps {
   controlMode: ControlMode;
   setControlMode: (mode: ControlMode) => void;
-  autoPilot: any;
-  setAutoPilot: (v: any) => void;
+  autoPilot: AutoPilotState;
+  setAutoPilot: (v: AutoPilotState | ((prev: AutoPilotState) => AutoPilotState)) => void;
   botBudget: number;
   setBotBudget: (v: number) => void;
   freeBudget: boolean;
@@ -38,29 +41,29 @@ interface TerminalChatProps {
   hasUnreadMessages: boolean;
   setHasUnreadMessages: (v: boolean) => void;
   chatEndRef: React.RefObject<HTMLDivElement | null>;
-  formatChatTime: (ts: any) => string;
-  handleSendMessage: (e: any) => void;
-  setConfirmAction: (v: any) => void;
+  formatChatTime: (ts: number) => string;
+  handleSendMessage: (e: React.FormEvent) => void;
+  setConfirmAction: (v: ConfirmAction | null) => void;
   manualTradeAmt: number;
   setManualTradeAmt: (v: number) => void;
-  manualStrategy: any;
-  setManualStrategy: (v: any) => void;
-  manualExecStatus: { text: string; type: 'success' | 'error' | 'loading' } | null;
+  manualStrategy: ManualStrategy;
+  setManualStrategy: (v: ManualStrategy | ((prev: ManualStrategy) => ManualStrategy)) => void;
+  manualExecStatus: ManualExecStatusData | null;
   executeManualSignal: (type: 'BUY' | 'SELL', customAmt?: number) => void;
   isManualChatThinking: boolean;
   setIsManualChatThinking: (v: boolean) => void;
   manualChatInput: string;
   setManualChatInput: (v: string) => void;
-  manualChatHistory: any[];
-  setManualChatHistory: (v: any) => void;
+  manualChatHistory: ManualChatEntry[];
+  setManualChatHistory: (v: ManualChatEntry[] | ((prev: ManualChatEntry[]) => ManualChatEntry[])) => void;
   handleManualEval: () => void;
   handleBacktest: () => void;
   isBacktesting: boolean;
-  backtestResult: any;
-  marketSentiment: any;
+  backtestResult: BacktestResult | null;
+  marketSentiment: MarketSentimentData | null;
   isEvaluatingSentiment: boolean;
   handleSentimentEval: () => void;
-  aiKnowledge: any[];
+  aiKnowledge: AiKnowledge[];
   manualRulesExpanded: boolean;
   setManualRulesExpanded: (v: boolean) => void;
   manualBeExpanded: boolean;
@@ -241,7 +244,7 @@ export const TerminalChat: React.FC<TerminalChatProps> = ({
               {isManualChatThinking && <div className="text-[9px] text-gray-500 animate-pulse">Analizando...</div>}
             </div>
             <div className="p-3 border-t border-white/5 flex gap-2">
-              <input value={manualChatInput} onChange={e => setManualChatInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && manualChatInput.trim()) { const prompt = manualChatInput; setManualChatInput(''); setManualChatHistory((prev: any) => [...prev, { role: 'user', text: prompt }]); setIsManualChatThinking(true); setTimeout(() => { setManualStrategy((prev: any) => ({ ...prev, emaFast: 12, emaSlow: 26, rsiPeriod: 14, rsiBuy: 30, rsiSell: 70, stochK: 14, stochD: 3, stochOverbought: 80, stochOversold: 20 })); setManualChatHistory((prev: any) => [...prev, { role: 'bot', text: "Entendido. He marcado mis sugerencias en el panel manual." }]); setIsManualChatThinking(false); }, 1500); } }} placeholder="Escribe tu estrategia..." className="flex-1 bg-black/50 border border-white/5 rounded-xl px-3 py-1.5 text-[10px] focus:outline-none" />
+              <input value={manualChatInput} onChange={e => setManualChatInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && manualChatInput.trim()) { const prompt = manualChatInput; setManualChatInput(''); setManualChatHistory((prev: ManualChatEntry[]) => [...prev, { role: 'user', text: prompt }]); setIsManualChatThinking(true); setTimeout(() => { setManualStrategy((prev: ManualStrategy) => ({ ...prev, emaFast: 12, emaSlow: 26, rsiPeriod: 14, rsiBuy: 30, rsiSell: 70, stochK: 14, stochD: 3, stochOverbought: 80, stochOversold: 20 })); setManualChatHistory((prev: ManualChatEntry[]) => [...prev, { role: 'bot', text: "Entendido. He marcado mis sugerencias en el panel manual." }]); setIsManualChatThinking(false); }, 1500); } }} placeholder="Escribe tu estrategia..." className="flex-1 bg-black/50 border border-white/5 rounded-xl px-3 py-1.5 text-[10px] focus:outline-none" />
             </div>
           </div>
 
@@ -255,8 +258,8 @@ export const TerminalChat: React.FC<TerminalChatProps> = ({
                     { label: 'RSI Period', key: 'rsiPeriod', min: 1, max: 30 }, { label: 'Estocástico %K', key: 'stochK', min: 1, max: 100 },
                     { label: 'Sobrecompra Estoc.', key: 'stochOverbought', min: 50, max: 100 }, { label: 'Sobreventa Estoc.', key: 'stochOversold', min: 1, max: 50 }
                   ].map(item => (
-                    <div key={item.key}><div className="flex justify-between items-center mb-1"><span className="text-[10px] text-gray-500 font-bold">{item.label}</span><span className="text-[10px] text-white font-mono">{(manualStrategy as any)[item.key]}</span></div>
-                    <input type="range" min={item.min} max={item.max} value={(manualStrategy as any)[item.key]} onChange={e => setManualStrategy({...manualStrategy, [item.key]: parseInt(e.target.value)})} className="w-full h-1 bg-white/10 rounded-full appearance-none accent-blis-red" /></div>
+                    <div key={item.key}><div className="flex justify-between items-center mb-1"><span className="text-[10px] text-gray-500 font-bold">{item.label}</span><span className="text-[10px] text-white font-mono">{String(manualStrategy[item.key as keyof ManualStrategy])}</span></div>
+                    <input type="range" min={item.min} max={item.max} value={Number(manualStrategy[item.key as keyof ManualStrategy])} onChange={e => setManualStrategy({...manualStrategy, [item.key]: parseInt(e.target.value)})} className="w-full h-1 bg-white/10 rounded-full appearance-none accent-blis-red" /></div>
                   ))}
                   <div className="flex flex-col gap-2 mt-4">
                     <button onClick={handleManualEval} className="w-full py-2 bg-white/5 text-white rounded-xl text-[10px] font-black uppercase tracking-wider">Evaluar Mercado</button>
@@ -327,7 +330,7 @@ export const TerminalChat: React.FC<TerminalChatProps> = ({
               <button type="button" onClick={() => setChatInput('Inicia autopilot SCALPING en modo defensivo y seguro.')} className="flex-1 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 p-2 rounded-xl transition-all active:scale-95"><span className="text-[8px] font-black text-emerald-400 uppercase tracking-wider">🛡️ Seguro</span></button>
             </div>
             <form onSubmit={handleSendMessage} className="flex gap-2 items-end">
-              <textarea value={chatInput} onChange={e => { setChatInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(e as any); } }} placeholder="Instruye al bot..." rows={1} className="flex-1 bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-medium outline-none focus:border-blis-red/40 text-white placeholder:text-gray-700 font-mono resize-none overflow-hidden" />
+              <textarea value={chatInput} onChange={e => { setChatInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendMessage(e as unknown as React.FormEvent); } }} placeholder="Instruye al bot..." rows={1} className="flex-1 bg-black/40 border border-white/10 rounded-xl p-3 text-[10px] font-medium outline-none focus:border-blis-red/40 text-white placeholder:text-gray-700 font-mono resize-none overflow-hidden" />
               <button type="submit" className="bg-blis-red/20 border border-blis-red/40 p-3 rounded-xl hover:bg-blis-red-neon transition-all group active:scale-90 shrink-0"><Send size={14} className="text-white group-hover:scale-110 transition-transform" /></button>
             </form>
           </div>

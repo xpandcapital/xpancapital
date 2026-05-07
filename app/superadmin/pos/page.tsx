@@ -1,6 +1,6 @@
 "use client";
 
-import { POSManager } from "@/components/superadmin/POSManager";
+import { POSManager } from "@/components/superadmin/pos";
 import { motion } from "framer-motion";
 
 export default function POSPage() {

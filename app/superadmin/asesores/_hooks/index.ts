@@ -1,8 +1,32 @@
+// Types ────────────────────────────────────────────────────────────────────────
+import type { Advisor, EquipoCurso, EquipoProducto, Role } from '../_types';
+
+interface CursoInfo {
+  id: string;
+  nombre: string;
+  precio_usd: number;
+  imagen_principal: string | null;
+  para_equipo?: boolean;
+}
+
+interface ProductoInfo {
+  id: string;
+  nombre: string;
+  precio_usd: number;
+  imagen_principal: string | null;
+}
+
+type EquipoCursoRow = Omit<EquipoCurso, 'cursos'>;
+type EquipoProductoRow = Omit<EquipoProducto, 'productos'>;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Implementation
+// ═══════════════════════════════════════════════════════════════════════════════
+
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import type { Advisor, EquipoCurso, EquipoProducto, Role } from '../_types'
 
 const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
@@ -47,7 +71,7 @@ export function useEquipoCursos(advisorId: string | null) {
         .order('asignado_en', { ascending: false })
       if (error) throw error
 
-      let cursosInfo: Record<string, any> = {}
+      let cursosInfo: Record<string, CursoInfo> = {}
       if (equipoData && equipoData.length > 0) {
         const cursoIds = [...new Set(equipoData.map(e => e.curso_id).filter(Boolean))]
         if (cursoIds.length > 0) {
@@ -56,16 +80,16 @@ export function useEquipoCursos(advisorId: string | null) {
             .select('id, nombre, precio_usd, imagen_principal, para_equipo')
             .in('id', cursoIds)
           if (cursosData) {
-            for (const c of cursosData) cursosInfo[c.id] = c
+            for (const c of (cursosData as CursoInfo[])) cursosInfo[c.id] = c
           }
         }
       }
 
-      const merged = (equipoData || []).map((ec: any) => ({
+      const merged = (equipoData || []).map((ec: EquipoCursoRow) => ({
         ...ec,
         cursos: cursosInfo[ec.curso_id] || null,
       }))
-      setCursos(merged)
+      setCursos(merged as EquipoCurso[])
     } catch {
       setCursos([])
     } finally {
@@ -111,7 +135,7 @@ export function useEquipoProductos(advisorId: string | null) {
         .eq('advisor_id', advisorId)
         .order('asignado_en', { ascending: false })
 
-      let productosInfo: Record<string, any> = {}
+      let productosInfo: Record<string, ProductoInfo> = {}
       if (equipoProdsData && equipoProdsData.length > 0) {
         const productoIds = [...new Set(equipoProdsData.map(e => e.producto_id).filter(Boolean))]
         if (productoIds.length > 0) {
@@ -120,16 +144,16 @@ export function useEquipoProductos(advisorId: string | null) {
             .select('id, nombre, precio_usd, imagen_principal')
             .in('id', productoIds)
           if (prodsData) {
-            for (const p of prodsData) productosInfo[p.id] = p
+            for (const p of (prodsData as ProductoInfo[])) productosInfo[p.id] = p
           }
         }
       }
 
-      const merged = (equipoProdsData || []).map((ep: any) => ({
+      const merged = (equipoProdsData || []).map((ep: EquipoProductoRow) => ({
         ...ep,
         productos: productosInfo[ep.producto_id] || null,
       }))
-      setProductos(merged)
+      setProductos(merged as EquipoProducto[])
     } catch {
       setProductos([])
     } finally {

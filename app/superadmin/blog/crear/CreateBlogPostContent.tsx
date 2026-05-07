@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  ArrowLeft, Save, Send, Sparkles, Loader2, Image as ImageIcon,
-  Tag, Eye, Trash2, RotateCcw, CheckCircle2
+  ArrowLeft, Save, Send, Sparkles, Loader2,
+  Eye, CheckCircle2, Link2, Copy, Check, X
 } from 'lucide-react';
 import RichTextEditor from '@/components/superadmin/RichTextEditor';
+import { CoverImagePanel, SeoPanel, AccessPanel, ShortLinkPanel, ConfigPanel, TagsPanel } from './_components';
 
 interface Category {
   id: string;
@@ -27,6 +28,9 @@ interface BlogPost {
   estado: string;
   es_premium: boolean;
   precio_coins: number;
+  contrasena: string;
+  visibilidad: 'publico' | 'oculto';
+  sin_recompensa: boolean;
   seo_title?: string;
   seo_description?: string;
   tags?: string[];
@@ -44,6 +48,13 @@ export default function CreateBlogPostContent() {
   const [publishing, setPublishing] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<{ published: boolean; slug: string } | null>(null);
+  const [shortLink, setShortLink] = useState<string | null>(null);
+  const [generatingLink, setGeneratingLink] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [shortCode, setShortCode] = useState('');
+  const [shortCodeEditing, setShortCodeEditing] = useState(false);
+  const [shortCodeSaving, setShortCodeSaving] = useState(false);
 
   const [post, setPost] = useState<BlogPost>({
     id: '',
@@ -57,6 +68,9 @@ export default function CreateBlogPostContent() {
     estado: 'borrador',
     es_premium: false,
     precio_coins: 0,
+    contrasena: '',
+    visibilidad: 'publico',
+    sin_recompensa: false,
     seo_title: '',
     seo_description: '',
     tags: [],
@@ -64,8 +78,9 @@ export default function CreateBlogPostContent() {
 
   const [tagInput, setTagInput] = useState('');
   const [showPreview, setShowPreview] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const coverFileRef = useRef<HTMLInputElement>(null);
 
-  // Load empresa and categories
   useEffect(() => {
     const loadInitial = async () => {
       try {
@@ -81,7 +96,6 @@ export default function CreateBlogPostContent() {
             setCategories(catData.data);
           }
 
-          // If editing, load post
           if (editId) {
             const postRes = await fetch(`/api/blog?id=${editId}`);
             const postData = await postRes.json();
@@ -99,6 +113,9 @@ export default function CreateBlogPostContent() {
                 estado: p.estado || 'borrador',
                 es_premium: p.es_premium || false,
                 precio_coins: p.precio_coins || 0,
+                contrasena: p.contrasena || '',
+                visibilidad: p.visibilidad || 'publico',
+                sin_recompensa: p.sin_recompensa || false,
                 seo_title: p.seo_title || '',
                 seo_description: p.seo_description || '',
                 tags: p.tags?.map((t: any) => t.nombre) || [],
@@ -114,6 +131,23 @@ export default function CreateBlogPostContent() {
     };
     loadInitial();
   }, [editId]);
+
+  useEffect(() => {
+    if (!post.slug) return;
+    const checkShortLink = async () => {
+      try {
+        const fullUrl = `https://www.blis-corp.com/blog/articulo/${post.slug}`;
+        const res = await fetch('/api/short-links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: fullUrl }) });
+        const data = await res.json();
+        if (data.success && data.codigo && !data.existente) {
+          await fetch(`/api/short-links?codigo=${data.codigo}`, { method: 'DELETE' });
+        } else if (data.success && data.existente) {
+          setShortCode(data.codigo);
+        }
+      } catch {}
+    };
+    checkShortLink();
+  }, [post.slug]);
 
   const updateField = (field: keyof BlogPost, value: any) => {
     setPost(prev => ({ ...prev, [field]: value }));
@@ -176,6 +210,9 @@ export default function CreateBlogPostContent() {
         estado: publish ? 'publicado' : 'borrador',
         es_premium: post.es_premium,
         precio_coins: post.precio_coins,
+        contrasena: post.contrasena || null,
+        visibilidad: post.visibilidad || 'publico',
+        sin_recompensa: post.sin_recompensa || false,
         tags: post.tags,
       };
 
@@ -196,7 +233,9 @@ export default function CreateBlogPostContent() {
 
       const data = await res.json();
       if (data.success) {
-        setMessage({ text: publish ? '¡Artículo publicado!' : 'Borrador guardado', type: 'success' });
+        const isPublished = publish;
+        const slug = data.data?.slug || post.slug || '';
+        setSaveSuccess({ published: isPublished, slug });
         if (!editId && data.data?.id) {
           router.replace(`/superadmin/blog/crear?id=${data.data.id}`);
         }
@@ -222,7 +261,6 @@ export default function CreateBlogPostContent() {
       });
       const data = await res.json();
       if (data.title) {
-        // Fix: cerrar blockquotes no cerrados
         let fixedContent = data.content || ''
         if (fixedContent) {
           const openBq = (fixedContent.match(/<blockquote[^>]*>/gi) || []).length
@@ -234,7 +272,6 @@ export default function CreateBlogPostContent() {
           }
         }
 
-        // Hacer match de categoría por nombre (case-insensitive)
         let matchedCategoryId = ''
         if (data.category && categories.length > 0) {
           const catLower = data.category.toLowerCase().trim()
@@ -267,15 +304,109 @@ export default function CreateBlogPostContent() {
     } finally {
       setGenerating(false);
     }
-  }, []);
+  }, [categories]);
 
   const handleCancelAIGenerate = () => {
     setGenerating(false);
   };
 
   const handleImageSearch = () => {
-    // Open image search modal or redirect to image search
     window.open('/superadmin/utilidades?tab=imagenes', '_blank');
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setMessage({ text: 'La imagen excede el límite de 10MB', type: 'error' });
+      return;
+    }
+    setUploadingCover(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'blog-covers');
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      if (data.success) {
+        updateField('imagen_portada', data.url);
+        setMessage({ text: 'Imagen subida correctamente', type: 'success' });
+      } else {
+        setMessage({ text: data.error || 'Error al subir imagen', type: 'error' });
+      }
+    } catch {
+      setMessage({ text: 'Error de red al subir imagen', type: 'error' });
+    } finally {
+      setUploadingCover(false);
+      if (coverFileRef.current) coverFileRef.current.value = '';
+    }
+  };
+
+  const generateShortLink = async () => {
+    if (!saveSuccess?.slug) return;
+    setGeneratingLink(true);
+    try {
+      const fullUrl = `https://www.blis-corp.com/blog/articulo/${saveSuccess.slug}`;
+      const res = await fetch('/api/short-links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: fullUrl }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setShortLink(`blis-corp.com/s/${data.codigo}`);
+      }
+    } catch {} finally {
+      setGeneratingLink(false);
+    }
+  };
+
+  const copyShortLink = () => {
+    if (!shortLink) return;
+    navigator.clipboard.writeText(`https://${shortLink}`);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const saveShortCode = async () => {
+    if (!post.slug || !shortCode.trim()) return;
+    setShortCodeSaving(true);
+    try {
+      const fullUrl = `https://www.blis-corp.com/blog/articulo/${post.slug}`;
+      const res = await fetch('/api/short-links', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: fullUrl, nuevo_codigo: shortCode.trim().toLowerCase() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setShortCode(data.codigo);
+        setShortCodeEditing(false);
+        setMessage({ text: 'Enlace corto actualizado', type: 'success' });
+      } else {
+        setMessage({ text: data.error || 'Error al guardar', type: 'error' });
+      }
+    } catch {
+      setMessage({ text: 'Error de red', type: 'error' });
+    } finally {
+      setShortCodeSaving(false);
+    }
+  };
+
+  const handleCopyShortCode = () => {
+    navigator.clipboard.writeText(`https://blis-corp.com/s/${shortCode}`);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const handleDeleteShortCode = async () => {
+    await fetch(`/api/short-links?codigo=${shortCode}`, { method: 'DELETE' });
+    setShortCode('');
+  };
+
+  const handleCancelShortCodeEdit = () => {
+    setShortCodeEditing(false);
+    setShortCode('');
   };
 
   if (loading) {
@@ -332,6 +463,60 @@ export default function CreateBlogPostContent() {
         {message && (
           <div className={`mb-6 p-4 rounded-lg text-sm font-bold ${message.type === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>
             {message.text}
+          </div>
+        )}
+
+        {saveSuccess && (
+          <div className="mb-6 p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <span className="text-sm font-bold text-emerald-400">
+                {saveSuccess.published ? '¡Artículo publicado con éxito!' : 'Borrador guardado correctamente'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {saveSuccess.published && saveSuccess.slug && (
+                <>
+                  <a
+                    href={`/blog/articulo/${saveSuccess.slug}`}
+                    target="_blank"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition-colors"
+                  >
+                    <Eye className="w-3.5 h-3.5" /> Ver artículo
+                  </a>
+                  {!shortLink ? (
+                    <button
+                      onClick={generateShortLink}
+                      disabled={generatingLink}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-colors disabled:opacity-50"
+                    >
+                      {generatingLink ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Link2 className="w-3.5 h-3.5" />}
+                      Generar enlace corto
+                    </button>
+                  ) : (
+                    <button
+                      onClick={copyShortLink}
+                      className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white text-black text-xs font-bold hover:bg-gray-200 transition-colors"
+                    >
+                      {linkCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      {linkCopied ? 'Copiado!' : shortLink}
+                    </button>
+                  )}
+                </>
+              )}
+              <Link
+                href="/superadmin/blog"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" /> Ir al blog
+              </Link>
+              <button
+                onClick={() => { setSaveSuccess(null); setShortLink(null); }}
+                className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -415,153 +600,64 @@ export default function CreateBlogPostContent() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* SEO */}
-            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-                <Eye className="w-4 h-4 text-gray-400" />
-                SEO
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SEO Title</label>
-                  <input
-                    type="text"
-                    value={post.seo_title || ''}
-                    onChange={e => updateField('seo_title', e.target.value)}
-                    placeholder="Título para buscadores"
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SEO Description</label>
-                  <textarea
-                    value={post.seo_description || ''}
-                    onChange={e => updateField('seo_description', e.target.value)}
-                    placeholder="Descripción para buscadores"
-                    rows={3}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm resize-none"
-                  />
-                </div>
-              </div>
-            </div>
+            <SeoPanel
+              seoTitle={post.seo_title || ''}
+              seoDescription={post.seo_description || ''}
+              onSeoTitleChange={v => updateField('seo_title', v)}
+              onSeoDescriptionChange={v => updateField('seo_description', v)}
+            />
 
-            {/* Portada */}
-            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-gray-400" />
-                Imagen de portada
-              </h3>
-              <div className="space-y-4">
-                {post.imagen_portada && (
-                  <div className="relative rounded-xl overflow-hidden border border-white/10">
-                    <img src={post.imagen_portada} alt="Portada" className="w-full h-40 object-cover" />
-                    <button
-                      onClick={() => updateField('imagen_portada', '')}
-                      className="absolute top-2 right-2 p-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/40 transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-                <input
-                  type="text"
-                  value={post.imagen_portada || ''}
-                  onChange={e => updateField('imagen_portada', e.target.value)}
-                  placeholder="https://..."
-                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm"
-                />
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Alt text</label>
-                  <input
-                    type="text"
-                    value={post.imagen_alt || ''}
-                    onChange={e => updateField('imagen_alt', e.target.value)}
-                    placeholder="Descripción de la imagen"
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm"
-                  />
-                </div>
-              </div>
-            </div>
+            <CoverImagePanel
+              imagen_portada={post.imagen_portada || ''}
+              imagen_alt={post.imagen_alt || ''}
+              uploadingCover={uploadingCover}
+              coverFileRef={coverFileRef}
+              onImageUrlChange={v => updateField('imagen_portada', v)}
+              onAltChange={v => updateField('imagen_alt', v)}
+              onRemoveImage={() => updateField('imagen_portada', '')}
+              onFileUpload={handleCoverUpload}
+            />
 
-            {/* Configuración */}
-            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-bold mb-4">Configuración</h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="es_premium"
-                    checked={post.es_premium}
-                    onChange={e => updateField('es_premium', e.target.checked)}
-                    className="w-4 h-4 rounded border-white/30 bg-white/5"
-                  />
-                  <label htmlFor="es_premium" className="text-sm font-bold">Contenido Premium</label>
-                </div>
+            <AccessPanel
+              contrasena={post.contrasena}
+              visibilidad={post.visibilidad}
+              onContrasenaChange={v => updateField('contrasena', v)}
+              onVisibilidadChange={v => updateField('visibilidad', v)}
+            />
 
-                {post.es_premium && (
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Precio (BLIS Coins)</label>
-                    <input
-                      type="number"
-                      value={post.precio_coins}
-                      onChange={e => updateField('precio_coins', parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/30 text-sm"
-                    />
-                  </div>
-                )}
+            {post.slug && (
+              <ShortLinkPanel
+                shortCode={shortCode}
+                shortCodeEditing={shortCodeEditing}
+                shortCodeSaving={shortCodeSaving}
+                linkCopied={linkCopied}
+                onShortCodeChange={setShortCode}
+                onSaveShortCode={saveShortCode}
+                onStartEditing={() => setShortCodeEditing(true)}
+                onCancelEditing={handleCancelShortCodeEdit}
+                onDelete={handleDeleteShortCode}
+                onCopy={handleCopyShortCode}
+              />
+            )}
 
-                <div className="pt-2 border-t border-white/5">
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Estado</label>
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
-                      post.estado === 'publicado' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-yellow-500/10 text-yellow-400'
-                    }`}>
-                      {post.estado === 'publicado' ? 'Publicado' : 'Borrador'}
-                    </span>
-                    {post.estado === 'publicado' && (
-                      <button
-                        onClick={() => updateField('estado', 'borrador')}
-                        className="text-xs text-gray-500 hover:text-white transition-colors"
-                      >
-                        <RotateCcw className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ConfigPanel
+              es_premium={post.es_premium}
+              precio_coins={post.precio_coins}
+              sin_recompensa={post.sin_recompensa}
+              estado={post.estado}
+              onPremiumChange={v => updateField('es_premium', v)}
+              onPrecioCoinsChange={v => updateField('precio_coins', v)}
+              onSinRecompensaChange={v => updateField('sin_recompensa', v)}
+              onEstadoChange={v => updateField('estado', v)}
+            />
 
-            {/* Tags */}
-            <div className="p-5 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
-                <Tag className="w-4 h-4 text-gray-400" />
-                Tags
-              </h3>
-              <div className="flex items-center gap-2 mb-3">
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={e => setTagInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  placeholder="Agregar tag..."
-                  className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-white/30 text-sm"
-                />
-                <button
-                  onClick={addTag}
-                  className="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-colors"
-                >
-                  +
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {post.tags?.map(tag => (
-                  <span key={tag} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 text-xs font-bold">
-                    {tag}
-                    <button onClick={() => removeTag(tag)} className="text-gray-400 hover:text-white">×</button>
-                  </span>
-                ))}
-              </div>
-            </div>
+            <TagsPanel
+              tags={post.tags || []}
+              tagInput={tagInput}
+              onTagInputChange={setTagInput}
+              onAddTag={addTag}
+              onRemoveTag={removeTag}
+            />
           </div>
         </div>
       </div>

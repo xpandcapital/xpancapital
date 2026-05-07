@@ -1,7 +1,8 @@
 "use client";
 
-import { Plus, Search, Activity, Eye, Edit3, BarChart, Trash2, X, List, Grid, Check, Filter, Trash, Tag, Loader2 } from "lucide-react";
+import { Plus, Search, Activity, Eye, Edit3, BarChart, Trash2, X, List, Grid, Check, Filter, Trash, Tag, Loader2, Lock, EyeOff, Download } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,6 +22,8 @@ interface BlogPost {
     creado_en: string;
     es_premium: boolean;
     precio_coins: number;
+    contrasena?: string;
+    visibilidad?: string;
     tags?: { id: string; nombre: string }[];
 }
 
@@ -166,6 +169,26 @@ export default function AdminBlog() {
         return views.toString();
     };
 
+    const exportBlogCSV = () => {
+        const BOM = '\uFEFF'
+        const headers = '"Título","Slug","Categoría","Estado","Vistas","Premium","Fecha"\n'
+        const rows = filteredBlogs.map((post) => {
+            const titulo = '"' + (post.titulo || '').replace(/"/g, '""') + '"'
+            const slug = '"' + (post.slug || '').replace(/"/g, '""') + '"'
+            const categoria = '"' + (post.categoria?.nombre || '').replace(/"/g, '""') + '"'
+            const estado = '"' + post.estado + '"'
+            const vistas = '"' + post.vistas + '"'
+            const premium = '"' + (post.es_premium ? 'Si (' + post.precio_coins + ' coins)' : 'No') + '"'
+            const fecha = '"' + (post.creado_en ? new Date(post.creado_en).toLocaleDateString('es-ES') : '') + '"'
+            return [titulo, slug, categoria, estado, vistas, premium, fecha].join(',')
+        }).join('\n')
+        const blob = new Blob([BOM + headers + rows], { type: 'text/csv;charset=utf-8' })
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = 'blog_' + new Date().toISOString().split('T')[0] + '.csv'
+        a.click()
+    }
+
     const confirmDelete = () => {
         if (!guard('blog', 'eliminar')) return;
         if (idsToDelete.length === 0) {
@@ -237,13 +260,18 @@ export default function AdminBlog() {
                                 />
                             </div>
 
-                            <div className="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 shadow-inner">
+                            <div className="flex items-center gap-2">
+                                <button onClick={exportBlogCSV} className="flex items-center gap-2 bg-white/5 border border-white/10 text-white px-4 py-2 rounded-xl font-bold uppercase tracking-wider text-[10px] hover:bg-white/10 transition-colors">
+                                    <Download className="w-3.5 h-3.5" /> Exportar CSV
+                                </button>
+                                <div className="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 shadow-inner">
                                 <button onClick={() => setViewMode("grid")} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white text-black shadow-lg scale-105' : 'text-gray-500 hover:text-white'}`}>
                                     <Grid className="w-4 h-4" />
                                 </button>
                                 <button onClick={() => setViewMode("list")} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white text-black shadow-lg scale-105' : 'text-gray-500 hover:text-white'}`}>
                                     <List className="w-4 h-4" />
                                 </button>
+                            </div>
                             </div>
                         </div>
 
@@ -335,7 +363,7 @@ export default function AdminBlog() {
                                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.2, delay: i * 0.05 }} key={post.id} className={`bg-zinc-950 border border-white/5 rounded-[1.5rem] overflow-hidden group hover:border-blis-red/30 transition-all relative ${viewMode === 'list' ? 'flex flex-row items-center p-3 gap-6' : 'flex flex-col'}`}>
                                     <div className={viewMode === 'grid' ? "aspect-video relative overflow-hidden bg-gradient-to-br from-zinc-900 to-black" : "w-40 h-24 shrink-0 rounded-xl overflow-hidden relative bg-gradient-to-br from-zinc-900 to-black"}>
                                         {post.imagen_portada ? (
-                                            <img src={post.imagen_portada} alt={post.titulo} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
+                                            <Image src={post.imagen_portada} alt={post.titulo} width={400} height={225} unoptimized className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100" />
                                         ) : (
                                             <div className="w-full h-full flex flex-col items-center justify-center border border-white/5 border-dashed">
                                                 <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center mb-1">
@@ -352,10 +380,20 @@ export default function AdminBlog() {
                                                 <Trash className="w-4 h-4" />
                                             </button>
                                         </div>
-                                        <div className="absolute top-3 left-3">
+                                        <div className="absolute top-3 left-3 flex items-center gap-1.5">
                                             <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest backdrop-blur-md border ${post.estado === 'publicado' ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/20' : 'bg-amber-500/20 text-amber-500 border-amber-500/20'}`}>
                                                 {post.estado}
                                             </span>
+                                            {post.contrasena && (
+                                                <span className="px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest bg-purple-500/20 text-purple-400 border border-purple-500/20 backdrop-blur-md" title="Protegido con contraseña">
+                                                    <Lock className="w-2.5 h-2.5 inline" />
+                                                </span>
+                                            )}
+                                            {post.visibilidad === 'oculto' && (
+                                                <span className="px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest bg-gray-500/20 text-gray-400 border border-gray-500/20 backdrop-blur-md" title="Oculto de listados">
+                                                    <EyeOff className="w-2.5 h-2.5 inline" />
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 

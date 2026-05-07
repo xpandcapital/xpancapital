@@ -1,1 +1,1 @@
-export { useProjects, useImageUpload, useNotionSync } from './useProjects'
+export { useProjects, useImageUpload, useNotionSync, useAIParse } from './useProjects'

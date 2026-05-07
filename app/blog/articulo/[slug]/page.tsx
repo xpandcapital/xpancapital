@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion, AnimatePresence, useSpring, useMotionValue } from "framer-motion";
 import {
     Calendar as CalendarIcon, Coins, ArrowLeft, Clock, Sparkles, User, Bot,
@@ -32,43 +33,161 @@ interface Article {
     price: number;
     rewardSeconds: number;
     rewardAmount: number;
+    contrasena: string;
+    visibilidad: string;
+    sinRecompensa: boolean;
+}
+
+function HtmlContent({ html }: { html: string }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [ready, setReady] = useState(false);
+
+    useEffect(() => {
+        setReady(true);
+    }, []);
+
+    useEffect(() => {
+        if (ready && ref.current && html) {
+            ref.current.innerHTML = html;
+        }
+    }, [ready, html]);
+
+    if (!ready) return <div className="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed" />;
+    
+    return <div ref={ref} className="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed" />;
+}
+
+function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
+    article: { id: string; rewardSeconds: number; rewardAmount: number; title: string };
+    user: any;
+    userCoins: number;
+    onCoinsChange: (coins: number) => void;
+    onClose: () => void;
+}) {
+    const [timeLeft, setTimeLeft] = useState(article.rewardSeconds);
+    const [isClaiming, setIsClaiming] = useState(false);
+    const claimedRef = useRef(false);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        const claimedArticles = JSON.parse(localStorage.getItem('blis_claimed_articles') || '[]');
+        if (claimedArticles.includes(article.id)) {
+            claimedRef.current = true;
+            onClose();
+            return;
+        }
+
+        intervalRef.current = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    if (intervalRef.current) clearInterval(intervalRef.current);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, [article.id, article.rewardSeconds]);
+
+    const claimReward = async () => {
+        if (claimedRef.current || isClaiming || !user) return;
+        setIsClaiming(true);
+        try {
+            const response = await fetch('/api/blog/lectura', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    post_id: article.id,
+                    tiempo_segundos: article.rewardSeconds,
+                    completado: true,
+                    coins_cantidad: article.rewardAmount
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                claimedRef.current = true;
+                onCoinsChange(article.rewardAmount);
+                const claimedArticles = JSON.parse(localStorage.getItem('blis_claimed_articles') || '[]');
+                if (!claimedArticles.includes(article.id)) {
+                    claimedArticles.push(article.id);
+                    localStorage.setItem('blis_claimed_articles', JSON.stringify(claimedArticles));
+                }
+                onClose();
+            }
+        } catch {} finally {
+            setIsClaiming(false);
+        }
+    };
+
+    if (claimedRef.current) return null;
+
+    return (
+        <div className="sticky top-28 z-30 w-full flex justify-center mb-12">
+            <button
+                onClick={claimReward}
+                disabled={timeLeft > 0 || isClaiming}
+                className={`px-8 py-4 rounded-[40px] flex items-center gap-4 backdrop-blur-xl border transition-all duration-300 ${
+                    timeLeft > 0
+                        ? 'bg-[#BE0B3C]/90 border-red-400/30 text-white'
+                        : 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)]'
+                }`}
+            >
+                <div className="p-2 rounded-full bg-white/10">
+                    <Coins className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col items-start">
+                    <span className="font-black tracking-widest uppercase text-[10px]">
+                        {timeLeft > 0 ? 'PROCESANDO LECTURA' : '¡RECLAMAR RECOMPENSA!'}
+                    </span>
+                    <span className={`text-[14px] font-black ${timeLeft > 0 ? 'text-white/80' : 'text-black'}`}>
+                        {timeLeft > 0 ? `FALTAN ${timeLeft} SEG` : `+${article.rewardAmount} BLIS COINS`}
+                    </span>
+                </div>
+            </button>
+        </div>
+    );
 }
 
 const AdUnit = ({ type = "internal", position = "sidebar" }: { type: "adwords" | "internal", position: "mid" | "sidebar" }) => {
     return (
-        <div className={`bg-gradient-to-br from-blis-red to-[#87082a] p-8 text-white relative overflow-hidden group shadow-2xl ${position === 'mid' ? 'my-16 rounded-[40px]' : 'rounded-3xl'}`}>
+        <div className={`bg-gradient-to-br from-emerald-800 to-emerald-950 p-8 text-white relative overflow-hidden group shadow-2xl ${position === 'mid' ? 'my-16 rounded-[40px]' : 'rounded-3xl'}`}>
             <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
                 <Megaphone className="w-32 h-32" />
             </div>
             <div className="relative z-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 block text-red-100">Anuncio Corporativo</span>
-                <h3 className="text-2xl font-black uppercase mb-3 leading-tight">Proyecto "Hacienda Real"</h3>
-                <p className="text-red-100/80 text-sm mb-6 max-w-md">Lotes de inversión con entrega inmediata y servicios habilitados. 15% de descuento exclusivo para lectores del Blog.</p>
-                <button className="bg-white text-blis-red px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-xl">Más Información</button>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 block text-emerald-200">Proyecto Destacado</span>
+                <h3 className="text-2xl font-black uppercase mb-3 leading-tight">Montebello</h3>
+                <p className="text-emerald-100/80 text-sm mb-6 max-w-md">Residencia de lujo con vista panorámica. Terrenos exclusivos con financiamiento directo y entrega inmediata.</p>
+                <a href="/proyectos/montebello" className="inline-block bg-white text-emerald-900 px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-xl">Más Información</a>
             </div>
         </div>
     );
 };
 
-export default function ArticleDetailPage() {
+function ArticleDetailPage() {
     const params = useParams();
     const router = useRouter();
     const slug = params.slug as string;
     const { user, loading: authLoading } = useAuth();
 
     const [article, setArticle] = useState<Article | null>(null);
-    const [timeLeft, setTimeLeft] = useState(60);
-    const [reward, setReward] = useState(5);
     const [claimed, setClaimed] = useState(false);
     const [isUnlocked, setIsUnlocked] = useState(false);
     const [showInsufficientCoins, setShowInsufficientCoins] = useState(false);
     const [userCoins, setUserCoins] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const [isClaiming, setIsClaiming] = useState(false);
     const [isUnlocking, setIsUnlocking] = useState(false);
+    const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
     const [newComment, setNewComment] = useState('');
     const [editingComment, setEditingComment] = useState<string | null>(null);
     const [editText, setEditText] = useState('');
+    const [passwordEntered, setPasswordEntered] = useState(false);
+    const [passwordInput, setPasswordInput] = useState('');
+    const [passwordError, setPasswordError] = useState(false);
 
     const articleContentRef = useRef<HTMLDivElement>(null);
     const progress = useMotionValue(0);
@@ -106,7 +225,7 @@ export default function ArticleDetailPage() {
                     slug: supabasePost.slug,
                     excerpt: supabasePost.extracto || '',
                     content: supabasePost.contenido || '',
-                    image: supabasePost.imagen_portada || 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200',
+                    image: supabasePost.imagen_portada || '',
                     category: supabasePost.categoria?.nombre || 'General',
                     author: supabasePost.autor ? `${supabasePost.autor.nombre} ${supabasePost.autor.apellido || ''}`.trim() : 'Kevin Valdez',
                     date: supabasePost.publicado_en ? new Date(supabasePost.publicado_en).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date(supabasePost.creado_en).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }),
@@ -114,14 +233,23 @@ export default function ArticleDetailPage() {
                     isPremium: supabasePost.es_premium,
                     price: supabasePost.precio_coins || 0,
                     rewardSeconds: supabasePost.recompensa_segundos || 60,
-                    rewardAmount: supabasePost.recompensa_coins || 5
+                    rewardAmount: supabasePost.recompensa_coins || 5,
+                    contrasena: supabasePost.contrasena || '',
+                    visibilidad: supabasePost.visibilidad || 'publico',
+                    sinRecompensa: supabasePost.sin_recompensa || false
                 };
             }
 
             if (found) {
                 setArticle(found);
-                setTimeLeft(found.rewardSeconds);
-                setReward(found.rewardAmount);
+
+                // Check if already entered password for this article (localStorage)
+                const unlockedPasswords = JSON.parse(localStorage.getItem('blis_article_passwords') || '{}');
+                if (found.contrasena && unlockedPasswords[found.id] === found.contrasena) {
+                    setPasswordEntered(true);
+                } else if (!found.contrasena) {
+                    setPasswordEntered(true);
+                }
 
                 // Non-premium articles are unlocked by default
                 if (!found.isPremium) {
@@ -147,6 +275,30 @@ export default function ArticleDetailPage() {
         loadArticle();
     }, [slug, getPostBySlug]);
 
+    // Fetch related articles
+    useEffect(() => {
+        if (!article?.id) return;
+        const fetchRelated = async () => {
+            try {
+                const res = await fetch(`/api/blog?empresa_id=${DEFAULT_EMPRESA_ID}&estado=publicado&limit=6`);
+                const data = await res.json();
+                if (data.success && data.data) {
+                    const filtered = data.data
+                        .filter((p: any) => p.id !== article.id && p.visibilidad !== 'oculto')
+                        .map((p: any) => ({
+                            id: p.id,
+                            title: p.titulo,
+                            slug: p.slug,
+                            image: p.imagen_portada,
+                            date: p.publicado_en ? new Date(p.publicado_en).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : '',
+                        }));
+                    setRelatedArticles(filtered);
+                }
+            } catch {}
+        };
+        fetchRelated();
+    }, [article?.id]);
+
     // Reading progress scroll tracking
     useEffect(() => {
         const handleScroll = () => {
@@ -163,62 +315,17 @@ export default function ArticleDetailPage() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, [progress]);
 
-    // Timer for reading reward
-    useEffect(() => {
-        if (!article || !isUnlocked || article.isPremium) return;
-        if (claimed || timeLeft <= 0) return;
-
-        const interval = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(interval);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [article, isUnlocked, claimed, timeLeft]);
-
-    // Claim reward
-    const claimReward = async () => {
-        if (!article || claimed || !user) return;
-
-        setIsClaiming(true);
-
-        try {
-            const response = await fetch('/api/blog/lectura', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: user.id,
-                    post_id: article.id,
-                    tiempo_segundos: article.rewardSeconds,
-                    completado: true,
-                    coins_cantidad: article.rewardAmount
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                setClaimed(true);
-                setUserCoins(prev => prev + article.rewardAmount);
-
-                // Update localStorage
-                const claimedArticles = JSON.parse(localStorage.getItem('blis_claimed_articles') || '[]');
-                if (!claimedArticles.includes(article.id)) {
-                    claimedArticles.push(article.id);
-                    localStorage.setItem('blis_claimed_articles', JSON.stringify(claimedArticles));
-                }
-            } else {
-                console.error('Error claiming reward:', data.error);
-            }
-        } catch (err) {
-            console.error('Error claiming reward:', err);
-        } finally {
-            setIsClaiming(false);
+    // Verify password
+    const handlePasswordSubmit = () => {
+        if (!article) return;
+        if (passwordInput === article.contrasena) {
+            setPasswordEntered(true);
+            setPasswordError(false);
+            const unlockedPasswords = JSON.parse(localStorage.getItem('blis_article_passwords') || '{}');
+            unlockedPasswords[article.id] = article.contrasena;
+            localStorage.setItem('blis_article_passwords', JSON.stringify(unlockedPasswords));
+        } else {
+            setPasswordError(true);
         }
     };
 
@@ -287,7 +394,65 @@ export default function ArticleDetailPage() {
         );
     }
 
-    const relatedArticles: any[] = []; // We will fetch related from Supabase later or keep it empty for now
+    // Password gate
+    if (article.contrasena && !passwordEntered) {
+        return (
+            <div className="min-h-screen bg-[#020202] text-white">
+                <Header />
+                <main className="flex items-center justify-center min-h-[80vh] px-4">
+                    <div className="w-full max-w-lg">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="relative bg-zinc-900/80 border border-emerald-500/20 rounded-[40px] p-10 text-center backdrop-blur-2xl shadow-[0_0_60px_rgba(16,185,129,0.08)]"
+                        >
+                            <div className="absolute inset-0 rounded-[40px] bg-gradient-to-b from-emerald-500/5 to-transparent pointer-events-none" />
+                            <motion.div
+                                animate={{ boxShadow: ["0 0 30px rgba(16,185,129,0.1)", "0 0 60px rgba(16,185,129,0.4)", "0 0 30px rgba(16,185,129,0.1)"] }}
+                                transition={{ duration: 3, repeat: Infinity }}
+                                className="w-24 h-24 bg-emerald-500/10 border-2 border-emerald-500/30 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 relative"
+                            >
+                                <LockIcon className="w-10 h-10 text-emerald-400" />
+                                <div className="absolute -top-1.5 -right-1.5 bg-emerald-500 text-black text-[8px] font-black px-2.5 py-1 rounded-full uppercase tracking-tight shadow-lg">
+                                    Acceso Restringido
+                                </div>
+                            </motion.div>
+                            <h2 className="text-3xl font-black text-white uppercase mb-3 tracking-tighter">Contenido <span className="text-emerald-400">Exclusivo</span></h2>
+                            <p className="text-gray-400 text-sm mb-8 max-w-sm mx-auto">Este artículo requiere autenticación. Ingresa la clave de acceso proporcionada.</p>
+                            <div className="space-y-4 relative z-10">
+                                <div className="relative">
+                                    <input
+                                        type="password"
+                                        value={passwordInput}
+                                        onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }}
+                                        onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                                        placeholder="••••••••"
+                                        className={`w-full px-5 py-4 rounded-2xl bg-black/60 border text-white placeholder-gray-600 focus:outline-none text-center text-xl font-mono tracking-[0.3em] transition-all ${
+                                            passwordError ? 'border-red-500/50 bg-red-500/5' : 'border-emerald-500/30 focus:border-emerald-500/70 focus:shadow-[0_0_25px_rgba(16,185,129,0.15)]'
+                                        }`}
+                                        autoFocus
+                                    />
+                                    {passwordError && (
+                                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-400 text-xs font-bold mt-3 absolute -bottom-7 left-0 right-0 text-center">Clave incorrecta. Intenta de nuevo.</motion.p>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={handlePasswordSubmit}
+                                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-sm transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_40px_rgba(16,185,129,0.5)] active:scale-[0.98]"
+                                >
+                                    Desbloquear Acceso
+                                </button>
+                            </div>
+                            <div className="mt-6 pt-5 border-t border-white/5">
+                                <p className="text-[10px] text-gray-600 font-mono uppercase tracking-widest">Sistema de Seguridad BLIS Corp</p>
+                            </div>
+                        </motion.div>
+                    </div>
+                </main>
+                <Footer />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#020202] text-white selection:bg-emerald-500/30">
@@ -328,43 +493,23 @@ export default function ArticleDetailPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
                         {/* Main Content */}
                         <div ref={articleContentRef} className="lg:col-span-8 flex flex-col">
-                            {/* Reward Banner */}
-                            {isUnlocked && !article.isPremium && !claimed && user && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="sticky top-28 left-0 right-0 z-[50] w-full flex justify-center mb-12"
-                                >
-                                    <button
-                                        onClick={claimReward}
-                                        disabled={timeLeft > 0 || isClaiming}
-                                        className={`px-8 py-4 rounded-[40px] flex items-center gap-4 backdrop-blur-3xl transition-all duration-700 shadow-2xl border ${
-                                            timeLeft > 0
-                                                ? 'bg-blis-red border-red-400/50 text-white shadow-[0_0_30px_rgba(190,11,60,0.5)]'
-                                                : 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.5)]'
-                                        }`}
-                                    >
-                                        <div className={`p-2 rounded-full ${timeLeft > 0 ? 'bg-white/10 animate-pulse' : 'bg-black/20'}`}>
-                                            <Coins className="w-5 h-5" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="font-black tracking-widest uppercase text-[10px]">
-                                                {timeLeft > 0 ? 'PROCESANDO LECTURA' : '¡RECLAMAR RECOMPENSA!'}
-                                            </span>
-                                            <span className={`text-[14px] font-black ${timeLeft > 0 ? 'text-white' : 'text-black'}`}>
-                                                {timeLeft > 0 ? `FALTAN ${timeLeft} SEG` : `+${reward} BLIS COINS`}
-                                            </span>
-                                        </div>
-                                    </button>
-                                </motion.div>
+                            {/* Reward Banner - isolated component prevents flickering */}
+                            {article && isUnlocked && !article.isPremium && !article.sinRecompensa && user && (
+                                <RewardBanner
+                                    article={{ id: article.id, rewardSeconds: article.rewardSeconds, rewardAmount: article.rewardAmount, title: article.title }}
+                                    user={user}
+                                    userCoins={userCoins}
+                                    onCoinsChange={(added) => { setUserCoins(prev => prev + added); setClaimed(true); }}
+                                    onClose={() => setClaimed(true)}
+                                />
                             )}
 
                             {claimed && (
-                                <div className="sticky top-28 left-0 right-0 z-[50] w-full flex justify-center mb-12">
+                                <div className="sticky top-28 z-30 w-full flex justify-center mb-12">
                                     <div className="px-8 py-4 rounded-[40px] flex items-center gap-4 bg-emerald-500 text-black shadow-[0_0_30px_rgba(16,185,129,0.5)]">
                                         <CheckCircle2 className="w-5 h-5" />
                                         <span className="font-black tracking-widest uppercase text-[10px]">
-                                            +{reward} COINS GANADOS
+                                            +{article?.rewardAmount || 0} COINS GANADOS
                                         </span>
                                     </div>
                                 </div>
@@ -401,11 +546,15 @@ export default function ArticleDetailPage() {
                                     </div>
                                 </div>
 
-                                {/* Featured Image */}
+                                {/* Featured Image - only show if there's one */}
+                                {article.image && (
                                 <div className="w-full aspect-video rounded-[40px] overflow-hidden shadow-2xl border border-white/5 relative group">
-                                    <img
+                                    <Image
                                         src={article.image}
                                         alt={article.title}
+                                        width={1200}
+                                        height={675}
+                                        unoptimized
                                         className={`w-full h-full object-cover transition-all duration-1000 ${!isUnlocked && 'blur-3xl scale-110 opacity-40'}`}
                                     />
                                     {!isUnlocked && article.isPremium && (
@@ -468,6 +617,7 @@ export default function ArticleDetailPage() {
                                         </div>
                                     )}
                                 </div>
+                                )}
                             </div>
 
                             {/* Article Content */}
@@ -478,10 +628,7 @@ export default function ArticleDetailPage() {
                                             "{article.excerpt}"
                                         </p>
 
-                                        <div 
-                                            className="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed"
-                                            dangerouslySetInnerHTML={{ __html: article.content || '<p>Contenido del artículo...</p>' }}
-                                        />
+                                        <HtmlContent html={article.content} />
                                     </div>
 
                                     {/* Comments Section */}
@@ -660,7 +807,7 @@ export default function ArticleDetailPage() {
                                     {relatedArticles.slice(0, 5).map((ra, i) => (
                                         <Link key={i} href={`/blog/articulo/${ra.slug || ra.id}`} className="group flex items-start gap-4">
                                             <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-white/10">
-                                                <img src={ra.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="" />
+                                                <Image src={ra.image} width={64} height={64} unoptimized className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="" />
                                             </div>
                                             <div className="flex flex-col gap-1">
                                                 <h4 className="text-[11px] font-black uppercase leading-tight group-hover:text-emerald-500 transition-colors line-clamp-2">{ra.title}</h4>
@@ -681,4 +828,11 @@ export default function ArticleDetailPage() {
             <Footer />
         </div>
     );
+}
+
+export default function ArticlePage() {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => { setMounted(true); }, []);
+    if (!mounted) return <div className="min-h-screen bg-[#020202]" />;
+    return <ArticleDetailPage />;
 }

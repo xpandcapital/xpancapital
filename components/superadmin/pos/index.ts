@@ -1,0 +1,1 @@
+export { POSManager } from './POSManager';

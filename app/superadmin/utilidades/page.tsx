@@ -1,11 +1,15 @@
 "use client";
 
 import React from 'react';
-import { SidebarTools } from '@/components/superadmin/SidebarTools';
+import { useSearchParams } from 'next/navigation';
+import { SidebarTools } from '@/components/superadmin/sidebar-tools/SidebarTools';
 import { motion } from 'framer-motion';
 import { Boxes } from 'lucide-react';
 
 export default function UtilidadesPage() {
+    const searchParams = useSearchParams();
+    const initialTool = searchParams.get('tool') || undefined;
+
     return (
         <div className="h-screen flex flex-col bg-zinc-950 overflow-hidden">
             {/* Minimal Header */}
@@ -41,7 +45,7 @@ export default function UtilidadesPage() {
 
             {/* Layout Full Width / Height */}
             <div className="flex-1 overflow-hidden">
-                <SidebarTools />
+                <SidebarTools initialTool={initialTool} />
             </div>
         </div>
     );

@@ -1,40 +1,32 @@
-const CACHE_NAME = 'blistrade-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/manifest.json',
-  '/pwa-icon.png',
-  '/favicon.png'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim();
+  event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('fetch', (event) => {
-  // Respond with cached asset or fetch from network
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  self.registration.showNotification(data.titulo || 'BLIS Corp', {
+    body: data.mensaje || '',
+    icon: '/pwa-icon.png',
+    badge: '/pwa-icon.png',
+    data: { url: data.url || '/' },
+    vibrate: [200, 100, 200],
+    tag: 'blis-notification'
+  });
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === url && 'focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
     })
   );
 });

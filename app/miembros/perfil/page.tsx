@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles } from "lucide-react";
+import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles, ShoppingCart, GraduationCap, FileText, UserPlus, Settings } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isAdminRole } from "@/lib/auth/permissions";
@@ -10,7 +10,16 @@ import { useToast } from "@/components/ui/Toast";
 import { useCoins } from "@/lib/hooks/useCoins";
 import { useReferrals } from "@/lib/hooks/useReferrals";
 import { ReferralPanel } from "@/components/profile/ReferralPanel";
+import { getSupabase } from "@/lib/supabase";
 import Link from "next/link";
+
+const NOTIFICACION_TIPOS = [
+  { key: "blog", label: "Blog", icon: FileText, color: "text-violet-400" },
+  { key: "leads", label: "Leads", icon: UserPlus, color: "text-emerald-400" },
+  { key: "compras", label: "Compras", icon: ShoppingCart, color: "text-amber-400" },
+  { key: "cursos", label: "Cursos", icon: GraduationCap, color: "text-blue-400" },
+  { key: "sistema", label: "Sistema", icon: Settings, color: "text-gray-400" },
+];
 
 const COUNTRIES = [
     { name: "Ecuador", code: "+593", flag: "🇪🇨" },
@@ -311,6 +320,45 @@ export default function ProfilePage() {
     const [notifications, setNotifications] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [notificacionesTipos, setNotificacionesTipos] = useState<Record<string, boolean>>({
+        blog: true,
+        leads: true,
+        compras: true,
+        cursos: true,
+        sistema: true,
+    });
+    const [tiposCargados, setTiposCargados] = useState(false);
+
+    useEffect(() => {
+        if (!user?.id || tiposCargados) return;
+        const loadTipos = async () => {
+            const supabase = getSupabase();
+            if (!supabase) return;
+            const { data } = await supabase
+                .from("profiles")
+                .select("notificaciones_tipos")
+                .eq("id", user.id)
+                .single();
+            if (data?.notificaciones_tipos) {
+                setNotificacionesTipos(data.notificaciones_tipos);
+            }
+            setTiposCargados(true);
+        };
+        loadTipos();
+    }, [user?.id, tiposCargados]);
+
+    const handleToggleTipo = async (key: string, enabled: boolean) => {
+        const nuevos = { ...notificacionesTipos, [key]: enabled };
+        setNotificacionesTipos(nuevos);
+        if (!user?.id) return;
+        const supabase = getSupabase();
+        if (!supabase) return;
+        await supabase
+            .from("profiles")
+            .update({ notificaciones_tipos: nuevos })
+            .eq("id", user.id);
+    };
+
     // Sync with global state
     useEffect(() => {
         if (user) {
@@ -543,7 +591,7 @@ export default function ProfilePage() {
                         >
                             <div className="flex items-center gap-4">
                                 <Bell className="w-5 h-5 text-gray-500 group-hover:text-blis-red transition-colors" />
-                                <span className="text-sm font-bold text-white">Notificaciones de Cuenta</span>
+                                <span className="text-sm font-bold text-white">Notificaciones Push</span>
                             </div>
                             <div className={`w-12 h-6 rounded-full relative p-1 transition-colors duration-300 ${notifications ? 'bg-blis-red' : 'bg-zinc-800'}`}>
                                 <motion.div
@@ -552,6 +600,31 @@ export default function ProfilePage() {
                                 />
                             </div>
                         </button>
+
+                        <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl space-y-3">
+                            <h3 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                <Bell className="w-3.5 h-3.5 text-gray-500" />
+                                Tipos de Notificación
+                            </h3>
+                            <div className="space-y-2">
+                                {NOTIFICACION_TIPOS.map(({ key, label, icon: IconComp, color }) => (
+                                    <button
+                                        key={key}
+                                        onClick={() => handleToggleTipo(key, !notificacionesTipos[key])}
+                                        className="w-full flex items-center justify-between p-2.5 bg-white/[0.02] hover:bg-white/[0.05] rounded-xl transition-all text-left"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <IconComp className={`w-4 h-4 ${color}`} />
+                                            <span className="text-xs font-bold text-white uppercase tracking-wider">{label}</span>
+                                        </div>
+                                        <div className={`w-10 h-5 rounded-full relative p-0.5 transition-colors duration-300 ${notificacionesTipos[key] ? 'bg-blis-red' : 'bg-zinc-800'}`}>
+                                            <motion.div animate={{ x: notificacionesTipos[key] ? 20 : 0 }} className="w-4 h-4 bg-white rounded-full" />
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         <div className="p-6 bg-blis-red/5 border border-blis-red/20 rounded-[2rem] space-y-4">
                             <h3 className="text-xs font-black text-white uppercase tracking-tight">Autenticación de 2 Factores</h3>
                             <p className="text-[10px] text-gray-500 font-medium leading-relaxed uppercase tracking-widest">Añade una capa extra de seguridad a tu portal de inversión.</p>

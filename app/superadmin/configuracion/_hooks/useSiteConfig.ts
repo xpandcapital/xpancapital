@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useToast } from '@/components/ui/Toast'
 import type { SiteConfig } from '../_types'
 import { defaultConfig } from '../_types'
@@ -10,14 +10,21 @@ export function useSiteConfig() {
   const [config, setConfig] = useState<SiteConfig>(defaultConfig)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [keywordsInput, setKeywordsInput] = useState('')
+  const configRef = useRef(config)
+  configRef.current = config
+
+  useEffect(() => {
+    setKeywordsInput((config.meta_keywords || []).join(', '))
+  }, [config.meta_keywords])
 
   const loadConfig = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/configuracion')
+      const res = await fetch('/api/site-config')
       const data = await res.json()
-      if (data.success && data.config) {
-        setConfig({ ...defaultConfig, ...data.config })
+      if (data.success && data.data) {
+        setConfig({ ...defaultConfig, ...data.data })
       }
     } catch (error) {
       console.error('Error loading config:', error)
@@ -27,26 +34,22 @@ export function useSiteConfig() {
     }
   }, [showToast])
 
-  const saveConfig = useCallback(async (configToSave: SiteConfig) => {
+  const saveConfig = useCallback(async () => {
     setSaving(true)
     try {
-      const res = await fetch('/api/admin/configuracion', {
-        method: 'POST',
+      const res = await fetch('/api/site-config', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(configToSave)
+        body: JSON.stringify(configRef.current)
       })
       const data = await res.json()
       if (data.success) {
         showToast('Configuración guardada', 'success')
-        return { success: true }
       } else {
         showToast(data.error || 'Error al guardar', 'error')
-        return { success: false, error: data.error }
       }
-    } catch (error) {
-      console.error('Error saving config:', error)
-      showToast('Error al guardar configuración', 'error')
-      return { success: false, error: 'Error al guardar' }
+    } catch {
+      showToast('Error al guardar', 'error')
     } finally {
       setSaving(false)
     }
@@ -62,9 +65,10 @@ export function useSiteConfig() {
 
   return {
     config,
-    setConfig,
     loading,
     saving,
+    keywordsInput,
+    setKeywordsInput,
     loadConfig,
     saveConfig,
     updateField
