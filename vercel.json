@@ -4,5 +4,11 @@
     "app/api/upload/route.ts": {
       "maxDuration": 30
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/chat-cleanup",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }

@@ -10,6 +10,8 @@ import { CursorWrapper } from "@/components/ui/CursorWrapper"
 import { PWARegistrar } from "@/components/utils/PWARegistrar"
 import { DynamicMetadata } from "@/components/utils/DynamicMetadata"
 import { FaviconBadge } from "@/components/layout/FaviconBadge"
+import { ChatWidget } from "@/components/chat/ChatWidget"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 interface LayoutProvidersProps {
   children: React.ReactNode
@@ -34,23 +36,26 @@ export function LayoutProviders({
           : undefined
       }
     >
-      <DynamicMetadata />
-      <AuthProvider>
-        <ToastProvider>
-          <ShopProvider>
-            <SalesProvider>
-              <CursorWrapper />
-              <PWARegistrar />
-              <FaviconBadge />
-              <Header
-                logoHorizontal={logoHorizontal}
-                logoVertical={logoVertical}
-              />
-              {children}
-            </SalesProvider>
-          </ShopProvider>
-        </ToastProvider>
-      </AuthProvider>
+      <TooltipProvider>
+        <DynamicMetadata />
+        <AuthProvider>
+          <ToastProvider>
+            <ShopProvider>
+              <SalesProvider>
+                <CursorWrapper />
+                <PWARegistrar />
+                <FaviconBadge />
+                <Header
+                  logoHorizontal={logoHorizontal}
+                  logoVertical={logoVertical}
+                />
+                {children}
+                <ChatWidget />
+              </SalesProvider>
+            </ShopProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </TooltipProvider>
     </LandingCMSProvider>
   )
 }

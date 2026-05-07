@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Montserrat, Geist } from "next/font/google";
 import "./globals.css";
 import { LayoutShell } from "@/components/layout/LayoutShell";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -28,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="es" className={cn("scroll-smooth", "font-sans", geist.variable)} suppressHydrationWarning>
       <body className={`${montserrat.variable} font-sans antialiased bg-black text-white selection:bg-blis-red/30 selection:text-white`}>
         <LayoutShell>{children}</LayoutShell>
       </body>
