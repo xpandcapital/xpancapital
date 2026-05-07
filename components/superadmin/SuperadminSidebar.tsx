@@ -10,7 +10,8 @@ import {
     ShoppingCart, Boxes, CandlestickChart, Scale, BarChart3,
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
-    CalendarDays, Megaphone, ClipboardList, BookOpenCheck, Package, Bell
+    CalendarDays, Megaphone, ClipboardList, BookOpenCheck, Package, Bell,
+    MessageCircle
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { LucideProps } from "lucide-react"
