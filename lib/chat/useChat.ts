@@ -20,6 +20,7 @@ export function useChat() {
   const [tieneMasMensajes, setTieneMasMensajes] = useState(false);
   const [escribiendoEn, setEscribiendoEn] = useState<Record<string, boolean>>({});
   const [plantillas, setPlantillas] = useState<ChatPlantilla[]>([]);
+  const [noLeidos, setNoLeidos] = useState<Record<string, number>>({});
 
   const channelRef = useRef<any>(null);
   const presenciaChannelRef = useRef<any>(null);
@@ -215,6 +216,34 @@ export function useChat() {
     }
   }, [user]);
 
+  // Programar mensaje
+  const programarMensaje = useCallback(async (
+    salaId: string,
+    contenido: string,
+    fechaHora: string
+  ) => {
+    if (!user || !contenido.trim() || !fechaHora) return false;
+    const supabase = getSupabase();
+    if (!supabase) return false;
+
+    try {
+      const { error } = await supabase.from("chat_mensajes").insert({
+        sala_id: salaId,
+        user_id: user.id,
+        tipo: "texto",
+        contenido: contenido.trim(),
+        programado_para: fechaHora,
+        enviado: false,
+      });
+
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error("[useChat] Error programando mensaje:", err);
+      return false;
+    }
+  }, [user]);
+
   // Marcar mensajes como leídos
   const marcarLeidos = useCallback(async (salaId: string) => {
     if (!user) return;
@@ -276,6 +305,8 @@ export function useChat() {
         await cargarMensajes(salaId);
         await cargarMiembros(salaId);
         await marcarLeidos(salaId);
+        // Limpiar no leídos
+        setNoLeidos((prev) => ({ ...prev, [salaId]: 0 }));
       }
     } catch (err) {
       console.error("[useChat] Error uniéndose a sala:", err);
@@ -519,6 +550,23 @@ export function useChat() {
           if (salaIdRef.current === nuevoMensaje.sala_id) {
             setMensajes((prev) => [...prev, nuevoMensaje]);
             await marcarLeidos(nuevoMensaje.sala_id);
+          } else {
+            // Incrementar contador de no leídos
+            setNoLeidos((prev) => ({
+              ...prev,
+              [nuevoMensaje.sala_id]: (prev[nuevoMensaje.sala_id] || 0) + 1,
+            }));
+
+            // Notificación del navegador
+            if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+              try {
+                new Notification("Nuevo mensaje de chat", {
+                  body: nuevoMensaje.contenido || "Nuevo mensaje",
+                  icon: "/favicon.ico",
+                  tag: nuevoMensaje.sala_id,
+                });
+              } catch { /* ignore */ }
+            }
           }
 
           setSalas((prev) =>
@@ -659,5 +707,7 @@ export function useChat() {
     fijarMensaje,
     buscarMensajes,
     transferirSala,
+    programarMensaje,
+    noLeidos,
   };
 }

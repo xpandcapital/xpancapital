@@ -4,13 +4,17 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Minimize2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useChat } from "@/lib/chat/useChat";
 import { ChatPanel } from "./ChatPanel";
 
 export function ChatWidget() {
   const [abierto, setAbierto] = useState(false);
   const [minimizado, setMinimizado] = useState(false);
   const { user } = useAuth();
+  const { noLeidos } = useChat();
   const widgetRef = useRef<HTMLDivElement>(null);
+
+  const totalNoLeidos = Object.values(noLeidos).reduce((a, b) => a + b, 0);
 
   // Detectar página actual para mostrar/ocultar widget
   const [mostrarWidget, setMostrarWidget] = useState(false);
@@ -109,8 +113,10 @@ export function ChatWidget() {
             >
               <MessageCircle className="w-6 h-6" />
               {/* Indicador de mensajes nuevos */}
-              {!user && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black" />
+              {totalNoLeidos > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-emerald-500 rounded-full border-2 border-black flex items-center justify-center text-[10px] font-bold text-white px-1">
+                  {totalNoLeidos > 9 ? "9+" : totalNoLeidos}
+                </span>
               )}
             </motion.div>
           )}
