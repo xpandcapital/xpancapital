@@ -13,16 +13,8 @@ import {
   CheckCheck,
   ExternalLink,
 } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-
-function getSupabase() {
-  if (typeof window === "undefined") return null;
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !supabaseAnonKey) return null;
-  return createClient(supabaseUrl, supabaseAnonKey);
-}
 
 interface Notificacion {
   id: string;
@@ -31,11 +23,11 @@ interface Notificacion {
   tipo: string;
   titulo: string;
   mensaje: string;
-  url: string | null;
+  link: string | null;
   leida: boolean;
   leida_en: string | null;
-  created_at: string;
-  metadata: Record<string, unknown>;
+  creado_en: string;
+  data?: { url?: string | null } | null;
 }
 
 const TIPO_ICONOS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -82,20 +74,26 @@ export function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
+  const { user } = useAuth();
 
   const fetchNotifications = useCallback(async () => {
-    const supabase = getSupabase();
-    if (!supabase) return;
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
-      const res = await fetch("/api/notificaciones", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
+      const res = await fetch("/api/notificaciones?unread=true");
+      const countData = await res.json();
+      if (countData.success && typeof countData.count === "number") {
+        setUnreadCount(countData.count);
+      }
+    } catch {
+      // silencioso
+    }
+
+    try {
+      const res = await fetch("/api/notificaciones");
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
@@ -106,35 +104,21 @@ export function NotificationBell() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
 
   useEffect(() => {
-    const supabase = getSupabase();
-    if (!supabase) return;
+    if (!user) return;
 
-    const channel = supabase
-      .channel("notificaciones-realtime")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "notificaciones",
-        },
-        () => {
-          fetchNotifications();
-        }
-      )
-      .subscribe();
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchNotifications]);
+    return () => clearInterval(interval);
+  }, [fetchNotifications, user]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -151,22 +135,11 @@ export function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleMarkRead = async (id: string, url?: string | null) => {
-    const supabase = getSupabase();
-    if (!supabase) return;
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) return;
-
+  const handleMarkRead = async (id: string, link?: string | null) => {
     try {
       await fetch("/api/notificaciones", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
 
@@ -182,28 +155,17 @@ export function NotificationBell() {
       // silencioso
     }
 
-    if (url) {
+    if (link) {
       setIsOpen(false);
-      router.push(url);
+      router.push(link);
     }
   };
 
   const handleMarkAllRead = async () => {
-    const supabase = getSupabase();
-    if (!supabase) return;
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) return;
-
     try {
       await fetch("/api/notificaciones", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ marcar_todas: true }),
       });
 
@@ -296,7 +258,7 @@ export function NotificationBell() {
                     return (
                       <button
                         key={n.id}
-                        onClick={() => handleMarkRead(n.id, n.url)}
+                        onClick={() => handleMarkRead(n.id, n.link || n.data?.url || null)}
                         className={`w-full text-left px-4 py-3 flex gap-3 hover:bg-white/[0.03] transition-colors group ${
                           !n.leida ? "bg-white/[0.02]" : ""
                         }`}
@@ -326,9 +288,9 @@ export function NotificationBell() {
                           </p>
                           <div className="flex items-center justify-between mt-1.5">
                             <span className="text-[10px] text-gray-600 font-medium uppercase tracking-wider">
-                              {tiempoRelativo(n.created_at)}
+                              {tiempoRelativo(n.creado_en)}
                             </span>
-                            {n.url && (
+                            {(n.link || n.data?.url) && (
                               <ExternalLink className="w-3 h-3 text-gray-600 group-hover:text-blis-red transition-colors" />
                             )}
                           </div>

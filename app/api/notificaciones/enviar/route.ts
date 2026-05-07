@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       tipo: "sistema",
       titulo: titulo.trim(),
       mensaje: mensaje.trim(),
-      data: { url: link?.trim() || null },
+      link: link?.trim() || null,
       leida: false,
     }));
 

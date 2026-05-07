@@ -578,18 +578,9 @@ export default function NotificacionesPage() {
                             className="border-b border-white/5 hover:bg-white/5 transition-colors"
                           >
                             <td className="p-4">
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${n.leida ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
-                                {n.leida ? "Leída" : "Pendiente"}
+                              <span className="text-xs text-gray-400">
+                                {formatDate(n.creado_en)}
                               </span>
-                            </td>
-                            <td className="p-4 text-right">
-                              <button
-                                onClick={() => handleDeleteNotificacion(n.id)}
-                                className="p-1.5 hover:bg-red-500/20 rounded-lg text-gray-500 hover:text-red-400 transition-colors"
-                                title="Eliminar"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
                             </td>
                             <td className="p-4">
                               <div>
@@ -618,15 +609,18 @@ export default function NotificacionesPage() {
                               </span>
                             </td>
                             <td className="p-4">
-                              <span
-                                className={`text-xs px-2 py-0.5 rounded-full ${
-                                  n.leida
-                                    ? "bg-emerald-500/20 text-emerald-400"
-                                    : "bg-amber-500/20 text-amber-400"
-                                }`}
-                              >
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${n.leida ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"}`}>
                                 {n.leida ? "Leída" : "Pendiente"}
                               </span>
+                            </td>
+                            <td className="p-4 text-right">
+                              <button
+                                onClick={() => handleDeleteNotificacion(n.id)}
+                                className="p-1.5 hover:bg-red-500/20 rounded-lg text-gray-500 hover:text-red-400 transition-colors"
+                                title="Eliminar"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
                             </td>
                           </tr>
                         ))
