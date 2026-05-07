@@ -135,7 +135,7 @@ export function NotificationBell() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleMarkRead = async (id: string, link?: string | null) => {
+  const handleMarkRead = async (id: string, rawLink?: string | null) => {
     try {
       await fetch("/api/notificaciones", {
         method: "PUT",
@@ -155,9 +155,16 @@ export function NotificationBell() {
       // silencioso
     }
 
-    if (link) {
+    if (rawLink) {
       setIsOpen(false);
-      router.push(link);
+      const link = rawLink.trim();
+      if (link.startsWith("http://") || link.startsWith("https://")) {
+        window.location.href = link;
+      } else if (link.startsWith("/")) {
+        router.push(link);
+      } else {
+        router.push(`/${link}`);
+      }
     }
   };
 
