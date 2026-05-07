@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/useAuth";
-import type { ChatSala, ChatMensaje, ChatMiembro, ChatPresencia, ChatConfig } from "./types";
+import type { ChatSala, ChatMensaje, ChatMiembro, ChatPresencia, ChatConfig, ChatPlantilla } from "./types";
 
 const PAGE_SIZE = 50;
 
@@ -19,6 +19,7 @@ export function useChat() {
   const [enviando, setEnviando] = useState(false);
   const [tieneMasMensajes, setTieneMasMensajes] = useState(false);
   const [escribiendoEn, setEscribiendoEn] = useState<Record<string, boolean>>({});
+  const [plantillas, setPlantillas] = useState<ChatPlantilla[]>([]);
 
   const channelRef = useRef<any>(null);
   const presenciaChannelRef = useRef<any>(null);
@@ -156,6 +157,64 @@ export function useChat() {
     }
   }, [user]);
 
+  // Subir archivo y enviar mensaje
+  const subirArchivoChat = useCallback(async (salaId: string, file: File) => {
+    if (!user) return false;
+    const supabase = getSupabase();
+    if (!supabase) return false;
+
+    setEnviando(true);
+    try {
+      const ext = file.name.split(".").pop() || "";
+      const path = `${user.empresa_id || "global"}/${salaId}/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("chat-media")
+        .upload(path, file, { upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("chat-media")
+        .getPublicUrl(path);
+
+      const archivoUrl = urlData?.publicUrl || "";
+
+      // Determinar tipo por mime
+      let tipo: ChatMensaje["tipo"] = "archivo";
+      if (file.type.startsWith("image/")) tipo = "imagen";
+      else if (file.type.startsWith("video/")) tipo = "video";
+      else if (file.type.startsWith("audio/")) tipo = "audio";
+
+      const { error } = await supabase.from("chat_mensajes").insert({
+        sala_id: salaId,
+        user_id: user.id,
+        tipo,
+        contenido: file.name,
+        archivo_url: archivoUrl,
+        archivo_nombre: file.name,
+        archivo_size: file.size,
+        archivo_mime: file.type,
+        enviado: true,
+      });
+
+      if (error) throw error;
+
+      await supabase
+        .from("chat_miembros")
+        .update({ ultima_lectura: new Date().toISOString() })
+        .eq("sala_id", salaId)
+        .eq("user_id", user.id);
+
+      return true;
+    } catch (err) {
+      console.error("[useChat] Error subiendo archivo:", err);
+      return false;
+    } finally {
+      setEnviando(false);
+    }
+  }, [user]);
+
   // Marcar mensajes como leídos
   const marcarLeidos = useCallback(async (salaId: string) => {
     if (!user) return;
@@ -274,6 +333,26 @@ export function useChat() {
     }
   }, [user]);
 
+  // Cargar plantillas de respuesta rápida
+  const cargarPlantillas = useCallback(async () => {
+    if (!user) return;
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("chat_plantillas")
+        .select("*")
+        .eq("activo", true)
+        .order("titulo", { ascending: true });
+
+      if (error) throw error;
+      setPlantillas((data || []) as ChatPlantilla[]);
+    } catch (err) {
+      console.error("[useChat] Error cargando plantillas:", err);
+    }
+  }, [user]);
+
   // Actualizar presencia (escribiendo)
   const setEscribiendo = useCallback(async (salaId: string, escribiendo: boolean) => {
     if (!user) return;
@@ -294,7 +373,123 @@ export function useChat() {
     }
   }, [user]);
 
-  // Suscripción realtime a mensajes
+  // Editar mensaje
+  const editarMensaje = useCallback(async (mensajeId: string, nuevoContenido: string) => {
+    if (!user) return false;
+    const supabase = getSupabase();
+    if (!supabase) return false;
+
+    try {
+      const { error } = await supabase
+        .from("chat_mensajes")
+        .update({ contenido: nuevoContenido, editado: true })
+        .eq("id", mensajeId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error("[useChat] Error editando mensaje:", err);
+      return false;
+    }
+  }, [user]);
+
+  // Eliminar mensaje (soft delete)
+  const eliminarMensaje = useCallback(async (mensajeId: string) => {
+    if (!user) return false;
+    const supabase = getSupabase();
+    if (!supabase) return false;
+
+    try {
+      const { error } = await supabase
+        .from("chat_mensajes")
+        .update({ eliminado: true })
+        .eq("id", mensajeId)
+        .eq("user_id", user.id);
+
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error("[useChat] Error eliminando mensaje:", err);
+      return false;
+    }
+  }, [user]);
+
+  // Fijar/desfijar mensaje
+  const fijarMensaje = useCallback(async (mensajeId: string, fijar: boolean) => {
+    if (!user) return false;
+    const supabase = getSupabase();
+    if (!supabase) return false;
+
+    try {
+      const { error } = await supabase
+        .from("chat_mensajes")
+        .update({ fijado: fijar })
+        .eq("id", mensajeId);
+
+      if (error) throw error;
+      return true;
+    } catch (err) {
+      console.error("[useChat] Error fijando mensaje:", err);
+      return false;
+    }
+  }, [user]);
+
+  // Buscar mensajes
+  const buscarMensajes = useCallback(async (salaId: string, query: string) => {
+    if (!user || !query.trim()) return [] as ChatMensaje[];
+    const supabase = getSupabase();
+    if (!supabase) return [] as ChatMensaje[];
+
+    try {
+      const { data, error } = await supabase
+        .from("chat_mensajes")
+        .select(`*, user:profiles(id, nombre, avatar_url, rol)`)
+        .eq("sala_id", salaId)
+        .eq("eliminado", false)
+        .ilike("contenido", `%${query}%`)
+        .order("creado_en", { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      return (data || []) as ChatMensaje[];
+    } catch (err) {
+      console.error("[useChat] Error buscando mensajes:", err);
+      return [] as ChatMensaje[];
+    }
+  }, [user]);
+
+  // Transferir sala a otro agente
+  const transferirSala = useCallback(async (salaId: string, nuevoAgenteId: string) => {
+    if (!user) return false;
+    const supabase = getSupabase();
+    if (!supabase) return false;
+
+    try {
+      const { error } = await supabase
+        .from("chat_salas")
+        .update({ asignado_a: nuevoAgenteId })
+        .eq("id", salaId);
+
+      if (error) throw error;
+
+      // Agregar mensaje de sistema
+      await supabase.from("chat_mensajes").insert({
+        sala_id: salaId,
+        user_id: null,
+        tipo: "sistema",
+        contenido: `Sala transferida a otro agente`,
+        enviado: true,
+      });
+
+      return true;
+    } catch (err) {
+      console.error("[useChat] Error transfiriendo sala:", err);
+      return false;
+    }
+  }, [user]);
+
+  // Suscripción realtime a mensajes (INSERT + UPDATE)
   useEffect(() => {
     if (!user) return;
     const supabase = getSupabase();
@@ -312,25 +507,20 @@ export function useChat() {
         async (payload) => {
           const nuevoMensaje = payload.new as ChatMensaje;
 
-          // Cargar info del usuario
           if (nuevoMensaje.user_id) {
             const { data: userData } = await supabase
               .from("profiles")
               .select("id, nombre, avatar_url, rol")
               .eq("id", nuevoMensaje.user_id)
               .single();
-
             nuevoMensaje.user = userData || null;
           }
 
-          // Si es de la sala activa, agregarlo
           if (salaIdRef.current === nuevoMensaje.sala_id) {
             setMensajes((prev) => [...prev, nuevoMensaje]);
-            // Marcar como leído automáticamente
             await marcarLeidos(nuevoMensaje.sala_id);
           }
 
-          // Actualizar último mensaje en la lista de salas
           setSalas((prev) =>
             prev.map((s) =>
               s.id === nuevoMensaje.sala_id
@@ -338,6 +528,22 @@ export function useChat() {
                 : s
             )
           );
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "chat_mensajes",
+        },
+        (payload) => {
+          const updated = payload.new as ChatMensaje;
+          if (salaIdRef.current === updated.sala_id) {
+            setMensajes((prev) =>
+              prev.map((m) => (m.id === updated.id ? { ...m, ...updated } : m))
+            );
+          }
         }
       )
       .subscribe();
@@ -409,7 +615,7 @@ export function useChat() {
     };
   }, [user]);
 
-  // Cargar salas iniciales
+  // Cargar salas y plantillas iniciales
   useEffect(() => {
     if (!user) {
       setLoading(false);
@@ -417,7 +623,8 @@ export function useChat() {
     }
 
     cargarSalas().then(() => setLoading(false));
-  }, [user, cargarSalas]);
+    cargarPlantillas();
+  }, [user, cargarSalas, cargarPlantillas]);
 
   // Obtener estado de un usuario
   const getEstadoUsuario = useCallback((userId: string): ChatPresencia | undefined => {
@@ -435,6 +642,7 @@ export function useChat() {
     enviando,
     tieneMasMensajes,
     escribiendoEn,
+    plantillas,
     setSalaActiva,
     cargarSalas,
     cargarMensajes,
@@ -444,5 +652,12 @@ export function useChat() {
     crearSalaDirecta,
     setEscribiendo,
     getEstadoUsuario,
+    cargarPlantillas,
+    subirArchivoChat,
+    editarMensaje,
+    eliminarMensaje,
+    fijarMensaje,
+    buscarMensajes,
+    transferirSala,
   };
 }

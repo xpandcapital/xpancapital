@@ -5,16 +5,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   X, Minimize2, Send, Paperclip, Smile, Phone, Video,
   MoreVertical, ArrowLeft, User, Bot, Sparkles, MessageCircle,
-  Clock, Check, CheckCheck, Loader2
+  Clock, Check, CheckCheck, Loader2, LayoutTemplate,
+  Search, Pin, PinOff, Edit3, Trash2, MoreHorizontal, X as XIcon
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/lib/chat/useChat";
+import { useWebRTC } from "@/lib/chat/useWebRTC";
+import { getSupabase } from "@/lib/supabase";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { ChatSala, ChatMensaje } from "@/lib/chat/types";
+import { CallModal } from "./CallModal";
 
 interface ChatPanelProps {
   onClose: () => void;
@@ -34,7 +39,26 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     enviarMensaje,
     crearSalaDirecta,
     setEscribiendo,
+    plantillas,
+    subirArchivoChat,
+    editarMensaje,
+    eliminarMensaje,
+    fijarMensaje,
+    buscarMensajes,
+    transferirSala,
+    escribiendoEn,
   } = useChat();
+
+  const {
+    callState,
+    iniciarLlamada,
+    aceptarLlamada,
+    rechazarLlamada,
+    colgar,
+    toggleMute,
+    toggleVideo,
+    toggleScreenShare,
+  } = useWebRTC();
 
   const [vista, setVista] = useState<"lista" | "chat" | "visitante">("lista");
   const [mensajeInput, setMensajeInput] = useState("");
@@ -42,7 +66,50 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const [visitanteEmail, setVisitanteEmail] = useState("");
   const [visitanteMensaje, setVisitanteMensaje] = useState("");
   const [visitanteEnviando, setVisitanteEnviando] = useState(false);
+  const [llamadaEntranteId, setLlamadaEntranteId] = useState<string | null>(null);
+  const [mostrarBusqueda, setMostrarBusqueda] = useState(false);
+  const [queryBusqueda, setQueryBusqueda] = useState("");
+  const [mensajesBuscados, setMensajesBuscados] = useState<ChatMensaje[]>([]);
+  const [editandoMensaje, setEditandoMensaje] = useState<string | null>(null);
+  const [editInput, setEditInput] = useState("");
+  const [menuMensaje, setMenuMensaje] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Escuchar llamadas entrantes
+  useEffect(() => {
+    if (!user) return;
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const channel = supabase
+      .channel("chat-llamadas")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "chat_llamadas",
+          filter: `recibida_por=eq.${user.id}`,
+        },
+        (payload) => {
+          const llamada = payload.new as any;
+          if (llamada.estado === "llamando") {
+            setLlamadaEntranteId(llamada.id);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  // Determinar usuario remoto para llamada en sala directa
+  const remoteUserId = salaActiva && miembros.length > 0
+    ? miembros.find((m) => m.user_id !== user?.id)?.user_id
+    : null;
 
   // Auto-scroll al final de mensajes
   useEffect(() => {
@@ -61,10 +128,33 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const handleEnviar = async () => {
     if (!mensajeInput.trim() || !salaActiva) return;
 
-    const success = await enviarMensaje(salaActiva.id, mensajeInput, "texto");
+    const contenido = mensajeInput.trim();
+    const success = await enviarMensaje(salaActiva.id, contenido, "texto");
     if (success) {
       setMensajeInput("");
       setEscribiendo(salaActiva.id, false);
+
+      // Si es sala IA, llamar a la API de IA
+      if (salaActiva.tipo === "ia") {
+        try {
+          const contexto = mensajes.slice(-10).map((m) => ({
+            rol: m.tipo === "ia" ? "ia" : "usuario",
+            contenido: m.contenido || "",
+          }));
+          await fetch("/api/chat/ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              mensaje: contenido,
+              sala_id: salaActiva.id,
+              contexto,
+              empresa_id: user?.empresa_id,
+            }),
+          });
+        } catch (err) {
+          console.error("Error llamando IA:", err);
+        }
+      }
     }
   };
 
@@ -80,6 +170,36 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     if (salaActiva && value.length > 0) {
       setEscribiendo(salaActiva.id, true);
     }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !salaActiva) return;
+    await subirArchivoChat(salaActiva.id, file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleBuscar = async () => {
+    if (!salaActiva || !queryBusqueda.trim()) return;
+    const resultados = await buscarMensajes(salaActiva.id, queryBusqueda);
+    setMensajesBuscados(resultados);
+  };
+
+  const handleEditar = async (msgId: string) => {
+    if (!editInput.trim()) return;
+    await editarMensaje(msgId, editInput);
+    setEditandoMensaje(null);
+    setEditInput("");
+  };
+
+  const handleEliminar = async (msgId: string) => {
+    await eliminarMensaje(msgId);
+    setMenuMensaje(null);
+  };
+
+  const handleFijar = async (msgId: string, fijar: boolean) => {
+    await fijarMensaje(msgId, fijar);
+    setMenuMensaje(null);
   };
 
   // Visitor chat handler
@@ -149,40 +269,146 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
           </AvatarFallback>
         </Avatar>
 
-        <div className={`max-w-[75%] ${esMio ? "items-end" : "items-start"} flex flex-col`}>
+        <div className={`max-w-[75%] ${esMio ? "items-end" : "items-start"} flex flex-col relative`}>
           {!esMio && (
             <span className="text-[10px] text-gray-500 mb-1 uppercase tracking-wider font-bold">
               {msg.user?.nombre || "Usuario"}
             </span>
           )}
 
-          <div
-            className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-              esMio
-                ? "bg-blis-red text-white rounded-br-md"
-                : "bg-white/5 text-gray-200 border border-white/10 rounded-bl-md"
-            }`}
-          >
-            {msg.contenido}
-          </div>
-
-          <div className="flex items-center gap-1 mt-1">
-            <span className="text-[9px] text-gray-600">
-              {new Date(msg.creado_en).toLocaleTimeString("es-ES", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-            {esMio && (
-              <span className="text-gray-600">
-                {msg.leido_por.length > 1 ? (
-                  <CheckCheck className="w-3 h-3 text-emerald-500" />
-                ) : (
-                  <Check className="w-3 h-3" />
+          {editandoMensaje === msg.id ? (
+            <div className="flex items-center gap-2 w-full">
+              <Input
+                value={editInput}
+                onChange={(e) => setEditInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleEditar(msg.id);
+                  if (e.key === "Escape") {
+                    setEditandoMensaje(null);
+                    setEditInput("");
+                  }
+                }}
+                className="bg-white/5 border-white/10 text-white text-xs h-8"
+                autoFocus
+              />
+              <button
+                onClick={() => handleEditar(msg.id)}
+                className="p-1.5 bg-blis-red rounded-lg text-white"
+              >
+                <Check className="w-3 h-3" />
+              </button>
+              <button
+                onClick={() => {
+                  setEditandoMensaje(null);
+                  setEditInput("");
+                }}
+                className="p-1.5 bg-white/10 rounded-lg text-gray-400"
+              >
+                <XIcon className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <div
+                className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed relative group ${
+                  esMio
+                    ? "bg-blis-red text-white rounded-br-md"
+                    : "bg-white/5 text-gray-200 border border-white/10 rounded-bl-md"
+                }`}
+              >
+                {msg.editado && (
+                  <span className="text-[9px] opacity-60 mr-1">(editado)</span>
                 )}
-              </span>
-            )}
-          </div>
+                {msg.tipo === "imagen" && msg.archivo_url ? (
+                  <a href={msg.archivo_url} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={msg.archivo_url}
+                      alt={msg.archivo_nombre || "Imagen"}
+                      className="max-w-[200px] max-h-[200px] rounded-lg object-cover"
+                    />
+                  </a>
+                ) : msg.tipo === "video" && msg.archivo_url ? (
+                  <video
+                    src={msg.archivo_url}
+                    controls
+                    className="max-w-[200px] max-h-[200px] rounded-lg"
+                  />
+                ) : msg.tipo === "audio" && msg.archivo_url ? (
+                  <audio src={msg.archivo_url} controls className="w-[200px]" />
+                ) : msg.tipo === "archivo" && msg.archivo_url ? (
+                  <a
+                    href={msg.archivo_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 underline"
+                  >
+                    <Paperclip className="w-4 h-4" />
+                    {msg.archivo_nombre || "Archivo"}
+                  </a>
+                ) : (
+                  msg.contenido
+                )}
+
+                {/* Menu contextual */}
+                {esMio && (
+                  <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Popover open={menuMensaje === msg.id} onOpenChange={(open) => setMenuMensaje(open ? msg.id : null)}>
+                      <PopoverTrigger>
+                        <button className="p-1 bg-[#1a1a1a] border border-white/10 rounded-full shadow-lg">
+                          <MoreHorizontal className="w-3 h-3 text-gray-400" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-32 p-1 bg-[#111] border-white/10">
+                        <button
+                          onClick={() => {
+                            setEditandoMensaje(msg.id);
+                            setEditInput(msg.contenido || "");
+                            setMenuMensaje(null);
+                          }}
+                          className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-300 hover:bg-white/5 rounded-md"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleFijar(msg.id, !msg.fijado)}
+                          className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-gray-300 hover:bg-white/5 rounded-md"
+                        >
+                          {msg.fijado ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
+                          {msg.fijado ? "Desfijar" : "Fijar"}
+                        </button>
+                        <button
+                          onClick={() => handleEliminar(msg.id)}
+                          className="w-full flex items-center gap-2 px-2 py-1.5 text-xs text-red-400 hover:bg-white/5 rounded-md"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Eliminar
+                        </button>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-[9px] text-gray-600">
+                  {new Date(msg.creado_en).toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+                {esMio && (
+                  <span className="text-gray-600">
+                    {msg.leido_por.length > 1 ? (
+                      <CheckCheck className="w-3 h-3 text-emerald-500" />
+                    ) : (
+                      <Check className="w-3 h-3" />
+                    )}
+                  </span>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
     );
@@ -233,22 +459,44 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         <div className="flex items-center gap-1">
           {vista === "chat" && (
             <>
-              <Tooltip>
-                <TooltipTrigger>
-                  <button className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-white">
-                    <Phone className="w-4 h-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Llamada de voz</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger>
-                  <button className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-white">
-                    <Video className="w-4 h-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>Videollamada</TooltipContent>
-              </Tooltip>
+              <button
+                onClick={() => {
+                  setMostrarBusqueda(!mostrarBusqueda);
+                  if (mostrarBusqueda) {
+                    setQueryBusqueda("");
+                    setMensajesBuscados([]);
+                  }
+                }}
+                className={`p-2 hover:bg-white/5 rounded-lg transition-colors ${mostrarBusqueda ? "text-white bg-white/10" : "text-gray-400 hover:text-white"}`}
+              >
+                <Search className="w-4 h-4" />
+              </button>
+              {remoteUserId && (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <button
+                        onClick={() => iniciarLlamada(remoteUserId, "audio")}
+                        className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-white"
+                      >
+                        <Phone className="w-4 h-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Llamada de voz</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <button
+                        onClick={() => iniciarLlamada(remoteUserId, "video")}
+                        className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-400 hover:text-white"
+                      >
+                        <Video className="w-4 h-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Videollamada</TooltipContent>
+                  </Tooltip>
+                </>
+              )}
             </>
           )}
           <button
@@ -393,6 +641,62 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
               exit={{ opacity: 0, x: 20 }}
               className="h-full flex flex-col"
             >
+              {/* Búsqueda */}
+              <AnimatePresence>
+                {mostrarBusqueda && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="border-b border-white/5 overflow-hidden"
+                  >
+                    <div className="px-4 py-2 flex gap-2">
+                      <Input
+                        value={queryBusqueda}
+                        onChange={(e) => setQueryBusqueda(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleBuscar()}
+                        placeholder="Buscar en conversación..."
+                        className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 text-xs h-8"
+                        autoFocus
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleBuscar}
+                        className="bg-blis-red hover:bg-blis-red/90 text-white text-xs h-8 px-3"
+                      >
+                        Buscar
+                      </Button>
+                    </div>
+                    {mensajesBuscados.length > 0 && (
+                      <div className="px-4 pb-2">
+                        <p className="text-[10px] text-gray-500">
+                          {mensajesBuscados.length} resultado(s)
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Mensajes fijados */}
+              {mensajes.some((m) => m.fijado) && (
+                <div className="px-4 py-2 border-b border-white/5 bg-white/[0.02]">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Pin className="w-3 h-3 text-blis-red" />
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                      Fijado
+                    </span>
+                  </div>
+                  {mensajes
+                    .filter((m) => m.fijado)
+                    .map((msg) => (
+                      <p key={msg.id} className="text-xs text-gray-300 truncate">
+                        {msg.contenido}
+                      </p>
+                    ))}
+                </div>
+              )}
+
               {/* Mensajes */}
               <ScrollArea className="flex-1 px-4 py-4" ref={scrollRef}>
                 {mensajes.length === 0 ? (
@@ -407,9 +711,24 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                     </p>
                   </div>
                 ) : (
-                  mensajes.map((msg, i) => renderMensaje(msg, i))
+                  <>
+                    {(mostrarBusqueda && mensajesBuscados.length > 0
+                      ? mensajesBuscados.reverse()
+                      : mensajes
+                    ).map((msg, i) => renderMensaje(msg, i))}
+                  </>
                 )}
               </ScrollArea>
+
+              {/* Indicador "escribiendo..." */}
+              {escribiendoEn[salaActiva.id] && (
+                <div className="px-4 pb-1">
+                  <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    Alguien está escribiendo...
+                  </div>
+                </div>
+              )}
 
               {/* Input */}
               <div className="px-4 py-3 border-t border-white/5 bg-[#0a0a0a]/90">
@@ -426,9 +745,63 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                   </div>
 
                   <div className="flex items-center gap-1">
+                    <Popover>
+                      <PopoverTrigger>
+                        <button className="p-2.5 hover:bg-white/5 rounded-xl transition-colors text-gray-400 hover:text-white">
+                          <LayoutTemplate className="w-5 h-5" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        side="top"
+                        align="end"
+                        className="w-64 p-0 bg-[#111] border-white/10"
+                      >
+                        <div className="p-2">
+                          <h4 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 px-2">
+                            Respuestas rápidas
+                          </h4>
+                          <ScrollArea className="h-48">
+                            <div className="space-y-1">
+                              {plantillas.length === 0 && (
+                                <p className="text-xs text-gray-600 px-2 py-2">
+                                  Sin plantillas
+                                </p>
+                              )}
+                              {plantillas.map((p) => (
+                                <button
+                                  key={p.id}
+                                  onClick={() => {
+                                    setMensajeInput(p.contenido);
+                                  }}
+                                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 transition-colors"
+                                >
+                                  <p className="text-xs font-bold text-white">
+                                    {p.titulo}
+                                  </p>
+                                  <p className="text-[10px] text-gray-500 truncate">
+                                    {p.contenido}
+                                  </p>
+                                </button>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileChange}
+                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
+                    />
                     <Tooltip>
                       <TooltipTrigger>
-                        <button className="p-2.5 hover:bg-white/5 rounded-xl transition-colors text-gray-400 hover:text-white">
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="p-2.5 hover:bg-white/5 rounded-xl transition-colors text-gray-400 hover:text-white"
+                        >
                           <Paperclip className="w-5 h-5" />
                         </button>
                       </TooltipTrigger>
@@ -517,6 +890,29 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Call Modal */}
+      {(callState.estado !== "idle" || llamadaEntranteId) && (
+        <CallModal
+          callState={callState}
+          aceptarLlamada={aceptarLlamada}
+          rechazarLlamada={rechazarLlamada}
+          colgar={colgar}
+          toggleMute={toggleMute}
+          toggleVideo={toggleVideo}
+          toggleScreenShare={toggleScreenShare}
+          llamadaId={llamadaEntranteId || undefined}
+          remoteUserName={
+            salaActiva
+              ? miembros.find((m) => m.user_id !== user?.id)?.user?.nombre || "Usuario"
+              : undefined
+          }
+          onClose={() => {
+            setLlamadaEntranteId(null);
+            if (callState.estado !== "idle") colgar();
+          }}
+        />
+      )}
     </div>
   );
 }

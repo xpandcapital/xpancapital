@@ -105,3 +105,16 @@ export interface ChatPresencia {
 }
 
 export type ChatEstado = 'online' | 'ausente' | 'ocupado' | 'offline';
+
+export interface ChatVisitante {
+  id: string;
+  session_id: string;
+  nombre: string;
+  email?: string;
+  empresa_id: string;
+  sala_id: string;
+  pagina_origen?: string;
+  estado: 'activo' | 'resuelto' | 'abandonado';
+  ultima_actividad: string;
+  creado_en: string;
+}
