@@ -84,12 +84,16 @@ export function ChatWidget() {
         )}
       </AnimatePresence>
 
-      {/* Botón flotante */}
+      {/* Botón flotante neon */}
       <motion.button
-        whileHover={{ scale: 1.05 }}
+        whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setAbierto(!abierto)}
-        className="relative w-14 h-14 rounded-full bg-blis-red shadow-lg shadow-blis-red/30 flex items-center justify-center text-white hover:shadow-xl hover:shadow-blis-red/40 transition-shadow"
+        className="relative w-14 h-14 rounded-full bg-blis-red flex items-center justify-center text-white transition-all duration-300"
+        style={{
+          boxShadow: "0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.3), 0 0 60px rgba(239, 68, 68, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.1)",
+          border: "1px solid rgba(255, 100, 100, 0.3)",
+        }}
       >
         <AnimatePresence mode="wait">
           {abierto ? (
@@ -122,9 +126,12 @@ export function ChatWidget() {
           )}
         </AnimatePresence>
 
-        {/* Efecto de pulso */}
+        {/* Efecto de pulso neon */}
         {!abierto && (
-          <span className="absolute inset-0 rounded-full bg-blis-red animate-ping opacity-20" />
+          <>
+            <span className="absolute inset-0 rounded-full bg-blis-red animate-ping opacity-30" style={{ animationDuration: "2s" }} />
+            <span className="absolute -inset-1 rounded-full bg-blis-red/20 animate-pulse" style={{ animationDuration: "3s" }} />
+          </>
         )}
       </motion.button>
     </div>

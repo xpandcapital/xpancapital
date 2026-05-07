@@ -33,20 +33,29 @@ export function useChat() {
     if (!supabase) return;
 
     try {
-      const { data, error } = await supabase
+      // Paso 1: obtener los sala_id de las salas donde el usuario es miembro
+      const { data: membresias, error: errM } = await supabase
         .from("chat_miembros")
-        .select(`
-          *,
-          sala:chat_salas!inner(*)
-        `)
-        .eq("user_id", user.id)
-        .eq("sala.estado", "activo")
-        .order("sala.ultima_actividad", { ascending: false });
+        .select("sala_id")
+        .eq("user_id", user.id);
+
+      if (errM) throw errM;
+      const salaIds = (membresias || []).map((m) => m.sala_id);
+      if (salaIds.length === 0) {
+        setSalas([]);
+        return;
+      }
+
+      // Paso 2: cargar las salas activas directamente, ordenadas
+      const { data, error } = await supabase
+        .from("chat_salas")
+        .select("*")
+        .in("id", salaIds)
+        .eq("estado", "activo")
+        .order("ultima_actividad", { ascending: false });
 
       if (error) throw error;
-
-      const salasData = (data || []).map((m: any) => m.sala as ChatSala);
-      setSalas(salasData);
+      setSalas((data || []) as ChatSala[]);
     } catch (err) {
       console.error("[useChat] Error cargando salas:", err);
     }
@@ -268,6 +277,12 @@ export function useChat() {
       console.error("[useChat] Error marcando leídos:", err);
     }
   }, [user]);
+
+  // Ref para acceder a marcarLeidos desde realtime sin causar re-subscripciones
+  const marcarLeidosRef = useRef(marcarLeidos);
+  useEffect(() => {
+    marcarLeidosRef.current = marcarLeidos;
+  }, [marcarLeidos]);
 
   // Unirse a sala
   const unirseSala = useCallback(async (salaId: string) => {
@@ -549,7 +564,7 @@ export function useChat() {
 
           if (salaIdRef.current === nuevoMensaje.sala_id) {
             setMensajes((prev) => [...prev, nuevoMensaje]);
-            await marcarLeidos(nuevoMensaje.sala_id);
+            await marcarLeidosRef.current(nuevoMensaje.sala_id);
           } else {
             // Incrementar contador de no leídos
             setNoLeidos((prev) => ({
@@ -601,7 +616,7 @@ export function useChat() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, marcarLeidos]);
+  }, [user]);
 
   // Suscripción a presencia
   useEffect(() => {
