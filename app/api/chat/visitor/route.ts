@@ -1,8 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { getAuthUser } from "@/lib/supabase/api-auth";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+export async function GET(request: NextRequest) {
+  try {
+    const auth = await getAuthUser(request);
+    if (!auth) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const estado = searchParams.get("estado") || "activo";
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    const { data, error } = await supabaseAdmin
+      .from("chat_visitantes")
+      .select(`
+        *,
+        sala:chat_salas(id, nombre, ultima_actividad)
+      `)
+      .eq("estado", estado)
+      .order("ultima_actividad", { ascending: false });
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, data: data || [] });
+  } catch (error: any) {
+    console.error("[chat/visitor GET] Error:", error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,11 +60,10 @@ export async function POST(request: NextRequest) {
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    const empresaId = "6186f014-c8c7-4027-9f08-8acf2bae3eae"; // Default empresa
+    const empresaId = "6186f014-c8c7-4027-9f08-8acf2bae3eae";
 
     let visitorSessionId = session_id || crypto.randomUUID();
 
-    // Buscar sala existente para este visitante
     let salaId: string;
 
     if (session_id) {
@@ -44,7 +77,6 @@ export async function POST(request: NextRequest) {
       if (existente) {
         salaId = existente.sala_id;
       } else {
-        // Crear nueva sala
         const { data: sala, error: salaError } = await supabaseAdmin
           .from("chat_salas")
           .insert({
@@ -59,7 +91,6 @@ export async function POST(request: NextRequest) {
         salaId = sala.id;
       }
     } else {
-      // Crear nueva sala
       const { data: sala, error: salaError } = await supabaseAdmin
         .from("chat_salas")
         .insert({
@@ -74,7 +105,6 @@ export async function POST(request: NextRequest) {
       salaId = sala.id;
     }
 
-    // Crear o actualizar visitante
     await supabaseAdmin.from("chat_visitantes").upsert({
       sala_id: salaId,
       nombre,
@@ -87,7 +117,6 @@ export async function POST(request: NextRequest) {
       estado: "activo",
     });
 
-    // Insertar mensaje
     const { error: msgError } = await supabaseAdmin.from("chat_mensajes").insert({
       sala_id: salaId,
       user_id: null,
@@ -98,16 +127,13 @@ export async function POST(request: NextRequest) {
 
     if (msgError) throw msgError;
 
-    // Notificar a agentes (esto se haría vía trigger, pero también podemos forzar aquí)
-    // Por ahora, la notificación se maneja por el trigger de notificaciones
-
     return NextResponse.json({
       success: true,
       session_id: visitorSessionId,
       sala_id: salaId,
     });
   } catch (error: any) {
-    console.error("[chat/visitor] Error:", error);
+    console.error("[chat/visitor POST] Error:", error);
     return NextResponse.json(
       { success: false, error: error.message || "Error interno" },
       { status: 500 }
