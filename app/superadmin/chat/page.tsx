@@ -1123,18 +1123,22 @@ export default function ChatAdminPage() {
                 </AnimatePresence>
 
                 {/* Messages */}
-                <ScrollArea className="flex-1 px-6 py-4" ref={scrollRef}>
-                  {mensajes.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                      <Headphones className="w-12 h-12 text-gray-600 mb-4" />
-                      <p className="text-gray-500">Inicia la conversación con el cliente</p>
+                <div className="flex-1 min-h-0 overflow-hidden relative">
+                  <ScrollArea className="h-full" ref={scrollRef}>
+                    <div className="px-4 md:px-6 py-4">
+                      {mensajes.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                          <Headphones className="w-12 h-12 text-gray-600 mb-4" />
+                          <p className="text-gray-500">Inicia la conversación con el cliente</p>
+                        </div>
+                      ) : (
+                        <>
+                          {(mostrarBusqueda && mensajesBuscados.length > 0 ? mensajesBuscados.reverse() : mensajes).map((msg, i) => renderMensaje(msg, i))}
+                        </>
+                      )}
                     </div>
-                  ) : (
-                    <>
-                      {(mostrarBusqueda && mensajesBuscados.length > 0 ? mensajesBuscados.reverse() : mensajes).map((msg, i) => renderMensaje(msg, i))}
-                    </>
-                  )}
-                </ScrollArea>
+                  </ScrollArea>
+                </div>
 
                 {/* Input */}
                 <div className="px-6 py-4 border-t border-white/5 flex-shrink-0">

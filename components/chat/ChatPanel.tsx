@@ -867,27 +867,31 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
               )}
 
               {/* Mensajes */}
-              <ScrollArea className="flex-1 px-4 py-4" ref={scrollRef}>
-                {mensajes.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center">
-                    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-3">
-                      <Sparkles className="w-6 h-6 text-gray-600" />
-                    </div>
-                    <p className="text-sm text-gray-500">
-                      {salaActiva.tipo === "ia"
-                        ? "Hola, soy tu asistente virtual. ¿En qué puedo ayudarte?"
-                        : "Inicia la conversación..."}
-                    </p>
+              <div className="flex-1 min-h-0 overflow-hidden relative">
+                <ScrollArea className="h-full" ref={scrollRef}>
+                  <div className="px-4 py-4">
+                    {mensajes.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full text-center">
+                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-3">
+                          <Sparkles className="w-6 h-6 text-gray-600" />
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {salaActiva.tipo === "ia"
+                            ? "Hola, soy tu asistente virtual. ¿En qué puedo ayudarte?"
+                            : "Inicia la conversación..."}
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {(mostrarBusqueda && mensajesBuscados.length > 0
+                          ? mensajesBuscados.reverse()
+                          : mensajes
+                        ).map((msg, i) => renderMensaje(msg, i))}
+                      </>
+                    )}
                   </div>
-                ) : (
-                  <>
-                    {(mostrarBusqueda && mensajesBuscados.length > 0
-                      ? mensajesBuscados.reverse()
-                      : mensajes
-                    ).map((msg, i) => renderMensaje(msg, i))}
-                  </>
-                )}
-              </ScrollArea>
+                </ScrollArea>
+              </div>
 
               {/* Indicador "escribiendo..." */}
               {escribiendoEn[salaActiva.id] && (
@@ -1014,22 +1018,26 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
               exit={{ opacity: 0, x: 20 }}
               className="h-full flex flex-col"
             >
-              <ScrollArea className="flex-1 px-4 py-4" ref={scrollRef}>
-                {visitanteHistorial.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-center space-y-4 px-4">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                      <Bot className="w-6 h-6 text-emerald-400" />
-                    </div>
-                    <p className="text-sm text-gray-300 leading-relaxed">
-                      {widgetConfig?.widget_mensaje_bienvenida || `¡Hola ${visitanteNombre || ""}! Bienvenido a BLIS Corp. ¿En qué podemos ayudarte hoy?`}
-                    </p>
+              <div className="flex-1 min-h-0 overflow-hidden relative">
+                <ScrollArea className="h-full" ref={scrollRef}>
+                  <div className="px-4 py-4">
+                    {visitanteHistorial.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full text-center space-y-4 px-4">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                          <Bot className="w-6 h-6 text-emerald-400" />
+                        </div>
+                        <p className="text-sm text-gray-300 leading-relaxed">
+                          {widgetConfig?.widget_mensaje_bienvenida || `¡Hola ${visitanteNombre || ""}! Bienvenido a BLIS Corp. ¿En qué podemos ayudarte hoy?`}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        {visitanteHistorial.map((msg, i) => renderMensaje(msg, i))}
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="space-y-1">
-                    {visitanteHistorial.map((msg, i) => renderMensaje(msg, i))}
-                  </div>
-                )}
-              </ScrollArea>
+                </ScrollArea>
+              </div>
 
               <div className="px-4 py-3 border-t border-white/5">
                 <div className="flex items-end gap-2">
