@@ -193,6 +193,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // NOTA: Notificación removida temporalmente porque el tipo "sistema"
+    // no es válido para el constraint notificaciones_tipo_check.
+    // Cuando se necesite, usar un tipo válido de la tabla notificaciones.
+
     // Obtener historial de mensajes de esta sala para retornar al visitante
     const { data: historial } = await supabaseAdmin
       .from("chat_mensajes")
