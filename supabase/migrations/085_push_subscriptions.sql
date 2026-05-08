@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS push_subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  empresa_id uuid NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
+  empresa_id uuid,
   endpoint text NOT NULL,
   p256dh text NOT NULL,
   auth text NOT NULL,

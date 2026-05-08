@@ -201,39 +201,8 @@ export async function POST(request: NextRequest) {
       ].filter(Boolean);
 
       if (targetUserIds.length > 0) {
-        const { data: subs } = await supabaseAdmin
-          .from("push_subscriptions")
-          .select("endpoint, p256dh, auth")
-          .in("user_id", targetUserIds);
-
-        if (subs && subs.length > 0) {
-          const webpush = (await import("web-push")).default;
-          webpush.setVapidDetails(
-            "mailto:soporte@blis-corp.com",
-            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-            process.env.VAPID_PRIVATE_KEY!
-          );
-
-          const payload = JSON.stringify({
-            titulo: `💬 ${nombre} - Chat`,
-            mensaje: mensaje.slice(0, 100),
-            url: "/superadmin/chat",
-            tipo: "chat",
-          });
-
-          for (const sub of subs) {
-            try {
-              await webpush.sendNotification({
-                endpoint: sub.endpoint,
-                keys: { p256dh: sub.p256dh, auth: sub.auth },
-              }, payload, { TTL: 3600, urgency: "high" });
-            } catch (err: any) {
-              if (err.statusCode === 410 || err.statusCode === 404) {
-                await supabaseAdmin.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
-              }
-            }
-          }
-        }
+        const { sendPushToUsers } = await import("@/lib/push-notifications");
+        await sendPushToUsers(supabaseAdmin, targetUserIds, `💬 ${nombre} - Chat`, mensaje.slice(0, 100), "/superadmin/chat", "chat");
       }
     } catch (notifErr) {
       console.warn("[chat/visitor POST] Push notification error (non-critical):", notifErr);
