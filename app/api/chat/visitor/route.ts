@@ -180,7 +180,66 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // PASO 4: Obtener historial completo
+    // PASO 4: Notificar a los agentes de la empresa via push
+    try {
+      const { data: miembros } = await supabaseAdmin
+        .from("chat_miembros")
+        .select("user_id")
+        .eq("sala_id", salaId);
+
+      const { data: admins } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("empresa_id", empresaId)
+        .in("rol", ["admin", "superadmin", "editor"]);
+
+      const targetUserIds = [
+        ...new Set([
+          ...(miembros || []).map((m: any) => m.user_id),
+          ...(admins || []).map((a: any) => a.id),
+        ]),
+      ].filter(Boolean);
+
+      if (targetUserIds.length > 0) {
+        const { data: subs } = await supabaseAdmin
+          .from("push_subscriptions")
+          .select("endpoint, p256dh, auth")
+          .in("user_id", targetUserIds);
+
+        if (subs && subs.length > 0) {
+          const webpush = (await import("web-push")).default;
+          webpush.setVapidDetails(
+            "mailto:soporte@blis-corp.com",
+            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+            process.env.VAPID_PRIVATE_KEY!
+          );
+
+          const payload = JSON.stringify({
+            titulo: `💬 ${nombre} - Chat`,
+            mensaje: mensaje.slice(0, 100),
+            url: "/superadmin/chat",
+            tipo: "chat",
+          });
+
+          for (const sub of subs) {
+            try {
+              await webpush.sendNotification({
+                endpoint: sub.endpoint,
+                keys: { p256dh: sub.p256dh, auth: sub.auth },
+              }, payload, { TTL: 3600, urgency: "high" });
+            } catch (err: any) {
+              if (err.statusCode === 410 || err.statusCode === 404) {
+                await supabaseAdmin.from("push_subscriptions").delete().eq("endpoint", sub.endpoint);
+              }
+            }
+          }
+        }
+      }
+    } catch (notifErr) {
+      console.warn("[chat/visitor POST] Push notification error (non-critical):", notifErr);
+    }
+
+    // PASO 5: Obtener historial completo
     const { data: historial, error: hError } = await supabaseAdmin
       .from("chat_mensajes")
       .select("id, tipo, contenido, creado_en, user_id")

@@ -30,7 +30,7 @@ import { usePushNotifications } from "@/lib/hooks/usePushNotifications";
 
 export default function ChatAdminPage() {
   const { user } = useAuth();
-  const { showNotification } = usePushNotifications();
+  const { showNotification, sendPushToUser, requestPermission, isSubscribed } = usePushNotifications();
   const {
     salas,
     salaActiva,
@@ -309,15 +309,26 @@ export default function ChatAdminPage() {
         }
         audioRef.current.play().catch(() => {});
       }
-      // Notificación push del navegador
+      // Notificación push del navegador (funciona incluso con Chrome cerrado en móvil)
       if (lastMsg.contenido) {
         showNotification("Nuevo mensaje de chat", {
           body: lastMsg.contenido.slice(0, 150),
           tag: lastMsg.sala_id,
+          data: { url: "/superadmin/chat" },
         });
       }
     }
   }, [mensajes, salaActiva, sonidoActivado, user?.id, showNotification]);
+
+  // Auto-solicitar permisos de notificación push
+  useEffect(() => {
+    if (user && !isSubscribed && Notification.permission === "default") {
+      const t = setTimeout(() => {
+        requestPermission();
+      }, 5000);
+      return () => clearTimeout(t);
+    }
+  }, [user, isSubscribed, requestPermission]);
 
   // Realtime: recargar salas y visitantes instantáneamente
   useEffect(() => {
