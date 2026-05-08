@@ -165,34 +165,42 @@ export async function POST(request: NextRequest) {
       console.warn("[chat/visitor POST] Visitante upsert error:", upsertError.message);
     }
 
-    // PASO 2b: Auto-agregar admins de la empresa como miembros de la sala
+    // PASO 2b+4 consolidado: miembros + admins en paralelo, auto-agregar, push notifications
+    // Antes: 4 queries separadas. Ahora: 2 en Promise.all + opcional INSERT
     try {
-      const { data: existingMembers } = await supabaseAdmin
-        .from("chat_miembros")
-        .select("user_id")
-        .eq("sala_id", salaId);
+      const [miembrosRes, adminsRes] = await Promise.all([
+        supabaseAdmin.from("chat_miembros").select("user_id").eq("sala_id", salaId),
+        supabaseAdmin.from("profiles").select("id").eq("empresa_id", empresaId).in("rol", ["admin", "superadmin", "editor"]),
+      ]);
 
-      const existingIds = new Set((existingMembers || []).map((m: any) => m.user_id));
+      const existingMemberIds = new Set((miembrosRes.data || []).map((m: any) => m.user_id));
+      const adminIds = (adminsRes.data || []).map((a: any) => a.id);
 
-      const { data: admins } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("empresa_id", empresaId)
-        .in("rol", ["admin", "superadmin", "editor"]);
-
-      const newMembers = (admins || [])
-        .filter((a: any) => !existingIds.has(a.id))
-        .map((a: any) => ({
-          sala_id: salaId,
-          user_id: a.id,
-          rol_sala: "admin",
-        }));
+      // Auto-agregar admins que no son miembros aún
+      const newMembers = adminIds
+        .filter((id: string) => !existingMemberIds.has(id))
+        .map((id: string) => ({ sala_id: salaId, user_id: id, rol_sala: "admin" }));
 
       if (newMembers.length > 0) {
         await supabaseAdmin.from("chat_miembros").insert(newMembers);
       }
+
+      // Notificar via push a todos los admins + miembros existentes
+      const targetUserIds = [...new Set([...existingMemberIds, ...adminIds])].filter(Boolean);
+
+      if (targetUserIds.length > 0) {
+        const { sendPushToUsers } = await import("@/lib/push-notifications");
+        await sendPushToUsers(
+          supabaseAdmin,
+          targetUserIds,
+          `💬 ${nombre} envió un mensaje`,
+          mensaje.slice(0, 100),
+          "/superadmin/chat",
+          "chat"
+        );
+      }
     } catch (memberErr) {
-      console.warn("[chat/visitor POST] Auto-add members error (non-critical):", memberErr);
+      console.warn("[chat/visitor POST] Members/push error (non-critical):", memberErr);
     }
 
     // PASO 3: Insertar mensaje
@@ -214,42 +222,6 @@ export async function POST(request: NextRequest) {
         { success: false, error: `Error enviando mensaje: ${msgError.message}` },
         { status: 500 }
       );
-    }
-
-    // PASO 4: Notificar a los agentes de la empresa via push
-    try {
-      const { data: miembros } = await supabaseAdmin
-        .from("chat_miembros")
-        .select("user_id")
-        .eq("sala_id", salaId);
-
-      const { data: admins } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("empresa_id", empresaId)
-        .in("rol", ["admin", "superadmin", "editor"]);
-
-      const targetUserIds = [
-        ...new Set([
-          ...(miembros || []).map((m: any) => m.user_id),
-          ...(admins || []).map((a: any) => a.id),
-        ]),
-      ].filter(Boolean);
-
-      if (targetUserIds.length > 0) {
-        const { sendPushToUsers } = await import("@/lib/push-notifications");
-
-        await sendPushToUsers(
-          supabaseAdmin,
-          targetUserIds,
-          `💬 ${nombre} envió un mensaje`,
-          mensaje.slice(0, 100),
-          "/superadmin/chat",
-          "chat"
-        );
-      }
-    } catch (notifErr) {
-      console.warn("[chat/visitor POST] Push notification error (non-critical):", notifErr);
     }
 
     // PASO 5: Obtener historial completo

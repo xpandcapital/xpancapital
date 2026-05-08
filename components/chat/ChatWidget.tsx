@@ -1,32 +1,17 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 import { ChatPanel } from "./ChatPanel";
 
 export function ChatWidget() {
   const [abierto, setAbierto] = useState(false);
-  const { user } = useAuth();
   const widgetRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
-  const [mostrarWidget, setMostrarWidget] = useState(true);
-
-  useEffect(() => {
-    const checkPage = () => {
-      const path = window.location.pathname;
-      if (path.startsWith("/superadmin") || path.startsWith("/miembros")) {
-        setMostrarWidget(false);
-        return;
-      }
-      setMostrarWidget(true);
-    };
-
-    checkPage();
-    const interval = setInterval(checkPage, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const mostrarWidget = !pathname.startsWith("/superadmin") && !pathname.startsWith("/miembros");
 
   if (!mostrarWidget) return null;
 

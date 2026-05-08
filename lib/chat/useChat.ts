@@ -575,7 +575,8 @@ export function useChat() {
         async (payload) => {
           const nuevoMensaje = payload.new as ChatMensaje;
 
-          if (nuevoMensaje.user_id) {
+          // Solo consultar profiles si es la sala activa (evita query innecesaria)
+          if (salaIdRef.current === nuevoMensaje.sala_id && nuevoMensaje.user_id) {
             const { data: userData } = await supabase
               .from("profiles")
               .select("id, nombre, avatar_url, rol")
@@ -689,14 +690,14 @@ export function useChat() {
 
     presenciaChannelRef.current = channel;
 
-    // Ping de presencia cada 30 segundos
+    // Ping de presencia cada 120 segundos (reducido de 30s para optimizar)
     const interval = setInterval(async () => {
       await supabase.from("chat_presencia").upsert({
         user_id: user.id,
         estado: "online",
         ultimo_ping: new Date().toISOString(),
       });
-    }, 30000);
+    }, 120000);
 
     return () => {
       clearInterval(interval);

@@ -95,6 +95,8 @@ export default function ChatAdminPage() {
   }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const debounceSalas = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debounceVisitantes = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Configuración de chat
   const [chatConfig, setChatConfig] = useState<any>(null);
@@ -131,36 +133,22 @@ export default function ChatAdminPage() {
     }
   };
 
-  // Cargar agentes disponibles
-  const cargarAgentes = async () => {
+  // Cargar equipo (agentes + contactos) en una sola query
+  const cargarEquipo = async () => {
     const supabase = (await import("@/lib/supabase")).getSupabase();
     if (!supabase || !user?.empresa_id) return;
     try {
       const { data } = await supabase
         .from("profiles")
-        .select("id, nombre, avatar_url, estado_chat, rol, email")
+        .select("id, nombre, avatar_url, estado_chat, rol")
         .eq("empresa_id", user.empresa_id)
-        .in("rol", ["admin", "editor", "superadmin"]);
-      setAgentesDisponibles(data || []);
-    } catch (err) {
-      console.error("Error cargando agentes:", err);
-    }
-  };
-
-  // Cargar contactos para nuevo chat
-  const cargarContactosEmpresa = async () => {
-    const supabase = (await import("@/lib/supabase")).getSupabase();
-    if (!supabase || !user?.empresa_id) return;
-    try {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, nombre, avatar_url, rol, estado_chat")
-        .eq("empresa_id", user.empresa_id)
-        .neq("id", user.id)
         .order("nombre", { ascending: true });
-      setContactosEmpresa(data || []);
+
+      const todos = (data || []) as any[];
+      setAgentesDisponibles(todos.filter((p) => ["admin", "editor", "superadmin"].includes(p.rol)));
+      setContactosEmpresa(todos.filter((p) => p.id !== user.id));
     } catch (err) {
-      console.error("Error cargando contactos:", err);
+      console.error("Error cargando equipo:", err);
     }
   };
 
@@ -279,15 +267,9 @@ export default function ChatAdminPage() {
 
   useEffect(() => {
     cargarVisitantes();
-    cargarAgentes();
-    cargarContactosEmpresa();
+    cargarEquipo();
     cargarConfiguracion();
     cargarPlantillasAdmin();
-    const interval = setInterval(() => {
-      cargarVisitantes();
-      cargarAgentes();
-    }, 3000);
-    return () => clearInterval(interval);
   }, [user?.empresa_id]);
 
   // Auto-scroll
@@ -331,7 +313,7 @@ export default function ChatAdminPage() {
     }
   }, [user, isSubscribed, requestPermission]);
 
-  // Realtime: recargar salas y visitantes instantáneamente
+  // Realtime: recargar salas y visitantes con debounce 500ms
   useEffect(() => {
     if (!user) return;
     const supabase = getSupabase();
@@ -340,15 +322,19 @@ export default function ChatAdminPage() {
     const channel = supabase
       .channel(`chat-admin-realtime`)
       .on("postgres_changes", { event: "*", schema: "public", table: "chat_salas" }, () => {
-        cargarSalas();
+        if (debounceSalas.current) clearTimeout(debounceSalas.current);
+        debounceSalas.current = setTimeout(() => cargarSalas(), 500);
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "chat_visitantes" }, () => {
-        cargarVisitantes();
+        if (debounceVisitantes.current) clearTimeout(debounceVisitantes.current);
+        debounceVisitantes.current = setTimeout(() => cargarVisitantes(), 500);
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      if (debounceSalas.current) clearTimeout(debounceSalas.current);
+      if (debounceVisitantes.current) clearTimeout(debounceVisitantes.current);
     };
   }, [user, cargarSalas, cargarVisitantes]);
 
@@ -579,7 +565,7 @@ export default function ChatAdminPage() {
           </div>
           <div className="flex items-center gap-3">
             <Button
-              onClick={() => { setModalNuevoChat(true); cargarContactosEmpresa(); }}
+              onClick={() => { setModalNuevoChat(true); cargarEquipo(); }}
               className="bg-blis-red hover:bg-blis-red/90 text-white font-black uppercase tracking-wider text-xs"
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -1215,7 +1201,7 @@ export default function ChatAdminPage() {
                 <h3 className="text-lg font-black text-white uppercase tracking-wider mb-2">Selecciona una conversación</h3>
                 <p className="text-sm text-gray-500 max-w-sm">Elige un chat del panel izquierdo o haz clic en "Nuevo Chat" para empezar.</p>
                 <Button
-                  onClick={() => { setModalNuevoChat(true); cargarContactosEmpresa(); }}
+                  onClick={() => { setModalNuevoChat(true); cargarEquipo(); }}
                   className="mt-6 bg-blis-red hover:bg-blis-red/90 text-white font-black uppercase tracking-wider text-xs"
                 >
                   <Plus className="w-4 h-4 mr-2" />
