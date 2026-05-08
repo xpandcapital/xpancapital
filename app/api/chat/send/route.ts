@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { sala_id, contenido, tipo = "texto", user_id } = body;
+    const { sala_id, contenido, tipo = "texto", user_id, reply_to, metadata } = body;
 
     if (!sala_id || !contenido?.trim()) {
       return NextResponse.json(
@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
         user_id: user_id || auth.id,
         tipo,
         contenido: contenido.trim(),
+        reply_to: reply_to || null,
+        metadata: metadata || {},
         enviado: true,
       })
       .select("id, tipo, contenido, creado_en, user_id")
