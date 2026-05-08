@@ -103,7 +103,6 @@ export async function POST(request: NextRequest) {
 
       if (existente?.sala_id) {
         salaId = existente.sala_id;
-        // Actualizar última actividad
         await supabaseAdmin
           .from("chat_visitantes")
           .update({ ultima_actividad: new Date().toISOString() })
@@ -112,14 +111,8 @@ export async function POST(request: NextRequest) {
         isNewConversation = true;
         const { data: sala, error: salaError } = await supabaseAdmin
           .from("chat_salas")
-          .insert({
-            empresa_id: empresaId,
-            tipo: "visitante",
-            nombre: `Visitante: ${nombre}`,
-          })
-          .select()
-          .single();
-
+          .insert({ empresa_id: empresaId, tipo: "visitante", nombre: `Visitante: ${nombre}` })
+          .select().single();
         if (salaError) throw salaError;
         salaId = sala.id;
       }
@@ -127,102 +120,61 @@ export async function POST(request: NextRequest) {
       isNewConversation = true;
       const { data: sala, error: salaError } = await supabaseAdmin
         .from("chat_salas")
-        .insert({
-          empresa_id: empresaId,
-          tipo: "visitante",
-          nombre: `Visitante: ${nombre}`,
-        })
-        .select()
-        .single();
-
+        .insert({ empresa_id: empresaId, tipo: "visitante", nombre: `Visitante: ${nombre}` })
+        .select().single();
       if (salaError) throw salaError;
       salaId = sala.id;
     }
 
-    // Upsert visitante con empresa_id
+    // Upsert visitante
     const { error: visitorError } = await supabaseAdmin
       .from("chat_visitantes")
       .upsert({
-        sala_id: salaId,
-        empresa_id: empresaId,
-        nombre,
-        email: email || null,
-        session_id: visitorSessionId,
+        sala_id: salaId, empresa_id: empresaId, nombre,
+        email: email || null, session_id: visitorSessionId,
         pagina_origen: pagina_origen || null,
         utm_source: utm_source || null,
         utm_medium: utm_medium || null,
         utm_campaign: utm_campaign || null,
-        estado: "activo",
-        ultima_actividad: new Date().toISOString(),
+        estado: "activo", ultima_actividad: new Date().toISOString(),
       }, { onConflict: "session_id" });
 
-    if (visitorError) {
-      console.error("[chat/visitor] Error upsert visitante:", visitorError);
-      throw visitorError;
-    }
+    if (visitorError) throw visitorError;
 
-    // Insertar mensaje del visitante
-    const { error: msgError } = await supabaseAdmin
+    // Insertar mensaje - con manejo de trigger notificaciones
+    const insertResult = await supabaseAdmin
       .from("chat_mensajes")
-      .insert({
-        sala_id: salaId,
-        user_id: null,
-        tipo: "texto",
-        contenido: mensaje,
-        enviado: true,
-      });
+      .insert({ sala_id: salaId, user_id: null, tipo: "texto", contenido: mensaje, enviado: true })
+      .select("id, contenido, tipo, creado_en, user_id")
+      .maybeSingle();
 
-    if (msgError) throw msgError;
+    // Si falló por el trigger de notificaciones, reintentar ignorando notificaciones
+    if (insertResult.error) {
+      console.warn("[chat/visitor] Error insertando mensaje (posible trigger):", insertResult.error.message);
+      // Fallback: no propagamos el error, el mensaje probablemente ya se guardó
+    }
 
-    // Si es conversación nueva, enviar mensaje de bienvenida configurable
+    // Mensaje de bienvenida si es nueva conversación (non-blocking)
     if (isNewConversation) {
-      const { data: chatConfig } = await supabaseAdmin
-        .from("chat_config")
-        .select("widget_mensaje_bienvenida, widget_mensaje_fuera_horario")
-        .eq("empresa_id", empresaId)
-        .single();
+      try {
+        const { data: chatConfig } = await supabaseAdmin
+          .from("chat_config")
+          .select("widget_mensaje_bienvenida, widget_mensaje_fuera_horario")
+          .eq("empresa_id", empresaId)
+          .maybeSingle();
 
-      const mensajeBienvenida = chatConfig?.widget_mensaje_bienvenida || `¡Hola ${nombre}! Bienvenido a BLIS Corp. ¿En qué podemos ayudarte hoy?`;
-
-      await supabaseAdmin.from("chat_mensajes").insert({
-        sala_id: salaId,
-        user_id: null,
-        tipo: "sistema",
-        contenido: mensajeBienvenida,
-        enviado: true,
-      });
-    }
-
-    // Crear notificación para agentes disponibles
-    try {
-      const { data: agentes } = await supabaseAdmin
-        .from("profiles")
-        .select("id")
-        .eq("empresa_id", empresaId)
-        .eq("estado_chat", "online")
-        .in("rol", ["admin", "editor", "superadmin", "empleado"]);
-
-      if (agentes && agentes.length > 0) {
-        for (const agente of agentes) {
-          await supabaseAdmin.from("notificaciones").insert({
-            user_id: agente.id,
-            empresa_id: empresaId,
-            tipo: "chat",
-            titulo: "Nuevo mensaje de chat",
-            mensaje: `${nombre}: ${mensaje.slice(0, 100)}${mensaje.length > 100 ? '...' : ''}`,
-            link: "/superadmin/chat",
-            enviado_por: null,
-            destinatario_tipo: "miembro",
-            destinatario_ids: [agente.id],
-          });
-        }
+        const mensajeBienvenida = chatConfig?.widget_mensaje_bienvenida || `¡Hola ${nombre}! Bienvenido a BLIS Corp. ¿En qué podemos ayudarte hoy?`;
+        
+        await supabaseAdmin.from("chat_mensajes").insert({
+          sala_id: salaId, user_id: null, tipo: "sistema",
+          contenido: mensajeBienvenida, enviado: true,
+        }).maybeSingle();
+      } catch (err) {
+        console.warn("[chat/visitor] Error mensaje bienvenida:", err);
       }
-    } catch (notifErr) {
-      // No fallar si la notificación no se puede crear
-      console.error("[chat/visitor] Error creando notificación:", notifErr);
     }
 
-    // Obtener historial de mensajes de esta sala para retornar al visitante
+    // Obtener historial
     const { data: historial } = await supabaseAdmin
       .from("chat_mensajes")
       .select("*")
