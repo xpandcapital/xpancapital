@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageCircle, Users, Headphones, ArrowLeft, Send,
@@ -89,6 +89,13 @@ export default function ChatAdminPage() {
   const [agenteAsignado, setAgenteAsignado] = useState<string>("");
   const [contactosEmpresa, setContactosEmpresa] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const vp = el.querySelector("[data-radix-scroll-area-viewport]");
+    if (vp) (vp as HTMLElement).scrollTop = (vp as HTMLElement).scrollHeight;
+    else el.scrollTop = el.scrollHeight;
+  }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -287,11 +294,7 @@ export default function ChatAdminPage() {
   }, [user?.empresa_id]);
 
   // Auto-scroll
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [mensajes]);
+  useEffect(() => { scrollToBottom(); }, [mensajes, scrollToBottom]);
 
   // Notificaciones de sonido + push
   useEffect(() => {

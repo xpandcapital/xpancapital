@@ -117,6 +117,23 @@ export async function POST(request: NextRequest) {
       })
     ]);
 
+    // Si falló el visitante upsert, loguear
+    if (visitorResult.status === "rejected") {
+      console.error("[chat/visitor] Error upsert:", visitorResult.reason);
+    }
+
+    // Si falló el mensaje, intentar secuencialmente (el trigger pudo causar el error)
+    if (msgResult.status === "rejected") {
+      console.warn("[chat/visitor] Mensaje falló en paralelo, reintentando:", msgResult.reason);
+      const retry = await supabaseAdmin.from("chat_mensajes").insert({
+        sala_id: salaId, user_id: null, tipo: "texto",
+        contenido: mensaje, enviado: true,
+      });
+      if (retry.error) {
+        console.error("[chat/visitor] Reintento también falló:", retry.error);
+      }
+    }
+
     // Obtener historial (rápido)
     const { data: historial } = await supabaseAdmin
       .from("chat_mensajes")

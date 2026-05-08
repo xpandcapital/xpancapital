@@ -109,6 +109,18 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const llamadasChannelId = useRef(`chat-llamadas-${Math.random().toString(36).slice(2)}`);
 
+  // Scroll to bottom helper (works with ScrollArea viewport)
+  const scrollToBottom = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const viewport = el.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
+    if (viewport) {
+      viewport.scrollTop = viewport.scrollHeight;
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
+  }, []);
+
   // Realtime: visitor recibe mensajes nuevos instantáneamente
   useEffect(() => {
     if (user) return; // solo visitantes
@@ -142,9 +154,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
               return [...prev, nuevo];
             });
             // Auto-scroll
-            setTimeout(() => {
-              if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-            }, 100);
+            setTimeout(scrollToBottom, 100);
           })
           .subscribe();
       })
@@ -277,10 +287,8 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
 
   // Auto-scroll al final de mensajes
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [mensajes, visitanteHistorial]);
+    scrollToBottom();
+  }, [mensajes, visitanteHistorial, scrollToBottom]);
 
   // Cambiar a vista chat cuando se une a una sala
   useEffect(() => {
@@ -384,9 +392,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     setVisitanteMensaje("");
 
     // Auto-scroll
-    setTimeout(() => {
-      if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }, 100);
+    setTimeout(scrollToBottom, 100);
 
     try {
       const response = await fetch("/api/chat/visitor", {
@@ -409,9 +415,12 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         setVisitanteSessionId(data.session_id);
         setVisitanteSalaId(data.sala_id);
         setVisitanteIniciado(true);
-        // Reemplazar historial con datos reales
+        // Solo reemplazar si el servidor devuelve >= mensajes de los que ya tenemos
         if (data.historial && data.historial.length > 0) {
-          setVisitanteHistorial(data.historial);
+          setVisitanteHistorial((prev) => {
+            if (data.historial.length >= prev.length) return data.historial;
+            return prev;
+          });
         }
       } else {
         // Remover mensaje optimista si falló
