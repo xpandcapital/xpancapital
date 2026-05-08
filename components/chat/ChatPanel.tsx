@@ -127,7 +127,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
 
   const [mostrarWidget, setMostrarWidget] = useState(true);
 
-  // Visitor: polling cada 1.5s
+  // Visitor: polling cada 5s
   useEffect(() => {
     if (user) return;
     const savedSession = localStorage.getItem("blis_chat_session");
@@ -159,7 +159,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     };
 
     poll();
-    const interval = setInterval(poll, 1500);
+    const interval = setInterval(poll, 5000);
     return () => { active = false; clearInterval(interval); };
   }, [user, visitanteSessionId]);
 

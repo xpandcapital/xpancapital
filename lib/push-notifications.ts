@@ -1,8 +1,10 @@
-import webpush from "web-push";
-
+let webpush: any = null;
 let initialized = false;
 
-function ensureVapid() {
+async function ensureVapid() {
+  if (!webpush) {
+    webpush = (await import("web-push")).default;
+  }
   if (initialized) return;
   webpush.setVapidDetails(
     "mailto:soporte@blis-corp.com",
@@ -21,7 +23,7 @@ export async function sendPushToUsers(
   tipo: string = "chat"
 ) {
   try {
-    ensureVapid();
+    await ensureVapid();
 
     const { data: subs } = await supabaseAdmin
       .from("push_subscriptions")
