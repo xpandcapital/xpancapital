@@ -378,7 +378,7 @@ CREATE INDEX IF NOT EXISTS idx_chat_miembros_user ON chat_miembros(user_id);
 CREATE INDEX IF NOT EXISTS idx_chat_mensajes_sala ON chat_mensajes(sala_id);
 CREATE INDEX IF NOT EXISTS idx_chat_mensajes_creado ON chat_mensajes(creado_en DESC);
 CREATE INDEX IF NOT EXISTS idx_chat_mensajes_eliminado ON chat_mensajes(eliminado) WHERE eliminado = false;
-CREATE INDEX IF NOT EXISTS idx_chat_presencia_empresa ON chat_presencia(empresa_id, estado_chat);
+CREATE INDEX IF NOT EXISTS idx_chat_presencia_empresa ON chat_presencia(empresa_id);
 CREATE INDEX IF NOT EXISTS idx_chat_visitantes_session ON chat_visitantes(session_id);
 CREATE INDEX IF NOT EXISTS idx_chat_visitantes_estado ON chat_visitantes(estado, empresa_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_empresa_estado ON profiles(empresa_id, estado_chat);
