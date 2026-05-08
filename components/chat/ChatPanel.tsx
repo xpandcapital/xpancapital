@@ -322,6 +322,11 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
       });
 
       const data = await response.json();
+      if (!response.ok) {
+        console.error("[ChatPanel] Error del servidor:", data.error);
+        alert("Error al enviar: " + (data.error || "Error desconocido"));
+        return;
+      }
       if (data.success && data.session_id) {
         localStorage.setItem("blis_chat_session", data.session_id);
         localStorage.setItem("blis_chat_name", visitanteNombre);
@@ -334,8 +339,9 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         }
         setVisitanteMensaje("");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error enviando mensaje de visitante:", err);
+      alert("Error de conexión al enviar mensaje");
     } finally {
       setVisitanteEnviando(false);
     }
@@ -358,8 +364,10 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
 
   // Render message bubble
   const renderMensaje = (msg: ChatMensaje | VisitorMensaje, index: number) => {
-    const esMio = "user_id" in msg ? msg.user_id === user?.id : false;
     const esSistema = msg.tipo === "sistema" || msg.tipo === "ia";
+    // Si el usuario está logueado: es mío si user_id coincide
+    // Si NO está logueado (visitante): es mío si user_id es null (mensaje del visitante)
+    const esMio = user ? msg.user_id === user.id : msg.user_id === null;
     const esVisitante = msg.user_id === null && msg.tipo === "texto";
 
     if (esSistema) {
