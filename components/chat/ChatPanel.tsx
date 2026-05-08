@@ -109,6 +109,66 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const llamadasChannelId = useRef(`chat-llamadas-${Math.random().toString(36).slice(2)}`);
 
+  // Realtime: visitor recibe mensajes nuevos instantáneamente
+  useEffect(() => {
+    if (user) return; // solo visitantes
+    const savedSession = localStorage.getItem("blis_chat_session");
+    if (!savedSession) return;
+
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const channelId = `visitor-msgs-${Math.random().toString(36).slice(2)}`;
+
+    // Primero obtener sala_id de esta sesión
+    supabase.from("chat_visitantes")
+      .select("sala_id")
+      .eq("session_id", savedSession)
+      .single()
+      .then(({ data }) => {
+        if (!data?.sala_id) return;
+
+        const channel = supabase
+          .channel(channelId)
+          .on("postgres_changes", {
+            event: "INSERT",
+            schema: "public",
+            table: "chat_mensajes",
+            filter: `sala_id=eq.${data.sala_id}`,
+          }, (payload) => {
+            const nuevo = payload.new as VisitorMensaje;
+            setVisitanteHistorial((prev) => {
+              if (prev.some((m) => m.id === nuevo.id)) return prev;
+              return [...prev, nuevo];
+            });
+            // Auto-scroll
+            setTimeout(() => {
+              if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            }, 100);
+          })
+          .subscribe();
+      })
+      .catch(() => {});
+
+    // También polling cada 3s como fallback
+    const pollInterval = setInterval(() => {
+      fetch(`/api/chat/visitor?session_id=${savedSession}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.success && data.historial) {
+            setVisitanteHistorial(data.historial);
+          }
+        })
+        .catch(() => {});
+    }, 3000);
+
+    return () => {
+      clearInterval(pollInterval);
+      const sup = getSupabase();
+      if (sup) sup.removeChannel(sup.channel(channelId));
+    };
+  }, [user, visitanteIniciado]);
+
   // Load widget config on mount
   useEffect(() => {
     fetch("/api/chat/widget-config")

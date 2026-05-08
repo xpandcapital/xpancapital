@@ -67,120 +67,62 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      nombre,
-      email,
-      mensaje,
-      session_id,
-      pagina_origen,
-      utm_source,
-      utm_medium,
-      utm_campaign,
-    } = body;
+    const { nombre, email, mensaje, session_id, pagina_origen } = body;
 
     if (!nombre || !mensaje) {
-      return NextResponse.json(
-        { success: false, error: "Nombre y mensaje son requeridos" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "Nombre y mensaje son requeridos" }, { status: 400 });
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const empresaId = "6186f014-c8c7-4027-9f08-8acf2bae3eae";
-
-    let visitorSessionId = session_id || randomUUID();
+    const visitorSessionId = session_id || randomUUID();
     let salaId: string;
-    let isNewConversation = false;
 
-    // Verificar si ya existe sesión activa
+    // Buscar o crear sala (rápido: 1 query)
     if (session_id) {
       const { data: existente } = await supabaseAdmin
         .from("chat_visitantes")
-        .select("sala_id, nombre, email")
-        .eq("session_id", session_id)
-        .eq("estado", "activo")
-        .single();
+        .select("sala_id").eq("session_id", session_id).eq("estado", "activo")
+        .maybeSingle();
 
       if (existente?.sala_id) {
         salaId = existente.sala_id;
-        await supabaseAdmin
-          .from("chat_visitantes")
-          .update({ ultima_actividad: new Date().toISOString() })
-          .eq("session_id", session_id);
       } else {
-        isNewConversation = true;
-        const { data: sala, error: salaError } = await supabaseAdmin
+        const { data: sala } = await supabaseAdmin
           .from("chat_salas")
           .insert({ empresa_id: empresaId, tipo: "visitante", nombre: `Visitante: ${nombre}` })
-          .select().single();
-        if (salaError) throw salaError;
+          .select("id").single();
+        if (!sala) return NextResponse.json({ success: false, error: "Error creando sala" }, { status: 500 });
         salaId = sala.id;
       }
     } else {
-      isNewConversation = true;
-      const { data: sala, error: salaError } = await supabaseAdmin
+      const { data: sala } = await supabaseAdmin
         .from("chat_salas")
         .insert({ empresa_id: empresaId, tipo: "visitante", nombre: `Visitante: ${nombre}` })
-        .select().single();
-      if (salaError) throw salaError;
+        .select("id").single();
+      if (!sala) return NextResponse.json({ success: false, error: "Error creando sala" }, { status: 500 });
       salaId = sala.id;
     }
 
-    // Upsert visitante
-    const { error: visitorError } = await supabaseAdmin
-      .from("chat_visitantes")
-      .upsert({
-        sala_id: salaId, empresa_id: empresaId, nombre,
-        email: email || null, session_id: visitorSessionId,
-        pagina_origen: pagina_origen || null,
-        utm_source: utm_source || null,
-        utm_medium: utm_medium || null,
-        utm_campaign: utm_campaign || null,
+    // Upsert visitante + insert mensaje en paralelo
+    const [visitorResult, msgResult] = await Promise.allSettled([
+      supabaseAdmin.from("chat_visitantes").upsert({
+        sala_id: salaId, empresa_id: empresaId, nombre, email: email || null,
+        session_id: visitorSessionId, pagina_origen: pagina_origen || null,
         estado: "activo", ultima_actividad: new Date().toISOString(),
-      }, { onConflict: "session_id" });
+      }, { onConflict: "session_id" }),
+      supabaseAdmin.from("chat_mensajes").insert({
+        sala_id: salaId, user_id: null, tipo: "texto",
+        contenido: mensaje, enviado: true,
+      })
+    ]);
 
-    if (visitorError) throw visitorError;
-
-    // Insertar mensaje - con manejo de trigger notificaciones
-    const insertResult = await supabaseAdmin
-      .from("chat_mensajes")
-      .insert({ sala_id: salaId, user_id: null, tipo: "texto", contenido: mensaje, enviado: true })
-      .select("id, contenido, tipo, creado_en, user_id")
-      .maybeSingle();
-
-    // Si falló por el trigger de notificaciones, reintentar ignorando notificaciones
-    if (insertResult.error) {
-      console.warn("[chat/visitor] Error insertando mensaje (posible trigger):", insertResult.error.message);
-      // Fallback: no propagamos el error, el mensaje probablemente ya se guardó
-    }
-
-    // Mensaje de bienvenida si es nueva conversación (non-blocking)
-    if (isNewConversation) {
-      try {
-        const { data: chatConfig } = await supabaseAdmin
-          .from("chat_config")
-          .select("widget_mensaje_bienvenida, widget_mensaje_fuera_horario")
-          .eq("empresa_id", empresaId)
-          .maybeSingle();
-
-        const mensajeBienvenida = chatConfig?.widget_mensaje_bienvenida || `¡Hola ${nombre}! Bienvenido a BLIS Corp. ¿En qué podemos ayudarte hoy?`;
-        
-        await supabaseAdmin.from("chat_mensajes").insert({
-          sala_id: salaId, user_id: null, tipo: "sistema",
-          contenido: mensajeBienvenida, enviado: true,
-        }).maybeSingle();
-      } catch (err) {
-        console.warn("[chat/visitor] Error mensaje bienvenida:", err);
-      }
-    }
-
-    // Obtener historial
+    // Obtener historial (rápido)
     const { data: historial } = await supabaseAdmin
       .from("chat_mensajes")
-      .select("*")
-      .eq("sala_id", salaId)
-      .eq("eliminado", false)
-      .order("creado_en", { ascending: true });
+      .select("id, tipo, contenido, creado_en, user_id")
+      .eq("sala_id", salaId).eq("eliminado", false)
+      .order("creado_en", { ascending: true }).limit(30);
 
     return NextResponse.json({
       success: true,
@@ -190,9 +132,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("[chat/visitor POST] Error:", error);
-    return NextResponse.json(
-      { success: false, error: error.message || "Error interno" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message || "Error interno" }, { status: 500 });
   }
 }
