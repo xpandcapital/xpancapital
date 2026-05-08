@@ -522,9 +522,9 @@ export default function ChatAdminPage() {
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-7xl mx-auto p-6 h-screen flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 flex-shrink-0 gap-4">
           <div>
-            <h1 className="text-3xl font-black uppercase tracking-tighter">Centro de Chat</h1>
+            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter">Centro de Chat</h1>
             <p className="text-gray-400 text-sm mt-1">Gestiona conversaciones, visitantes y agentes</p>
           </div>
           <div className="flex items-center gap-3">
@@ -549,7 +549,7 @@ export default function ChatAdminPage() {
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-4 gap-4 mb-6 flex-shrink-0">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 flex-shrink-0">
           {[
             { label: "Conversaciones", value: stats.conversacionesActivas, icon: Inbox, color: "text-blis-red" },
             { label: "Visitantes", value: stats.visitantesActivos, icon: Users, color: "text-amber-400" },

@@ -8,15 +8,40 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get("session_id");
+    const estado = searchParams.get("estado") || "activo";
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Si hay session_id (visitante anónimo), devolver historial público
+    if (sessionId) {
+      const { data: visitante } = await supabaseAdmin
+        .from("chat_visitantes")
+        .select("sala_id")
+        .eq("session_id", sessionId)
+        .single();
+
+      if (!visitante?.sala_id) {
+        return NextResponse.json({ success: true, historial: [] });
+      }
+
+      const { data: historial, error } = await supabaseAdmin
+        .from("chat_mensajes")
+        .select("*")
+        .eq("sala_id", visitante.sala_id)
+        .eq("eliminado", false)
+        .order("creado_en", { ascending: true });
+
+      if (error) throw error;
+      return NextResponse.json({ success: true, historial: historial || [] });
+    }
+
+    // Sin session_id: requiere auth (admin)
     const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
-
-    const { searchParams } = new URL(request.url);
-    const estado = searchParams.get("estado") || "activo";
-
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     const { data, error } = await supabaseAdmin
       .from("chat_visitantes")
