@@ -312,9 +312,7 @@ export default function ChatAdminPage() {
       // Notificación push con nombre del remitente
       if (lastMsg.contenido) {
         const senderName = ("user" in lastMsg ? lastMsg.user?.nombre : undefined) || "Usuario";
-        const salaTipo = salaActiva.tipo || "directo";
-        const tipoLabel = salaTipo === "visitante" ? "Visitante" : salaTipo === "soporte" ? "Soporte" : salaTipo === "ventas" ? "Ventas" : salaTipo === "ia" ? "IA" : "Mensaje";
-        showNotification(`${tipoLabel}: ${senderName}`, {
+        showNotification(`${senderName} envió un mensaje`, {
           body: lastMsg.contenido.slice(0, 150),
           tag: lastMsg.sala_id,
           data: { url: "/superadmin/chat" },
@@ -639,7 +637,7 @@ export default function ChatAdminPage() {
                 >
                   <item.icon className={`w-5 h-5 ${seccionActiva === item.id ? "text-blis-red" : ""}`} />
                   <span className="text-sm font-bold flex-1">{item.label}</span>
-                  {"count" in item && item.count > 0 && (
+                  {"count" in item && (item as any).count > 0 && (
                     <Badge className="bg-blis-red text-white text-[10px]">{item.count}</Badge>
                   )}
                   <ChevronRight className="w-4 h-4" />

@@ -36,7 +36,15 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(titulo, options)
+    self.registration.getNotifications({ tag: options.tag }).then((existing) => {
+      if (existing.length > 0) {
+        const count = existing.length + 1;
+        options.body = `${count} mensajes nuevos`;
+        options.title = titulo;
+        return self.registration.showNotification(titulo, options);
+      }
+      return self.registration.showNotification(titulo, options);
+    })
   );
 });
 

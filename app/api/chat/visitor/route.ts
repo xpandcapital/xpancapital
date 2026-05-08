@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     if (sessionId) {
       const { data: visitante, error: vError } = await supabaseAdmin
         .from("chat_visitantes")
-        .select("sala_id")
+        .select("sala_id, nombre")
         .eq("session_id", sessionId)
         .order("creado_en", { ascending: false })
         .limit(1);
@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
       }
 
       const salaId = visitante?.[0]?.sala_id;
+      const visitanteNombre = visitante?.[0]?.nombre || null;
       if (!salaId) {
         return NextResponse.json({ success: true, historial: [] });
       }
@@ -44,7 +45,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: true, historial: [] });
       }
 
-      return NextResponse.json({ success: true, historial: historial || [] });
+      const historialConNombre = (historial || []).map((msg: any) => ({
+        ...msg,
+        nombre_visitante: msg.user_id ? null : visitanteNombre,
+      }));
+
+      return NextResponse.json({ success: true, historial: historialConNombre });
     }
 
     const auth = await getAuthUser(request);
@@ -159,6 +165,36 @@ export async function POST(request: NextRequest) {
       console.warn("[chat/visitor POST] Visitante upsert error:", upsertError.message);
     }
 
+    // PASO 2b: Auto-agregar admins de la empresa como miembros de la sala
+    try {
+      const { data: existingMembers } = await supabaseAdmin
+        .from("chat_miembros")
+        .select("user_id")
+        .eq("sala_id", salaId);
+
+      const existingIds = new Set((existingMembers || []).map((m: any) => m.user_id));
+
+      const { data: admins } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("empresa_id", empresaId)
+        .in("rol", ["admin", "superadmin", "editor"]);
+
+      const newMembers = (admins || [])
+        .filter((a: any) => !existingIds.has(a.id))
+        .map((a: any) => ({
+          sala_id: salaId,
+          user_id: a.id,
+          rol_sala: "admin",
+        }));
+
+      if (newMembers.length > 0) {
+        await supabaseAdmin.from("chat_miembros").insert(newMembers);
+      }
+    } catch (memberErr) {
+      console.warn("[chat/visitor POST] Auto-add members error (non-critical):", memberErr);
+    }
+
     // PASO 3: Insertar mensaje
     const { data: msgData, error: msgError } = await supabaseAdmin
       .from("chat_mensajes")
@@ -202,10 +238,11 @@ export async function POST(request: NextRequest) {
 
       if (targetUserIds.length > 0) {
         const { sendPushToUsers } = await import("@/lib/push-notifications");
+
         await sendPushToUsers(
           supabaseAdmin,
           targetUserIds,
-          `💬 Visitante: ${nombre}`,
+          `💬 ${nombre} envió un mensaje`,
           mensaje.slice(0, 100),
           "/superadmin/chat",
           "chat"
@@ -228,11 +265,16 @@ export async function POST(request: NextRequest) {
       console.warn("[chat/visitor POST] Error obteniendo historial:", hError.message);
     }
 
+    const historialConNombre = (historial || []).map((msg: any) => ({
+      ...msg,
+      nombre_visitante: msg.user_id ? null : nombre,
+    }));
+
     return NextResponse.json({
       success: true,
       session_id: visitorSessionId,
       sala_id: salaId,
-      historial: historial || [],
+      historial: historialConNombre,
     });
   } catch (error: any) {
     console.error("[chat/visitor POST] Error:", error.message, error.stack);

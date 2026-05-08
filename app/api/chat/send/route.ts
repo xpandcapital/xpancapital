@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-    const senderId = user_id || auth.id;
+    const senderId = user_id || auth.userId;
 
     // Insertar mensaje
     const { data: msgData, error: msgError } = await supabaseAdmin
@@ -51,27 +51,21 @@ export async function POST(request: NextRequest) {
 
     // Obtener info del remitente y miembros de la sala para notificar
     try {
-      const [senderRes, miembrosRes, salaRes] = await Promise.all([
-        supabaseAdmin.from("profiles").select("nombre, rol").eq("id", senderId).single(),
+      const [senderRes, miembrosRes] = await Promise.all([
+        supabaseAdmin.from("profiles").select("nombre").eq("id", senderId).single(),
         supabaseAdmin.from("chat_miembros").select("user_id").eq("sala_id", sala_id),
-        supabaseAdmin.from("chat_salas").select("tipo, nombre").eq("id", sala_id).single(),
       ]);
 
       const senderName = senderRes.data?.nombre || "Usuario";
-      const senderRol = senderRes.data?.rol || "";
-      const salaTipo = salaRes.data?.tipo || "";
       const miembros = (miembrosRes.data || []) as { user_id: string }[];
 
-      // Filtrar: no notificar al que envió
       const targetIds = miembros.map((m: { user_id: string }) => m.user_id).filter((id: string) => id !== senderId);
 
       if (targetIds.length > 0) {
-        const tipoLabel = salaTipo === "visitante" ? "Visitante" : salaTipo === "soporte" ? "Soporte" : salaTipo === "ventas" ? "Ventas" : salaTipo === "ia" ? "IA" : senderRol === "admin" || senderRol === "superadmin" ? "Admin" : "Mensaje";
-
         await sendPushToUsers(
           supabaseAdmin,
           targetIds,
-          `${tipoLabel}: ${senderName}`,
+          `${senderName} envió un mensaje`,
           contenido.trim().slice(0, 100),
           "/superadmin/chat",
           "chat"

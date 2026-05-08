@@ -34,24 +34,34 @@ export function useChat() {
     if (!supabase) return;
 
     try {
-      // Paso 1: obtener los sala_id de las salas donde el usuario es miembro
-      const { data: membresias, error: errM } = await supabase
-        .from("chat_miembros")
-        .select("sala_id")
-        .eq("user_id", user.id);
+      const [membresiasRes, visitorSalasRes] = await Promise.all([
+        supabase
+          .from("chat_miembros")
+          .select("sala_id")
+          .eq("user_id", user.id),
+        supabase
+          .from("chat_salas")
+          .select("id")
+          .eq("empresa_id", user.empresa_id)
+          .eq("tipo", "visitante")
+          .eq("estado", "activo"),
+      ]);
 
-      if (errM) throw errM;
-      const salaIds = (membresias || []).map((m) => m.sala_id);
-      if (salaIds.length === 0) {
+      if (membresiasRes.error) throw membresiasRes.error;
+
+      const miembroSalaIds = (membresiasRes.data || []).map((m) => m.sala_id);
+      const visitorSalaIds = (visitorSalasRes.data || []).map((s) => s.id);
+      const allSalaIds = [...new Set([...miembroSalaIds, ...visitorSalaIds])];
+
+      if (allSalaIds.length === 0) {
         setSalas([]);
         return;
       }
 
-      // Paso 2: cargar las salas activas directamente, ordenadas
       const { data, error } = await supabase
         .from("chat_salas")
         .select("*")
-        .in("id", salaIds)
+        .in("id", allSalaIds)
         .eq("estado", "activo")
         .order("ultima_actividad", { ascending: false });
 
@@ -62,7 +72,7 @@ export function useChat() {
     }
   }, [user]);
 
-  // Cargar mensajes de una sala
+// Cargar mensajes de una sala
   const cargarMensajes = useCallback(async (salaId: string, antesDe?: string) => {
     if (!user) return;
     const supabase = getSupabase();
@@ -71,10 +81,7 @@ export function useChat() {
     try {
       let query = supabase
         .from("chat_mensajes")
-        .select(`
-          *,
-          user:profiles!user_id(id, nombre, avatar_url, rol)
-        `)
+        .select("*")
         .eq("sala_id", salaId)
         .eq("eliminado", false)
         .eq("enviado", true)
@@ -91,10 +98,29 @@ export function useChat() {
 
       const mensajesData = (data || []).reverse() as ChatMensaje[];
 
+      const userIds = mensajesData
+        .filter((m) => m.user_id)
+        .map((m) => m.user_id!)
+        .filter((v, i, a) => a.indexOf(v) === i);
+
+      let userMap: Record<string, { id: string; nombre: string; avatar_url: string | null; rol: string }> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, nombre, avatar_url, rol")
+          .in("id", userIds);
+        (profiles || []).forEach((p: any) => { userMap[p.id] = p; });
+      }
+
+      const mensajesConUser = mensajesData.map((m) => ({
+        ...m,
+        user: m.user_id ? (userMap[m.user_id] || null) : null,
+      })) as ChatMensaje[];
+
       if (antesDe) {
-        setMensajes((prev) => [...mensajesData, ...prev]);
+        setMensajes((prev) => [...mensajesConUser, ...prev]);
       } else {
-        setMensajes(mensajesData);
+        setMensajes(mensajesConUser);
       }
 
       setTieneMasMensajes((data || []).length === PAGE_SIZE);
@@ -297,21 +323,12 @@ export function useChat() {
     if (!supabase) return;
 
     try {
-      // Verificar si ya es miembro
-      const { data: miembro } = await supabase
-        .from("chat_miembros")
-        .select("*")
-        .eq("sala_id", salaId)
-        .eq("user_id", user.id)
-        .single();
-
-      if (!miembro) {
-        await supabase.from("chat_miembros").insert({
-          sala_id: salaId,
-          user_id: user.id,
-          rol_sala: "miembro",
-        });
-      }
+      // Upsert como miembro (ignorar si ya existe)
+      await supabase.from("chat_miembros").upsert({
+        sala_id: salaId,
+        user_id: user.id,
+        rol_sala: "miembro",
+      }, { onConflict: "sala_id,user_id" });
 
       // Cargar sala
       const { data: sala } = await supabase
@@ -326,7 +343,6 @@ export function useChat() {
         await cargarMensajes(salaId);
         await cargarMiembros(salaId);
         await marcarLeidos(salaId);
-        // Limpiar no leídos
         setNoLeidos((prev) => ({ ...prev, [salaId]: 0 }));
       }
     } catch (err) {
@@ -566,19 +582,19 @@ export function useChat() {
               .eq("id", nuevoMensaje.user_id)
               .single();
             nuevoMensaje.user = userData || null;
+          } else {
+            (nuevoMensaje as any).user = null;
           }
 
           if (salaIdRef.current === nuevoMensaje.sala_id) {
             setMensajes((prev) => [...prev, nuevoMensaje]);
             await marcarLeidosRef.current(nuevoMensaje.sala_id);
           } else {
-            // Incrementar contador de no leídos
             setNoLeidos((prev) => ({
               ...prev,
               [nuevoMensaje.sala_id]: (prev[nuevoMensaje.sala_id] || 0) + 1,
             }));
 
-            // Notificación del navegador
             if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
               try {
                 new Notification("Nuevo mensaje de chat", {
@@ -590,13 +606,17 @@ export function useChat() {
             }
           }
 
-          setSalas((prev) =>
-            prev.map((s) =>
-              s.id === nuevoMensaje.sala_id
-                ? { ...s, ultimo_mensaje: nuevoMensaje, ultima_actividad: nuevoMensaje.creado_en }
-                : s
-            )
-          );
+          setSalas((prev) => {
+            const exists = prev.some((s) => s.id === nuevoMensaje.sala_id);
+            if (exists) {
+              return prev.map((s) =>
+                s.id === nuevoMensaje.sala_id
+                  ? { ...s, ultimo_mensaje: nuevoMensaje, ultima_actividad: nuevoMensaje.creado_en }
+                  : s
+              );
+            }
+            return prev;
+          });
         }
       )
       .on(

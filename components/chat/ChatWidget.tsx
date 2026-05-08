@@ -2,64 +2,31 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Minimize2 } from "lucide-react";
+import { MessageCircle, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useChat } from "@/lib/chat/useChat";
 import { ChatPanel } from "./ChatPanel";
 
 export function ChatWidget() {
   const [abierto, setAbierto] = useState(false);
-  const [minimizado, setMinimizado] = useState(false);
   const { user } = useAuth();
-  const { noLeidos } = useChat();
   const widgetRef = useRef<HTMLDivElement>(null);
 
-  const totalNoLeidos = Object.values(noLeidos).reduce((a, b) => a + b, 0);
-
-  // Detectar página actual para mostrar/ocultar widget - usando window.location directamente
   const [mostrarWidget, setMostrarWidget] = useState(true);
 
   useEffect(() => {
     const checkPage = () => {
       const path = window.location.pathname;
-      const paginasWidget = ["/tienda", "/blog", "/contacto"];
-      const paginasConIcono = ["/", "/proyectos"];
-
       if (path.startsWith("/superadmin") || path.startsWith("/miembros")) {
         setMostrarWidget(false);
-        return;
-      }
-      if (paginasWidget.some((p) => path.startsWith(p))) {
-        setMostrarWidget(true);
-        return;
-      }
-      if (paginasConIcono.some((p) => path === p || path.startsWith(p))) {
-        setMostrarWidget(true);
         return;
       }
       setMostrarWidget(true);
     };
 
     checkPage();
-    // Revisar periódicamente por si hay navegación del cliente
     const interval = setInterval(checkPage, 1000);
     return () => clearInterval(interval);
   }, []);
-
-  // Cerrar al hacer clic fuera
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (widgetRef.current && !widgetRef.current.contains(e.target as Node)) {
-        if (abierto) setAbierto(false);
-      }
-    };
-
-    if (abierto) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [abierto]);
 
   if (!mostrarWidget) return null;
 
@@ -76,13 +43,12 @@ export function ChatWidget() {
           >
             <ChatPanel
               onClose={() => setAbierto(false)}
-              onMinimize={() => setMinimizado(true)}
+              onMinimize={() => {}}
             />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Botón flotante neon */}
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
@@ -114,17 +80,10 @@ export function ChatWidget() {
               className="relative"
             >
               <MessageCircle className="w-6 h-6" />
-              {/* Indicador de mensajes nuevos */}
-              {totalNoLeidos > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-emerald-500 rounded-full border-2 border-black flex items-center justify-center text-[10px] font-bold text-white px-1">
-                  {totalNoLeidos > 9 ? "9+" : totalNoLeidos}
-                </span>
-              )}
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Efecto de pulso neon */}
         {!abierto && (
           <>
             <span className="absolute inset-0 rounded-full bg-blis-red animate-ping opacity-30" style={{ animationDuration: "2s" }} />

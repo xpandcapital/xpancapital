@@ -33,6 +33,7 @@ interface VisitorMensaje {
   contenido: string | null;
   creado_en: string;
   user_id?: string | null;
+  nombre_visitante?: string | null;
 }
 
 interface ContactoUsuario {
@@ -104,6 +105,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const [menuMensaje, setMenuMensaje] = useState<string | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const visitorContainerRef = useRef<HTMLDivElement>(null);
+  const visitorInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const llamadasChannelId = useRef(`chat-llamadas-${Math.random().toString(36).slice(2)}`);
 
@@ -346,6 +348,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
       console.error("[ChatPanel] Error enviando:", err);
     } finally {
       setVisitanteEnviando(false);
+      setTimeout(() => visitorInputRef.current?.focus(), 50);
     }
   };
 
@@ -359,7 +362,10 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
 
   const handleNuevoChatContacto = async (contacto: ContactoUsuario) => {
     const salaId = await crearSalaDirecta(contacto.id);
-    if (salaId) await unirseSala(salaId);
+    if (salaId) {
+      await unirseSala(salaId);
+      setVista("chat");
+    }
   };
 
   const renderMensaje = (msg: ChatMensaje | VisitorMensaje, index: number) => {
@@ -401,7 +407,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         <div className={`max-w-[75%] ${esMio ? "items-end" : "items-start"} flex flex-col relative`}>
           {!esMio && (
             <span className="text-[10px] text-gray-500 mb-1 uppercase tracking-wider font-bold">
-              {esVisitante ? visitanteNombre : ("user" in msg ? msg.user?.nombre : "Asesor")}
+              {esVisitante ? ((msg as VisitorMensaje).nombre_visitante || visitanteNombre || salaActiva?.nombre?.replace(/^Visitante:\s*/, "") || "Visitante") : ("user" in msg ? msg.user?.nombre : "Asesor")}
             </span>
           )}
 
@@ -582,7 +588,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                       <div className="flex-1 overflow-y-auto">
                         <div className="p-3 space-y-1">
                           {salas.map((sala) => (
-                            <button key={sala.id} onClick={() => unirseSala(sala.id)} className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors text-left group">
+                            <button key={sala.id} onClick={async () => { await unirseSala(sala.id); setVista("chat"); }} className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 transition-colors text-left group">
                               <div className="relative">
                                 <Avatar className="w-12 h-12"><AvatarFallback className="bg-blis-red/20 text-blis-red font-black">{sala.nombre?.[0] || "C"}</AvatarFallback></Avatar>
                                 <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0a0a0a]" />
@@ -738,6 +744,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
               <div className="px-4 py-3 border-t border-white/5">
                 <div className="flex items-end gap-2">
                   <Input
+                    ref={visitorInputRef}
                     value={visitanteMensaje}
                     onChange={(e) => setVisitanteMensaje(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleVisitanteEnviar(); } }}
