@@ -7,7 +7,7 @@ import {
   ArrowLeft, User, Bot, Sparkles, MessageCircle,
   Clock, Check, CheckCheck, Loader2, LayoutTemplate,
   Search, Pin, PinOff, Edit3, Trash2, MoreHorizontal, X as XIcon,
-  Users
+  Users, Bell
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/lib/chat/useChat";
@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { ChatSala, ChatMensaje } from "@/lib/chat/types";
 import { CallModal } from "./CallModal";
+import { usePushNotifications } from "@/lib/hooks/usePushNotifications";
 
 interface ChatPanelProps {
   onClose: () => void;
@@ -45,6 +46,7 @@ interface ContactoUsuario {
 
 export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const { user } = useAuth();
+  const { requestPermission, permission: pushPermission } = usePushNotifications();
   const {
     salas,
     salaActiva,
@@ -599,6 +601,15 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                 </>
               )}
             </>
+          )}
+          {user && pushPermission === "default" && (
+            <button
+              onClick={requestPermission}
+              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-amber-400 hover:text-amber-300"
+              title="Activar notificaciones"
+            >
+              <Bell className="w-4 h-4" />
+            </button>
           )}
           <button
             onClick={onClose}

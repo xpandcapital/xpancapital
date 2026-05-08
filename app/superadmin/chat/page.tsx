@@ -26,9 +26,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from "@/components/ui/switch";
 import type { ChatSala, ChatMensaje, ChatVisitante } from "@/lib/chat/types";
 import { CallModal } from "@/components/chat/CallModal";
+import { usePushNotifications } from "@/lib/hooks/usePushNotifications";
 
 export default function ChatAdminPage() {
   const { user } = useAuth();
+  const { showNotification } = usePushNotifications();
   const {
     salas,
     salaActiva,
@@ -291,17 +293,27 @@ export default function ChatAdminPage() {
     }
   }, [mensajes]);
 
-  // Notificaciones de sonido
+  // Notificaciones de sonido + push
   useEffect(() => {
-    if (!sonidoActivado || !salaActiva) return;
+    if (!salaActiva) return;
     const lastMsg = mensajes[mensajes.length - 1];
     if (lastMsg && lastMsg.user_id !== user?.id) {
-      if (!audioRef.current) {
-        audioRef.current = new Audio("/notification.mp3");
+      // Sonido
+      if (sonidoActivado) {
+        if (!audioRef.current) {
+          audioRef.current = new Audio("/notification.mp3");
+        }
+        audioRef.current.play().catch(() => {});
       }
-      audioRef.current.play().catch(() => {});
+      // Notificación push del navegador
+      if (lastMsg.contenido) {
+        showNotification("Nuevo mensaje de chat", {
+          body: lastMsg.contenido.slice(0, 150),
+          tag: lastMsg.sala_id,
+        });
+      }
     }
-  }, [mensajes, salaActiva, sonidoActivado, user?.id]);
+  }, [mensajes, salaActiva, sonidoActivado, user?.id, showNotification]);
 
   // Realtime: recargar salas y visitantes instantáneamente
   useEffect(() => {

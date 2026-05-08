@@ -193,9 +193,34 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // NOTA: Notificación removida temporalmente porque el tipo "sistema"
-    // no es válido para el constraint notificaciones_tipo_check.
-    // Cuando se necesite, usar un tipo válido de la tabla notificaciones.
+    // Crear notificación para agentes disponibles
+    try {
+      const { data: agentes } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("empresa_id", empresaId)
+        .eq("estado_chat", "online")
+        .in("rol", ["admin", "editor", "superadmin", "empleado"]);
+
+      if (agentes && agentes.length > 0) {
+        for (const agente of agentes) {
+          await supabaseAdmin.from("notificaciones").insert({
+            user_id: agente.id,
+            empresa_id: empresaId,
+            tipo: "chat",
+            titulo: "Nuevo mensaje de chat",
+            mensaje: `${nombre}: ${mensaje.slice(0, 100)}${mensaje.length > 100 ? '...' : ''}`,
+            link: "/superadmin/chat",
+            enviado_por: null,
+            destinatario_tipo: "miembro",
+            destinatario_ids: [agente.id],
+          });
+        }
+      }
+    } catch (notifErr) {
+      // No fallar si la notificación no se puede crear
+      console.error("[chat/visitor] Error creando notificación:", notifErr);
+    }
 
     // Obtener historial de mensajes de esta sala para retornar al visitante
     const { data: historial } = await supabaseAdmin
