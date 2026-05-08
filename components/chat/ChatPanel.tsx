@@ -102,10 +102,23 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   const [editandoMensaje, setEditandoMensaje] = useState<string | null>(null);
   const [editInput, setEditInput] = useState("");
   const [menuMensaje, setMenuMensaje] = useState<string | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const visitorEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const visitorContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const llamadasChannelId = useRef(`chat-llamadas-${Math.random().toString(36).slice(2)}`);
+
+  // Auto-scroll al fondo cuando llegan mensajes nuevos
+  useEffect(() => {
+    if (vista === "chat" && messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, [mensajes, vista]);
+
+  useEffect(() => {
+    if (vista === "visitante" && visitorContainerRef.current) {
+      visitorContainerRef.current.scrollTop = visitorContainerRef.current.scrollHeight;
+    }
+  }, [visitanteHistorial, vista]);
 
   const noLeidos = useChat().noLeidos;
   const totalNoLeidos = Object.values(noLeidos).reduce((a, b) => a + b, 0);
@@ -641,9 +654,9 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                 </div>
               )}
 
-              {/* Mensajes - flex-col justify-end para que empujen hacia arriba */}
-              <div className="flex-1 min-h-0 overflow-y-auto">
-                <div className="flex flex-col justify-end min-h-full px-4 py-4">
+              {/* Mensajes */}
+              <div className="flex-1 min-h-0 overflow-y-auto" ref={messagesContainerRef}>
+                <div className="px-4 py-4">
                   {mensajes.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center">
                       <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-3"><Sparkles className="w-6 h-6 text-gray-600" /></div>
@@ -654,7 +667,6 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                       {(mostrarBusqueda && mensajesBuscados.length > 0 ? mensajesBuscados.reverse() : mensajes).map((msg, i) => renderMensaje(msg, i))}
                     </>
                   )}
-                  <div ref={messagesEndRef} />
                 </div>
               </div>
 
@@ -706,8 +718,8 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
           {/* Vista visitante */}
           {vista === "visitante" && (
             <motion.div key="visitante" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="h-full flex flex-col">
-              <div className="flex-1 min-h-0 overflow-y-auto">
-                <div className="flex flex-col justify-end min-h-full px-4 py-4">
+              <div className="flex-1 min-h-0 overflow-y-auto" ref={visitorContainerRef}>
+                <div className="px-4 py-4">
                   {visitanteHistorial.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center space-y-4 px-4">
                       <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center"><Bot className="w-6 h-6 text-emerald-400" /></div>
@@ -720,7 +732,6 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                       {visitanteHistorial.map((msg, i) => renderMensaje(msg, i))}
                     </div>
                   )}
-                  <div ref={visitorEndRef} />
                 </div>
               </div>
 

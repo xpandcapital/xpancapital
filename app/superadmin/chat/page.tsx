@@ -90,18 +90,8 @@ export default function ChatAdminPage() {
   const [contactosEmpresa, setContactosEmpresa] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = useCallback(() => {
-    const doScroll = () => {
-      const el = scrollRef.current;
-      if (!el) return;
-      const vp = el.querySelector("[data-radix-scroll-area-viewport]");
-      if (vp) (vp as HTMLElement).scrollTop = (vp as HTMLElement).scrollHeight;
-      else el.scrollTop = el.scrollHeight;
-    };
-    doScroll();
-    setTimeout(doScroll, 50);
-    setTimeout(doScroll, 150);
-    setTimeout(doScroll, 300);
-    setTimeout(doScroll, 500);
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
   }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -301,7 +291,11 @@ export default function ChatAdminPage() {
   }, [user?.empresa_id]);
 
   // Auto-scroll
-  useEffect(() => { scrollToBottom(); }, [mensajes, scrollToBottom]);
+  useEffect(() => {
+    scrollToBottom();
+    const t = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(t);
+  }, [mensajes, scrollToBottom]);
 
   // Notificaciones de sonido + push
   useEffect(() => {
@@ -1144,9 +1138,8 @@ export default function ChatAdminPage() {
                   )}
                 </AnimatePresence>
 
-                {/* Messages */}
-                <div className="flex-1 min-h-0 overflow-hidden relative">
-                  <ScrollArea className="h-full" ref={scrollRef}>
+{/* Messages */}
+                <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollRef}>
                     <div className="px-4 md:px-6 py-4">
                       {mensajes.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center">
@@ -1159,8 +1152,7 @@ export default function ChatAdminPage() {
                         </>
                       )}
                     </div>
-                  </ScrollArea>
-                </div>
+                  </div>
 
                 {/* Input */}
                 <div className="px-6 py-4 border-t border-white/5 flex-shrink-0">
