@@ -130,17 +130,16 @@ DROP POLICY IF EXISTS "chat_miembros_join_visitor" ON chat_miembros;
 CREATE POLICY "chat_miembros_join_visitor"
   ON chat_miembros FOR INSERT
   WITH CHECK (
-    user_id = auth.uid()
-    AND EXISTS (
-      SELECT 1 FROM chat_salas
-      WHERE chat_salas.id = chat_miembros.sala_id
-        AND chat_salas.empresa_id = user_empresa_id()
-        AND chat_salas.tipo IN ('visitante', 'soporte', 'ventas')
-    )
-  )
-  OR (
-    user_id = auth.uid()
-    AND sala_id IN (SELECT user_sala_ids())
+    (user_id = auth.uid()
+     AND EXISTS (
+       SELECT 1 FROM chat_salas
+       WHERE chat_salas.id = chat_miembros.sala_id
+         AND chat_salas.empresa_id = user_empresa_id()
+         AND chat_salas.tipo IN ('visitante', 'soporte', 'ventas')
+     ))
+    OR
+    (user_id = auth.uid()
+     AND sala_id IN (SELECT user_sala_ids()))
   );
 
 DROP POLICY IF EXISTS "chat_miembros_insert_admin" ON chat_miembros;
