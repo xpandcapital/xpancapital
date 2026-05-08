@@ -121,63 +121,38 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     }
   }, []);
 
-  // Realtime: visitor recibe mensajes nuevos instantáneamente
+  // Visitor: polling cada 2s para recibir mensajes nuevos
+  // (realtime no funciona para anónimos porque RLS bloquea SELECT)
   useEffect(() => {
-    if (user) return; // solo visitantes
+    if (user) return;
     const savedSession = localStorage.getItem("blis_chat_session");
     if (!savedSession) return;
 
-    const supabase = getSupabase();
-    if (!supabase) return;
-
-    const channelId = `visitor-msgs-${Math.random().toString(36).slice(2)}`;
-
-    // Primero obtener sala_id de esta sesión
-    supabase.from("chat_visitantes")
-      .select("sala_id")
-      .eq("session_id", savedSession)
-      .single()
-      .then(({ data }) => {
-        if (!data?.sala_id) return;
-
-        const channel = supabase
-          .channel(channelId)
-          .on("postgres_changes", {
-            event: "INSERT",
-            schema: "public",
-            table: "chat_mensajes",
-            filter: `sala_id=eq.${data.sala_id}`,
-          }, (payload) => {
-            const nuevo = payload.new as VisitorMensaje;
-            setVisitanteHistorial((prev) => {
-              if (prev.some((m) => m.id === nuevo.id)) return prev;
-              return [...prev, nuevo];
-            });
-            // Auto-scroll
-            setTimeout(scrollToBottom, 100);
-          })
-          .subscribe();
-      })
-      .catch(() => {});
-
-    // También polling cada 3s como fallback
     const pollInterval = setInterval(() => {
       fetch(`/api/chat/visitor?session_id=${savedSession}`)
         .then((r) => r.json())
         .then((data) => {
-          if (data.success && data.historial) {
-            setVisitanteHistorial(data.historial);
+          if (data.success && data.historial && data.historial.length > 0) {
+            setVisitanteHistorial((prev) => {
+              const prevIds = new Set(prev.map((m) => m.id));
+              const nuevos = data.historial.filter((m: VisitorMensaje) => !prevIds.has(m.id));
+              if (nuevos.length > 0) {
+                const merged = [...prev, ...nuevos];
+                merged.sort((a: VisitorMensaje, b: VisitorMensaje) =>
+                  new Date(a.creado_en).getTime() - new Date(b.creado_en).getTime()
+                );
+                setTimeout(scrollToBottom, 100);
+                return merged;
+              }
+              return prev;
+            });
           }
         })
         .catch(() => {});
-    }, 3000);
+    }, 2000);
 
-    return () => {
-      clearInterval(pollInterval);
-      const sup = getSupabase();
-      if (sup) sup.removeChannel(sup.channel(channelId));
-    };
-  }, [user, visitanteSessionId]);
+    return () => clearInterval(pollInterval);
+  }, [user, visitanteSessionId, scrollToBottom]);
 
   // Load widget config on mount
   useEffect(() => {
@@ -201,18 +176,18 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         if (savedEmail) setVisitanteEmail(savedEmail);
         setVisitanteIniciado(true);
         setVista("visitante");
-        // Fetch conversation history
         fetch(`/api/chat/visitor?session_id=${savedSession}`)
           .then((r) => r.json())
           .then((data) => {
-            if (data.success && data.historial) {
+            if (data.success && data.historial && data.historial.length > 0) {
               setVisitanteHistorial(data.historial);
+              setTimeout(scrollToBottom, 100);
             }
           })
           .catch(() => {});
       }
     }
-  }, [user]);
+  }, [user, scrollToBottom]);
 
   // Load contacts for logged-in users
   const cargarContactos = useCallback(async () => {
@@ -373,13 +348,14 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     setMenuMensaje(null);
   };
 
-  // Visitor chat handler with optimistic update
   const handleVisitanteEnviar = async () => {
     if (!visitanteMensaje.trim() || !visitanteNombre.trim()) return;
     setVisitanteEnviando(true);
 
     const contenido = visitanteMensaje.trim();
-    // Optimistic: mostrar el mensaje al instante
+    const currentSessionId = visitanteSessionId || localStorage.getItem("blis_chat_session") || undefined;
+
+    // Optimistic: mostrar mensaje al instante
     const tempId = `temp-${Date.now()}`;
     const msgOptimista: VisitorMensaje = {
       id: tempId,
@@ -390,9 +366,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     };
     setVisitanteHistorial((prev) => [...prev, msgOptimista]);
     setVisitanteMensaje("");
-
-    // Auto-scroll
-    setTimeout(scrollToBottom, 100);
+    setTimeout(scrollToBottom, 50);
 
     try {
       const response = await fetch("/api/chat/visitor", {
@@ -400,36 +374,43 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre: visitanteNombre,
-          email: visitanteEmail,
+          email: visitanteEmail || undefined,
           mensaje: contenido,
-          session_id: visitanteSessionId || localStorage.getItem("blis_chat_session") || undefined,
-          pagina_origen: typeof window !== "undefined" ? window.location.pathname : "",
+          session_id: currentSessionId,
+          pagina_origen: window.location.pathname,
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
       const data = await response.json();
-      if (data.success && data.session_id) {
-        localStorage.setItem("blis_chat_session", data.session_id);
+      if (data.success) {
+        if (data.session_id) {
+          localStorage.setItem("blis_chat_session", data.session_id);
+          setVisitanteSessionId(data.session_id);
+        }
         localStorage.setItem("blis_chat_name", visitanteNombre);
         if (visitanteEmail) localStorage.setItem("blis_chat_email", visitanteEmail);
-        setVisitanteSessionId(data.session_id);
-        setVisitanteSalaId(data.sala_id);
+        if (data.sala_id) setVisitanteSalaId(data.sala_id);
         setVisitanteIniciado(true);
-        // Solo reemplazar si el servidor devuelve >= mensajes de los que ya tenemos
+
+        // Reemplazar historial con datos del servidor (más confiables)
         if (data.historial && data.historial.length > 0) {
-          setVisitanteHistorial((prev) => {
-            if (data.historial.length >= prev.length) return data.historial;
-            return prev;
-          });
+          setVisitanteHistorial(data.historial);
+          setTimeout(scrollToBottom, 100);
+        } else {
+          // Si no hay historial del servidor, remover el optimista
+          setVisitanteHistorial((prev) => prev.filter((m) => m.id !== tempId));
         }
       } else {
-        // Remover mensaje optimista si falló
         setVisitanteHistorial((prev) => prev.filter((m) => m.id !== tempId));
-        console.error("[ChatPanel] Error:", data.error);
+        console.error("[ChatPanel] Error API:", data.error);
       }
-    } catch (err: any) {
+    } catch (err) {
       setVisitanteHistorial((prev) => prev.filter((m) => m.id !== tempId));
-      console.error("Error enviando:", err);
+      console.error("[ChatPanel] Error enviando:", err);
     } finally {
       setVisitanteEnviando(false);
     }

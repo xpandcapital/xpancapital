@@ -14,30 +14,39 @@ export async function GET(request: NextRequest) {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Si hay session_id (visitante anónimo), devolver historial público
     if (sessionId) {
-      const { data: visitante } = await supabaseAdmin
+      const { data: visitante, error: vError } = await supabaseAdmin
         .from("chat_visitantes")
         .select("sala_id")
         .eq("session_id", sessionId)
-        .single();
+        .order("creado_en", { ascending: false })
+        .limit(1);
 
-      if (!visitante?.sala_id) {
+      if (vError) {
+        console.error("[chat/visitor GET] Error finding visitor:", vError);
         return NextResponse.json({ success: true, historial: [] });
       }
 
-      const { data: historial, error } = await supabaseAdmin
+      const salaId = visitante?.[0]?.sala_id;
+      if (!salaId) {
+        return NextResponse.json({ success: true, historial: [] });
+      }
+
+      const { data: historial, error: hError } = await supabaseAdmin
         .from("chat_mensajes")
-        .select("*")
-        .eq("sala_id", visitante.sala_id)
+        .select("id, tipo, contenido, creado_en, user_id")
+        .eq("sala_id", salaId)
         .eq("eliminado", false)
         .order("creado_en", { ascending: true });
 
-      if (error) throw error;
+      if (hError) {
+        console.error("[chat/visitor GET] Error fetching historial:", hError);
+        return NextResponse.json({ success: true, historial: [] });
+      }
+
       return NextResponse.json({ success: true, historial: historial || [] });
     }
 
-    // Sin session_id: requiere auth (admin)
     const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -56,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: data || [] });
   } catch (error: any) {
-    console.error("[chat/visitor GET] Error:", error);
+    console.error("[chat/visitor GET] Error:", error.message);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
@@ -70,76 +79,117 @@ export async function POST(request: NextRequest) {
     const { nombre, email, mensaje, session_id, pagina_origen } = body;
 
     if (!nombre || !mensaje) {
-      return NextResponse.json({ success: false, error: "Nombre y mensaje son requeridos" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Nombre y mensaje son requeridos" },
+        { status: 400 }
+      );
     }
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const empresaId = "6186f014-c8c7-4027-9f08-8acf2bae3eae";
-    const visitorSessionId = session_id || randomUUID();
+
     let salaId: string;
+    let visitorSessionId = session_id;
 
-    // Buscar o crear sala (rápido: 1 query)
-    if (session_id) {
-      const { data: existente } = await supabaseAdmin
+    // PASO 1: Buscar sala existente o crear nueva
+    if (visitorSessionId) {
+      const { data: existente, error: veError } = await supabaseAdmin
         .from("chat_visitantes")
-        .select("sala_id").eq("session_id", session_id).eq("estado", "activo")
-        .maybeSingle();
+        .select("sala_id, estado")
+        .eq("session_id", visitorSessionId)
+        .order("creado_en", { ascending: false })
+        .limit(1);
 
-      if (existente?.sala_id) {
-        salaId = existente.sala_id;
+      if (veError) {
+        console.error("[chat/visitor POST] Error buscando visitante:", veError);
+      }
+
+      const existingSalaId = existente?.[0]?.sala_id;
+      if (existingSalaId) {
+        salaId = existingSalaId;
       } else {
-        const { data: sala } = await supabaseAdmin
+        const { data: sala, error: sError } = await supabaseAdmin
           .from("chat_salas")
           .insert({ empresa_id: empresaId, tipo: "visitante", nombre: `Visitante: ${nombre}` })
-          .select("id").single();
-        if (!sala) return NextResponse.json({ success: false, error: "Error creando sala" }, { status: 500 });
+          .select("id")
+          .single();
+
+        if (sError || !sala) {
+          console.error("[chat/visitor POST] Error creando sala:", sError);
+          return NextResponse.json(
+            { success: false, error: "Error creando sala de chat" },
+            { status: 500 }
+          );
+        }
         salaId = sala.id;
       }
     } else {
-      const { data: sala } = await supabaseAdmin
+      visitorSessionId = randomUUID();
+      const { data: sala, error: sError } = await supabaseAdmin
         .from("chat_salas")
         .insert({ empresa_id: empresaId, tipo: "visitante", nombre: `Visitante: ${nombre}` })
-        .select("id").single();
-      if (!sala) return NextResponse.json({ success: false, error: "Error creando sala" }, { status: 500 });
+        .select("id")
+        .single();
+
+      if (sError || !sala) {
+        console.error("[chat/visitor POST] Error creando sala (nueva):", sError);
+        return NextResponse.json(
+          { success: false, error: "Error creando sala de chat" },
+          { status: 500 }
+        );
+      }
       salaId = sala.id;
     }
 
-    // Upsert visitante + insert mensaje en paralelo
-    const [visitorResult, msgResult] = await Promise.allSettled([
-      supabaseAdmin.from("chat_visitantes").upsert({
-        sala_id: salaId, empresa_id: empresaId, nombre, email: email || null,
-        session_id: visitorSessionId, pagina_origen: pagina_origen || null,
-        estado: "activo", ultima_actividad: new Date().toISOString(),
-      }, { onConflict: "session_id" }),
-      supabaseAdmin.from("chat_mensajes").insert({
-        sala_id: salaId, user_id: null, tipo: "texto",
-        contenido: mensaje, enviado: true,
-      })
-    ]);
+    // PASO 2: Upsert visitante
+    const { error: upsertError } = await supabaseAdmin
+      .from("chat_visitantes")
+      .upsert({
+        sala_id: salaId,
+        empresa_id: empresaId,
+        nombre,
+        email: email || null,
+        session_id: visitorSessionId,
+        pagina_origen: pagina_origen || null,
+        estado: "activo",
+        ultima_actividad: new Date().toISOString(),
+      }, { onConflict: "session_id" });
 
-    // Si falló el visitante upsert, loguear
-    if (visitorResult.status === "rejected") {
-      console.error("[chat/visitor] Error upsert:", visitorResult.reason);
+    if (upsertError) {
+      console.warn("[chat/visitor POST] Visitante upsert error (non-critical):", upsertError.message);
     }
 
-    // Si falló el mensaje, intentar secuencialmente (el trigger pudo causar el error)
-    if (msgResult.status === "rejected") {
-      console.warn("[chat/visitor] Mensaje falló en paralelo, reintentando:", msgResult.reason);
-      const retry = await supabaseAdmin.from("chat_mensajes").insert({
-        sala_id: salaId, user_id: null, tipo: "texto",
-        contenido: mensaje, enviado: true,
+    // PASO 3: Insertar mensaje
+    const { error: msgError } = await supabaseAdmin
+      .from("chat_mensajes")
+      .insert({
+        sala_id: salaId,
+        user_id: null,
+        tipo: "texto",
+        contenido: mensaje,
+        enviado: true,
       });
-      if (retry.error) {
-        console.error("[chat/visitor] Reintento también falló:", retry.error);
-      }
+
+    if (msgError) {
+      console.error("[chat/visitor POST] Error insertando mensaje:", msgError);
+      return NextResponse.json(
+        { success: false, error: `Error enviando mensaje: ${msgError.message}` },
+        { status: 500 }
+      );
     }
 
-    // Obtener historial (rápido)
-    const { data: historial } = await supabaseAdmin
+    // PASO 4: Obtener historial completo
+    const { data: historial, error: hError } = await supabaseAdmin
       .from("chat_mensajes")
       .select("id, tipo, contenido, creado_en, user_id")
-      .eq("sala_id", salaId).eq("eliminado", false)
-      .order("creado_en", { ascending: true }).limit(30);
+      .eq("sala_id", salaId)
+      .eq("eliminado", false)
+      .order("creado_en", { ascending: true })
+      .limit(50);
+
+    if (hError) {
+      console.warn("[chat/visitor POST] Error obteniendo historial:", hError.message);
+    }
 
     return NextResponse.json({
       success: true,
@@ -148,7 +198,10 @@ export async function POST(request: NextRequest) {
       historial: historial || [],
     });
   } catch (error: any) {
-    console.error("[chat/visitor POST] Error:", error);
-    return NextResponse.json({ success: false, error: error.message || "Error interno" }, { status: 500 });
+    console.error("[chat/visitor POST] Error:", error.message);
+    return NextResponse.json(
+      { success: false, error: error.message || "Error interno" },
+      { status: 500 }
+    );
   }
 }
