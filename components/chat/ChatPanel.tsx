@@ -111,10 +111,9 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
 
   // Scroll to bottom helper (works with ScrollArea viewport)
   const scrollToBottom = useCallback(() => {
-    const attempt = (tries: number) => {
-      if (tries <= 0) return;
+    const doScroll = () => {
       const el = scrollRef.current;
-      if (!el) { requestAnimationFrame(() => attempt(tries - 1)); return; }
+      if (!el) return;
       const viewport = el.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
       if (viewport) {
         viewport.scrollTop = viewport.scrollHeight;
@@ -122,7 +121,11 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         el.scrollTop = el.scrollHeight;
       }
     };
-    attempt(5);
+    doScroll();
+    setTimeout(doScroll, 50);
+    setTimeout(doScroll, 150);
+    setTimeout(doScroll, 300);
+    setTimeout(doScroll, 500);
   }, []);
 
   // Visitor: polling cada 1.5s para recibir mensajes nuevos
@@ -188,8 +191,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
           .then((data) => {
             if (data.success && data.historial && data.historial.length > 0) {
               setVisitanteHistorial(data.historial);
-              setTimeout(scrollToBottom, 200);
-              setTimeout(scrollToBottom, 500);
+              scrollToBottom();
             }
           })
           .catch(() => {});
@@ -271,8 +273,6 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   // Auto-scroll al final de mensajes
   useEffect(() => {
     scrollToBottom();
-    setTimeout(scrollToBottom, 100);
-    setTimeout(scrollToBottom, 300);
   }, [mensajes, visitanteHistorial, scrollToBottom]);
 
   // Cambiar a vista chat cuando se une a una sala

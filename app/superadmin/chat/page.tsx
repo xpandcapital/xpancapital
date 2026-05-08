@@ -90,13 +90,18 @@ export default function ChatAdminPage() {
   const [contactosEmpresa, setContactosEmpresa] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = useCallback(() => {
-    requestAnimationFrame(() => {
+    const doScroll = () => {
       const el = scrollRef.current;
       if (!el) return;
       const vp = el.querySelector("[data-radix-scroll-area-viewport]");
       if (vp) (vp as HTMLElement).scrollTop = (vp as HTMLElement).scrollHeight;
       else el.scrollTop = el.scrollHeight;
-    });
+    };
+    doScroll();
+    setTimeout(doScroll, 50);
+    setTimeout(doScroll, 150);
+    setTimeout(doScroll, 300);
+    setTimeout(doScroll, 500);
   }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -296,11 +301,7 @@ export default function ChatAdminPage() {
   }, [user?.empresa_id]);
 
   // Auto-scroll
-  useEffect(() => {
-    scrollToBottom();
-    setTimeout(scrollToBottom, 100);
-    setTimeout(scrollToBottom, 300);
-  }, [mensajes, scrollToBottom]);
+  useEffect(() => { scrollToBottom(); }, [mensajes, scrollToBottom]);
 
   // Notificaciones de sonido + push
   useEffect(() => {
