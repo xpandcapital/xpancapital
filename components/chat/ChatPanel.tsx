@@ -506,7 +506,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   };
 
   return (
-    <div className="w-[380px] h-[600px] bg-[#0a0a0a] border border-white/10 rounded-[32px] shadow-2xl shadow-black/50 flex flex-col overflow-hidden backdrop-blur-xl">
+    <div className="w-[calc(100vw-32px)] max-w-[380px] h-[500px] sm:h-[600px] bg-[#0a0a0a] border border-white/10 rounded-[24px] sm:rounded-[32px] shadow-2xl shadow-black/50 flex flex-col overflow-hidden backdrop-blur-xl">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-[#0a0a0a]/90">
         <div className="flex items-center gap-3">
@@ -991,12 +991,12 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                       whileTap={{ scale: 0.95 }}
                       onClick={handleEnviar}
                       disabled={!mensajeInput.trim() || enviando}
-                      className="p-3 bg-blis-red rounded-xl text-white hover:bg-blis-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-4 bg-blis-red rounded-xl text-white hover:bg-blis-red/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px] min-w-[48px] flex items-center justify-center"
                     >
                       {enviando ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 className="w-6 h-6 animate-spin" />
                       ) : (
-                        <Send className="w-5 h-5" />
+                        <Send className="w-6 h-6" />
                       )}
                     </motion.button>
                   </div>
@@ -1051,12 +1051,12 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
                     whileTap={{ scale: 0.95 }}
                     onClick={handleVisitanteEnviar}
                     disabled={!visitanteMensaje.trim() || visitanteEnviando}
-                    className="p-3 bg-blis-red rounded-xl text-white hover:bg-blis-red/90 transition-colors disabled:opacity-50"
+                    className="p-4 bg-blis-red rounded-xl text-white hover:bg-blis-red/90 transition-colors disabled:opacity-50 min-h-[48px] min-w-[48px] flex items-center justify-center"
                   >
                     {visitanteEnviando ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                      <Send className="w-5 h-5" />
+                      <Send className="w-6 h-6" />
                     )}
                   </motion.button>
                 </div>

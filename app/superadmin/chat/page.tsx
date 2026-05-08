@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useChat } from "@/lib/chat/useChat";
 import { useWebRTC } from "@/lib/chat/useWebRTC";
+import { getSupabase } from "@/lib/supabase";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -279,7 +280,7 @@ export default function ChatAdminPage() {
     const interval = setInterval(() => {
       cargarVisitantes();
       cargarAgentes();
-    }, 15000);
+    }, 3000);
     return () => clearInterval(interval);
   }, [user?.empresa_id]);
 
@@ -301,6 +302,27 @@ export default function ChatAdminPage() {
       audioRef.current.play().catch(() => {});
     }
   }, [mensajes, salaActiva, sonidoActivado, user?.id]);
+
+  // Realtime: recargar salas y visitantes instantáneamente
+  useEffect(() => {
+    if (!user) return;
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const channel = supabase
+      .channel(`chat-admin-realtime`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_salas" }, () => {
+        cargarSalas();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_visitantes" }, () => {
+        cargarVisitantes();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, cargarSalas, cargarVisitantes]);
 
   const handleEnviar = async () => {
     if (!mensajeInput.trim() || !salaActiva) return;
@@ -566,9 +588,9 @@ export default function ChatAdminPage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 flex-1 min-h-0">
           {/* Internal Sidebar */}
-          <div className="lg:col-span-1 bg-zinc-900/50 border border-white/10 rounded-3xl overflow-hidden flex flex-col">
+          <div className={`md:col-span-1 bg-zinc-900/50 border border-white/10 rounded-3xl overflow-hidden flex flex-col ${salaActiva ? 'hidden md:flex' : 'flex'}`}>
             <div className="p-4 space-y-1">
               {[
                 { id: "conversaciones" as const, label: "Conversaciones", icon: Inbox, count: salas.filter((s) => s.estado === "activo").length },
@@ -1017,12 +1039,18 @@ export default function ChatAdminPage() {
           </div>
 
           {/* Chat Area */}
-          <div className="lg:col-span-3 bg-zinc-900/50 border border-white/10 rounded-3xl overflow-hidden flex flex-col">
+          <div className={`md:col-span-3 bg-zinc-900/50 border border-white/10 rounded-3xl overflow-hidden flex flex-col ${salaActiva ? 'flex' : 'hidden md:flex'}`}>
             {salaActiva ? (
               <>
                 {/* Chat Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 flex-shrink-0">
+                <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-white/5 flex-shrink-0">
                   <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setSalaActiva(null)}
+                      className="md:hidden p-2 hover:bg-white/5 rounded-lg text-gray-400"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                    </button>
                     <Avatar className="w-10 h-10">
                       <AvatarFallback className={`font-black ${salaActiva.tipo === "ia" ? "bg-emerald-500/20 text-emerald-500" : "bg-blis-red/20 text-blis-red"}`}>
                         {salaActiva.tipo === "ia" ? <Bot className="w-5 h-5" /> : (salaActiva.nombre?.[0] || "C")}
