@@ -309,9 +309,12 @@ export default function ChatAdminPage() {
         }
         audioRef.current.play().catch(() => {});
       }
-      // Notificación push del navegador (funciona incluso con Chrome cerrado en móvil)
+      // Notificación push con nombre del remitente
       if (lastMsg.contenido) {
-        showNotification("Nuevo mensaje de chat", {
+        const senderName = ("user" in lastMsg ? lastMsg.user?.nombre : undefined) || "Usuario";
+        const salaTipo = salaActiva.tipo || "directo";
+        const tipoLabel = salaTipo === "visitante" ? "Visitante" : salaTipo === "soporte" ? "Soporte" : salaTipo === "ventas" ? "Ventas" : salaTipo === "ia" ? "IA" : "Mensaje";
+        showNotification(`${tipoLabel}: ${senderName}`, {
           body: lastMsg.contenido.slice(0, 150),
           tag: lastMsg.sala_id,
           data: { url: "/superadmin/chat" },
