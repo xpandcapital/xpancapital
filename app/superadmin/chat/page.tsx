@@ -296,7 +296,11 @@ export default function ChatAdminPage() {
   }, [user?.empresa_id]);
 
   // Auto-scroll
-  useEffect(() => { scrollToBottom(); }, [mensajes, scrollToBottom]);
+  useEffect(() => {
+    scrollToBottom();
+    setTimeout(scrollToBottom, 100);
+    setTimeout(scrollToBottom, 300);
+  }, [mensajes, scrollToBottom]);
 
   // Notificaciones de sonido + push
   useEffect(() => {

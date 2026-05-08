@@ -111,39 +111,42 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
 
   // Scroll to bottom helper (works with ScrollArea viewport)
   const scrollToBottom = useCallback(() => {
-    requestAnimationFrame(() => {
+    const attempt = (tries: number) => {
+      if (tries <= 0) return;
       const el = scrollRef.current;
-      if (!el) return;
+      if (!el) { requestAnimationFrame(() => attempt(tries - 1)); return; }
       const viewport = el.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
       if (viewport) {
         viewport.scrollTop = viewport.scrollHeight;
       } else {
         el.scrollTop = el.scrollHeight;
       }
-    });
+    };
+    attempt(5);
   }, []);
 
-  // Visitor: polling cada 2s para recibir mensajes nuevos
-  // (realtime no funciona para anónimos porque RLS bloquea SELECT)
+  // Visitor: polling cada 1.5s para recibir mensajes nuevos
   useEffect(() => {
     if (user) return;
     const savedSession = localStorage.getItem("blis_chat_session");
     if (!savedSession) return;
 
-    const pollInterval = setInterval(() => {
+    let active = true;
+    const poll = () => {
+      if (!active) return;
       fetch(`/api/chat/visitor?session_id=${savedSession}`)
         .then((r) => r.json())
         .then((data) => {
+          if (!active) return;
           if (data.success && data.historial && data.historial.length > 0) {
             setVisitanteHistorial((prev) => {
               const prevIds = new Set(prev.map((m) => m.id));
-              const nuevos = data.historial.filter((m: VisitorMensaje) => !prevIds.has(m.id));
-              if (nuevos.length > 0) {
-                const merged = [...prev, ...nuevos];
+              const newMsgs = data.historial.filter((m: VisitorMensaje) => !prevIds.has(m.id) && !m.id.startsWith("temp-"));
+              if (newMsgs.length > 0) {
+                const merged = [...prev.filter((m) => !m.id.startsWith("temp-")), ...newMsgs];
                 merged.sort((a: VisitorMensaje, b: VisitorMensaje) =>
                   new Date(a.creado_en).getTime() - new Date(b.creado_en).getTime()
                 );
-                setTimeout(scrollToBottom, 100);
                 return merged;
               }
               return prev;
@@ -151,10 +154,12 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
           }
         })
         .catch(() => {});
-    }, 2000);
+    };
 
-    return () => clearInterval(pollInterval);
-  }, [user, visitanteSessionId, scrollToBottom]);
+    poll();
+    const interval = setInterval(poll, 1500);
+    return () => { active = false; clearInterval(interval); };
+  }, [user, visitanteSessionId]);
 
   // Load widget config on mount
   useEffect(() => {
@@ -183,7 +188,8 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
           .then((data) => {
             if (data.success && data.historial && data.historial.length > 0) {
               setVisitanteHistorial(data.historial);
-              setTimeout(scrollToBottom, 100);
+              setTimeout(scrollToBottom, 200);
+              setTimeout(scrollToBottom, 500);
             }
           })
           .catch(() => {});
@@ -265,6 +271,8 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   // Auto-scroll al final de mensajes
   useEffect(() => {
     scrollToBottom();
+    setTimeout(scrollToBottom, 100);
+    setTimeout(scrollToBottom, 300);
   }, [mensajes, visitanteHistorial, scrollToBottom]);
 
   // Cambiar a vista chat cuando se une a una sala
@@ -351,24 +359,13 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
   };
 
   const handleVisitanteEnviar = async () => {
-    if (!visitanteMensaje.trim() || !visitanteNombre.trim()) return;
+    if (!visitanteMensaje.trim() || !visitanteNombre.trim() || visitanteEnviando) return;
     setVisitanteEnviando(true);
 
     const contenido = visitanteMensaje.trim();
     const currentSessionId = visitanteSessionId || localStorage.getItem("blis_chat_session") || undefined;
 
-    // Optimistic: mostrar mensaje al instante
-    const tempId = `temp-${Date.now()}`;
-    const msgOptimista: VisitorMensaje = {
-      id: tempId,
-      tipo: "texto",
-      contenido,
-      creado_en: new Date().toISOString(),
-      user_id: null,
-    };
-    setVisitanteHistorial((prev) => [...prev, msgOptimista]);
     setVisitanteMensaje("");
-    setTimeout(scrollToBottom, 50);
 
     try {
       const response = await fetch("/api/chat/visitor", {
@@ -383,10 +380,6 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         }),
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
       const data = await response.json();
       if (data.success) {
         if (data.session_id) {
@@ -398,20 +391,14 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         if (data.sala_id) setVisitanteSalaId(data.sala_id);
         setVisitanteIniciado(true);
 
-        // Reemplazar historial con datos del servidor (más confiables)
         if (data.historial && data.historial.length > 0) {
           setVisitanteHistorial(data.historial);
-          setTimeout(scrollToBottom, 100);
-        } else {
-          // Si no hay historial del servidor, remover el optimista
-          setVisitanteHistorial((prev) => prev.filter((m) => m.id !== tempId));
+          scrollToBottom();
         }
       } else {
-        setVisitanteHistorial((prev) => prev.filter((m) => m.id !== tempId));
         console.error("[ChatPanel] Error API:", data.error);
       }
     } catch (err) {
-      setVisitanteHistorial((prev) => prev.filter((m) => m.id !== tempId));
       console.error("[ChatPanel] Error enviando:", err);
     } finally {
       setVisitanteEnviando(false);
