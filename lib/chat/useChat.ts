@@ -126,7 +126,7 @@ export function useChat() {
     }
   }, [user]);
 
-  // Enviar mensaje
+  // Enviar mensaje (con fallback a API si RLS falla)
   const enviarMensaje = useCallback(async (
     salaId: string,
     contenido: string,
@@ -136,30 +136,48 @@ export function useChat() {
   ) => {
     if (!user || !contenido.trim()) return false;
     const supabase = getSupabase();
-    if (!supabase) return false;
 
     setEnviando(true);
     try {
-      const { error } = await supabase.from("chat_mensajes").insert({
-        sala_id: salaId,
-        user_id: user.id,
-        tipo,
-        contenido: contenido.trim(),
-        reply_to: replyTo || null,
-        metadata: metadata || {},
-        enviado: true,
+      if (supabase) {
+        const { error } = await supabase.from("chat_mensajes").insert({
+          sala_id: salaId,
+          user_id: user.id,
+          tipo,
+          contenido: contenido.trim(),
+          reply_to: replyTo || null,
+          metadata: metadata || {},
+          enviado: true,
+        });
+
+        if (!error) {
+          await supabase
+            .from("chat_miembros")
+            .update({ ultima_lectura: new Date().toISOString() })
+            .eq("sala_id", salaId)
+            .eq("user_id", user.id);
+          return true;
+        }
+
+        console.warn("[useChat] RLS falló, intentando via API:", error.message);
+      }
+
+      const res = await fetch("/api/chat/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sala_id: salaId,
+          contenido: contenido.trim(),
+          tipo,
+          user_id: user.id,
+        }),
       });
 
-      if (error) throw error;
+      const data = await res.json();
+      if (data.success || res.ok) return true;
 
-      // Actualizar última actividad
-      await supabase
-        .from("chat_miembros")
-        .update({ ultima_lectura: new Date().toISOString() })
-        .eq("sala_id", salaId)
-        .eq("user_id", user.id);
-
-      return true;
+      console.error("[useChat] API fallback falló:", data.error);
+      return false;
     } catch (err) {
       console.error("[useChat] Error enviando mensaje:", err);
       return false;

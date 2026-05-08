@@ -111,14 +111,16 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
 
   // Scroll to bottom helper (works with ScrollArea viewport)
   const scrollToBottom = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const viewport = el.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
-    if (viewport) {
-      viewport.scrollTop = viewport.scrollHeight;
-    } else {
-      el.scrollTop = el.scrollHeight;
-    }
+    requestAnimationFrame(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const viewport = el.querySelector("[data-radix-scroll-area-viewport]") as HTMLElement | null;
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
+      } else {
+        el.scrollTop = el.scrollHeight;
+      }
+    });
   }, []);
 
   // Visitor: polling cada 2s para recibir mensajes nuevos

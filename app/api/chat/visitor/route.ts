@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         if (sError || !sala) {
           console.error("[chat/visitor POST] Error creando sala:", sError);
           return NextResponse.json(
-            { success: false, error: "Error creando sala de chat" },
+            { success: false, error: `Error creando sala: ${sError?.message || "unknown"}` },
             { status: 500 }
           );
         }
@@ -134,14 +134,14 @@ export async function POST(request: NextRequest) {
       if (sError || !sala) {
         console.error("[chat/visitor POST] Error creando sala (nueva):", sError);
         return NextResponse.json(
-          { success: false, error: "Error creando sala de chat" },
+          { success: false, error: `Error creando sala: ${sError?.message || "unknown"}` },
           { status: 500 }
         );
       }
       salaId = sala.id;
     }
 
-    // PASO 2: Upsert visitante
+    // PASO 2: Upsert visitante (non-critical)
     const { error: upsertError } = await supabaseAdmin
       .from("chat_visitantes")
       .upsert({
@@ -156,11 +156,11 @@ export async function POST(request: NextRequest) {
       }, { onConflict: "session_id" });
 
     if (upsertError) {
-      console.warn("[chat/visitor POST] Visitante upsert error (non-critical):", upsertError.message);
+      console.warn("[chat/visitor POST] Visitante upsert error:", upsertError.message);
     }
 
     // PASO 3: Insertar mensaje
-    const { error: msgError } = await supabaseAdmin
+    const { data: msgData, error: msgError } = await supabaseAdmin
       .from("chat_mensajes")
       .insert({
         sala_id: salaId,
@@ -168,10 +168,12 @@ export async function POST(request: NextRequest) {
         tipo: "texto",
         contenido: mensaje,
         enviado: true,
-      });
+      })
+      .select("id, tipo, contenido, creado_en, user_id")
+      .single();
 
     if (msgError) {
-      console.error("[chat/visitor POST] Error insertando mensaje:", msgError);
+      console.error("[chat/visitor POST] Error insertando mensaje:", msgError.message, msgError.code, msgError.details);
       return NextResponse.json(
         { success: false, error: `Error enviando mensaje: ${msgError.message}` },
         { status: 500 }
@@ -198,7 +200,7 @@ export async function POST(request: NextRequest) {
       historial: historial || [],
     });
   } catch (error: any) {
-    console.error("[chat/visitor POST] Error:", error.message);
+    console.error("[chat/visitor POST] Error:", error.message, error.stack);
     return NextResponse.json(
       { success: false, error: error.message || "Error interno" },
       { status: 500 }

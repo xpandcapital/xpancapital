@@ -90,11 +90,13 @@ export default function ChatAdminPage() {
   const [contactosEmpresa, setContactosEmpresa] = useState<any[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const vp = el.querySelector("[data-radix-scroll-area-viewport]");
-    if (vp) (vp as HTMLElement).scrollTop = (vp as HTMLElement).scrollHeight;
-    else el.scrollTop = el.scrollHeight;
+    requestAnimationFrame(() => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const vp = el.querySelector("[data-radix-scroll-area-viewport]");
+      if (vp) (vp as HTMLElement).scrollTop = (vp as HTMLElement).scrollHeight;
+      else el.scrollTop = el.scrollHeight;
+    });
   }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
