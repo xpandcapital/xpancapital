@@ -167,7 +167,7 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
       const sup = getSupabase();
       if (sup) sup.removeChannel(sup.channel(channelId));
     };
-  }, [user, visitanteIniciado]);
+  }, [user, visitanteSessionId]);
 
   // Load widget config on mount
   useEffect(() => {
@@ -365,10 +365,28 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
     setMenuMensaje(null);
   };
 
-  // Visitor chat handler with persistence
+  // Visitor chat handler with optimistic update
   const handleVisitanteEnviar = async () => {
     if (!visitanteMensaje.trim() || !visitanteNombre.trim()) return;
     setVisitanteEnviando(true);
+
+    const contenido = visitanteMensaje.trim();
+    // Optimistic: mostrar el mensaje al instante
+    const tempId = `temp-${Date.now()}`;
+    const msgOptimista: VisitorMensaje = {
+      id: tempId,
+      tipo: "texto",
+      contenido,
+      creado_en: new Date().toISOString(),
+      user_id: null,
+    };
+    setVisitanteHistorial((prev) => [...prev, msgOptimista]);
+    setVisitanteMensaje("");
+
+    // Auto-scroll
+    setTimeout(() => {
+      if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }, 100);
 
     try {
       const response = await fetch("/api/chat/visitor", {
@@ -377,18 +395,13 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         body: JSON.stringify({
           nombre: visitanteNombre,
           email: visitanteEmail,
-          mensaje: visitanteMensaje,
+          mensaje: contenido,
           session_id: visitanteSessionId || localStorage.getItem("blis_chat_session") || undefined,
           pagina_origen: typeof window !== "undefined" ? window.location.pathname : "",
         }),
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        console.error("[ChatPanel] Error del servidor:", data.error);
-        alert("Error al enviar: " + (data.error || "Error desconocido"));
-        return;
-      }
       if (data.success && data.session_id) {
         localStorage.setItem("blis_chat_session", data.session_id);
         localStorage.setItem("blis_chat_name", visitanteNombre);
@@ -396,14 +409,18 @@ export function ChatPanel({ onClose, onMinimize }: ChatPanelProps) {
         setVisitanteSessionId(data.session_id);
         setVisitanteSalaId(data.sala_id);
         setVisitanteIniciado(true);
-        if (data.historial) {
+        // Reemplazar historial con datos reales
+        if (data.historial && data.historial.length > 0) {
           setVisitanteHistorial(data.historial);
         }
-        setVisitanteMensaje("");
+      } else {
+        // Remover mensaje optimista si falló
+        setVisitanteHistorial((prev) => prev.filter((m) => m.id !== tempId));
+        console.error("[ChatPanel] Error:", data.error);
       }
     } catch (err: any) {
-      console.error("Error enviando mensaje de visitante:", err);
-      alert("Error de conexión al enviar mensaje");
+      setVisitanteHistorial((prev) => prev.filter((m) => m.id !== tempId));
+      console.error("Error enviando:", err);
     } finally {
       setVisitanteEnviando(false);
     }
