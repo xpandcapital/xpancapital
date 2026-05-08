@@ -202,7 +202,14 @@ export async function POST(request: NextRequest) {
 
       if (targetUserIds.length > 0) {
         const { sendPushToUsers } = await import("@/lib/push-notifications");
-        await sendPushToUsers(supabaseAdmin, targetUserIds, `💬 ${nombre} - Chat`, mensaje.slice(0, 100), "/superadmin/chat", "chat");
+        await sendPushToUsers(
+          supabaseAdmin,
+          targetUserIds,
+          `💬 Visitante: ${nombre}`,
+          mensaje.slice(0, 100),
+          "/superadmin/chat",
+          "chat"
+        );
       }
     } catch (notifErr) {
       console.warn("[chat/visitor POST] Push notification error (non-critical):", notifErr);
