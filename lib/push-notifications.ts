@@ -3,13 +3,15 @@ let initialized = false;
 
 async function ensureVapid() {
   if (!webpush) {
-    webpush = (await import("web-push")).default;
+    const mod = await import("web-push");
+    webpush = mod.default || mod;
   }
   if (initialized) return;
+  if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return;
   webpush.setVapidDetails(
     "mailto:soporte@blis-corp.com",
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
   );
   initialized = true;
 }

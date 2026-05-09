@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X } from "lucide-react";
+import { useChat } from "@/lib/chat/useChat";
 import { ChatPanel } from "./ChatPanel";
 
 export function ChatWidget() {
   const [abierto, setAbierto] = useState(false);
-  const widgetRef = useRef<HTMLDivElement>(null);
+  const { noLeidos } = useChat();
   const pathname = usePathname();
 
   const mostrarWidget = !pathname.startsWith("/superadmin") && !pathname.startsWith("/miembros");
+  const totalNoLeidos = Object.values(noLeidos).reduce((a, b) => a + b, 0);
 
   if (!mostrarWidget) return null;
 
@@ -65,6 +66,11 @@ export function ChatWidget() {
               className="relative"
             >
               <MessageCircle className="w-6 h-6" />
+              {totalNoLeidos > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-emerald-500 rounded-full border-2 border-black flex items-center justify-center text-[10px] font-bold text-white px-1">
+                  {totalNoLeidos > 9 ? "9+" : totalNoLeidos}
+                </span>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
