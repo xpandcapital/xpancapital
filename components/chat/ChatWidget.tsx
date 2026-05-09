@@ -12,13 +12,13 @@ export function ChatWidget() {
   const { noLeidos } = useChat();
   const pathname = usePathname();
 
-  const mostrarWidget = !pathname.startsWith("/superadmin") && !pathname.startsWith("/miembros");
+  const mostrar = !pathname.startsWith("/superadmin") && !pathname.startsWith("/miembros");
   const totalNoLeidos = Object.values(noLeidos).reduce((a, b) => a + b, 0);
 
-  if (!mostrarWidget) return null;
+  if (!mostrar) return null;
 
   return (
-    <div ref={widgetRef} className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-3">
+    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-3">
       <AnimatePresence>
         {abierto && (
           <motion.div
