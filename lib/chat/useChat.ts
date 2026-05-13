@@ -25,7 +25,7 @@ export function useChat() {
   const channelRef = useRef<any>(null);
   const presenciaChannelRef = useRef<any>(null);
   const salaIdRef = useRef<string | null>(null);
-  const cargarSalasRef = useRef(cargarSalas);
+  const cargarSalasRef = useRef<any>(null);
   const instanceId = useRef(Math.random().toString(36).slice(2));
 
   useEffect(() => {
