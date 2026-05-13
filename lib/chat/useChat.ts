@@ -712,9 +712,7 @@ export function useChat() {
       setLoading(false);
       return;
     }
-
-    cargarSalas().then(() => setLoading(false));
-    cargarPlantillas();
+    Promise.all([cargarSalas(), cargarPlantillas()]).then(() => setLoading(false));
   }, [user, cargarSalas, cargarPlantillas]);
 
   // Obtener estado de un usuario
