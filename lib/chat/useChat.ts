@@ -28,43 +28,18 @@ export function useChat() {
   const cargarSalasRef = useRef<any>(null);
   const instanceId = useRef(Math.random().toString(36).slice(2));
 
-  // Cargar salas del usuario
+  // Cargar salas del usuario (1 sola query RPC en vez de 3)
   const cargarSalas = useCallback(async () => {
     if (!user) return;
     const supabase = getSupabase();
     if (!supabase) return;
 
     try {
-      const [membresiasRes, visitorSalasRes] = await Promise.all([
-        supabase
-          .from("chat_miembros")
-          .select("sala_id")
-          .eq("user_id", user.id),
-        supabase
-          .from("chat_salas")
-          .select("id")
-          .eq("empresa_id", user.empresa_id)
-          .eq("tipo", "visitante")
-          .eq("estado", "activo"),
-      ]);
-
-      if (membresiasRes.error) throw membresiasRes.error;
-
-      const miembroSalaIds = (membresiasRes.data || []).map((m) => m.sala_id);
-      const visitorSalaIds = (visitorSalasRes.data || []).map((s) => s.id);
-      const allSalaIds = [...new Set([...miembroSalaIds, ...visitorSalaIds])];
-
-      if (allSalaIds.length === 0) {
-        setSalas([]);
-        return;
-      }
-
       const { data, error } = await supabase
-        .from("chat_salas")
-        .select("*")
-        .in("id", allSalaIds)
-        .eq("estado", "activo")
-        .order("ultima_actividad", { ascending: false });
+        .rpc("get_user_salas", {
+          p_user_id: user.id,
+          p_empresa_id: user.empresa_id,
+        });
 
       if (error) throw error;
       setSalas((data || []) as ChatSala[]);
