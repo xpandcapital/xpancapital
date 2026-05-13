@@ -28,10 +28,6 @@ export function useChat() {
   const cargarSalasRef = useRef<any>(null);
   const instanceId = useRef(Math.random().toString(36).slice(2));
 
-  useEffect(() => {
-    cargarSalasRef.current = cargarSalas;
-  }, [cargarSalas]);
-
   // Cargar salas del usuario
   const cargarSalas = useCallback(async () => {
     if (!user) return;
@@ -76,6 +72,10 @@ export function useChat() {
       console.error("[useChat] Error cargando salas:", err);
     }
   }, [user]);
+
+  useEffect(() => {
+    cargarSalasRef.current = cargarSalas;
+  }, [cargarSalas]);
 
 // Cargar mensajes de una sala
   const cargarMensajes = useCallback(async (salaId: string, antesDe?: string) => {
