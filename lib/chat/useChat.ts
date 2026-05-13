@@ -328,26 +328,20 @@ export function useChat() {
     if (!supabase) return;
 
     try {
-      // Upsert como miembro (ignorar si ya existe)
-      await supabase.from("chat_miembros").upsert({
-        sala_id: salaId,
-        user_id: user.id,
-        rol_sala: "miembro",
-      }, { onConflict: "sala_id,user_id" });
-
-      // Cargar sala
-      const { data: sala } = await supabase
-        .from("chat_salas")
-        .select("*")
-        .eq("id", salaId)
-        .single();
+      const [_, { data: sala }] = await Promise.all([
+        supabase.from("chat_miembros").upsert({
+          sala_id: salaId,
+          user_id: user.id,
+          rol_sala: "miembro",
+        }, { onConflict: "sala_id,user_id" }),
+        supabase.from("chat_salas").select("*").eq("id", salaId).single(),
+      ]);
 
       if (sala) {
         setSalaActiva(sala as ChatSala);
         salaIdRef.current = salaId;
-        await cargarMensajes(salaId);
-        await cargarMiembros(salaId);
-        await marcarLeidos(salaId);
+        await Promise.all([cargarMensajes(salaId), cargarMiembros(salaId)]);
+        marcarLeidos(salaId); // fire-and-forget
         setNoLeidos((prev) => ({ ...prev, [salaId]: 0 }));
       }
     } catch (err) {
