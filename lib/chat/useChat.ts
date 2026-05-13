@@ -25,7 +25,12 @@ export function useChat() {
   const channelRef = useRef<any>(null);
   const presenciaChannelRef = useRef<any>(null);
   const salaIdRef = useRef<string | null>(null);
+  const cargarSalasRef = useRef(cargarSalas);
   const instanceId = useRef(Math.random().toString(36).slice(2));
+
+  useEffect(() => {
+    cargarSalasRef.current = cargarSalas;
+  }, [cargarSalas]);
 
   // Cargar salas del usuario
   const cargarSalas = useCallback(async () => {
@@ -616,6 +621,8 @@ export function useChat() {
                   : s
               );
             }
+            // Sala nueva (ej: visitante recién llegado) → refrescar lista
+            setTimeout(() => cargarSalasRef.current(), 300);
             return prev;
           });
         }
