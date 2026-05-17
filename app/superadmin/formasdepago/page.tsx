@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/Toast";
 
 interface Bank { name: string; account_number: string; account_holder: string; cci: string; currency: string; account_type: string; }
 interface Wallet { network: string; address: string; label: string; }
@@ -23,6 +24,7 @@ const ICONOS: Record<string, any> = { helio_card: CreditCard, helio_crypto: Wall
 const COLORES: Record<string, string> = { helio_card: "bg-blue-500/10 border-blue-500/20 text-blue-400", helio_crypto: "bg-purple-500/10 border-purple-500/20 text-purple-400", coins: "bg-amber-500/10 border-amber-500/20 text-amber-400", transfer: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", crypto_manual: "bg-orange-500/10 border-orange-500/20 text-orange-400" };
 
 export default function FormasPagoAdminPage() {
+    const { showToast } = useToast();
     const [formas, setFormas] = useState<FormaPago[]>([]);
     const [loading, setLoading] = useState(true);
     const [guardando, setGuardando] = useState<string | null>(null);
@@ -31,14 +33,21 @@ export default function FormasPagoAdminPage() {
 
     const cargar = async () => {
         setLoading(true);
-        const res = await fetch("/api/admin/formas-pago");
-        const d = await res.json();
-        if (d.success) {
-            setFormas(d.formas || []);
-            const t = (d.formas || []).find((f: FormaPago) => f.slug === 'transfer' && f.activo);
-            if (t) setExpanded(t.id);
+        try {
+            const res = await fetch("/api/admin/formas-pago");
+            const d = await res.json();
+            if (d.success && d.formas) {
+                setFormas(d.formas || []);
+                const t = (d.formas || []).find((f: FormaPago) => f.slug === 'transfer' && f.activo);
+                if (t) setExpanded(t.id);
+            } else if (d.error) {
+                showToast(`Error: ${d.error}`, "error");
+            }
+        } catch {
+            showToast("Error al cargar formas de pago", "error");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     useEffect(() => { cargar(); }, []);
@@ -47,12 +56,14 @@ export default function FormasPagoAdminPage() {
         setGuardando(forma.id);
         await fetch("/api/admin/formas-pago", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: forma.id, activo: !forma.activo }) });
         setFormas(prev => prev.map(f => f.id === forma.id ? { ...f, activo: !f.activo } : f));
+        showToast(`${forma.nombre} ${forma.activo ? 'desactivado' : 'activado'}`, "success");
         setGuardando(null);
     };
 
     const guardarConfig = async (forma: FormaPago) => {
         setGuardando(forma.id);
         await fetch("/api/admin/formas-pago", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: forma.id, config: forma.config }) });
+        showToast(`Configuración de ${forma.nombre} guardada`, "success");
         setGuardando(null);
     };
 
@@ -222,7 +233,7 @@ export default function FormasPagoAdminPage() {
 
                                             {forma.slug === 'crypto_manual' && (
                                                 <div className="ml-16 space-y-3">
-                                                    {wallets.map((w: Wallet, idx: number) => (
+                                                    {wallets.length > 0 && wallets.map((w: Wallet, idx: number) => (
                                                         <div key={idx} className="flex items-center gap-3 bg-black/30 border border-white/5 rounded-xl p-3">
                                                             <div className="w-32 flex-shrink-0">
                                                                 <Input value={w.label} onChange={e => updateWallet(forma.id, idx, 'label', e.target.value)} placeholder="Ej: USDT TRC20" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
@@ -230,6 +241,12 @@ export default function FormasPagoAdminPage() {
                                                             <Input value={w.address} onChange={e => updateWallet(forma.id, idx, 'address', e.target.value)} placeholder="Dirección de wallet" className="bg-white/5 border-white/10 text-white text-[10px] flex-1 h-8 font-mono" />
                                                         </div>
                                                     ))}
+                                                    <Button size="sm" variant="outline" onClick={() => {
+                                                        const wallets = [...getWallets(formas.find(f => f.id === forma.id)!), { label: "", address: "", network: "" }];
+                                                        updateForma(forma.id, { wallets });
+                                                    }} className="text-xs border-white/10 text-gray-400 hover:text-white w-full">
+                                                        <Plus className="w-3 h-3 mr-1" /> {wallets.length === 0 ? 'Agregar Wallet' : 'Agregar otra Wallet'}
+                                                    </Button>
                                                 </div>
                                             )}
 
