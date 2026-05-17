@@ -389,6 +389,13 @@ export default function AdminUsers() {
                                                         }
                                                         showToast('Usuario creado exitosamente');
                                                         fetchUsers();
+                                                        setTimeout(() => {
+                                                            setIsModalOpen(false);
+                                                            setCreatedPassword(null);
+                                                            setNewUserName('');
+                                                            setNewUserEmail('');
+                                                            setNewUserPassword('');
+                                                        }, 2000);
                                                     } else {
                                                         showToast(data.error || 'Error al crear usuario', 'error');
                                                     }

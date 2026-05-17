@@ -62,7 +62,7 @@ export function PermissionSelector({ role, permisosAdicionales, onChange, readOn
   const [activeTab, setActiveTab] = useState<'defaults' | 'overrides'>('overrides')
 
   const defaults = ROLE_DEFAULTS[role] || ROLE_DEFAULTS.usuario
-  const isWildcard = defaults.includes('*') || role === 'superadmin' || role === 'admin'
+  const isWildcard = defaults.includes('*')
   const extras = permisosAdicionales?.extra || []
   const denieds = permisosAdicionales?.denied || []
 
@@ -106,69 +106,19 @@ export function PermissionSelector({ role, permisosAdicionales, onChange, readOn
     return defaults.includes(perm) || extras.includes(perm)
   }
 
-  if (isWildcard) {
-    return (
-      <div className="p-4 bg-zinc-950 border border-white/5 rounded-2xl">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-xl bg-blis-red/10 border border-blis-red/30">
-            <Shield className="w-5 h-5 text-blis-red" />
-          </div>
-          <div>
-            <p className="text-white font-bold text-sm">Acceso Total</p>
-            <p className="text-gray-500 text-xs">Este rol tiene acceso a todas las secciones</p>
-          </div>
-        </div>
-        {!readOnly && denieds.length > 0 && (
-          <>
-            <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mb-2">Permisos denegados explícitamente</p>
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              {denieds.map(d => (
-                <span key={d} className="text-[9px] px-2 py-0.5 bg-red-500/10 border border-red-500/30 rounded-full text-red-400">
-                  {PERMISSIONS[d as Permission] || d}
-                </span>
-              ))}
-            </div>
-          </>
-        )}
-        {!readOnly && (
-          <>
-            <p className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mb-3">Denegar permisos específicos</p>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {Object.entries(PERMISSION_CATEGORIES).map(([cat, perms]) => (
-                <div key={cat}>
-                  <button onClick={() => toggleCategory(cat)} className="flex items-center gap-2 w-full text-left py-1">
-                    {expandedCats.has(cat) ? <ChevronDown className="w-3 h-3 text-gray-600" /> : <ChevronRight className="w-3 h-3 text-gray-600" />}
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{cat}</span>
-                    {perms.some(p => denieds.includes(p)) && <span className="w-1.5 h-1.5 rounded-full bg-red-400" />}
-                  </button>
-                  <AnimatePresence>
-                    {expandedCats.has(cat) && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                        <div className="flex flex-wrap gap-1.5 ml-5 mb-1">
-                          {perms.map(perm => (
-                            <button
-                              key={perm}
-                              onClick={() => toggleDenied(perm)}
-                              className={`text-[9px] px-2 py-0.5 rounded-full border transition-all ${denieds.includes(perm) ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-white/5 border-white/10 text-gray-500 hover:border-white/20 hover:text-gray-300'}`}
-                            >
-                              {PERMISSIONS[perm]}
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
+      {isWildcard && (
+        <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3">
+          <div className="p-1.5 rounded-lg bg-emerald-500/20">
+            <Shield className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div>
+            <p className="text-white font-bold text-xs">Acceso Total</p>
+            <p className="text-gray-500 text-[10px]">Tiene todos los permisos — puedes denegar secciones específicas abajo</p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center gap-3 mb-2">
         <div className="p-2 rounded-xl bg-white/5 border border-white/10">
           <Shield className="w-5 h-5 text-gray-400" />
