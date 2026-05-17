@@ -346,6 +346,81 @@ export default function EbooksPage() {
                     </div>
                 </div>
 
+                {!loading && !searchQuery && !selectedCategory && !selectedAuthor && !onlySaved && libros.length > 0 && (
+                    <>
+                        {/* ── Sección: Destacados ── */}
+                        <div className="mb-10">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-lg font-black uppercase tracking-tighter">✨ Destacados</h2>
+                            </div>
+                            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
+                                {libros.filter(b => b.isFeatured).slice(0, 8).map((book) => (
+                                    <motion.div key={book.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-shrink-0 w-40 group cursor-pointer"
+                                        onClick={() => { setSelectedCategory(book.category); setVisibleLimit(24); }}>
+                                        <div className="relative aspect-[3/4.2] rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 group-hover:border-blis-red/40 transition-all duration-300 mb-2">
+                                            {book.imgSrc ? (
+                                                <Image src={book.imgSrc} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="160px" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-zinc-800"><BookOpen className="w-8 h-8 text-gray-600" /></div>
+                                            )}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                                            <div className="absolute bottom-0 left-0 right-0 p-3">
+                                                <span className="text-[9px] font-black text-white/90 uppercase tracking-wider line-clamp-2">{book.title}</span>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                                {libros.filter(b => b.isFeatured).length === 0 && (
+                                    <p className="text-gray-500 text-sm py-4">Próximamente...</p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* ── Sección: Categorías ── */}
+                        <div className="mb-10">
+                            <h2 className="text-lg font-black uppercase tracking-tighter mb-4">📂 Categorías</h2>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                                {categories.slice(0, 12).map((cat) => {
+                                    const count = libros.filter(b => b.category === cat).length;
+                                    return (
+                                        <button key={cat}
+                                            onClick={() => { setSelectedCategory(cat); setVisibleLimit(24); }}
+                                            className="group relative p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-blis-red/30 hover:bg-blis-red/5 transition-all duration-300 text-left"
+                                        >
+                                            <div className="w-10 h-10 rounded-xl bg-blis-red/10 flex items-center justify-center mb-3 group-hover:bg-blis-red/20 transition-colors">
+                                                <BookOpen className="w-5 h-5 text-blis-red" />
+                                            </div>
+                                            <h3 className="text-xs font-bold text-white group-hover:text-blis-red transition-colors truncate">{cat}</h3>
+                                            <span className="text-[10px] text-gray-500 mt-1">{count} libros</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* ── Sección: Autores ── */}
+                        <div className="mb-10 pb-6 border-b border-white/5">
+                            <h2 className="text-lg font-black uppercase tracking-tighter mb-4">✍️ Autores</h2>
+                            <div className="flex flex-wrap gap-2">
+                                {authors.slice(0, 16).map((author) => {
+                                    const count = libros.filter(b => b.author === author).length;
+                                    return (
+                                        <button key={author}
+                                            onClick={() => { setSelectedAuthor(author); setVisibleLimit(24); }}
+                                            className="px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/5 hover:border-blis-red/30 hover:bg-blis-red/5 text-[10px] font-medium text-gray-400 hover:text-white transition-all"
+                                        >
+                                            {author} <span className="text-gray-600 ml-1">({count})</span>
+                                        </button>
+                                    );
+                                })}
+                                {authors.length > 16 && (
+                                    <span className="px-3 py-1.5 text-[10px] text-gray-600">+{authors.length - 16} más</span>
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+
                 {/* Main Content Layout */}
                 {/* Horizontal Filter Pills */}
                 <div className="flex flex-wrap items-center gap-2 mb-8 pb-6 border-b border-white/5">
