@@ -309,9 +309,9 @@ export default function ProfilePage() {
         }
     }, [user?.id, fetchBalance, fetchTransactions]);
 
-    const [name, setName] = useState(user?.name || "Kevin Valdez");
-    const [email, setEmail] = useState(user?.email || "kevin.inv@bliscorp.com");
-    const [phone, setPhone] = useState(user?.phone || "991234567");
+    const [name, setName] = useState(user?.nombre || user?.name || "");
+    const [email, setEmail] = useState(user?.email || "");
+    const [phone, setPhone] = useState(user?.telefono || user?.phone || "");
     const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
     const [isCountryOpen, setIsCountryOpen] = useState(false);
     const [countrySearch, setCountrySearch] = useState("");
@@ -436,10 +436,16 @@ export default function ProfilePage() {
                             <CheckCircle2 className="w-3 h-3" /> Verificado
                         </span>
                     </div>
-                    <p className="text-gray-400 font-medium text-xs sm:text-sm leading-relaxed max-w-xl">Inversor Residencial Senior & Miembro Fundador de Blis Academy.</p>
+                    <p className="text-gray-400 font-medium text-xs sm:text-sm leading-relaxed max-w-xl">
+                        {user?.bio || `${user?.rol || 'Miembro'} de Blis Corp`}
+                    </p>
                     <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-4 mt-2">
-                        <div className="bg-white/5 border border-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-500">ID: BLIS-7742</div>
-                        <div className="bg-white/5 border border-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-500">Desde: Enero 2026</div>
+                        <div className="bg-white/5 border border-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-500">
+                            ID: {user?.id?.slice(0, 8)?.toUpperCase() || 'N/A'}
+                        </div>
+                        <div className="bg-white/5 border border-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-500">
+                            {user?.role || user?.rol ? (user.role || user.rol).charAt(0).toUpperCase() + (user.role || user.rol).slice(1) : 'Miembro'}
+                        </div>
                     </div>
                 </div>
             </div>

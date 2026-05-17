@@ -41,10 +41,10 @@ export default function UserDashboard() {
     ];
 
     const displayStats = stats ? [
-        { title: "Cursos Completados", value: `${stats.cursosCompletados}/${stats.cursosInscritos || 8}`, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
+        { title: "Cursos Completados", value: `${stats.cursosCompletados}/${stats.cursosInscritos}`, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
         { title: "Documentos Listos", value: stats.documentosDescargados.toString(), icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10" },
         { title: "Tiempo de Estudio", value: `${stats.tiempoEstudio}h`, icon: Clock, color: "text-purple-500", bg: "bg-purple-500/10" },
-        { title: "Plusvalía Estimada", value: "+18%", icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+        { title: "Compras Realizadas", value: stats.documentosDescargados.toString(), icon: Package, color: "text-emerald-500", bg: "bg-emerald-500/10" },
         { title: "BLISCOINS", value: stats.blisCoins.toLocaleString(), icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
         { title: "Nivel de Inversor", value: stats.nivelInversor, icon: Zap, color: "text-blis-red", bg: "bg-blis-red/10" },
     ] : staticStats;
