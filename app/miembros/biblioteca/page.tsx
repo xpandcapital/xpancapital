@@ -39,21 +39,34 @@ function useLibros() {
     const [libros, setLibros] = useState<EBook[]>([]);
     const [loading, setLoading] = useState(true);
     useEffect(() => {
-        fetch("/api/biblioteca/libros?limit=500")
-            .then(r => r.json())
-            .then(d => {
-                if (d.libros) setLibros(d.libros.map((l: any) => ({
-                    id: l.id,
-                    title: l.titulo,
-                    author: l.autor,
-                    category: l.categoria,
-                    downloadLink: l.download_link || "",
-                    imgSrc: l.portada_url || "",
-                    isFeatured: l.is_featured,
-                })));
+        async function cargar() {
+            try {
+                const all: EBook[] = [];
+                let page = 1;
+                while (true) {
+                    const res = await fetch(`/api/biblioteca/libros?page=${page}&limit=100`);
+                    const d = await res.json();
+                    if (!d.libros || d.libros.length === 0) break;
+                    all.push(...d.libros.map((l: any) => ({
+                        id: l.id,
+                        title: l.titulo,
+                        author: l.autor,
+                        category: l.categoria,
+                        downloadLink: l.download_link || "",
+                        imgSrc: l.portada_url || "",
+                        isFeatured: l.is_featured,
+                    })));
+                    if (d.libros.length < 100) break;
+                    page++;
+                }
+                setLibros(all);
+            } catch (e) {
+                console.error("Error cargando libros:", e);
+            } finally {
                 setLoading(false);
-            })
-            .catch(() => setLoading(false));
+            }
+        }
+        cargar();
     }, []);
     return { libros, loading };
 }
@@ -245,10 +258,8 @@ export default function EbooksPage() {
     const [onlySaved, setOnlySaved] = useState(false);
     const [savedIds, setSavedIds] = useState<string[]>([]);
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
-    const [visibleLimit, setVisibleLimit] = useState(20);
+    const [visibleLimit, setVisibleLimit] = useState(24);
     const { libros, loading } = useLibros();
-
-    const allBooks = libros.length > 0 ? libros : EXTRACTED_BOOKS;
 
     // Persistence for Saved Books
     useEffect(() => {
@@ -270,7 +281,7 @@ export default function EbooksPage() {
 
     // Filter Logic
     const filteredBooks = useMemo(() => {
-        const filtered = allBooks.filter(book => {
+        const filtered = libros.filter(book => {
             const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 book.category.toLowerCase().includes(searchQuery.toLowerCase());
@@ -284,8 +295,8 @@ export default function EbooksPage() {
 
     const visibleBooks = useMemo(() => filteredBooks.slice(0, visibleLimit), [filteredBooks, visibleLimit]);
 
-    const categories = useMemo(() => Array.from(new Set(allBooks.map(b => b.category))), [allBooks]);
-    const authors = useMemo(() => Array.from(new Set(allBooks.map(b => b.author))), [allBooks]);
+    const categories = useMemo(() => Array.from(new Set(libros.map(b => b.category))).sort(), [libros]);
+    const authors = useMemo(() => Array.from(new Set(libros.map(b => b.author))).sort(), [libros]);
 
     return (
         <div className="min-h-screen bg-transparent text-white px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
@@ -298,7 +309,7 @@ export default function EbooksPage() {
                             BIBLIOTECA <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/20">DIGITAL</span>
                         </h1>
                         <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl leading-tight">
-                            Explora nuestra colección de más de 400 libros y recursos especializados.
+                            {loading ? "Cargando biblioteca..." : `Explora nuestra colección de ${libros.length} libros y recursos especializados.`}
                         </p>
                     </div>
 
@@ -351,7 +362,19 @@ export default function EbooksPage() {
                     {/* Results Grid */}
                     <div className="flex-1 min-w-0">
                         <AnimatePresence mode="wait">
-                            {visibleBooks.length > 0 ? (
+                            {loading ? (
+                                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12">
+                                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-x-4 gap-y-10">
+                                        {Array.from({ length: 12 }).map((_, i) => (
+                                            <div key={i} className="animate-pulse">
+                                                <div className="aspect-[3/4.2] rounded-2xl bg-zinc-800/50 mb-3" />
+                                                <div className="h-3 bg-zinc-800/50 rounded w-3/4 mb-2" />
+                                                <div className="h-2 bg-zinc-800/30 rounded w-1/2" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            ) : visibleBooks.length > 0 ? (
                                 <motion.div
                                     key="books-grid"
                                     initial={{ opacity: 0 }}

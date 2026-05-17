@@ -92,7 +92,8 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/api/postulantes/upload') ||
     pathname.startsWith('/api/postulantes/puestos') ||
     pathname.startsWith('/api/cms/landing') ||
-    pathname.startsWith('/api/chat')
+    pathname.startsWith('/api/chat') ||
+    pathname.startsWith('/api/biblioteca')
   )
 
   // Early return: rutas públicas sin cookies de sesión → omitir getUser()
