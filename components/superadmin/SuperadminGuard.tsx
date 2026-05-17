@@ -12,6 +12,7 @@ const PATH_TO_SECTION: Record<string, string> = {
   '/superadmin/asesores': 'asesores:ver',
   '/superadmin/pos': 'pos:ver',
   '/superadmin/ventas': 'ventas:ver',
+  '/superadmin/formasdepago': 'formasdepago:ver',
   '/superadmin/productos': 'productos:ver',
   '/superadmin/clientes': 'clientes:ver',
   '/superadmin/cursos': 'cursos:ver',

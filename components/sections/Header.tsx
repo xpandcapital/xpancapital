@@ -272,33 +272,33 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                     </button>
 
                                     {/* Cart Mini-Menu */}
-                                    <div className="absolute top-full right-0 pt-4 w-64 scale-95 opacity-0 pointer-events-none group-hover/cart:scale-100 group-hover/cart:opacity-100 group-hover/cart:pointer-events-auto transition-all duration-300 origin-top-right z-50">
+                                    <div className="absolute top-full right-0 pt-4 w-80 scale-95 opacity-0 pointer-events-none group-hover/cart:scale-100 group-hover/cart:opacity-100 group-hover/cart:pointer-events-auto transition-all duration-300 origin-top-right z-50">
                                         <div className="bg-[#0A0D11]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
                                             <div className="p-4 border-b border-white/5">
-                                                <h3 className="text-[10px] font-black uppercase tracking-widest text-gray-500">Carrito de Compras</h3>
+                                                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Carrito ({cart.length})</h3>
                                             </div>
-                                            <div className="max-h-60 overflow-y-auto p-2">
+                                            <div className="max-h-72 overflow-y-auto p-3">
                                                 {cart.length > 0 ? cart.map((item, idx) => (
-                                                    <div key={idx} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-colors">
-                                                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                                                    <div key={idx} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors">
+                                                        <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-white/5">
                                                             <img src={item.image} className="w-full h-full object-cover" alt="" />
                                                         </div>
                                                         <div className="flex-1 min-w-0">
-                                                            <p className="text-[10px] font-bold text-white truncate">{stripHtml(item.title)}</p>
-                                                            <p className="text-[9px] text-blis-red font-black font-mono">${item.price}</p>
+                                                            <p className="text-xs font-bold text-white truncate">{stripHtml(item.title)}</p>
+                                                            <p className="text-sm font-black text-blis-red font-mono">${item.price}</p>
                                                         </div>
                                                     </div>
                                                 )) : (
                                                     <div className="py-8 text-center">
-                                                        <ShoppingCart className="w-8 h-8 text-white/5 mx-auto mb-2" />
-                                                        <p className="text-[10px] text-gray-600 uppercase font-bold">Carrito vacío</p>
+                                                        <ShoppingCart className="w-10 h-10 text-white/5 mx-auto mb-2" />
+                                                        <p className="text-xs text-gray-600 uppercase font-bold">Carrito vacío</p>
                                                     </div>
                                                 )}
                                             </div>
                                             {cart.length > 0 && (
                                                 <div className="p-3 bg-black/50 border-t border-white/5">
                                                     <button onClick={() => { openCart(); }}
-                                                        className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest transition-all">
+                                                        className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black uppercase tracking-widest transition-all">
                                                         Ir al Carrito
                                                     </button>
                                                 </div>

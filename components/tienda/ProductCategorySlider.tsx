@@ -139,7 +139,7 @@ export function ProductCategorySlider(props: CategorySliderProps) {
 // Factorizamos la lógica de Tarjeta que antes vivía en el Grid (ProductCard)
 function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onTriggerAuth: () => void }) {
     const { user } = useAuth();
-    const { favorites, toggleFavorite, addToCart, blisCoins, purchasedProducts } = useShop();
+    const { favorites, toggleFavorite, addToCart, openCart, blisCoins, purchasedProducts } = useShop();
     const { showToast } = useToast();
     const router = useRouter();
     const isLiked = favorites.some(fav => fav.id === product.id);
@@ -258,6 +258,7 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                                         price: product.price
                                     })
                                     showToast(`"${product.title}" agregado al carrito`, "success");
+                                    openCart();
                                 }}
                                 disabled={isPurchased}
                                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-90 group/cart ${isPurchased ? 'bg-gray-500/20 text-gray-500 cursor-not-allowed' : 'bg-white text-black hover:bg-blis-red hover:text-white'}`}

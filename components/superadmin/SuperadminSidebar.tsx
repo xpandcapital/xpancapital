@@ -67,6 +67,7 @@ const ALL_SECTIONS: Section[] = [
                 subItems: [
                     { icon: ShoppingCart, label: "Terminal POS", href: "/superadmin/pos", permission: "pos:ver" },
                     { icon: DollarSign, label: "Historial de Ventas", href: "/superadmin/ventas", permission: "ventas:ver" },
+                    { icon: Settings, label: "Formas de Pago", href: "/superadmin/formasdepago", permission: "formasdepago:ver" },
                     { icon: ShoppingBag, label: "Productos", href: "/superadmin/productos", permission: "productos:ver" },
                     { icon: Package, label: "Entregas Digitales", href: "/superadmin/productos/entregas", permission: "productos:ver" },
                     { icon: Coins, label: "Clientes", href: "/superadmin/clientes", permission: "clientes:ver" },
