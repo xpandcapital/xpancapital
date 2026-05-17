@@ -257,6 +257,7 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                                         image: product.image,
                                         price: product.price
                                     })
+                                    showToast(`"${product.title}" agregado al carrito`, "success");
                                 }}
                                 disabled={isPurchased}
                                 className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-90 group/cart ${isPurchased ? 'bg-gray-500/20 text-gray-500 cursor-not-allowed' : 'bg-white text-black hover:bg-blis-red hover:text-white'}`}

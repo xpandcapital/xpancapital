@@ -41,7 +41,7 @@ export function CartSidebar() {
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed top-0 right-0 h-full w-full max-w-md bg-zinc-950 border-l border-white/5 z-[101] flex flex-col"
+                        className="fixed top-0 right-0 h-full w-full max-w-lg bg-zinc-950 border-l border-white/5 z-[101] flex flex-col shadow-2xl"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 border-b border-white/5">
@@ -91,7 +91,7 @@ export function CartSidebar() {
                                             className="flex gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5"
                                         >
                                             {/* Image */}
-                                            <div className="w-20 h-20 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 bg-zinc-900">
+                                            <div className="w-24 h-24 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 bg-zinc-900">
                                                 <img
                                                     src={item.image}
                                                     alt={item.title}
@@ -101,14 +101,14 @@ export function CartSidebar() {
 
                                             {/* Info */}
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="text-sm font-bold text-white line-clamp-2 mb-1">
+                                                <h4 className="text-base font-bold text-white line-clamp-2 mb-1">
                                                     {item.title}
                                                 </h4>
-                                                <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-2">
+                                                <p className="text-[11px] text-gray-500 uppercase tracking-widest mb-2">
                                                     {item.category}
                                                 </p>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-lg font-black text-white">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-xl font-black text-white">
                                                         ${(item.price || item.precio_usd || 0).toFixed(2)}
                                                     </span>
                                                     {(item.precio_coins || item.price) && (

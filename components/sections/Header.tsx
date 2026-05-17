@@ -27,7 +27,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
     const { user, logout, loading } = useAuth()
-    const { cart, favorites, blisCoins } = useShop()
+    const { cart, favorites, blisCoins, openCart } = useShop()
     const { templateData, siteConfig } = useLandingCMS()
     const isDashboard = pathname?.startsWith('/superadmin') || pathname?.startsWith('/miembros')
 
@@ -297,8 +297,9 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                             </div>
                                             {cart.length > 0 && (
                                                 <div className="p-3 bg-black/50 border-t border-white/5">
-                                                    <button className="w-full py-2.5 rounded-xl bg-blis-red text-white text-[9px] font-black uppercase tracking-widest hover:bg-red-700 transition-all">
-                                                        Finalizar Compra
+                                                    <button onClick={() => { openCart(); }}
+                                                        className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest transition-all">
+                                                        Ir al Carrito
                                                     </button>
                                                 </div>
                                             )}
