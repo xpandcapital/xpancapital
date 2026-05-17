@@ -36,6 +36,12 @@ export default function FormasPagoAdminPage() {
     };
 
     useEffect(() => { cargar(); }, []);
+    useEffect(() => {
+        if (formas.length > 0 && !expanded) {
+            const first = formas.find(f => ['helio_card', 'helio_crypto', 'transfer', 'crypto_manual', 'coins'].includes(f.slug));
+            if (first) setExpanded(first.id);
+        }
+    }, [formas]);
 
     const toggleActivo = async (forma: FormaPago) => {
         setGuardando(forma.id);
@@ -113,7 +119,7 @@ export default function FormasPagoAdminPage() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            {(banks.length > 0 || wallets.length > 0 || forma.slug === 'coins') && (
+                                            {(banks.length > 0 || wallets.length > 0 || ['coins', 'helio_card', 'helio_crypto', 'transfer', 'crypto_manual'].includes(forma.slug)) && (
                                                 <Button variant="ghost" size="sm" onClick={() => setExpanded(isExpanded ? null : forma.id)} className="text-xs text-gray-500">
                                                     <Settings className="w-4 h-4" /> {isExpanded ? 'Ocultar' : 'Configurar'}
                                                 </Button>
