@@ -8,7 +8,7 @@ import {
     Search,
     Filter,
     X,
-    ChevronRight,
+    ChevronRight, ChevronLeft, User, Star,
     Bookmark,
     AlertCircle,
     ArrowUpRight,
@@ -263,6 +263,7 @@ export default function EbooksPage() {
     const [savedIds, setSavedIds] = useState<string[]>([]);
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
     const [visibleLimit, setVisibleLimit] = useState(24);
+    const [slideIndex, setSlideIndex] = useState(0);
     const { libros, loading, error } = useLibros();
 
     // Persistence for Saved Books
@@ -270,6 +271,16 @@ export default function EbooksPage() {
         const saved = localStorage.getItem("blis_saved_ebooks");
         if (saved) setSavedIds(JSON.parse(saved));
     }, []);
+
+    // Auto-rotación del carrusel
+    useEffect(() => {
+        const featured = libros.filter(b => b.isFeatured);
+        if (featured.length < 2) return;
+        const timer = setInterval(() => {
+            setSlideIndex(prev => (prev + 1) % featured.length);
+        }, 5000);
+        return () => clearInterval(timer);
+    }, [libros]);
 
     const toggleSave = (id: string) => {
         const newSaved = savedIds.includes(id)
@@ -301,6 +312,16 @@ export default function EbooksPage() {
 
     const categories = useMemo(() => Array.from(new Set(libros.map(b => b.category))).sort(), [libros]);
     const authors = useMemo(() => Array.from(new Set(libros.map(b => b.author))).sort(), [libros]);
+
+    const authorCovers = useMemo(() => {
+        const map: Record<string, string> = {};
+        for (const b of libros) {
+            if (!map[b.author] && b.imgSrc) map[b.author] = b.imgSrc;
+        }
+        return map;
+    }, [libros]);
+
+    const featuredBooks = useMemo(() => libros.filter(b => b.isFeatured).slice(0, 10), [libros]);
 
     return (
 <div className="min-h-screen bg-transparent text-white px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20 relative">
@@ -349,50 +370,133 @@ export default function EbooksPage() {
                 {!loading && !searchQuery && !selectedCategory && !selectedAuthor && !onlySaved && libros.length > 0 && (
                     <>
                         {/* ── Sección: Destacados ── */}
-                        <div className="mb-10">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-lg font-black uppercase tracking-tighter">✨ Destacados</h2>
-                            </div>
-                            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4">
-                                {libros.filter(b => b.isFeatured).slice(0, 8).map((book) => (
-                                    <motion.div key={book.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex-shrink-0 w-40 group cursor-pointer"
-                                        onClick={() => { setSelectedCategory(book.category); setVisibleLimit(24); }}>
-                                        <div className="relative aspect-[3/4.2] rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 group-hover:border-blis-red/40 transition-all duration-300 mb-2">
-                                            {book.imgSrc ? (
-                                                <Image src={book.imgSrc} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="160px" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-zinc-800"><BookOpen className="w-8 h-8 text-gray-600" /></div>
-                                            )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                                            <div className="absolute bottom-0 left-0 right-0 p-3">
-                                                <span className="text-[9px] font-black text-white/90 uppercase tracking-wider line-clamp-2">{book.title}</span>
+                        {featuredBooks.length > 0 && (
+                            <div className="mb-12 relative group/carousel">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl font-black uppercase tracking-tighter flex items-center gap-2">
+                                        <span className="w-2 h-2 bg-blis-red rounded-full animate-pulse" />
+                                        Destacados
+                                    </h2>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => setSlideIndex(Math.max(0, slideIndex - 1))}
+                                            className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-30"
+                                            disabled={slideIndex === 0}>
+                                            <ChevronLeft className="w-4 h-4" />
+                                        </button>
+                                        <button onClick={() => setSlideIndex(Math.min(featuredBooks.length - 1, slideIndex + 1))}
+                                            className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors disabled:opacity-30"
+                                            disabled={slideIndex >= featuredBooks.length - 1}>
+                                            <ChevronRight className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="overflow-hidden rounded-3xl">
+                                    <motion.div className="flex gap-0"
+                                        animate={{ x: `-${slideIndex * 100}%` }}
+                                        transition={{ type: "spring", stiffness: 300, damping: 30 }}>
+                                        {featuredBooks.map((book) => (
+                                            <div key={book.id} className="w-full flex-shrink-0 cursor-pointer"
+                                                onClick={() => { setSelectedCategory(book.category); setVisibleLimit(24); }}>
+                                                <div className="relative h-48 sm:h-64 md:h-80 rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 group">
+                                                    {book.imgSrc ? (
+                                                        <Image src={book.imgSrc} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="100vw" priority />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blis-red/5 to-amber-500/5">
+                                                            <BookOpen className="w-16 h-16 text-gray-700" />
+                                                        </div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent" />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                                                    <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <span className="px-2 py-0.5 bg-blis-red/20 border border-blis-red/30 rounded-full text-blis-red text-[9px] font-bold uppercase">
+                                                                {book.category}
+                                                            </span>
+                                                            <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                                                        </div>
+                                                        <h3 className="text-lg sm:text-2xl font-black uppercase tracking-tighter text-white mb-1 line-clamp-2">{book.title}</h3>
+                                                        <p className="text-xs text-gray-400 flex items-center gap-1">
+                                                            <User className="w-3 h-3" /> {book.author}
+                                                        </p>
+                                                    </div>
+                                                    {/* Slide dots */}
+                                                    <div className="absolute bottom-6 right-6 flex gap-1.5">
+                                                        {featuredBooks.map((_, i) => (
+                                                            <button key={i} onClick={(e) => { e.stopPropagation(); setSlideIndex(i); }}
+                                                                className={`w-2 h-2 rounded-full transition-all ${i === slideIndex ? 'bg-blis-red w-6' : 'bg-white/30 hover:bg-white/60'}`} />
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        ))}
                                     </motion.div>
-                                ))}
-                                {libros.filter(b => b.isFeatured).length === 0 && (
-                                    <p className="text-gray-500 text-sm py-4">Próximamente...</p>
-                                )}
+                                </div>
                             </div>
-                        </div>
+                        )}
+
+                        {featuredBooks.length === 0 && (
+                            <div className="mb-10">
+                                <h2 className="text-xl font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" /> Recién Agregados
+                                </h2>
+                                <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 snap-x">
+                                    {libros.slice(0, 10).map((book, i) => (
+                                        <motion.div key={book.id}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: i * 0.05 }}
+                                            className="flex-shrink-0 w-36 sm:w-44 snap-start group cursor-pointer"
+                                            onClick={() => { setSelectedCategory(book.category); setVisibleLimit(24); }}>
+                                            <div className="relative aspect-[3/4.2] rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 group-hover:border-blis-red/40 transition-all duration-300 mb-2 shadow-lg">
+                                                {book.imgSrc ? (
+                                                    <Image src={book.imgSrc} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="176px" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
+                                                        <BookOpen className="w-8 h-8 text-gray-600" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                <div className="absolute top-2 right-2 z-10">
+                                                    <div className="w-8 h-8 rounded-full bg-blis-red/80 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <ArrowUpRight className="w-4 h-4 text-white" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h4 className="text-xs font-bold text-white truncate group-hover:text-blis-red transition-colors">{book.title}</h4>
+                                            <p className="text-[10px] text-gray-500 truncate">{book.author}</p>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* ── Sección: Categorías ── */}
                         <div className="mb-10">
-                            <h2 className="text-lg font-black uppercase tracking-tighter mb-4">📂 Categorías</h2>
+                            <h2 className="text-xl font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 bg-amber-400 rounded-full" /> Categorías
+                            </h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-                                {categories.slice(0, 12).map((cat) => {
+                                {categories.slice(0, 12).map((cat, i) => {
                                     const count = libros.filter(b => b.category === cat).length;
+                                    const gradientColors = [
+                                        "from-blis-red/5 to-blis-red/10", "from-amber-500/5 to-amber-500/10",
+                                        "from-emerald-500/5 to-emerald-500/10", "from-blue-500/5 to-blue-500/10",
+                                        "from-purple-500/5 to-purple-500/10", "from-rose-500/5 to-rose-500/10",
+                                    ];
                                     return (
-                                        <button key={cat}
+                                        <motion.button key={cat}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
                                             onClick={() => { setSelectedCategory(cat); setVisibleLimit(24); }}
-                                            className="group relative p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-blis-red/30 hover:bg-blis-red/5 transition-all duration-300 text-left"
+                                            className={`group relative p-5 rounded-2xl bg-gradient-to-br ${gradientColors[i % gradientColors.length]} border border-white/5 hover:border-white/20 transition-all duration-300 text-left overflow-hidden`}
                                         >
-                                            <div className="w-10 h-10 rounded-xl bg-blis-red/10 flex items-center justify-center mb-3 group-hover:bg-blis-red/20 transition-colors">
-                                                <BookOpen className="w-5 h-5 text-blis-red" />
+                                            <div className="absolute top-0 right-0 w-20 h-20 rounded-full bg-white/[0.02] -mr-10 -mt-10 group-hover:bg-white/[0.05] transition-colors" />
+                                            <div className="relative z-10">
+                                                <BookOpen className="w-6 h-6 text-gray-400 group-hover:text-white mb-3 transition-colors" />
+                                                <h3 className="text-xs font-bold text-white group-hover:text-blis-red transition-colors truncate">{cat}</h3>
+                                                <p className="text-[10px] text-gray-500 mt-1">{count} libros</p>
                                             </div>
-                                            <h3 className="text-xs font-bold text-white group-hover:text-blis-red transition-colors truncate">{cat}</h3>
-                                            <span className="text-[10px] text-gray-500 mt-1">{count} libros</span>
-                                        </button>
+                                        </motion.button>
                                     );
                                 })}
                             </div>
@@ -400,22 +504,36 @@ export default function EbooksPage() {
 
                         {/* ── Sección: Autores ── */}
                         <div className="mb-10 pb-6 border-b border-white/5">
-                            <h2 className="text-lg font-black uppercase tracking-tighter mb-4">✍️ Autores</h2>
-                            <div className="flex flex-wrap gap-2">
-                                {authors.slice(0, 16).map((author) => {
+                            <h2 className="text-xl font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
+                                <span className="w-2 h-2 bg-emerald-400 rounded-full" /> Autores Destacados
+                            </h2>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                                {authors.slice(0, 12).map((author) => {
                                     const count = libros.filter(b => b.author === author).length;
+                                    const cover = authorCovers[author];
                                     return (
-                                        <button key={author}
+                                        <motion.button key={author}
+                                            whileHover={{ scale: 1.03 }}
+                                            whileTap={{ scale: 0.97 }}
                                             onClick={() => { setSelectedAuthor(author); setVisibleLimit(24); }}
-                                            className="px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/5 hover:border-blis-red/30 hover:bg-blis-red/5 text-[10px] font-medium text-gray-400 hover:text-white transition-all"
+                                            className="group flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-white/20 hover:bg-white/[0.06] transition-all duration-300"
                                         >
-                                            {author} <span className="text-gray-600 ml-1">({count})</span>
-                                        </button>
+                                            <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-800 border border-white/5 flex-shrink-0 relative">
+                                                {cover ? (
+                                                    <Image src={cover} alt={author} fill className="object-cover" sizes="48px" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blis-red/10 to-amber-500/10">
+                                                        <User className="w-5 h-5 text-gray-500" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="text-left min-w-0">
+                                                <h3 className="text-xs font-bold text-white group-hover:text-blis-red transition-colors truncate">{author}</h3>
+                                                <span className="text-[10px] text-gray-500">{count} libros</span>
+                                            </div>
+                                        </motion.button>
                                     );
                                 })}
-                                {authors.length > 16 && (
-                                    <span className="px-3 py-1.5 text-[10px] text-gray-600">+{authors.length - 16} más</span>
-                                )}
                             </div>
                         </div>
                     </>
