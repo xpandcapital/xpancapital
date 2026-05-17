@@ -5,15 +5,15 @@ import { motion } from "framer-motion";
 import {
     CreditCard, Coins, Building2, ShieldCheck, Loader2,
     ToggleLeft, ToggleRight, Settings, Save, Globe, Wallet,
-    Plus, Trash2, Phone, ChevronDown, ChevronRight, Copy
+    Plus, Trash2, Phone, ChevronDown, ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-interface Bank { name: string; account_number: string; account_holder: string; cci: string; account_type: string; }
+interface Bank { name: string; account_number: string; account_holder: string; cci: string; currency: string; account_type: string; }
 interface Wallet { network: string; address: string; label: string; }
-interface Country { label: string; flag: string; currency: string; banks: Bank[]; }
+interface Country { label: string; flag: string; banks: Bank[]; }
 interface FormaPago {
     id: string; nombre: string; slug: string; descripcion: string;
     activo: boolean; config: Record<string, any>; orden: number;
@@ -21,7 +21,6 @@ interface FormaPago {
 
 const ICONOS: Record<string, any> = { helio_card: CreditCard, helio_crypto: Wallet, coins: Coins, transfer: Building2, crypto_manual: Globe };
 const COLORES: Record<string, string> = { helio_card: "bg-blue-500/10 border-blue-500/20 text-blue-400", helio_crypto: "bg-purple-500/10 border-purple-500/20 text-purple-400", coins: "bg-amber-500/10 border-amber-500/20 text-amber-400", transfer: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", crypto_manual: "bg-orange-500/10 border-orange-500/20 text-orange-400" };
-const MONEDAS: Record<string, string> = { "PEN": "S/", "USD": "$", "EUR": "€", "MXN": "MX$", "COP": "COL$", "ARS": "AR$", "CLP": "CLP$" };
 
 export default function FormasPagoAdminPage() {
     const [formas, setFormas] = useState<FormaPago[]>([]);
@@ -36,7 +35,6 @@ export default function FormasPagoAdminPage() {
         const d = await res.json();
         if (d.success) {
             setFormas(d.formas || []);
-            // Auto-expand transferencia
             const t = (d.formas || []).find((f: FormaPago) => f.slug === 'transfer' && f.activo);
             if (t) setExpanded(t.id);
         }
@@ -58,7 +56,6 @@ export default function FormasPagoAdminPage() {
         setGuardando(null);
     };
 
-    // Helpers para transferencia
     const getCountries = (forma: FormaPago): Record<string, Country> => forma.config?.countries || {};
     const updateForma = (formaId: string, config: Record<string, any>) => {
         setFormas(prev => prev.map(f => f.id === formaId ? { ...f, config: { ...f.config, ...config } } : f));
@@ -67,7 +64,7 @@ export default function FormasPagoAdminPage() {
         const key = prompt("Código del país (ej: peru, usa, mexico):")?.toLowerCase();
         if (!key) return;
         const forma = formas.find(f => f.id === formaId)!;
-        const countries = { ...getCountries(forma), [key]: { label: key.charAt(0).toUpperCase() + key.slice(1), flag: "🏳️", currency: "PEN", banks: [] } };
+        const countries = { ...getCountries(forma), [key]: { label: key.charAt(0).toUpperCase() + key.slice(1), flag: "🏳️", banks: [] } };
         updateForma(formaId, { countries });
         setExpandedPais(prev => ({ ...prev, [`${formaId}-${key}`]: true }));
     };
@@ -84,8 +81,7 @@ export default function FormasPagoAdminPage() {
     };
     const addBank = (formaId: string, countryKey: string) => {
         const countries = { ...getCountries(formas.find(f => f.id === formaId)!) };
-        const currency = countries[countryKey]?.currency || "PEN";
-        countries[countryKey].banks = [...(countries[countryKey].banks || []), { name: "", account_number: "", account_holder: "", cci: "", account_type: "ahorros" }];
+        countries[countryKey].banks = [...(countries[countryKey].banks || []), { name: "", account_number: "", account_holder: "", cci: "", currency: "PEN", account_type: "ahorros" }];
         updateForma(formaId, { countries });
     };
     const removeBank = (formaId: string, countryKey: string, idx: number) => {
@@ -99,7 +95,6 @@ export default function FormasPagoAdminPage() {
         updateForma(formaId, { countries });
     };
 
-    // Helpers para crypto manual
     const getWallets = (forma: FormaPago): Wallet[] => forma.config?.wallets || [];
     const updateWallet = (formaId: string, idx: number, field: string, value: string) => {
         const wallets = [...getWallets(formas.find(f => f.id === formaId)!)];
@@ -107,7 +102,6 @@ export default function FormasPagoAdminPage() {
         updateForma(formaId, { wallets });
     };
 
-    // Helpers genéricos
     const updateSimple = (formaId: string, key: string, value: string) => { updateForma(formaId, { [key]: value }); };
 
     return (
@@ -128,7 +122,6 @@ export default function FormasPagoAdminPage() {
 
                             return (
                                 <div key={forma.id} className={`bg-zinc-900/50 border rounded-2xl p-6 transition-all ${forma.activo ? 'border-white/10' : 'border-white/5 opacity-60'}`}>
-                                    {/* Header */}
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-4">
                                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${colorClass}`}><Icon className="w-6 h-6" /></div>
@@ -147,7 +140,6 @@ export default function FormasPagoAdminPage() {
 
                                     {forma.activo && (
                                         <>
-                                            {/* ── PAÍSES (Transferencia) ── */}
                                             {forma.slug === 'transfer' && (
                                                 <div className="space-y-3 ml-16">
                                                     {countryKeys.length > 0 && (
@@ -162,7 +154,6 @@ export default function FormasPagoAdminPage() {
                                                                                 {paisExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                                                                                 <span className="text-lg">{c.flag || "🏳️"}</span>
                                                                                 <span>{c.label || key}</span>
-                                                                                <span className="text-xs text-gray-500">({MONEDAS[c.currency] || c.currency})</span>
                                                                                 <span className="text-[10px] text-gray-600">{c.banks?.length || 0} bancos</span>
                                                                             </button>
                                                                             <div className="flex items-center gap-2">
@@ -172,30 +163,17 @@ export default function FormasPagoAdminPage() {
 
                                                                         {paisExpanded && (
                                                                             <div className="pt-3 space-y-3 border-t border-white/5">
-                                                                                <div className="grid grid-cols-3 gap-3">
+                                                                                <div className="grid grid-cols-2 gap-3">
                                                                                     <div>
                                                                                         <label className="text-[9px] text-gray-600 uppercase block mb-1">Nombre del País</label>
                                                                                         <Input value={c.label} onChange={e => updateCountryField(forma.id, key, 'label', e.target.value)} className="bg-white/5 border-white/10 text-white text-xs" />
                                                                                     </div>
                                                                                     <div>
-                                                                                        <label className="text-[9px] text-gray-600 uppercase block mb-1">Bandera (emoji)</label>
+                                                                                        <label className="text-[9px] text-gray-600 uppercase block mb-1">Bandera / Símbolo</label>
                                                                                         <Input value={c.flag} onChange={e => updateCountryField(forma.id, key, 'flag', e.target.value)} className="bg-white/5 border-white/10 text-white text-xs" />
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <label className="text-[9px] text-gray-600 uppercase block mb-1">Moneda</label>
-                                                                                        <select value={c.currency} onChange={e => updateCountryField(forma.id, key, 'currency', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-2 text-xs text-white">
-                                                                                            <option value="PEN">PEN (Soles)</option>
-                                                                                            <option value="USD">USD (Dólares)</option>
-                                                                                            <option value="EUR">EUR (Euros)</option>
-                                                                                            <option value="MXN">MXN (Pesos MX)</option>
-                                                                                            <option value="COP">COP (Pesos CO)</option>
-                                                                                            <option value="ARS">ARS (Pesos AR)</option>
-                                                                                            <option value="CLP">CLP (Pesos CL)</option>
-                                                                                        </select>
                                                                                     </div>
                                                                                 </div>
 
-                                                                                {/* Bancos del país */}
                                                                                 <div className="space-y-3 mt-3">
                                                                                     {(c.banks || []).map((bank: Bank, idx: number) => (
                                                                                         <div key={idx} className="bg-black/20 border border-white/5 rounded-lg p-3">
@@ -204,27 +182,22 @@ export default function FormasPagoAdminPage() {
                                                                                                 <button onClick={() => removeBank(forma.id, key, idx)} className="text-red-400 hover:text-red-300"><Trash2 className="w-3.5 h-3.5" /></button>
                                                                                             </div>
                                                                                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                                                                <div>
-                                                                                                    <label className="text-[9px] text-gray-600 block mb-0.5">Banco</label>
-                                                                                                    <Input value={bank.name} onChange={e => updateBankField(forma.id, key, idx, 'name', e.target.value)} placeholder="BCP" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
-                                                                                                </div>
-                                                                                                <div>
-                                                                                                    <label className="text-[9px] text-gray-600 block mb-0.5">N° Cuenta</label>
-                                                                                                    <Input value={bank.account_number} onChange={e => updateBankField(forma.id, key, idx, 'account_number', e.target.value)} placeholder="123-456" className="bg-white/5 border-white/10 text-white text-[10px] h-8 font-mono" />
-                                                                                                </div>
-                                                                                                <div>
-                                                                                                    <label className="text-[9px] text-gray-600 block mb-0.5">Titular</label>
-                                                                                                    <Input value={bank.account_holder} onChange={e => updateBankField(forma.id, key, idx, 'account_holder', e.target.value)} placeholder="BLIS Corp SAC" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
-                                                                                                </div>
-                                                                                                <div>
-                                                                                                    <label className="text-[9px] text-gray-600 block mb-0.5">CCI</label>
-                                                                                                    <Input value={bank.cci} onChange={e => updateBankField(forma.id, key, idx, 'cci', e.target.value)} placeholder="002..." className="bg-white/5 border-white/10 text-white text-[10px] h-8 font-mono" />
-                                                                                                </div>
+                                                                                                <div><label className="text-[9px] text-gray-600 block mb-0.5">Banco</label><Input value={bank.name} onChange={e => updateBankField(forma.id, key, idx, 'name', e.target.value)} placeholder="BCP" className="bg-white/5 border-white/10 text-white text-[10px] h-8" /></div>
+                                                                                                <div><label className="text-[9px] text-gray-600 block mb-0.5">N° Cuenta</label><Input value={bank.account_number} onChange={e => updateBankField(forma.id, key, idx, 'account_number', e.target.value)} placeholder="123-456" className="bg-white/5 border-white/10 text-white text-[10px] h-8 font-mono" /></div>
+                                                                                                <div><label className="text-[9px] text-gray-600 block mb-0.5">Titular</label><Input value={bank.account_holder} onChange={e => updateBankField(forma.id, key, idx, 'account_holder', e.target.value)} placeholder="BLIS Corp SAC" className="bg-white/5 border-white/10 text-white text-[10px] h-8" /></div>
+                                                                                                <div><label className="text-[9px] text-gray-600 block mb-0.5">CCI</label><Input value={bank.cci} onChange={e => updateBankField(forma.id, key, idx, 'cci', e.target.value)} placeholder="002..." className="bg-white/5 border-white/10 text-white text-[10px] h-8 font-mono" /></div>
                                                                                                 <div>
                                                                                                     <label className="text-[9px] text-gray-600 block mb-0.5">Tipo Cuenta</label>
                                                                                                     <select value={bank.account_type} onChange={e => updateBankField(forma.id, key, idx, 'account_type', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-1.5 text-[10px] text-white h-8">
                                                                                                         <option value="ahorros">Ahorros</option>
                                                                                                         <option value="corriente">Corriente</option>
+                                                                                                    </select>
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    <label className="text-[9px] text-gray-600 block mb-0.5">Moneda</label>
+                                                                                                    <select value={bank.currency} onChange={e => updateBankField(forma.id, key, idx, 'currency', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-1.5 text-[10px] text-white h-8">
+                                                                                                        <option value="PEN">S/ Soles</option>
+                                                                                                        <option value="USD">$ Dólares</option>
                                                                                                     </select>
                                                                                                 </div>
                                                                                             </div>
@@ -247,23 +220,19 @@ export default function FormasPagoAdminPage() {
                                                 </div>
                                             )}
 
-                                            {/* ── WALLETS (Crypto Manual) ── */}
                                             {forma.slug === 'crypto_manual' && (
                                                 <div className="ml-16 space-y-3">
                                                     {wallets.map((w: Wallet, idx: number) => (
                                                         <div key={idx} className="flex items-center gap-3 bg-black/30 border border-white/5 rounded-xl p-3">
                                                             <div className="w-32 flex-shrink-0">
-                                                                <Input value={w.label} onChange={e => updateWallet(forma.id, idx, 'label', e.target.value)}
-                                                                    placeholder="Ej: USDT TRC20" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
+                                                                <Input value={w.label} onChange={e => updateWallet(forma.id, idx, 'label', e.target.value)} placeholder="Ej: USDT TRC20" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
                                                             </div>
-                                                            <Input value={w.address} onChange={e => updateWallet(forma.id, idx, 'address', e.target.value)}
-                                                                placeholder="Dirección de wallet" className="bg-white/5 border-white/10 text-white text-[10px] flex-1 h-8 font-mono" />
+                                                            <Input value={w.address} onChange={e => updateWallet(forma.id, idx, 'address', e.target.value)} placeholder="Dirección de wallet" className="bg-white/5 border-white/10 text-white text-[10px] flex-1 h-8 font-mono" />
                                                         </div>
                                                     ))}
                                                 </div>
                                             )}
 
-                                            {/* ── Botón Configurar (WhatsApp + Instrucciones + Helio + BLISCOINS) ── */}
                                             <div className="ml-16 mt-3">
                                                 <Button variant="ghost" size="sm" onClick={() => setExpanded(isExpanded ? null : forma.id)} className="text-xs text-gray-500">
                                                     <Settings className="w-4 h-4 mr-1" /> {isExpanded ? 'Ocultar Configuración' : 'Configurar'}
@@ -272,7 +241,6 @@ export default function FormasPagoAdminPage() {
 
                                             {isExpanded && (
                                                 <div className="ml-16 mt-4 space-y-3 border-t border-white/5 pt-4">
-                                                    {/* WhatsApp + Instructions (manual methods) */}
                                                     {['transfer', 'crypto_manual'].includes(forma.slug) && (
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                             <div>
@@ -286,30 +254,19 @@ export default function FormasPagoAdminPage() {
                                                         </div>
                                                     )}
 
-                                                    {/* Helio Card */}
                                                     {forma.slug === 'helio_card' && (
-                                                        <div className="space-y-3">
-                                                            <p className="text-sm font-bold text-white">Helio API — Tarjetas</p>
-                                                            <div className="grid grid-cols-1 gap-3">
-                                                                <Input value={forma.config?.api_key || ""} onChange={e => updateSimple(forma.id, 'api_key', e.target.value)} placeholder="API Key (pk_live_...)" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
-                                                                <Input value={forma.config?.secret_key || ""} onChange={e => updateSimple(forma.id, 'secret_key', e.target.value)} placeholder="Secret Key (sk_live_...)" type="password" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
-                                                            </div>
+                                                        <div className="grid grid-cols-1 gap-3">
+                                                            <Input value={forma.config?.api_key || ""} onChange={e => updateSimple(forma.id, 'api_key', e.target.value)} placeholder="Helio API Key (pk_live_...)" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
+                                                            <Input value={forma.config?.secret_key || ""} onChange={e => updateSimple(forma.id, 'secret_key', e.target.value)} placeholder="Helio Secret Key (sk_live_...)" type="password" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
                                                         </div>
                                                     )}
-
-                                                    {/* Helio Crypto */}
                                                     {forma.slug === 'helio_crypto' && (
-                                                        <div className="space-y-3">
-                                                            <p className="text-sm font-bold text-white">Helio Crypto API</p>
-                                                            <div className="grid grid-cols-1 gap-3">
-                                                                <Input value={forma.config?.api_key || ""} onChange={e => updateSimple(forma.id, 'api_key', e.target.value)} placeholder="API Key" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
-                                                                <Input value={forma.config?.secret_key || ""} onChange={e => updateSimple(forma.id, 'secret_key', e.target.value)} placeholder="Secret Key" type="password" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
-                                                                <Input value={forma.config?.webhook_url || ""} onChange={e => updateSimple(forma.id, 'webhook_url', e.target.value)} placeholder="Webhook URL" className="bg-white/5 border-white/10 text-white text-xs" />
-                                                            </div>
+                                                        <div className="grid grid-cols-1 gap-3">
+                                                            <Input value={forma.config?.api_key || ""} onChange={e => updateSimple(forma.id, 'api_key', e.target.value)} placeholder="Helio API Key" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
+                                                            <Input value={forma.config?.secret_key || ""} onChange={e => updateSimple(forma.id, 'secret_key', e.target.value)} placeholder="Helio Secret Key" type="password" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
+                                                            <Input value={forma.config?.webhook_url || ""} onChange={e => updateSimple(forma.id, 'webhook_url', e.target.value)} placeholder="Webhook URL" className="bg-white/5 border-white/10 text-white text-xs" />
                                                         </div>
                                                     )}
-
-                                                    {/* BLISCOINS */}
                                                     {forma.slug === 'coins' && (
                                                         <div className="grid grid-cols-2 gap-3">
                                                             <Input value={forma.config?.rate || "10"} onChange={e => updateSimple(forma.id, 'rate', e.target.value)} type="number" placeholder="Tasa (1 USD = X BLIS)" className="bg-white/5 border-white/10 text-white text-sm" />
