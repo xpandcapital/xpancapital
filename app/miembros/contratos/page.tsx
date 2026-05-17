@@ -1,137 +1,104 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, Download, ShieldCheck, Eye, Search, Filter, Clock, ChevronRight } from "lucide-react";
+import { FileText, Download, Shield, Clock, ExternalLink, Loader2, Package } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useCompras } from "@/lib/hooks/useCompras";
+import Link from "next/link";
 
-const MY_CONTRACTS = [
-    {
-        id: "con1",
-        title: "Contrato de Arrendamiento - Blindaje 360",
-        version: "v2.1",
-        date: "Hoy, 14:20",
-        size: "1.2 MB",
-        status: "Listo",
-        type: "PDF / Word"
-    },
-    {
-        id: "con2",
-        title: "Promesa de Compraventa Irrevocable",
-        version: "v1.0",
-        date: "15 Feb 2026",
-        size: "2.5 MB",
-        status: "Listo",
-        type: "PDF"
-    }
-];
+export default function ContratosPage() {
+    const { user } = useAuth();
+    const { compras, loading } = useCompras();
 
-export default function ContractsPage() {
+    const documentos = compras?.filter(c => c.estado === 'completado') || [];
+    const totalDocs = documentos.length;
+
     return (
         <div className="space-y-10 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
-                <div className="w-full sm:w-auto">
-                    <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none sm:leading-tight">Mis Contratos</h1>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl leading-tight">Documentación legal y plantillas de alta coercibilidad preparadas para tus operaciones.</p>
-                </div>
-                <div className="relative w-full sm:w-80 mt-4 sm:mt-0">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <input
-                        type="text"
-                        placeholder="Buscar contrato..."
-                        className="w-full pl-12 pr-4 py-3 sm:py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest text-white focus:outline-none focus:border-blis-red focus:bg-white/10 transition-all"
-                    />
-                </div>
+            <div className="w-full mx-auto">
+                <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none">Mis Documentos</h1>
+                <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">Accede a tus contratos, guías y documentos legales adquiridos.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main List */}
-                <div className="lg:col-span-2 space-y-4">
-                    <div className="flex items-center justify-between px-6 mb-4">
-                        <span className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Documentos Recientes</span>
-                        <button className="flex items-center gap-2 text-[10px] font-black text-blis-red uppercase tracking-widest hover:text-white transition-colors">
-                            <Filter className="w-3 h-3" /> Filtrar por Tipo
-                        </button>
-                    </div>
-
-                    {MY_CONTRACTS.map((doc, i) => (
-                        <motion.div
-                            key={doc.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="bg-zinc-950/50 border border-white/5 rounded-3xl p-6 hover:bg-zinc-900 transition-all group flex flex-col sm:flex-row items-center gap-6 shadow-xl"
-                        >
-                            <div className="w-16 h-16 rounded-2xl bg-blis-red/10 border border-blis-red/20 flex items-center justify-center text-blis-red group-hover:bg-blis-red group-hover:text-white transition-all">
-                                <FileText className="w-8 h-8" />
-                            </div>
-
-                            <div className="flex-1 text-center sm:text-left">
-                                <h3 className="text-lg font-black text-white uppercase tracking-tight mb-1 group-hover:text-blis-red transition-colors">{doc.title}</h3>
-                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                                    <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> Generado: {doc.date}</span>
-                                    <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Versión {doc.version}</span>
-                                    <span className="text-white/20">|</span>
-                                    <span className="text-white/40">{doc.type}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-3">
-                                <button className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 text-white rounded-2xl transition-all">
-                                    <Eye className="w-5 h-5" />
-                                </button>
-                                <button className="px-6 py-4 bg-blis-red text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:shadow-[0_0_20px_rgba(190,11,60,0.4)] transition-all flex items-center gap-2">
-                                    <Download className="w-4 h-4" /> Bajar
-                                </button>
-                            </div>
-                        </motion.div>
-                    ))}
-
-                    <div className="p-8 border-2 border-dashed border-white/5 rounded-[2.5rem] flex flex-col items-center justify-center text-center bg-black/20 hover:bg-white/5 transition-all group cursor-pointer">
-                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                            <ChevronRight className="w-5 h-5 text-gray-600 group-hover:text-blis-red" />
+            {loading ? (
+                <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blis-red" /></div>
+            ) : (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-zinc-950 border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-[60px] -mr-16 -mt-16 pointer-events-none" />
+                            <Shield className="w-8 h-8 text-blue-400 mb-4" />
+                            <h3 className="text-4xl font-black text-white">{totalDocs}</h3>
+                            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-1">Documentos Adquiridos</p>
                         </div>
-                        <h4 className="text-white font-black uppercase tracking-tight text-sm">Ver Historial de Documentos</h4>
-                        <p className="text-gray-600 text-[10px] mt-1 font-bold tracking-widest uppercase">Has generado 12 documentos este año</p>
-                    </div>
-                </div>
-
-                {/* Sidebar: New Document CTA */}
-                <div className="space-y-6">
-                    <div className="bg-blis-red p-8 rounded-[2.5rem] text-white space-y-6 shadow-[0_20px_40px_rgba(190,11,60,0.3)] relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-1000 rotate-12">
-                            <ShieldCheck className="w-40 h-40" />
+                        <div className="bg-zinc-950 border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[60px] -mr-16 -mt-16 pointer-events-none" />
+                            <Clock className="w-8 h-8 text-emerald-400 mb-4" />
+                            <h3 className="text-4xl font-black text-white">{user?.role === 'admin' || user?.role === 'superadmin' ? 'Premium' : 'Activo'}</h3>
+                            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-1">Estado de Cuenta</p>
                         </div>
-
-                        <div className="relative z-10">
-                            <span className="bg-black/20 text-white text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-full mb-6 inline-block">Asistente Blis Legal</span>
-                            <h2 className="text-3xl font-black uppercase tracking-tighter leading-none mb-4">¿Necesitas un nuevo blindaje legal?</h2>
-                            <p className="text-white/80 text-sm font-medium mb-8 leading-relaxed">
-                                Elige una plantilla estandarizada y nuestro sistema la autocompletará con tus datos de perfil en segundos.
-                            </p>
-                            <button className="w-full bg-white text-black font-black uppercase tracking-widest py-4 rounded-2xl hover:bg-black hover:text-white transition-all shadow-xl">
-                                Crear Nuevo Documento
-                            </button>
+                        <div className="bg-zinc-950 border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden shadow-2xl">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-[60px] -mr-16 -mt-16 pointer-events-none" />
+                            <Package className="w-8 h-8 text-amber-400 mb-4" />
+                            <h3 className="text-4xl font-black text-white">{compras?.length || 0}</h3>
+                            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mt-1">Total de Compras</p>
                         </div>
                     </div>
 
-                    <div className="bg-zinc-950 border border-white/5 p-8 rounded-[2.5rem]">
-                        <h3 className="text-sm font-black text-white uppercase tracking-widest mb-6">Soporte Legal Directo</h3>
-                        <div className="space-y-4">
-                            <div className="p-4 bg-white/5 border border-white/5 rounded-2xl flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center">
-                                    <span className="text-xs font-black">SL</span>
-                                </div>
-                                <div>
-                                    <p className="text-xs font-bold text-white uppercase">Abogado Asignado</p>
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Chat Activo 24/7</p>
-                                </div>
-                            </div>
-                            <button className="w-full py-4 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-white/10 transition-all opacity-50 cursor-not-allowed">
-                                Iniciar Consultoría VIP
-                            </button>
+                    <div className="bg-zinc-950/50 border border-white/5 rounded-[2.5rem] overflow-hidden shadow-xl">
+                        <div className="p-8 border-b border-white/5">
+                            <h2 className="text-lg font-black text-white uppercase tracking-widest">Mis Documentos y Guías</h2>
                         </div>
+                        {documentos.length > 0 ? (
+                            <div className="divide-y divide-white/5">
+                                {documentos.map((doc, i) => (
+                                    <motion.div
+                                        key={doc.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        className="flex items-center justify-between p-6 hover:bg-white/[0.02] transition-colors group"
+                                    >
+                                        <div className="flex items-center gap-4 min-w-0">
+                                            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 group-hover:bg-blis-red/10 group-hover:border-blis-red/20 transition-colors">
+                                                <FileText className="w-6 h-6 text-gray-400 group-hover:text-blis-red transition-colors" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h3 className="text-sm font-bold text-white truncate group-hover:text-blis-red transition-colors">
+                                                    {doc.producto?.nombre || `Documento #${doc.id?.slice(0, 8)}`}
+                                                </h3>
+                                                <div className="flex items-center gap-3 mt-1">
+                                                    <span className="text-[10px] text-gray-600 font-bold uppercase">
+                                                        {doc.creado_en ? new Date(doc.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+                                                    </span>
+                                                    <span className="w-1 h-1 rounded-full bg-gray-700" />
+                                                    <span className="text-[10px] text-emerald-500 font-bold uppercase">Adquirido</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 flex-shrink-0">
+                                            {doc.producto?.nombre && (
+                                                <Link
+                                                    href={`/miembros/productos/${doc.id}`}
+                                                    className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold uppercase tracking-wider text-gray-400 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                                                >
+                                                    <ExternalLink className="w-3 h-3" /> Ver Detalle
+                                                </Link>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-12 text-center">
+                                <FileText className="w-12 h-12 text-gray-700 mx-auto mb-4" />
+                                <p className="text-gray-500 font-bold uppercase text-sm">Sin documentos aún</p>
+                                <p className="text-gray-600 text-xs mt-1">Los documentos de tus compras aparecerán aquí</p>
+                            </div>
+                        )}
                     </div>
-                </div>
-            </div>
+                </>
+            )}
         </div>
     );
 }
