@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/Toast";
 
 interface Bank { name: string; account_number: string; account_holder: string; cci: string; currency: string; account_type: string; }
-interface Wallet { network: string; address: string; label: string; }
+interface Wallet { network: string; address: string; label: string; qr_url?: string; }
 interface Country { label: string; flag: string; banks: Bank[]; }
 interface FormaPago {
     id: string; nombre: string; slug: string; descripcion: string;
@@ -234,15 +234,46 @@ export default function FormasPagoAdminPage() {
                                             {forma.slug === 'crypto_manual' && (
                                                 <div className="ml-16 space-y-3">
                                                     {wallets.length > 0 && wallets.map((w: Wallet, idx: number) => (
-                                                        <div key={idx} className="flex items-center gap-3 bg-black/30 border border-white/5 rounded-xl p-3">
-                                                            <div className="w-32 flex-shrink-0">
-                                                                <Input value={w.label} onChange={e => updateWallet(forma.id, idx, 'label', e.target.value)} placeholder="Ej: USDT TRC20" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
+                                                        <div key={idx} className="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-32 flex-shrink-0">
+                                                                    <Input value={w.label} onChange={e => updateWallet(forma.id, idx, 'label', e.target.value)} placeholder="Ej: USDT TRC20" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
+                                                                </div>
+                                                                <Input value={w.address} onChange={e => updateWallet(forma.id, idx, 'address', e.target.value)} placeholder="Dirección de wallet" className="bg-white/5 border-white/10 text-white text-[10px] flex-1 h-8 font-mono" />
                                                             </div>
-                                                            <Input value={w.address} onChange={e => updateWallet(forma.id, idx, 'address', e.target.value)} placeholder="Dirección de wallet" className="bg-white/5 border-white/10 text-white text-[10px] flex-1 h-8 font-mono" />
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex-1">
+                                                                    <Input value={w.qr_url || ""} onChange={e => updateWallet(forma.id, idx, 'qr_url', e.target.value)} placeholder="URL del QR (opcional)" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
+                                                                </div>
+                                                                <div className="flex-shrink-0">
+                                                                    <label className="cursor-pointer px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] text-gray-400 hover:text-white hover:bg-white/10 flex items-center gap-1">
+                                                                        📷 Subir QR
+                                                                        <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                                                            const file = e.target.files?.[0];
+                                                                            if (!file) return;
+                                                                            setGuardando(forma.id);
+                                                                            try {
+                                                                                const supabase = (await import("@/lib/supabase").then(m => m.getSupabase()));
+                                                                                const ext = file.name.split('.').pop();
+                                                                                const path = `qrs/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
+                                                                                const { error } = await supabase.storage.from('biblioteca-portadas').upload(path, file, { upsert: true });
+                                                                                if (error) throw error;
+                                                                                const { data: { publicUrl } } = supabase.storage.from('biblioteca-portadas').getPublicUrl(path);
+                                                                                updateWallet(forma.id, idx, 'qr_url', publicUrl);
+                                                                                showToast("QR subido", "success");
+                                                                            } catch { showToast("Error al subir QR", "error"); }
+                                                                            setGuardando(null);
+                                                                        }} />
+                                                                    </label>
+                                                                </div>
+                                                                {w.qr_url && (
+                                                                    <img src={w.qr_url} alt="QR" className="w-10 h-10 rounded-lg object-cover border border-white/10" />
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     ))}
                                                     <Button size="sm" variant="outline" onClick={() => {
-                                                        const wallets = [...getWallets(formas.find(f => f.id === forma.id)!), { label: "", address: "", network: "" }];
+                                                        const wallets = [...getWallets(formas.find(f => f.id === forma.id)!), { label: "", address: "", network: "", qr_url: "" }];
                                                         updateForma(forma.id, { wallets });
                                                     }} className="text-xs border-white/10 text-gray-400 hover:text-white w-full">
                                                         <Plus className="w-3 h-3 mr-1" /> {wallets.length === 0 ? 'Agregar Wallet' : 'Agregar otra Wallet'}
