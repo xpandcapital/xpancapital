@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ShoppingCart, Coins, CreditCard, MapPin, User, Mail, Phone,
     CheckCircle2, Loader2, ArrowLeft, Lock, Shield, Package,
-    Zap, Truck, Gift, Star
+    Zap, Truck, Gift, Star, Wallet, Building2, Globe
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,7 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/Toast";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 
-type PaymentMethod = 'coins' | 'helio_card' | 'helio_crypto' | 'transfer';
+type PaymentMethod = 'coins' | 'helio_card' | 'helio_crypto' | 'transfer' | 'crypto_manual';
 
 interface CheckoutForm {
     nombre: string;
@@ -71,6 +71,8 @@ function CheckoutContent() {
     const [isComplete, setIsComplete] = useState(false);
     const [orderEmail, setOrderEmail] = useState("");
     const [isNewUser, setIsNewUser] = useState(false);
+    const [formasPago, setFormasPago] = useState<any[]>([]);
+    const [selectedCountry, setSelectedCountry] = useState("");
 
     const [form, setForm] = useState<CheckoutForm>({
         nombre: user?.name?.split(" ")[0] || '',
@@ -106,6 +108,12 @@ function CheckoutContent() {
             router.push('/tienda');
         }
     }, [isRedeemFlow, user, showToast, router]);
+
+    // Fetch formas de pago activas
+    useEffect(() => {
+        fetch("/api/admin/formas-pago?public=1")
+            .then(r => r.json()).then(d => { if (d.success) setFormasPago(d.formas || []); }).catch(() => {});
+    }, []);
 
     // Pre-llenar con datos del usuario
     useEffect(() => {
@@ -495,55 +503,52 @@ function CheckoutContent() {
 
                             <div className="space-y-3">
                                 {/* BLIS Coins */}
-                                {canPayWithCoins && (
-                                    <PayOption
-                                        selected={paymentMethod === 'coins'}
-                                        onClick={() => setPaymentMethod('coins')}
-                                        icon={<Coins className="w-5 h-5 text-amber-400" />}
-                                        bg="bg-amber-500/10 border-amber-500/40"
-                                        label="Pagar con BLIS Coins"
-                                        sublabel={`Saldo disponible: ${blisCoins.toLocaleString()} coins`}
-                                        amount={`${totalCoins.toLocaleString()} COINS`}
-                                    />
+                                {canPayWithCoins && formasPago.find(f => f.slug === 'coins')?.activo !== false && (
+                                    <PayOption selected={paymentMethod === 'coins'} onClick={() => setPaymentMethod('coins')}
+                                        icon={<Coins className="w-5 h-5 text-amber-400" />} bg="bg-amber-500/10 border-amber-500/40"
+                                        label="Pagar con BLIS Coins" sublabel={`Saldo: ${blisCoins.toLocaleString()} coins`} amount={`${totalCoins.toLocaleString()} COINS`} />
                                 )}
-
-                                {/* Hel.io - Tarjeta */}
-                                <PayOption
-                                    selected={paymentMethod === 'helio_card'}
-                                    onClick={() => setPaymentMethod('helio_card')}
-                                    icon={<CreditCard className="w-5 h-5 text-emerald-400" />}
-                                    bg="bg-emerald-500/10 border-emerald-500/40"
-                                    label="Tarjeta de Crédito / Débito"
-                                    sublabel="Visa, Mastercard, AMEX — Pago seguro vía Hel.io"
-                                    amount={`$${totalUSD.toFixed(2)}`}
-                                />
-
-                                {/* Hel.io - Criptomonedas */}
-                                <PayOption
-                                    selected={paymentMethod === 'helio_crypto'}
-                                    onClick={() => setPaymentMethod('helio_crypto')}
-                                    icon={<Coins className="w-5 h-5 text-yellow-400" />}
-                                    bg="bg-yellow-500/10 border-yellow-500/40"
-                                    label="Criptomonedas"
-                                    sublabel="BTC, ETH, USDT, USDC, SOL y más — vía Hel.io"
-                                    amount={`$${totalUSD.toFixed(2)}`}
-                                />
-
-                                {/* Transferencia */}
-                                <PayOption
-                                    selected={paymentMethod === 'transfer'}
-                                    onClick={() => setPaymentMethod('transfer')}
-                                    icon={<Shield className="w-5 h-5 text-sky-400" />}
-                                    bg="bg-sky-500/10 border-sky-500/40"
-                                    label="Transferencia Bancaria"
-                                    sublabel="Recibirás las instrucciones por email"
-                                    amount={`$${totalUSD.toFixed(2)}`}
-                                />
+                                {formasPago.filter(f => f.slug !== 'coins' && f.slug !== 'transfer').map((fp: any) => {
+                                    const imap: Record<string, any> = { helio_card: CreditCard, helio_crypto: Coins, crypto_manual: Globe };
+                                    const cmap: Record<string, string> = { helio_card: "bg-emerald-500/10 border-emerald-500/40", helio_crypto: "bg-yellow-500/10 border-yellow-500/40", crypto_manual: "bg-orange-500/10 border-orange-500/40" };
+                                    const tmap: Record<string, string> = { helio_card: "text-emerald-400", helio_crypto: "text-yellow-400", crypto_manual: "text-orange-400" };
+                                    const Ic = imap[fp.slug] || CreditCard;
+                                    return <PayOption key={fp.id} selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
+                                        icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
+                                        label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${totalUSD.toFixed(2)}`} />;
+                                })}
+                                {formasPago.find(f => f.slug === 'transfer')?.activo !== false && (
+                                    <PayOption selected={paymentMethod === 'transfer'} onClick={() => setPaymentMethod('transfer')}
+                                        icon={<Building2 className="w-5 h-5 text-sky-400" />} bg="bg-sky-500/10 border-sky-500/40"
+                                        label="Transferencia Bancaria" sublabel="Selecciona tu país para ver los datos bancarios" amount={`$${totalUSD.toFixed(2)}`} />
+)}
                             </div>
+
+                            {/* ── Transferencia ── */}
+                            {paymentMethod === 'transfer' && (() => {
+                                const fp = formasPago.find(f => f.slug === 'transfer');
+                                const cts: Record<string, any> = fp?.config?.countries || {};
+                                const keys = Object.keys(cts);
+                                const sel = cts[selectedCountry] || (keys.length === 1 ? cts[keys[0]] : null);
+                                const bks: any[] = sel?.banks || [];
+                                const wpp = fp?.config?.whatsapp || "";
+                                const ins = fp?.config?.instructions || "";
+                                const msg = encodeURIComponent(`Hola! Confirmo mi pago:\n\n👤 ${form.nombre || user?.name || ''}\n📧 ${form.email || user?.email || ''}\n🛒 ${cart.map(c => c.title).join(', ')}\n💰 $${totalUSD.toFixed(2)}\n${sel ? `🏦 ${sel.label}` : ''}\n\nAdjunto comprobante.`);
+                                return (<div className="mb-4 p-4 bg-sky-500/5 border border-sky-500/20 rounded-2xl space-y-4"><p className="text-xs text-sky-400 font-bold uppercase flex gap-2"><Building2 className="w-4 h-4"/>Datos Bancarios</p>{keys.length>1&&<div className="flex flex-wrap gap-2">{keys.map(k=><button key={k}onClick={()=>setSelectedCountry(k)}className={`px-4 py-2 rounded-xl text-xs font-bold ${selectedCountry===k?'bg-white text-black':'bg-white/5 text-gray-400'}`}>{cts[k].flag||'🏳️'} {cts[k].label}</button>)}</div>}{bks.length>0&&<div className="space-y-3">{bks.map((b:any,i:number)=>(<div key={i}className="bg-black/30 border border-white/10 rounded-xl p-3"><p className="text-sm font-bold text-white">{b.name} <span className="text-[10px]text-gray-500">{sel?.currency||''}</span></p><p className="text-xs text-gray-400">Cuenta: <span className="text-white font-mono">{b.account_number}</span></p><p className="text-xs text-gray-400">Titular: <span className="text-white">{b.account_holder}</span></p>{b.cci&&<p className="text-xs text-gray-400">CCI: <span className="text-white font-mono">{b.cci}</span></p>}</div>))}</div>}{wpp&&<a href={`https://wa.me/${wpp.replace(/[^0-9]/g,'')}?text=${msg}`}target="_blank"className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><Phone className="w-4 h-4"/>Enviar Comprobante por WhatsApp</a>}{ins&&<p className="text-[10px]text-gray-500 text-center">{ins}</p>}</div>);
+                            })()}
+
+                            {paymentMethod === 'crypto_manual' && (() => {
+                                const fp = formasPago.find(f => f.slug === 'crypto_manual');
+                                const wls: any[] = fp?.config?.wallets || [];
+                                const wpp = fp?.config?.whatsapp || "";
+                                const ins = fp?.config?.instructions || "";
+                                const msg = encodeURIComponent(`Hola! Confirmo pago crypto:\n\n👤 ${form.nombre||''}\n📧 ${form.email||''}\n🛒 ${cart.map(c=>c.title).join(', ')}\n💰 $${totalUSD.toFixed(2)}\n\nAdjunto hash.`);
+                                return (<div className="mb-4 p-4 bg-orange-500/5 border border-orange-500/20 rounded-2xl space-y-4"><p className="text-xs text-orange-400 font-bold uppercase flex gap-2"><Wallet className="w-4 h-4"/>Carteras Crypto</p>{wls.length>0&&<div className="space-y-2">{wls.map((w:any,i:number)=>(<div key={i}className="bg-black/30 border border-white/10 rounded-xl p-3"><p className="text-xs font-bold text-white mb-1">{w.label||w.network}</p>{w.address?<p className="text-[10px]font-mono text-gray-400 break-all select-all">{w.address}</p>:<p className="text-[10px]text-gray-600 italic">No configurada</p>}</div>))}</div>}{wpp&&<a href={`https://wa.me/${wpp.replace(/[^0-9]/g,'')}?text=${msg}`}target="_blank"className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><Phone className="w-4 h-4"/>Enviar Hash por WhatsApp</a>}{ins&&<p className="text-[10px]text-gray-500 text-center">{ins}</p>}</div>);
+                            })()}
                         </div>
                     </div>
 
-                    {/* ── Resumen del pedido ────────────────────────────────── */}
+                        {/* ── Resumen del pedido ────────────────────────────────── */}
                     <div className="lg:col-span-2">
                         <div className="bg-zinc-900/30 border border-white/5 rounded-3xl p-6 sticky top-28 space-y-6">
                             <h2 className="text-base font-black uppercase tracking-widest flex items-center gap-3">
