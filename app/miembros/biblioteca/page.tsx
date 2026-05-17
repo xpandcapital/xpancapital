@@ -10,7 +10,7 @@ import {
     X,
     ChevronRight,
     Bookmark,
-    Ghost,
+    AlertCircle,
     ArrowUpRight,
     TrendingUp,
     Target,
@@ -38,6 +38,7 @@ interface EBook {
 function useLibros() {
     const [libros, setLibros] = useState<EBook[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     useEffect(() => {
         async function cargar() {
             try {
@@ -60,15 +61,15 @@ function useLibros() {
                     page++;
                 }
                 setLibros(all);
-            } catch (e) {
-                console.error("Error cargando libros:", e);
+            } catch (e: any) {
+                setError(e.message || "Error de conexión");
             } finally {
                 setLoading(false);
             }
         }
         cargar();
     }, []);
-    return { libros, loading };
+    return { libros, loading, error };
 }
 
 // Data extracted from campus.blis-corp.com/libros/ (legacy fallback)
@@ -259,7 +260,7 @@ export default function EbooksPage() {
     const [savedIds, setSavedIds] = useState<string[]>([]);
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
     const [visibleLimit, setVisibleLimit] = useState(24);
-    const { libros, loading } = useLibros();
+    const { libros, loading, error } = useLibros();
 
     // Persistence for Saved Books
     useEffect(() => {
@@ -481,22 +482,37 @@ export default function EbooksPage() {
                                     exit={{ opacity: 0 }}
                                     className="flex flex-col items-center justify-center py-32 text-center"
                                 >
-                                    <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                                        <Ghost className="w-10 h-10 text-gray-700" />
-                                    </div>
-                                    <h3 className="text-xl font-black text-white uppercase tracking-tight">No encontramos nada...</h3>
-                                    <p className="text-gray-500 mt-2 max-w-xs">Intenta con otros términos o limpia los filtros para ver todo el catálogo.</p>
-                                    <button
-                                        onClick={() => {
-                                            setSearchQuery("");
-                                            setSelectedCategory(null);
-                                            setSelectedAuthor(null);
-                                            setOnlySaved(false);
-                                        }}
-                                        className="mt-8 px-8 py-4 bg-blis-red/20 text-blis-red border border-blis-red/30 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-blis-red hover:text-white transition-all font-black"
-                                    >
-                                        Ver Todos los Libros
-                                    </button>
+                                    {error ? (
+                                        <>
+                                            <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
+                                                <AlertCircle className="w-10 h-10 text-red-400" />
+                                            </div>
+                                            <h3 className="text-xl font-black text-white uppercase tracking-tight">Error de conexión</h3>
+                                            <p className="text-gray-500 mt-2 max-w-xs">No se pudo cargar la biblioteca. Supabase puede estar sobrecargado.</p>
+                                            <button onClick={() => window.location.reload()} className="mt-6 px-8 py-4 bg-blis-red/20 text-blis-red border border-blis-red/30 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-blis-red hover:text-white transition-all">
+                                                Reintentar
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                                                <Search className="w-10 h-10 text-gray-700" />
+                                            </div>
+                                            <h3 className="text-xl font-black text-white uppercase tracking-tight">No encontramos nada...</h3>
+                                            <p className="text-gray-500 mt-2 max-w-xs">Intenta con otros términos o limpia los filtros para ver todo el catálogo.</p>
+                                            <button
+                                                onClick={() => {
+                                                    setSearchQuery("");
+                                                    setSelectedCategory(null);
+                                                    setSelectedAuthor(null);
+                                                    setOnlySaved(false);
+                                                }}
+                                                className="mt-8 px-8 py-4 bg-blis-red/20 text-blis-red border border-blis-red/30 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-blis-red hover:text-white transition-all"
+                                            >
+                                                Limpiar filtros
+                                            </button>
+                                        </>
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
