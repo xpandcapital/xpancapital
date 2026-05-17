@@ -75,7 +75,7 @@ export default function ShopPage() {
 
         <div className="flex-1 md:ml-64 px-4 md:px-8 xl:px-10 pt-24 pb-16 space-y-10 min-w-0">
 
-          <ShopHeroSlider />
+          <ShopHeroSlider products={allProducts} />
 
           <ProductSearch products={allProducts} />
 
@@ -137,7 +137,7 @@ export default function ShopPage() {
         </div>
       </div>
 
-      <LiveBuyerNotification />
+      <LiveBuyerNotification products={allProducts.map(p => p.title).filter(Boolean)} />
       <FooterSections />
     </main>
   );

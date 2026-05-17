@@ -1,43 +1,52 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Zap, ArrowRight } from "lucide-react";
+import type { ProductDef } from "@/lib/types/shop";
 
-const HERO_BANNERS = [
-    {
-        id: 1,
-        title: "Kits para Desarrolladores Inmobiliarios",
-        subtitle: "Evaluación Financiera, Marketing Arquitectónico y Estrategias Múltiples de Negociación.",
-        price: "$499",
-        bgImage: "/images/arkadia-1.webp",
-        tag: "MEGA PAQUETE B2B",
-        accent: "blis-red"
-    },
-    {
-        id: 2,
-        title: "Masterclass: Inteligencia Competitiva en Real Estate",
-        subtitle: "Acelerador de ventas corporativas y prospección de Nómadas Digitales por IA.",
-        price: "$249",
-        bgImage: "/images/Cumbres-1.webp",
-        tag: "TENDENCIA MUNDIAL",
-        accent: "blis-red"
-    }
-];
+interface ShopHeroSliderProps {
+    products?: ProductDef[];
+    data?: any;
+}
 
-export function ShopHeroSlider() {
+export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
+    const banners = useMemo(() => {
+        if (products && products.length > 0) {
+            return products.slice(0, 5).filter(p => p.title).map((p, i) => ({
+                id: i,
+                title: p.title,
+                subtitle: p.description || p.category || "",
+                price: p.price ? `$${p.price.toLocaleString()}` : "",
+                bgImage: p.image || "/images/arkadia-1.webp",
+                tag: p.category || "Producto",
+                accent: "blis-red"
+            }));
+        }
+        return [
+            {
+                id: 1, title: "Capacitaciones Profesionales", subtitle: "Formación de alto nivel para impulsar tu carrera en el sector inmobiliario.",
+                price: "", bgImage: "/images/arkadia-1.webp", tag: "CURSOS PREMIUM", accent: "blis-red"
+            },
+            {
+                id: 2, title: "Kits Legales y Contratos", subtitle: "Documentación profesional lista para usar con respaldo legal completo.",
+                price: "", bgImage: "/images/Cumbres-1.webp", tag: "PROTECCIÓN LEGAL", accent: "blis-red"
+            }
+        ];
+    }, [products]);
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
 
     const next = useCallback(() => {
         setDirection(1);
-        setCurrentIndex((prev) => (prev + 1) % HERO_BANNERS.length);
+        setCurrentIndex((prev) => (prev + 1) % banners.length);
     }, []);
 
     const prev = useCallback(() => {
         setDirection(-1);
-        setCurrentIndex((prev) => (prev - 1 + HERO_BANNERS.length) % HERO_BANNERS.length);
+        setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
     }, []);
 
     useEffect(() => {
@@ -98,7 +107,7 @@ export function ShopHeroSlider() {
                     className="absolute inset-0"
                 >
                     <Image
-                        src={HERO_BANNERS[currentIndex].bgImage}
+                        src={banners[currentIndex].bgImage}
                         alt="Promo Background"
                         fill
                         className="object-cover opacity-70 scale-105"
@@ -130,7 +139,7 @@ export function ShopHeroSlider() {
                             className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-white text-[9px] md:text-xs font-black uppercase tracking-[0.3em] px-3 py-1.5 md:px-4 md:py-2 rounded-full mb-4 md:mb-6 w-max backdrop-blur-2xl"
                         >
                             <Zap className="w-3 h-3 text-blis-red fill-blis-red animate-pulse" />
-                            <span className="opacity-80">{HERO_BANNERS[currentIndex].tag}</span>
+                            <span className="opacity-80">{banners[currentIndex].tag}</span>
                         </motion.div>
 
                         <motion.h2
@@ -140,14 +149,14 @@ export function ShopHeroSlider() {
                             animate="visible"
                             className="text-[1.5rem] md:text-3xl lg:text-4xl font-black text-white uppercase tracking-tighter mb-4 max-w-2xl leading-[1.15] drop-shadow-2xl line-clamp-3"
                         >
-                            {HERO_BANNERS[currentIndex].title.includes(':') ? (
-                                HERO_BANNERS[currentIndex].title.split(':').map((part, i) => (
+                            {banners[currentIndex].title.includes(':') ? (
+                                banners[currentIndex].title.split(':').map((part, i) => (
                                     <span key={i} className={i === 0 ? "text-blis-red" : ""}>
                                         {i === 0 ? part + ': ' : part}
                                     </span>
                                 ))
                             ) : (
-                                <span>{HERO_BANNERS[currentIndex].title}</span>
+                                <span>{banners[currentIndex].title}</span>
                             )}
                         </motion.h2>
 
@@ -158,7 +167,7 @@ export function ShopHeroSlider() {
                             animate="visible"
                             className="text-gray-300 text-xs md:text-base font-medium max-w-xl mb-6 md:mb-8 leading-relaxed line-clamp-2"
                         >
-                            {HERO_BANNERS[currentIndex].subtitle.split(' ').map((word, i) => (
+                            {banners[currentIndex].subtitle.split(' ').map((word, i) => (
                                 <span key={i} className="inline-block mr-1">
                                     {word.toLowerCase().includes('prospección') || word.toLowerCase().includes('financiera') ? (
                                         <span className="relative inline-block">
@@ -179,7 +188,7 @@ export function ShopHeroSlider() {
                         >
                             <button className="group/btn relative overflow-hidden bg-white text-black font-black uppercase tracking-widest px-6 py-4 md:px-10 md:py-5 rounded-2xl transition-all duration-500 hover:pr-14 active:scale-95 shadow-[0_20px_40px_rgba(255,255,255,0.1)] text-[10px] md:text-sm">
                                 <span className="relative z-10 flex items-center gap-2">
-                                    Adquirir Licencia <span className="text-blis-red opacity-50 mr-2">|</span> {HERO_BANNERS[currentIndex].price}
+                                    Adquirir Licencia <span className="text-blis-red opacity-50 mr-2">|</span> {banners[currentIndex].price}
                                 </span>
                                 <ArrowRight className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 md:w-6 md:h-6 opacity-0 group-hover/btn:opacity-100 transition-all duration-300 translate-x-4 group-hover/btn:translate-x-0" />
                                 <div className="absolute inset-0 bg-blis-red/10 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500" />
@@ -223,7 +232,7 @@ export function ShopHeroSlider() {
 
             {/* Minimalist Progress Indicators */}
             <div className="absolute top-8 right-8 flex flex-col gap-3 z-30">
-                {HERO_BANNERS.map((_, idx) => (
+                {banners.map((_, idx) => (
                     <button
                         key={idx}
                         onClick={() => {

@@ -17,22 +17,25 @@ const BUYERS = [
     { name: "Mauricio G.", flagCode: "ve" }
 ];
 
-const PRODUCTS = [
-    "Kit Legal de Agentes",
-    "Técnicas de Cierre (Ebook)",
-    "Pack Redes Sociales",
-    "Masterclass Inversiones",
-    "Contrato Maestro Promesa"
-];
+interface LiveBuyerNotificationProps {
+    products?: string[];
+    data?: any;
+}
 
-export function LiveBuyerNotification() {
+export function LiveBuyerNotification({ products }: LiveBuyerNotificationProps) {
     const [notification, setNotification] = useState<{ name: string; flagCode: string; product: string; time: number } | null>(null);
+    const productNames = products && products.length > 0 ? products : [
+        "Capacitación Inmobiliaria",
+        "Kit de Contratos",
+        "Guía de Ventas",
+        "Mentoría Personalizada"
+    ];
 
     useEffect(() => {
         // Random intervals between 12 and 45 seconds to spawn a new notification
         const showRandomNotification = () => {
             const randomBuyer = BUYERS[Math.floor(Math.random() * BUYERS.length)];
-            const randomProduct = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
+            const randomProduct = productNames[Math.floor(Math.random() * productNames.length)];
             const randomTime = Math.floor(Math.random() * 59) + 1; // 1 to 59 mins ago
 
             setNotification({
