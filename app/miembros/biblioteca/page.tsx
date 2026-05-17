@@ -47,13 +47,12 @@ function useLibros() {
                 while (true) {
                     const res = await fetch(`/api/biblioteca/libros?page=${page}&limit=100`);
                     const d = await res.json();
-                    console.log("[biblioteca] page", page, "success:", d.success, "count:", d.libros?.length, "total:", d.total);
                     if (!d.success || !d.libros || d.libros.length === 0) break;
                     all.push(...d.libros.map((l: any) => ({
                         id: l.id,
                         title: l.titulo,
                         author: l.autor,
-                        category: l.categoria || "General",
+                        category: getSmartCategory(l.autor, l.titulo),
                         downloadLink: l.download_link || "",
                         imgSrc: l.portada_url || "",
                         isFeatured: l.is_featured || false,
@@ -61,10 +60,8 @@ function useLibros() {
                     if (d.libros.length < 100) break;
                     page++;
                 }
-                console.log("[biblioteca] Total cargados:", all.length);
                 setLibros(all);
             } catch (e: any) {
-                console.error("[biblioteca] Error:", e);
                 setError(e.message || "Error de conexión");
             } finally {
                 setLoading(false);
@@ -74,6 +71,45 @@ function useLibros() {
     }, []);
     return { libros, loading, error };
 }
+
+// ── Clasificador inteligente por autor/título ──
+const CATEGORY_RULES: Record<string, string[]> = {
+    "Finanzas": ["Kiyosaki", "Buffett", "Clason", "Eker", "Graham", "Macias", "Cardone", "Belfort", "Trump", "Keller", "Ferriss"],
+    "Liderazgo": ["Maxwell", "Sharma", "Rohn", "Carnegie", "Goleman", "Covey", "Branson", "Blanchard", "Mandino"],
+    "Ventas": ["Cardone", "Belfort", "Mandino", "Dey", "Proctor", "Kawasaki", "Godin", "Tracy"],
+    "Crecimiento Personal": ["Ruiz", "Osho", "Chopra", "Tolle", "Dyer", "Hay", "Weiss", "Riso", "Sordo", "Stamateas", "Corbera", "Fromm", "Fisher", "Hansen", "Punset", "Baron"],
+    "Emprendimiento": ["Muñoz", "Urzua", "Abratte", "Cruz", "Samso", "Fernandez", "Klaric", "Guerrero", "Cañongo", "Gomez", "Figueroa", "Nacho Muñoz"],
+    "Idiomas": ["Campayo"],
+    "Inmobiliaria": ["Keller", "Trump"],
+};
+
+function getSmartCategory(author: string, title: string): string {
+    const a = author.toLowerCase();
+    const t = title.toLowerCase();
+
+    if (t.includes("alemán") || t.includes("inglés") || t.includes("ingles") || t.includes("idioma")) return "Idiomas";
+    if (t.includes("inmobiliario") || t.includes("inmobiliaria") || t.includes("bienes raíces") || t.includes("bienes raices")) return "Inmobiliaria";
+    if (t.includes("dinero") || t.includes("finanza") || t.includes("rico") || t.includes("pobre") || t.includes("millonario") || t.includes("inversión") || t.includes("inversion") || t.includes("bolsa")) return "Finanzas";
+    if (t.includes("vender") || t.includes("venta") || t.includes("negociación") || t.includes("persuasión") || t.includes("marketing")) return "Ventas";
+    if (t.includes("líder") || t.includes("lider") || t.includes("equipo") || t.includes("influencia") || t.includes("carisma")) return "Liderazgo";
+
+    for (const [cat, keywords] of Object.entries(CATEGORY_RULES)) {
+        if (keywords.some(k => a.includes(k.toLowerCase()))) return cat;
+    }
+
+    return "Desarrollo Personal";
+}
+
+const CATEGORY_ICONS: Record<string, string> = {
+    "Finanzas": "💰",
+    "Liderazgo": "👑",
+    "Ventas": "💎",
+    "Crecimiento Personal": "🧠",
+    "Emprendimiento": "🚀",
+    "Idiomas": "🌍",
+    "Inmobiliaria": "🏠",
+    "Desarrollo Personal": "✨",
+};
 
 // Data extracted from campus.blis-corp.com/libros/ (legacy fallback)
 const EXTRACTED_BOOKS: EBook[] = [
@@ -262,8 +298,9 @@ export default function EbooksPage() {
     const [onlySaved, setOnlySaved] = useState(false);
     const [savedIds, setSavedIds] = useState<string[]>([]);
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
-    const [visibleLimit, setVisibleLimit] = useState(24);
+    const [currentPage, setCurrentPage] = useState(1);
     const [slideIndex, setSlideIndex] = useState(0);
+    const booksPerPage = 12;
     const { libros, loading, error } = useLibros();
 
     // Persistence for Saved Books
@@ -308,7 +345,12 @@ export default function EbooksPage() {
         return filtered;
     }, [searchQuery, selectedCategory, selectedAuthor, onlySaved, savedIds, libros]);
 
-    const visibleBooks = useMemo(() => filteredBooks.slice(0, visibleLimit), [filteredBooks, visibleLimit]);
+    const visibleBooks = useMemo(() => {
+        const start = (currentPage - 1) * booksPerPage;
+        return filteredBooks.slice(start, start + booksPerPage);
+    }, [filteredBooks, currentPage, booksPerPage]);
+
+    const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
 
     const categories = useMemo(() => Array.from(new Set(libros.map(b => b.category))).sort(), [libros]);
     const authors = useMemo(() => Array.from(new Set(libros.map(b => b.author))).sort(), [libros]);
@@ -355,10 +397,10 @@ export default function EbooksPage() {
                                     placeholder="Buscar por título, autor o categoría..."
                                     className="w-full bg-transparent border-none outline-none text-white placeholder:text-gray-600 text-sm py-3 px-3"
                                     value={searchQuery}
-                                    onChange={(e) => { setSearchQuery(e.target.value); setVisibleLimit(24); }}
+                                    onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                                 />
                                 {searchQuery && (
-                                    <button onClick={() => { setSearchQuery(""); setVisibleLimit(24); }} className="p-2 text-gray-500 hover:text-white mr-1">
+                                    <button onClick={() => { setSearchQuery(""); setCurrentPage(1); }} className="p-2 text-gray-500 hover:text-white mr-1">
                                         <X className="w-4 h-4" />
                                     </button>
                                 )}
@@ -396,7 +438,7 @@ export default function EbooksPage() {
                                         transition={{ type: "spring", stiffness: 300, damping: 30 }}>
                                         {featuredBooks.map((book) => (
                                             <div key={book.id} className="w-full flex-shrink-0 cursor-pointer"
-                                                onClick={() => { setSelectedCategory(book.category); setVisibleLimit(24); }}>
+                                                onClick={() => { setSelectedCategory(book.category); setCurrentPage(1); }}>
                                                 <div className="relative h-48 sm:h-64 md:h-80 rounded-3xl overflow-hidden bg-zinc-900 border border-white/10 group">
                                                     {book.imgSrc ? (
                                                         <Image src={book.imgSrc} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" sizes="100vw" priority />
@@ -446,7 +488,7 @@ export default function EbooksPage() {
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: i * 0.05 }}
                                             className="flex-shrink-0 w-36 sm:w-44 snap-start group cursor-pointer"
-                                            onClick={() => { setSelectedCategory(book.category); setVisibleLimit(24); }}>
+                                            onClick={() => { setSelectedCategory(book.category); setCurrentPage(1); }}>
                                             <div className="relative aspect-[3/4.2] rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 group-hover:border-blis-red/40 transition-all duration-300 mb-2 shadow-lg">
                                                 {book.imgSrc ? (
                                                     <Image src={book.imgSrc} alt={book.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="176px" />
@@ -471,30 +513,42 @@ export default function EbooksPage() {
                         )}
 
                         {/* ── Sección: Categorías ── */}
-                        <div className="mb-10">
-                            <h2 className="text-xl font-black uppercase tracking-tighter mb-4 flex items-center gap-2">
-                                <span className="w-2 h-2 bg-amber-400 rounded-full" /> Categorías
+                        <div className="mb-12">
+                            <h2 className="text-xl font-black uppercase tracking-tighter mb-6 flex items-center gap-2">
+                                <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" /> Categorías
                             </h2>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-                                {categories.slice(0, 12).map((cat, i) => {
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                                {categories.map((cat) => {
                                     const count = libros.filter(b => b.category === cat).length;
-                                    const gradientColors = [
-                                        "from-blis-red/5 to-blis-red/10", "from-amber-500/5 to-amber-500/10",
-                                        "from-emerald-500/5 to-emerald-500/10", "from-blue-500/5 to-blue-500/10",
-                                        "from-purple-500/5 to-purple-500/10", "from-rose-500/5 to-rose-500/10",
-                                    ];
+                                    const icon = CATEGORY_ICONS[cat] || "📚";
+                                    const glowColors: Record<string, string> = {
+                                        "Finanzas": "shadow-amber-500/20 border-amber-500/20 group-hover:border-amber-400/50",
+                                        "Ventas": "shadow-purple-500/20 border-purple-500/20 group-hover:border-purple-400/50",
+                                        "Liderazgo": "shadow-blue-500/20 border-blue-500/20 group-hover:border-blue-400/50",
+                                        "Crecimiento Personal": "shadow-emerald-500/20 border-emerald-500/20 group-hover:border-emerald-400/50",
+                                        "Emprendimiento": "shadow-rose-500/20 border-rose-500/20 group-hover:border-rose-400/50",
+                                        "Idiomas": "shadow-cyan-500/20 border-cyan-500/20 group-hover:border-cyan-400/50",
+                                        "Inmobiliaria": "shadow-orange-500/20 border-orange-500/20 group-hover:border-orange-400/50",
+                                        "Desarrollo Personal": "shadow-teal-500/20 border-teal-500/20 group-hover:border-teal-400/50",
+                                    };
+                                    const glow = glowColors[cat] || "shadow-white/5 border-white/5 group-hover:border-white/20";
                                     return (
                                         <motion.button key={cat}
-                                            whileHover={{ scale: 1.02 }}
+                                            whileHover={{ scale: 1.03, y: -2 }}
                                             whileTap={{ scale: 0.98 }}
-                                            onClick={() => { setSelectedCategory(cat); setVisibleLimit(24); }}
-                                            className={`group relative p-5 rounded-2xl bg-gradient-to-br ${gradientColors[i % gradientColors.length]} border border-white/5 hover:border-white/20 transition-all duration-300 text-left overflow-hidden`}
+                                            onClick={() => { setSelectedCategory(cat); setCurrentPage(1); }}
+                                            className={`group relative p-5 rounded-2xl bg-white/[0.03] backdrop-blur-sm border ${glow} transition-all duration-300 text-left overflow-hidden shadow-lg`}
                                         >
-                                            <div className="absolute top-0 right-0 w-20 h-20 rounded-full bg-white/[0.02] -mr-10 -mt-10 group-hover:bg-white/[0.05] transition-colors" />
+                                            <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/[0.01] -mr-12 -mt-12 group-hover:bg-white/[0.04] transition-colors" />
+                                            <div className="absolute top-3 right-3 text-3xl opacity-20 group-hover:opacity-40 group-hover:scale-110 transition-all duration-500">{icon}</div>
                                             <div className="relative z-10">
-                                                <BookOpen className="w-6 h-6 text-gray-400 group-hover:text-white mb-3 transition-colors" />
-                                                <h3 className="text-xs font-bold text-white group-hover:text-blis-red transition-colors truncate">{cat}</h3>
-                                                <p className="text-[10px] text-gray-500 mt-1">{count} libros</p>
+                                                <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">{icon}</div>
+                                                <h3 className="text-sm font-black text-white group-hover:text-white transition-colors truncate">{cat}</h3>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <span className="text-[10px] text-gray-500">{count} libros</span>
+                                                    <div className="flex-1 h-px bg-white/10" />
+                                                    <ChevronRight className="w-3 h-3 text-gray-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                                                </div>
                                             </div>
                                         </motion.button>
                                     );
@@ -515,7 +569,7 @@ export default function EbooksPage() {
                                         <motion.button key={author}
                                             whileHover={{ scale: 1.03 }}
                                             whileTap={{ scale: 0.97 }}
-                                            onClick={() => { setSelectedAuthor(author); setVisibleLimit(24); }}
+                                            onClick={() => { setSelectedAuthor(author); setCurrentPage(1); }}
                                             className="group flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-white/20 hover:bg-white/[0.06] transition-all duration-300"
                                         >
                                             <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-800 border border-white/5 flex-shrink-0 relative">
@@ -544,7 +598,7 @@ export default function EbooksPage() {
                 <div className="flex flex-wrap items-center gap-2 mb-8 pb-6 border-b border-white/5">
                     <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider mr-2">Filtrar:</span>
                     <button
-                        onClick={() => { setSelectedCategory(null); setSelectedAuthor(null); setOnlySaved(false); setVisibleLimit(24); }}
+                        onClick={() => { setSelectedCategory(null); setSelectedAuthor(null); setOnlySaved(false); setCurrentPage(1); }}
                         className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${!selectedCategory && !selectedAuthor && !onlySaved ? 'bg-blis-red text-white shadow-lg shadow-blis-red/20' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'}`}
                     >
                         Todos
@@ -559,7 +613,7 @@ export default function EbooksPage() {
                     {categories.slice(0, 8).map((cat) => (
                         <button
                             key={cat}
-                            onClick={() => { setSelectedCategory(selectedCategory === cat ? null : cat); setVisibleLimit(24); }}
+                            onClick={() => { setSelectedCategory(selectedCategory === cat ? null : cat); setCurrentPage(1); }}
                             className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${selectedCategory === cat ? 'bg-white text-black shadow-lg shadow-white/10' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'}`}
                         >
                             {cat}
@@ -571,7 +625,7 @@ export default function EbooksPage() {
                     <div className="w-px h-6 bg-white/10 mx-2" />
                     <select
                         value={selectedAuthor || ""}
-                        onChange={(e) => { setSelectedAuthor(e.target.value || null); setVisibleLimit(24); }}
+                        onChange={(e) => { setSelectedAuthor(e.target.value || null); setCurrentPage(1); }}
                         className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/5 border border-white/5 text-gray-400 hover:bg-white/10 hover:text-white cursor-pointer appearance-none pr-8 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNjY2IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_12px_center]"
                     >
                         <option value="" className="bg-[#0a0a0a]">Por Autor</option>
@@ -606,6 +660,17 @@ export default function EbooksPage() {
                                     exit={{ opacity: 0 }}
                                     className="space-y-12"
                                 >
+                                    {/* Page info + results count */}
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs text-gray-500">
+                                            {filteredBooks.length > 0
+                                                ? `Mostrando ${(currentPage - 1) * booksPerPage + 1}–${Math.min(currentPage * booksPerPage, filteredBooks.length)} de ${filteredBooks.length} libros`
+                                                : "Sin resultados"}
+                                        </p>
+                                        {totalPages > 1 && (
+                                            <p className="text-xs text-gray-600">Página {currentPage} de {totalPages}</p>
+                                        )}
+                                    </div>
                                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-x-4 gap-y-10">
                                         {visibleBooks.map((book, i) => (
                                             <motion.div
@@ -686,14 +751,45 @@ export default function EbooksPage() {
                                         ))}
                                     </div>
 
-                                    {filteredBooks.length > visibleLimit && (
+                                    {totalPages > 1 && (
                                         <div className="flex justify-center pt-8">
-                                            <button
-                                                onClick={() => setVisibleLimit(prev => prev + 24)}
-                                                className="px-12 py-4 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white/10 hover:border-white/20 transition-all flex items-center gap-3 active:scale-95"
-                                            >
-                                                Cargar más libros <ChevronRight className="w-4 h-4" />
-                                            </button>
+                                            <div className="flex items-center gap-1 bg-white/[0.03] border border-white/5 rounded-2xl p-1.5 backdrop-blur-sm">
+                                                <button
+                                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                                    disabled={currentPage === 1}
+                                                    className="p-2.5 rounded-xl hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                                                    <ChevronLeft className="w-4 h-4 text-gray-400" />
+                                                </button>
+                                                {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                                                    let pageNum: number;
+                                                    if (totalPages <= 7) {
+                                                        pageNum = i + 1;
+                                                    } else if (currentPage <= 4) {
+                                                        pageNum = i + 1;
+                                                    } else if (currentPage >= totalPages - 3) {
+                                                        pageNum = totalPages - 6 + i;
+                                                    } else {
+                                                        pageNum = currentPage - 3 + i;
+                                                    }
+                                                    return (
+                                                        <button key={pageNum}
+                                                            onClick={() => setCurrentPage(pageNum)}
+                                                            className={`w-9 h-9 rounded-xl text-xs font-bold transition-all ${
+                                                                pageNum === currentPage
+                                                                    ? 'bg-blis-red text-white shadow-lg shadow-blis-red/20'
+                                                                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                                            }`}>
+                                                            {pageNum}
+                                                        </button>
+                                                    );
+                                                })}
+                                                <button
+                                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                                    disabled={currentPage === totalPages}
+                                                    className="p-2.5 rounded-xl hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                                                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </motion.div>
