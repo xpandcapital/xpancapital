@@ -40,5 +40,6 @@ INSERT INTO formas_pago (nombre, slug, descripcion, activo, config, orden) VALUE
   ('Tarjeta de Crédito/Débito', 'helio_card', 'Pago con tarjeta via Hel.io', true, '{"provider": "helio", "type": "card"}', 1),
   ('Criptomonedas', 'helio_crypto', 'Pago con crypto via Hel.io', false, '{"provider": "helio", "type": "crypto"}', 2),
   ('BLISCOINS', 'coins', 'Paga con tus BLISCOINS acumulados', true, '{"provider": "internal", "rate": 10}', 3),
-  ('Transferencia Bancaria', 'transfer', 'Pago por transferencia bancaria', true, '{"provider": "manual", "bank_info": ""}', 4)
+  ('Transferencia Bancaria', 'transfer', 'Pago por transferencia bancaria', true, '{"provider": "manual", "whatsapp": "+51999999999", "instructions": "Envía el comprobante de pago por WhatsApp para validar tu compra.", "banks": [{"name": "Banco de Crédito BCP", "account_number": "123-456-789", "account_holder": "BLIS Corp SAC", "cci": "00212300456789012345", "currency": "PEN", "account_type": "ahorros"}]}', 4),
+  ('Cripto Manual', 'crypto_manual', 'Pago directo con criptomonedas (manual)', false, '{"provider": "manual", "whatsapp": "+51999999999", "instructions": "Realiza el pago a la wallet indicada y envía el hash de transacción por WhatsApp.", "wallets": [{"network": "USDT (TRC20)", "address": "", "label": "USDT TRC20"}, {"network": "USDT (BEP20)", "address": "", "label": "USDT BEP20"}, {"network": "BTC", "address": "", "label": "Bitcoin"}, {"network": "ETH", "address": "", "label": "Ethereum"}]}', 5)
 ON CONFLICT (slug) DO NOTHING;
