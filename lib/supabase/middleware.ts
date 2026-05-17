@@ -10,6 +10,7 @@ const SECTION_ROUTES: Record<string, string[]> = {
   'contratos:ver': ['/superadmin/contratos'],
   'asesores:ver': ['/superadmin/asesores'],
   'pos:ver': ['/superadmin/pos'],
+  'ventas:ver': ['/superadmin/ventas'],
   'productos:ver': ['/superadmin/productos'],
   'clientes:ver': ['/superadmin/clientes'],
   'cursos:ver': ['/superadmin/cursos'],

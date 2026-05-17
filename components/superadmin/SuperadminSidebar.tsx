@@ -11,7 +11,7 @@ import {
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
     CalendarDays, Megaphone, ClipboardList, BookOpenCheck, Package, Bell,
-    MessageCircle, Library
+    MessageCircle, Library, DollarSign
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { LucideProps } from "lucide-react"
@@ -66,6 +66,7 @@ const ALL_SECTIONS: Section[] = [
                 label: "Punto de Venta",
                 subItems: [
                     { icon: ShoppingCart, label: "Terminal POS", href: "/superadmin/pos", permission: "pos:ver" },
+                    { icon: DollarSign, label: "Historial de Ventas", href: "/superadmin/ventas", permission: "ventas:ver" },
                     { icon: ShoppingBag, label: "Productos", href: "/superadmin/productos", permission: "productos:ver" },
                     { icon: Package, label: "Entregas Digitales", href: "/superadmin/productos/entregas", permission: "productos:ver" },
                     { icon: Coins, label: "Clientes", href: "/superadmin/clientes", permission: "clientes:ver" },
