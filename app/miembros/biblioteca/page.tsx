@@ -47,21 +47,24 @@ function useLibros() {
                 while (true) {
                     const res = await fetch(`/api/biblioteca/libros?page=${page}&limit=100`);
                     const d = await res.json();
-                    if (!d.libros || d.libros.length === 0) break;
+                    console.log("[biblioteca] page", page, "success:", d.success, "count:", d.libros?.length, "total:", d.total);
+                    if (!d.success || !d.libros || d.libros.length === 0) break;
                     all.push(...d.libros.map((l: any) => ({
                         id: l.id,
                         title: l.titulo,
                         author: l.autor,
-                        category: l.categoria,
+                        category: l.categoria || "General",
                         downloadLink: l.download_link || "",
                         imgSrc: l.portada_url || "",
-                        isFeatured: l.is_featured,
+                        isFeatured: l.is_featured || false,
                     })));
                     if (d.libros.length < 100) break;
                     page++;
                 }
+                console.log("[biblioteca] Total cargados:", all.length);
                 setLibros(all);
             } catch (e: any) {
+                console.error("[biblioteca] Error:", e);
                 setError(e.message || "Error de conexión");
             } finally {
                 setLoading(false);
