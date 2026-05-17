@@ -295,7 +295,7 @@ export default function EbooksPage() {
             return matchesSearch && matchesCategory && matchesAuthor && matchesSaved;
         });
         return filtered;
-    }, [searchQuery, selectedCategory, selectedAuthor, onlySaved, savedIds]);
+    }, [searchQuery, selectedCategory, selectedAuthor, onlySaved, savedIds, libros]);
 
     const visibleBooks = useMemo(() => filteredBooks.slice(0, visibleLimit), [filteredBooks, visibleLimit]);
 
@@ -303,82 +303,109 @@ export default function EbooksPage() {
     const authors = useMemo(() => Array.from(new Set(libros.map(b => b.author))).sort(), [libros]);
 
     return (
-        <div className="min-h-screen bg-transparent text-white px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
-            <div className="w-full mx-auto">
-                {/* Header & Integrated Search Section */}
-                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-12 relative z-10">
-                    <div className="space-y-1 w-full lg:w-auto">
-                        <span className="text-blis-red text-[10px] font-black uppercase tracking-[0.4em]">Acceso VIP</span>
-                        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-black uppercase tracking-tighter leading-none sm:leading-tight">
-                            BIBLIOTECA <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/20">DIGITAL</span>
+<div className="min-h-screen bg-transparent text-white px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20 relative">
+            {/* Background effect */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b from-blis-red/5 via-blis-red/2 to-transparent rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="w-full mx-auto relative z-10">
+                {/* Header */}
+                <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                            <span className="px-3 py-1.5 bg-blis-red/10 border border-blis-red/20 rounded-full text-blis-red text-[10px] font-black uppercase tracking-[0.3em]">Acceso VIP</span>
+                            {!loading && <span className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-gray-400 text-[10px] font-bold">{libros.length} libros</span>}
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl lg:text-6xl font-black uppercase tracking-tighter leading-none">
+                            Biblioteca <span className="text-transparent bg-clip-text bg-gradient-to-r from-blis-red via-red-400 to-amber-400">Digital</span>
                         </h1>
-                        <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl leading-tight">
-                            {loading ? "Cargando biblioteca..." : `Explora nuestra colección de ${libros.length} libros y recursos especializados.`}
+                        <p className="text-sm text-gray-400 font-light max-w-xl">
+                            {loading ? "Cargando catálogo..." : `${libros.length} libros curados para tu crecimiento profesional y personal`}
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row flex-1 max-w-2xl items-center gap-4 mt-4 lg:mt-0 w-full lg:w-auto">
-                        <div className="relative flex-1 group/search w-full">
-                            <div className="relative flex items-center bg-white/[0.03] border border-white/10 rounded-2xl p-1.5 backdrop-blur-xl group-focus-within/search:border-blis-red/50 transition-all">
-                                <div className="pl-4 pr-2 text-gray-500">
-                                    <Search className="w-4 h-4 sm:w-5 sm:h-5" />
-                                </div>
+                    {/* Search */}
+                    <div className="w-full lg:w-96">
+                        <div className="relative group/search">
+                            <div className="absolute inset-0 bg-gradient-to-r from-blis-red/20 to-transparent rounded-2xl blur-md opacity-0 group-focus-within/search:opacity-100 transition-opacity duration-500" />
+                            <div className="relative flex items-center bg-white/[0.04] backdrop-blur-xl border border-white/10 rounded-2xl p-2 group-focus-within/search:border-blis-red/50 transition-all duration-300">
+                                <Search className="w-5 h-5 text-gray-500 ml-3 group-focus-within/search:text-blis-red transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Encuentra tu próximo libro..."
-                                    className="w-full bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-white placeholder:text-gray-600 text-xs sm:text-sm font-bold py-3 sm:py-2"
+                                    placeholder="Buscar por título, autor o categoría..."
+                                    className="w-full bg-transparent border-none outline-none text-white placeholder:text-gray-600 text-sm py-3 px-3"
                                     value={searchQuery}
-                                    onChange={(e) => {
-                                        setSearchQuery(e.target.value);
-                                        setVisibleLimit(20);
-                                    }}
+                                    onChange={(e) => { setSearchQuery(e.target.value); setVisibleLimit(24); }}
                                 />
                                 {searchQuery && (
-                                    <button
-                                        onClick={() => setSearchQuery("")}
-                                        className="p-2 text-gray-500 hover:text-white transition-colors mr-1"
-                                    >
+                                    <button onClick={() => { setSearchQuery(""); setVisibleLimit(24); }} className="p-2 text-gray-500 hover:text-white mr-1">
                                         <X className="w-4 h-4" />
                                     </button>
                                 )}
                             </div>
                         </div>
-
-                        {(searchQuery || selectedCategory || selectedAuthor || onlySaved) && (
-                            <button
-                                onClick={() => {
-                                    setSearchQuery("");
-                                    setSelectedCategory(null);
-                                    setSelectedAuthor(null);
-                                    setOnlySaved(false);
-                                    setVisibleLimit(20);
-                                }}
-                                className="w-full sm:w-auto px-6 py-4 sm:px-4 sm:py-3 bg-white/5 border border-white/10 text-gray-400 text-[10px] sm:text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-blis-red hover:text-white hover:border-blis-red transition-all active:scale-95 flex items-center justify-center gap-2"
-                            >
-                                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Reset
-                            </button>
-                        )}
                     </div>
                 </div>
 
                 {/* Main Content Layout */}
-                <div className="flex flex-col lg:flex-row gap-8 pb-20">
-                    {/* Results Grid */}
-                    <div className="flex-1 min-w-0">
-                        <AnimatePresence mode="wait">
-                            {loading ? (
-                                <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12">
-                                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-x-4 gap-y-10">
-                                        {Array.from({ length: 12 }).map((_, i) => (
-                                            <div key={i} className="animate-pulse">
-                                                <div className="aspect-[3/4.2] rounded-2xl bg-zinc-800/50 mb-3" />
-                                                <div className="h-3 bg-zinc-800/50 rounded w-3/4 mb-2" />
-                                                <div className="h-2 bg-zinc-800/30 rounded w-1/2" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </motion.div>
-                            ) : visibleBooks.length > 0 ? (
+                {/* Horizontal Filter Pills */}
+                <div className="flex flex-wrap items-center gap-2 mb-8 pb-6 border-b border-white/5">
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider mr-2">Filtrar:</span>
+                    <button
+                        onClick={() => { setSelectedCategory(null); setSelectedAuthor(null); setOnlySaved(false); setVisibleLimit(24); }}
+                        className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${!selectedCategory && !selectedAuthor && !onlySaved ? 'bg-blis-red text-white shadow-lg shadow-blis-red/20' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'}`}
+                    >
+                        Todos
+                    </button>
+                    <button
+                        onClick={() => setOnlySaved(!onlySaved)}
+                        className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${onlySaved ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'}`}
+                    >
+                        <Heart className={`w-3 h-3 ${onlySaved ? 'fill-current' : ''}`} /> Guardados
+                    </button>
+                    <div className="w-px h-6 bg-white/10 mx-2" />
+                    {categories.slice(0, 8).map((cat) => (
+                        <button
+                            key={cat}
+                            onClick={() => { setSelectedCategory(selectedCategory === cat ? null : cat); setVisibleLimit(24); }}
+                            className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${selectedCategory === cat ? 'bg-white text-black shadow-lg shadow-white/10' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/5'}`}
+                        >
+                            {cat}
+                        </button>
+                    ))}
+                    {categories.length > 8 && (
+                        <span className="text-[10px] text-gray-600 px-2">+{categories.length - 8} más</span>
+                    )}
+                    <div className="w-px h-6 bg-white/10 mx-2" />
+                    <select
+                        value={selectedAuthor || ""}
+                        onChange={(e) => { setSelectedAuthor(e.target.value || null); setVisibleLimit(24); }}
+                        className="px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/5 border border-white/5 text-gray-400 hover:bg-white/10 hover:text-white cursor-pointer appearance-none pr-8 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNjY2IiBzdHJva2Utd2lkdGg9IjEuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+')] bg-no-repeat bg-[right_12px_center]"
+                    >
+                        <option value="" className="bg-[#0a0a0a]">Por Autor</option>
+                        {authors.map(a => (
+                            <option key={a} value={a} className="bg-[#0a0a0a]">{a}</option>
+                        ))}
+                    </select>
+                </div>
+
+                {/* Results Grid */}
+                <div className="pb-20">
+                    <AnimatePresence mode="wait">
+                        {loading ? (
+                            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-12">
+                                <p className="text-center text-gray-500 text-sm py-8">Cargando {libros.length || '...'} libros...</p>
+                                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-x-4 gap-y-10">
+                                    {Array.from({ length: 12 }).map((_, i) => (
+                                        <div key={i} className="animate-pulse">
+                                            <div className="aspect-[3/4.2] rounded-2xl bg-zinc-800/50 mb-3" />
+                                            <div className="h-3 bg-zinc-800/50 rounded w-3/4 mb-2" />
+                                            <div className="h-2 bg-zinc-800/30 rounded w-1/2" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        ) : visibleBooks.length > 0 ? (
+                            <>
                                 <motion.div
                                     key="books-grid"
                                     initial={{ opacity: 0 }}
@@ -477,6 +504,7 @@ export default function EbooksPage() {
                                         </div>
                                     )}
                                 </motion.div>
+                            </>
                             ) : (
                                 <motion.div
                                     key="no-results"
@@ -520,82 +548,6 @@ export default function EbooksPage() {
                             )}
                         </AnimatePresence>
                     </div>
-
-                    {/* Right Sidebar Filters */}
-                    <aside className="w-full lg:w-80 shrink-0 space-y-8">
-                        <div className="sticky top-24 space-y-8">
-                            <div className="flex items-center gap-3 mb-6">
-                                <Filter className="w-5 h-5 text-blis-red" />
-                                <h2 className="text-xl font-black uppercase tracking-tighter">Mega Filtros</h2>
-                            </div>
-
-                            {/* Guardados Toggle */}
-                            <button
-                                onClick={() => setOnlySaved(!onlySaved)}
-                                className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between group ${onlySaved ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-white/5 border-white/5 text-gray-400 hover:border-white/10'}`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <Heart className={`w-5 h-5 ${onlySaved ? 'fill-current' : ''}`} />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Mis Guardados</span>
-                                </div>
-                                <div className={`w-2 h-2 rounded-full ${onlySaved ? 'bg-emerald-400 animate-pulse' : 'bg-gray-700'}`} />
-                            </button>
-
-                            {/* Categorías */}
-                            <div className="space-y-4">
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 ml-1">Categorías</h3>
-                                <div className="flex flex-col gap-2">
-                                    <button
-                                        onClick={() => {
-                                            setSelectedCategory(null);
-                                            setVisibleLimit(20);
-                                        }}
-                                        className={`w-full px-5 py-4 rounded-xl text-left text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-between group ${!selectedCategory ? 'bg-blis-red text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}
-                                    >
-                                        <span>Todas</span>
-                                        {!selectedCategory && <ChevronRight className="w-4 h-4" />}
-                                    </button>
-                                    {categories.map((cat) => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => {
-                                                setSelectedCategory(selectedCategory === cat ? null : cat);
-                                                setVisibleLimit(20);
-                                            }}
-                                            className={`w-full px-5 py-4 rounded-xl text-left text-[11px] font-black uppercase tracking-widest transition-all flex items-center justify-between group ${selectedCategory === cat ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}
-                                        >
-                                            <span>{cat}</span>
-                                            {selectedCategory === cat ? <ChevronRight className="w-4 h-4" /> : <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Autores */}
-                            <div className="space-y-4">
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 ml-1">Autores</h3>
-                                <div className="relative">
-                                    <select
-                                        className="w-full bg-white/5 border border-white/5 text-gray-400 text-[10px] font-black uppercase tracking-widest p-4 rounded-xl focus:ring-blis-red focus:border-blis-red appearance-none cursor-pointer hover:bg-white/10 transition-colors"
-                                        value={selectedAuthor || ""}
-                                        onChange={(e) => {
-                                            setSelectedAuthor(e.target.value || null);
-                                            setVisibleLimit(20);
-                                        }}
-                                    >
-                                        <option value="" className="bg-[#050505]">Filtrar por Autor...</option>
-                                        {authors.map(a => (
-                                            <option key={a} value={a} className="bg-[#050505]">{a}</option>
-                                        ))}
-                                    </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
-                                        <ChevronRight className="w-4 h-4 rotate-90" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </aside>
-                </div>
 
             </div>
         </div>
