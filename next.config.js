@@ -30,8 +30,15 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'blis-corp.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'campus.blis-corp.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'srjhrhiesienkofisvnv.supabase.co',
+      },
     ],
-    unoptimized: true,
   },
 }
 

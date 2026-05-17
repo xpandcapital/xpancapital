@@ -22,7 +22,7 @@ import {
     Heart
 } from "lucide-react";
 import Image from "next/image";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 
 // Types
 interface EBook {
@@ -34,8 +34,31 @@ interface EBook {
     imgSrc: string;
     isFeatured?: boolean;
 }
+// Hook para obtener libros desde API
+function useLibros() {
+    const [libros, setLibros] = useState<EBook[]>([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        fetch("/api/biblioteca/libros?limit=500")
+            .then(r => r.json())
+            .then(d => {
+                if (d.libros) setLibros(d.libros.map((l: any) => ({
+                    id: l.id,
+                    title: l.titulo,
+                    author: l.autor,
+                    category: l.categoria,
+                    downloadLink: l.download_link || "",
+                    imgSrc: l.portada_url || "",
+                    isFeatured: l.is_featured,
+                })));
+                setLoading(false);
+            })
+            .catch(() => setLoading(false));
+    }, []);
+    return { libros, loading };
+}
 
-// Data extracted from campus.blis-corp.com/libros/
+// Data extracted from campus.blis-corp.com/libros/ (legacy fallback)
 const EXTRACTED_BOOKS: EBook[] = [
     {
         id: "1",
@@ -223,6 +246,9 @@ export default function EbooksPage() {
     const [savedIds, setSavedIds] = useState<string[]>([]);
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
     const [visibleLimit, setVisibleLimit] = useState(20);
+    const { libros, loading } = useLibros();
+
+    const allBooks = libros.length > 0 ? libros : EXTRACTED_BOOKS;
 
     // Persistence for Saved Books
     useEffect(() => {
@@ -244,7 +270,7 @@ export default function EbooksPage() {
 
     // Filter Logic
     const filteredBooks = useMemo(() => {
-        const filtered = EXTRACTED_BOOKS.filter(book => {
+        const filtered = allBooks.filter(book => {
             const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 book.category.toLowerCase().includes(searchQuery.toLowerCase());
@@ -258,8 +284,8 @@ export default function EbooksPage() {
 
     const visibleBooks = useMemo(() => filteredBooks.slice(0, visibleLimit), [filteredBooks, visibleLimit]);
 
-    const categories = useMemo(() => Array.from(new Set(EXTRACTED_BOOKS.map(b => b.category))), []);
-    const authors = useMemo(() => Array.from(new Set(EXTRACTED_BOOKS.map(b => b.author))), []);
+    const categories = useMemo(() => Array.from(new Set(allBooks.map(b => b.category))), [allBooks]);
+    const authors = useMemo(() => Array.from(new Set(allBooks.map(b => b.author))), [allBooks]);
 
     return (
         <div className="min-h-screen bg-transparent text-white px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">

@@ -69,6 +69,7 @@
     "eslint-config-next": "16.1.6",
     "happy-dom": "^17.6.3",
     "tailwindcss": "^4",
+    "tsx": "^4.22.1",
     "typescript": "^5",
     "vitest": "^3.2.4"
   }
