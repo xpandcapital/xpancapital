@@ -66,7 +66,7 @@ export function MiembrosSidebar() {
         <motion.aside
             initial={false}
             animate={{ width: isCollapsed ? sidebarWidth : 240 }}
-            className="flex flex-col bg-black border-r border-white/5 h-[calc(100vh-80px)] fixed md:relative left-0 top-[80px] md:top-0 z-50 overflow-hidden shadow-[10px_0_30px_rgba(0,0,0,0.5)]"
+            className="flex flex-col bg-black border-r border-white/5 h-[calc(100vh-80px)] relative left-0 top-0 z-10 overflow-hidden flex-shrink-0"
         >
             <div className={`pt-4 pb-2 px-4 flex items-center ${isCollapsed ? 'justify-center px-0' : 'justify-between'}`}>
                 {!isCollapsed && (
