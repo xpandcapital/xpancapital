@@ -16,8 +16,20 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 200);
     const estado = searchParams.get("estado") || "";
     const search = searchParams.get("search") || "";
+    const logsCompraId = searchParams.get("logs_compra_id");
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Si se pide historial de una compra específica
+    if (logsCompraId) {
+      const { data } = await supabase
+        .from("compras_logs")
+        .select("*, admin:profiles!user_id(id, nombre)")
+        .eq("compra_id", logsCompraId)
+        .order("creado_en", { ascending: false });
+
+      return NextResponse.json({ success: true, logs: data || [] });
+    }
 
     let query = supabase
       .from("compras")
@@ -42,18 +54,25 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT — actualizar estado y/o método de pago de una venta
+// PUT — actualizar estado y/o método de pago de una venta (con logs)
 export async function PUT(request: NextRequest) {
   try {
     const auth = await getAuthUser(request);
     if (!auth) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const body = await request.json();
-    const { id, estado, metodo_pago } = body;
+    const { id, estado, metodo_pago, notas } = body;
 
     if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Obtener estado anterior para el log
+    const { data: compraActual } = await supabase
+      .from("compras")
+      .select("estado")
+      .eq("id", id)
+      .single();
 
     const updates: any = { updated_at: new Date().toISOString() };
     if (estado) updates.estado = estado;
@@ -68,17 +87,28 @@ export async function PUT(request: NextRequest) {
 
     if (error) throw error;
 
+    // Insertar log de cambio si cambió el estado
+    if (estado && compraActual && compraActual.estado !== estado) {
+      await supabase.from("compras_logs").insert({
+        compra_id: id,
+        user_id: auth.userId,
+        estado_anterior: compraActual.estado,
+        estado_nuevo: estado,
+        notas: notas || null,
+      });
+    }
+
     return NextResponse.json({ success: true, venta: data });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
-// DELETE — eliminar venta (solo superadmin)
+// DELETE — eliminar venta (admin/superadmin)
 export async function DELETE(request: NextRequest) {
   try {
     const auth = await getAuthUser(request);
-    if (!auth || auth.rol !== "superadmin") {
+    if (!auth || !["superadmin", "admin"].includes(auth.rol)) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 

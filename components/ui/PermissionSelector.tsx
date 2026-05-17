@@ -19,6 +19,7 @@ const PERMISSION_CATEGORIES: Record<string, Permission[]> = {
   'Contratos': ['contratos:ver', 'contratos:crear', 'contratos:editar'],
   'Asesores': ['asesores:ver', 'asesores:crear', 'asesores:editar'],
   'POS': ['pos:ver'],
+  'Ventas': ['ventas:ver', 'ventas:crear', 'ventas:editar', 'ventas:eliminar'],
   'Productos': ['productos:ver', 'productos:crear', 'productos:editar', 'productos:eliminar'],
   'Clientes': ['clientes:ver', 'clientes:editar'],
   'Cursos': ['cursos:ver', 'cursos:crear', 'cursos:editar', 'cursos:eliminar'],
