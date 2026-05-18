@@ -6,10 +6,9 @@ import { motion } from 'framer-motion'
 
 const STEPS = [
   { id: 'upload', label: 'Subiendo y preparando imagen', icon: UploadCloud },
-  { id: 'bg', label: 'Removiendo fondo (opcional)', icon: Scissors },
-  { id: 'quantize', label: 'Extrayendo colores dominantes', icon: PenTool },
+  { id: 'quantize', label: 'Extrayendo colores dominantes (Sharp)', icon: PenTool },
   { id: 'vectorize', label: 'Vectorizando curvas (Potrace)', icon: PenTool },
-  { id: 'render', label: 'Generando previsualización 3D', icon: Box },
+  { id: 'render', label: 'Generando previsualización 3D (Gemini)', icon: Box },
 ]
 
 interface Props {

@@ -92,17 +92,8 @@ export function AutoEmbroideryTool() {
         const imageUrl = await uploadToStorage(file)
         cleanImageUrl = imageUrl
 
-        // Paso 1: Remove background (opcional)
+        // Paso 1: Quantize — extrae colores dominantes, genera máscaras B/N, posteriza
         setCurrentStep(1)
-        try {
-          const bgResult = await callBordadoAPI('remove-bg', { imageUrl })
-          cleanImageUrl = bgResult.url
-        } catch (e: any) {
-          errors.push('Remove BG: ' + (e.message || 'falló'))
-        }
-
-        // Paso 2: Quantize — extrae colores dominantes, genera máscaras B/N, posteriza
-        setCurrentStep(2)
         try {
           const quantResult = await callBordadoAPI('quantize', {
             imageUrl: cleanImageUrl,
@@ -123,8 +114,8 @@ export function AutoEmbroideryTool() {
         if (!colors.length) colors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e']
         if (!maskUrls.length) maskUrls = [cleanImageUrl]
 
-        // Paso 3: Vectorize — Potrace sobre cada máscara
-        setCurrentStep(3)
+        // Paso 2: Vectorize — Potrace sobre cada máscara
+        setCurrentStep(2)
         let vectorLayers: LayerInfo[] = []
         try {
           const vecResult = await callBordadoAPI('vectorize', {
@@ -150,8 +141,8 @@ export function AutoEmbroideryTool() {
           return
         }
 
-        // Paso 4: Assemble SVG
-        setCurrentStep(4)
+        // Paso 3: Assemble SVG
+        setCurrentStep(3)
         try {
           const svgResult = await callBordadoAPI('assemble-svg', { layers: vectorLayers })
           setSvgContent(svgResult.svg)
@@ -163,7 +154,7 @@ export function AutoEmbroideryTool() {
         setApiErrors(errors)
         setStatus('done')
 
-        // Paso 5: Preview 3D con Gemini (no bloqueante)
+        // Paso 4: Preview 3D con Gemini (no bloqueante)
         try {
           const renderResult = await callBordadoAPI('gemini-render', {
             imageUrl: posterizedImage || dataUrl,

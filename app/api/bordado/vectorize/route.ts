@@ -29,7 +29,7 @@ function extractPathsFromSVG(svg: string): { pathD: string; transform: string; v
   const gMatch = svg.match(/<g[^>]*transform=["']([^"']+)["'][^>]*>/)
   const transform = gMatch ? gMatch[1] : ''
 
-  const pathRegex = /<path[^>]*\sd=["']([^"']+)["'][^>]*\/?>/g
+  const pathRegex = /<path\b[^>]*\bd=["']([^"']+)["'][^>]*\/?>/g
   const pathDs: string[] = []
   let match
   while ((match = pathRegex.exec(svg)) !== null) {
