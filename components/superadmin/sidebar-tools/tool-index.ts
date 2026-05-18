@@ -338,6 +338,14 @@ const TOOL_INDEX: ToolDef[] = [
             simple: "Pega un enlace de YouTube y presiona Enter para agregar.",
             advanced: "Agrega múltiples enlaces, selecciona calidad máxima y descarga todos en lote."
         }
+    },
+    {
+        id: 'bordado', name: 'Bordado IA', description: 'Convierte imágenes a SVG multicapa para Wilcom con render 3D de hilo', cat: 'Multimedia', icon: Scissors, isIA: true,
+        help: "Sube una imagen JPG/PNG. La IA separa capas con SAM 2, vectoriza con Potrace y genera un SVG listo para importar en Wilcom EmbroideryStudio.",
+        examples: {
+            simple: "Sube un logo simple para vectorizarlo como bordado de 2-3 capas.",
+            advanced: "Procesa una ilustración compleja con múltiples colores. SAM 2 separa hasta 8 capas y Potrace genera curvas SVG limpias para cada una."
+        }
     }
 ];
 

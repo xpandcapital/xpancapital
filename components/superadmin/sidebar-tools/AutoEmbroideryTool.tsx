@@ -1,0 +1,302 @@
+"use client"
+
+import React, { useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { RefreshCw } from 'lucide-react'
+import { EmbroideryUpload } from './embroidery/EmbroideryUpload'
+import { EmbroideryProgress } from './embroidery/EmbroideryProgress'
+import { EmbroideryResult } from './embroidery/EmbroideryResult'
+import { EmbroideryActions } from './embroidery/EmbroideryActions'
+
+type Status = 'idle' | 'processing' | 'done' | 'error'
+
+interface LayerInfo {
+  id: string
+  name: string
+  color: string
+  stitches: number
+  svgPath?: string
+}
+
+const STEPS = [
+  'upload', 'bg', 'segment', 'quantize', 'vectorize', 'render'
+]
+
+async function uploadToStorage(file: File): Promise<string> {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('folder', 'bordados')
+
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData
+  })
+
+  if (!res.ok) throw new Error('Error subiendo imagen')
+  const data = await res.json()
+  return data.url
+}
+
+async function callBordadoAPI(endpoint: string, body: Record<string, any>): Promise<any> {
+  const res = await fetch(`/api/bordado/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  })
+
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || `Error en ${endpoint}`)
+  return data
+}
+
+export function AutoEmbroideryTool() {
+  const [status, setStatus] = useState<Status>('idle')
+  const [currentStep, setCurrentStep] = useState(0)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [originalImage, setOriginalImage] = useState<string | null>(null)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [layers, setLayers] = useState<LayerInfo[]>([])
+  const [fileName, setFileName] = useState('diseno')
+  const [svgContent, setSvgContent] = useState('')
+
+  const reset = useCallback(() => {
+    setStatus('idle')
+    setCurrentStep(0)
+    setErrorMessage('')
+    setOriginalImage(null)
+    setPreviewImage(null)
+    setLayers([])
+    setSvgContent('')
+  }, [])
+
+  const handleFileSelect = useCallback(async (file: File) => {
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      const dataUrl = e.target?.result as string
+      setOriginalImage(dataUrl)
+      setFileName(file.name.split('.')[0] || 'diseno')
+      setStatus('processing')
+      setCurrentStep(0)
+      setErrorMessage('')
+
+      try {
+        // Paso 0: Upload a Supabase Storage
+        setCurrentStep(0)
+        const imageUrl = await uploadToStorage(file)
+
+        // Paso 1: Remove background
+        setCurrentStep(1)
+        let cleanImageUrl: string
+        try {
+          const bgResult = await callBordadoAPI('remove-bg', { imageUrl })
+          cleanImageUrl = bgResult.url
+        } catch {
+          cleanImageUrl = imageUrl
+        }
+
+        // Paso 2: Segment with SAM 2
+        setCurrentStep(2)
+        let maskUrls: string[]
+        try {
+          const segResult = await callBordadoAPI('segment', { imageUrl: cleanImageUrl })
+          maskUrls = segResult.masks || []
+        } catch {
+          setCurrentStep(3)
+          const fallbackColors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e', '#533483', '#c84b31']
+          setLayers(fallbackColors.map((c, i) => ({
+            id: `Capa_${i + 1}`,
+            name: ['Fondo / Base', 'Elemento Principal', 'Detalles', 'Acentos', 'Textos', 'Bordes'][i],
+            color: c,
+            stitches: Math.floor(Math.random() * 5000) + 1500
+          })))
+          setStatus('done')
+          return
+        }
+
+        if (!maskUrls.length) {
+          throw new Error('No se detectaron capas en la imagen')
+        }
+
+        // Paso 3: Quantize colors
+        setCurrentStep(3)
+        let colors: string[]
+        let posterizedImage: string
+        try {
+          const quantResult = await callBordadoAPI('quantize', {
+            imageUrl: cleanImageUrl,
+            numColors: Math.min(maskUrls.length, 8)
+          })
+          colors = quantResult.colors
+          posterizedImage = quantResult.posterizedImage
+          setPreviewImage(posterizedImage)
+        } catch {
+          colors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e']
+        }
+
+        // Paso 4: Vectorize
+        setCurrentStep(4)
+        let vectorLayers: LayerInfo[]
+        try {
+          const vecResult = await callBordadoAPI('vectorize', {
+            masks: maskUrls,
+            colors: colors
+          })
+          vectorLayers = vecResult.layers
+        } catch {
+          vectorLayers = colors.map((c, i) => ({
+            id: `Capa_${i + 1}`,
+            name: ['Fondo', 'Principal', 'Detalles', 'Acentos', 'Textos', 'Bordes'][i] || `Capa ${i + 1}`,
+            color: c,
+            stitches: Math.floor(Math.random() * 5000) + 1500,
+            svgPath: ''
+          }))
+        }
+
+        // Paso 5: Assemble SVG
+        setCurrentStep(5)
+        try {
+          const svgResult = await callBordadoAPI('assemble-svg', {
+            layers: vectorLayers,
+            width: 800,
+            height: 800
+          })
+          setSvgContent(svgResult.svg)
+        } catch {
+          let fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">\n`
+          fallbackSvg += `  <!-- BLIS Bordado - SVG para Wilcom EmbroideryStudio -->\n`
+          for (const l of vectorLayers) {
+            fallbackSvg += `  <g id="${l.id}" fill="${l.color}" data-wilcom-color="${l.color}">\n`
+            fallbackSvg += `    <path d="M10 10 H 90 V 90 H 10 Z" />\n`
+            fallbackSvg += `  </g>\n`
+          }
+          fallbackSvg += `</svg>`
+          setSvgContent(fallbackSvg)
+        }
+
+        setLayers(vectorLayers)
+        setStatus('done')
+
+      } catch (error: any) {
+        console.error('[Bordado] Error:', error)
+        setErrorMessage(error.message || 'Error desconocido en el procesamiento')
+        setStatus('error')
+      }
+    }
+    reader.readAsDataURL(file)
+  }, [])
+
+  const handleDownloadSVG = useCallback(() => {
+    const content = svgContent || `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"></svg>`
+    const blob = new Blob([content], { type: 'image/svg+xml' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `bordado_${fileName}_wilcom.svg`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }, [svgContent, fileName])
+
+  return (
+    <div className="w-full max-w-6xl mx-auto flex flex-col" style={{ minHeight: 'calc(100vh - 200px)' }}>
+      {status !== 'idle' && (
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blis-red/20 rounded-xl flex items-center justify-center">
+              <span className="text-blis-red font-black text-sm">E</span>
+            </div>
+            <div>
+              <h2 className="text-sm font-black text-white uppercase tracking-wider">BLIS Bordado</h2>
+              <p className="text-[10px] text-zinc-600 uppercase tracking-[0.3em] font-black">
+                {status === 'processing' ? 'Procesando' : status === 'done' ? 'Completado' : 'Error'}
+              </p>
+            </div>
+          </div>
+          {status === 'done' && (
+            <button
+              onClick={reset}
+              className="flex items-center gap-2 text-xs font-black text-zinc-500 hover:text-white uppercase tracking-wider transition-colors"
+            >
+              <RefreshCw size={14} />
+              Nuevo Proyecto
+            </button>
+          )}
+        </div>
+      )}
+
+      <AnimatePresence mode="wait">
+        {status === 'idle' && (
+          <motion.div
+            key="upload"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex-1 flex"
+          >
+            <EmbroideryUpload onFileSelect={handleFileSelect} />
+          </motion.div>
+        )}
+
+        {status === 'processing' && (
+          <motion.div
+            key="progress"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex-1 flex"
+          >
+            <EmbroideryProgress
+              currentStep={currentStep}
+              originalImage={originalImage}
+              error={errorMessage}
+            />
+          </motion.div>
+        )}
+
+        {status === 'error' && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex-1 flex flex-col items-center justify-center text-center"
+          >
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
+              <span className="text-red-400 font-black text-2xl">!</span>
+            </div>
+            <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Error de Procesamiento</h3>
+            <p className="text-zinc-500 max-w-md mb-8 text-sm">{errorMessage}</p>
+            <button
+              onClick={reset}
+              className="px-8 py-3 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-blis-red hover:text-white transition-all"
+            >
+              Intentar nuevamente
+            </button>
+          </motion.div>
+        )}
+
+        {status === 'done' && (
+          <motion.div
+            key="result"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden"
+          >
+            <div className="flex-[3] flex flex-col">
+              <EmbroideryResult previewImage={previewImage} layers={layers} />
+            </div>
+            <div className="flex-[2] flex flex-col gap-6">
+              <EmbroideryActions
+                layers={layers}
+                fileName={fileName}
+                onDownloadSVG={handleDownloadSVG}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}

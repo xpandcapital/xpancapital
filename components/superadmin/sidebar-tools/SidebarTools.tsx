@@ -31,6 +31,7 @@ import { MiniSpreadsheet } from './MiniSpreadsheet';
 import { FormulaCalc } from './FormulaCalc';
 import { NoteTool } from './NoteTool';
 import { ShortLinkTool } from './ShortLinkTool';
+import { AutoEmbroideryTool } from './AutoEmbroideryTool';
 
 export const SidebarTools = ({ initialTool }: { initialTool?: string }) => {
     const router = useRouter();
@@ -252,6 +253,8 @@ export const SidebarTools = ({ initialTool }: { initialTool?: string }) => {
                             {(() => {
                                 const staticTool = favorites.find(t => t.id === activeTool);
                                 if (staticTool) return staticTool.component;
+
+                                if (activeTool === 'bordado') return <AutoEmbroideryTool />;
 
                                 const registryTool = TOOL_INDEX.find(t => t.id === activeTool);
                                 if (registryTool) return <SmartAITool tool={registryTool} />;
