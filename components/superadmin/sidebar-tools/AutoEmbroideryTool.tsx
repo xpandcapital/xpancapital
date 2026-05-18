@@ -56,6 +56,7 @@ export function AutoEmbroideryTool() {
   const [fileName, setFileName] = useState('diseno')
   const [svgContent, setSvgContent] = useState('')
   const [apiDiag, setApiDiag] = useState<Record<string, any> | null>(null)
+  const [apiErrors, setApiErrors] = useState<string[]>([])
 
   useEffect(() => { getDiagnostics().then(setApiDiag).catch(() => {}) }, [])
 
@@ -83,6 +84,7 @@ export function AutoEmbroideryTool() {
       let maskUrls: string[] = []
       let colors: string[] = []
       let posterizedImage = ''
+      const errors: string[] = []
 
       try {
         // Paso 0: Upload
@@ -95,8 +97,8 @@ export function AutoEmbroideryTool() {
         try {
           const bgResult = await callBordadoAPI('remove-bg', { imageUrl })
           cleanImageUrl = bgResult.url
-        } catch {
-          // Seguimos con la imagen original
+        } catch (e: any) {
+          errors.push('Remove BG: ' + (e.message || 'falló'))
         }
 
         // Paso 2: Segmente con SAM 2 (opcional)
@@ -104,8 +106,8 @@ export function AutoEmbroideryTool() {
         try {
           const segResult = await callBordadoAPI('segment', { imageUrl: cleanImageUrl })
           maskUrls = segResult.masks || []
-        } catch {
-          // SAM no disponible — las máscaras las generará quantize
+        } catch (e: any) {
+          errors.push('SAM Segment: ' + (e.message || 'falló'))
         }
 
         // Paso 3: Quantize — SIEMPRE, genera colores + preview + máscaras B/N por color
@@ -123,7 +125,8 @@ export function AutoEmbroideryTool() {
           if (!maskUrls.length && quantResult.masks?.length) {
             maskUrls = quantResult.masks.filter(Boolean)
           }
-        } catch {
+        } catch (e: any) {
+          errors.push('Quantize: ' + (e.message || 'falló'))
           colors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e']
           setPreviewImage(dataUrl)
         }
@@ -145,8 +148,8 @@ export function AutoEmbroideryTool() {
             imageUrl: cleanImageUrl
           })
           vectorLayers = vecResult.layers || []
-        } catch {
-          // Fallback mínimo
+        } catch (e: any) {
+          errors.push('Vectorize: ' + (e.message || 'falló'))
         }
 
         if (!vectorLayers.length) {
@@ -168,7 +171,8 @@ export function AutoEmbroideryTool() {
             height: 800
           })
           setSvgContent(svgResult.svg)
-        } catch {
+        } catch (e: any) {
+          errors.push('Assemble SVG: ' + (e.message || 'falló'))
           let fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">\n`
           fallbackSvg += `  <!-- BLIS Bordado - SVG para Wilcom EmbroideryStudio -->\n`
           for (const l of vectorLayers) {
@@ -185,6 +189,7 @@ export function AutoEmbroideryTool() {
         }
 
         setLayers(vectorLayers)
+        setApiErrors(errors)
         setStatus('done')
 
         // Paso 6: Render 3D con Gemini (async, no bloqueante)
@@ -196,8 +201,8 @@ export function AutoEmbroideryTool() {
           if (renderResult.url) {
             setPreviewImage(renderResult.url)
           }
-        } catch {
-          // Si falla, se queda el preview posterizado de quantize
+        } catch (e: any) {
+          errors.push('Render 3D: ' + (e.message || 'falló'))
         }
 
       } catch (error: any) {
@@ -301,7 +306,12 @@ export function AutoEmbroideryTool() {
               <EmbroideryResult previewImage={previewImage} layers={layers} />
             </div>
             <div className="flex-[2] flex flex-col gap-6">
-              <EmbroideryActions layers={layers} fileName={fileName} onDownloadSVG={handleDownloadSVG} />
+              <EmbroideryActions
+                layers={layers}
+                fileName={fileName}
+                onDownloadSVG={handleDownloadSVG}
+                errors={apiErrors}
+              />
             </div>
           </motion.div>
         )}

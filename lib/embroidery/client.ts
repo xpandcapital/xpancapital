@@ -8,7 +8,6 @@ const SAM_MODELS = [
   { owner: 'meta', name: 'sam-2' },
   { owner: 'meta', name: 'segment-anything-2' },
   { owner: 'meta', name: 'segment-anything' },
-  { owner: 'cjwbw', name: 'rembg' },
 ]
 const REMBG_MODEL = { owner: 'cjwbw', name: 'rembg' }
 

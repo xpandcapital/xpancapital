@@ -5,51 +5,43 @@ export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
   try {
-    const { layers, width = 800, height = 800 } = await request.json()
+    const { layers } = await request.json()
     if (!layers || !Array.isArray(layers)) {
       return NextResponse.json({ error: 'Se requiere layers (array)' }, { status: 400 })
     }
 
-    let hasViewBox = false
-    let vbW = width
-    let vbH = height
+    const vb = 512
+    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vb} ${vb}" width="${vb}" height="${vb}">\n`
+    svgContent += `  <!-- BLIS Bordado - SVG para Wilcom EmbroideryStudio / CorelDRAW -->\n`
+    svgContent += `  <!-- Capas detectadas: ${layers.length} | Medidas: ${vb}x${vb}px -->\n`
+    svgContent += `  <!-- Importar en CorelDRAW/Wilcom: Archivo > Importar (Ctrl+I) > seleccionar .SVG -->\n\n`
 
-    for (const l of layers) {
-      if (l.viewBox) {
-        const parts = l.viewBox.split(/\s+/)
-        if (parts.length === 4) {
-          vbW = parseInt(parts[2]) || width
-          vbH = parseInt(parts[3]) || height
-          hasViewBox = true
-          break
-        }
-      }
-    }
-
-    let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vbW} ${vbH}" width="100%" height="100%">\n`
-    svgContent += `  <!-- BLIS Bordado - SVG para Wilcom EmbroideryStudio -->\n`
-    svgContent += `  <!-- Capas detectadas: ${layers.length} -->\n`
-    svgContent += `  <!-- Importar: Modo Gráfico > Ctrl+I > Convertir a bordado -->\n\n`
-
-    for (const layer of layers) {
+    for (let i = 0; i < layers.length; i++) {
+      const layer = layers[i]
       const color = layer.color || '#000000'
       const pathD = layer.svgPath || ''
       const transform = layer.transform || ''
-      const id = layer.id || `Capa_${layers.indexOf(layer) + 1}`
+      const id = layer.id || `Capa_${i + 1}`
       const name = layer.name || id
+      const stitches = layer.stitches || 1500
 
-      svgContent += `  <!-- ${name} - ${color} - ~${layer.stitches || '?'} pts -->\n`
-      svgContent += `  <g id="${id}" data-name="${name}" data-color="${color}">\n`
+      svgContent += `  <!-- ${name} | ${color} | ~${stitches} pts -->\n`
 
-      if (transform) {
-        svgContent += `    <g transform="${transform}">\n`
-        svgContent += `      <path d="${pathD}" fill="${color}" stroke="${color}" stroke-width="0.3" />\n`
-        svgContent += `    </g>\n`
+      if (pathD && pathD.length > 10) {
+        svgContent += `  <g id="${id}" data-name="${escapeXml(name)}" data-color="${color}" data-stitches="${stitches}">\n`
+        if (transform && transform.length > 5) {
+          svgContent += `    <g transform="${transform}">\n`
+          svgContent += `      <path d="${pathD}" fill="${color}" stroke="${color}" stroke-width="0.5" stroke-linejoin="round" />\n`
+          svgContent += `    </g>\n`
+        } else {
+          svgContent += `    <path d="${pathD}" fill="${color}" stroke="${color}" stroke-width="0.5" stroke-linejoin="round" />\n`
+        }
+        svgContent += `  </g>\n\n`
       } else {
-        svgContent += `    <path d="${pathD}" fill="${color}" stroke="${color}" stroke-width="0.3" />\n`
+        svgContent += `  <g id="${id}" data-name="${escapeXml(name)}" data-color="${color}" data-stitches="${stitches}">\n`
+        svgContent += `    <rect x="${10 + i * 5}" y="${10 + i * 5}" width="${vb - 20 - i * 10}" height="${vb - 20 - i * 10}" fill="${color}" stroke="${color}" stroke-width="0.5" rx="4" />\n`
+        svgContent += `  </g>\n\n`
       }
-
-      svgContent += `  </g>\n\n`
     }
 
     svgContent += `</svg>`
@@ -59,4 +51,8 @@ export async function POST(request: NextRequest) {
     console.error('[assemble-svg] Error:', error)
     return NextResponse.json({ error: error.message || 'Error ensamblando SVG' }, { status: 500 })
   }
+}
+
+function escapeXml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }

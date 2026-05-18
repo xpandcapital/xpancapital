@@ -16,9 +16,10 @@ interface Props {
   layers: LayerInfo[]
   fileName: string
   onDownloadSVG: () => void
+  errors?: string[]
 }
 
-export function EmbroideryActions({ layers, fileName, onDownloadSVG }: Props) {
+export function EmbroideryActions({ layers, fileName, onDownloadSVG, errors = [] }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -29,6 +30,15 @@ export function EmbroideryActions({ layers, fileName, onDownloadSVG }: Props) {
       <p className="text-sm text-zinc-500 leading-relaxed">
         El archivo SVG mantiene la separación por colores en etiquetas <code className="bg-white/5 px-1.5 py-0.5 rounded text-blis-red text-xs">&lt;g&gt;</code> para importación nativa a CorelDRAW y el puente Wilcom.
       </p>
+
+      {errors.length > 0 && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 space-y-1">
+          <h5 className="text-[10px] font-black text-red-400 uppercase tracking-wider mb-1">Errores detectados</h5>
+          {errors.map((err, i) => (
+            <p key={i} className="text-[10px] text-red-300 leading-relaxed font-mono break-all">{err}</p>
+          ))}
+        </div>
+      )}
 
       <button
         onClick={onDownloadSVG}
