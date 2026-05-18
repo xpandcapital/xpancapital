@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, CheckCircle2, XCircle } from 'lucide-react'
 import { EmbroideryUpload } from './embroidery/EmbroideryUpload'
 import { EmbroideryProgress } from './embroidery/EmbroideryProgress'
 import { EmbroideryResult } from './embroidery/EmbroideryResult'
@@ -32,12 +32,18 @@ async function uploadToStorage(file: File): Promise<string> {
 async function callBordadoAPI(endpoint: string, body: Record<string, any>): Promise<any> {
   const res = await fetch(`/api/bordado/${endpoint}`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   })
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || `Error en ${endpoint}`)
   return data
+}
+
+async function getDiagnostics(): Promise<any> {
+  const res = await fetch('/api/bordado/debug', { credentials: 'include' })
+  return res.json()
 }
 
 export function AutoEmbroideryTool() {
@@ -49,6 +55,9 @@ export function AutoEmbroideryTool() {
   const [layers, setLayers] = useState<LayerInfo[]>([])
   const [fileName, setFileName] = useState('diseno')
   const [svgContent, setSvgContent] = useState('')
+  const [apiDiag, setApiDiag] = useState<Record<string, any> | null>(null)
+
+  useEffect(() => { getDiagnostics().then(setApiDiag).catch(() => {}) }, [])
 
   const reset = useCallback(() => {
     setStatus('idle')
@@ -178,6 +187,19 @@ export function AutoEmbroideryTool() {
         setLayers(vectorLayers)
         setStatus('done')
 
+        // Paso 6: Render 3D con Gemini (async, no bloqueante)
+        try {
+          const renderResult = await callBordadoAPI('render', {
+            imageUrl: posterizedImage || dataUrl,
+            mimeType: 'image/png'
+          })
+          if (renderResult.url) {
+            setPreviewImage(renderResult.url)
+          }
+        } catch {
+          // Si falla, se queda el preview posterizado de quantize
+        }
+
       } catch (error: any) {
         console.error('[Bordado] Error:', error)
         setErrorMessage(error.message || 'Error desconocido')
@@ -229,8 +251,28 @@ export function AutoEmbroideryTool() {
 
       <AnimatePresence mode="wait">
         {status === 'idle' && (
-          <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex">
+          <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col">
             <EmbroideryUpload onFileSelect={handleFileSelect} />
+            {apiDiag && (
+              <div className="flex items-center justify-center gap-6 mt-4 pb-6">
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider">
+                  {apiDiag?.diagnostics?.replicate_key?.found
+                    ? <CheckCircle2 size={12} className="text-emerald-400" />
+                    : <XCircle size={12} className="text-red-400" />}
+                  <span className={apiDiag?.diagnostics?.replicate_key?.found ? 'text-emerald-400' : 'text-red-400'}>
+                    Replicate
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider">
+                  {apiDiag?.diagnostics?.gemini_key?.found
+                    ? <CheckCircle2 size={12} className="text-emerald-400" />
+                    : <XCircle size={12} className="text-red-400" />}
+                  <span className={apiDiag?.diagnostics?.gemini_key?.found ? 'text-emerald-400' : 'text-red-400'}>
+                    Gemini
+                  </span>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
 
