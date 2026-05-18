@@ -167,9 +167,19 @@ function ButtonEditor({ selectedBlock, handleUpdateContent, handleOpenMedia }) {
     <PropertyGroup title="Botón">
       <PropertyInput label="Texto del Botón" value={selectedBlock.content.text} onChange={(v) => handleUpdateContent('text', v)} />
       <PropertyInput label="Enlace (Link)" value={selectedBlock.content.url} onChange={(v) => handleUpdateContent('url', v)} />
-      <div className="grid grid-cols-2 gap-2"><PropertyColor label="Fondo Botón" value={selectedBlock.content.buttonBgColor} onChange={(v) => handleUpdateContent('buttonBgColor', v)} /><PropertyColor label="Texto" value={selectedBlock.content.textColor} onChange={(v) => handleUpdateContent('textColor', v)} /></div>
+      <div className="grid grid-cols-2 gap-2">
+        <PropertyColor label="Fondo Botón" value={selectedBlock.content.buttonBgColor} onChange={(v) => handleUpdateContent('buttonBgColor', v)} />
+        <PropertyColor label="Color Texto" value={selectedBlock.content.textColor} onChange={(v) => handleUpdateContent('textColor', v)} />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <PropertyInput label="Tamaño (px)" type="number" value={selectedBlock.content.fontSize} onChange={(v) => handleUpdateContent('fontSize', v)} />
+        <PropertySelect label="Peso" value={selectedBlock.content.fontWeight} onChange={(v) => handleUpdateContent('fontWeight', v)} options={FONT_WEIGHTS} />
+      </div>
       <PropertyInput label="Redondeo (px)" type="number" value={selectedBlock.content.borderRadius} onChange={(v) => handleUpdateContent('borderRadius', v)} />
       <PropertyAlignment value={selectedBlock.content.align} onChange={(v) => handleUpdateContent('align', v)} />
+      <PropertyColor label="Fondo Contenedor" value={selectedBlock.content.containerBgColor} onChange={(v) => handleUpdateContent('containerBgColor', v)} />
+      <PropertyBackgroundImage bgImageUrl={selectedBlock.content.bgImageUrl} bgSize={selectedBlock.content.bgSize} bgPosition={selectedBlock.content.bgPosition} onChange={(key, value) => handleUpdateContent(key, value)} onOpenGallery={() => handleOpenMedia((url) => handleUpdateContent('bgImageUrl', url))} />
+      <PropertyPadding label="Padding (px)" value={selectedBlock.content} onChange={(v) => handleUpdateContent(Object.keys(v)[0], Object.values(v)[0])} />
     </PropertyGroup>
   );
 }
