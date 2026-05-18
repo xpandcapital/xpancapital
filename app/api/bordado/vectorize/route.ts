@@ -24,7 +24,7 @@ function traceImage(buffer: Buffer): Promise<string> {
 }
 
 function extractPathsFromSVG(svg: string): { pathD: string; transform: string; viewBox: string } {
-  const viewBox = (svg.match(/viewBox=["']([^"']+)["']/) || [])[1] || '0 0 800 800'
+  const viewBox = (svg.match(/viewBox=["']([^"']+)["']/) || [])[1] || '0 0 512 512'
 
   const gMatch = svg.match(/<g[^>]*transform=["']([^"']+)["'][^>]*>/)
   const transform = gMatch ? gMatch[1] : ''
@@ -33,74 +33,67 @@ function extractPathsFromSVG(svg: string): { pathD: string; transform: string; v
   const pathDs: string[] = []
   let match
   while ((match = pathRegex.exec(svg)) !== null) {
-    pathDs.push(match[1])
+    if (match[1].length > 5) pathDs.push(match[1])
   }
 
-  const pathD = pathDs.join(' ')
-
-  return { pathD, transform, viewBox }
+  return { pathD: pathDs.join(' '), transform, viewBox }
 }
 
 export async function POST(request: NextRequest) {
+  const diag: string[] = []
   try {
-    const { masks, colors, imageUrl } = await request.json()
+    const { masks, colors } = await request.json()
+    const maskUrls: string[] = masks || []
+    const colorList: string[] = colors || []
 
-    const maskUrls = masks || []
-    const colorList = colors || ['#000000']
-
-    if (!Array.isArray(maskUrls) || !Array.isArray(colorList)) {
-      return NextResponse.json({ error: 'Se requiere masks (array URLs) y colors (array hex)' }, { status: 400 })
+    if (!maskUrls.length) {
+      return NextResponse.json({ layers: [], diag: ['Sin máscaras para vectorizar'] })
     }
 
     const layers: VectorLayer[] = []
     const nameMap = ['Fondo / Base', 'Elemento Principal', 'Detalles', 'Acentos', 'Textos', 'Bordes']
 
-    if (maskUrls.length === 0 && imageUrl) {
-      maskUrls.push(imageUrl)
-    }
-
     for (let i = 0; i < maskUrls.length; i++) {
+      const maskUrl = maskUrls[i]
+      if (!maskUrl) { diag.push(`Máscara ${i}: vacía`); continue }
+
       try {
         let buffer: Buffer
-        const maskUrl = maskUrls[i]
-
         if (maskUrl.startsWith('data:')) {
-          const base64 = maskUrl.split(',')[1]
-          buffer = Buffer.from(base64, 'base64')
+          const b64 = maskUrl.split(',')[1]
+          if (!b64) { diag.push(`Máscara ${i}: data URI sin base64`); continue }
+          buffer = Buffer.from(b64, 'base64')
+          diag.push(`Máscara ${i}: data URI ${(buffer.length/1024).toFixed(1)}KB`)
         } else {
           const res = await fetch(maskUrl)
-          if (!res.ok) {
-            console.warn(`[vectorize] No se pudo descargar máscara ${i}: ${res.status}`)
-            continue
-          }
+          if (!res.ok) { diag.push(`Máscara ${i}: fetch error ${res.status}`); continue }
           buffer = Buffer.from(await res.arrayBuffer())
+          diag.push(`Máscara ${i}: URL ${(buffer.length/1024).toFixed(1)}KB`)
         }
 
         const svg = await traceImage(buffer)
+        diag.push(`Máscara ${i}: potrace OK (${svg.length} chars)`)
+
         const { pathD, transform, viewBox } = extractPathsFromSVG(svg)
+        if (!pathD) { diag.push(`Máscara ${i}: sin path (máscara vacía?)`); continue }
 
-        if (!pathD) continue
-
-        const color = colorList[i % colorList.length]
-        const estimatedStitches = Math.max(800, Math.floor(pathD.length * 2.5))
-
+        const color = colorList[i] || colorList[i % colorList.length] || '#000000'
         layers.push({
           id: `Capa_${i + 1}`,
-          name: nameMap[i % nameMap.length],
+          name: nameMap[i] || `Capa ${i + 1}`,
           color,
           svgPath: pathD,
           transform,
-          stitches: estimatedStitches,
+          stitches: Math.max(800, Math.floor(pathD.length * 2.5)),
           viewBox
         })
-      } catch (err) {
-        console.warn(`[vectorize] Error máscara ${i}:`, err)
+      } catch (err: any) {
+        diag.push(`Máscara ${i}: ERROR ${err.message?.slice(0, 80) || err}`)
       }
     }
 
-    return NextResponse.json({ layers })
+    return NextResponse.json({ layers, diag })
   } catch (error: any) {
-    console.error('[vectorize] Error:', error)
-    return NextResponse.json({ error: error.message || 'Error vectorizando' }, { status: 500 })
+    return NextResponse.json({ error: error.message, diag }, { status: 500 })
   }
 }

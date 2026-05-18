@@ -133,6 +133,9 @@ export function AutoEmbroideryTool() {
             imageUrl: cleanImageUrl
           })
           vectorLayers = vecResult.layers || []
+          if (vecResult.diag?.length) {
+            errors.push('Vectorize diag: ' + vecResult.diag.join(' | '))
+          }
         } catch (e: any) {
           errors.push('Vectorize: ' + (e.message || 'falló'))
         }
@@ -162,7 +165,7 @@ export function AutoEmbroideryTool() {
 
         // Paso 5: Preview 3D con Gemini (no bloqueante)
         try {
-          const renderResult = await callBordadoAPI('preview', {
+          const renderResult = await callBordadoAPI('gemini-render', {
             imageUrl: posterizedImage || dataUrl,
             mimeType: 'image/png'
           })

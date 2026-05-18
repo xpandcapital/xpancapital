@@ -15,14 +15,19 @@ async function createColorMask(buffer: Buffer, targetR: number, targetG: number,
     .raw()
     .toBuffer({ resolveWithObject: true })
 
-  const maskData = Buffer.alloc(info.width * info.height)
+  const maskData = Buffer.alloc(info.width * info.height * 4)
   for (let i = 0; i < data.length; i += info.channels) {
     const r = data[i], g = data[i + 1], b = data[i + 2]
     const a = info.channels === 4 ? data[i + 3] : 255
     const dist = Math.sqrt((r-targetR)**2 + (g-targetG)**2 + (b-targetB)**2)
-    maskData[i / info.channels] = (a > 20 && dist <= tolerance) ? 255 : 0
+    const pixelIndex = (i / info.channels) * 4
+    const isColor = a > 20 && dist <= tolerance
+    maskData[pixelIndex] = isColor ? 255 : 0
+    maskData[pixelIndex + 1] = isColor ? 255 : 0
+    maskData[pixelIndex + 2] = isColor ? 255 : 0
+    maskData[pixelIndex + 3] = 255
   }
-  return sharp(maskData, { raw: { width: info.width, height: info.height, channels: 1 } }).png().toBuffer()
+  return sharp(maskData, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer()
 }
 
 export async function POST(request: NextRequest) {
