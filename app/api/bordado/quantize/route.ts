@@ -61,6 +61,13 @@ export async function POST(request: NextRequest) {
       .raw()
       .toBuffer({ resolveWithObject: true })
 
+    // Detectar color de fondo (píxel esquina superior izquierda)
+    const bgR = data[0], bgG = data[1], bgB = data[2]
+    const qBgR = Math.round(bgR / 96) * 96
+    const qBgG = Math.round(bgG / 96) * 96
+    const qBgB = Math.round(bgB / 96) * 96
+    const bgHex = `#${qBgR.toString(16).padStart(2,'0')}${qBgG.toString(16).padStart(2,'0')}${qBgB.toString(16).padStart(2,'0')}`
+
     const colorCounts = new Map<number, { r: number; g: number; b: number; count: number }>()
 
     for (let i = 0; i < data.length; i += info.channels) {
@@ -124,6 +131,11 @@ export async function POST(request: NextRequest) {
       }
       if (fillRatio < 0.03) {
         discarded.push(`${hex}: ruido (${(fillRatio*100).toFixed(1)}%)`)
+        continue
+      }
+      // Descartar si coincide con el color de fondo (esquina 0,0)
+      if (hex === bgHex) {
+        discarded.push(`${hex}: color de fondo (esquina)`)
         continue
       }
 

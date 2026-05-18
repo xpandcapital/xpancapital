@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
       svgContent += `  <!-- ${name} | ${color} | ~${stitches} pts -->\n`
 
       if (pathD && pathD.length > 10) {
+        if (isBoundingBox(pathD, vb)) continue
         svgContent += `  <g id="${id}" data-name="${escapeXml(name)}" data-color="${color}" data-stitches="${stitches}">\n`
         if (transform && transform.length > 5) {
           svgContent += `    <g transform="${transform}">\n`
@@ -51,4 +52,13 @@ export async function POST(request: NextRequest) {
 
 function escapeXml(s: string): string {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+function isBoundingBox(pathD: string, canvasSize: number): boolean {
+  if (!pathD) return false
+  const nums = pathD.match(/[\d.]+/g)?.map(Number) || []
+  if (nums.length < 6) return false
+  const maxX = Math.max(...nums.filter((_, i) => i % 2 === 0))
+  const maxY = Math.max(...nums.filter((_, i) => i % 2 === 1))
+  return maxX >= canvasSize * 0.95 && maxY >= canvasSize * 0.95
 }
