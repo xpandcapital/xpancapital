@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/Toast";
 
 interface Bank { name: string; account_number: string; account_holder: string; cci: string; currency: string; account_type: string; }
-interface Wallet { network: string; address: string; label: string; qr_url?: string; }
+interface Wallet { network: string; address: string; label: string; qr_url?: string; holder?: string; }
 interface Country { label: string; flag: string; banks: Bank[]; }
 interface FormaPago {
     id: string; nombre: string; slug: string; descripcion: string;
@@ -242,6 +242,9 @@ export default function FormasPagoAdminPage() {
                                                                 <Input value={w.address} onChange={e => updateWallet(forma.id, idx, 'address', e.target.value)} placeholder="Dirección de wallet" className="bg-white/5 border-white/10 text-white text-[10px] flex-1 h-8 font-mono" />
                                                             </div>
                                                             <div className="flex items-center gap-3">
+                                                                <div className="w-32 flex-shrink-0">
+                                                                    <Input value={w.holder || ""} onChange={e => updateWallet(forma.id, idx, 'holder', e.target.value)} placeholder="Titular / Nombre" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
+                                                                </div>
                                                                 <div className="flex-1">
                                                                     <Input value={w.qr_url || ""} onChange={e => updateWallet(forma.id, idx, 'qr_url', e.target.value)} placeholder="URL del QR (opcional)" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
                                                                 </div>
@@ -275,7 +278,7 @@ export default function FormasPagoAdminPage() {
                                                         </div>
                                                     ))}
                                                     <Button size="sm" variant="outline" onClick={() => {
-                                                        const wallets = [...getWallets(formas.find(f => f.id === forma.id)!), { label: "", address: "", network: "", qr_url: "" }];
+                                                        const wallets = [...getWallets(formas.find(f => f.id === forma.id)!), { label: "", address: "", network: "", qr_url: "", holder: "" }];
                                                         updateForma(forma.id, { wallets });
                                                     }} className="text-xs border-white/10 text-gray-400 hover:text-white w-full">
                                                         <Plus className="w-3 h-3 mr-1" /> {wallets.length === 0 ? 'Agregar Wallet' : 'Agregar otra Wallet'}
