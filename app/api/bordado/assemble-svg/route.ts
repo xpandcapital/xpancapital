@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
         svgContent += `  <g id="${id}" data-name="${escapeXml(name)}" data-color="${color}" data-stitches="${stitches}">\n`
         if (transform && transform.length > 5) {
           svgContent += `    <g transform="${transform}">\n`
-          svgContent += `      <path d="${pathD}" fill="${color}" stroke="${color}" stroke-width="0.5" stroke-linejoin="round" />\n`
+          svgContent += `      <path d="${pathD}" fill="${color}" fill-rule="evenodd" stroke="${color}" stroke-width="0.5" stroke-linejoin="round" />\n`
           svgContent += `    </g>\n`
         } else {
-          svgContent += `    <path d="${pathD}" fill="${color}" stroke="${color}" stroke-width="0.5" stroke-linejoin="round" />\n`
+          svgContent += `    <path d="${pathD}" fill="${color}" fill-rule="evenodd" stroke="${color}" stroke-width="0.5" stroke-linejoin="round" />\n`
         }
         svgContent += `  </g>\n\n`
       }
