@@ -6,6 +6,7 @@ export const runtime = 'nodejs'
 
 async function createColorMask(buffer: Buffer, targetR: number, targetG: number, targetB: number, tolerance: number): Promise<Buffer> {
   const { data, info } = await sharp(buffer)
+    .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true })
@@ -75,17 +76,16 @@ export async function POST(request: NextRequest) {
     const colors = sorted.map(([hex]) => hex)
     const colorRGBs = sorted.map(([, v]) => ({ r: v.r, g: v.g, b: v.b }))
 
-    // Generar máscara blanco/negro para cada color dominante
-    const masks: string[] = []
-    for (const rgb of colorRGBs) {
-      try {
-        const maskBuffer = await createColorMask(buffer, rgb.r, rgb.g, rgb.b, 100)
-        const base64 = maskBuffer.toString('base64')
-        masks.push(`data:image/png;base64,${base64}`)
-      } catch {
-        masks.push('')
+    // Generar máscara blanco/negro para cada color dominante (en paralelo)
+    const maskBuffers = await Promise.allSettled(
+      colorRGBs.map(rgb => createColorMask(buffer, rgb.r, rgb.g, rgb.b, 100))
+    )
+    const masks = maskBuffers.map(r => {
+      if (r.status === 'fulfilled') {
+        return `data:image/png;base64,${r.value.toString('base64')}`
       }
-    }
+      return ''
+    })
 
     // Posterizar la imagen para preview
     const posterizedBuf = await sharp(buffer)
