@@ -22,9 +22,9 @@ async function createColorMask(buffer: Buffer, targetR: number, targetG: number,
     const dist = Math.sqrt((r-targetR)**2 + (g-targetG)**2 + (b-targetB)**2)
     const pixelIndex = (i / info.channels) * 4
     const isColor = a > 20 && dist <= tolerance
-    maskData[pixelIndex] = isColor ? 255 : 0
-    maskData[pixelIndex + 1] = isColor ? 255 : 0
-    maskData[pixelIndex + 2] = isColor ? 255 : 0
+    maskData[pixelIndex] = isColor ? 0 : 255
+    maskData[pixelIndex + 1] = isColor ? 0 : 255
+    maskData[pixelIndex + 2] = isColor ? 0 : 255
     maskData[pixelIndex + 3] = 255
   }
   return sharp(maskData, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer()

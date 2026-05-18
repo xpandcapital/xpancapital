@@ -57,6 +57,7 @@ export function AutoEmbroideryTool() {
   const [svgContent, setSvgContent] = useState('')
   const [apiDiag, setApiDiag] = useState<Record<string, any> | null>(null)
   const [apiErrors, setApiErrors] = useState<string[]>([])
+  const [apiDiags, setApiDiags] = useState<string[]>([])
 
   useEffect(() => { getDiagnostics().then(setApiDiag).catch(() => {}) }, [])
 
@@ -125,7 +126,7 @@ export function AutoEmbroideryTool() {
           })
           vectorLayers = vecResult.layers || []
           if (vecResult.diag?.length) {
-            errors.push('Vectorize: ' + vecResult.diag.join(' | '))
+            setApiDiags(vecResult.diag)
           }
         } catch (e: any) {
           errors.push('Vectorize: ' + (e.message || 'falló'))
@@ -156,7 +157,7 @@ export function AutoEmbroideryTool() {
 
         // Paso 4: Preview 3D con Gemini (no bloqueante)
         try {
-          const renderResult = await callBordadoAPI('gemini-render', {
+          const renderResult = await callBordadoAPI('geminirender', {
             imageUrl: posterizedImage || dataUrl,
             mimeType: 'image/png'
           })
@@ -271,6 +272,7 @@ export function AutoEmbroideryTool() {
                 fileName={fileName}
                 onDownloadSVG={handleDownloadSVG}
                 errors={apiErrors}
+                diags={apiDiags}
               />
             </div>
           </motion.div>

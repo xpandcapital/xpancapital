@@ -17,9 +17,10 @@ interface Props {
   fileName: string
   onDownloadSVG: () => void
   errors?: string[]
+  diags?: string[]
 }
 
-export function EmbroideryActions({ layers, fileName, onDownloadSVG, errors = [] }: Props) {
+export function EmbroideryActions({ layers, fileName, onDownloadSVG, errors = [], diags = [] }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -30,6 +31,15 @@ export function EmbroideryActions({ layers, fileName, onDownloadSVG, errors = []
       <p className="text-sm text-zinc-500 leading-relaxed">
         El archivo SVG mantiene la separación por colores en etiquetas <code className="bg-white/5 px-1.5 py-0.5 rounded text-blis-red text-xs">&lt;g&gt;</code> para importación nativa a CorelDRAW y el puente Wilcom.
       </p>
+
+      {diags.length > 0 && (
+        <div className="bg-blis-red/5 border border-blis-red/10 rounded-xl p-3 space-y-1 max-h-32 overflow-y-auto custom-scrollbar">
+          <h5 className="text-[10px] font-black text-blis-red uppercase tracking-wider mb-1">Diagnóstico Vectorize</h5>
+          {diags.map((d, i) => (
+            <p key={i} className="text-[10px] text-zinc-400 leading-relaxed font-mono break-all">{d}</p>
+          ))}
+        </div>
+      )}
 
       {errors.length > 0 && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 space-y-1">
