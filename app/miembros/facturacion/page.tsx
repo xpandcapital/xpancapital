@@ -5,12 +5,14 @@ import { CreditCard, DollarSign, Download, Clock, Star, TrendingUp, Wallet, Load
 import { useAuth } from "@/hooks/useAuth";
 import { useCompras } from "@/lib/hooks/useCompras";
 import { useUserStats } from "@/lib/hooks/useUserStats";
+import { useShop } from "@/context/ShopContext";
 import { useState } from "react";
 
 export default function BillingPage() {
     const { user } = useAuth();
     const { compras, loading } = useCompras();
     const { stats, loading: statsLoading } = useUserStats();
+    const { coinsEnabled } = useShop();
 
     const totalInvertido = compras?.reduce((sum, c) => sum + (c.monto_usd || 0), 0) || 0;
     const blisCoins = stats?.blisCoins || 0;
@@ -28,6 +30,7 @@ export default function BillingPage() {
             ) : (
                 <>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {coinsEnabled && (
                         <div className="bg-zinc-950 border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden group shadow-2xl">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[60px] -mr-16 -mt-16 pointer-events-none" />
                             <Star className="w-8 h-8 text-emerald-500 mb-4 fill-emerald-500" />
@@ -35,6 +38,7 @@ export default function BillingPage() {
                             <h3 className="text-4xl font-black text-white">{blisCoins.toLocaleString()} <span className="text-sm text-emerald-500 uppercase">BLIS</span></h3>
                             <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-4">Nivel: {nivel}</p>
                         </div>
+                    )}
 
                         <div className="bg-zinc-950 border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden group shadow-2xl">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-blis-red/10 blur-[60px] -mr-16 -mt-16 pointer-events-none" />
@@ -120,10 +124,12 @@ export default function BillingPage() {
                                         <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest block mb-1">Total Invertido</span>
                                         <span className="text-2xl font-black text-white">${totalInvertido.toLocaleString()}<span className="text-sm text-gray-500">.00</span></span>
                                     </div>
+                                    {coinsEnabled && (
                                     <div className="bg-black/40 rounded-2xl p-4 border border-white/5">
                                         <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest block mb-1">BLISCOINS</span>
                                         <span className="text-2xl font-black text-emerald-400">{blisCoins.toLocaleString()} <span className="text-sm text-emerald-600">BLIS</span></span>
                                     </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

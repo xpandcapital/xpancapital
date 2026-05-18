@@ -22,6 +22,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserStats } from "@/lib/hooks/useUserStats";
 import { useCursos, useUserCursos } from "@/lib/hooks/useCursos";
 import { useCompras } from "@/lib/hooks/useCompras";
+import { useShop } from "@/context/ShopContext";
 import { useEffect } from "react";
 
 export default function UserDashboard() {
@@ -30,6 +31,7 @@ export default function UserDashboard() {
     const { cursos, loading: cursosLoading } = useCursos();
     const { userCursos, loading: userCursosLoading, refetch: refetchUserCursos } = useUserCursos(user?.id || null);
     const { compras, loading: comprasLoading, fetchUserPurchases } = useCompras();
+    const { coinsEnabled } = useShop();
 
     const staticStats = [
         { title: "Cursos Completados", value: "0", icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
@@ -48,6 +50,7 @@ export default function UserDashboard() {
         { title: "BLISCOINS", value: stats.blisCoins.toLocaleString(), icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
         { title: "Nivel de Inversor", value: stats.nivelInversor, icon: Zap, color: "text-blis-red", bg: "bg-blis-red/10" },
     ] : staticStats;
+    const visibleStats = coinsEnabled ? displayStats : displayStats.filter(s => s.title !== 'BLISCOINS');
 
     const enrolledCourses = userCursos.map(curso => ({
         id: curso.id,
@@ -156,7 +159,7 @@ export default function UserDashboard() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-6">
-                {displayStats.map((stat, i) => (
+                {visibleStats.map((stat, i) => (
                     <motion.div
                         key={i}
                         initial={{ opacity: 0, y: 20 }}

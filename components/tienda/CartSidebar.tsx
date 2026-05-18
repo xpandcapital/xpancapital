@@ -9,7 +9,7 @@ import { useShop } from "@/context/ShopContext";
 import { useAuth } from "@/hooks/useAuth";
 
 export function CartSidebar() {
-    const { cart, blisCoins, removeFromCart, getCartTotal, getCartCount, isCartOpen: isOpen, closeCart: onClose } = useShop();
+    const { cart, blisCoins, removeFromCart, getCartTotal, getCartCount, isCartOpen: isOpen, closeCart: onClose, coinsEnabled } = useShop();
     const { user } = useAuth();
     const router = useRouter();
 
@@ -111,7 +111,7 @@ export function CartSidebar() {
                                                     <span className="text-xl font-black text-white">
                                                         ${(item.price || item.precio_usd || 0).toFixed(2)}
                                                     </span>
-                                                    {(item.precio_coins || item.price) && (
+                                                    {coinsEnabled && (item.precio_coins || item.price) && (
                                                         <span className="text-[10px] text-amber-500 font-bold flex items-center gap-1">
                                                             <Coins className="w-3 h-3" />
                                                             {item.precio_coins || Math.round((item.price || 0) * 10)} COINS
@@ -142,7 +142,7 @@ export function CartSidebar() {
                                         <span className="text-gray-400">Subtotal</span>
                                         <span className="text-white font-bold">${totalUSD.toFixed(2)}</span>
                                     </div>
-                                    {user && (
+                                    {coinsEnabled && user && (
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-gray-400 flex items-center gap-1">
                                                 <Coins className="w-3.5 h-3.5 text-amber-500" />
@@ -156,7 +156,7 @@ export function CartSidebar() {
                                         <span className="text-gray-400 font-bold">Total</span>
                                         <div className="text-right">
                                             <span className="text-2xl font-black text-white">${totalUSD.toFixed(2)}</span>
-                                            {totalCoins > 0 && (
+                                            {coinsEnabled && totalCoins > 0 && (
                                                 <p className="text-[10px] text-amber-500 font-bold">
                                                     o {totalCoins.toLocaleString()} BLIS COINS
                                                 </p>

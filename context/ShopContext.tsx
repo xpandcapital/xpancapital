@@ -24,6 +24,7 @@ interface ShopContextType {
     purchasedProducts: Product[];
     blisCoins: number;
     isCartOpen: boolean;
+    coinsEnabled: boolean;
     openCart: () => void;
     closeCart: () => void;
     addToCart: (product: Product) => void;
@@ -48,6 +49,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const [blisCoins, setBlisCoins] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [coinsEnabled, setCoinsEnabled] = useState(true);
     const openCart = useCallback(() => setIsCartOpen(true), []);
     const closeCart = useCallback(() => setIsCartOpen(false), []);
     const { user, loading: authLoading } = useAuth();
@@ -113,6 +115,19 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         } catch {
             // Silent fail - localStorage is the primary storage
         }
+    }, []);
+
+    // Check if BLISCOINS is globally enabled
+    useEffect(() => {
+        fetch("/api/admin/formas-pago?public=1")
+            .then(r => r.json())
+            .then(d => {
+                if (d.formas) {
+                    const coins = d.formas.find((f: any) => f.slug === 'coins');
+                    setCoinsEnabled(coins?.activo !== false);
+                }
+            })
+            .catch(() => {});
     }, []);
 
     // Load from localStorage on mount
@@ -337,6 +352,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                 isCartOpen,
                 openCart,
                 closeCart,
+                coinsEnabled,
                 addToCart,
                 toggleFavorite,
                 removeFromCart,
