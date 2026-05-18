@@ -104,6 +104,7 @@ export default function Mails() {
           movePalette={mail.movePalette}
           savePalette={mail.savePalette}
           addBlockToSpecificColumn={mail.addBlockToSpecificColumn}
+          addNetwork={mail.addNetwork}
           demoData={mail.demoData}
           applyDemoData={mail.applyDemoData}
           previewWithDemo={mail.previewWithDemo}
