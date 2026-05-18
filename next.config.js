@@ -11,6 +11,7 @@ const nextConfig = {
       sizeLimit: '10mb',
     },
   },
+  serverExternalPackages: ['potrace', 'jimp'],
   images: {
     remotePatterns: [
       {

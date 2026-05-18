@@ -134,20 +134,20 @@ export function AutoEmbroideryTool() {
           })
           vectorLayers = vecResult.layers || []
           if (vecResult.diag?.length) {
-            errors.push('Vectorize diag: ' + vecResult.diag.join(' | '))
+            errors.push('Vectorize: ' + vecResult.diag.join(' | '))
           }
         } catch (e: any) {
           errors.push('Vectorize: ' + (e.message || 'falló'))
         }
 
         if (!vectorLayers.length) {
-          vectorLayers = colors.map((c, i) => ({
-            id: `Capa_${i + 1}`,
-            name: ['Fondo', 'Principal', 'Detalles', 'Acentos', 'Textos'][i] || `Capa ${i + 1}`,
-            color: c,
-            stitches: 1500 + Math.floor(Math.random() * 3000),
-            svgPath: ''
-          }))
+          errors.push('Vectorize no produjo capas. El SVG no estará disponible.')
+          setLayers([])
+          setApiErrors(errors)
+          setStatus('error')
+          setErrorMessage('La vectorización falló en todas las capas. Revisa los diagnósticos arriba.')
+          reader.abort?.()
+          return
         }
 
         // Paso 4: Assemble SVG
@@ -184,8 +184,8 @@ export function AutoEmbroideryTool() {
   }, [])
 
   const handleDownloadSVG = useCallback(() => {
-    const content = svgContent || `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"></svg>`
-    const blob = new Blob([content], { type: 'image/svg+xml' })
+    if (!svgContent) return
+    const blob = new Blob([svgContent], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
