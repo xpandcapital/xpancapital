@@ -2,7 +2,7 @@
 import React from 'react';
 import { Monitor, Smartphone, Sun, Moon, Settings, Plus, FolderOpen, Upload, Database, Code, Send, Mail } from 'lucide-react';
 
-export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMode, setShowSettingsModal, onNewTemplate, setShowTemplatesModal, importTemplate, fileInputRef, setShowSaveModal, setShowExportHtml, setShowSendModal }) {
+export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMode, setShowSettingsModal, onNewTemplate, setShowTemplatesModal, importTemplate, fileInputRef, setShowSaveModal, setShowExportHtml, onOpenSend }) {
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-white dark:bg-[#111111] border-b border-gray-200 dark:border-[#222222] shadow-sm z-20 flex-shrink-0">
       <div className="flex items-center space-x-3">
@@ -42,7 +42,7 @@ export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMo
         <button onClick={() => setShowExportHtml(true)} title="Exportar HTML" className="p-2 flex items-center justify-center bg-[#e11d48] hover:bg-[#be123c] text-white rounded-md transition-colors">
           <Code size={18} />
         </button>
-        <button onClick={() => setShowSendModal(true)} title="Enviar Campaña" className="p-2 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+        <button onClick={onOpenSend} title="Enviar Campaña" className="p-2 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
           <Send size={18} />
         </button>
       </div>

@@ -23,7 +23,7 @@ export default function Mails() {
         fileInputRef={mail.fileInputRef}
         setShowSaveModal={mail.setShowSaveModal}
         setShowExportHtml={mail.setShowExportHtml}
-        setShowSendModal={mail.setShowSendModal}
+        onOpenSend={() => mail.handleOpenSendModal()}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -115,7 +115,7 @@ export default function Mails() {
       <ExportHtmlModal show={mail.showExportHtml} onClose={() => mail.setShowExportHtml(false)} generateHTML={htmlOutput} copied={mail.copied} setCopied={mail.setCopied} />
       <SaveTemplateModal show={mail.showSaveModal} onClose={() => mail.setShowSaveModal(false)} templateName={mail.templateName} setTemplateName={mail.setTemplateName} currentTemplateId={mail.currentTemplateId} onSave={mail.handleSaveTemplate} templatesLoading={mail.templatesLoading} />
       <TemplatesModal show={mail.showTemplatesModal} onClose={() => mail.setShowTemplatesModal(false)} savedTemplates={mail.savedTemplates} onLoadTemplate={mail.handleLoadTemplate} onDeleteTemplate={mail.deleteTemplateFromDb} />
-      <SendModal show={mail.showSendModal} onClose={() => mail.setShowSendModal(false)} campaignConfig={mail.campaignConfig} setCampaignConfig={mail.setCampaignConfig} senders={mail.senders} sendTab={mail.sendTab} setSendTab={mail.setSendTab} sendingEmail={mail.sendingEmail} onSend={() => {}} attachments={mail.attachments} setAttachments={mail.setAttachments} />
+      <SendModal show={mail.showSendModal} onClose={() => mail.setShowSendModal(false)} campaignConfig={mail.campaignConfig} setCampaignConfig={mail.setCampaignConfig} senders={mail.senders} sendTab={mail.sendTab} setSendTab={mail.setSendTab} sendingEmail={mail.sendingEmail} onSend={() => mail.handleSendCampaign()} attachments={mail.attachments} setAttachments={mail.setAttachments} />
       <MediaModal show={mail.showMediaModal} onClose={() => mail.setShowMediaModal(false)} media={mail.media} mediaLoading={mail.mediaLoading} mediaTab={mail.mediaTab} setMediaTab={mail.setMediaTab} uploadMedia={mail.uploadMedia} deleteMedia={mail.deleteMedia} mediaCallbackRef={mail.mediaCallbackRef} />
       <SettingsModal show={mail.showSettingsModal} onClose={() => mail.setShowSettingsModal(false)} senders={mail.senders} editingSender={mail.editingSender} setEditingSender={mail.setEditingSender} saveSender={mail.saveSender} deleteSender={mail.deleteSender} testingConnection={mail.testingConnection} testResult={mail.testResult} setTestResult={mail.setTestResult} settingsTab={mail.settingsTab} setSettingsTab={mail.setSettingsTab} />
       <ZipModal show={mail.zipModal} onClose={() => mail.setZipModal(false)} zipFiles={mail.zipFiles} onImport={mail.importFromHTML} />

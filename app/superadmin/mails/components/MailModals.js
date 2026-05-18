@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { X, Send, FolderOpen, Database, Code, Check, Server, Star, Pencil, AlertCircle, Loader2, Paperclip, Trash2, Upload, Grid, Mail, Layers } from 'lucide-react';
+import { X, Send, FolderOpen, Database, Code, Check, CheckCircle, Server, Star, Pencil, AlertCircle, Loader2, Paperclip, Trash2, Upload, Grid, Mail, Layers } from 'lucide-react';
 
 export function ExportHtmlModal({ show, onClose, generateHTML, copied, setCopied }) {
   if (!show) return null;
@@ -93,9 +93,9 @@ export function SendModal({ show, onClose, campaignConfig, setCampaignConfig, se
           )}
         </div>
         <div className="p-5 border-t border-gray-100 dark:border-[#222] flex justify-between bg-gray-50 dark:bg-[#161616] rounded-b-2xl">
-          <button onClick={() => { if (sendTab === 'envio') setSendTab('destinatarios'); else onClose(); }} className="px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#222] rounded-lg transition-colors">{sendTab === 'destinatarios' ? 'Cancelar' : 'Atrás'}</button>
-          <button onClick={onSend} disabled={sendingEmail} className="px-6 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-            {sendingEmail ? (<><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Enviando...</>) : (sendTab === 'envio' ? <><Send size={16}/> Enviar Campaña</> : 'Continuar')}
+          <button onClick={() => { if (sendTab === 'envio') { setSendTab('destinatarios'); } else { onClose(); } }} className="px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#222] rounded-lg transition-colors">{sendTab === 'destinatarios' ? 'Cancelar' : 'Atrás'}</button>
+          <button onClick={sendTab === 'destinatarios' ? () => setSendTab('envio') : onSend} disabled={sendingEmail} className="px-6 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            {sendingEmail ? (<><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Enviando...</>) : (sendTab === 'envio' ? <><Send size={16}/> Enviar Campaña</> : <><Send size={16}/> Continuar</>)}
           </button>
         </div>
       </div>
