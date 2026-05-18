@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest } from 'next/server'
 
 const REPLICATE_BASE = 'https://api.replicate.com/v1'
-const SAM2_MODEL = 'meta/sam-2'
+const SAM_MODELS = ['meta/sam-2', 'meta/segment-anything-2', 'meta/segment-anything']
 const REMBG_MODEL = 'cjwbw/rembg'
 
 interface ReplicatePrediction {
@@ -24,7 +24,7 @@ async function waitForPrediction(predictionId: string, token: string, maxWaitMs 
     if (prediction.status === 'succeeded' || prediction.status === 'failed' || prediction.status === 'canceled') {
       return prediction
     }
-    await new Promise(r => setTimeout(r, 1000))
+    await new Promise(r => setTimeout(r, 2000))
   }
   throw new Error('Timeout esperando predicción de Replicate')
 }
@@ -40,34 +40,48 @@ export async function getReplicateKey(request: NextRequest): Promise<string> {
 }
 
 export async function segmentWithSAM2(imageUrl: string, token: string): Promise<string[]> {
-  const res = await fetch(`${REPLICATE_BASE}/models/${SAM2_MODEL}/predictions`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Token ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      input: {
-        image: imageUrl,
-        output_type: 'mask'
+  let lastError: Error | null = null
+
+  for (const model of SAM_MODELS) {
+    try {
+      console.log(`[client] Probando SAM: ${model}`)
+      const res = await fetch(`${REPLICATE_BASE}/models/${model}/predictions`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          input: { image: imageUrl }
+        })
+      })
+
+      if (!res.ok) {
+        const err = await res.text()
+        console.warn(`[client] ${model} no disponible: ${res.status}`)
+        continue
       }
-    })
-  })
 
-  if (!res.ok) {
-    const err = await res.text()
-    throw new Error(`Replicate SAM 2 error: ${res.status} ${err}`)
+      const prediction: ReplicatePrediction = await res.json()
+      const result = await waitForPrediction(prediction.id, token)
+
+      if (result.status !== 'succeeded' || !result.output) {
+        console.warn(`[client] ${model} falló: ${result.error || 'sin output'}`)
+        continue
+      }
+
+      const output = result.output
+      if (Array.isArray(output)) return output
+      if (output?.masks && Array.isArray(output.masks)) return output.masks
+      if (typeof output === 'string') return [output]
+      return [JSON.stringify(output)]
+    } catch (err) {
+      lastError = err as Error
+      console.warn(`[client] ${model} error:`, err)
+    }
   }
 
-  const prediction: ReplicatePrediction = await res.json()
-  const result = await waitForPrediction(prediction.id, token)
-
-  if (result.status !== 'succeeded' || !result.output) {
-    throw new Error(`SAM 2 falló: ${result.error || 'Sin output'}`)
-  }
-
-  const maskUrls: string[] = Array.isArray(result.output) ? result.output : [result.output]
-  return maskUrls
+  throw lastError || new Error('Ningún modelo SAM disponible en Replicate')
 }
 
 export async function removeBackground(imageUrl: string, token: string): Promise<string> {

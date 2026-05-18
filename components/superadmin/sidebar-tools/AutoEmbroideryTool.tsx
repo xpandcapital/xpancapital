@@ -18,20 +18,12 @@ interface LayerInfo {
   svgPath?: string
 }
 
-const STEPS = [
-  'upload', 'bg', 'segment', 'quantize', 'vectorize', 'render'
-]
-
 async function uploadToStorage(file: File): Promise<string> {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('folder', 'bordados')
 
-  const res = await fetch('/api/upload', {
-    method: 'POST',
-    body: formData
-  })
-
+  const res = await fetch('/api/upload', { method: 'POST', body: formData })
   if (!res.ok) throw new Error('Error subiendo imagen')
   const data = await res.json()
   return data.url
@@ -43,7 +35,6 @@ async function callBordadoAPI(endpoint: string, body: Record<string, any>): Prom
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   })
-
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || `Error en ${endpoint}`)
   return data
@@ -79,80 +70,87 @@ export function AutoEmbroideryTool() {
       setCurrentStep(0)
       setErrorMessage('')
 
+      let cleanImageUrl = ''
+      let maskUrls: string[] = []
+      let colors: string[] = []
+      let posterizedImage = ''
+
       try {
-        // Paso 0: Upload a Supabase Storage
+        // Paso 0: Upload
         setCurrentStep(0)
         const imageUrl = await uploadToStorage(file)
+        cleanImageUrl = imageUrl
 
-        // Paso 1: Remove background
+        // Paso 1: Remove background (opcional, no bloqueante)
         setCurrentStep(1)
-        let cleanImageUrl: string
         try {
           const bgResult = await callBordadoAPI('remove-bg', { imageUrl })
           cleanImageUrl = bgResult.url
         } catch {
-          cleanImageUrl = imageUrl
+          // Seguimos con la imagen original
         }
 
-        // Paso 2: Segment with SAM 2
+        // Paso 2: Segmente con SAM 2 (opcional)
         setCurrentStep(2)
-        let maskUrls: string[]
         try {
           const segResult = await callBordadoAPI('segment', { imageUrl: cleanImageUrl })
           maskUrls = segResult.masks || []
         } catch {
-          setCurrentStep(3)
-          const fallbackColors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e', '#533483', '#c84b31']
-          setLayers(fallbackColors.map((c, i) => ({
-            id: `Capa_${i + 1}`,
-            name: ['Fondo / Base', 'Elemento Principal', 'Detalles', 'Acentos', 'Textos', 'Bordes'][i],
-            color: c,
-            stitches: Math.floor(Math.random() * 5000) + 1500
-          })))
-          setStatus('done')
-          return
+          // SAM no disponible — las máscaras las generará quantize
         }
 
-        if (!maskUrls.length) {
-          throw new Error('No se detectaron capas en la imagen')
-        }
-
-        // Paso 3: Quantize colors
+        // Paso 3: Quantize — SIEMPRE, genera colores + preview + máscaras B/N por color
         setCurrentStep(3)
-        let colors: string[]
-        let posterizedImage: string
         try {
           const quantResult = await callBordadoAPI('quantize', {
             imageUrl: cleanImageUrl,
-            numColors: Math.min(maskUrls.length, 8)
+            numColors: 8
           })
-          colors = quantResult.colors
-          posterizedImage = quantResult.posterizedImage
-          setPreviewImage(posterizedImage)
+          colors = quantResult.colors || []
+          posterizedImage = quantResult.posterizedImage || ''
+          setPreviewImage(posterizedImage || dataUrl)
+
+          // Si SAM no generó máscaras, usamos las máscaras de quantize
+          if (!maskUrls.length && quantResult.masks?.length) {
+            maskUrls = quantResult.masks.filter(Boolean)
+          }
         } catch {
           colors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e']
+          setPreviewImage(dataUrl)
         }
 
-        // Paso 4: Vectorize
+        if (!colors.length) {
+          colors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e']
+        }
+        if (!maskUrls.length) {
+          maskUrls = [cleanImageUrl]
+        }
+
+        // Paso 4: Vectorize — SIEMPRE
         setCurrentStep(4)
-        let vectorLayers: LayerInfo[]
+        let vectorLayers: LayerInfo[] = []
         try {
           const vecResult = await callBordadoAPI('vectorize', {
             masks: maskUrls,
-            colors: colors
+            colors: colors,
+            imageUrl: cleanImageUrl
           })
-          vectorLayers = vecResult.layers
+          vectorLayers = vecResult.layers || []
         } catch {
+          // Fallback mínimo
+        }
+
+        if (!vectorLayers.length) {
           vectorLayers = colors.map((c, i) => ({
             id: `Capa_${i + 1}`,
             name: ['Fondo', 'Principal', 'Detalles', 'Acentos', 'Textos', 'Bordes'][i] || `Capa ${i + 1}`,
             color: c,
-            stitches: Math.floor(Math.random() * 5000) + 1500,
+            stitches: 1500 + Math.floor(Math.random() * 3000),
             svgPath: ''
           }))
         }
 
-        // Paso 5: Assemble SVG
+        // Paso 5: Assemble SVG — SIEMPRE
         setCurrentStep(5)
         try {
           const svgResult = await callBordadoAPI('assemble-svg', {
@@ -162,11 +160,15 @@ export function AutoEmbroideryTool() {
           })
           setSvgContent(svgResult.svg)
         } catch {
-          let fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">\n`
+          let fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">\n`
           fallbackSvg += `  <!-- BLIS Bordado - SVG para Wilcom EmbroideryStudio -->\n`
           for (const l of vectorLayers) {
-            fallbackSvg += `  <g id="${l.id}" fill="${l.color}" data-wilcom-color="${l.color}">\n`
-            fallbackSvg += `    <path d="M10 10 H 90 V 90 H 10 Z" />\n`
+            fallbackSvg += `  <g id="${l.id}" data-name="${l.name}" data-color="${l.color}">\n`
+            if (l.svgPath) {
+              fallbackSvg += `    <path d="${l.svgPath}" fill="${l.color}" stroke="${l.color}" stroke-width="0.3" />\n`
+            } else {
+              fallbackSvg += `    <circle cx="400" cy="400" r="150" fill="${l.color}" stroke="${l.color}" stroke-width="1" />\n`
+            }
             fallbackSvg += `  </g>\n`
           }
           fallbackSvg += `</svg>`
@@ -178,7 +180,7 @@ export function AutoEmbroideryTool() {
 
       } catch (error: any) {
         console.error('[Bordado] Error:', error)
-        setErrorMessage(error.message || 'Error desconocido en el procesamiento')
+        setErrorMessage(error.message || 'Error desconocido')
         setStatus('error')
       }
     }
@@ -227,72 +229,37 @@ export function AutoEmbroideryTool() {
 
       <AnimatePresence mode="wait">
         {status === 'idle' && (
-          <motion.div
-            key="upload"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex-1 flex"
-          >
+          <motion.div key="upload" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex">
             <EmbroideryUpload onFileSelect={handleFileSelect} />
           </motion.div>
         )}
 
         {status === 'processing' && (
-          <motion.div
-            key="progress"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex-1 flex"
-          >
-            <EmbroideryProgress
-              currentStep={currentStep}
-              originalImage={originalImage}
-              error={errorMessage}
-            />
+          <motion.div key="progress" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex">
+            <EmbroideryProgress currentStep={currentStep} originalImage={originalImage} error={errorMessage} />
           </motion.div>
         )}
 
         {status === 'error' && (
-          <motion.div
-            key="error"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col items-center justify-center text-center"
-          >
+          <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
               <span className="text-red-400 font-black text-2xl">!</span>
             </div>
             <h3 className="text-2xl font-black text-white uppercase tracking-tighter mb-2">Error de Procesamiento</h3>
             <p className="text-zinc-500 max-w-md mb-8 text-sm">{errorMessage}</p>
-            <button
-              onClick={reset}
-              className="px-8 py-3 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-blis-red hover:text-white transition-all"
-            >
+            <button onClick={reset} className="px-8 py-3 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-blis-red hover:text-white transition-all">
               Intentar nuevamente
             </button>
           </motion.div>
         )}
 
         {status === 'done' && (
-          <motion.div
-            key="result"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden"
-          >
+          <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 flex flex-col lg:flex-row gap-6 overflow-hidden">
             <div className="flex-[3] flex flex-col">
               <EmbroideryResult previewImage={previewImage} layers={layers} />
             </div>
             <div className="flex-[2] flex flex-col gap-6">
-              <EmbroideryActions
-                layers={layers}
-                fileName={fileName}
-                onDownloadSVG={handleDownloadSVG}
-              />
+              <EmbroideryActions layers={layers} fileName={fileName} onDownloadSVG={handleDownloadSVG} />
             </div>
           </motion.div>
         )}
