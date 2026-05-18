@@ -52,7 +52,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 0}px`, 
+          padding: paddingStyle(block) , 
           textAlign: content.align || 'center',
           ...getStyle(block)
         }} 
@@ -103,7 +103,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 0}px`, 
+          padding: paddingStyle(block) , 
           textAlign: content.align || 'center',
           ...getStyle(block)
         }} 
@@ -132,7 +132,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
     const videoThumb = content.coverUrl || 'https://placehold.co/600x338/181818/ffffff?text=▶+Video';
     return (
       <div 
-        style={{ ...getBgStyle(content), padding: `${content.padding ?? 0}px`, ...getStyle(block) }} 
+        style={{ ...getBgStyle(content), padding: paddingStyle(block) , ...getStyle(block) }} 
         onClick={onClick}
       >
         <a href={content.videoUrl || '#'} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
@@ -151,7 +151,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 0}px`,
+          padding: paddingStyle(block) ,
           display: 'flex',
           alignItems: content.align === 'middle' ? 'center' : content.align === 'bottom' ? 'flex-end' : 'flex-start',
           ...getStyle(block)
@@ -174,7 +174,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle({ bgColor: content.containerBgColor, bgImageUrl: content.bgImageUrl, bgSize: content.bgSize, bgPosition: content.bgPosition }),
-          padding: `${content.padding ?? 0}px`, 
+          padding: paddingStyle(block) , 
           textAlign: content.align || 'center',
           ...getStyle(block)
         }} 
@@ -208,7 +208,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 0}px`,
+          padding: paddingStyle(block) ,
           ...getStyle(block)
         }} 
         onClick={onClick}
@@ -238,7 +238,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 0}px`, 
+          padding: paddingStyle(block), 
           textAlign: content.align || 'center',
           ...getStyle(block)
         }} 
@@ -388,7 +388,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
 
     return (
       <div 
-        style={{ ...getBgStyle(content), padding: `${content.padding ?? 0}px`, ...getStyle(block) }} 
+        style={{ ...getBgStyle(content), padding: paddingStyle(block) , ...getStyle(block) }} 
         onClick={onClick}
         dangerouslySetInnerHTML={{ __html: content.code || '' }}
       />
@@ -400,7 +400,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 0}px`, 
+          padding: paddingStyle(block) , 
           textAlign: content.align || 'center',
           ...getStyle(block)
         }} 
