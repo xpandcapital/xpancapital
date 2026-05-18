@@ -65,7 +65,7 @@ export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId
             {selectedBlock.type === 'button' && <ButtonEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
             {selectedBlock.type === 'divider' && <DividerEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
             {selectedBlock.type === 'spacer' && <SpacerEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
-            {selectedBlock.type === 'social' && <SocialEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} addNetwork={() => {}} />}
+            {selectedBlock.type === 'social' && <SocialEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} addNetwork={addNetwork} />}
             {selectedBlock.type === 'html' && <HtmlEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} />}
             {selectedBlock.type === 'footer' && <FooterEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} />}
           </div>
@@ -194,23 +194,36 @@ function SpacerEditor({ selectedBlock, handleUpdateContent, handleOpenMedia }) {
   );
 }
 
-function SocialEditor({ selectedBlock, handleUpdateContent, addNetwork }) {
+function SocialEditor({ selectedBlock, handleUpdateContent, handleOpenMedia, addNetwork }) {
   return (
     <PropertyGroup title="Redes Sociales">
-      <div className="space-y-3">
+      <PropertyAlignment value={selectedBlock.content.align} onChange={(v) => handleUpdateContent('align', v)} />
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-[10px] text-gray-500">Tamaño iconos: </span>
+        <input type="number" value={selectedBlock.content.iconSize} onChange={(v) => handleUpdateContent('iconSize', parseInt(v.target.value)||24)} className="w-16 px-2 py-1 border rounded text-xs dark:bg-[#0a0a0a] text-center" />
+        <span className="text-[10px] text-gray-500">Redondeo: </span>
+        <input type="number" value={selectedBlock.content.borderRadius} onChange={(v) => handleUpdateContent('borderRadius', parseInt(v.target.value)||8)} className="w-16 px-2 py-1 border rounded text-xs dark:bg-[#0a0a0a] text-center" />
+      </div>
+      <PropertyColor label="Color de Fondo" value={selectedBlock.content.bgColor} onChange={(v) => handleUpdateContent('bgColor', v)} />
+      <PropertyBackgroundImage bgImageUrl={selectedBlock.content.bgImageUrl} bgSize={selectedBlock.content.bgSize} bgPosition={selectedBlock.content.bgPosition} onChange={(key, value) => handleUpdateContent(key, value)} onOpenGallery={() => handleOpenMedia((url) => handleUpdateContent('bgImageUrl', url))} />
+      <PropertyPadding label="Padding (px)" value={selectedBlock.content} onChange={(v) => handleUpdateContent(Object.keys(v)[0], Object.values(v)[0])} />
+      <div className="space-y-3 mt-2">
         {selectedBlock.content.networks.map((net) => (
-          <div key={net.id} className="p-2 border rounded bg-gray-50 dark:bg-[#0a0a0a] dark:border-[#333]">
-            <div className="flex justify-between items-center mb-1">
-              <select value={net.network} onChange={(e) => { const newNet = e.target.value; handleUpdateContent('networks', selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, network: newNet, bgColor: SOCIAL_CONFIG[newNet].defaultBg } : n)); }} className="text-[10px] font-bold uppercase bg-transparent outline-none cursor-pointer border-b border-dashed border-gray-400">
+          <div key={net.id} className="p-3 border rounded bg-gray-50 dark:bg-[#0a0a0a] dark:border-[#333]">
+            <div className="flex justify-between items-center mb-2">
+              <select value={net.network} onChange={(e) => { const newNet = e.target.value; handleUpdateContent('networks', selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, network: newNet, bgColor: SOCIAL_CONFIG[newNet].defaultBg } : n)); }} className="text-[11px] font-bold uppercase bg-transparent outline-none cursor-pointer">
                 {Object.keys(SOCIAL_CONFIG).map(k => (<option key={k} value={k}>{SOCIAL_CONFIG[k].label}</option>))}
               </select>
-              <button onClick={() => handleUpdateContent('networks', selectedBlock.content.networks.filter(n => n.id !== net.id))} className="text-red-500"><Trash2 size={12}/></button>
+              <button onClick={() => handleUpdateContent('networks', selectedBlock.content.networks.filter(n => n.id !== net.id))} className="text-red-500 hover:bg-red-50 rounded p-0.5"><Trash2 size={12}/></button>
             </div>
-            <input type="text" value={net.url} onChange={(e) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, url: e.target.value } : n); handleUpdateContent('networks', newNets); }} className="w-full text-xs p-1 border rounded dark:bg-[#161616] mb-1" />
-            <div className="grid grid-cols-2 gap-1"><PropertyColor label="Icono" value={net.iconColor} onChange={(v) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, iconColor: v } : n); handleUpdateContent('networks', newNets); }} /><PropertyColor label="Fondo" value={net.bgColor} onChange={(v) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, bgColor: v } : n); handleUpdateContent('networks', newNets); }} /></div>
+            <input type="text" value={net.url} onChange={(e) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, url: e.target.value } : n); handleUpdateContent('networks', newNets); }} placeholder="https://..." className="w-full text-xs p-1.5 border rounded dark:bg-[#161616] mb-2" />
+            <div className="flex items-center gap-2">
+              <div className="flex-1"><PropertyColor label="Icono" value={net.iconColor} onChange={(v) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, iconColor: v } : n); handleUpdateContent('networks', newNets); }} /></div>
+              <div className="flex-1"><PropertyColor label="Fondo" value={net.bgColor} onChange={(v) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, bgColor: v } : n); handleUpdateContent('networks', newNets); }} /></div>
+            </div>
           </div>
         ))}
-        <button onClick={addNetwork} className="w-full py-1 text-xs bg-gray-100 dark:bg-[#222] font-bold">+ Añadir Red</button>
+        <button onClick={addNetwork} className="w-full py-2 text-xs bg-gray-100 dark:bg-[#222] font-bold rounded-lg border border-dashed border-gray-300 dark:border-[#444]">+ Añadir Red</button>
       </div>
     </PropertyGroup>
   );
