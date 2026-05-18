@@ -111,7 +111,10 @@ export default function Mails() {
           setPreviewWithDemo={mail.setPreviewWithDemo}
           generateHTML={htmlOutput}
           theme={mail.theme}
-          applyPalette={mail.applyPalette}
+          savedTemplates={mail.savedTemplates}
+          currentTemplateId={mail.currentTemplateId}
+          onLoadTemplateFromEvent={mail.onLoadTemplateFromEvent}
+          templatesLoading={mail.templatesLoading}
         />
       </div>
 

@@ -153,6 +153,13 @@ export function useMails() {
 
   const checkEnvatoAndSearch = () => { setLeftPanelTab('envato'); if (envatoResults.length === 0) searchEnvato(envatoQuery); if (!envatoStatus) checkEnvatoStatus(); };
 
+  const onLoadTemplateFromEvent = async (templateId) => {
+    if (currentTemplateId && blocks.length > 0) {
+      await saveTemplate(templateName || savedTemplates.find(t => t.id === currentTemplateId)?.nombre || 'Plantilla existente', false);
+    }
+    await handleLoadTemplate(templateId);
+  };
+
   return {
     blocks, setBlocks, settings, setSettings, selectedBlockId, setSelectedBlockId, previewMode, setPreviewMode,
     activeTab, setActiveTab, demoData, setDemoData, previewWithDemo, setPreviewWithDemo, theme, setTheme,
@@ -172,6 +179,7 @@ export function useMails() {
     saveTemplate, handleSaveTemplate, handleLoadTemplate, handleNewTemplate, handleOpenSendModal, handleSendCampaign, exportTemplate, handleNetworkUpdate, addNetwork,
     applyDemoData, importTemplate, processZipFile, searchEnvato, downloadEnvatoItem, pasteEnvatoSession, checkEnvatoStatus,
     checkEnvatoAndSearch, detectEnvatoPlatform, importFromHTML, PLATFORM_LABELS_MAP,
+    onLoadTemplateFromEvent,
     getTemplate, deleteTemplateFromDb, saveSender, deleteSender, uploadMedia, deleteMedia,
   };
 }

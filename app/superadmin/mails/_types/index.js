@@ -77,7 +77,7 @@ export const RECEIPT_DEMO = {
 
 export const INITIAL_SETTINGS = {
   bodyBg: '#F3F4F6', containerBg: '#FFFFFF', width: 600, fontFamily: 'Verdana, Geneva, sans-serif',
-  sectionGap: 0, activePaletteId: 'bliscorp-light', palettes: DEFAULT_PALETTES, subject: '', previewText: ''
+  sectionGap: 0, activePaletteId: 'bliscorp-light', palettes: DEFAULT_PALETTES, subject: '', previewText: '', evento: 'ninguno'
 };
 
 let _uidCounter = 0;

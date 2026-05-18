@@ -6,6 +6,7 @@ interface EmailTemplate {
   id: string
   nombre: string
   descripcion?: string
+  evento?: string
   settings: Record<string, unknown>
   blocks: unknown[]
   creado_en: string

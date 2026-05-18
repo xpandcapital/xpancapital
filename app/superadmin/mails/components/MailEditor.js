@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { MousePointerClick, Settings, Database, Copy, Sparkles, Type, Image as ImageIcon, Video, MousePointerClick as ClickIcon, Minus, Share2, Code, Layout, ArrowUp, ArrowDown, Trash2, Grid } from 'lucide-react';
 import { SOCIAL_CONFIG, FONTS, FONT_WEIGHTS } from '../_types';
 import { PropertyGroup, PropertyInput, PropertyTextarea, PropertySelect, PropertyColor, PropertyAlignment, PropertyFileOrUrl, PropertyBackgroundImage, PropertyPadding } from './PropertyComponents';
+import EventSelector from './EventSelector';
+import VariablePanel from './VariablePanel';
 
 function AIGenerator({ blockId, currentText, onGenerate }) {
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,7 @@ function ColToolBtn({ icon: Icon, label, onClick }) {
   return <button onClick={onClick} className="flex flex-col items-center p-2 hover:bg-white dark:hover:bg-[#222] rounded transition-colors border border-transparent hover:border-[#e11d48]/30"><Icon size={14} className="mb-1 text-gray-500" /><span className="text-[8px] font-bold text-gray-600 dark:text-gray-400">{label}</span></button>;
 }
 
-export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId, selectedBlock, selectedBlockId, moveBlock, duplicateBlock, removeBlock, applyPalette, senders, addNetwork, settings, updateSetting, currentPalettes, handleUpdateContent, showMediaModal, setShowMediaModal, mediaCallbackRef, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, addBlockToSpecificColumn, demoData, applyDemoData, previewWithDemo, setPreviewWithDemo, generateHTML, theme }) {
+export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId, selectedBlock, selectedBlockId, moveBlock, duplicateBlock, removeBlock, applyPalette, senders, addNetwork, settings, updateSetting, currentPalettes, handleUpdateContent, showMediaModal, setShowMediaModal, mediaCallbackRef, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, addBlockToSpecificColumn, demoData, applyDemoData, previewWithDemo, setPreviewWithDemo, generateHTML, theme, savedTemplates, currentTemplateId, onLoadTemplateFromEvent, templatesLoading }) {
   const BLOCK_ICONS = { text: Type, image: ImageIcon, button: ClickIcon, video: Video, divider: Minus, social: Share2, html: Code, header: Layout, footer: Settings };
   const handleOpenMedia = (callback) => { setShowMediaModal(true); mediaCallbackRef.current = callback; };
 
@@ -70,8 +72,8 @@ export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId
             {selectedBlock.type === 'footer' && <FooterEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} />}
           </div>
         )}
-        {activeTab === 'global' && <GlobalSettings settings={settings} updateSetting={updateSetting} currentPalettes={currentPalettes} isEditingPalette={isEditingPalette} editingPaletteId={editingPaletteId} paletteForm={paletteForm} setPaletteForm={setPaletteForm} toggleCreatePalette={toggleCreatePalette} startEditPalette={startEditPalette} deletePalette={deletePalette} movePalette={movePalette} savePalette={savePalette} applyPalette={applyPalette} senders={senders} />}
-        {activeTab === 'variables' && <VariablesPanel demoData={demoData} previewWithDemo={previewWithDemo} setPreviewWithDemo={setPreviewWithDemo} generateHTML={generateHTML} applyDemoData={applyDemoData} />}
+        {activeTab === 'global' && <GlobalSettings settings={settings} updateSetting={updateSetting} currentPalettes={currentPalettes} isEditingPalette={isEditingPalette} editingPaletteId={editingPaletteId} paletteForm={paletteForm} setPaletteForm={setPaletteForm} toggleCreatePalette={toggleCreatePalette} startEditPalette={startEditPalette} deletePalette={deletePalette} movePalette={movePalette} savePalette={savePalette} applyPalette={applyPalette} senders={senders} savedTemplates={savedTemplates} currentTemplateId={currentTemplateId} onLoadTemplateFromEvent={onLoadTemplateFromEvent} templatesLoading={templatesLoading} />}
+        {activeTab === 'variables' && <VariablePanel currentEvent={settings.evento || 'ninguno'} />}
       </div>
     </aside>
   );
@@ -248,9 +250,19 @@ function FooterEditor({ selectedBlock, handleUpdateContent }) {
   return (<PropertyGroup title="Pie de Página"><PropertyTextarea label="Texto Legal" value={selectedBlock.content.text} onChange={(v) => handleUpdateContent('text', v)} /><PropertyColor label="Color de Texto" value={selectedBlock.content.textColor} onChange={(v) => handleUpdateContent('textColor', v)} /><PropertyInput label="Tamaño (px)" type="number" value={selectedBlock.content.fontSize} onChange={(v) => handleUpdateContent('fontSize', v)} /><PropertyAlignment value={selectedBlock.content.align} onChange={(v) => handleUpdateContent('align', v)} /><PropertyPadding label="Padding (px)" value={selectedBlock.content} onChange={(v) => handleUpdateContent(Object.keys(v)[0], Object.values(v)[0])} /></PropertyGroup>);
 }
 
-function GlobalSettings({ settings, updateSetting, currentPalettes, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, applyPalette, senders }) {
+function GlobalSettings({ settings, updateSetting, currentPalettes, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, applyPalette, senders, savedTemplates, currentTemplateId, onLoadTemplateFromEvent, templatesLoading }) {
   return (
     <div className="space-y-6">
+      <PropertyGroup title="Evento del Sistema">
+        <EventSelector
+          savedTemplates={savedTemplates}
+          currentTemplateId={currentTemplateId}
+          currentEvent={settings.evento || 'ninguno'}
+          onAssignEvent={(value) => updateSetting('evento', value)}
+          onLoadTemplate={onLoadTemplateFromEvent}
+          templatesLoading={templatesLoading}
+        />
+      </PropertyGroup>
       <PropertyGroup title="Remitente por defecto">
         <select value={settings.senderId || ''} onChange={(e) => updateSetting('senderId', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-sm text-white">
           <option value="">Sin remitente asignado</option>
@@ -285,25 +297,6 @@ function GlobalSettings({ settings, updateSetting, currentPalettes, isEditingPal
         <PropertySelect label="Tipografía Global" value={settings.fontFamily} onChange={(v) => updateSetting('fontFamily', v)} options={FONTS} />
         <PropertyInput label="Separación de Secciones (px)" type="number" value={settings.sectionGap} onChange={(v) => updateSetting('sectionGap', parseInt(v)||0)} />
       </PropertyGroup>
-    </div>
-  );
-}
-
-function VariablesPanel({ demoData, previewWithDemo, setPreviewWithDemo, generateHTML, applyDemoData }) {
-  const [copied, setCopied] = useState(false);
-  const groups = [
-    { label: '👤 Cliente', color: 'text-sky-400', bg: 'bg-sky-500/10 border-sky-500/20', vars: [{ key: 'nombre', desc: 'Nombre completo' }, { key: 'email', desc: 'Email' }, { key: 'telefono', desc: 'Teléfono' }, { key: 'ciudad', desc: 'Ciudad' }] },
-    { label: '🔐 Acceso', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', vars: [{ key: 'password', desc: 'Contraseña temporal' }, { key: 'enlace_acceso', desc: 'URL acceso' }, { key: 'enlace_baja', desc: 'URL baja' }] },
-    { label: '🛒 Compra', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', vars: [{ key: 'total', desc: 'Monto total' }, { key: 'subtotal', desc: 'Subtotal' }, { key: 'descuento_monto', desc: 'Descuento' }, { key: 'metodo_pago', desc: 'Método de pago' }, { key: 'fecha', desc: 'Fecha' }] },
-    { label: '📦 Productos', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20', vars: [{ key: 'producto_1_nombre', desc: 'Producto 1' }, { key: 'producto_1_precio', desc: 'Precio 1' }, { key: 'producto_2_nombre', desc: 'Producto 2' }, { key: 'producto_2_precio', desc: 'Precio 2' }] },
-    { label: '🎁 Ofertas', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', vars: [{ key: 'campana', desc: 'Campaña' }, { key: 'descuento', desc: '% descuento' }, { key: 'cupon', desc: 'Código cupón' }, { key: 'vencimiento', desc: 'Vencimiento' }] },
-    { label: '🏢 Empresa', color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20', vars: [{ key: 'empresa', desc: 'Nombre empresa' }, { key: 'whatsapp', desc: 'WhatsApp' }] },
-  ];
-  return (
-    <div className="space-y-5">
-      <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4"><h3 className="text-amber-400 font-black text-xs uppercase tracking-widest mb-1 flex items-center gap-2"><Database size={14} /> Variables Disponibles</h3><p className="text-xs text-gray-400 leading-relaxed">Escribe <code className="text-amber-400 bg-black/40 px-1 rounded">{'{{nombre}}'}</code> en cualquier bloque y se reemplazará al enviar.</p></div>
-      <div className="flex items-center justify-between bg-gray-100 dark:bg-[#1a1a1a] rounded-xl p-3"><div><p className="text-xs font-bold text-gray-700 dark:text-gray-200">Vista previa con datos demo</p><p className="text-[10px] text-gray-500">Ver cómo se verá el email con datos reales</p></div><button onClick={() => setPreviewWithDemo(p => !p)} className={`w-11 h-6 rounded-full transition-colors relative flex-shrink-0 ${previewWithDemo ? 'bg-amber-500' : 'bg-gray-300 dark:bg-gray-600'}`}><span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${previewWithDemo ? 'translate-x-5' : 'translate-x-0.5'}`} /></button></div>
-      {groups.map(group => (<div key={group.label} className={`rounded-xl border p-3 ${group.bg}`}><p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${group.color}`}>{group.label}</p><div className="space-y-1">{group.vars.map(v => (<button key={v.key} onClick={() => { navigator.clipboard.writeText(`{{${v.key}}}`); }} title={`Clic para copiar {{${v.key}}}`} className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-black/20 hover:bg-black/40 transition-colors group text-left"><div className="min-w-0"><code className={`text-[11px] font-black ${group.color}`}>{`{{${v.key}}}`}</code><p className="text-[10px] text-gray-500 truncate">{v.desc}</p></div><Copy size={11} className="text-gray-600 group-hover:text-gray-300 transition-colors flex-shrink-0" /></button>))}</div></div>))}
     </div>
   );
 }

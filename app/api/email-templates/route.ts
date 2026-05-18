@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('email_templates')
-      .select('id, nombre, descripcion, creado_en, actualizado_en')
+      .select('id, nombre, descripcion, evento, creado_en, actualizado_en')
       .eq('empresa_id', empresaId)
       .order('creado_en', { ascending: false })
 
