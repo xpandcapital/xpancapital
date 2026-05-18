@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Se requiere layers (array)' }, { status: 400 })
     }
 
-    const vb = 512
+    const vb = 1024
     let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vb} ${vb}" width="${vb}" height="${vb}">\n`
     svgContent += `  <!-- BLIS Bordado - SVG para Wilcom EmbroideryStudio / CorelDRAW -->\n`
     svgContent += `  <!-- Capas detectadas: ${layers.length} | Medidas: ${vb}x${vb}px -->\n`

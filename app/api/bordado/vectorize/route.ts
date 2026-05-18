@@ -16,7 +16,13 @@ interface VectorLayer {
 
 function traceImage(buffer: Buffer): Promise<string> {
   return new Promise((resolve, reject) => {
-    trace(buffer, (err: Error | null, svg: string) => {
+    trace(buffer, {
+      alphaMax: 0,
+      turdSize: 2,
+      optTolerance: 0.2,
+      threshold: 128,
+      blackOnWhite: true,
+    }, (err: Error | null, svg: string) => {
       if (err) reject(err)
       else resolve(svg)
     })
@@ -24,7 +30,7 @@ function traceImage(buffer: Buffer): Promise<string> {
 }
 
 function extractPathsFromSVG(svg: string): { pathD: string; transform: string; viewBox: string } {
-  const viewBox = (svg.match(/viewBox=["']([^"']+)["']/) || [])[1] || '0 0 512 512'
+  const viewBox = (svg.match(/viewBox=["']([^"']+)["']/) || [])[1] || '0 0 1024 1024'
 
   const gMatch = svg.match(/<g[^>]*transform=["']([^"']+)["'][^>]*>/)
   const transform = gMatch ? gMatch[1] : ''

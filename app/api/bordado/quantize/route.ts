@@ -10,7 +10,7 @@ function colorDistance(a: number[], b: number[]): number {
 
 async function createColorMask(buffer: Buffer, targetR: number, targetG: number, targetB: number, tolerance: number): Promise<Buffer> {
   const { data, info } = await sharp(buffer)
-    .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
+    .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true, kernel: 'lanczos3' })
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true })
@@ -22,9 +22,11 @@ async function createColorMask(buffer: Buffer, targetR: number, targetG: number,
     const dist = Math.sqrt((r-targetR)**2 + (g-targetG)**2 + (b-targetB)**2)
     const pixelIndex = (i / info.channels) * 4
     const isColor = a > 20 && dist <= tolerance
-    maskData[pixelIndex] = isColor ? 0 : 255
-    maskData[pixelIndex + 1] = isColor ? 0 : 255
-    maskData[pixelIndex + 2] = isColor ? 0 : 255
+    // Objeto = negro puro (0), fondo = blanco puro (255). Potrace traza negro sobre blanco.
+    const v = isColor ? 0 : 255
+    maskData[pixelIndex] = v
+    maskData[pixelIndex + 1] = v
+    maskData[pixelIndex + 2] = v
     maskData[pixelIndex + 3] = 255
   }
   return sharp(maskData, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer()
