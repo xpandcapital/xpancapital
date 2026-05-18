@@ -62,7 +62,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
           <img
             src={content.logoUrl}
             alt="Logo"
-            style={{ width: `${content.logoWidth ?? 600}px`, maxWidth: '100%', display: 'inline-block' }}
+            style={{ width: `${content.logoWidth ?? 600}px`, maxWidth: '100%', display: 'block' }}
           />
         ) : (
           <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: `${content.logoWidth ?? 150}px`, height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '6px', border: '1px dashed rgba(255,255,255,0.3)' }}>
@@ -111,17 +111,17 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       >
         {content.linkUrl ? (
           <a href={content.linkUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-            <img 
+             <img 
               src={content.imageUrl} 
               alt={content.altText || ''} 
-              style={{ width: `${content.width ?? 100}%`, borderRadius: `${content.borderRadius ?? 0}px`, maxWidth: '100%' }} 
+              style={{ width: `${content.width ?? 100}%`, borderRadius: `${content.borderRadius ?? 0}px`, maxWidth: '100%', display: 'block' }} 
             />
           </a>
         ) : (
           <img 
             src={content.imageUrl} 
             alt={content.altText || ''} 
-            style={{ width: `${content.width ?? 100}%`, borderRadius: `${content.borderRadius ?? 0}px`, maxWidth: '100%' }} 
+            style={{ width: `${content.width ?? 100}%`, borderRadius: `${content.borderRadius ?? 0}px`, maxWidth: '100%', display: 'block' }} 
           />
         )}
       </div>
@@ -269,7 +269,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
                 <img 
                   src={`https://img.icons8.com/ios-filled/50/${colorHex}/${cfg.iconName}.png`} 
                   alt={cfg.label}
-                  style={{ width: `${content.iconSize ?? 24}px`, height: `${content.iconSize ?? 24}px` }}
+                  style={{ width: `${content.iconSize ?? 24}px`, height: `${content.iconSize ?? 24}px`, display: 'block' }}
                 />
               </a>
             );
