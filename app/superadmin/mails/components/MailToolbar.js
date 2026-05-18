@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Monitor, Smartphone, Sun, Moon, Settings, Plus, FolderOpen, Upload, Database, Code, Send, Mail } from 'lucide-react';
+import { Monitor, Smartphone, Sun, Moon, Settings, Plus, FolderOpen, Upload, Database, Code, Send, Mail, Save } from 'lucide-react';
 
 export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMode, setShowSettingsModal, onNewTemplate, setShowTemplatesModal, importTemplate, fileInputRef, setShowSaveModal, onSaveCurrent, currentTemplateId, setShowExportHtml, onOpenSend }) {
   return (
@@ -37,7 +37,7 @@ export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMo
           <Upload size={18} />
         </button>
         <button onClick={onSaveCurrent} title="Guardar (sobrescribir)" className="p-2 flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-md">
-          <Database size={18} />
+          <Save size={18} />
         </button>
         <button onClick={() => setShowSaveModal(true)} title="Guardar como Nuevo" className="p-2 flex items-center justify-center bg-emerald-500/80 hover:bg-emerald-500 text-white rounded-md text-[10px] font-bold gap-1">
           <Plus size={14} /> Nuevo
