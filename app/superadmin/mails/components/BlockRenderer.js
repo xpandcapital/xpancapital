@@ -33,9 +33,9 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
   const paddingStyle = (block) => {
     const p = block.content;
     if (p.paddingTop !== undefined || p.paddingRight !== undefined || p.paddingBottom !== undefined || p.paddingLeft !== undefined) {
-      return `${p.paddingTop ?? p.padding ?? 20}px ${p.paddingRight ?? p.padding ?? 20}px ${p.paddingBottom ?? p.padding ?? 20}px ${p.paddingLeft ?? p.padding ?? 20}px`;
+      return `${p.paddingTop ?? p.padding ?? 0}px ${p.paddingRight ?? p.padding ?? 0}px ${p.paddingBottom ?? p.padding ?? 0}px ${p.paddingLeft ?? p.padding ?? 0}px`;
     }
-    return `${p.padding ?? 20}px`;
+    return `${p.padding ?? 0}px`;
   };
 
   const getStyle = (block) => {
@@ -132,7 +132,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
     const videoThumb = content.coverUrl || 'https://placehold.co/600x338/181818/ffffff?text=▶+Video';
     return (
       <div 
-        style={{ ...getBgStyle(content), padding: `${content.padding ?? 20}px`, ...getStyle(block) }} 
+        style={{ ...getBgStyle(content), padding: `${content.padding ?? 0}px`, ...getStyle(block) }} 
         onClick={onClick}
       >
         <a href={content.videoUrl || '#'} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
@@ -151,7 +151,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 20}px`,
+          padding: `${content.padding ?? 0}px`,
           display: 'flex',
           alignItems: content.align === 'middle' ? 'center' : content.align === 'bottom' ? 'flex-end' : 'flex-start',
           ...getStyle(block)
@@ -174,7 +174,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle({ bgColor: content.containerBgColor, bgImageUrl: content.bgImageUrl, bgSize: content.bgSize, bgPosition: content.bgPosition }),
-          padding: `${content.padding ?? 10}px`, 
+          padding: `${content.padding ?? 0}px`, 
           textAlign: content.align || 'center',
           ...getStyle(block)
         }} 
@@ -187,7 +187,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
           onClick={e => e.stopPropagation()}
           style={{
             display: 'inline-block',
-            padding: `${content.paddingY ?? 15}px ${content.paddingX ?? 30}px`,
+            padding: `${content.paddingY ?? 15}px ${content.paddingX ?? 0}px`,
             backgroundColor: content.buttonBgColor || '#e11d48',
             color: content.textColor || '#fff',
             fontFamily: fontFamily,
@@ -208,7 +208,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 20}px`,
+          padding: `${content.padding ?? 0}px`,
           ...getStyle(block)
         }} 
         onClick={onClick}
@@ -225,7 +225,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          height: `${content.height ?? 30}px`,
+          height: `${content.height ?? 0}px`,
           ...getStyle(block)
         }} 
         onClick={onClick}
@@ -238,7 +238,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 20}px`, 
+          padding: `${content.padding ?? 0}px`, 
           textAlign: content.align || 'center',
           ...getStyle(block)
         }} 
@@ -400,7 +400,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
       <div 
         style={{ 
           ...getBgStyle(content),
-          padding: `${content.padding ?? 30}px`, 
+          padding: `${content.padding ?? 0}px`, 
           textAlign: content.align || 'center',
           ...getStyle(block)
         }} 

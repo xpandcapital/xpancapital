@@ -229,7 +229,7 @@ function SocialEditor({ selectedBlock, handleUpdateContent, handleOpenMedia, add
               <button onClick={() => handleUpdateContent('networks', selectedBlock.content.networks.filter(n => n.id !== net.id))} className="text-red-500 hover:bg-red-50 rounded p-0.5"><Trash2 size={12}/></button>
             </div>
             <input type="text" value={net.url} onChange={(e) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, url: e.target.value } : n); handleUpdateContent('networks', newNets); }} placeholder="https://..." className="w-full text-xs p-1.5 border rounded dark:bg-[#161616] mb-2" />
-            <div className="flex items-center gap-2">
+<div className="flex flex-col gap-2">
               <div className="flex-1"><PropertyColor label="Icono" value={net.iconColor} onChange={(v) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, iconColor: v } : n); handleUpdateContent('networks', newNets); }} /></div>
               <div className="flex-1"><PropertyColor label="Fondo" value={net.bgColor} onChange={(v) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, bgColor: v } : n); handleUpdateContent('networks', newNets); }} /></div>
             </div>
