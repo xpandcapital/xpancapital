@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { X, Send, FolderOpen, Database, Code, Check, CheckCircle, Server, Star, Pencil, AlertCircle, Loader2, Paperclip, Trash2, Upload, Grid, Mail, Layers } from 'lucide-react';
+import { X, Send, FolderOpen, Database, Code, Check, CheckCircle, Server, Star, Pencil, AlertCircle, Loader2, Paperclip, Trash2, Upload, Grid, Mail, Layers, Search, Plus, Users } from 'lucide-react';
 
 export function ExportHtmlModal({ show, onClose, generateHTML, copied, setCopied }) {
   if (!show) return null;
@@ -59,6 +59,55 @@ export function TemplatesModal({ show, onClose, savedTemplates, onLoadTemplate, 
 }
 
 export function SendModal({ show, onClose, campaignConfig, setCampaignConfig, senders, sendTab, setSendTab, sendingEmail, onSend, attachments, setAttachments }) {
+  const [crmSearch, setCrmSearch] = useState('');
+  const [crmContacts, setCrmContacts] = useState([]);
+  const [crmLoading, setCrmLoading] = useState(false);
+  const [selectedContacts, setSelectedContacts] = useState([]);
+  const [grupos, setGrupos] = useState(() => { try { return JSON.parse(localStorage.getItem('blis_email_grupos') || '[]'); } catch { return []; } });
+  const [nuevoGrupo, setNuevoGrupo] = useState('');
+
+  const buscarCRM = async (q) => {
+    setCrmSearch(q);
+    if (q.length < 2) { setCrmContacts([]); return; }
+    setCrmLoading(true);
+    try {
+      const res = await fetch(`/api/admin/contactos?search=${encodeURIComponent(q)}&limit=20`);
+      const d = await res.json();
+      if (d.success) setCrmContacts(d.contactos || []);
+    } catch { setCrmContacts([]); }
+    setCrmLoading(false);
+  };
+
+  const toggleContacto = (c) => {
+    setSelectedContacts(prev => prev.find(p => p.id === c.id) ? prev.filter(p => p.id !== c.id) : [...prev, c]);
+  };
+
+  const agregarSeleccionados = () => {
+    const emails = selectedContacts.map(c => c.email).filter(Boolean).join(', ');
+    setCampaignConfig(prev => ({ ...prev, emails: prev.emails ? prev.emails + ', ' + emails : emails, type: 'manual' }));
+    setSelectedContacts([]);
+  };
+
+  const crearGrupo = () => {
+    if (!nuevoGrupo.trim()) return;
+    const g = [...grupos, { id: Date.now().toString(), nombre: nuevoGrupo.trim(), contactos: selectedContacts.map(c => ({ id: c.id, email: c.email, nombre: c.nombre })) }];
+    setGrupos(g);
+    localStorage.setItem('blis_email_grupos', JSON.stringify(g));
+    setNuevoGrupo('');
+    setSelectedContacts([]);
+  };
+
+  const eliminarGrupo = (id) => {
+    const g = grupos.filter(gr => gr.id !== id);
+    setGrupos(g);
+    localStorage.setItem('blis_email_grupos', JSON.stringify(g));
+  };
+
+  const usarGrupo = (grupo) => {
+    const emails = grupo.contactos.map(c => c.email).join(', ');
+    setCampaignConfig(prev => ({ ...prev, emails, type: 'manual' }));
+  };
+
   if (!show) return null;
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -77,8 +126,56 @@ export function SendModal({ show, onClose, campaignConfig, setCampaignConfig, se
                 <button onClick={() => setCampaignConfig({...campaignConfig, type: 'grupos'})} className={`p-3 border rounded-xl flex flex-col items-center gap-2 transition-all ${campaignConfig.type === 'grupos' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500' : 'border-gray-200 dark:border-[#333] text-gray-500'}`}><Layers size={20} /><span className="text-xs font-bold">Grupos</span></button>
               </div></div>
               {campaignConfig.type === 'manual' && (<div className="bg-gray-50 dark:bg-[#161616] p-4 rounded-xl border border-gray-200 dark:border-[#333]"><label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">Correos Electrónicos (separados por coma)</label><textarea rows={4} placeholder="cliente1@gmail.com, usuario2@empresa.com" value={campaignConfig.emails} onChange={(e) => setCampaignConfig({...campaignConfig, emails: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-[#444] rounded-lg bg-white dark:bg-[#0a0a0a] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" /><p className="text-[10px] text-gray-500 mt-2">Cada correo irá en copia oculta (BCC)</p></div>)}
-              {campaignConfig.type === 'leads' && (<div className="bg-gray-50 dark:bg-[#161616] p-4 rounded-xl border border-gray-200 dark:border-[#333] text-center py-8"><Database size={32} className="mx-auto text-gray-400 mb-3 opacity-50" /><h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">Desde CRM</h4><p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">Selecciona leads o contactos desde tu base de datos.</p><button className="mt-4 px-4 py-2 bg-white dark:bg-[#222] border border-gray-200 dark:border-[#444] rounded-lg text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm">+ Cargar Contactos</button></div>)}
-              {campaignConfig.type === 'grupos' && (<div className="bg-gray-50 dark:bg-[#161616] p-4 rounded-xl border border-gray-200 dark:border-[#333] text-center py-8"><Layers size={32} className="mx-auto text-gray-400 mb-3 opacity-50" /><h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">Envío por Grupos</h4><p className="text-xs text-gray-500 mt-1 max-w-sm mx-auto">Envía a segmentos predefinidos.</p><select className="mt-4 w-full max-w-xs px-3 py-2 border border-gray-300 dark:border-[#444] rounded-lg bg-white dark:bg-[#0a0a0a] text-sm mx-auto block"><option value="">Selecciona un grupo...</option><option value="todos">Todos los Leads</option><option value="clientes">Clientes Activos</option><option value="suscritos">Suscriptores Newsletter</option></select></div>)}
+              {campaignConfig.type === 'leads' && (<div className="bg-gray-50 dark:bg-[#161616] p-4 rounded-xl border border-gray-200 dark:border-[#333] space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input type="text" placeholder="Buscar por nombre o email..." value={crmSearch} onChange={e => buscarCRM(e.target.value)} className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-[#444] rounded-lg bg-white dark:bg-[#0a0a0a] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                {crmLoading && <div className="text-center py-4"><Loader2 size={20} className="animate-spin mx-auto text-blue-500" /></div>}
+                {!crmLoading && crmContacts.length > 0 && (
+                  <div className="max-h-48 overflow-y-auto space-y-1">
+                    {crmContacts.map(c => (
+                      <label key={c.id} className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${selectedContacts.find(s => s.id === c.id) ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-300' : 'hover:bg-gray-100 dark:hover:bg-[#222] border border-transparent'}`}>
+                        <input type="checkbox" checked={!!selectedContacts.find(s => s.id === c.id)} onChange={() => toggleContacto(c)} className="rounded" />
+                        <div className="flex-1 min-w-0"><p className="text-sm font-bold truncate">{c.nombre}</p><p className="text-xs text-gray-500 truncate">{c.email}</p></div>
+                        <span className="text-[10px] text-gray-400 uppercase">{c.rol}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {!crmLoading && crmContacts.length === 0 && crmSearch.length >= 2 && <p className="text-xs text-gray-500 text-center py-4">Sin resultados</p>}
+                {selectedContacts.length > 0 && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-[#333]">
+                    <span className="text-xs text-gray-500">{selectedContacts.length} seleccionados</span>
+                    <button onClick={agregarSeleccionados} className="ml-auto px-3 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700">Agregar al envío</button>
+                    <button onClick={() => { const n = prompt('Nombre del grupo:'); if (n) { const g = [...grupos, { id: Date.now().toString(), nombre: n.trim(), contactos: selectedContacts.map(c => ({ id: c.id, email: c.email, nombre: c.nombre })) }]; setGrupos(g); localStorage.setItem('blis_email_grupos', JSON.stringify(g)); setSelectedContacts([]); } }} className="px-3 py-1.5 bg-white dark:bg-[#222] border border-gray-200 dark:border-[#444] text-xs font-bold rounded-lg"><Users size={12} className="inline mr-1" /> Crear Grupo</button>
+                  </div>
+                )}
+              </div>)}
+              {campaignConfig.type === 'grupos' && (<div className="bg-gray-50 dark:bg-[#161616] p-4 rounded-xl border border-gray-200 dark:border-[#333] space-y-3">
+                {grupos.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Users size={32} className="mx-auto text-gray-400 mb-3 opacity-50" />
+                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">Sin grupos</h4>
+                    <p className="text-xs text-gray-500 mt-1">Selecciona contactos en "Desde CRM" y crea un grupo</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {grupos.map(g => (
+                      <div key={g.id} className="flex items-center justify-between bg-white dark:bg-[#0a0a0a] p-3 rounded-lg border border-gray-200 dark:border-[#333]">
+                        <div>
+                          <p className="text-sm font-bold">{g.nombre}</p>
+                          <p className="text-[10px] text-gray-500">{g.contactos?.length || 0} contactos</p>
+                        </div>
+                        <div className="flex gap-1">
+                          <button onClick={() => usarGrupo(g)} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[10px] font-bold rounded">Usar</button>
+                          <button onClick={() => eliminarGrupo(g.id)} className="px-2 py-1 text-red-500 hover:bg-red-50 rounded"><Trash2 size={12} /></button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>)}
               <div className="bg-gray-50 dark:bg-[#161616] p-4 rounded-xl border border-gray-200 dark:border-[#333]"><label className="block text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 flex items-center gap-2"><Paperclip size={14} /> Archivos Adjuntos</label><input type="file" multiple onChange={(e) => { const files = Array.from(e.target.files || []); setAttachments([...attachments, ...files]); }} className="w-full text-xs text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 dark:file:bg-blue-900/20 file:text-blue-600 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/30" />{attachments.length > 0 && (<div className="mt-3 space-y-2">{attachments.map((file, idx) => (<div key={idx} className="flex items-center justify-between bg-white dark:bg-[#0a0a0a] p-2 rounded border border-gray-200 dark:border-[#333]"><span className="text-xs truncate flex-1">{file.name}</span><button onClick={() => setAttachments(attachments.filter((_, i) => i !== idx))} className="text-red-500 ml-2"><X size={14} /></button></div>))}</div>)}</div>
             </div>
           )}
