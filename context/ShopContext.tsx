@@ -124,7 +124,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             .then(d => {
                 if (d.formas) {
                     const coins = d.formas.find((f: any) => f.slug === 'coins');
-                    setCoinsEnabled(coins?.activo !== false);
+                    setCoinsEnabled(coins ? coins.activo !== false : false);
                 }
             })
             .catch(() => {});
