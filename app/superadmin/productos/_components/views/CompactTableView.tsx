@@ -58,7 +58,7 @@ export function CompactTableView({
   )
 
   return (
-    <table className="w-full text-left border-collapse min-w-[1400px]">
+    <table className="w-full text-left border-collapse min-w-[1000px]">
       <thead>
         <tr className="text-xs font-black text-gray-500 uppercase tracking-widest border-b border-white/5 bg-white/[0.01]">
           <th className="px-4 py-3 w-10 text-center">
@@ -72,7 +72,7 @@ export function CompactTableView({
               <SortIndicator column="sku" />
             </div>
           </th>
-          <th className="px-4 py-3 min-w-[300px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('name')}>
+          <th className="px-4 py-3 min-w-[250px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('name')}>
             <div className="flex items-center justify-center gap-2">
               Nombre del Producto
               <SortIndicator column="name" />

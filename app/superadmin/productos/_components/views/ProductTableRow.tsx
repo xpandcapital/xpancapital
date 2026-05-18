@@ -56,10 +56,10 @@ return (
         </div>
       </td>
 
-      <td className="px-6 py-6 align-middle min-w-[350px] lg:min-w-[400px]">
-        <div className="flex items-center gap-4">
+      <td className="px-4 py-3 align-middle min-w-[280px]">
+        <div className="flex items-center gap-3">
           {!isBulkEditing && (
-            <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 overflow-hidden relative flex-shrink-0 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 overflow-hidden relative flex-shrink-0 group-hover:scale-110 transition-transform">
               <img
                 src={product.image?.startsWith('http') ? product.image : `/images/${product.image}`}
                 alt={product.name}
@@ -105,14 +105,14 @@ return (
             ) : (
               <>
                 <span className="text-xs text-white font-bold group-hover:text-blis-red transition-colors whitespace-nowrap overflow-hidden text-ellipsis block">{product.name}</span>
-                <span className="text-[11px] text-blue-400 font-bold uppercase tracking-widest whitespace-nowrap">{product.sku}</span>
+                <span className="text-[11px] text-blue-400 font-bold uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis block">{product.sku}</span>
               </>
             )}
           </div>
         </div>
       </td>
 
-      <td className="px-6 py-6 align-middle w-40">
+      <td className="px-4 py-3 align-middle w-32">
         {isBulkEditing ? (
           <select
             value={product.category}
@@ -128,7 +128,7 @@ return (
         )}
       </td>
 
-      <td className="px-2 py-6 align-middle w-[100px] text-[11px] font-black text-emerald-500 uppercase tracking-tighter text-left">
+      <td className="px-2 py-3 align-middle w-[80px] text-[11px] font-black text-emerald-500 uppercase tracking-tighter text-left">
         <div className="flex justify-start">
           <span className="bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-1 rounded-lg">
             {product.currencyCode || selectedCurrency.code}
@@ -136,7 +136,7 @@ return (
         </div>
       </td>
 
-      <td className="px-6 py-6 align-middle w-32">
+      <td className="px-4 py-3 align-middle w-28">
         {isBulkEditing ? (
           <div className="flex flex-col gap-2 min-w-[120px]">
             <div className="flex items-center gap-2">
@@ -172,7 +172,7 @@ return (
         )}
       </td>
 
-      <td className="px-6 py-6 align-middle w-24">
+      <td className="px-4 py-3 align-middle w-20">
         {isBulkEditing ? (
           isBlisCoinsEnabled && (
             <div className="flex items-center gap-2">
@@ -199,7 +199,7 @@ return (
         )}
       </td>
 
-      <td className="px-6 py-6 align-middle w-36">
+      <td className="px-4 py-3 align-middle w-28">
         {isBulkEditing ? (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
@@ -236,7 +236,7 @@ return (
         )}
       </td>
 
-      <td className="px-6 py-6 align-middle min-w-[200px]">
+      <td className="px-4 py-3 align-middle min-w-[120px]">
         <span
           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest border border-white/5 whitespace-nowrap"
           style={{ backgroundColor: `${statusColor}15`, color: statusColor }}
@@ -246,15 +246,15 @@ return (
         </span>
       </td>
 
-      <td className="px-6 py-6 align-middle min-w-[250px] text-center">
-        <div className="flex items-center justify-center gap-3 text-gray-400 transition-all opacity-100 flex-nowrap shrink-0">
-          <button onClick={() => onPrintLabels(product)} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all transform hover:scale-110 shrink-0" title="Generar Etiquetas (Barras)">
+      <td className="px-4 py-3 align-middle w-[140px] text-center">
+        <div className="flex items-center justify-center gap-2 text-gray-400 transition-all opacity-100 flex-nowrap shrink-0">
+          <button onClick={() => onPrintLabels(product)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all transform hover:scale-110 shrink-0" title="Generar Etiquetas (Barras)">
             <BarcodeIcon className="w-4 h-4" />
           </button>
-          <button onClick={() => onEdit(product)} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all transform hover:scale-110 shrink-0">
+          <button onClick={() => onEdit(product)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all transform hover:scale-110 shrink-0">
             <Edit2 className="w-4 h-4" />
           </button>
-          <button onClick={() => onDelete(product.id)} className="p-3 rounded-xl bg-white/5 hover:bg-blis-red/20 text-gray-400 hover:text-blis-red transition-all transform hover:scale-110">
+          <button onClick={() => onDelete(product.id)} className="p-2 rounded-xl bg-white/5 hover:bg-blis-red/20 text-gray-400 hover:text-blis-red transition-all transform hover:scale-110">
             <Trash2 className="w-4 h-4" />
           </button>
         </div>

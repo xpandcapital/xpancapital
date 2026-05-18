@@ -34,51 +34,51 @@ export function ProductTableHeader({
             {allSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
           </button>
         </th>
-        <th className="px-6 py-6 w-[500px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('name')}>
+        <th className="px-4 py-4 w-[320px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('name')}>
           <div className="flex items-center justify-center gap-2">
             Producto / SKU
             <SortIndicator column="name" />
           </div>
         </th>
-        <th className="px-6 py-6 w-[180px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('category')}>
+        <th className="px-4 py-4 w-[130px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('category')}>
           <div className="flex items-center justify-center gap-2">
             Categoría
             <SortIndicator column="category" />
           </div>
         </th>
-        <th className="px-2 py-6 w-[100px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('currencyCode')}>
+        <th className="px-2 py-4 w-[80px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('currencyCode')}>
           <div className="flex items-center gap-1 justify-center">
             Moneda
             <SortIndicator column="currencyCode" />
           </div>
         </th>
-        <th className="px-6 py-6 w-[150px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('price')}>
+        <th className="px-4 py-4 w-[110px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('price')}>
           <div className="flex items-center justify-center gap-2">
             Precio
             <SortIndicator column="price" />
           </div>
         </th>
         {isBlisCoinsEnabled && (
-        <th className="px-6 py-6 w-[130px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('bliscoins')}>
+        <th className="px-4 py-4 w-[100px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('bliscoins')}>
           <div className="flex items-center justify-center gap-2">
             BlisCoins
             <SortIndicator column="bliscoins" />
           </div>
         </th>
         )}
-        <th className="px-6 py-6 w-[180px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('stock')}>
+        <th className="px-4 py-4 w-[110px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('stock')}>
           <div className="flex items-center justify-center gap-2">
             Stock
             <SortIndicator column="stock" />
           </div>
         </th>
-        <th className="px-6 py-6 w-[200px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('status')}>
+        <th className="px-4 py-4 w-[130px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('status')}>
           <div className="flex items-center justify-center gap-2">
             Estado
             <SortIndicator column="status" />
           </div>
         </th>
-        <th className="px-6 py-6 w-[230px] text-center">Acciones</th>
+        <th className="px-4 py-4 w-[140px] text-center">Acciones</th>
       </tr>
     </thead>
   )
