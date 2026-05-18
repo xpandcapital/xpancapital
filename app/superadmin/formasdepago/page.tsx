@@ -253,14 +253,16 @@ export default function FormasPagoAdminPage() {
                                                                             if (!file) return;
                                                                             setGuardando(forma.id);
                                                                             try {
-                                                                                const supabase = (await import("@/lib/supabase").then(m => m.getSupabase()));
-                                                                                const ext = file.name.split('.').pop();
-                                                                                const path = `qrs/${Date.now()}-${Math.random().toString(36).slice(2,6)}.${ext}`;
-                                                                                const { error } = await supabase.storage.from('biblioteca-portadas').upload(path, file, { upsert: true });
-                                                                                if (error) throw error;
-                                                                                const { data: { publicUrl } } = supabase.storage.from('biblioteca-portadas').getPublicUrl(path);
-                                                                                updateWallet(forma.id, idx, 'qr_url', publicUrl);
-                                                                                showToast("QR subido", "success");
+                                                                                const fd = new FormData();
+                                                                                fd.append("file", file);
+                                                                                const res = await fetch("/api/admin/biblioteca/upload", { method: "POST", body: fd });
+                                                                                const d = await res.json();
+                                                                                if (d.success) {
+                                                                                    updateWallet(forma.id, idx, 'qr_url', d.url);
+                                                                                    showToast("QR subido", "success");
+                                                                                } else {
+                                                                                    showToast(d.error || "Error al subir", "error");
+                                                                                }
                                                                             } catch { showToast("Error al subir QR", "error"); }
                                                                             setGuardando(null);
                                                                         }} />
