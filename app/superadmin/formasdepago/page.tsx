@@ -5,7 +5,8 @@ import { motion } from "framer-motion";
 import {
     CreditCard, Coins, Building2, ShieldCheck, Loader2,
     ToggleLeft, ToggleRight, Settings, Save, Globe, Wallet,
-    Plus, Trash2, Phone, ChevronDown, ChevronRight
+    Plus, Trash2, Phone, ChevronDown, ChevronRight,
+    ArrowUp, ArrowDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,18 +37,10 @@ export default function FormasPagoAdminPage() {
         try {
             const res = await fetch("/api/admin/formas-pago");
             const d = await res.json();
-            if (d.success && d.formas) {
-                setFormas(d.formas || []);
-                const t = (d.formas || []).find((f: FormaPago) => f.slug === 'transfer' && f.activo);
-                if (t) setExpanded(t.id);
-            } else if (d.error) {
-                showToast(`Error: ${d.error}`, "error");
-            }
-        } catch {
-            showToast("Error al cargar formas de pago", "error");
-        } finally {
-            setLoading(false);
-        }
+            if (d.success && d.formas) setFormas(d.formas || []);
+            else if (d.error) showToast(`Error: ${d.error}`, "error");
+        } catch { showToast("Error al cargar formas de pago", "error"); }
+        finally { setLoading(false); }
     };
 
     useEffect(() => { cargar(); }, []);
@@ -67,6 +60,19 @@ export default function FormasPagoAdminPage() {
         setGuardando(null);
     };
 
+    const moverOrden = async (forma: FormaPago, dir: number) => {
+        const idx = formas.findIndex(f => f.id === forma.id);
+        const other = formas[idx + dir];
+        if (!other) return;
+        const a = forma.orden, b = other.orden;
+        await Promise.all([
+            fetch("/api/admin/formas-pago", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: forma.id, orden: b }) }),
+            fetch("/api/admin/formas-pago", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: other.id, orden: a }) }),
+        ]);
+        cargar();
+    };
+
+    // ── Helpers países / bancos ──
     const getCountries = (forma: FormaPago): Record<string, Country> => forma.config?.countries || {};
     const updateForma = (formaId: string, config: Record<string, any>) => {
         setFormas(prev => prev.map(f => f.id === formaId ? { ...f, config: { ...f.config, ...config } } : f));
@@ -74,56 +80,59 @@ export default function FormasPagoAdminPage() {
     const addCountry = (formaId: string) => {
         const key = prompt("Código del país (ej: peru, usa, mexico):")?.toLowerCase();
         if (!key) return;
-        const forma = formas.find(f => f.id === formaId)!;
-        const countries = { ...getCountries(forma), [key]: { label: key.charAt(0).toUpperCase() + key.slice(1), flag: "🏳️", banks: [] } };
-        updateForma(formaId, { countries });
+        updateForma(formaId, { countries: { ...getCountries(formas.find(f => f.id === formaId)!), [key]: { label: key.charAt(0).toUpperCase() + key.slice(1), flag: "🏳️", banks: [] } } });
         setExpandedPais(prev => ({ ...prev, [`${formaId}-${key}`]: true }));
     };
     const removeCountry = (formaId: string, key: string) => {
         if (!confirm("¿Eliminar este país y todos sus bancos?")) return;
-        const countries = { ...getCountries(formas.find(f => f.id === formaId)!) };
-        delete countries[key];
-        updateForma(formaId, { countries });
+        const c = { ...getCountries(formas.find(f => f.id === formaId)!) }; delete c[key];
+        updateForma(formaId, { countries: c });
     };
     const updateCountryField = (formaId: string, key: string, field: string, value: string) => {
-        const countries = { ...getCountries(formas.find(f => f.id === formaId)!) };
-        countries[key] = { ...countries[key], [field]: value };
-        updateForma(formaId, { countries });
+        const c = { ...getCountries(formas.find(f => f.id === formaId)!) }; c[key] = { ...c[key], [field]: value };
+        updateForma(formaId, { countries: c });
     };
     const addBank = (formaId: string, countryKey: string) => {
-        const countries = { ...getCountries(formas.find(f => f.id === formaId)!) };
-        countries[countryKey].banks = [...(countries[countryKey].banks || []), { name: "", account_number: "", account_holder: "", cci: "", currency: "PEN", account_type: "ahorros" }];
-        updateForma(formaId, { countries });
+        const c = { ...getCountries(formas.find(f => f.id === formaId)!) };
+        c[countryKey].banks = [...(c[countryKey].banks || []), { name: "", account_number: "", account_holder: "", cci: "", currency: "PEN", account_type: "ahorros" }];
+        updateForma(formaId, { countries: c });
     };
     const removeBank = (formaId: string, countryKey: string, idx: number) => {
-        const countries = { ...getCountries(formas.find(f => f.id === formaId)!) };
-        countries[countryKey].banks = countries[countryKey].banks.filter((_: any, i: number) => i !== idx);
-        updateForma(formaId, { countries });
+        const c = { ...getCountries(formas.find(f => f.id === formaId)!) };
+        c[countryKey].banks = c[countryKey].banks.filter((_: any, i: number) => i !== idx);
+        updateForma(formaId, { countries: c });
     };
     const updateBankField = (formaId: string, countryKey: string, idx: number, field: string, value: string) => {
-        const countries = { ...getCountries(formas.find(f => f.id === formaId)!) };
-        countries[countryKey].banks[idx] = { ...countries[countryKey].banks[idx], [field]: value };
-        updateForma(formaId, { countries });
+        const c = { ...getCountries(formas.find(f => f.id === formaId)!) };
+        c[countryKey].banks[idx] = { ...c[countryKey].banks[idx], [field]: value };
+        updateForma(formaId, { countries: c });
     };
 
+    // ── Helpers wallets ──
     const getWallets = (forma: FormaPago): Wallet[] => forma.config?.wallets || [];
     const updateWallet = (formaId: string, idx: number, field: string, value: string) => {
-        const wallets = [...getWallets(formas.find(f => f.id === formaId)!)];
-        wallets[idx] = { ...wallets[idx], [field]: value };
-        updateForma(formaId, { wallets });
+        const w = [...getWallets(formas.find(f => f.id === formaId)!)];
+        w[idx] = { ...w[idx], [field]: value };
+        updateForma(formaId, { wallets: w });
     };
-
+    const addWallet = (formaId: string) => {
+        const w = [...getWallets(formas.find(f => f.id === formaId)!), { label: "", address: "", network: "", qr_url: "", holder: "" }];
+        updateForma(formaId, { wallets: w });
+    };
     const updateSimple = (formaId: string, key: string, value: string) => { updateForma(formaId, { [key]: value }); };
 
     return (
-        <div className="min-h-screen bg-black text-white p-6">
+        <div className="min-h-screen bg-black text-white p-4 sm:p-6">
             <div className="max-w-4xl mx-auto">
-                <div className="flex items-center justify-between mb-8">
-                    <div><h1 className="text-3xl font-black uppercase tracking-tighter">Formas de Pago</h1><p className="text-gray-400 text-sm mt-1">Activa, desactiva y configura los métodos de pago</p></div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-3">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tighter">Formas de Pago</h1>
+                        <p className="text-gray-400 text-xs sm:text-sm mt-1">Activa, desactiva, ordena y configura los métodos de pago</p>
+                    </div>
                 </div>
                 {loading ? <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blis-red" /></div> : (
                     <div className="space-y-4">
-                        {formas.map(forma => {
+                        {formas.map((forma, i) => {
                             const Icon = ICONOS[forma.slug] || Settings;
                             const colorClass = COLORES[forma.slug] || "bg-gray-500/10 border-gray-500/20 text-gray-400";
                             const countries = getCountries(forma);
@@ -132,168 +141,41 @@ export default function FormasPagoAdminPage() {
                             const isExpanded = expanded === forma.id;
 
                             return (
-                                <div key={forma.id} className={`bg-zinc-900/50 border rounded-2xl p-6 transition-all ${forma.activo ? 'border-white/10' : 'border-white/5 opacity-60'}`}>
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${colorClass}`}><Icon className="w-6 h-6" /></div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <h3 className="text-lg font-black text-white">{forma.nombre}</h3>
-                                                    <Badge className={forma.activo ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}>{forma.activo ? "Activo" : "Inactivo"}</Badge>
+                                <div key={forma.id} className={`bg-zinc-900/50 border rounded-2xl p-4 sm:p-6 transition-all overflow-hidden ${forma.activo ? 'border-white/10' : 'border-white/5 opacity-60'}`}>
+                                    {/* Header + Toggle + Reorder */}
+                                    <div className="flex items-start gap-3 mb-2">
+                                        <div className="flex flex-col gap-0.5 mr-2">
+                                            <button onClick={() => moverOrden(forma, -1)} disabled={i === 0} className="p-0.5 hover:text-white text-gray-600 disabled:opacity-20"><ArrowUp className="w-4 h-4" /></button>
+                                            <button onClick={() => moverOrden(forma, 1)} disabled={i === formas.length - 1} className="p-0.5 hover:text-white text-gray-600 disabled:opacity-20"><ArrowDown className="w-4 h-4" /></button>
+                                        </div>
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center border flex-shrink-0 ${colorClass}`}><Icon className="w-5 h-5 sm:w-6 sm:h-6" /></div>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h3 className="text-base sm:text-lg font-black text-white truncate">{forma.nombre}</h3>
+                                                    <Badge className={forma.activo ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[9px]" : "bg-red-500/10 text-red-400 border-red-500/20 text-[9px]"}>{forma.activo ? "Activo" : "Inactivo"}</Badge>
                                                 </div>
-                                                <p className="text-sm text-gray-400">{forma.descripcion}</p>
+                                                <p className="text-xs sm:text-sm text-gray-400 truncate">{forma.descripcion}</p>
                                             </div>
                                         </div>
-                                        <Button onClick={() => toggleActivo(forma)} disabled={guardando === forma.id} variant="ghost" className={`text-xs ${forma.activo ? 'text-emerald-400' : 'text-gray-600'}`}>
-                                            {guardando === forma.id ? <Loader2 className="w-6 h-6 animate-spin" /> : forma.activo ? <ToggleRight className="w-10 h-10" /> : <ToggleLeft className="w-10 h-10" />}
+                                        <Button onClick={() => toggleActivo(forma)} disabled={guardando === forma.id} variant="ghost" className={`text-xs flex-shrink-0 ${forma.activo ? 'text-emerald-400' : 'text-gray-600'}`}>
+                                            {guardando === forma.id ? <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" /> : forma.activo ? <ToggleRight className="w-8 h-8 sm:w-10 sm:h-10" /> : <ToggleLeft className="w-8 h-8 sm:w-10 sm:h-10" />}
                                         </Button>
                                     </div>
 
                                     {forma.activo && (
                                         <>
-                                            {forma.slug === 'transfer' && (
-                                                <div className="space-y-3 ml-16">
-                                                    {countryKeys.length > 0 && (
-                                                        <div className="space-y-3">
-                                                            {countryKeys.map(key => {
-                                                                const c = countries[key];
-                                                                const paisExpanded = expandedPais[`${forma.id}-${key}`];
-                                                                return (
-                                                                    <div key={key} className="bg-black/30 border border-white/5 rounded-xl p-4">
-                                                                        <div className="flex items-center justify-between mb-3">
-                                                                            <button onClick={() => setExpandedPais(prev => ({ ...prev, [`${forma.id}-${key}`]: !paisExpanded }))} className="flex items-center gap-2 text-white font-bold">
-                                                                                {paisExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                                                                <span className="text-lg">{c.flag || "🏳️"}</span>
-                                                                                <span>{c.label || key}</span>
-                                                                                <span className="text-[10px] text-gray-600">{c.banks?.length || 0} bancos</span>
-                                                                            </button>
-                                                                            <div className="flex items-center gap-2">
-                                                                                <button onClick={() => removeCountry(forma.id, key)} className="text-red-400 hover:text-red-300 text-xs"><Trash2 className="w-4 h-4" /></button>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {paisExpanded && (
-                                                                            <div className="pt-3 space-y-3 border-t border-white/5">
-                                                                                <div className="grid grid-cols-2 gap-3">
-                                                                                    <div>
-                                                                                        <label className="text-[9px] text-gray-600 uppercase block mb-1">Nombre del País</label>
-                                                                                        <Input value={c.label} onChange={e => updateCountryField(forma.id, key, 'label', e.target.value)} className="bg-white/5 border-white/10 text-white text-xs" />
-                                                                                    </div>
-                                                                                    <div>
-                                                                                        <label className="text-[9px] text-gray-600 uppercase block mb-1">Bandera / Símbolo</label>
-                                                                                        <Input value={c.flag} onChange={e => updateCountryField(forma.id, key, 'flag', e.target.value)} className="bg-white/5 border-white/10 text-white text-xs" />
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                <div className="space-y-3 mt-3">
-                                                                                    {(c.banks || []).map((bank: Bank, idx: number) => (
-                                                                                        <div key={idx} className="bg-black/20 border border-white/5 rounded-lg p-3">
-                                                                                            <div className="flex justify-between items-center mb-2">
-                                                                                                <span className="text-[10px] text-gray-500 font-bold">Banco #{idx + 1}</span>
-                                                                                                <button onClick={() => removeBank(forma.id, key, idx)} className="text-red-400 hover:text-red-300"><Trash2 className="w-3.5 h-3.5" /></button>
-                                                                                            </div>
-                                                                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                                                                                <div><label className="text-[9px] text-gray-600 block mb-0.5">Banco</label><Input value={bank.name} onChange={e => updateBankField(forma.id, key, idx, 'name', e.target.value)} placeholder="BCP" className="bg-white/5 border-white/10 text-white text-[10px] h-8" /></div>
-                                                                                                <div><label className="text-[9px] text-gray-600 block mb-0.5">N° Cuenta</label><Input value={bank.account_number} onChange={e => updateBankField(forma.id, key, idx, 'account_number', e.target.value)} placeholder="123-456" className="bg-white/5 border-white/10 text-white text-[10px] h-8 font-mono" /></div>
-                                                                                                <div><label className="text-[9px] text-gray-600 block mb-0.5">Titular</label><Input value={bank.account_holder} onChange={e => updateBankField(forma.id, key, idx, 'account_holder', e.target.value)} placeholder="BLIS Corp SAC" className="bg-white/5 border-white/10 text-white text-[10px] h-8" /></div>
-                                                                                                <div><label className="text-[9px] text-gray-600 block mb-0.5">CCI</label><Input value={bank.cci} onChange={e => updateBankField(forma.id, key, idx, 'cci', e.target.value)} placeholder="002..." className="bg-white/5 border-white/10 text-white text-[10px] h-8 font-mono" /></div>
-                                                                                                <div>
-                                                                                                    <label className="text-[9px] text-gray-600 block mb-0.5">Tipo Cuenta</label>
-                                                                                                    <select value={bank.account_type} onChange={e => updateBankField(forma.id, key, idx, 'account_type', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-1.5 text-[10px] text-white h-8">
-                                                                                                        <option value="ahorros">Ahorros</option>
-                                                                                                        <option value="corriente">Corriente</option>
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                                <div>
-                                                                                                    <label className="text-[9px] text-gray-600 block mb-0.5">Moneda</label>
-                                                                                                    <select value={bank.currency} onChange={e => updateBankField(forma.id, key, idx, 'currency', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-1.5 text-[10px] text-white h-8">
-                                                                                                        <option value="PEN">S/ Soles</option>
-                                                                                                        <option value="USD">$ Dólares</option>
-                                                                                                    </select>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    ))}
-                                                                                    <Button size="sm" variant="outline" onClick={() => addBank(forma.id, key)} className="text-xs border-white/10 text-gray-400 hover:text-white w-full">
-                                                                                        <Plus className="w-3 h-3 mr-1" /> Agregar Banco en {c.label || key}
-                                                                                    </Button>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                    <Button size="sm" variant="outline" onClick={() => addCountry(forma.id)} className="text-xs border-white/10 text-gray-400 hover:text-white">
-                                                        <Plus className="w-3 h-3 mr-1" /> Agregar País
-                                                    </Button>
-                                                </div>
-                                            )}
-
-                                            {forma.slug === 'crypto_manual' && (
-                                                <div className="ml-16 space-y-3">
-                                                    {wallets.length > 0 && wallets.map((w: Wallet, idx: number) => (
-                                                        <div key={idx} className="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-32 flex-shrink-0">
-                                                                    <Input value={w.label} onChange={e => updateWallet(forma.id, idx, 'label', e.target.value)} placeholder="Ej: USDT TRC20" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
-                                                                </div>
-                                                                <Input value={w.address} onChange={e => updateWallet(forma.id, idx, 'address', e.target.value)} placeholder="Dirección de wallet" className="bg-white/5 border-white/10 text-white text-[10px] flex-1 h-8 font-mono" />
-                                                            </div>
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-32 flex-shrink-0">
-                                                                    <Input value={w.holder || ""} onChange={e => updateWallet(forma.id, idx, 'holder', e.target.value)} placeholder="Titular / Nombre" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
-                                                                </div>
-                                                                <div className="flex-1">
-                                                                    <Input value={w.qr_url || ""} onChange={e => updateWallet(forma.id, idx, 'qr_url', e.target.value)} placeholder="URL del QR (opcional)" className="bg-white/5 border-white/10 text-white text-[10px] h-8" />
-                                                                </div>
-                                                                <div className="flex-shrink-0">
-                                                                    <label className="cursor-pointer px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] text-gray-400 hover:text-white hover:bg-white/10 flex items-center gap-1">
-                                                                        📷 Subir QR
-                                                                        <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
-                                                                            const file = e.target.files?.[0];
-                                                                            if (!file) return;
-                                                                            setGuardando(forma.id);
-                                                                            try {
-                                                                                const fd = new FormData();
-                                                                                fd.append("file", file);
-                                                                                const res = await fetch("/api/admin/biblioteca/upload", { method: "POST", body: fd });
-                                                                                const d = await res.json();
-                                                                                if (d.success) {
-                                                                                    updateWallet(forma.id, idx, 'qr_url', d.url);
-                                                                                    showToast("QR subido", "success");
-                                                                                } else {
-                                                                                    showToast(d.error || "Error al subir", "error");
-                                                                                }
-                                                                            } catch { showToast("Error al subir QR", "error"); }
-                                                                            setGuardando(null);
-                                                                        }} />
-                                                                    </label>
-                                                                </div>
-                                                                {w.qr_url && (
-                                                                    <img src={w.qr_url} alt="QR" className="w-10 h-10 rounded-lg object-cover border border-white/10" />
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    <Button size="sm" variant="outline" onClick={() => {
-                                                        const wallets = [...getWallets(formas.find(f => f.id === forma.id)!), { label: "", address: "", network: "", qr_url: "", holder: "" }];
-                                                        updateForma(forma.id, { wallets });
-                                                    }} className="text-xs border-white/10 text-gray-400 hover:text-white w-full">
-                                                        <Plus className="w-3 h-3 mr-1" /> {wallets.length === 0 ? 'Agregar Wallet' : 'Agregar otra Wallet'}
-                                                    </Button>
-                                                </div>
-                                            )}
-
-                                            <div className="ml-16 mt-3">
+                                            {/* ── Botón Configurar ── */}
+                                            <div className="ml-10 sm:ml-16 mt-3">
                                                 <Button variant="ghost" size="sm" onClick={() => setExpanded(isExpanded ? null : forma.id)} className="text-xs text-gray-500">
                                                     <Settings className="w-4 h-4 mr-1" /> {isExpanded ? 'Ocultar Configuración' : 'Configurar'}
                                                 </Button>
                                             </div>
 
+                                            {/* ── SECCIÓN EXPANDIBLE ── */}
                                             {isExpanded && (
-                                                <div className="ml-16 mt-4 space-y-3 border-t border-white/5 pt-4">
+                                                <div className="ml-4 sm:ml-16 mt-4 space-y-3 border-t border-white/5 pt-4">
+                                                    {/* WhatsApp + Instrucciones (transfer + crypto) */}
                                                     {['transfer', 'crypto_manual'].includes(forma.slug) && (
                                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                             <div>
@@ -307,10 +189,112 @@ export default function FormasPagoAdminPage() {
                                                         </div>
                                                     )}
 
+                                                    {/* ── PAÍSES + BANCOS (Transferencia) ── */}
+                                                    {forma.slug === 'transfer' && (
+                                                        <div className="space-y-3">
+                                                            {countryKeys.length > 0 && (
+                                                                <div className="space-y-3">
+                                                                    {countryKeys.map(key => {
+                                                                        const c = countries[key];
+                                                                        const paisExpanded = expandedPais[`${forma.id}-${key}`];
+                                                                        return (
+                                                                            <div key={key} className="bg-black/30 border border-white/5 rounded-xl p-3 sm:p-4">
+                                                                                <div className="flex items-center justify-between mb-3">
+                                                                                    <button onClick={() => setExpandedPais(prev => ({ ...prev, [`${forma.id}-${key}`]: !paisExpanded }))} className="flex items-center gap-2 text-white font-bold text-sm">
+                                                                                        {paisExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                                                                        <span className="text-lg">{c.flag || "🏳️"}</span>
+                                                                                        <span className="truncate">{c.label || key}</span>
+                                                                                        <span className="text-[10px] text-gray-600 hidden sm:inline">{c.banks?.length || 0} bancos</span>
+                                                                                    </button>
+                                                                                    <button onClick={() => removeCountry(forma.id, key)} className="text-red-400 hover:text-red-300"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                                                </div>
+                                                                                {paisExpanded && (
+                                                                                    <div className="pt-3 space-y-3 border-t border-white/5">
+                                                                                        <div className="grid grid-cols-2 gap-2">
+                                                                                            <div><label className="text-[9px] text-gray-600 block mb-0.5">Nombre</label><Input value={c.label} onChange={e => updateCountryField(forma.id, key, 'label', e.target.value)} className="bg-white/5 border-white/10 text-white text-[10px] h-8" /></div>
+                                                                                            <div><label className="text-[9px] text-gray-600 block mb-0.5">Símbolo</label><Input value={c.flag} onChange={e => updateCountryField(forma.id, key, 'flag', e.target.value)} className="bg-white/5 border-white/10 text-white text-[10px] h-8" /></div>
+                                                                                        </div>
+                                                                                        <div className="space-y-2">
+                                                                                            {(c.banks || []).map((bank: Bank, idx: number) => (
+                                                                                                <div key={idx} className="bg-black/20 border border-white/5 rounded-lg p-2 sm:p-3">
+                                                                                                    <div className="flex justify-between items-center mb-2">
+                                                                                                        <span className="text-[10px] text-gray-500 font-bold">Banco #{idx + 1}</span>
+                                                                                                        <button onClick={() => removeBank(forma.id, key, idx)} className="text-red-400 hover:text-red-300"><Trash2 className="w-3 h-3" /></button>
+                                                                                                    </div>
+                                                                                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                                                                                        {['name','account_number','account_holder','cci'].map(field => {
+                                                                                                            const labels: Record<string,string> = { name:'Banco', account_number:'N° Cuenta', account_holder:'Titular', cci:'CCI' };
+                                                                                                            return <div key={field}><label className="text-[9px] text-gray-600 block mb-0.5">{labels[field]}</label><Input value={(bank as any)[field]} onChange={e => updateBankField(forma.id, key, idx, field, e.target.value)} className="bg-white/5 border-white/10 text-white text-[10px] h-7 font-mono" /></div>;
+                                                                                                        })}
+                                                                                                        <div>
+                                                                                                            <label className="text-[9px] text-gray-600 block mb-0.5">Tipo</label>
+                                                                                                            <select value={bank.account_type} onChange={e => updateBankField(forma.id, key, idx, 'account_type', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-1 text-[10px] text-white h-7">
+                                                                                                                <option value="ahorros">Ahorros</option><option value="corriente">Corriente</option>
+                                                                                                            </select>
+                                                                                                        </div>
+                                                                                                        <div>
+                                                                                                            <label className="text-[9px] text-gray-600 block mb-0.5">Moneda</label>
+                                                                                                            <select value={bank.currency} onChange={e => updateBankField(forma.id, key, idx, 'currency', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg p-1 text-[10px] text-white h-7">
+                                                                                                                <option value="PEN">S/</option><option value="USD">$</option>
+                                                                                                            </select>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            ))}
+                                                                                            <Button size="sm" variant="outline" onClick={() => addBank(forma.id, key)} className="text-[10px] border-white/10 text-gray-400 hover:text-white w-full h-8"><Plus className="w-3 h-3 mr-1" /> Agregar Banco</Button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
+                                                            <Button size="sm" variant="outline" onClick={() => addCountry(forma.id)} className="text-[10px] border-white/10 text-gray-400 hover:text-white w-full"><Plus className="w-3 h-3 mr-1" /> Agregar País</Button>
+                                                        </div>
+                                                    )}
+
+                                                    {/* ── WALLETS (Crypto Manual) ── */}
+                                                    {forma.slug === 'crypto_manual' && (
+                                                        <div className="space-y-3">
+                                                            {wallets.map((w: Wallet, idx: number) => (
+                                                                <div key={idx} className="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2">
+                                                                    <div className="flex flex-col sm:flex-row gap-2">
+                                                                        <div className="w-full sm:w-32"><Input value={w.label} onChange={e => updateWallet(forma.id, idx, 'label', e.target.value)} placeholder="Red (USDT TRC20)" className="bg-white/5 border-white/10 text-white text-[10px] h-7" /></div>
+                                                                        <Input value={w.address} onChange={e => updateWallet(forma.id, idx, 'address', e.target.value)} placeholder="Dirección de wallet" className="bg-white/5 border-white/10 text-white text-[10px] flex-1 h-7 font-mono" />
+                                                                    </div>
+                                                                    <div className="flex flex-col sm:flex-row gap-2">
+                                                                        <div className="w-full sm:w-32"><Input value={w.holder || ""} onChange={e => updateWallet(forma.id, idx, 'holder', e.target.value)} placeholder="Titular" className="bg-white/5 border-white/10 text-white text-[10px] h-7" /></div>
+                                                                        <div className="flex-1"><Input value={w.qr_url || ""} onChange={e => updateWallet(forma.id, idx, 'qr_url', e.target.value)} placeholder="URL del QR" className="bg-white/5 border-white/10 text-white text-[10px] h-7" /></div>
+                                                                        <div className="flex-shrink-0">
+                                                                            <label className="cursor-pointer px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] text-gray-400 hover:text-white hover:bg-white/10 flex items-center gap-1"><span className="hidden sm:inline">📷</span> Subir QR
+                                                                                <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                                                                    const file = e.target.files?.[0]; if (!file) return;
+                                                                                    setGuardando(forma.id);
+                                                                                    try {
+                                                                                        const fd = new FormData(); fd.append("file", file);
+                                                                                        const res = await fetch("/api/admin/biblioteca/upload", { method: "POST", body: fd });
+                                                                                        const d = await res.json();
+                                                                                        if (d.success) { updateWallet(forma.id, idx, 'qr_url', d.url); showToast("QR subido", "success"); }
+                                                                                        else showToast(d.error || "Error", "error");
+                                                                                    } catch { showToast("Error al subir QR", "error"); }
+                                                                                    setGuardando(null);
+                                                                                }} />
+                                                                            </label>
+                                                                        </div>
+                                                                        {w.qr_url && <img src={w.qr_url} alt="QR" className="w-8 h-8 rounded-lg object-cover border border-white/10 flex-shrink-0" />}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                            <Button size="sm" variant="outline" onClick={() => addWallet(forma.id)} className="text-[10px] border-white/10 text-gray-400 hover:text-white w-full h-8"><Plus className="w-3 h-3 mr-1" /> {wallets.length === 0 ? 'Agregar Wallet' : 'Agregar otra Wallet'}</Button>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Helio API configs */}
                                                     {forma.slug === 'helio_card' && (
                                                         <div className="grid grid-cols-1 gap-3">
                                                             <Input value={forma.config?.api_key || ""} onChange={e => updateSimple(forma.id, 'api_key', e.target.value)} placeholder="Helio API Key (pk_live_...)" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
-                                                            <Input value={forma.config?.secret_key || ""} onChange={e => updateSimple(forma.id, 'secret_key', e.target.value)} placeholder="Helio Secret Key (sk_live_...)" type="password" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
+                                                            <Input value={forma.config?.secret_key || ""} onChange={e => updateSimple(forma.id, 'secret_key', e.target.value)} placeholder="Helio Secret Key" type="password" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
                                                         </div>
                                                     )}
                                                     {forma.slug === 'helio_crypto' && (
