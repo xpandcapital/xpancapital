@@ -98,13 +98,16 @@ export function AutoEmbroideryTool() {
         try {
           const quantResult = await callBordadoAPI('quantize', {
             imageUrl: cleanImageUrl,
-            numColors: 5
+            numColors: 8
           })
           colors = quantResult.colors || []
           posterizedImage = quantResult.posterizedImage || ''
           setPreviewImage(posterizedImage || dataUrl)
           if (quantResult.masks?.length) {
             maskUrls = quantResult.masks.filter(Boolean)
+          }
+          if (quantResult.discarded?.length) {
+            setApiDiags(prev => [...(prev || []), 'Descartadas: ' + quantResult.discarded.join(' | ')])
           }
         } catch (e: any) {
           errors.push('Quantize: ' + (e.message || 'falló'))
@@ -126,7 +129,7 @@ export function AutoEmbroideryTool() {
           })
           vectorLayers = vecResult.layers || []
           if (vecResult.diag?.length) {
-            setApiDiags(vecResult.diag)
+            setApiDiags(prev => [...(prev || []), ...vecResult.diag])
           }
         } catch (e: any) {
           errors.push('Vectorize: ' + (e.message || 'falló'))
