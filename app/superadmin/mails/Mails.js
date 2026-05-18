@@ -24,6 +24,8 @@ export default function Mails() {
         setShowSaveModal={mail.setShowSaveModal}
         setShowExportHtml={mail.setShowExportHtml}
         onOpenSend={() => mail.handleOpenSendModal()}
+        onSaveCurrent={() => mail.handleSaveTemplate(false)}
+        currentTemplateId={mail.currentTemplateId}
       />
 
       <div className="flex flex-1 overflow-hidden">
