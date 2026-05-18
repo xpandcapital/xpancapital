@@ -20,7 +20,7 @@ interface ReplicatePrediction {
   logs?: string
 }
 
-async function waitForPrediction(predictionId: string, token: string, maxWaitMs = 60000): Promise<ReplicatePrediction> {
+async function waitForPrediction(predictionId: string, token: string, maxWaitMs = 90000): Promise<ReplicatePrediction> {
   const start = Date.now()
   while (Date.now() - start < maxWaitMs) {
     const res = await fetch(`${REPLICATE_BASE}/predictions/${predictionId}`, {

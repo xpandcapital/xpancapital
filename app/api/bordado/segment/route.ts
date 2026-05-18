@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getReplicateKey, segmentWithSAM2 } from '@/lib/embroidery/client'
 
-export const maxDuration = 60
+export const maxDuration = 120
 export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
