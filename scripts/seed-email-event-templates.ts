@@ -15,13 +15,16 @@ const supabase = createClient(
 );
 
 const DEFAULT_EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae';
+const LOGO_URL = 'https://srjhrhiesienkofisvnv.supabase.co/storage/v1/object/public/cms/email-media/6186f014-c8c7-4027-9f08-8acf2bae3eae/1779111044315-yyaszr.png';
 const getUniqueId = (type: string) => `${type}-evt-${Date.now()}-${Math.floor(Math.random() * 99999)}`;
 
-// ─── Plantilla Base (Light Palette) ──
-function buildTemplate(nombre: string, evento: string, subject: string, previewText: string, blocks: any[]) {
+// ─── Plantilla Base ──
+function buildTemplate(nombre: string, evento: string, subject: string, previewText: string, blocks: any[], dark = false) {
+  const base = dark
+    ? { bodyBg: '#0a0a0a', containerBg: '#111111', activePaletteId: 'bliscorp-dark' }
+    : { bodyBg: '#F3F4F6', containerBg: '#FFFFFF', activePaletteId: 'bliscorp-light' };
   const settings = {
-    bodyBg: '#F3F4F6', containerBg: '#FFFFFF', width: 600, fontFamily: 'Verdana, Geneva, sans-serif',
-    sectionGap: 0, activePaletteId: 'bliscorp-light',
+    ...base, width: 600, fontFamily: 'Verdana, Geneva, sans-serif', sectionGap: 0,
     palettes: [
       { id: 'bliscorp-dark', name: 'BlisCorp Oscuro', bodyBg: '#181818', containerBg: '#181818', text: '#e5e7eb', primary: '#e11d48' },
       { id: 'bliscorp-light', name: 'BlisCorp Claro', bodyBg: '#F3F4F6', containerBg: '#FFFFFF', text: '#333333', primary: '#e11d48' }
@@ -31,14 +34,18 @@ function buildTemplate(nombre: string, evento: string, subject: string, previewT
   return { empresa_id: DEFAULT_EMPRESA_ID, nombre, evento, settings, blocks };
 }
 
-function hdr(logoWidth = 580) {
-  return { id: getUniqueId('header'), type: 'header', content: { logoUrl: 'https://cloud.blis-corp.com/d/ucnxd3PrBf1kMBJNb7sE09KUO8Nh6Y/MTMxfHBhZGRpbg.png', bgColor: '#181818', padding: 0, align: 'center', logoWidth } };
+function hdr(logoWidth = 480, bg = '#181818') {
+  return { id: getUniqueId('header'), type: 'header', content: { logoUrl: LOGO_URL, bgColor: bg, padding: 0, align: 'center', logoWidth } };
 }
+function hdrDark(lw = 480) { return hdr(lw, '#0a0a0a'); }
 function spac(h = 0) {
   return { id: getUniqueId('spacer'), type: 'spacer', content: { height: h, bgColor: 'transparent' } };
 }
 function txt(texto: string, opts: any = {}) {
-  return { id: getUniqueId('text'), type: 'text', content: { text: texto, textColor: opts.textColor || '#333333', fontSize: opts.fontSize || 16, fontWeight: opts.fontWeight || 'normal', align: opts.align || 'left', bgColor: 'transparent', padding: opts.padding ?? 16, paddingTop: null, paddingRight: null, paddingBottom: null, paddingLeft: null, lineHeight: 1.6, fontFamily: 'Verdana, Geneva, sans-serif' } };
+  return { id: getUniqueId('text'), type: 'text', content: { text: texto, textColor: opts.textColor || '#333333', fontSize: opts.fontSize || 16, fontWeight: opts.fontWeight || 'normal', align: opts.align || 'left', bgColor: 'transparent', padding: opts.padding ?? 16, paddingTop: opts.paddingTop ?? null, paddingRight: opts.paddingRight ?? null, paddingBottom: opts.paddingBottom ?? null, paddingLeft: opts.paddingLeft ?? null, lineHeight: 1.6, fontFamily: 'Verdana, Geneva, sans-serif' } };
+}
+function txtDark(texto: string, opts: any = {}) {
+  return txt(texto, { ...opts, textColor: opts.textColor || '#e5e7eb', fontSize: opts.fontSize || 15, padding: opts.padding ?? 24, lineHeight: 1.7 });
 }
 function btn(texto: string, url: string, opts: any = {}) {
   return { id: getUniqueId('button'), type: 'button', content: { text: texto, url, buttonBgColor: opts.bg || '#e11d48', containerBgColor: 'transparent', textColor: '#ffffff', align: 'center', paddingY: opts.paddingY || 14, paddingX: opts.paddingX || 32, borderRadius: 8, fontSize: 16, fontWeight: 'bold', fontFamily: 'Verdana, Geneva, sans-serif', width: 'auto', borderStyle: 'none', borderWidth: 0, borderColor: '#e11d48', padding: opts.containerPadding ?? 0 } };
@@ -46,12 +53,43 @@ function btn(texto: string, url: string, opts: any = {}) {
 function div(color = '#e5e7eb', h = 1) {
   return { id: getUniqueId('divider'), type: 'divider', content: { color, height: h, borderStyle: 'solid', bgColor: 'transparent', padding: 0 } };
 }
-function soc(networks: any[]) {
-  return { id: getUniqueId('social'), type: 'social', content: { align: 'center', bgColor: 'transparent', padding: 0, iconSize: 28, borderRadius: 8, networks } };
+function soc(networks: any[], opts: any = {}) {
+  return { id: getUniqueId('social'), type: 'social', content: { align: 'center', bgColor: 'transparent', padding: 0, iconSize: opts.iconSize || 28, borderRadius: 8, networks } };
 }
 function ftr() {
-  return { id: getUniqueId('footer'), type: 'footer', content: { text: '© 2026 BLIS Corp. Todos los derechos reservados.\nDesarrollo inmobiliario de alta precisión y rentabilidad.', bgColor: 'transparent', textColor: '#9ca3af', padding: 0, fontSize: 12, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' } };
+  return { id: getUniqueId('footer'), type: 'footer', content: { text: '© 2026 BLIS Corp. Todos los derechos reservados.\nDesarrollo inmobiliario de alta precision y rentabilidad.', bgColor: 'transparent', textColor: '#9ca3af', padding: 0, fontSize: 12, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' } };
 }
+function ftrDark() {
+  return { id: getUniqueId('footer'), type: 'footer', content: { text: '© 2026 BLIS Corp. Todos los derechos reservados.', bgColor: 'transparent', textColor: '#6b7280', padding: 0, fontSize: 11, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' } };
+}
+
+function receipt(items?: any[]) {
+  return { id: getUniqueId('receipt'), type: 'receipt', content: {
+    items: items || [
+      { nombre: '{{producto_1_nombre}}', categoria: '{{producto_1_categoria}}', precio: '{{producto_1_precio}}', imagen: '{{producto_1_imagen}}' },
+      { nombre: '{{producto_2_nombre}}', categoria: '{{producto_2_categoria}}', precio: '{{producto_2_precio}}', imagen: '{{producto_2_imagen}}' },
+      { nombre: '{{producto_3_nombre}}', categoria: '{{producto_3_categoria}}', precio: '{{producto_3_precio}}', imagen: '{{producto_3_imagen}}' }
+    ],
+    bgColor: '#0a0a0a', headerBg: '#141414', totalBg: '#0a1a0f', rowBg1: '#0f0f0f', rowBg2: '#0a0a0a',
+    accentColor: '#4ade80',
+    subtotalVar: '{{subtotal}}', descuentoVar: '{{descuento_monto}}', cuponVar: '{{cupon}}', totalVar: '{{total}}',
+    metodoPagoVar: '{{metodo_pago}}', fechaVar: '{{fecha_compra}}', showDiscount: true, padding: '16px 20px 20px'
+  }};
+}
+function receiptPendiente() {
+  return { id: getUniqueId('receipt'), type: 'receipt', content: {
+    items: [
+      { nombre: '{{producto_1_nombre}}', categoria: '{{producto_1_categoria}}', precio: '{{producto_1_precio}}', imagen: '{{producto_1_imagen}}' },
+      { nombre: '{{producto_2_nombre}}', categoria: '{{producto_2_categoria}}', precio: '{{producto_2_precio}}', imagen: '{{producto_2_imagen}}' },
+      { nombre: '{{producto_3_nombre}}', categoria: '{{producto_3_categoria}}', precio: '{{producto_3_precio}}', imagen: '{{producto_3_imagen}}' }
+    ],
+    bgColor: '#0a0a0a', headerBg: '#141414', totalBg: '#1a120e', rowBg1: '#0f0f0f', rowBg2: '#0a0a0a',
+    accentColor: '#f59e0b',
+    subtotalVar: '{{total}}', descuentoVar: '{{total}}', cuponVar: '', totalVar: '{{total}}',
+    metodoPagoVar: '{{metodo_pago}}', fechaVar: '{{fecha_compra}}', showDiscount: false, padding: '16px 20px 20px'
+  }};
+}
+
 
 const defaultNets = [
   { id: getUniqueId('net'), network: 'facebook', url: 'https://www.facebook.com/BlisCorp', iconColor: '#ffffff', bgColor: '#181818' },
@@ -63,107 +101,132 @@ const defaultNets = [
 
 // ─── 1. TRANSACCIONES & PAGOS (10) ──
 const transacciones = [
-  buildTemplate('Compra Completada (Logueado)', 'transaccion_compra_completada_logueado',
+  buildTemplate('Confirmacion de Compra (Logueado)', 'transaccion_compra_completada_logueado',
     '¡Gracias por tu compra, {{nombre}}!',
     'Tu pedido #{{comprobante_id}} ha sido confirmado.',
-    [hdr(), spac(),
-      txt(`¡Hola, {{nombre}}!\n\nTu compra ha sido procesada exitosamente. Aquí están los detalles de tu pedido:\n\n📦 Productos:\n{{productos}}\n\n💰 Total: {{moneda}} {{total}}\n💳 Método de pago: {{metodo_pago}}\n📅 Fecha: {{fecha_compra}}\n🆔 Comprobante: {{comprobante_id}}`, { fontSize: 16, fontWeight: 'normal' }),
-      spac(),
-      btn('Ver mi Factura', '{{enlace_factura}}'),
-      spac(),
-      txt(`Tienes {{dias_garantia}} días de garantía. Si necesitas ayuda, contáctanos al {{whatsapp_soporte}}.`, { fontSize: 13, textColor: '#6b7280', align: 'center' }),
-      spac(), div(),
-      txt(`Subtotal: {{moneda}} {{subtotal}}  |  Descuento: {{moneda}} {{descuento}}`, { fontSize: 12, textColor: '#9ca3af', align: 'center', padding: 0 }),
-      spac(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
-  buildTemplate('Compra Completada (Invitado)', 'transaccion_compra_completada_invitado',
+    [hdrDark(), spac(20),
+      txtDark('¡Gracias por tu compra!', { fontSize: 22, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#ffffff' }),
+      txtDark('Tu pedido ha sido procesado exitosamente. Aqui estan los detalles:', { fontSize: 14, textColor: '#9ca3af', align: 'center', paddingTop: 0, paddingBottom: 8 }),
+      receipt(),
+      spac(12),
+      btn('Ver Factura', '{{enlace_factura}}'),
+      spac(8),
+      txtDark(`Garantia de {{dias_garantia}} dias. Soporte: {{whatsapp_soporte}}`, { fontSize: 12, textColor: '#6b7280', align: 'center', padding: 16 }),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
+  buildTemplate('Confirmacion de Compra (Invitado)', 'transaccion_compra_completada_invitado',
     '¡Gracias por tu compra en BLIS Corp!',
-    'Tu pedido #{{comprobante_id}} ha sido confirmado. Crea tu cuenta.',
-    [hdr(), spac(),
-      txt(`¡Hola!\n\nGracias por confiar en BLIS Corp. Tu compra ha sido confirmada:\n\n📦 {{productos}}\n💰 Total: {{moneda}} {{total}}\n📅 {{fecha_compra}}`, { fontSize: 16 }),
-      spac(), btn('Crear mi Cuenta', '{{enlace_crear_cuenta}}'),
-      spac(),
-      txt(`Hemos generado una cuenta para ti:\n🔑 Contraseña temporal: {{password_temporal}}\n\nTu garantía es de {{dias_garantia}} días.`, { fontSize: 14 }),
-      spac(), div(),
-      txt(`Factura disponible en: {{enlace_factura}}`, { fontSize: 12, textColor: '#9ca3af', align: 'center', padding: 0 }),
-      spac(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
+    'Tu pedido #{{comprobante_id}} ha sido confirmado.',
+    [hdrDark(), spac(20),
+      txtDark('¡Gracias por tu compra!', { fontSize: 22, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#ffffff' }),
+      txtDark('Tu pedido ha sido confirmado. Crea tu cuenta para acceder a tus productos:', { fontSize: 14, textColor: '#9ca3af', align: 'center', paddingTop: 0, paddingBottom: 8 }),
+      receipt(),
+      spac(12),
+      btn('Crear Mi Cuenta', '{{enlace_crear_cuenta}}'),
+      spac(4),
+      txtDark('Contrasena temporal:', { fontSize: 13, textColor: '#9ca3af', align: 'center', fontWeight: 'normal', padding: 16 }),
+      txtDark('{{password_temporal}}', { fontSize: 18, textColor: '#4ade80', align: 'center', fontWeight: 'bold', paddingTop: 0, paddingBottom: 4 }),
+      txtDark('Accede con este codigo y cambia tu contrasena al iniciar sesion.', { fontSize: 12, textColor: '#6b7280', align: 'center', paddingTop: 0, padding: 16 }),
+      spac(4),
+      txtDark(`Garantia de {{dias_garantia}} dias. Factura: {{enlace_factura}}`, { fontSize: 12, textColor: '#6b7280', align: 'center', padding: 16 }),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
   buildTemplate('Compra Pendiente (Logueado)', 'transaccion_compra_pendiente_logueado',
-    'Tu pedido #{{comprobante_id}} está pendiente de pago',
-    'Estamos esperando tu {{metodo_pago}} para confirmar.',
-    [hdr(), spac(),
-      txt(`¡Hola, {{nombre}}!\n\nHemos recibido tu pedido pero tu pago está pendiente de confirmación.\n\n📦 {{productos}}\n💰 Total a pagar: {{moneda}} {{total}}\n💳 Método: {{metodo_pago}}`, { fontSize: 16 }),
-      spac(), btn('Ver Instrucciones de Pago', '{{enlace_seguimiento}}'),
-      spac(),
-      txt(`Tu pedido #{{comprobante_id}} será confirmado una vez recibamos tu pago. ¿Dudas? Escríbenos al {{whatsapp_soporte}}.`, { fontSize: 13, textColor: '#6b7280' }),
-      spac(), div(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
+    'Tu pedido #{{comprobante_id}} esta pendiente de pago',
+    'Completa tu {{metodo_pago}} para confirmar.',
+    [hdrDark(), spac(20),
+      txtDark('Pago pendiente de confirmacion', { fontSize: 20, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#f59e0b' }),
+      txtDark('Hemos recibido tu pedido pero tu pago esta pendiente:', { fontSize: 14, textColor: '#9ca3af', align: 'center', paddingTop: 0, paddingBottom: 8 }),
+      receiptPendiente(),
+      spac(12),
+      btn('Completar Pago', '{{enlace_seguimiento}}'),
+      spac(8),
+      txtDark(`Tu pedido #{{comprobante_id}} sera confirmado al recibir tu pago.\nSoporte: {{whatsapp_soporte}}`, { fontSize: 13, textColor: '#6b7280', align: 'center', padding: 16 }),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
   buildTemplate('Compra Pendiente (Invitado)', 'transaccion_compra_pendiente_invitado',
-    'Tu pedido #{{comprobante_id}} está pendiente de pago',
-    'Completa tu {{metodo_pago}} para confirmar tu compra.',
-    [hdr(), spac(),
-      txt(`¡Hola!\n\nHemos registrado tu pedido, pero necesitamos que completes el pago para procesarlo.\n\n📦 {{productos}}\n💰 Total: {{moneda}} {{total}}\n💳 {{metodo_pago}}`, { fontSize: 16 }),
-      spac(), btn('Completar Pago', '{{enlace_seguimiento}}'),
-      spac(),
-      txt(`Una vez confirmado el pago, recibirás acceso inmediato. También puedes crear tu cuenta: {{enlace_crear_cuenta}}`, { fontSize: 13, textColor: '#6b7280' }),
-      spac(), div(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
+    'Tu pedido #{{comprobante_id}} esta pendiente de pago',
+    'Completa tu {{metodo_pago}} para confirmar.',
+    [hdrDark(), spac(20),
+      txtDark('Pago pendiente de confirmacion', { fontSize: 20, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#f59e0b' }),
+      txtDark('Hemos registrado tu pedido. Completa el pago para procesarlo:', { fontSize: 14, textColor: '#9ca3af', align: 'center', paddingTop: 0, paddingBottom: 8 }),
+      receiptPendiente(),
+      spac(12),
+      btn('Completar Pago', '{{enlace_seguimiento}}'),
+      spac(4),
+      txtDark(`Al confirmar el pago recibiras acceso inmediato.\nCrea tu cuenta: {{enlace_crear_cuenta}}`, { fontSize: 13, textColor: '#d1d5db', align: 'center', padding: 16 }),
+      spac(4),
+      txtDark(`Soporte: {{whatsapp_soporte}}`, { fontSize: 12, textColor: '#6b7280', align: 'center', padding: 16 }),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
   buildTemplate('Compra Aprobada', 'transaccion_compra_aprobada',
     '¡Tu compra ha sido aprobada, {{nombre}}!',
-    'Tu pedido #{{comprobante_id}} ya está confirmado.',
-    [hdr(), spac(),
-      txt(`¡Excelentes noticias, {{nombre}}!\n\nTu compra ha sido aprobada y ya tienes acceso a tus productos.\n\n📦 {{productos}}\n💰 {{moneda}} {{total}}\n📅 {{fecha_aprobacion}}`, { fontSize: 16 }),
-      spac(), btn('Ir a mi Dashboard', '{{enlace_acceso}}'),
-      spac(),
-      txt(`Descarga tu factura aquí: {{enlace_factura}}\n\nGarantía: {{dias_garantia}} días.`, { fontSize: 13, textColor: '#6b7280', align: 'center' }),
-      spac(), div(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
+    'Tu pedido #{{comprobante_id}} ya esta confirmado.',
+    [hdrDark(), spac(20),
+      txtDark('¡Compra Aprobada!', { fontSize: 22, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#4ade80' }),
+      txtDark('Tu pedido ha sido aprobado y ya tienes acceso a tus productos:', { fontSize: 14, textColor: '#9ca3af', align: 'center', paddingTop: 0, paddingBottom: 8 }),
+      { ...receipt(), content: { ...receipt().content, fechaVar: '{{fecha_aprobacion}}' } },
+      spac(12),
+      btn('Ir al Dashboard', '{{enlace_acceso}}'),
+      spac(8),
+      txtDark(`Factura: {{enlace_factura}}  |  Garantia: {{dias_garantia}} dias`, { fontSize: 12, textColor: '#6b7280', align: 'center', padding: 16 }),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
   buildTemplate('Compra Rechazada', 'transaccion_compra_rechazada',
-    'Actualización sobre tu pedido #{{comprobante_id}}',
+    'Actualizacion sobre tu pedido #{{comprobante_id}}',
     'Lamentamos informarte que tu compra no pudo ser procesada.',
-    [hdr(), spac(),
-      txt(`Hola, {{nombre}}.\n\nLamentamos informarte que tu compra no ha podido ser aprobada.\n\n📦 {{productos}}\n💰 {{moneda}} {{total}}\n❌ Motivo: {{motivo_rechazo}}`, { fontSize: 16 }),
-      spac(),
-      txt(`Si crees que hubo un error, contáctanos al {{whatsapp_soporte}} y con gusto te ayudaremos.`, { fontSize: 13, textColor: '#6b7280' }),
-      spac(), div(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
+    [hdrDark(), spac(20),
+      txtDark('Compra no aprobada', { fontSize: 20, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#ef4444' }),
+      txtDark('Lamentamos informarte que tu compra no pudo ser aprobada:', { fontSize: 14, textColor: '#9ca3af', align: 'center', paddingTop: 0, paddingBottom: 8 }),
+      { ...receiptPendiente(), content: { ...receiptPendiente().content, fechaVar: '{{fecha_rechazo}}' } },
+      spac(8),
+      txtDark(`Motivo: {{motivo_rechazo}}\n\nSi crees que hubo un error, contactanos al {{whatsapp_soporte}}.`, { fontSize: 13, textColor: '#d1d5db', align: 'center', padding: 16 }),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
   buildTemplate('Pago de Mensualidad', 'transaccion_pago_mensualidad',
-    'Tu membresía ha sido renovada, {{nombre}}',
-    'Mensualidad {{periodo}} procesada exitosamente.',
-    [hdr(), spac(),
-      txt(`¡Hola, {{nombre}}!\n\nTu membresía ha sido renovada exitosamente.\n\n📅 Periodo: {{periodo}}\n💰 Monto: {{moneda}} {{total}}\n💳 {{metodo_pago}}\n🆔 {{comprobante_id}}`, { fontSize: 16 }),
-      spac(), btn('Ir al Dashboard', '{{enlace_acceso}}'),
-      spac(),
-      txt(`Factura disponible: {{enlace_factura}}`, { fontSize: 12, textColor: '#9ca3af', align: 'center', padding: 0 }),
-      spac(), div(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
+    'Tu membresia ha sido renovada, {{nombre}}',
+    '{{periodo}} procesado exitosamente.',
+    [hdrDark(), spac(20),
+      txtDark('¡Membresia Renovada!', { fontSize: 22, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#4ade80' }),
+      txtDark(`Periodo: {{periodo}}\nMonto: {{moneda}} {{total}}\nMetodo: {{metodo_pago}}\nComprobante: {{comprobante_id}}`, { fontSize: 15, textColor: '#e5e7eb', align: 'center', fontWeight: 'bold' }),
+      spac(12),
+      btn('Ir al Dashboard', '{{enlace_acceso}}'),
+      spac(8),
+      txtDark(`Factura: {{enlace_factura}}  |  Fecha: {{fecha_compra}}`, { fontSize: 12, textColor: '#6b7280', align: 'center', padding: 16 }),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
   buildTemplate('Mensualidad Vencida', 'transaccion_pago_vencido',
-    'Tu membresía necesita atención, {{nombre}}',
-    'Tu suscripción venció hace {{dias_vencidos}} días.',
-    [hdr(), spac(),
-      txt(`Hola, {{nombre}}.\n\nQueremos recordarte que tu membresía ha vencido.\n\n📅 Vencimiento: {{fecha_vencimiento}}\n⏰ Días vencidos: {{dias_vencidos}}\n💰 Monto pendiente: {{moneda}} {{total}}`, { fontSize: 16 }),
-      spac(), btn('Renovar Ahora', '{{enlace_pago}}'),
-      spac(),
-      txt(`¿Necesitas ayuda? Contáctanos al {{whatsapp_soporte}}.`, { fontSize: 13, textColor: '#6b7280', align: 'center' }),
-      spac(), div(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
+    'Tu membresia necesita atencion, {{nombre}}',
+    'Tu suscripcion vencio hace {{dias_vencidos}} dias.',
+    [hdrDark(), spac(20),
+      txtDark('Membresia Vencida', { fontSize: 20, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#f59e0b' }),
+      txtDark(`Tu membresia ha vencido.\n\nVencimiento: {{fecha_vencimiento}}\nDias vencidos: {{dias_vencidos}}\nMonto pendiente: {{moneda}} {{total}}`, { fontSize: 15, textColor: '#e5e7eb', align: 'center' }),
+      spac(12),
+      btn('Renovar Ahora', '{{enlace_pago}}'),
+      spac(8),
+      txtDark(`Soporte: {{whatsapp_soporte}}`, { fontSize: 12, textColor: '#6b7280', align: 'center', padding: 16 }),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
   buildTemplate('Factura Emitida', 'transaccion_factura_emitida',
-    'Tu {{tipo_documento}} #{{comprobante_id}} está lista',
+    'Tu {{tipo_documento}} #{{comprobante_id}} esta lista',
     'Documento fiscal generado para tu compra del {{fecha_compra}}.',
-    [hdr(), spac(),
-      txt(`Hola, {{nombre}}.\n\nTu {{tipo_documento}} ha sido generada:\n\n🆔 N° {{comprobante_id}}\n📅 Fecha: {{fecha_compra}}\n💰 Total: {{moneda}} {{total}}\n📦 Subtotal: {{moneda}} {{subtotal}}\n🏷️ Descuento: {{moneda}} {{descuento}}`, { fontSize: 16 }),
-      spac(), btn('Descargar Factura', '{{enlace_factura}}'),
-      spac(), div(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
+    [hdrDark(), spac(20),
+      txtDark('Factura Disponible', { fontSize: 22, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#ffffff' }),
+      txtDark(`{{tipo_documento}} N° {{comprobante_id}}\n\nFecha: {{fecha_compra}}\nTotal: {{moneda}} {{total}}\nSubtotal: {{moneda}} {{subtotal}}\nDescuento: {{moneda}} {{descuento}}`, { fontSize: 15, textColor: '#e5e7eb', align: 'center' }),
+      spac(12),
+      btn('Descargar Factura', '{{enlace_factura}}'),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
   buildTemplate('Reembolso Procesado', 'transaccion_reembolso_procesado',
     'Reembolso procesado, {{nombre}}',
     'Tu reembolso por {{moneda}} {{total}} ha sido ejecutado.',
-    [hdr(), spac(),
-      txt(`Hola, {{nombre}}.\n\nTu reembolso ha sido procesado:\n\n💰 Monto: {{moneda}} {{total}}\n📅 Fecha: {{fecha_reembolso}}\n📝 Motivo: {{motivo_reembolso}}\n🆔 Referencia: {{comprobante_id}}`, { fontSize: 16 }),
-      spac(),
-      txt(`Si tienes preguntas, escríbenos al {{whatsapp_soporte}}.`, { fontSize: 13, textColor: '#6b7280', align: 'center' }),
-      spac(), div(), soc(defaultNets), spac(), ftr(), spac()]
-  ),
+    [hdrDark(), spac(20),
+      txtDark('Reembolso Procesado', { fontSize: 22, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#ffffff' }),
+      txtDark(`Monto: {{moneda}} {{total}}\nFecha: {{fecha_reembolso}}\nMotivo: {{motivo_reembolso}}\nReferencia: {{comprobante_id}}`, { fontSize: 15, textColor: '#e5e7eb', align: 'center' }),
+      spac(8),
+      txtDark(`¿Dudas? Contactanos al {{whatsapp_soporte}}.`, { fontSize: 13, textColor: '#9ca3af', align: 'center', padding: 16 }),
+      div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
+  , true),
 ];
 
 // ─── 2. CUENTA & ACCESO (10) ──

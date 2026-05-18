@@ -22,37 +22,55 @@ export const EVENT_GROUPS = [
         value: 'transaccion_compra_completada_logueado',
         label: 'Compra completada (logueado)',
         desc: 'Usuario con cuenta completa una compra exitosa',
-        vars: ['productos', 'total', 'subtotal', 'descuento', 'moneda', 'metodo_pago', 'fecha_compra', 'comprobante_id', 'enlace_factura', 'dias_garantia', 'whatsapp_soporte', 'enlace_acceso']
+        vars: ['productos', 'total', 'subtotal', 'descuento', 'cupon', 'moneda', 'metodo_pago', 'fecha_compra', 'comprobante_id', 'enlace_factura', 'dias_garantia', 'whatsapp_soporte', 'enlace_acceso',
+          'producto_1_nombre', 'producto_1_categoria', 'producto_1_precio', 'producto_1_imagen',
+          'producto_2_nombre', 'producto_2_categoria', 'producto_2_precio', 'producto_2_imagen',
+          'producto_3_nombre', 'producto_3_categoria', 'producto_3_precio', 'producto_3_imagen']
       },
       {
         value: 'transaccion_compra_completada_invitado',
         label: 'Compra completada (invitado)',
         desc: 'Invitado sin cuenta completa una compra exitosa',
-        vars: ['productos', 'total', 'subtotal', 'descuento', 'moneda', 'metodo_pago', 'fecha_compra', 'comprobante_id', 'enlace_factura', 'enlace_crear_cuenta', 'password_temporal', 'dias_garantia']
+        vars: ['productos', 'total', 'subtotal', 'descuento', 'cupon', 'moneda', 'metodo_pago', 'fecha_compra', 'comprobante_id', 'enlace_factura', 'enlace_crear_cuenta', 'password_temporal', 'dias_garantia',
+          'producto_1_nombre', 'producto_1_categoria', 'producto_1_precio', 'producto_1_imagen',
+          'producto_2_nombre', 'producto_2_categoria', 'producto_2_precio', 'producto_2_imagen',
+          'producto_3_nombre', 'producto_3_categoria', 'producto_3_precio', 'producto_3_imagen']
       },
       {
         value: 'transaccion_compra_pendiente_logueado',
         label: 'Compra pendiente (logueado)',
         desc: 'Pago por transferencia/crypto pendiente de aprobacion',
-        vars: ['productos', 'total', 'moneda', 'metodo_pago', 'fecha_compra', 'comprobante_id', 'enlace_seguimiento', 'whatsapp_soporte']
+        vars: ['productos', 'total', 'moneda', 'metodo_pago', 'fecha_compra', 'comprobante_id', 'enlace_seguimiento', 'whatsapp_soporte',
+          'producto_1_nombre', 'producto_1_categoria', 'producto_1_precio',
+          'producto_2_nombre', 'producto_2_categoria', 'producto_2_precio',
+          'producto_3_nombre', 'producto_3_categoria', 'producto_3_precio']
       },
       {
         value: 'transaccion_compra_pendiente_invitado',
         label: 'Compra pendiente (invitado)',
         desc: 'Pago pendiente de invitado — espera aprobacion',
-        vars: ['productos', 'total', 'moneda', 'metodo_pago', 'fecha_compra', 'comprobante_id', 'enlace_seguimiento', 'whatsapp_soporte', 'enlace_crear_cuenta']
+        vars: ['productos', 'total', 'moneda', 'metodo_pago', 'fecha_compra', 'comprobante_id', 'enlace_seguimiento', 'whatsapp_soporte', 'enlace_crear_cuenta',
+          'producto_1_nombre', 'producto_1_categoria', 'producto_1_precio',
+          'producto_2_nombre', 'producto_2_categoria', 'producto_2_precio',
+          'producto_3_nombre', 'producto_3_categoria', 'producto_3_precio']
       },
       {
         value: 'transaccion_compra_aprobada',
         label: 'Compra aprobada',
         desc: 'Admin aprobo la compra pendiente',
-        vars: ['productos', 'total', 'moneda', 'metodo_pago', 'fecha_aprobacion', 'comprobante_id', 'enlace_factura', 'enlace_acceso', 'dias_garantia']
+        vars: ['productos', 'total', 'moneda', 'metodo_pago', 'fecha_aprobacion', 'comprobante_id', 'enlace_factura', 'enlace_acceso', 'dias_garantia',
+          'producto_1_nombre', 'producto_1_categoria', 'producto_1_precio',
+          'producto_2_nombre', 'producto_2_categoria', 'producto_2_precio',
+          'producto_3_nombre', 'producto_3_categoria', 'producto_3_precio']
       },
       {
         value: 'transaccion_compra_rechazada',
         label: 'Compra rechazada',
         desc: 'Admin rechazo la compra pendiente',
-        vars: ['productos', 'total', 'moneda', 'metodo_pago', 'motivo_rechazo', 'fecha_rechazo', 'whatsapp_soporte']
+        vars: ['productos', 'total', 'moneda', 'metodo_pago', 'motivo_rechazo', 'fecha_rechazo', 'whatsapp_soporte',
+          'producto_1_nombre', 'producto_1_categoria', 'producto_1_precio',
+          'producto_2_nombre', 'producto_2_categoria', 'producto_2_precio',
+          'producto_3_nombre', 'producto_3_categoria', 'producto_3_precio']
       },
       {
         value: 'transaccion_pago_mensualidad',
