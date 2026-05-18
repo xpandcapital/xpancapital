@@ -47,14 +47,26 @@ async function createColorMask(
 
 export async function POST(request: NextRequest) {
   try {
-    const { imageUrl, numColors = 8 } = await request.json()
+    const { imageUrl, numColors = 8, designType = 'logo' } = await request.json()
     if (!imageUrl) {
       return NextResponse.json({ error: 'Se requiere imageUrl' }, { status: 400 })
     }
 
     const res = await fetch(imageUrl)
     if (!res.ok) throw new Error(`No se pudo descargar imagen: ${res.status}`)
-    const buffer = Buffer.from(await res.arrayBuffer())
+    let buffer = Buffer.from(await res.arrayBuffer())
+
+    const isIlustracion = designType === 'ilustracion'
+
+    // Ilustración: pre-filtro para eliminar ruido de degradados
+    if (isIlustracion) {
+      const filtered = await sharp(buffer)
+        .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+        .median(3)
+        .blur(1.5)
+        .toBuffer()
+      buffer = Buffer.from(filtered)
+    }
 
     const { data, info } = await sharp(buffer)
       .ensureAlpha()
@@ -99,14 +111,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const effectiveNumColors = isIlustracion ? 6 : numColors
+
     const top = merged
       .sort((a, b) => b[1].count - a[1].count)
-      .slice(0, numColors)
+      .slice(0, effectiveNumColors)
 
     const colorRGBs = top.map(([, v]) => ({ r: v.r, g: v.g, b: v.b }))
 
+    const tolerance = isIlustracion ? 150 : 110
+
     const results = await Promise.allSettled(
-      colorRGBs.map(rgb => createColorMask(buffer, rgb.r, rgb.g, rgb.b, 110))
+      colorRGBs.map(rgb => createColorMask(buffer, rgb.r, rgb.g, rgb.b, tolerance))
     )
 
     const colors: string[] = []
@@ -124,12 +140,15 @@ export async function POST(request: NextRequest) {
       const rgb = colorRGBs[i]
       const hex = `#${rgb.r.toString(16).padStart(2,'0')}${rgb.g.toString(16).padStart(2,'0')}${rgb.b.toString(16).padStart(2,'0')}`
 
-      // Filtrar capas parásitas
-      if (fillRatio > 0.90) {
+      // Filtrar capas parásitas (umbrales según modo)
+      const maxFill = isIlustracion ? 0.95 : 0.90
+      const minFill = isIlustracion ? 0.005 : 0.03
+
+      if (fillRatio > maxFill) {
         discarded.push(`${hex}: fondo (${(fillRatio*100).toFixed(0)}%)`)
         continue
       }
-      if (fillRatio < 0.03) {
+      if (fillRatio < minFill) {
         discarded.push(`${hex}: ruido (${(fillRatio*100).toFixed(1)}%)`)
         continue
       }

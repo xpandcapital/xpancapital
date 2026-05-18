@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { RefreshCw, CheckCircle2, XCircle } from 'lucide-react'
-import { EmbroideryUpload } from './embroidery/EmbroideryUpload'
+import { EmbroideryUpload, DesignType } from './embroidery/EmbroideryUpload'
 import { EmbroideryProgress } from './embroidery/EmbroideryProgress'
 import { EmbroideryResult } from './embroidery/EmbroideryResult'
 import { EmbroideryActions } from './embroidery/EmbroideryActions'
@@ -71,7 +71,7 @@ export function AutoEmbroideryTool() {
     setSvgContent('')
   }, [])
 
-  const handleFileSelect = useCallback(async (file: File) => {
+  const handleFileSelect = useCallback(async (file: File, designType: DesignType) => {
     const reader = new FileReader()
     reader.onload = async (e) => {
       const dataUrl = e.target?.result as string
@@ -98,7 +98,8 @@ export function AutoEmbroideryTool() {
         try {
           const quantResult = await callBordadoAPI('quantize', {
             imageUrl: cleanImageUrl,
-            numColors: 8
+            numColors: 8,
+            designType
           })
           colors = quantResult.colors || []
           posterizedImage = quantResult.posterizedImage || ''
@@ -125,7 +126,8 @@ export function AutoEmbroideryTool() {
           const vecResult = await callBordadoAPI('vectorize', {
             masks: maskUrls,
             colors: colors,
-            imageUrl: cleanImageUrl
+            imageUrl: cleanImageUrl,
+            designType
           })
           vectorLayers = vecResult.layers || []
           if (vecResult.diag?.length) {

@@ -1,17 +1,20 @@
 "use client"
 
 import React, { useRef } from 'react'
-import { UploadCloud } from 'lucide-react'
+import { UploadCloud, Shapes, Image } from 'lucide-react'
 import { motion } from 'framer-motion'
 
+export type DesignType = 'logo' | 'ilustracion'
+
 interface Props {
-  onFileSelect: (file: File) => void
+  onFileSelect: (file: File, designType: DesignType) => void
   disabled?: boolean
 }
 
 export function EmbroideryUpload({ onFileSelect, disabled }: Props) {
   const dropRef = useRef<HTMLDivElement>(null)
   const [isOver, setIsOver] = React.useState(false)
+  const [designType, setDesignType] = React.useState<DesignType>('logo')
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -27,22 +30,18 @@ export function EmbroideryUpload({ onFileSelect, disabled }: Props) {
 
   const processFile = (file: File) => {
     if (!file.type.startsWith('image/')) return
-    onFileSelect(file)
+    onFileSelect(file, designType)
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setIsOver(false)
-    if (e.dataTransfer.files?.length > 0) {
-      processFile(e.dataTransfer.files[0])
-    }
+    if (e.dataTransfer.files?.length > 0) processFile(e.dataTransfer.files[0])
   }
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length) {
-      processFile(e.target.files[0])
-    }
+    if (e.target.files?.length) processFile(e.target.files[0])
   }
 
   return (
@@ -55,8 +54,38 @@ export function EmbroideryUpload({ onFileSelect, disabled }: Props) {
         >
           Convertir imagen a <span className="text-blis-red">bordado</span>
         </motion.h2>
-        <p className="text-zinc-500 text-sm max-w-lg mx-auto">
-          Sube una imagen plana. La IA separará las capas, vectorizará los contornos y generará un archivo SVG multicapa listo para Wilcom EmbroideryStudio.
+
+        <div className="flex items-center justify-center gap-2">
+          <div className="bg-white/5 border border-white/10 rounded-xl p-1 flex gap-1">
+            <button
+              onClick={() => setDesignType('logo')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                designType === 'logo'
+                  ? 'bg-blis-red text-white shadow-lg shadow-blis-red/20'
+                  : 'text-zinc-500 hover:text-white'
+              }`}
+            >
+              <Shapes size={14} />
+              Logo / Color Plano
+            </button>
+            <button
+              onClick={() => setDesignType('ilustracion')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                designType === 'ilustracion'
+                  ? 'bg-blis-red text-white shadow-lg shadow-blis-red/20'
+                  : 'text-zinc-500 hover:text-white'
+              }`}
+            >
+              <Image size={14} />
+              Ilustración / Foto
+            </button>
+          </div>
+        </div>
+
+        <p className="text-zinc-500 text-xs max-w-md mx-auto">
+          {designType === 'logo'
+            ? 'Óptimo para logos, íconos y texto. Trazos nítidos, colores planos, sin degradados.'
+            : 'Para ilustraciones y fotos. Suaviza degradados, reduce a 6 colores, curvas orgánicas.'}
         </p>
 
         <motion.div
@@ -69,7 +98,7 @@ export function EmbroideryUpload({ onFileSelect, disabled }: Props) {
           onDrop={handleDrop}
           onClick={() => !disabled && document.getElementById('bordado-file-input')?.click()}
           className={`
-            mt-8 border-2 border-dashed rounded-2xl p-16 flex flex-col items-center justify-center
+            border-2 border-dashed rounded-2xl p-16 flex flex-col items-center justify-center
             cursor-pointer transition-all duration-200
             ${isOver
               ? 'border-blis-red bg-blis-red/10 scale-[1.02]'

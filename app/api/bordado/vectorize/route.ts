@@ -14,15 +14,26 @@ interface VectorLayer {
   viewBox: string
 }
 
-function traceImage(buffer: Buffer): Promise<string> {
+function traceImage(buffer: Buffer, designType: string): Promise<string> {
+  const isIlustracion = designType === 'ilustracion'
+  const options = isIlustracion
+    ? {
+        alphaMax: 1,
+        turdSize: 15,
+        optTolerance: 0.4,
+        threshold: 128,
+        blackOnWhite: true,
+      }
+    : {
+        alphaMax: 0,
+        turdSize: 2,
+        optTolerance: 0.2,
+        threshold: 128,
+        blackOnWhite: true,
+      }
+
   return new Promise((resolve, reject) => {
-    trace(buffer, {
-      alphaMax: 0,
-      turdSize: 2,
-      optTolerance: 0.2,
-      threshold: 128,
-      blackOnWhite: true,
-    }, (err: Error | null, svg: string) => {
+    trace(buffer, options, (err: Error | null, svg: string) => {
       if (err) reject(err)
       else resolve(svg)
     })
@@ -48,7 +59,7 @@ function extractPathsFromSVG(svg: string): { pathD: string; transform: string; v
 export async function POST(request: NextRequest) {
   const diag: string[] = []
   try {
-    const { masks, colors } = await request.json()
+    const { masks, colors, designType = 'logo' } = await request.json()
     const maskUrls: string[] = masks || []
     const colorList: string[] = colors || []
 
@@ -77,7 +88,7 @@ export async function POST(request: NextRequest) {
           diag.push(`Máscara ${i}: URL ${(buffer.length/1024).toFixed(1)}KB`)
         }
 
-        const svg = await traceImage(buffer)
+        const svg = await traceImage(buffer, designType)
         diag.push(`Máscara ${i}: potrace OK (${svg.length} chars)`)
 
         const { pathD, transform, viewBox } = extractPathsFromSVG(svg)
