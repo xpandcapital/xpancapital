@@ -18,13 +18,43 @@ interface LayerInfo {
   svgPath?: string
 }
 
+async function resizeImage(file: File, maxDim = 2048): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      let { width, height } = img
+      if (width <= maxDim && height <= maxDim) return resolve(file)
+
+      if (width > height) { height = Math.round(height * maxDim / width); width = maxDim }
+      else { width = Math.round(width * maxDim / height); height = maxDim }
+
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(img, 0, 0, width, height)
+
+      canvas.toBlob(blob => {
+        if (!blob) return reject(new Error('Error al redimensionar'))
+        resolve(new File([blob], file.name, { type: 'image/jpeg' }))
+      }, 'image/jpeg', 0.85)
+    }
+    img.onerror = () => reject(new Error('Error al cargar imagen'))
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 async function uploadToStorage(file: File): Promise<string> {
+  const resized = await resizeImage(file)
   const formData = new FormData()
-  formData.append('file', file)
+  formData.append('file', resized)
   formData.append('folder', 'bordados')
 
   const res = await fetch('/api/upload', { method: 'POST', body: formData })
-  if (!res.ok) throw new Error('Error subiendo imagen')
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw new Error(data.error || `Error subiendo imagen (${res.status})`)
+  }
   const data = await res.json()
   return data.url
 }
