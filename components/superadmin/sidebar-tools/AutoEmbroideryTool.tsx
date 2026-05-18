@@ -194,7 +194,7 @@ export function AutoEmbroideryTool() {
 
         // Paso 6: Render 3D con Gemini (async, no bloqueante)
         try {
-          const renderResult = await callBordadoAPI('render', {
+          const renderResult = await callBordadoAPI('preview', {
             imageUrl: posterizedImage || dataUrl,
             mimeType: 'image/png'
           })

@@ -4,12 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest } from 'next/server'
 
 const REPLICATE_BASE = 'https://api.replicate.com/v1'
-const SAM_MODELS = [
-  { owner: 'meta', name: 'sam-2' },
-  { owner: 'meta', name: 'segment-anything-2' },
-  { owner: 'meta', name: 'segment-anything' },
-]
-const REMBG_MODEL = { owner: 'cjwbw', name: 'rembg' }
+
+const MODELS: Record<string, string> = {
+  rembg: 'fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003',
+  'sam-2': 'fe97b453a6455861e3bac769b441ca1f1086110da7466dbb65cf1eecfd60dc83',
+  'segment-anything-2': 'be7cbde9fdf0eecdc8b20ffec9dd0d1cfeace0832d4d0b58a071d993182e1be0',
+}
 
 interface ReplicatePrediction {
   id: string
@@ -19,19 +19,37 @@ interface ReplicatePrediction {
   logs?: string
 }
 
-async function waitForPrediction(predictionId: string, token: string, maxWaitMs = 90000): Promise<ReplicatePrediction> {
+async function waitForPrediction(id: string, token: string, maxWaitMs = 90000): Promise<ReplicatePrediction> {
   const start = Date.now()
   while (Date.now() - start < maxWaitMs) {
-    const res = await fetch(`${REPLICATE_BASE}/predictions/${predictionId}`, {
+    const res = await fetch(`${REPLICATE_BASE}/predictions/${id}`, {
       headers: { Authorization: `Token ${token}` }
     })
-    const prediction: ReplicatePrediction = await res.json()
-    if (prediction.status === 'succeeded' || prediction.status === 'failed' || prediction.status === 'canceled') {
-      return prediction
+    const p: ReplicatePrediction = await res.json()
+    if (p.status === 'succeeded' || p.status === 'failed' || p.status === 'canceled') {
+      return p
     }
     await new Promise(r => setTimeout(r, 2000))
   }
-  throw new Error('Timeout esperando predicción de Replicate (60s)')
+  throw new Error('Timeout esperando predicción de Replicate (90s)')
+}
+
+async function createPrediction(version: string, input: Record<string, any>, token: string): Promise<ReplicatePrediction> {
+  const res = await fetch(`${REPLICATE_BASE}/predictions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Token ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ version, input })
+  })
+
+  if (!res.ok) {
+    const err = await res.text()
+    throw new Error(`Replicate error ${res.status}: ${err.slice(0, 300)}`)
+  }
+
+  return res.json()
 }
 
 export async function getReplicateKey(request: NextRequest): Promise<string> {
@@ -45,44 +63,24 @@ export async function getReplicateKey(request: NextRequest): Promise<string> {
 }
 
 export async function segmentWithSAM2(imageUrl: string, token: string): Promise<string[]> {
-  let lastError: Error | null = null
+  const versions = [MODELS['sam-2'], MODELS['segment-anything-2']]
 
-  for (const model of SAM_MODELS) {
+  for (const version of versions) {
     try {
-      const modelPath = `${model.owner}/${model.name}`
-      console.log(`[segment] Probando modelo: ${modelPath}`)
+      console.log(`[segment] Usando version: ${version.slice(0, 8)}...`)
 
-      const res = await fetch(`${REPLICATE_BASE}/models/${modelPath}/predictions`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          input: { image: imageUrl }
-        })
-      })
-
-      if (!res.ok) {
-        const errText = await res.text()
-        console.warn(`[segment] ${modelPath} no disponible (${res.status}): ${errText.slice(0, 200)}`)
-        continue
-      }
-
-      const prediction: ReplicatePrediction = await res.json()
-      console.log(`[segment] Predicción creada: ${prediction.id}, status: ${prediction.status}`)
+      const prediction = await createPrediction(version, { image: imageUrl }, token)
+      console.log(`[segment] Predicción: ${prediction.id}, status: ${prediction.status}`)
 
       const result = await waitForPrediction(prediction.id, token)
       console.log(`[segment] Resultado: ${result.status}`)
 
       if (result.status === 'failed') {
-        console.warn(`[segment] ${modelPath} falló: ${result.error}`)
+        console.warn(`[segment] Version ${version.slice(0, 8)} falló: ${result.error}`)
         continue
       }
 
-      if (result.status !== 'succeeded' || !result.output) {
-        continue
-      }
+      if (result.status !== 'succeeded' || !result.output) continue
 
       const output = result.output
       if (Array.isArray(output)) return output
@@ -91,38 +89,17 @@ export async function segmentWithSAM2(imageUrl: string, token: string): Promise<
       if (typeof output === 'string') return [output]
       return []
     } catch (err) {
-      lastError = err as Error
-      console.warn(`[segment] ${model.owner}/${model.name} error:`, err)
+      console.warn(`[segment] Error con version ${version.slice(0, 8)}:`, err)
     }
   }
 
-  throw lastError || new Error('Ningún modelo SAM disponible en Replicate. Verifica los nombres de modelo.')
+  throw new Error('Ningún modelo SAM 2 disponible en Replicate')
 }
 
 export async function removeBackground(imageUrl: string, token: string): Promise<string> {
-  console.log(`[remove-bg] Iniciando con modelo: ${REMBG_MODEL.owner}/${REMBG_MODEL.name}`)
-  console.log(`[remove-bg] Image URL: ${imageUrl.slice(0, 80)}...`)
+  console.log(`[remove-bg] Iniciando rembg version ${MODELS.rembg.slice(0, 8)}...`)
 
-  const res = await fetch(
-    `${REPLICATE_BASE}/models/${REMBG_MODEL.owner}/${REMBG_MODEL.name}/predictions`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        input: { image: imageUrl }
-      })
-    }
-  )
-
-  if (!res.ok) {
-    const errText = await res.text()
-    throw new Error(`Replicate ${REMBG_MODEL.owner}/${REMBG_MODEL.name} error ${res.status}: ${errText.slice(0, 300)}`)
-  }
-
-  const prediction: ReplicatePrediction = await res.json()
+  const prediction = await createPrediction(MODELS.rembg, { image: imageUrl }, token)
   console.log(`[remove-bg] Predicción: ${prediction.id}`)
 
   const result = await waitForPrediction(prediction.id, token)
@@ -132,9 +109,9 @@ export async function removeBackground(imageUrl: string, token: string): Promise
   }
 
   if (result.status !== 'succeeded' || !result.output) {
-    throw new Error(`rembg no generó output (status: ${result.status})`)
+    throw new Error(`rembg sin output (status: ${result.status})`)
   }
 
-  console.log(`[remove-bg] Éxito, output: ${typeof result.output}`)
-  return typeof result.output === 'string' ? result.output : result.output.image || JSON.stringify(result.output)
+  console.log(`[remove-bg] Éxito`)
+  return typeof result.output === 'string' ? result.output : ''
 }
