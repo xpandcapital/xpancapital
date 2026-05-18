@@ -22,7 +22,7 @@ function ColToolBtn({ icon: Icon, label, onClick }) {
   return <button onClick={onClick} className="flex flex-col items-center p-2 hover:bg-white dark:hover:bg-[#222] rounded transition-colors border border-transparent hover:border-[#e11d48]/30"><Icon size={14} className="mb-1 text-gray-500" /><span className="text-[8px] font-bold text-gray-600 dark:text-gray-400">{label}</span></button>;
 }
 
-export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId, selectedBlock, selectedBlockId, settings, updateSetting, currentPalettes, handleUpdateContent, showMediaModal, setShowMediaModal, mediaCallbackRef, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, addBlockToSpecificColumn, demoData, applyDemoData, previewWithDemo, setPreviewWithDemo, generateHTML, theme }) {
+export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId, selectedBlock, selectedBlockId, moveBlock, duplicateBlock, removeBlock, settings, updateSetting, currentPalettes, handleUpdateContent, showMediaModal, setShowMediaModal, mediaCallbackRef, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, addBlockToSpecificColumn, demoData, applyDemoData, previewWithDemo, setPreviewWithDemo, generateHTML, theme }) {
   const BLOCK_ICONS = { text: Type, image: ImageIcon, button: ClickIcon, video: Video, divider: Minus, social: Share2, html: Code, header: Layout, footer: Settings };
   const handleOpenMedia = (callback) => { setShowMediaModal(true); mediaCallbackRef.current = callback; };
 
@@ -51,16 +51,17 @@ export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId
             <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-[#262626] mb-4">
               <span className="text-xs font-bold text-[#e11d48] uppercase tracking-wider bg-red-50 dark:bg-[#2a0e16] px-2 py-1 rounded">Sección: {selectedBlock.type}</span>
               <div className="flex items-center gap-1">
-                <button onClick={(e) => { e.stopPropagation(); }} className="p-1.5 text-gray-400 hover:text-[#e11d48] hover:bg-gray-100 dark:hover:bg-[#222] rounded" title="Subir"><ArrowUp size={14} /></button>
-                <button onClick={(e) => { }} className="p-1.5 text-gray-400 hover:text-[#e11d48] hover:bg-gray-100 dark:hover:bg-[#222] rounded" title="Bajar"><ArrowDown size={14} /></button>
-                <button className="p-1.5 bg-red-50 text-red-500 rounded" title="Eliminar"><Trash2 size={14} /></button>
+                <button onClick={(e) => { e.stopPropagation(); moveBlock(selectedBlockId, 'up'); }} className="p-1.5 text-gray-400 hover:text-[#e11d48] hover:bg-gray-100 dark:hover:bg-[#222] rounded" title="Subir"><ArrowUp size={14} /></button>
+                <button onClick={(e) => { e.stopPropagation(); moveBlock(selectedBlockId, 'down'); }} className="p-1.5 text-gray-400 hover:text-[#e11d48] hover:bg-gray-100 dark:hover:bg-[#222] rounded" title="Bajar"><ArrowDown size={14} /></button>
+                <button onClick={(e) => { e.stopPropagation(); duplicateBlock(selectedBlockId, e); }} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-[#1e2a3a] rounded" title="Duplicar"><Copy size={14} /></button>
+                <button onClick={(e) => { e.stopPropagation(); removeBlock(selectedBlockId, e); }} className="p-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded" title="Eliminar"><Trash2 size={14} /></button>
               </div>
             </div>
             {selectedBlock.type === 'header' && <HeaderEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
             {selectedBlock.type === 'text' && <TextEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
             {selectedBlock.type === 'image' && <ImageEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
             {selectedBlock.type === 'video' && <VideoEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
-            {selectedBlock.type === 'columns' && <ColumnsEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} addBlockToSpecificColumn={addBlockToSpecificColumn} selectedBlockId={selectedBlockId} BLOCK_ICONS={BLOCK_ICONS} />}
+            {selectedBlock.type === 'columns' && <ColumnsEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} addBlockToSpecificColumn={addBlockToSpecificColumn} selectedBlockId={selectedBlockId} BLOCK_ICONS={BLOCK_ICONS} setSelectedBlockId={setSelectedBlockId} removeBlock={removeBlock} />}
             {selectedBlock.type === 'button' && <ButtonEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
             {selectedBlock.type === 'divider' && <DividerEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
             {selectedBlock.type === 'spacer' && <SpacerEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
@@ -129,7 +130,7 @@ function VideoEditor({ selectedBlock, handleUpdateContent, handleOpenMedia }) {
   );
 }
 
-function ColumnsEditor({ selectedBlock, handleUpdateContent, handleOpenMedia, addBlockToSpecificColumn, selectedBlockId, BLOCK_ICONS }) {
+function ColumnsEditor({ selectedBlock, handleUpdateContent, handleOpenMedia, addBlockToSpecificColumn, selectedBlockId, BLOCK_ICONS, setSelectedBlockId, removeBlock }) {
   return (
     <div className="space-y-4">
       <PropertyGroup title="Configuración de Columnas">
@@ -148,7 +149,7 @@ function ColumnsEditor({ selectedBlock, handleUpdateContent, handleOpenMedia, ad
                   <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Columna {colIdx + 1}</span>
                   <span className="text-[9px] text-gray-600">{colBlocks.length} bloque{colBlocks.length !== 1 ? 's' : ''}</span>
                 </div>
-                {colBlocks.length > 0 && (<div className="divide-y divide-gray-100 dark:divide-[#222]">{colBlocks.map((childBlock, blockIdx) => { const IconComp = BLOCK_ICONS[childBlock.type] || Code; const preview = childBlock.content?.text?.substring(0, 30) || childBlock.content?.imageUrl?.split('/').pop()?.substring(0, 20) || childBlock.content?.url?.substring(0, 20) || childBlock.type; return (<div key={childBlock.id || blockIdx} className="group"><button onClick={() => {/* setSelectedBlockId */}} className={`w-full flex items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-blue-50 dark:hover:bg-[#1e2a3a]`}><IconComp size={12} className="text-[#e11d48] flex-shrink-0" /><span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 capitalize flex-1 truncate">{childBlock.type}</span><span className="text-[10px] text-gray-400 truncate max-w-[80px]">{preview}</span></button></div>); })}</div>)}
+                {colBlocks.length > 0 && (<div className="divide-y divide-gray-100 dark:divide-[#222]">{colBlocks.map((childBlock, blockIdx) => { const IconComp = BLOCK_ICONS[childBlock.type] || Code; const preview = childBlock.content?.text?.substring(0, 30) || childBlock.content?.imageUrl?.split('/').pop()?.substring(0, 20) || childBlock.content?.url?.substring(0, 20) || childBlock.type; return (<div key={childBlock.id || blockIdx} className="group flex items-center"><button onClick={() => setSelectedBlockId(childBlock.id)} className={`flex-1 flex items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-blue-50 dark:hover:bg-[#1e2a3a]`}><IconComp size={12} className="text-[#e11d48] flex-shrink-0" /><span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 capitalize flex-1 truncate">{childBlock.type}</span><span className="text-[10px] text-gray-400 truncate max-w-[80px]">{preview}</span></button><button onClick={(e) => { e.stopPropagation(); removeBlock(childBlock.id, e); }} className="p-1.5 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12} /></button></div>); })}</div>)}
                 <div className="p-2 bg-gray-50 dark:bg-[#0a0a0a]"><p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-1.5">Agregar</p><div className="grid grid-cols-4 gap-1"><ColToolBtn icon={Type} label="Texto" onClick={() => addBlockToSpecificColumn(selectedBlock.id, colIdx, 'text')} /><ColToolBtn icon={ImageIcon} label="Imagen" onClick={() => addBlockToSpecificColumn(selectedBlock.id, colIdx, 'image')} /><ColToolBtn icon={ClickIcon} label="Botón" onClick={() => addBlockToSpecificColumn(selectedBlock.id, colIdx, 'button')} /><ColToolBtn icon={Video} label="Video" onClick={() => addBlockToSpecificColumn(selectedBlock.id, colIdx, 'video')} /></div></div>
               </div>
             );

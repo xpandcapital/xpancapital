@@ -80,6 +80,9 @@ export default function Mails() {
           setSelectedBlockId={mail.setSelectedBlockId}
           selectedBlock={mail.selectedBlock}
           selectedBlockId={mail.selectedBlockId}
+          moveBlock={mail.moveBlock}
+          duplicateBlock={mail.duplicateBlock}
+          removeBlock={mail.removeBlock}
           settings={mail.settings}
           updateSetting={mail.updateSetting}
           currentPalettes={mail.currentPalettes}
