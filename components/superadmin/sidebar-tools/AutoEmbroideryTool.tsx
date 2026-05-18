@@ -113,7 +113,7 @@ export function AutoEmbroideryTool() {
         try {
           const quantResult = await callBordadoAPI('quantize', {
             imageUrl: cleanImageUrl,
-            numColors: 8
+            numColors: 5
           })
           colors = quantResult.colors || []
           posterizedImage = quantResult.posterizedImage || ''
