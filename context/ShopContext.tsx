@@ -49,7 +49,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const [blisCoins, setBlisCoins] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const [coinsEnabled, setCoinsEnabled] = useState(true);
+    const [coinsEnabled, setCoinsEnabled] = useState(false); // false por defecto — evita flash al cargar
     const openCart = useCallback(() => setIsCartOpen(true), []);
     const closeCart = useCallback(() => setIsCartOpen(false), []);
     const { user, loading: authLoading } = useAuth();

@@ -86,7 +86,7 @@ export function CompactTableView({
           </th>
           <th className="px-4 py-3 w-16 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('currencyCode')}>Moneda</th>
           <th className="px-4 py-3 w-24 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('price')}>Precio</th>
-          <th className="px-4 py-3 w-28 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('bliscoins')}>BlisCoins</th>
+          {isBlisCoinsEnabled && <th className="px-4 py-3 w-28 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('bliscoins')}>BlisCoins</th>}
           <th className="px-4 py-3 w-20 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('stock')}>Stock</th>
           <th className="px-4 py-3 w-32 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('status')}>
             <div className="flex items-center justify-center gap-2">

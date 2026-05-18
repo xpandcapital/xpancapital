@@ -2,6 +2,7 @@
 
 import { CheckSquare, Square, ChevronUp, ChevronDown } from "lucide-react"
 import type { ProductSort } from '../../_types'
+import { useCurrency } from "@/context/CurrencyContext"
 
 interface ProductTableHeaderProps {
   allSelected: boolean
@@ -16,6 +17,7 @@ export function ProductTableHeader({
   sortConfig,
   onSort
 }: ProductTableHeaderProps) {
+  const { isBlisCoinsEnabled } = useCurrency();
   const SortIndicator = ({ column }: { column: string }) => (
     <div className={`transition-all ${sortConfig.key === column ? 'opacity-100' : 'opacity-0 group-hover/th:opacity-50'}`}>
       {sortConfig.key === column && sortConfig.direction === 'desc' 
@@ -56,12 +58,14 @@ export function ProductTableHeader({
             <SortIndicator column="price" />
           </div>
         </th>
+        {isBlisCoinsEnabled && (
         <th className="px-6 py-6 w-[130px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('bliscoins')}>
           <div className="flex items-center justify-center gap-2">
             BlisCoins
             <SortIndicator column="bliscoins" />
           </div>
         </th>
+        )}
         <th className="px-6 py-6 w-[180px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('stock')}>
           <div className="flex items-center justify-center gap-2">
             Stock
