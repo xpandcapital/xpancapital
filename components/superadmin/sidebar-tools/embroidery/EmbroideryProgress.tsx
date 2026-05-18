@@ -6,9 +6,8 @@ import { motion } from 'framer-motion'
 
 const STEPS = [
   { id: 'upload', label: 'Subiendo y preparando imagen', icon: UploadCloud },
-  { id: 'bg', label: 'Removiendo fondo (rembg)', icon: Scissors },
-  { id: 'segment', label: 'Segmentando objetos con SAM 2', icon: Scissors },
-  { id: 'quantize', label: 'Reduciendo paleta de colores', icon: PenTool },
+  { id: 'bg', label: 'Removiendo fondo (opcional)', icon: Scissors },
+  { id: 'quantize', label: 'Extrayendo colores dominantes', icon: PenTool },
   { id: 'vectorize', label: 'Vectorizando curvas (Potrace)', icon: PenTool },
   { id: 'render', label: 'Generando previsualización 3D', icon: Box },
 ]

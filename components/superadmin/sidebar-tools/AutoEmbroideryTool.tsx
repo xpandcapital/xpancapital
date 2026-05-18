@@ -87,12 +87,12 @@ export function AutoEmbroideryTool() {
       const errors: string[] = []
 
       try {
-        // Paso 0: Upload
+        // Paso 0: Upload a Supabase Storage
         setCurrentStep(0)
         const imageUrl = await uploadToStorage(file)
         cleanImageUrl = imageUrl
 
-        // Paso 1: Remove background (opcional, no bloqueante)
+        // Paso 1: Remove background (opcional)
         setCurrentStep(1)
         try {
           const bgResult = await callBordadoAPI('remove-bg', { imageUrl })
@@ -101,17 +101,8 @@ export function AutoEmbroideryTool() {
           errors.push('Remove BG: ' + (e.message || 'falló'))
         }
 
-        // Paso 2: Segmente con SAM 2 (opcional)
+        // Paso 2: Quantize — extrae colores dominantes, genera máscaras B/N, posteriza
         setCurrentStep(2)
-        try {
-          const segResult = await callBordadoAPI('segment', { imageUrl: cleanImageUrl })
-          maskUrls = segResult.masks || []
-        } catch (e: any) {
-          errors.push('SAM Segment: ' + (e.message || 'falló'))
-        }
-
-        // Paso 3: Quantize — SIEMPRE, genera colores + preview + máscaras B/N por color
-        setCurrentStep(3)
         try {
           const quantResult = await callBordadoAPI('quantize', {
             imageUrl: cleanImageUrl,
@@ -120,9 +111,7 @@ export function AutoEmbroideryTool() {
           colors = quantResult.colors || []
           posterizedImage = quantResult.posterizedImage || ''
           setPreviewImage(posterizedImage || dataUrl)
-
-          // Si SAM no generó máscaras, usamos las máscaras de quantize
-          if (!maskUrls.length && quantResult.masks?.length) {
+          if (quantResult.masks?.length) {
             maskUrls = quantResult.masks.filter(Boolean)
           }
         } catch (e: any) {
@@ -131,15 +120,11 @@ export function AutoEmbroideryTool() {
           setPreviewImage(dataUrl)
         }
 
-        if (!colors.length) {
-          colors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e']
-        }
-        if (!maskUrls.length) {
-          maskUrls = [cleanImageUrl]
-        }
+        if (!colors.length) colors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e']
+        if (!maskUrls.length) maskUrls = [cleanImageUrl]
 
-        // Paso 4: Vectorize — SIEMPRE
-        setCurrentStep(4)
+        // Paso 3: Vectorize — Potrace sobre cada máscara
+        setCurrentStep(3)
         let vectorLayers: LayerInfo[] = []
         try {
           const vecResult = await callBordadoAPI('vectorize', {
@@ -155,54 +140,35 @@ export function AutoEmbroideryTool() {
         if (!vectorLayers.length) {
           vectorLayers = colors.map((c, i) => ({
             id: `Capa_${i + 1}`,
-            name: ['Fondo', 'Principal', 'Detalles', 'Acentos', 'Textos', 'Bordes'][i] || `Capa ${i + 1}`,
+            name: ['Fondo', 'Principal', 'Detalles', 'Acentos', 'Textos'][i] || `Capa ${i + 1}`,
             color: c,
             stitches: 1500 + Math.floor(Math.random() * 3000),
             svgPath: ''
           }))
         }
 
-        // Paso 5: Assemble SVG — SIEMPRE
-        setCurrentStep(5)
+        // Paso 4: Assemble SVG
+        setCurrentStep(4)
         try {
-          const svgResult = await callBordadoAPI('assemble-svg', {
-            layers: vectorLayers,
-            width: 800,
-            height: 800
-          })
+          const svgResult = await callBordadoAPI('assemble-svg', { layers: vectorLayers })
           setSvgContent(svgResult.svg)
         } catch (e: any) {
           errors.push('Assemble SVG: ' + (e.message || 'falló'))
-          let fallbackSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">\n`
-          fallbackSvg += `  <!-- BLIS Bordado - SVG para Wilcom EmbroideryStudio -->\n`
-          for (const l of vectorLayers) {
-            fallbackSvg += `  <g id="${l.id}" data-name="${l.name}" data-color="${l.color}">\n`
-            if (l.svgPath) {
-              fallbackSvg += `    <path d="${l.svgPath}" fill="${l.color}" stroke="${l.color}" stroke-width="0.3" />\n`
-            } else {
-              fallbackSvg += `    <circle cx="400" cy="400" r="150" fill="${l.color}" stroke="${l.color}" stroke-width="1" />\n`
-            }
-            fallbackSvg += `  </g>\n`
-          }
-          fallbackSvg += `</svg>`
-          setSvgContent(fallbackSvg)
         }
 
         setLayers(vectorLayers)
         setApiErrors(errors)
         setStatus('done')
 
-        // Paso 6: Render 3D con Gemini (async, no bloqueante)
+        // Paso 5: Preview 3D con Gemini (no bloqueante)
         try {
           const renderResult = await callBordadoAPI('preview', {
             imageUrl: posterizedImage || dataUrl,
             mimeType: 'image/png'
           })
-          if (renderResult.url) {
-            setPreviewImage(renderResult.url)
-          }
+          if (renderResult.url) setPreviewImage(renderResult.url)
         } catch (e: any) {
-          errors.push('Render 3D: ' + (e.message || 'falló'))
+          errors.push('Preview 3D: ' + (e.message || 'falló'))
         }
 
       } catch (error: any) {
