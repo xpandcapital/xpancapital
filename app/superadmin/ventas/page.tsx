@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useShop } from "@/context/ShopContext";
 
 interface Venta {
     id: string;
@@ -38,6 +39,7 @@ interface LogEntry {
 }
 
 export default function VentasAdminPage() {
+    const { coinsEnabled } = useShop();
     const [ventas, setVentas] = useState<Venta[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
@@ -225,7 +227,7 @@ export default function VentasAdminPage() {
                                             </td>
                                             <td className="p-4 hidden md:table-cell">
                                                 <span className="flex items-center gap-1 text-xs text-gray-400">
-                                                    {venta.metodo_pago === 'bliscoins' ? <Coins className="w-3 h-3 text-amber-400" /> :
+                                                    {venta.metodo_pago === 'bliscoins' && coinsEnabled ? <Coins className="w-3 h-3 text-amber-400" /> :
                                                      venta.metodo_pago === 'transfer' ? <Banknote className="w-3 h-3" /> :
                                                      venta.metodo_pago === 'transferencia' ? <Banknote className="w-3 h-3" /> :
                                                      <CreditCard className="w-3 h-3" />}
@@ -233,7 +235,7 @@ export default function VentasAdminPage() {
                                                 </span>
                                             </td>
                                             <td className="p-4 font-mono font-bold text-white">
-                                                {venta.monto_coins > 0 ? (
+                                                {venta.monto_coins > 0 && coinsEnabled ? (
                                                     <span className="flex items-center gap-1 text-amber-400">
                                                         <Coins className="w-3 h-3" /> {venta.monto_coins.toLocaleString()} BLIS
                                                     </span>
@@ -321,11 +323,11 @@ export default function VentasAdminPage() {
                                 <option value="transferencia">Transferencia</option>
                                 <option value="efectivo">Efectivo</option>
                                 <option value="tarjeta">Tarjeta</option>
-                                <option value="bliscoins">BLISCOINS</option>
+                                {coinsEnabled && <option value="bliscoins">BLISCOINS</option>}
                                 <option value="otro">Otro</option>
                             </select>
                         </div>
-                        {formNueva.metodo_pago === "bliscoins" ? (
+                        {formNueva.metodo_pago === "bliscoins" && coinsEnabled ? (
                             <div>
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Monto BLISCOINS</label>
                                 <Input type="number" value={formNueva.monto_coins || ""} onChange={e => setFormNueva({ ...formNueva, monto_coins: parseInt(e.target.value) || 0 })}

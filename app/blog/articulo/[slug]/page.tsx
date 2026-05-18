@@ -16,6 +16,7 @@ import { FooterSections as Footer } from "@/components/sections/Footer";
 import { usePublicBlog } from "@/lib/hooks/usePublicBlog";
 import { useAuth } from "@/hooks/useAuth";
 import { useComments } from "@/lib/hooks/useComments";
+import { useShop } from "@/context/ShopContext";
 import Link from "next/link";
 
 interface Article {
@@ -173,6 +174,7 @@ function ArticleDetailPage() {
     const router = useRouter();
     const slug = params.slug as string;
     const { user, loading: authLoading } = useAuth();
+    const { coinsEnabled } = useShop();
 
     const [article, setArticle] = useState<Article | null>(null);
     const [claimed, setClaimed] = useState(false);
@@ -494,7 +496,7 @@ function ArticleDetailPage() {
                         {/* Main Content */}
                         <div ref={articleContentRef} className="lg:col-span-8 flex flex-col">
                             {/* Reward Banner - isolated component prevents flickering */}
-                            {article && isUnlocked && !article.isPremium && !article.sinRecompensa && user && (
+                            {article && isUnlocked && !article.isPremium && !article.sinRecompensa && user && coinsEnabled && (
                                 <RewardBanner
                                     article={{ id: article.id, rewardSeconds: article.rewardSeconds, rewardAmount: article.rewardAmount, title: article.title }}
                                     user={user}
@@ -504,7 +506,7 @@ function ArticleDetailPage() {
                                 />
                             )}
 
-                            {claimed && (
+                            {claimed && coinsEnabled && (
                                 <div className="sticky top-28 z-30 w-full flex justify-center mb-12">
                                     <div className="px-8 py-4 rounded-[40px] flex items-center gap-4 bg-emerald-500 text-black shadow-[0_0_30px_rgba(16,185,129,0.5)]">
                                         <CheckCircle2 className="w-5 h-5" />

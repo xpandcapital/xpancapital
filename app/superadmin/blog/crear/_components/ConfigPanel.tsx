@@ -1,6 +1,7 @@
 'use client';
 
 import { Coins, RotateCcw } from 'lucide-react';
+import { useShop } from "@/context/ShopContext";
 
 interface ConfigPanelProps {
   es_premium: boolean;
@@ -23,6 +24,7 @@ export default function ConfigPanel({
   onSinRecompensaChange,
   onEstadoChange,
 }: ConfigPanelProps) {
+  const { coinsEnabled } = useShop();
   return (
     <div className="p-5 rounded-xl bg-white/5 border border-white/10">
       <h3 className="text-sm font-bold mb-4">Configuración</h3>
@@ -38,7 +40,7 @@ export default function ConfigPanel({
           <label htmlFor="es_premium" className="text-sm font-bold">Contenido Premium</label>
         </div>
 
-        {es_premium && (
+        {es_premium && coinsEnabled && (
           <div>
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Precio (BLIS Coins)</label>
             <input
@@ -50,7 +52,7 @@ export default function ConfigPanel({
           </div>
         )}
 
-        <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+        {coinsEnabled && (<><div className="flex items-center gap-3 pt-2 border-t border-white/5">
           <input
             type="checkbox"
             id="sin_recompensa"
@@ -63,6 +65,7 @@ export default function ConfigPanel({
           </label>
         </div>
         <p className="text-[9px] text-gray-500 mt-1 ml-7">No se otorgarán BLIS Coins por leer este artículo.</p>
+        </>)}
 
         <div className="pt-2 border-t border-white/5">
           <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Estado</label>

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useMonedas } from "@/lib/hooks/useMonedas";
+import { useShop } from "@/context/ShopContext";
 
 export interface Currency {
     code: string;
@@ -65,12 +66,14 @@ const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { config, tasas, loading, updateConfig, refreshRatesFromAPI } = useMonedas();
+    const { coinsEnabled } = useShop();
     
     const [selectedCurrency, setCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "USD") || INITIAL_CURRENCIES[0]);
     const [taxCurrency, setTaxCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "PEN") || INITIAL_CURRENCIES[0]);
     const [fiscalCurrency, setFiscalCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "PEN") || INITIAL_CURRENCIES[0]);
     const [isMultiCurrencyEnabled, setIsMultiCurrencyEnabled] = useState<boolean>(false);
-    const [isBlisCoinsEnabled, setIsBlisCoinsEnabled] = useState<boolean>(true);
+    const isBlisCoinsEnabled = coinsEnabled; // Master toggle from formas_pago
+    const setIsBlisCoinsEnabled = (_v: boolean) => {}; // No-op, controlled by formas_pago
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
     const activeCurrencyCodes = config?.monedas_activas || ["USD", "PEN", "MXN", "EUR"];
