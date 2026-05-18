@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { MousePointerClick, Settings, Database, Copy, Sparkles, Type, Image as ImageIcon, Video, MousePointerClick as ClickIcon, Minus, Share2, Code, Layout, ArrowUp, ArrowDown, Trash2, Grid } from 'lucide-react';
 import { SOCIAL_CONFIG, FONTS, FONT_WEIGHTS } from '../_types';
-import { PropertyGroup, PropertyInput, PropertyTextarea, PropertySelect, PropertyColor, PropertyAlignment, PropertyFileOrUrl, PropertyBackgroundImage } from './PropertyComponents';
+import { PropertyGroup, PropertyInput, PropertyTextarea, PropertySelect, PropertyColor, PropertyAlignment, PropertyFileOrUrl, PropertyBackgroundImage, PropertyPadding } from './PropertyComponents';
 
 function AIGenerator({ blockId, currentText, onGenerate }) {
   const [loading, setLoading] = useState(false);
@@ -83,7 +83,7 @@ function HeaderEditor({ selectedBlock, handleUpdateContent, handleOpenMedia }) {
       <PropertyFileOrUrl label="URL del Logo" value={selectedBlock.content.logoUrl} onChange={(v) => handleUpdateContent('logoUrl', v)} onOpenGallery={() => handleOpenMedia((url) => handleUpdateContent('logoUrl', url))} />
       <PropertyInput label="Ancho (px)" type="number" value={selectedBlock.content.logoWidth} onChange={(v) => handleUpdateContent('logoWidth', v)} />
       <PropertyColor label="Fondo" value={selectedBlock.content.bgColor} onChange={(v) => handleUpdateContent('bgColor', v)} />
-      <PropertyInput label="Padding (px)" type="number" value={selectedBlock.content.padding} onChange={(v) => handleUpdateContent('padding', v)} />
+      <PropertyPadding label="Padding (px)" value={selectedBlock.content} onChange={(v) => handleUpdateContent(Object.keys(v)[0], Object.values(v)[0])} />
       <PropertyAlignment value={selectedBlock.content.align} onChange={(v) => handleUpdateContent('align', v)} />
       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-[#333]"><PropertyBackgroundImage bgImageUrl={selectedBlock.content.bgImageUrl} bgSize={selectedBlock.content.bgSize} bgPosition={selectedBlock.content.bgPosition} onChange={(key, value) => handleUpdateContent(key, value)} onOpenGallery={() => handleOpenMedia((url) => handleUpdateContent('bgImageUrl', url))} /></div>
     </PropertyGroup>
@@ -102,6 +102,7 @@ function TextEditor({ selectedBlock, handleUpdateContent, handleOpenMedia }) {
       <PropertyColor label="Color del texto" value={selectedBlock.content.textColor} onChange={(v) => handleUpdateContent('textColor', v)} />
       <PropertyColor label="Color de fondo" value={selectedBlock.content.bgColor} onChange={(v) => handleUpdateContent('bgColor', v)} />
       <PropertyAlignment value={selectedBlock.content.align} onChange={(v) => handleUpdateContent('align', v)} />
+      <PropertyPadding label="Padding (px)" value={selectedBlock.content} onChange={(v) => handleUpdateContent(Object.keys(v)[0], Object.values(v)[0])} />
     </PropertyGroup>
   );
 }
@@ -113,6 +114,7 @@ function ImageEditor({ selectedBlock, handleUpdateContent, handleOpenMedia }) {
       <PropertyInput label="Ancho (%)" type="number" value={selectedBlock.content.width} onChange={(v) => handleUpdateContent('width', v)} />
       <PropertyInput label="Redondeo (px)" type="number" value={selectedBlock.content.borderRadius} onChange={(v) => handleUpdateContent('borderRadius', v)} />
       <PropertyAlignment value={selectedBlock.content.align} onChange={(v) => handleUpdateContent('align', v)} />
+      <PropertyPadding label="Padding (px)" value={selectedBlock.content} onChange={(v) => handleUpdateContent(Object.keys(v)[0], Object.values(v)[0])} />
     </PropertyGroup>
   );
 }
@@ -178,7 +180,7 @@ function DividerEditor({ selectedBlock, handleUpdateContent, handleOpenMedia }) 
       <PropertyColor label="Color de Línea" value={selectedBlock.content.color} onChange={(v) => handleUpdateContent('color', v)} />
       <PropertyInput label="Grosor (px)" type="number" value={selectedBlock.content.height} onChange={(v) => handleUpdateContent('height', v)} />
       <PropertySelect label="Estilo" value={selectedBlock.content.borderStyle} onChange={(v) => handleUpdateContent('borderStyle', v)} options={[{value:'solid',label:'Sólido'},{value:'dashed',label:'Guiones'},{value:'dotted',label:'Puntos'}]} />
-      <PropertyInput label="Padding (px)" type="number" value={selectedBlock.content.padding} onChange={(v) => handleUpdateContent('padding', v)} />
+      <PropertyPadding label="Padding (px)" value={selectedBlock.content} onChange={(v) => handleUpdateContent(Object.keys(v)[0], Object.values(v)[0])} />
     </PropertyGroup>
   );
 }
@@ -218,7 +220,7 @@ function HtmlEditor({ selectedBlock, handleUpdateContent }) {
   return (<PropertyGroup title="Código HTML"><PropertyTextarea label="Código" value={selectedBlock.content.code} onChange={(v) => handleUpdateContent('code', v)} /></PropertyGroup>);
 }
 function FooterEditor({ selectedBlock, handleUpdateContent }) {
-  return (<PropertyGroup title="Pie de Página"><PropertyTextarea label="Texto Legal" value={selectedBlock.content.text} onChange={(v) => handleUpdateContent('text', v)} /><PropertyColor label="Color de Texto" value={selectedBlock.content.textColor} onChange={(v) => handleUpdateContent('textColor', v)} /><PropertyInput label="Tamaño (px)" type="number" value={selectedBlock.content.fontSize} onChange={(v) => handleUpdateContent('fontSize', v)} /><PropertyAlignment value={selectedBlock.content.align} onChange={(v) => handleUpdateContent('align', v)} /></PropertyGroup>);
+  return (<PropertyGroup title="Pie de Página"><PropertyTextarea label="Texto Legal" value={selectedBlock.content.text} onChange={(v) => handleUpdateContent('text', v)} /><PropertyColor label="Color de Texto" value={selectedBlock.content.textColor} onChange={(v) => handleUpdateContent('textColor', v)} /><PropertyInput label="Tamaño (px)" type="number" value={selectedBlock.content.fontSize} onChange={(v) => handleUpdateContent('fontSize', v)} /><PropertyAlignment value={selectedBlock.content.align} onChange={(v) => handleUpdateContent('align', v)} /><PropertyPadding label="Padding (px)" value={selectedBlock.content} onChange={(v) => handleUpdateContent(Object.keys(v)[0], Object.values(v)[0])} /></PropertyGroup>);
 }
 
 function GlobalSettings({ settings, updateSetting, currentPalettes, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, applyPalette, senders }) {

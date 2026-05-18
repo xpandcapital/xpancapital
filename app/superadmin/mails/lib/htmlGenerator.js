@@ -1,5 +1,12 @@
 import { SOCIAL_CONFIG } from '../_types';
 
+const pad = (c) => ({
+    pt: c.paddingTop ?? c.padding ?? 0,
+    pr: c.paddingRight ?? c.padding ?? 0,
+    pb: c.paddingBottom ?? c.padding ?? 0,
+    pl: c.paddingLeft ?? c.padding ?? 0,
+  });
+
 export function generateHTML(blocks, settings) {
   const { bodyBg, containerBg, width, fontFamily, sectionGap } = settings;
   const safeWidth = Math.min(Math.max(parseInt(width) || 600, 300), 800);

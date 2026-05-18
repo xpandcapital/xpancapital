@@ -252,3 +252,46 @@ export function BlockActions({ selectedBlockId, moveBlock, removeBlock }) {
     </div>
   );
 }
+
+export function PropertyPadding({ label, value, onChange }) {
+  const getPad = (side) => {
+    if (value?.[`padding${side}`] != null) return value[`padding${side}`];
+    if (value?.padding != null) return value.padding;
+    return 0;
+  };
+  const setPad = (side, v) => onChange({ [`padding${side}`]: parseInt(v) || 0 });
+  return (
+    <div className="mb-3">
+      {label && <label className="block text-[11px] font-bold text-gray-600 dark:text-gray-400 mb-1">{label}</label>}
+      <div className="grid grid-cols-4 gap-1">
+        <div className="text-center">
+          <span className="text-[9px] text-gray-500 block mb-0.5">↑ Arriba</span>
+          <PropertyInputNoLabel type="number" value={getPad('Top')} onChange={(v) => setPad('Top', v)} />
+        </div>
+        <div className="text-center">
+          <span className="text-[9px] text-gray-500 block mb-0.5">↓ Abajo</span>
+          <PropertyInputNoLabel type="number" value={getPad('Bottom')} onChange={(v) => setPad('Bottom', v)} />
+        </div>
+        <div className="text-center">
+          <span className="text-[9px] text-gray-500 block mb-0.5">← Izq</span>
+          <PropertyInputNoLabel type="number" value={getPad('Left')} onChange={(v) => setPad('Left', v)} />
+        </div>
+        <div className="text-center">
+          <span className="text-[9px] text-gray-500 block mb-0.5">→ Der</span>
+          <PropertyInputNoLabel type="number" value={getPad('Right')} onChange={(v) => setPad('Right', v)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PropertyInputNoLabel({ value, onChange, type = 'text' }) {
+  return (
+    <input
+      type={type}
+      value={value ?? ''}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full px-2 py-1.5 border border-gray-300 dark:border-[#333] bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-200 rounded text-[10px] font-mono text-center"
+    />
+  );
+}
