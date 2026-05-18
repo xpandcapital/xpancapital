@@ -36,14 +36,12 @@ export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMo
         <button onClick={() => fileInputRef.current?.click()} title="Importar JSON" className="p-2 flex items-center justify-center bg-white dark:bg-[#161616] border border-gray-300 dark:border-[#262626] text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-[#222]">
           <Upload size={18} />
         </button>
-        <button onClick={() => setShowSaveModal(true)} title="Guardar como Nuevo" className="p-2 flex items-center justify-center bg-emerald-500/50 hover:bg-emerald-500 text-white rounded-md text-[10px] font-bold gap-1">
+        <button onClick={onSaveCurrent} title="Guardar (sobrescribir)" className="p-2 flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-md">
+          <Database size={18} />
+        </button>
+        <button onClick={() => setShowSaveModal(true)} title="Guardar como Nuevo" className="p-2 flex items-center justify-center bg-emerald-500/80 hover:bg-emerald-500 text-white rounded-md text-[10px] font-bold gap-1">
           <Plus size={14} /> Nuevo
         </button>
-        {currentTemplateId && (
-          <button onClick={onSaveCurrent} title="Guardar (sobrescribir)" className="p-2 flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-md">
-            <Database size={18} />
-          </button>
-        )}
         <button onClick={() => setShowExportHtml(true)} title="Exportar HTML" className="p-2 flex items-center justify-center bg-[#e11d48] hover:bg-[#be123c] text-white rounded-md transition-colors">
           <Code size={18} />
         </button>
