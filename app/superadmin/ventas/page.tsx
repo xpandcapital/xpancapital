@@ -84,13 +84,15 @@ export default function VentasAdminPage() {
     };
 
     const actualizarEstado = async (id: string, estado: string, notas?: string) => {
-        await fetch("/api/admin/ventas", {
+        const res = await fetch("/api/admin/ventas", {
             method: "PUT", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id, estado, ...(notas ? { notas } : {}) }),
         });
-        setVentas(prev => prev.map(v => v.id === id ? { ...v, estado } : v));
-        setModalVerificar(null);
-        setNotasVerificacion("");
+        if (res.ok) {
+            setVentas(prev => prev.map(v => v.id === id ? { ...v, estado } : v));
+            setModalVerificar(null);
+            setNotasVerificacion("");
+        }
     };
 
     const eliminar = async (id: string) => {
@@ -224,9 +226,10 @@ export default function VentasAdminPage() {
                                             <td className="p-4 hidden md:table-cell">
                                                 <span className="flex items-center gap-1 text-xs text-gray-400">
                                                     {venta.metodo_pago === 'bliscoins' ? <Coins className="w-3 h-3 text-amber-400" /> :
+                                                     venta.metodo_pago === 'transfer' ? <Banknote className="w-3 h-3" /> :
                                                      venta.metodo_pago === 'transferencia' ? <Banknote className="w-3 h-3" /> :
                                                      <CreditCard className="w-3 h-3" />}
-                                                    {venta.metodo_pago || "N/A"}
+                                                    {venta.metodo_pago === 'transfer' ? 'Transferencia' : venta.metodo_pago === 'transferencia' ? 'Transferencia' : venta.metodo_pago || 'N/A'}
                                                 </span>
                                             </td>
                                             <td className="p-4 font-mono font-bold text-white">

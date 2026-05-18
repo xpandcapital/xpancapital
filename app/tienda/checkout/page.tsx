@@ -253,7 +253,7 @@ function CheckoutContent() {
                 headers,
                 body: JSON.stringify({
                     ...commonPayload,
-                    metodo_pago: paymentMethod === 'coins' ? 'coins' : 'stripe',
+                    metodo_pago: paymentMethod,
                     monto_coins: paymentMethod === 'coins' ? totalCoins : 0,
                     monto_usd: paymentMethod === 'coins' ? 0 : totalUSD,
                 })

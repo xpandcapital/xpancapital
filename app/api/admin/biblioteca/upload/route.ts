@@ -13,8 +13,18 @@ export async function POST(request: NextRequest) {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Crear bucket si no existe
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const exists = buckets?.some((b: any) => b.name === BUCKET);
+    if (!exists) {
+      const { error: createErr } = await supabase.storage.createBucket(BUCKET, { public: true });
+      if (createErr) {
+        console.warn("[upload] Error al crear bucket:", createErr.message);
+      }
+    }
+
     const ext = file.name.split(".").pop() || "jpg";
-    const filename = `covers/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const filename = `qrs/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
     const { error } = await supabase.storage
       .from(BUCKET)
@@ -26,6 +36,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, url: data.publicUrl });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || "Error al subir archivo" }, { status: 500 });
   }
 }
