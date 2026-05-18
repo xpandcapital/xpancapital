@@ -502,75 +502,102 @@ function CheckoutContent() {
                             </h2>
 
                             <div className="space-y-3">
-                                {/* BLIS Coins */}
-                                {canPayWithCoins && formasPago.find(f => f.slug === 'coins')?.activo !== false && (
-                                    <PayOption selected={paymentMethod === 'coins'} onClick={() => setPaymentMethod('coins')}
-                                        icon={<Coins className="w-5 h-5 text-amber-400" />} bg="bg-amber-500/10 border-amber-500/40"
-                                        label="Pagar con BLIS Coins" sublabel={`Saldo: ${blisCoins.toLocaleString()} coins`} amount={`${totalCoins.toLocaleString()} COINS`} />
-                                )}
-                                {formasPago.filter(f => f.slug !== 'coins' && f.slug !== 'transfer').map((fp: any) => {
-                                    const imap: Record<string, any> = { helio_card: CreditCard, helio_crypto: Coins, crypto_manual: Globe };
-                                    const cmap: Record<string, string> = { helio_card: "bg-emerald-500/10 border-emerald-500/40", helio_crypto: "bg-yellow-500/10 border-yellow-500/40", crypto_manual: "bg-orange-500/10 border-orange-500/40" };
-                                    const tmap: Record<string, string> = { helio_card: "text-emerald-400", helio_crypto: "text-yellow-400", crypto_manual: "text-orange-400" };
-                                    const Ic = imap[fp.slug] || CreditCard;
-                                    return (<div key={fp.id}>
-                                        <PayOption selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
-                                            icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
-                                            label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${totalUSD.toFixed(2)}`} />
-                                        {fp.slug === 'crypto_manual' && paymentMethod === 'crypto_manual' && (() => {
-                                            const wls: any[] = fp.config?.wallets || [];
-                                            const wpp = fp.config?.whatsapp || "";
-                                            const ins = fp.config?.instructions || "";
-                                            const msg = encodeURIComponent(`Hola! Confirmo pago con criptomonedas:\n\n👤 ${form.nombre || ''} ${form.apellido || ''}\n📧 ${form.email || ''}\n🛒 ${cart.map(c => c.title).join(', ')}\n💰 $${totalUSD.toFixed(2)}\n\nAdjunto el hash/ID de mi transacción.`);
-                                            return (<div className="mt-3 p-4 bg-orange-500/5 border border-orange-500/20 rounded-2xl space-y-4">
-                                                <p className="text-xs text-orange-400 font-bold uppercase flex gap-2"><Wallet className="w-4 h-4"/>Carteras Crypto — Elige tu red</p>
-                                                {wls.length > 0 ? <div className="space-y-3">{wls.map((w: any, i: number) => (
-                                                    <div key={i} className="bg-black/30 border border-white/10 rounded-xl p-3 flex items-center gap-3">
-                                                        <div className="flex-1">
-                                                            <p className="text-xs font-bold text-white mb-1">{w.label || w.network}</p>
-                                                            {w.address ? <><p className="text-[10px] font-mono text-gray-400 break-all select-all flex items-center gap-1">{w.address} <button onClick={() => { navigator.clipboard.writeText((w.address || '').trim()) }} className="text-gray-500 hover:text-white"><Copy className="w-3 h-3" /></button></p>
-                                                            {w.holder && <p className="text-[10px] text-gray-500 mt-0.5">Titular: <span className="text-white">{w.holder}</span></p>}</> : <p className="text-[10px] text-gray-600 italic">Dirección no configurada</p>}
+                                {/* Todos los métodos en orden desde formasPago */}
+                                {formasPago.map((fp: any) => {
+                                    if (fp.slug === 'coins') {
+                                        const disabled = !canPayWithCoins || totalCoins <= 0;
+                                        return (
+                                            <PayOption key={fp.id}
+                                                selected={paymentMethod === 'coins'}
+                                                onClick={() => {
+                                                    if (disabled) {
+                                                        showToast(totalCoins <= 0 ? "Tu carrito no tiene costo en BLISCOINS" : `Te faltan ${(totalCoins - blisCoins).toLocaleString()} BLISCOINS`, "info");
+                                                        return;
+                                                    }
+                                                    setPaymentMethod('coins');
+                                                }}
+                                                disabled={disabled}
+                                                icon={<Coins className="w-5 h-5 text-amber-400" />}
+                                                bg={disabled ? "bg-amber-500/5 border-amber-500/10 opacity-60" : "bg-amber-500/10 border-amber-500/40"}
+                                                label="Pagar con BLIS Coins"
+                                                sublabel={disabled ? (totalCoins <= 0 ? "Este carrito no aplica para BLISCOINS" : `Te faltan ${(totalCoins - blisCoins).toLocaleString()} BLISCOINS`) : `Saldo: ${blisCoins.toLocaleString()} BLIS`}
+                                                amount={`${totalCoins.toLocaleString()} COINS`} />
+                                        );
+                                    }
+                                    if (fp.slug === 'transfer') {
+                                        if (fp.activo === false) return null;
+                                        return (
+                                            <div key={fp.id}>
+                                                <PayOption selected={paymentMethod === 'transfer'} onClick={() => setPaymentMethod('transfer')}
+                                                    icon={<Building2 className="w-5 h-5 text-sky-400" />} bg="bg-sky-500/10 border-sky-500/40"
+                                                    label="Transferencia Bancaria" sublabel="Selecciona tu país" amount={`$${totalUSD.toFixed(2)}`} />
+                                                {paymentMethod === 'transfer' && (() => {
+                                                    const cts: Record<string, any> = fp.config?.countries || {};
+                                                    const keys = Object.keys(cts);
+                                                    const sel = cts[selectedCountry] || (keys.length === 1 ? cts[keys[0]] : null);
+                                                    const bks: any[] = sel?.banks || [];
+                                                    const wpp = fp.config?.whatsapp || "";
+                                                    const ins = fp.config?.instructions || "";
+                                                    const msg = encodeURIComponent(`Hola! Confirmo mi pago:\n\n👤 ${form.nombre || ''} ${form.apellido || ''}\n📧 ${form.email || ''}\n🛒 ${cart.map(c => c.title).join(', ')}\n💰 $${totalUSD.toFixed(2)}\n${sel ? `🏦 ${sel.label}` : ''}\n\nAdjunto comprobante.`);
+                                                    return (<div className="mt-3 p-4 bg-sky-500/5 border border-sky-500/20 rounded-2xl space-y-4">
+                                                        <p className="text-xs text-sky-400 font-bold uppercase flex gap-2"><Building2 className="w-4 h-4"/>Datos Bancarios</p>
+                                                        {keys.length > 1 && <div className="flex flex-wrap gap-2">{keys.map(k => <button key={k} onClick={() => setSelectedCountry(k)} className={`px-4 py-2 rounded-xl text-xs font-bold ${selectedCountry === k ? 'bg-white text-black' : 'bg-white/5 text-gray-400'}`}>{cts[k].flag || '🏳️'} {cts[k].label}</button>)}</div>}
+                                                        {bks.length > 0 ? <div className="space-y-3">{bks.map((b: any, i: number) => (
+                                                            <div key={i} className="bg-black/30 border border-white/10 rounded-xl p-3">
+                                                                <p className="text-sm font-bold text-white">{b.name} <span className="text-[10px] text-gray-500 ml-1">{b.currency === 'USD' ? '$' : 'S/'}</span></p>
+                                                                <p className="text-xs text-gray-400 flex items-center gap-2">Cuenta: <span className="text-white font-mono">{b.account_number}</span> <button onClick={() => { navigator.clipboard.writeText((b.account_number || '').replace(/[\s-]/g, '')) }} className="text-gray-500 hover:text-white"><Copy className="w-3 h-3" /></button></p>
+                                                                <p className="text-xs text-gray-400">Titular: <span className="text-white">{b.account_holder}</span></p>
+                                                                {b.cci && <p className="text-xs text-gray-400 flex items-center gap-2">CCI: <span className="text-white font-mono">{b.cci}</span> <button onClick={() => { navigator.clipboard.writeText((b.cci || '').replace(/[\s-]/g, '')) }} className="text-gray-500 hover:text-white"><Copy className="w-3 h-3" /></button></p>}
+                                                            </div>
+                                                        ))}</div> : <p className="text-xs text-gray-500 italic">No hay bancos configurados</p>}
+                                                        {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><Phone className="w-4 h-4"/>Enviar Comprobante por WhatsApp</a>}
+                                                        {ins && <p className="text-[10px] text-gray-500 text-center">{ins}</p>}
+                                                    </div>);
+                                                })()}
+                                            </div>
+                                        );
+                                    }
+                                    if (fp.slug === 'crypto_manual') {
+                                        if (fp.activo === false) return null;
+                                        const imap: Record<string, any> = { crypto_manual: Globe };
+                                        const cmap: Record<string, string> = { crypto_manual: "bg-orange-500/10 border-orange-500/40" };
+                                        const tmap: Record<string, string> = { crypto_manual: "text-orange-400" };
+                                        const Ic = imap[fp.slug] || Globe;
+                                        return (<div key={fp.id}>
+                                            <PayOption selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
+                                                icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
+                                                label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${totalUSD.toFixed(2)}`} />
+                                            {paymentMethod === 'crypto_manual' && (() => {
+                                                const wls: any[] = fp.config?.wallets || [];
+                                                const wpp = fp.config?.whatsapp || "";
+                                                const ins = fp.config?.instructions || "";
+                                                const msg = encodeURIComponent(`Hola! Confirmo pago con criptomonedas:\n\n👤 ${form.nombre || ''} ${form.apellido || ''}\n📧 ${form.email || ''}\n🛒 ${cart.map(c => c.title).join(', ')}\n💰 $${totalUSD.toFixed(2)}\n\nAdjunto el hash/ID de mi transacción.`);
+                                                return (<div className="mt-3 p-4 bg-orange-500/5 border border-orange-500/20 rounded-2xl space-y-4">
+                                                    <p className="text-xs text-orange-400 font-bold uppercase flex gap-2"><Wallet className="w-4 h-4"/>Carteras Crypto — Elige tu red</p>
+                                                    {wls.length > 0 ? <div className="space-y-3">{wls.map((w: any, i: number) => (
+                                                        <div key={i} className="bg-black/30 border border-white/10 rounded-xl p-3 flex items-center gap-3">
+                                                            <div className="flex-1"><p className="text-xs font-bold text-white mb-1">{w.label || w.network}</p>
+                                                                {w.address ? <><p className="text-[10px] font-mono text-gray-400 break-all select-all flex items-center gap-1">{w.address} <button onClick={() => { navigator.clipboard.writeText((w.address || '').trim()) }} className="text-gray-500 hover:text-white"><Copy className="w-3 h-3" /></button></p>
+                                                                {w.holder && <p className="text-[10px] text-gray-500 mt-0.5">Titular: <span className="text-white">{w.holder}</span></p>}</> : <p className="text-[10px] text-gray-600 italic">Dirección no configurada</p>}
+                                                            </div>
+                                                            {w.qr_url && <img src={w.qr_url} alt="QR" className="w-20 h-20 rounded-xl object-cover border border-white/10 flex-shrink-0" />}
                                                         </div>
-                                                        {w.qr_url && <img src={w.qr_url} alt="QR" className="w-20 h-20 rounded-xl object-cover border border-white/10 flex-shrink-0" />}
-                                                    </div>
-                                                ))}</div> : <p className="text-xs text-gray-500 italic">No hay wallets configuradas aún</p>}
-                                                {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><Phone className="w-4 h-4"/>Enviar Comprobante por WhatsApp</a>}
-                                                {ins && <p className="text-[10px] text-gray-500 text-center">{ins}</p>}
-                                            </div>);
-                                        })()}
-                                    </div>);
+                                                    ))}</div> : <p className="text-xs text-gray-500 italic">No hay wallets configuradas aún</p>}
+                                                    {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><Phone className="w-4 h-4"/>Enviar Comprobante por WhatsApp</a>}
+                                                    {ins && <p className="text-[10px] text-gray-500 text-center">{ins}</p>}
+                                                </div>);
+                                            })()}
+                                        </div>);
+                                    }
+                                    // helio_card, helio_crypto, etc.
+                                    const imap: Record<string, any> = { helio_card: CreditCard, helio_crypto: Coins };
+                                    const cmap: Record<string, string> = { helio_card: "bg-emerald-500/10 border-emerald-500/40", helio_crypto: "bg-yellow-500/10 border-yellow-500/40" };
+                                    const tmap: Record<string, string> = { helio_card: "text-emerald-400", helio_crypto: "text-yellow-400" };
+                                    const Ic = imap[fp.slug] || CreditCard;
+                                    return <PayOption key={fp.id} selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
+                                        icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
+                                        label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${totalUSD.toFixed(2)}`} />;
                                 })}
-                                {formasPago.find(f => f.slug === 'transfer')?.activo !== false && (
-                                    <div>
-                                        <PayOption selected={paymentMethod === 'transfer'} onClick={() => setPaymentMethod('transfer')}
-                                            icon={<Building2 className="w-5 h-5 text-sky-400" />} bg="bg-sky-500/10 border-sky-500/40"
-                                            label="Transferencia Bancaria" sublabel="Selecciona tu país" amount={`$${totalUSD.toFixed(2)}`} />
-                                        {paymentMethod === 'transfer' && (() => {
-                                            const fp = formasPago.find(f => f.slug === 'transfer');
-                                            const cts: Record<string, any> = fp?.config?.countries || {};
-                                            const keys = Object.keys(cts);
-                                            const sel = cts[selectedCountry] || (keys.length === 1 ? cts[keys[0]] : null);
-                                            const bks: any[] = sel?.banks || [];
-                                            const wpp = fp?.config?.whatsapp || "";
-                                            const ins = fp?.config?.instructions || "";
-                                            const msg = encodeURIComponent(`Hola! Confirmo mi pago:\n\n👤 ${form.nombre || ''} ${form.apellido || ''}\n📧 ${form.email || ''}\n🛒 ${cart.map(c => c.title).join(', ')}\n💰 $${totalUSD.toFixed(2)}\n${sel ? `🏦 ${sel.label}` : ''}\n\nAdjunto comprobante.`);
-                                            return (<div className="mt-3 p-4 bg-sky-500/5 border border-sky-500/20 rounded-2xl space-y-4">
-                                                <p className="text-xs text-sky-400 font-bold uppercase flex gap-2"><Building2 className="w-4 h-4"/>Datos Bancarios</p>
-                                                {keys.length > 1 && <div className="flex flex-wrap gap-2">{keys.map(k => <button key={k} onClick={() => setSelectedCountry(k)} className={`px-4 py-2 rounded-xl text-xs font-bold ${selectedCountry === k ? 'bg-white text-black' : 'bg-white/5 text-gray-400'}`}>{cts[k].flag || '🏳️'} {cts[k].label}</button>)}</div>}
-                                                {bks.length > 0 ? <div className="space-y-3">{bks.map((b: any, i: number) => (
-                                                    <div key={i} className="bg-black/30 border border-white/10 rounded-xl p-3">
-                                                        <p className="text-sm font-bold text-white">{b.name} <span className="text-[10px] text-gray-500 ml-1">{b.currency === 'USD' ? '$' : 'S/'}</span></p>
-                                                        <p className="text-xs text-gray-400 flex items-center gap-2">Cuenta: <span className="text-white font-mono">{b.account_number}</span> <button onClick={() => { navigator.clipboard.writeText((b.account_number || '').replace(/[\s-]/g, '')) }} className="text-gray-500 hover:text-white"><Copy className="w-3 h-3" /></button></p>
-                                                        <p className="text-xs text-gray-400">Titular: <span className="text-white">{b.account_holder}</span></p>
-                                                        {b.cci && <p className="text-xs text-gray-400 flex items-center gap-2">CCI: <span className="text-white font-mono">{b.cci}</span> <button onClick={() => { navigator.clipboard.writeText((b.cci || '').replace(/[\s-]/g, '')) }} className="text-gray-500 hover:text-white"><Copy className="w-3 h-3" /></button></p>}
-                                                    </div>
-                                                ))}</div> : <p className="text-xs text-gray-500 italic">No hay bancos configurados</p>}
-                                                {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><Phone className="w-4 h-4"/>Enviar Comprobante por WhatsApp</a>}
-                                                {ins && <p className="text-[10px] text-gray-500 text-center">{ins}</p>}
-                                            </div>);
-                                        })()}
-                                    </div>
-)}
                             </div>
                         </div>
                     </div>
@@ -667,15 +694,18 @@ function CheckoutContent() {
 }
 
 // ── Componente opción de pago ──────────────────────────────────────────────────
-function PayOption({ selected, onClick, icon, bg, label, sublabel, amount, badge }: {
+function PayOption({ selected, onClick, icon, bg, label, sublabel, amount, badge, disabled }: {
     selected: boolean; onClick: () => void; icon: React.ReactNode;
-    bg: string; label: string; sublabel: string; amount: string; badge?: string;
+    bg: string; label: string; sublabel: string; amount: string; badge?: string; disabled?: boolean;
 }) {
     return (
         <button
             type="button"
             onClick={onClick}
+            disabled={disabled}
             className={`w-full p-4 rounded-2xl border transition-all flex items-center justify-between text-left ${
+                disabled ? 'opacity-50 cursor-not-allowed' : ''
+            } ${
                 selected ? bg : 'bg-white/[0.02] border-white/8 hover:border-white/20'
             }`}
         >
