@@ -22,7 +22,7 @@ function ColToolBtn({ icon: Icon, label, onClick }) {
   return <button onClick={onClick} className="flex flex-col items-center p-2 hover:bg-white dark:hover:bg-[#222] rounded transition-colors border border-transparent hover:border-[#e11d48]/30"><Icon size={14} className="mb-1 text-gray-500" /><span className="text-[8px] font-bold text-gray-600 dark:text-gray-400">{label}</span></button>;
 }
 
-export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId, selectedBlock, selectedBlockId, moveBlock, duplicateBlock, removeBlock, applyPalette, settings, updateSetting, currentPalettes, handleUpdateContent, showMediaModal, setShowMediaModal, mediaCallbackRef, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, addBlockToSpecificColumn, demoData, applyDemoData, previewWithDemo, setPreviewWithDemo, generateHTML, theme }) {
+export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId, selectedBlock, selectedBlockId, moveBlock, duplicateBlock, removeBlock, applyPalette, senders, settings, updateSetting, currentPalettes, handleUpdateContent, showMediaModal, setShowMediaModal, mediaCallbackRef, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, addBlockToSpecificColumn, demoData, applyDemoData, previewWithDemo, setPreviewWithDemo, generateHTML, theme }) {
   const BLOCK_ICONS = { text: Type, image: ImageIcon, button: ClickIcon, video: Video, divider: Minus, social: Share2, html: Code, header: Layout, footer: Settings };
   const handleOpenMedia = (callback) => { setShowMediaModal(true); mediaCallbackRef.current = callback; };
 
@@ -70,7 +70,7 @@ export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId
             {selectedBlock.type === 'footer' && <FooterEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} />}
           </div>
         )}
-        {activeTab === 'global' && <GlobalSettings settings={settings} updateSetting={updateSetting} currentPalettes={currentPalettes} isEditingPalette={isEditingPalette} editingPaletteId={editingPaletteId} paletteForm={paletteForm} setPaletteForm={setPaletteForm} toggleCreatePalette={toggleCreatePalette} startEditPalette={startEditPalette} deletePalette={deletePalette} movePalette={movePalette} savePalette={savePalette} applyPalette={applyPalette} />}
+        {activeTab === 'global' && <GlobalSettings settings={settings} updateSetting={updateSetting} currentPalettes={currentPalettes} isEditingPalette={isEditingPalette} editingPaletteId={editingPaletteId} paletteForm={paletteForm} setPaletteForm={setPaletteForm} toggleCreatePalette={toggleCreatePalette} startEditPalette={startEditPalette} deletePalette={deletePalette} movePalette={movePalette} savePalette={savePalette} applyPalette={applyPalette} senders={senders} />}
         {activeTab === 'variables' && <VariablesPanel demoData={demoData} previewWithDemo={previewWithDemo} setPreviewWithDemo={setPreviewWithDemo} generateHTML={generateHTML} applyDemoData={applyDemoData} />}
       </div>
     </aside>
@@ -221,9 +221,18 @@ function FooterEditor({ selectedBlock, handleUpdateContent }) {
   return (<PropertyGroup title="Pie de Página"><PropertyTextarea label="Texto Legal" value={selectedBlock.content.text} onChange={(v) => handleUpdateContent('text', v)} /><PropertyColor label="Color de Texto" value={selectedBlock.content.textColor} onChange={(v) => handleUpdateContent('textColor', v)} /><PropertyInput label="Tamaño (px)" type="number" value={selectedBlock.content.fontSize} onChange={(v) => handleUpdateContent('fontSize', v)} /><PropertyAlignment value={selectedBlock.content.align} onChange={(v) => handleUpdateContent('align', v)} /></PropertyGroup>);
 }
 
-function GlobalSettings({ settings, updateSetting, currentPalettes, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, applyPalette }) {
+function GlobalSettings({ settings, updateSetting, currentPalettes, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, applyPalette, senders }) {
   return (
     <div className="space-y-6">
+      <PropertyGroup title="Remitente por defecto">
+        <select value={settings.senderId || ''} onChange={(e) => updateSetting('senderId', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-sm text-white">
+          <option value="">Sin remitente asignado</option>
+          {(senders || []).map((s) => (
+            <option key={s.id} value={s.id}>{s.from_name} ({s.from_email}){s.is_default ? ' ★' : ''}</option>
+          ))}
+        </select>
+        <p className="text-[10px] text-gray-500 mt-1">Remitente que usará esta plantilla al enviarse automáticamente</p>
+      </PropertyGroup>
       <PropertyGroup title="Asunto y Previsualización">
         <PropertyInput label="Asunto del Correo" value={settings.subject || ''} onChange={(v) => updateSetting('subject', v)} placeholder="Ej: ¡Oferta especial para ti!" />
         <PropertyInput label="Texto de Previsualización" value={settings.previewText || ''} onChange={(v) => updateSetting('previewText', v)} placeholder="Aparece junto al asunto en la bandeja..." />

@@ -84,6 +84,7 @@ export default function Mails() {
           duplicateBlock={mail.duplicateBlock}
           removeBlock={mail.removeBlock}
           applyPalette={mail.applyPalette}
+          senders={mail.senders}
           settings={mail.settings}
           updateSetting={mail.updateSetting}
           currentPalettes={mail.currentPalettes}
