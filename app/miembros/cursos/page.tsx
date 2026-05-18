@@ -11,6 +11,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useCursos } from "@/lib/hooks/useCursos";
 import { useCertificados } from "@/lib/hooks/useCertificados";
+import { useShop } from "@/context/ShopContext";
 
 interface EquipoCurso {
     id: string;
@@ -36,6 +37,7 @@ export default function MisCursosPage() {
     const { user } = useAuth();
     const { cursos, loading: loadingCursos } = useCursos();
     const { certificados, loading: loadingCertificados } = useCertificados(user?.id || null);
+    const { coinsEnabled } = useShop();
     const [activeTab, setActiveTab] = useState<'cursos' | 'equipo' | 'certificados'>('cursos');
     const [equipoCursos, setEquipoCursos] = useState<EquipoCurso[]>([]);
     const [equipoProductos, setEquipoProductos] = useState<EquipoProducto[]>([]);
@@ -183,7 +185,7 @@ export default function MisCursosPage() {
                                                             </p>
                                                         )}
                                                         <div className="flex items-center gap-4 mt-2">
-                                                            {curso.precio_coins > 0 && (
+                                                            {coinsEnabled && curso.precio_coins > 0 && (
                                                                 <div className="flex items-center gap-1 text-xs text-amber-500">
                                                                     <Coins className="w-3 h-3" />
                                                                     {curso.precio_coins} coins

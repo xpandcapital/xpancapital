@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCursos } from "@/lib/hooks/useCursos";
+import { useShop } from "@/context/ShopContext";
 
 interface Curso {
     id: string;
@@ -21,6 +22,7 @@ interface Curso {
 
 export default function CursosPage() {
     const { cursos, loading, error } = useCursos();
+    const { coinsEnabled } = useShop();
     const [search, setSearch] = useState('');
 
     useEffect(() => {
@@ -105,7 +107,7 @@ export default function CursosPage() {
                                                 <div className="absolute inset-0 flex items-center justify-center">
                                                     <GraduationCap className="w-16 h-16 text-white/20" />
                                                 </div>
-                                                {curso.precio_coins > 0 && (
+                                                {coinsEnabled && curso.precio_coins > 0 && (
                                                     <div className="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full">
                                                         <Coins className="w-3 h-3 text-amber-400" />
                                                         <span className="text-[10px] font-bold text-amber-400">

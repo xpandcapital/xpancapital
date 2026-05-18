@@ -204,7 +204,7 @@ export default function ProductDetailPage() {
     const params = useParams();
     const id = params.id as string;
     const router = useRouter();
-    const { addToCart, toggleFavorite, favorites } = useShop();
+    const { addToCart, toggleFavorite, favorites, coinsEnabled } = useShop();
     const { showToast } = useToast();
     const { fetchProductBySlug, loading } = useProducts();
 
@@ -480,6 +480,7 @@ export default function ProductDetailPage() {
 
                                         <div className="h-12 w-px bg-white/10 hidden sm:block rotate-12" />
 
+                                        {coinsEnabled && (
                                         <div className="flex items-center gap-4 relative z-10 bg-amber-500/5 px-4 py-2 rounded-2xl border border-amber-500/10">
                                             <div className="flex flex-col items-end">
                                                 <span className="text-2xl font-black text-amber-500 leading-none">{Math.round(product.price * 10)}</span>
@@ -489,6 +490,7 @@ export default function ProductDetailPage() {
                                                 <TrendingUp className="w-5 h-5 text-amber-500" />
                                             </div>
                                         </div>
+                                    )}
                                     </div>
                                 </div>
 

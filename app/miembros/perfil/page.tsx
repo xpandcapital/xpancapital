@@ -8,6 +8,7 @@ import { isAdminRole } from "@/lib/auth/permissions";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import { useCoins } from "@/lib/hooks/useCoins";
+import { useShop } from "@/context/ShopContext";
 import { useReferrals } from "@/lib/hooks/useReferrals";
 import { ReferralPanel } from "@/components/profile/ReferralPanel";
 import { getSupabase } from "@/lib/supabase";
@@ -295,6 +296,7 @@ export default function ProfilePage() {
     const router = useRouter();
     const { showToast } = useToast();
     const { balance, transactions, loading: coinsLoading, fetchBalance, fetchTransactions } = useCoins(user?.id);
+    const { coinsEnabled } = useShop();
 
     useEffect(() => {
         if (user && isAdminRole(user.role)) {
@@ -657,7 +659,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Coins Section */}
-            <div className="mt-12 space-y-6">
+            <div className={`mt-12 space-y-6 ${!coinsEnabled ? 'hidden' : ''}`}>
                 <h2 className="text-lg font-black text-white uppercase tracking-widest px-4 flex items-center gap-3">
                     <Coins className="w-5 h-5 text-amber-500" /> Blis Coins
                 </h2>

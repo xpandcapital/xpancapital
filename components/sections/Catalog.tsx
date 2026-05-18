@@ -5,11 +5,13 @@ import { ArrowRight, ShoppingCart, Star, ChevronLeft, ChevronRight, Loader2, Pac
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { useProducts } from "@/lib/hooks/useProducts";
+import { useShop } from "@/context/ShopContext";
 import Link from "next/link";
 
 export function Catalog() {
     const { cmsData } = useLandingCMS();
     const { products: dbProducts, categories, loading, fetchProducts, fetchCategories } = useProducts();
+    const { coinsEnabled } = useShop();
     const [activeCategoryId, setActiveCategoryId] = useState<string>("");
     const [currentIndex, setCurrentIndex] = useState(0);
     const [progress, setProgress] = useState(0);
@@ -240,8 +242,8 @@ export function Catalog() {
                                     <div>
                                         <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">Desde</span>
                                         <div className="flex items-baseline gap-1.5 mb-0.5">
-                                            <span className="text-base font-black text-emerald-400">⚡{filteredProducts[0].bliscoins}</span>
-                                            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">BlisCoins</span>
+                                            {coinsEnabled && <><span className="text-base font-black text-emerald-400">⚡{filteredProducts[0].bliscoins}</span>
+                                            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">BlisCoins</span></>}
                                         </div>
                                         <span className="text-lg font-black text-white">{filteredProducts[0].price}</span>
                                     </div>
@@ -317,8 +319,8 @@ export function Catalog() {
                                                 <div>
                                                     <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">Desde</span>
                                                     <div className="flex items-baseline gap-1.5">
-                                                        <span className="text-base md:text-lg font-black text-emerald-400">⚡{item.bliscoins || 0}</span>
-                                                        <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">BlisCoins</span>
+                                                        {coinsEnabled && <><span className="text-base md:text-lg font-black text-emerald-400">⚡{item.bliscoins || 0}</span>
+                                                        <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">BlisCoins</span></>}
                                                     </div>
                                                     <span className="text-lg md:text-xl font-black text-white">{item.price}</span>
                                                 </div>

@@ -3,10 +3,12 @@
 import { Bell, Search, ShoppingCart, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useShop } from "@/context/ShopContext";
 import Link from "next/link";
 
 export function MiembrosHeader() {
     const { user } = useAuth();
+    const { coinsEnabled, blisCoins } = useShop();
     const isAdmin = user?.role ? ['superadmin', 'admin', 'editor'].includes(user.role) : false;
     const profileHref = isAdmin ? "/superadmin/perfil" : "/miembros/perfil";
 
@@ -24,10 +26,12 @@ export function MiembrosHeader() {
             </div>
 
             <div className="flex items-center gap-6">
+                {coinsEnabled && (
                 <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                     <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
-                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">2,450 BLISCOINS</span>
+                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">{blisCoins.toLocaleString()} BLISCOINS</span>
                 </div>
+                )}
 
                 <div className="flex items-center gap-4">
                     <button className="relative text-gray-400 hover:text-white transition-colors p-2">
