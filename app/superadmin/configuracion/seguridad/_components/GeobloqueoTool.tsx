@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Search, Shield, X, Plus, Check, Globe, AlertTriangle, Lock, Unlock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Flag from 'react-world-flags';
 import type { GeobloqueoConfig } from '../_types';
 import { defaultGeobloqueoConfig } from '../_types';
 
@@ -231,7 +232,7 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-sm">{getFlag(code)}</span>
+                  <Flag code={code} height="14" className="rounded-sm shrink-0" />
                   <span className="text-xs truncate">{PAISES[code] || code}</span>
                   <span className="text-[10px] text-gray-600">{code}</span>
                 </div>
@@ -298,7 +299,7 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
                           onClick={() => addPais(code)}
                           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-gray-300 hover:bg-blis-red/10 hover:text-white transition-colors text-left"
                         >
-                          <span className="text-sm">{getFlag(code)}</span>
+                          <Flag code={code} height="14" className="rounded-sm shrink-0" />
                           <span>{name}</span>
                           <span className="text-[10px] text-gray-600 ml-auto">{code}</span>
                         </button>
@@ -347,42 +348,3 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
   );
 }
 
-function getFlag(code: string): string {
-  const flags: Record<string, string> = {
-    CN: "🇨🇳", RU: "🇷🇺", KP: "🇰🇵", IR: "🇮🇷", SY: "🇸🇾", SD: "🇸🇩",
-    LY: "🇱🇾", IQ: "🇮🇶", AF: "🇦🇫", SO: "🇸🇴", YE: "🇾🇪", MM: "🇲🇲",
-    BY: "🇧🇾", PK: "🇵🇰", BD: "🇧🇩", NG: "🇳🇬", CU: "🇨🇺", VN: "🇻🇳",
-    LA: "🇱🇦", KH: "🇰🇭", NP: "🇳🇵", LK: "🇱🇰", UZ: "🇺🇿", TM: "🇹🇲",
-    KG: "🇰🇬", TJ: "🇹🇯", AZ: "🇦🇿", AM: "🇦🇲", GE: "🇬🇪", MD: "🇲🇩",
-    MN: "🇲🇳", AR: "🇦🇷", BO: "🇧🇴", CL: "🇨🇱", CO: "🇨🇴", CR: "🇨🇷",
-    DO: "🇩🇴", EC: "🇪🇨", SV: "🇸🇻", GT: "🇬🇹", HN: "🇭🇳", MX: "🇲🇽",
-    NI: "🇳🇮", PA: "🇵🇦", PY: "🇵🇾", PE: "🇵🇪", PR: "🇵🇷", ES: "🇪🇸",
-    UY: "🇺🇾", VE: "🇻🇪", BR: "🇧🇷", HT: "🇭🇹", BZ: "🇧🇿", US: "🇺🇸",
-    CA: "🇨🇦", GQ: "🇬🇶", GB: "🇬🇧", FR: "🇫🇷", DE: "🇩🇪", IT: "🇮🇹",
-    CH: "🇨🇭", NL: "🇳🇱", BE: "🇧🇪", AT: "🇦🇹", IE: "🇮🇪", PT: "🇵🇹",
-    SE: "🇸🇪", NO: "🇳🇴", DK: "🇩🇰", FI: "🇫🇮", IS: "🇮🇸", PL: "🇵🇱",
-    CZ: "🇨🇿", SK: "🇸🇰", HU: "🇭🇺", RO: "🇷🇴", BG: "🇧🇬", HR: "🇭🇷",
-    SI: "🇸🇮", EE: "🇪🇪", LV: "🇱🇻", LT: "🇱🇹", GR: "🇬🇷", CY: "🇨🇾",
-    MT: "🇲🇹", LU: "🇱🇺", AD: "🇦🇩", MC: "🇲🇨", LI: "🇱🇮", SM: "🇸🇲",
-    VA: "🇻🇦", JP: "🇯🇵", KR: "🇰🇷", TW: "🇹🇼", SG: "🇸🇬", AU: "🇦🇺",
-    NZ: "🇳🇿", PH: "🇵🇭", IL: "🇮🇱", AE: "🇦🇪", SA: "🇸🇦", QA: "🇶🇦",
-    KW: "🇰🇼", BH: "🇧🇭", OM: "🇴🇲", JO: "🇯🇴", TR: "🇹🇷", EG: "🇪🇬",
-    MA: "🇲🇦", TN: "🇹🇳", DZ: "🇩🇿", ZA: "🇿🇦", KE: "🇰🇪", GH: "🇬🇭",
-    HK: "🇭🇰", MO: "🇲🇴", TH: "🇹🇭", MY: "🇲🇾", ID: "🇮🇩", IN: "🇮🇳",
-    UA: "🇺🇦", AL: "🇦🇱", MK: "🇲🇰", ME: "🇲🇪", RS: "🇷🇸", BA: "🇧🇦",
-    JM: "🇯🇲", TT: "🇹🇹", BB: "🇧🇧", BS: "🇧🇸", BM: "🇧🇲", AG: "🇦🇬",
-    DM: "🇩🇲", GD: "🇬🇩", LC: "🇱🇨", VC: "🇻🇨", KN: "🇰🇳", SR: "🇸🇷",
-    GY: "🇬🇾", GF: "🇬🇫", GP: "🇬🇵", MQ: "🇲🇶", GL: "🇬🇱", FO: "🇫🇴",
-    GI: "🇬🇮", FJ: "🇫🇯", PG: "🇵🇬", WS: "🇼🇸", TO: "🇹🇴", VU: "🇻🇺",
-    SB: "🇸🇧", KI: "🇰🇮", NR: "🇳🇷", MH: "🇲🇭", FM: "🇫🇲", PW: "🇵🇼",
-    TL: "🇹🇱", BN: "🇧🇳", MV: "🇲🇻", BT: "🇧🇹", BW: "🇧🇼", NA: "🇳🇦",
-    MG: "🇲🇬", SC: "🇸🇨", MU: "🇲🇺", KM: "🇰🇲", ZW: "🇿🇼", ZM: "🇿🇲",
-    MZ: "🇲🇿", AO: "🇦🇴", CG: "🇨🇬", CD: "🇨🇩", CM: "🇨🇲", CI: "🇨🇮",
-    SN: "🇸🇳", ML: "🇲🇱", BF: "🇧🇫", NE: "🇳🇪", TD: "🇹🇩", ET: "🇪🇹",
-    ER: "🇪🇷", SS: "🇸🇸", UG: "🇺🇬", RW: "🇷🇼", BI: "🇧🇮", TZ: "🇹🇿",
-    LR: "🇱🇷", SL: "🇸🇱", GN: "🇬🇳", GW: "🇬🇼", GM: "🇬🇲", TG: "🇹🇬",
-    BJ: "🇧🇯", MR: "🇲🇷", LS: "🇱🇸", SZ: "🇸🇿", KZ: "🇰🇿", LB: "🇱🇧",
-    GA: "🇬🇦", CV: "🇨🇻", ST: "🇸🇹", CK: "🇨🇰", NU: "🇳🇺", TV: "🇹🇻",
-  };
-  return flags[code] || "🌐";
-}
