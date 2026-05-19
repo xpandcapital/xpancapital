@@ -70,10 +70,13 @@ function kMeans(pixels: number[][], k: number, maxIter = 10): number[][] {
 async function createColorMask(
   sourceBuffer: Buffer,
   targetR: number, targetG: number, targetB: number,
-  tolerance: number
+  tolerance: number,
+  designType: string
 ): Promise<{ buffer: Buffer; fillRatio: number; borderRatio: number }> {
+  const kernel = designType === 'logo' ? 'nearest' : 'lanczos3'
+  const size = designType === 'logo' ? 2048 : 1024
   const { data, info } = await sharp(sourceBuffer)
-    .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true, kernel: 'lanczos3' })
+    .resize(size, size, { fit: 'inside', withoutEnlargement: true, kernel })
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true })
@@ -233,7 +236,7 @@ export async function POST(request: NextRequest) {
 
     const tolerance = isIlustracion ? 80 : 110
     const results = await Promise.allSettled(
-      colorRGBs.map(rgb => createColorMask(workingBuffer, rgb.r, rgb.g, rgb.b, tolerance))
+      colorRGBs.map(rgb => createColorMask(workingBuffer, rgb.r, rgb.g, rgb.b, tolerance, designType))
     )
 
     const colors: string[] = []
