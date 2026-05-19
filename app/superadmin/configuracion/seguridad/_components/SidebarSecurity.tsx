@@ -20,6 +20,7 @@ import { SECURITY_TOOLS } from './tool-index';
 import { GeobloqueoTool } from './GeobloqueoTool';
 import { SecurityHeadersTool } from './SecurityHeadersTool';
 import { RateLimitingTool } from './RateLimitingTool';
+import { AccessLogsTool } from './AccessLogsTool';
 import { PlaceholderTool } from './PlaceholderTool';
 import type { SecurityToolDef, SecurityHeadersConfig, RateLimitingConfig } from '../_types';
 
@@ -147,6 +148,8 @@ export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeaders
             onUpdate={onUpdateRateLimiting}
           />
         );
+      case 'access_logs':
+        return <AccessLogsTool />;
       default:
         return <PlaceholderTool toolId={activeTool} />;
     }

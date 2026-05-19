@@ -32,13 +32,33 @@ export interface RateLimitingConfig {
   reglas: RateLimitRule[]
 }
 
+export interface AccessLogEntry {
+  id?: string
+  ip: string
+  pais: string
+  ruta: string
+  metodo: string
+  motivo: string
+  user_agent?: string
+  created_at?: string
+}
+
+export interface AccessLogsStats {
+  total_hoy: number
+  paises_unicos: number
+  ips_unicas: number
+  pico_hora: { hora: number; count: number } | null
+  por_hora: Array<{ hora: string; count: number }>
+  top_paises: Array<{ pais: string; count: number }>
+  top_rutas: Array<{ ruta: string; count: number }>
+}
+
 export interface SecurityConfig {
   geobloqueo?: GeobloqueoConfig
   security_headers?: SecurityHeadersConfig
   rate_limiting?: RateLimitingConfig
   // Future tools:
   // firewall?: FirewallConfig
-  // access_logs?: AccessLogsConfig
 }
 
 export interface SecurityToolDef {

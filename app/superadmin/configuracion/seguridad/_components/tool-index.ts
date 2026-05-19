@@ -40,10 +40,10 @@ export const SECURITY_TOOLS: SecurityToolDef[] = [
   {
     id: 'access_logs',
     name: 'Logs de Acceso',
-    description: 'Registro y monitoreo de visitas al sitio',
+    description: 'Registro y monitoreo de intentos bloqueados en tiempo real',
     cat: 'Monitoreo',
     icon: 'ScrollText',
-    status: 'coming_soon',
+    status: 'active',
     configKey: 'access_logs',
   },
   {

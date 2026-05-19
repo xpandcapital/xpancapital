@@ -3,6 +3,7 @@ import { updateSession } from '@/lib/supabase/middleware'
 import { shouldGeoBlock } from '@/lib/geoblock'
 import { getSecurityHeaders, injectHeaders } from '@/lib/security-headers'
 import { getRateLimitingConfig, checkInMemory, matchRateLimit } from '@/lib/rate-limit'
+import { logSecurityEvent } from '@/lib/access-logs'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
@@ -16,6 +17,8 @@ function getClientIP(request: NextRequest): string {
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const method = request.method
+  const ip = getClientIP(request)
+  const ua = request.headers.get('user-agent') || ''
 
   // 1. Geobloqueo: verificar antes de cualquier otra lógica
   const geoResult = await shouldGeoBlock(request)
@@ -25,6 +28,14 @@ export async function middleware(request: NextRequest) {
   }
 
   if (geoResult.blocked) {
+    logSecurityEvent({
+      ip,
+      pais: geoResult.country || 'XX',
+      ruta: pathname,
+      metodo: method,
+      motivo: 'geobloqueo',
+      user_agent: ua,
+    })
     return new NextResponse('Acceso denegado desde tu ubicación', {
       status: 403,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
@@ -37,9 +48,16 @@ export async function middleware(request: NextRequest) {
     if (rlConfig?.habilitado) {
       const regla = matchRateLimit(rlConfig, pathname, method)
       if (regla) {
-        const ip = getClientIP(request)
         const result = checkInMemory(ip, pathname, method, regla.limite, regla.ventana_segundos)
         if (!result.allowed) {
+          logSecurityEvent({
+            ip,
+            pais: geoResult.country || 'XX',
+            ruta: pathname,
+            metodo: method,
+            motivo: 'rate_limit',
+            user_agent: ua,
+          })
           if (IS_DEV) console.log(`[Middleware] Rate Limit: ${ip} en ${method} ${pathname}`)
           return new NextResponse(rlConfig.mensaje_limite, {
             status: 429,
@@ -54,7 +72,7 @@ export async function middleware(request: NextRequest) {
       }
     }
   } catch {
-    // Silencioso - no bloquear por fallo en rate limit
+    // Silencioso
   }
 
   // 3. Autenticación y autorización
