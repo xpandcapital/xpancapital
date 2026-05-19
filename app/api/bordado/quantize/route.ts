@@ -1,11 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
 
-export const maxDuration = 40
+export const maxDuration = 50
 export const runtime = 'nodejs'
 
 function colorDistance(a: number[], b: number[]): number {
   return Math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2)
+}
+
+// K-Means clustering para extraer paleta real de la imagen
+function kMeans(pixels: number[][], k: number, maxIter = 10): number[][] {
+  if (pixels.length === 0) return []
+  
+  // Inicializar centroides con píxeles espaciados uniformemente
+  const centroids: number[][] = []
+  const step = Math.max(1, Math.floor(pixels.length / k))
+  for (let i = 0; i < k; i++) {
+    centroids.push([...pixels[Math.min(i * step, pixels.length - 1)]])
+  }
+
+  for (let iter = 0; iter < maxIter; iter++) {
+    // Asignar cada píxel al centroide más cercano
+    const clusters: number[][][] = Array.from({ length: k }, () => [])
+    for (const pixel of pixels) {
+      let best = 0, bestDist = Infinity
+      for (let c = 0; c < k; c++) {
+        const d = colorDistance(pixel, centroids[c])
+        if (d < bestDist) { bestDist = d; best = c }
+      }
+      clusters[best].push(pixel)
+    }
+
+    // Recalcular centroides
+    let changed = false
+    for (let c = 0; c < k; c++) {
+      if (clusters[c].length === 0) continue
+      const avg = clusters[c].reduce((acc, p) => [acc[0]+p[0], acc[1]+p[1], acc[2]+p[2]], [0,0,0])
+      const n = clusters[c].length
+      const newCentroid = [Math.round(avg[0]/n), Math.round(avg[1]/n), Math.round(avg[2]/n)]
+      if (colorDistance(newCentroid, centroids[c]) > 1) changed = true
+      centroids[c] = newCentroid
+    }
+    if (!changed) break
+  }
+
+  return centroids.map(c => c.map(Math.round))
 }
 
 async function createColorMask(
@@ -30,7 +69,6 @@ async function createColorMask(
     const pixelIndex = (i / info.channels) * 4
     const isColor = a > 20 && dist <= tolerance
 
-    // Objeto = negro puro (0), fondo = blanco puro (255)
     const v = isColor ? 0 : 255
     maskData[pixelIndex] = v
     maskData[pixelIndex + 1] = v
@@ -40,9 +78,8 @@ async function createColorMask(
     if (isColor) objectPixels++
   }
 
-  const fillRatio = objectPixels / total
   const buf = await sharp(maskData, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer()
-  return { buffer: buf, fillRatio }
+  return { buffer: buf, fillRatio: objectPixels / total }
 }
 
 export async function POST(request: NextRequest) {
@@ -58,10 +95,10 @@ export async function POST(request: NextRequest) {
 
     const isIlustracion = designType === 'ilustracion'
 
-    // Ilustración: pre-filtro para eliminar ruido de degradados
+    // Pre-procesamiento para Ilustración
     if (isIlustracion) {
       const filtered = await sharp(buffer)
-        .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true })
+        .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
         .median(3)
         .blur(1.5)
         .toBuffer()
@@ -73,54 +110,77 @@ export async function POST(request: NextRequest) {
       .raw()
       .toBuffer({ resolveWithObject: true })
 
-    // Detectar color de fondo (píxel esquina superior izquierda)
+    // Color de fondo (esquina 0,0)
     const bgR = data[0], bgG = data[1], bgB = data[2]
-    const qBgR = Math.round(bgR / 96) * 96
-    const qBgG = Math.round(bgG / 96) * 96
-    const qBgB = Math.round(bgB / 96) * 96
-    const bgHex = `#${qBgR.toString(16).padStart(2,'0')}${qBgG.toString(16).padStart(2,'0')}${qBgB.toString(16).padStart(2,'0')}`
 
-    const colorCounts = new Map<number, { r: number; g: number; b: number; count: number }>()
+    let colorRGBs: { r: number; g: number; b: number }[]
 
-    for (let i = 0; i < data.length; i += info.channels) {
-      const r = data[i], g = data[i + 1], b = data[i + 2]
-      const a = info.channels === 4 ? data[i + 3] : 255
-      if (a < 20) continue
-
-      const qr = Math.round(r / 96) * 96
-      const qg = Math.round(g / 96) * 96
-      const qb = Math.round(b / 96) * 96
-      const key = (qr << 16) | (qg << 8) | qb
-
-      const existing = colorCounts.get(key)
-      if (existing) { existing.count++ }
-      else { colorCounts.set(key, { r: qr, g: qg, b: qb, count: 1 }) }
-    }
-
-    let entries = Array.from(colorCounts.entries())
-      .sort((a, b) => b[1].count - a[1].count)
-
-    const merged: typeof entries = []
-    for (const [key, val] of entries) {
-      const rgb = [val.r, val.g, val.b]
-      const similar = merged.find(([, m]) => colorDistance(rgb, [m.r, m.g, m.b]) < 120)
-      if (similar) {
-        similar[1].count += val.count
-      } else {
-        merged.push([key, val])
+    if (isIlustracion) {
+      // === MODO ILUSTRACIÓN: K-Means para paleta real ===
+      const sampleRate = 4
+      const pixels: number[][] = []
+      for (let i = 0; i < data.length; i += info.channels * sampleRate) {
+        const r = data[i], g = data[i + 1], b = data[i + 2]
+        const a = info.channels === 4 ? data[i + 3] : 255
+        if (a < 20) continue
+        // Excluir píxeles muy cercanos al fondo
+        const bgDist = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2)
+        if (bgDist < 50) continue
+        pixels.push([r, g, b])
       }
+
+      const k = Math.min(numColors, 8)
+      const centroids = kMeans(pixels, k)
+
+      // Ordenar por frecuencia (cuántos píxeles caen en cada cluster)
+      const counts = new Array(centroids.length).fill(0)
+      for (const pixel of pixels) {
+        let best = 0, bestDist = Infinity
+        for (let c = 0; c < centroids.length; c++) {
+          const d = colorDistance(pixel, centroids[c])
+          if (d < bestDist) { bestDist = d; best = c }
+        }
+        counts[best]++
+      }
+
+      colorRGBs = centroids
+        .map((c, i) => ({ r: c[0], g: c[1], b: c[2], count: counts[i] }))
+        .sort((a, b) => b.count - a.count)
+        .map(({ r, g, b }) => ({ r, g, b }))
+
+    } else {
+      // === MODO LOGO: binarización por bines ===
+      const colorCounts = new Map<number, { r: number; g: number; b: number; count: number }>()
+      for (let i = 0; i < data.length; i += info.channels) {
+        const r = data[i], g = data[i + 1], b = data[i + 2]
+        const a = info.channels === 4 ? data[i + 3] : 255
+        if (a < 20) continue
+        const qr = Math.round(r / 96) * 96
+        const qg = Math.round(g / 96) * 96
+        const qb = Math.round(b / 96) * 96
+        const key = (qr << 16) | (qg << 8) | qb
+        const existing = colorCounts.get(key)
+        if (existing) { existing.count++ }
+        else { colorCounts.set(key, { r: qr, g: qg, b: qb, count: 1 }) }
+      }
+
+      let entries = Array.from(colorCounts.entries()).sort((a, b) => b[1].count - a[1].count)
+      const merged: typeof entries = []
+      for (const [, val] of entries) {
+        const rgb = [val.r, val.g, val.b]
+        if (!merged.find(([, m]) => colorDistance(rgb, [m.r, m.g, m.b]) < 120)) {
+          merged.push([0, val])
+        }
+      }
+
+      colorRGBs = merged
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, numColors)
+        .map(([, v]) => ({ r: v.r, g: v.g, b: v.b }))
     }
 
-    const effectiveNumColors = isIlustracion ? 6 : numColors
-
-    const top = merged
-      .sort((a, b) => b[1].count - a[1].count)
-      .slice(0, effectiveNumColors)
-
-    const colorRGBs = top.map(([, v]) => ({ r: v.r, g: v.g, b: v.b }))
-
-    const tolerance = isIlustracion ? 150 : 110
-
+    // Crear máscaras
+    const tolerance = isIlustracion ? 80 : 110
     const results = await Promise.allSettled(
       colorRGBs.map(rgb => createColorMask(buffer, rgb.r, rgb.g, rgb.b, tolerance))
     )
@@ -129,8 +189,9 @@ export async function POST(request: NextRequest) {
     const masks: string[] = []
     const layers: any[] = []
     const discarded: string[] = []
-
     const nameMap = ['Fondo / Base', 'Elemento Principal', 'Detalles', 'Acentos', 'Textos', 'Bordes']
+
+    const bgHex = `#${(Math.round(bgR/96)*96).toString(16).padStart(2,'0')}${(Math.round(bgG/96)*96).toString(16).padStart(2,'0')}${(Math.round(bgB/96)*96).toString(16).padStart(2,'0')}`
 
     for (let i = 0; i < results.length; i++) {
       const r = results[i]
@@ -140,23 +201,11 @@ export async function POST(request: NextRequest) {
       const rgb = colorRGBs[i]
       const hex = `#${rgb.r.toString(16).padStart(2,'0')}${rgb.g.toString(16).padStart(2,'0')}${rgb.b.toString(16).padStart(2,'0')}`
 
-      // Filtrar capas parásitas (umbrales según modo)
       const maxFill = isIlustracion ? 0.95 : 0.90
       const minFill = isIlustracion ? 0.005 : 0.03
-
-      if (fillRatio > maxFill) {
-        discarded.push(`${hex}: fondo (${(fillRatio*100).toFixed(0)}%)`)
-        continue
-      }
-      if (fillRatio < minFill) {
-        discarded.push(`${hex}: ruido (${(fillRatio*100).toFixed(1)}%)`)
-        continue
-      }
-      // Descartar si coincide con el color de fondo (esquina 0,0)
-      if (hex === bgHex) {
-        discarded.push(`${hex}: color de fondo (esquina)`)
-        continue
-      }
+      if (fillRatio > maxFill) { discarded.push(`${hex}: fondo (${(fillRatio*100).toFixed(0)}%)`); continue }
+      if (fillRatio < minFill) { discarded.push(`${hex}: ruido (${(fillRatio*100).toFixed(1)}%)`); continue }
+      if (hex === bgHex) { discarded.push(`${hex}: color de fondo`); continue }
 
       colors.push(hex)
       masks.push(`data:image/png;base64,${maskBuf.toString('base64')}`)
