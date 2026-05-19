@@ -8,19 +8,14 @@ function colorDistance(a: number[], b: number[]): number {
   return Math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2)
 }
 
-// K-Means clustering para extraer paleta real de la imagen
 function kMeans(pixels: number[][], k: number, maxIter = 10): number[][] {
   if (pixels.length === 0) return []
-  
-  // Inicializar centroides con píxeles espaciados uniformemente
   const centroids: number[][] = []
   const step = Math.max(1, Math.floor(pixels.length / k))
   for (let i = 0; i < k; i++) {
     centroids.push([...pixels[Math.min(i * step, pixels.length - 1)]])
   }
-
   for (let iter = 0; iter < maxIter; iter++) {
-    // Asignar cada píxel al centroide más cercano
     const clusters: number[][][] = Array.from({ length: k }, () => [])
     for (const pixel of pixels) {
       let best = 0, bestDist = Infinity
@@ -30,29 +25,26 @@ function kMeans(pixels: number[][], k: number, maxIter = 10): number[][] {
       }
       clusters[best].push(pixel)
     }
-
-    // Recalcular centroides
     let changed = false
     for (let c = 0; c < k; c++) {
       if (clusters[c].length === 0) continue
       const avg = clusters[c].reduce((acc, p) => [acc[0]+p[0], acc[1]+p[1], acc[2]+p[2]], [0,0,0])
       const n = clusters[c].length
-      const newCentroid = [Math.round(avg[0]/n), Math.round(avg[1]/n), Math.round(avg[2]/n)]
-      if (colorDistance(newCentroid, centroids[c]) > 1) changed = true
-      centroids[c] = newCentroid
+      const nc = [Math.round(avg[0]/n), Math.round(avg[1]/n), Math.round(avg[2]/n)]
+      if (colorDistance(nc, centroids[c]) > 1) changed = true
+      centroids[c] = nc
     }
     if (!changed) break
   }
-
   return centroids.map(c => c.map(Math.round))
 }
 
 async function createColorMask(
-  buffer: Buffer,
+  sourceBuffer: Buffer,
   targetR: number, targetG: number, targetB: number,
   tolerance: number
 ): Promise<{ buffer: Buffer; fillRatio: number }> {
-  const { data, info } = await sharp(buffer)
+  const { data, info } = await sharp(sourceBuffer)
     .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true, kernel: 'lanczos3' })
     .ensureAlpha()
     .raw()
@@ -68,13 +60,11 @@ async function createColorMask(
     const dist = Math.sqrt((r-targetR)**2 + (g-targetG)**2 + (b-targetB)**2)
     const pixelIndex = (i / info.channels) * 4
     const isColor = a > 20 && dist <= tolerance
-
     const v = isColor ? 0 : 255
     maskData[pixelIndex] = v
     maskData[pixelIndex + 1] = v
     maskData[pixelIndex + 2] = v
     maskData[pixelIndex + 3] = 255
-
     if (isColor) objectPixels++
   }
 
@@ -91,48 +81,50 @@ export async function POST(request: NextRequest) {
 
     const res = await fetch(imageUrl)
     if (!res.ok) throw new Error(`No se pudo descargar imagen: ${res.status}`)
-    let buffer = Buffer.from(await res.arrayBuffer())
+    const arrBuf = await res.arrayBuffer()
+    if (arrBuf.byteLength < 100) throw new Error('Imagen descargada demasiado pequeña o corrupta')
+    let buffer = Buffer.from(arrBuf)
 
     const isIlustracion = designType === 'ilustracion'
 
-    // Pre-procesamiento para Ilustración
+    // Validar que el buffer es una imagen válida
+    try { await sharp(buffer).metadata() }
+    catch { throw new Error('Formato de imagen no soportado. Usa JPG o PNG.') }
+
+    // Pre-procesamiento
     if (isIlustracion) {
-      const filtered = await sharp(buffer)
+      buffer = Buffer.from(await sharp(buffer)
         .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
-        .median(5)
-        .blur(2)
-        .toBuffer()
-      buffer = Buffer.from(filtered)
+        .median(5).blur(2).toBuffer())
     }
 
+    // Leer píxeles
     const { data, info } = await sharp(buffer)
       .ensureAlpha()
       .raw()
       .toBuffer({ resolveWithObject: true })
 
-    // Color de fondo (esquina 0,0)
     const bgR = data[0], bgG = data[1], bgB = data[2]
-
     let colorRGBs: { r: number; g: number; b: number }[]
+    let workingBuffer = buffer
 
     if (isIlustracion) {
-      // === MODO ILUSTRACIÓN: K-Means para paleta real ===
       const sampleRate = 4
       const pixels: number[][] = []
       for (let i = 0; i < data.length; i += info.channels * sampleRate) {
         const r = data[i], g = data[i + 1], b = data[i + 2]
         const a = info.channels === 4 ? data[i + 3] : 255
         if (a < 20) continue
-        // Excluir píxeles muy cercanos al fondo
-        const bgDist = Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2)
-        if (bgDist < 50) continue
+        if (Math.sqrt((r-bgR)**2 + (g-bgG)**2 + (b-bgB)**2) < 50) continue
         pixels.push([r, g, b])
       }
 
-      const k = Math.min(numColors, 8)
-      const centroids = kMeans(pixels, k)
+      if (pixels.length < 100) throw new Error('Muy pocos píxeles para K-Means. La imagen puede ser monocromática.')
 
-      // Ordenar por frecuencia (cuántos píxeles caen en cada cluster)
+      const k = Math.max(2, Math.min(numColors, 8))
+      const centroids = kMeans(pixels, k)
+      if (centroids.length < 2) throw new Error('K-Means no encontró suficientes colores.')
+
       const counts = new Array(centroids.length).fill(0)
       for (const pixel of pixels) {
         let best = 0, bestDist = Infinity
@@ -148,8 +140,7 @@ export async function POST(request: NextRequest) {
         .sort((a, b) => b.count - a.count)
         .map(({ r, g, b }) => ({ r, g, b }))
 
-      // Post-K-Means despeckle: mapear píxeles a centroide + median para eliminar islas
-      const flatData = Buffer.alloc(data.length)
+      const flatData = Buffer.alloc(info.width * info.height * 4)
       for (let i = 0; i < data.length; i += info.channels) {
         const r = data[i], g = data[i+1], b = data[i+2]
         const a = info.channels === 4 ? data[i+3] : 255
@@ -165,14 +156,11 @@ export async function POST(request: NextRequest) {
         flatData[i+3] = 255
       }
 
-      // Median filter para eliminar píxeles aislados (confeti)
-      const filtered = await sharp(flatData, { raw: { width: info.width, height: info.height, channels: 4 } })
-        .median(3)
-        .toBuffer()
-      buffer = Buffer.from(filtered)
+      workingBuffer = Buffer.from(await sharp(flatData, {
+        raw: { width: info.width, height: info.height, channels: 4 }
+      }).median(3).png().toBuffer())
 
     } else {
-      // === MODO LOGO: binarización por bines ===
       const colorCounts = new Map<number, { r: number; g: number; b: number; count: number }>()
       for (let i = 0; i < data.length; i += info.channels) {
         const r = data[i], g = data[i + 1], b = data[i + 2]
@@ -183,29 +171,28 @@ export async function POST(request: NextRequest) {
         const qb = Math.round(b / 96) * 96
         const key = (qr << 16) | (qg << 8) | qb
         const existing = colorCounts.get(key)
-        if (existing) { existing.count++ }
-        else { colorCounts.set(key, { r: qr, g: qg, b: qb, count: 1 }) }
+        if (existing) existing.count++
+        else colorCounts.set(key, { r: qr, g: qg, b: qb, count: 1 })
       }
 
       let entries = Array.from(colorCounts.entries()).sort((a, b) => b[1].count - a[1].count)
       const merged: typeof entries = []
       for (const [, val] of entries) {
-        const rgb = [val.r, val.g, val.b]
-        if (!merged.find(([, m]) => colorDistance(rgb, [m.r, m.g, m.b]) < 120)) {
+        if (!merged.find(([, m]) => colorDistance([val.r, val.g, val.b], [m.r, m.g, m.b]) < 120)) {
           merged.push([0, val])
         }
       }
 
-      colorRGBs = merged
-        .sort((a, b) => b[1].count - a[1].count)
+      colorRGBs = merged.sort((a, b) => b[1].count - a[1].count)
         .slice(0, numColors)
         .map(([, v]) => ({ r: v.r, g: v.g, b: v.b }))
     }
 
-    // Crear máscaras
+    if (!colorRGBs?.length) throw new Error('No se detectaron colores en la imagen.')
+
     const tolerance = isIlustracion ? 80 : 110
     const results = await Promise.allSettled(
-      colorRGBs.map(rgb => createColorMask(buffer, rgb.r, rgb.g, rgb.b, tolerance))
+      colorRGBs.map(rgb => createColorMask(workingBuffer, rgb.r, rgb.g, rgb.b, tolerance))
     )
 
     const colors: string[] = []
@@ -219,7 +206,6 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < results.length; i++) {
       const r = results[i]
       if (r.status !== 'fulfilled') continue
-
       const { buffer: maskBuf, fillRatio } = r.value
       const rgb = colorRGBs[i]
       const hex = `#${rgb.r.toString(16).padStart(2,'0')}${rgb.g.toString(16).padStart(2,'0')}${rgb.b.toString(16).padStart(2,'0')}`
@@ -240,15 +226,14 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    if (!colors.length) throw new Error('Todas las capas fueron descartadas. Prueba con otro diseño o modo.')
+
     const posterizedBuf = isIlustracion
-      ? await sharp(buffer).ensureAlpha().png().toBuffer()
-      : await sharp(buffer).ensureAlpha().png({ palette: true, colours: Math.max(2, Math.min(colors.length || 2, 8)) }).toBuffer()
+      ? await sharp(workingBuffer).ensureAlpha().png().toBuffer()
+      : await sharp(workingBuffer).ensureAlpha().png({ palette: true, colours: Math.max(2, Math.min(colors.length, 8)) }).toBuffer()
 
     return NextResponse.json({
-      colors,
-      masks,
-      layers,
-      discarded,
+      colors, masks, layers, discarded,
       posterizedImage: `data:image/png;base64,${posterizedBuf.toString('base64')}`,
     })
   } catch (error: any) {
