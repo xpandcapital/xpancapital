@@ -56,4 +56,12 @@ export const SECURITY_TOOLS: SecurityToolDef[] = [
     configKey: 'bot_protection',
   },
   {
+    id: 'alerts',
+    name: 'Alertas',
+    description: 'Notificaciones ante intentos de acceso bloqueados',
+    cat: 'Monitoreo',
+    icon: 'Bell',
+    status: 'coming_soon',
+    configKey: 'alerts',
+  },
 ]
