@@ -2,6 +2,14 @@ import type { SecurityToolDef } from '../_types'
 
 export const SECURITY_TOOLS: SecurityToolDef[] = [
   {
+    id: 'dashboard',
+    name: 'Dashboard',
+    description: 'Centro de comando con KPIs, radar, gráficos y estado de herramientas',
+    cat: 'Principal',
+    icon: 'Cpu',
+    status: 'active',
+  },
+  {
     id: 'geobloqueo',
     name: 'Geobloqueo',
     description: 'Control de acceso por país usando Vercel Edge Network',

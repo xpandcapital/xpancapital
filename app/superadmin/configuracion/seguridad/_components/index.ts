@@ -1,4 +1,5 @@
 export { SidebarSecurity } from './SidebarSecurity'
+export { SecurityDashboard } from './SecurityDashboard'
 export { GeobloqueoTool } from './GeobloqueoTool'
 export { SecurityHeadersTool } from './SecurityHeadersTool'
 export { RateLimitingTool } from './RateLimitingTool'

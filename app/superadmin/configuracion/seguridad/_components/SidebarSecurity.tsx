@@ -14,6 +14,7 @@ import {
   Bell,
   ScrollText,
   Bot,
+  Cpu,
   Dot,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,6 +25,7 @@ import { RateLimitingTool } from './RateLimitingTool';
 import { AccessLogsTool } from './AccessLogsTool';
 import { BotProtectionTool } from './BotProtectionTool';
 import { AlertsTool } from './AlertsTool';
+import { SecurityDashboard } from './SecurityDashboard';
 import { PlaceholderTool } from './PlaceholderTool';
 import type { SecurityToolDef, SecurityHeadersConfig, RateLimitingConfig, BotProtectionConfig, AlertsConfig } from '../_types';
 
@@ -36,6 +38,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Bell,
   ScrollText,
   Bot,
+  Cpu,
 };
 
 interface Props {
@@ -55,6 +58,7 @@ interface Props {
 }
 
 const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Principal': Cpu,
   'Control de Acceso': Shield,
   'Protección Web': Wrench,
   'Monitoreo': Gauge,
@@ -63,9 +67,9 @@ const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeadersConfig, rateLimitingConfig, botProtectionConfig, alertsConfig, saving, onSave, onUpdateGeobloqueo, onUpdateSecurityHeaders, onUpdateRateLimiting, onUpdateBotProtection, onUpdateAlerts }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeTool, setActiveTool] = useState<string>(initialTool || 'geobloqueo');
+  const [activeTool, setActiveTool] = useState<string>(initialTool || 'dashboard');
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCats, setExpandedCats] = useState<string[]>(['Control de Acceso', 'Protección Web', 'Monitoreo']);
+  const [expandedCats, setExpandedCats] = useState<string[]>(['Principal', 'Control de Acceso', 'Protección Web', 'Monitoreo']);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handleSetTool = (id: string) => {
@@ -129,6 +133,8 @@ export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeaders
       return <PlaceholderTool toolId={activeTool} />;
     }
     switch (activeTool) {
+      case 'dashboard':
+        return <SecurityDashboard />;
       case 'geobloqueo':
         return (
           <GeobloqueoTool
