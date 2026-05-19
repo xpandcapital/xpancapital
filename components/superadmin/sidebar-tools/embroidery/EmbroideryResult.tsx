@@ -47,6 +47,7 @@ export function EmbroideryResult({ previewImage, layers }: Props) {
                 src={previewImage}
                 alt="Bordado 3D"
                 className="max-h-[55vh] max-w-full object-contain drop-shadow-2xl rounded-sm transition-transform duration-500 ease-out hover:scale-[1.02]"
+                style={{ imageRendering: 'auto' }}
               />
             ) : (
               <div className="w-64 h-64 bg-white/5 rounded-2xl flex items-center justify-center border border-white/5">

@@ -8,6 +8,14 @@ function colorDistance(a: number[], b: number[]): number {
   return Math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2)
 }
 
+// Distancia perceptual ponderada: da más peso a la luminancia (verde) y menos al azul
+function perceptualDistance(a: number[], b: number[]): number {
+  const dr = (a[0] - b[0]) * 0.299
+  const dg = (a[1] - b[1]) * 0.587
+  const db = (a[2] - b[2]) * 0.114
+  return Math.sqrt(dr*dr + dg*dg + db*db) * 2.5
+}
+
 // K-Means++ inicialización: elige centroides lejanos para evitar promedios sucios
 function kMeansInit(pixels: number[][], k: number): number[][] {
   if (pixels.length === 0) return []
@@ -16,7 +24,7 @@ function kMeansInit(pixels: number[][], k: number): number[][] {
     const dists = pixels.map(p => {
       let minDist = Infinity
       for (const ct of centroids) {
-        const d = colorDistance(p, ct)
+        const d = perceptualDistance(p, ct)
         if (d < minDist) minDist = d
       }
       return minDist * minDist
@@ -37,10 +45,10 @@ function kMeans(pixels: number[][], k: number, maxIter = 10): number[][] {
   const centroids = kMeansInit(pixels, k)
   for (let iter = 0; iter < maxIter; iter++) {
     const clusters: number[][][] = Array.from({ length: k }, () => [])
-    for (const pixel of pixels) {
+      for (const pixel of pixels) {
       let best = 0, bestDist = Infinity
       for (let c = 0; c < k; c++) {
-        const d = colorDistance(pixel, centroids[c])
+        const d = perceptualDistance(pixel, centroids[c])
         if (d < bestDist) { bestDist = d; best = c }
       }
       clusters[best].push(pixel)
@@ -51,7 +59,7 @@ function kMeans(pixels: number[][], k: number, maxIter = 10): number[][] {
       const avg = clusters[c].reduce((acc, p) => [acc[0]+p[0], acc[1]+p[1], acc[2]+p[2]], [0,0,0])
       const n = clusters[c].length
       const nc = [Math.round(avg[0]/n), Math.round(avg[1]/n), Math.round(avg[2]/n)]
-      if (colorDistance(nc, centroids[c]) > 1) changed = true
+      if (perceptualDistance(nc, centroids[c]) > 1) changed = true
       centroids[c] = nc
     }
     if (!changed) break
@@ -157,7 +165,7 @@ export async function POST(request: NextRequest) {
       for (const pixel of pixels) {
         let best = 0, bestDist = Infinity
         for (let c = 0; c < centroids.length; c++) {
-          const d = colorDistance(pixel, centroids[c])
+          const d = perceptualDistance(pixel, centroids[c])
           if (d < bestDist) { bestDist = d; best = c }
         }
         counts[best]++
@@ -175,7 +183,7 @@ export async function POST(request: NextRequest) {
         if (a < 20) { flatData[i]=0; flatData[i+1]=0; flatData[i+2]=0; flatData[i+3]=0; continue }
         let best = 0, bestDist = Infinity
         for (let c = 0; c < colorRGBs.length; c++) {
-          const d = colorDistance([r,g,b], [colorRGBs[c].r, colorRGBs[c].g, colorRGBs[c].b])
+          const d = perceptualDistance([r,g,b], [colorRGBs[c].r, colorRGBs[c].g, colorRGBs[c].b])
           if (d < bestDist) { bestDist = d; best = c }
         }
         flatData[i] = colorRGBs[best].r
