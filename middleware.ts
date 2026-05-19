@@ -1,8 +1,9 @@
-// Middleware principal de autenticación, autorización, geobloqueo, rate limiting y security headers
+// Middleware unificado — 1 consulta a BD, distribuye a todos los módulos de seguridad
 import { updateSession } from '@/lib/supabase/middleware'
-import { shouldGeoBlock } from '@/lib/geoblock'
-import { getSecurityHeaders, injectHeaders } from '@/lib/security-headers'
-import { getRateLimitingConfig, checkInMemory, matchRateLimit } from '@/lib/rate-limit'
+import { getSecurityConfig } from '@/lib/security-config'
+import { getCountryFromRequest, checkGeoBlock } from '@/lib/geoblock'
+import { injectHeaders } from '@/lib/security-headers'
+import { matchRateLimit, checkInMemory } from '@/lib/rate-limit'
 import { logSecurityEvent } from '@/lib/access-logs'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -20,21 +21,21 @@ export async function middleware(request: NextRequest) {
   const ip = getClientIP(request)
   const ua = request.headers.get('user-agent') || ''
 
-  // 1. Geobloqueo: verificar antes de cualquier otra lógica
-  const geoResult = await shouldGeoBlock(request)
+  // 0. Consultar configuración de seguridad UNA SOLA VEZ (caché 30s)
+  const secConfig = await getSecurityConfig()
 
-  if (IS_DEV) {
+  // 1. Geobloqueo
+  const country = getCountryFromRequest(request)
+  const geoResult = checkGeoBlock(country || '', secConfig.geobloqueo)
+
+  if (IS_DEV && geoResult.country) {
     console.log('[Middleware] GeoBlock:', JSON.stringify(geoResult))
   }
 
   if (geoResult.blocked) {
     logSecurityEvent({
-      ip,
-      pais: geoResult.country || 'XX',
-      ruta: pathname,
-      metodo: method,
-      motivo: 'geobloqueo',
-      user_agent: ua,
+      ip, pais: geoResult.country || 'XX', ruta: pathname,
+      metodo: method, motivo: 'geobloqueo', user_agent: ua,
     })
     return new NextResponse('Acceso denegado desde tu ubicación', {
       status: 403,
@@ -42,51 +43,36 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  // 2. Rate Limiting: verificar límites por IP y ruta
-  try {
-    const rlConfig = await getRateLimitingConfig()
-    if (rlConfig?.habilitado) {
-      const regla = matchRateLimit(rlConfig, pathname, method)
-      if (regla) {
-        const result = checkInMemory(ip, pathname, method, regla.limite, regla.ventana_segundos)
-        if (!result.allowed) {
-          logSecurityEvent({
-            ip,
-            pais: geoResult.country || 'XX',
-            ruta: pathname,
-            metodo: method,
-            motivo: 'rate_limit',
-            user_agent: ua,
-          })
-          if (IS_DEV) console.log(`[Middleware] Rate Limit: ${ip} en ${method} ${pathname}`)
-          return new NextResponse(rlConfig.mensaje_limite, {
-            status: 429,
-            headers: {
-              'Content-Type': 'text/plain; charset=utf-8',
-              'Retry-After': String(Math.ceil(result.resetMs / 1000)),
-              'X-RateLimit-Limit': String(result.limit),
-              'X-RateLimit-Remaining': '0',
-            },
-          })
-        }
+  // 2. Rate Limiting
+  if (secConfig.rate_limiting) {
+    const regla = matchRateLimit(secConfig.rate_limiting, pathname, method)
+    if (regla) {
+      const result = checkInMemory(ip, pathname, method, regla.limite, regla.ventana_segundos)
+      if (!result.allowed) {
+        logSecurityEvent({
+          ip, pais: country || 'XX', ruta: pathname,
+          metodo: method, motivo: 'rate_limit', user_agent: ua,
+        })
+        return new NextResponse(secConfig.rate_limiting.mensaje_limite, {
+          status: 429,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Retry-After': String(Math.ceil(result.resetMs / 1000)),
+          },
+        })
       }
     }
-  } catch {
-    // Silencioso
   }
 
   // 3. Autenticación y autorización
   const response = await updateSession(request)
 
-  // 4. Inyectar cabeceras de seguridad HTTP
-  try {
-    const secHeaders = await getSecurityHeaders()
-    if (secHeaders) {
-      injectHeaders(response, secHeaders)
+  // 4. Security Headers
+  if (secConfig.security_headers) {
+    try {
+      injectHeaders(response, secConfig.security_headers)
       if (IS_DEV) console.log('[Middleware] Security Headers inyectados')
-    }
-  } catch {
-    // Silencioso
+    } catch { /* silencioso */ }
   }
 
   return response
