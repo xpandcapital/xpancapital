@@ -1,13 +1,13 @@
 "use client"
 
 import React, { useRef } from 'react'
-import { UploadCloud, Shapes, Image } from 'lucide-react'
+import { UploadCloud, Shapes, Image, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export type DesignType = 'logo' | 'ilustracion'
 
 interface Props {
-  onFileSelect: (file: File, designType: DesignType) => void
+  onFileSelect: (file: File, designType: DesignType, enhance: boolean) => void
   disabled?: boolean
 }
 
@@ -15,6 +15,7 @@ export function EmbroideryUpload({ onFileSelect, disabled }: Props) {
   const dropRef = useRef<HTMLDivElement>(null)
   const [isOver, setIsOver] = React.useState(false)
   const [designType, setDesignType] = React.useState<DesignType>('logo')
+  const [enhance, setEnhance] = React.useState(true)
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -30,7 +31,7 @@ export function EmbroideryUpload({ onFileSelect, disabled }: Props) {
 
   const processFile = (file: File) => {
     if (!file.type.startsWith('image/')) return
-    onFileSelect(file, designType)
+    onFileSelect(file, designType, enhance)
   }
 
   const handleDrop = (e: React.DragEvent) => {
@@ -87,6 +88,25 @@ export function EmbroideryUpload({ onFileSelect, disabled }: Props) {
             ? 'Óptimo para logos, íconos y texto. Trazos nítidos, colores planos, sin degradados.'
             : 'Para ilustraciones y fotos. Suaviza degradados, reduce a 6 colores, curvas orgánicas.'}
         </p>
+
+        <div className="flex items-center justify-center">
+          <button
+            onClick={() => setEnhance(!enhance)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+              enhance
+                ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400 shadow-sm shadow-amber-500/5'
+                : 'bg-white/5 border border-white/10 text-zinc-600 hover:text-zinc-400'
+            }`}
+          >
+            <Sparkles size={14} className={enhance ? 'text-amber-400' : ''} />
+            Mejora IA (Real-ESRGAN)
+          </button>
+        </div>
+        {enhance && (
+          <p className="text-amber-400/60 text-[10px] max-w-sm mx-auto">
+            La IA reconstruye bordes, limpia ruido y escala 4x antes de vectorizar. Consume tokens de Replicate.
+          </p>
+        )}
 
         <motion.div
           ref={dropRef}

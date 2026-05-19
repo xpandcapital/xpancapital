@@ -1,11 +1,12 @@
 "use client"
 
 import React from 'react'
-import { Loader2, CheckCircle, UploadCloud, Scissors, PenTool, Box } from 'lucide-react'
+import { Loader2, CheckCircle, UploadCloud, PenTool, Box, Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const STEPS = [
   { id: 'upload', label: 'Subiendo y preparando imagen', icon: UploadCloud },
+  { id: 'enhance', label: 'Mejora IA — Real-ESRGAN 4x', icon: Sparkles },
   { id: 'quantize', label: 'Extrayendo colores dominantes (Sharp)', icon: PenTool },
   { id: 'vectorize', label: 'Vectorizando curvas (Potrace)', icon: PenTool },
   { id: 'render', label: 'Generando previsualización 3D (Gemini)', icon: Box },

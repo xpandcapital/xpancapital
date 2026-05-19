@@ -101,7 +101,7 @@ export function AutoEmbroideryTool() {
     setSvgContent('')
   }, [])
 
-  const handleFileSelect = useCallback(async (file: File, designType: DesignType) => {
+  const handleFileSelect = useCallback(async (file: File, designType: DesignType, enhance: boolean) => {
     const reader = new FileReader()
     reader.onload = async (e) => {
       const dataUrl = e.target?.result as string
@@ -123,8 +123,19 @@ export function AutoEmbroideryTool() {
         const imageUrl = await uploadToStorage(file)
         cleanImageUrl = imageUrl
 
-        // Paso 1: Quantize — extrae colores dominantes, genera máscaras B/N, posteriza
-        setCurrentStep(1)
+        // Paso 1 (opcional): Mejora IA con Real-ESRGAN
+        if (enhance) {
+          setCurrentStep(1)
+          try {
+            const enhResult = await callBordadoAPI('enhance', { imageUrl, scale: 4 })
+            cleanImageUrl = enhResult.url
+          } catch (e: any) {
+            errors.push('Mejora IA: ' + (e.message || 'falló'))
+          }
+        }
+
+        // Paso 2: Quantize — extrae colores dominantes, genera máscaras B/N, posteriza
+        setCurrentStep(enhance ? 2 : 1)
         try {
           const quantResult = await callBordadoAPI('quantize', {
             imageUrl: cleanImageUrl,
@@ -149,8 +160,8 @@ export function AutoEmbroideryTool() {
         if (!colors.length) colors = ['#1a1a2e', '#e94560', '#0f3460', '#16213e']
         if (!maskUrls.length) maskUrls = [cleanImageUrl]
 
-        // Paso 2: Vectorize — Potrace sobre cada máscara
-        setCurrentStep(2)
+        // Paso: Vectorize — Potrace sobre cada máscara
+        setCurrentStep(enhance ? 3 : 2)
         let vectorLayers: LayerInfo[] = []
         try {
           const vecResult = await callBordadoAPI('vectorize', {
@@ -177,8 +188,8 @@ export function AutoEmbroideryTool() {
           return
         }
 
-        // Paso 3: Assemble SVG
-        setCurrentStep(3)
+        // Paso: Assemble SVG
+        setCurrentStep(enhance ? 4 : 3)
         try {
           const svgResult = await callBordadoAPI('assemble-svg', { layers: vectorLayers })
           setSvgContent(svgResult.svg)

@@ -9,6 +9,7 @@ const MODELS: Record<string, string> = {
   rembg: 'fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003',
   'sam-2': 'fe97b453a6455861e3bac769b441ca1f1086110da7466dbb65cf1eecfd60dc83',
   'segment-anything-2': 'be7cbde9fdf0eecdc8b20ffec9dd0d1cfeace0832d4d0b58a071d993182e1be0',
+  'real-esrgan': 'b3ef194191d13140337468c916c2c5b96dd0cb06dffc032a022a31807f6a5ea8',
 }
 
 interface ReplicatePrediction {
@@ -113,5 +114,29 @@ export async function removeBackground(imageUrl: string, token: string): Promise
   }
 
   console.log(`[remove-bg] Éxito`)
+  return typeof result.output === 'string' ? result.output : ''
+}
+
+export async function enhanceImage(imageUrl: string, scale: number, token: string): Promise<string> {
+  console.log(`[enhance] Real-ESRGAN upscale ${scale}x...`)
+
+  const prediction = await createPrediction(MODELS['real-esrgan'], {
+    image: imageUrl,
+    scale,
+    face_enhance: false,
+  }, token)
+  console.log(`[enhance] Predicción: ${prediction.id}`)
+
+  const result = await waitForPrediction(prediction.id, token)
+
+  if (result.status === 'failed') {
+    throw new Error(`Real-ESRGAN falló: ${result.error || 'error desconocido'}`)
+  }
+
+  if (result.status !== 'succeeded' || !result.output) {
+    throw new Error(`Real-ESRGAN sin output (status: ${result.status})`)
+  }
+
+  console.log(`[enhance] Éxito`)
   return typeof result.output === 'string' ? result.output : ''
 }
