@@ -5,6 +5,7 @@ import { getCountryFromRequest, checkGeoBlock } from '@/lib/geoblock'
 import { injectHeaders } from '@/lib/security-headers'
 import { matchRateLimit, checkInMemory } from '@/lib/rate-limit'
 import { logSecurityEvent } from '@/lib/access-logs'
+import { checkAlerts, dispatchAlerts } from '@/lib/security-alerts'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
@@ -37,6 +38,8 @@ export async function middleware(request: NextRequest) {
       ip, pais: geoResult.country || 'XX', ruta: pathname,
       metodo: method, motivo: 'geobloqueo', user_agent: ua,
     })
+    const alerts = checkAlerts('geobloqueo', geoResult.country || 'XX', ip, pathname, secConfig.alerts)
+    if (alerts) dispatchAlerts(alerts, secConfig.alerts!)
     return new NextResponse('Acceso denegado desde tu ubicación', {
       status: 403,
       headers: { 'Content-Type': 'text/plain; charset=utf-8' },
@@ -53,6 +56,8 @@ export async function middleware(request: NextRequest) {
           ip, pais: country || 'XX', ruta: pathname,
           metodo: method, motivo: 'rate_limit', user_agent: ua,
         })
+        const rlAlerts = checkAlerts('rate_limit', country || 'XX', ip, pathname, secConfig.alerts)
+        if (rlAlerts) dispatchAlerts(rlAlerts, secConfig.alerts!)
         return new NextResponse(secConfig.rate_limiting.mensaje_limite, {
           status: 429,
           headers: {

@@ -42,6 +42,25 @@ export interface UnifiedSecurityConfig {
   geobloqueo: CachedGeobloqueoConfig | null
   security_headers: CachedSecurityHeadersConfig | null
   rate_limiting: CachedRateLimitConfig | null
+  alerts: AlertsConfig | null
+}
+
+interface AlertsConfig {
+  habilitado: boolean
+  email_destino: string
+  webhook_url: string
+  reglas: Array<{
+    id: string
+    nombre: string
+    descripcion: string
+    tipo: string
+    nivel: string
+    umbral: number
+    ventana_minutos: number
+    habilitado: boolean
+    notificar_email: boolean
+    notificar_webhook: boolean
+  }>
 }
 
 // ============================================================================
@@ -57,6 +76,7 @@ function parseSecurityConfig(data: unknown): UnifiedSecurityConfig {
   const geo = sc?.geobloqueo
   const headers = sc?.security_headers
   const rl = sc?.rate_limiting
+  const alerts = sc?.alerts
 
   return {
     geobloqueo: (geo && typeof geo === 'object' && geo.habilitado === true) ? {
@@ -70,6 +90,8 @@ function parseSecurityConfig(data: unknown): UnifiedSecurityConfig {
     security_headers: (headers && typeof headers === 'object' && headers.habilitado === true) ? headers : null,
 
     rate_limiting: (rl && typeof rl === 'object' && rl.habilitado === true) ? rl : null,
+
+    alerts: (alerts && typeof alerts === 'object' && alerts.habilitado === true) ? alerts : null,
   }
 }
 
@@ -83,7 +105,7 @@ export async function getSecurityConfig(): Promise<UnifiedSecurityConfig> {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     if (!supabaseUrl || !supabaseKey) {
-      return { geobloqueo: null, security_headers: null, rate_limiting: null }
+      return { geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null }
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey)
@@ -97,7 +119,7 @@ export async function getSecurityConfig(): Promise<UnifiedSecurityConfig> {
     cacheTimestamp = now
     return cachedConfig
   } catch {
-    return { geobloqueo: null, security_headers: null, rate_limiting: null }
+    return { geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null }
   }
 }
 

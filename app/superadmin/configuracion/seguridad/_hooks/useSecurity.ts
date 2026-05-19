@@ -52,53 +52,35 @@ export function useSecurity() {
 
   const updateGeobloqueo = useCallback(
     (updates: Partial<NonNullable<SecurityConfig['geobloqueo']>>) => {
-      setConfig(prev => ({
-        ...prev,
-        geobloqueo: { ...prev.geobloqueo!, ...updates }
-      }))
+      setConfig(prev => ({ ...prev, geobloqueo: { ...prev.geobloqueo!, ...updates } }))
     }, []
   )
 
   const updateSecurityHeaders = useCallback(
     (updates: Partial<NonNullable<SecurityConfig['security_headers']>>) => {
-      setConfig(prev => ({
-        ...prev,
-        security_headers: { ...prev.security_headers!, ...updates } as SecurityConfig['security_headers']
-      }))
+      setConfig(prev => ({ ...prev, security_headers: { ...prev.security_headers!, ...updates } as SecurityConfig['security_headers'] }))
     }, []
   )
 
   const updateRateLimiting = useCallback(
     (updates: Partial<NonNullable<SecurityConfig['rate_limiting']>>) => {
-      setConfig(prev => ({
-        ...prev,
-        rate_limiting: { ...prev.rate_limiting!, ...updates } as SecurityConfig['rate_limiting']
-      }))
+      setConfig(prev => ({ ...prev, rate_limiting: { ...prev.rate_limiting!, ...updates } as SecurityConfig['rate_limiting'] }))
     }, []
   )
 
   const updateBotProtection = useCallback(
     (updates: Partial<NonNullable<SecurityConfig['bot_protection']>>) => {
-      setConfig(prev => ({
-        ...prev,
-        bot_protection: { ...prev.bot_protection!, ...updates } as SecurityConfig['bot_protection']
-      }))
+      setConfig(prev => ({ ...prev, bot_protection: { ...prev.bot_protection!, ...updates } as SecurityConfig['bot_protection'] }))
     }, []
   )
 
-  useEffect(() => {
-    loadConfig()
-  }, [loadConfig])
+  const updateAlerts = useCallback(
+    (updates: Partial<NonNullable<SecurityConfig['alerts']>>) => {
+      setConfig(prev => ({ ...prev, alerts: { ...prev.alerts!, ...updates } as SecurityConfig['alerts'] }))
+    }, []
+  )
 
-  return {
-    config,
-    loading,
-    saving,
-    loadConfig,
-    saveConfig,
-    updateGeobloqueo,
-    updateSecurityHeaders,
-    updateRateLimiting,
-    updateBotProtection,
-  }
+  useEffect(() => { loadConfig() }, [loadConfig])
+
+  return { config, loading, saving, loadConfig, saveConfig, updateGeobloqueo, updateSecurityHeaders, updateRateLimiting, updateBotProtection, updateAlerts }
 }

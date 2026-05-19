@@ -23,8 +23,9 @@ import { SecurityHeadersTool } from './SecurityHeadersTool';
 import { RateLimitingTool } from './RateLimitingTool';
 import { AccessLogsTool } from './AccessLogsTool';
 import { BotProtectionTool } from './BotProtectionTool';
+import { AlertsTool } from './AlertsTool';
 import { PlaceholderTool } from './PlaceholderTool';
-import type { SecurityToolDef, SecurityHeadersConfig, RateLimitingConfig, BotProtectionConfig } from '../_types';
+import type { SecurityToolDef, SecurityHeadersConfig, RateLimitingConfig, BotProtectionConfig, AlertsConfig } from '../_types';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield,
@@ -43,12 +44,14 @@ interface Props {
   securityHeadersConfig?: import('../_types').SecurityHeadersConfig;
   rateLimitingConfig?: import('../_types').RateLimitingConfig;
   botProtectionConfig?: import('../_types').BotProtectionConfig;
+  alertsConfig?: import('../_types').AlertsConfig;
   saving?: boolean;
   onSave?: (toolId: string) => Promise<void>;
   onUpdateGeobloqueo?: (updates: Partial<import('../_types').GeobloqueoConfig>) => void;
   onUpdateSecurityHeaders?: (updates: Partial<import('../_types').SecurityHeadersConfig>) => void;
   onUpdateRateLimiting?: (updates: Partial<import('../_types').RateLimitingConfig>) => void;
   onUpdateBotProtection?: (updates: Partial<import('../_types').BotProtectionConfig>) => void;
+  onUpdateAlerts?: (updates: Partial<import('../_types').AlertsConfig>) => void;
 }
 
 const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -57,7 +60,7 @@ const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   'Monitoreo': Gauge,
 };
 
-export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeadersConfig, rateLimitingConfig, botProtectionConfig, saving, onSave, onUpdateGeobloqueo, onUpdateSecurityHeaders, onUpdateRateLimiting, onUpdateBotProtection }: Props) {
+export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeadersConfig, rateLimitingConfig, botProtectionConfig, alertsConfig, saving, onSave, onUpdateGeobloqueo, onUpdateSecurityHeaders, onUpdateRateLimiting, onUpdateBotProtection, onUpdateAlerts }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTool, setActiveTool] = useState<string>(initialTool || 'geobloqueo');
@@ -162,6 +165,15 @@ export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeaders
             saving={saving}
             onSave={() => onSave?.('bot_protection')}
             onUpdate={onUpdateBotProtection}
+          />
+        );
+      case 'alerts':
+        return (
+          <AlertsTool
+            config={alertsConfig}
+            saving={saving}
+            onSave={() => onSave?.('alerts')}
+            onUpdate={onUpdateAlerts}
           />
         );
       default:

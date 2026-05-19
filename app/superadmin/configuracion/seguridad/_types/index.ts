@@ -66,13 +66,43 @@ export interface BotProtectionConfig {
   rutas: BotRouteConfig[]
 }
 
+export interface AlertRule {
+  id: string
+  nombre: string
+  descripcion: string
+  tipo: string
+  nivel: 'info' | 'warning' | 'critical'
+  umbral: number
+  ventana_minutos: number
+  habilitado: boolean
+  notificar_email: boolean
+  notificar_webhook: boolean
+}
+
+export interface AlertsConfig {
+  habilitado: boolean
+  email_destino: string
+  webhook_url: string
+  reglas: AlertRule[]
+}
+
+export interface SecurityAlertEntry {
+  id: string
+  tipo: string
+  nivel: string
+  titulo: string
+  detalle?: string
+  metadata?: Record<string, unknown>
+  leida: boolean
+  created_at: string
+}
+
 export interface SecurityConfig {
   geobloqueo?: GeobloqueoConfig
   security_headers?: SecurityHeadersConfig
   rate_limiting?: RateLimitingConfig
   bot_protection?: BotProtectionConfig
-  // Future tools:
-  // firewall?: FirewallConfig
+  alerts?: AlertsConfig
 }
 
 export interface SecurityToolDef {
@@ -176,9 +206,22 @@ export const defaultBotProtectionConfig: BotProtectionConfig = {
   ]
 }
 
+export const defaultAlertsConfig: AlertsConfig = {
+  habilitado: false,
+  email_destino: '',
+  webhook_url: '',
+  reglas: [
+    { id: 'geo_spike', nombre: 'Pico de geobloqueo', descripcion: 'Múltiples intentos desde un mismo país', tipo: 'geo_spike', nivel: 'critical', umbral: 20, ventana_minutos: 5, habilitado: false, notificar_email: true, notificar_webhook: true },
+    { id: 'rate_brute', nombre: 'Fuerza bruta', descripcion: 'Misma IP excede rate limit repetidamente', tipo: 'rate_spike', nivel: 'warning', umbral: 10, ventana_minutos: 5, habilitado: false, notificar_email: true, notificar_webhook: false },
+    { id: 'route_attack', nombre: 'Ruta bajo ataque', descripcion: 'Muchos bloqueos en una misma ruta', tipo: 'route_attack', nivel: 'warning', umbral: 30, ventana_minutos: 10, habilitado: false, notificar_email: true, notificar_webhook: true },
+    { id: 'traffic_anomaly', nombre: 'Anomalía de tráfico', descripcion: 'Bloqueos superan 5x el promedio', tipo: 'traffic_anomaly', nivel: 'critical', umbral: 5, ventana_minutos: 60, habilitado: false, notificar_email: true, notificar_webhook: true },
+  ]
+}
+
 export const defaultSecurityConfig: SecurityConfig = {
   geobloqueo: defaultGeobloqueoConfig,
   security_headers: defaultSecurityHeadersConfig,
   rate_limiting: defaultRateLimitingConfig,
   bot_protection: defaultBotProtectionConfig,
+  alerts: defaultAlertsConfig,
 }

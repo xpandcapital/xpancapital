@@ -58,10 +58,10 @@ export const SECURITY_TOOLS: SecurityToolDef[] = [
   {
     id: 'alerts',
     name: 'Alertas',
-    description: 'Notificaciones ante intentos de acceso bloqueados',
+    description: 'Detección de amenazas con radar, heat map y notificaciones',
     cat: 'Monitoreo',
     icon: 'Bell',
-    status: 'coming_soon',
+    status: 'active',
     configKey: 'alerts',
   },
 ]
