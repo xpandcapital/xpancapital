@@ -19,8 +19,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SECURITY_TOOLS } from './tool-index';
 import { GeobloqueoTool } from './GeobloqueoTool';
 import { SecurityHeadersTool } from './SecurityHeadersTool';
+import { RateLimitingTool } from './RateLimitingTool';
 import { PlaceholderTool } from './PlaceholderTool';
-import type { SecurityToolDef, SecurityHeadersConfig } from '../_types';
+import type { SecurityToolDef, SecurityHeadersConfig, RateLimitingConfig } from '../_types';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield,
@@ -36,10 +37,12 @@ interface Props {
   initialTool?: string;
   geobloqueoConfig?: import('../_types').GeobloqueoConfig;
   securityHeadersConfig?: import('../_types').SecurityHeadersConfig;
+  rateLimitingConfig?: import('../_types').RateLimitingConfig;
   saving?: boolean;
   onSave?: (toolId: string) => Promise<void>;
   onUpdateGeobloqueo?: (updates: Partial<import('../_types').GeobloqueoConfig>) => void;
   onUpdateSecurityHeaders?: (updates: Partial<import('../_types').SecurityHeadersConfig>) => void;
+  onUpdateRateLimiting?: (updates: Partial<import('../_types').RateLimitingConfig>) => void;
 }
 
 const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -48,7 +51,7 @@ const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   'Monitoreo': Gauge,
 };
 
-export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeadersConfig, saving, onSave, onUpdateGeobloqueo, onUpdateSecurityHeaders }: Props) {
+export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeadersConfig, rateLimitingConfig, saving, onSave, onUpdateGeobloqueo, onUpdateSecurityHeaders, onUpdateRateLimiting }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTool, setActiveTool] = useState<string>(initialTool || 'geobloqueo');
@@ -133,6 +136,15 @@ export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeaders
             saving={saving}
             onSave={() => onSave?.('security_headers')}
             onUpdate={onUpdateSecurityHeaders}
+          />
+        );
+      case 'rate_limiting':
+        return (
+          <RateLimitingTool
+            config={rateLimitingConfig}
+            saving={saving}
+            onSave={() => onSave?.('rate_limiting')}
+            onUpdate={onUpdateRateLimiting}
           />
         );
       default:

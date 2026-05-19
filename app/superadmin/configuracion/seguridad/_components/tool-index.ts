@@ -25,7 +25,7 @@ export const SECURITY_TOOLS: SecurityToolDef[] = [
     description: 'Límite de peticiones por IP para prevenir abusos',
     cat: 'Protección Web',
     icon: 'Gauge',
-    status: 'coming_soon',
+    status: 'active',
     configKey: 'rate_limiting',
   },
   {

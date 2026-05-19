@@ -68,6 +68,15 @@ export function useSecurity() {
     }, []
   )
 
+  const updateRateLimiting = useCallback(
+    (updates: Partial<NonNullable<SecurityConfig['rate_limiting']>>) => {
+      setConfig(prev => ({
+        ...prev,
+        rate_limiting: { ...prev.rate_limiting!, ...updates } as SecurityConfig['rate_limiting']
+      }))
+    }, []
+  )
+
   useEffect(() => {
     loadConfig()
   }, [loadConfig])
@@ -80,5 +89,6 @@ export function useSecurity() {
     saveConfig,
     updateGeobloqueo,
     updateSecurityHeaders,
+    updateRateLimiting,
   }
 }

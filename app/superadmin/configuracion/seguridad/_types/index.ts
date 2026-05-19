@@ -16,11 +16,25 @@ export interface SecurityHeadersConfig {
   headers: Record<string, SecurityHeaderDef>
 }
 
+export interface RateLimitRule {
+  ruta: string
+  metodo: string
+  limite: number
+  ventana_segundos: number
+  habilitado: boolean
+}
+
+export interface RateLimitingConfig {
+  habilitado: boolean
+  mensaje_limite: string
+  reglas: RateLimitRule[]
+}
+
 export interface SecurityConfig {
   geobloqueo?: GeobloqueoConfig
   security_headers?: SecurityHeadersConfig
+  rate_limiting?: RateLimitingConfig
   // Future tools:
-  // rate_limiting?: RateLimitingConfig
   // firewall?: FirewallConfig
   // access_logs?: AccessLogsConfig
 }
@@ -97,7 +111,23 @@ export const defaultSecurityHeadersConfig: SecurityHeadersConfig = {
   }
 }
 
+export const defaultRateLimitingConfig: RateLimitingConfig = {
+  habilitado: false,
+  mensaje_limite: 'Demasiadas peticiones. Intenta de nuevo en unos segundos.',
+  reglas: [
+    { ruta: '/api/leads', metodo: 'POST', limite: 10, ventana_segundos: 60, habilitado: false },
+    { ruta: '/api/leads', metodo: 'GET', limite: 60, ventana_segundos: 60, habilitado: false },
+    { ruta: '/login', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
+    { ruta: '/api/checkout', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
+    { ruta: '/api/blog/comments', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
+    { ruta: '/api/postulantes/public', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
+    { ruta: '/api/formularios/public', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
+    { ruta: '/api/chat/send', metodo: 'POST', limite: 20, ventana_segundos: 60, habilitado: false },
+  ]
+}
+
 export const defaultSecurityConfig: SecurityConfig = {
   geobloqueo: defaultGeobloqueoConfig,
   security_headers: defaultSecurityHeadersConfig,
+  rate_limiting: defaultRateLimitingConfig,
 }
