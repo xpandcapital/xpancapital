@@ -4,35 +4,42 @@ import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Shield,
+  ShieldCheck,
   Gauge,
   Wrench,
   Search,
   ChevronRight,
   ChevronDown,
   ChevronLeft,
-  Menu,
-  X,
+  Bell,
+  ScrollText,
   Dot,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SECURITY_TOOLS } from './tool-index';
 import { GeobloqueoTool } from './GeobloqueoTool';
+import { SecurityHeadersTool } from './SecurityHeadersTool';
 import { PlaceholderTool } from './PlaceholderTool';
-import type { SecurityToolDef } from '../_types';
+import type { SecurityToolDef, SecurityHeadersConfig } from '../_types';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield,
+  ShieldCheck,
   Gauge,
   Wrench,
   Search,
+  Bell,
+  ScrollText,
 };
 
 interface Props {
   initialTool?: string;
   geobloqueoConfig?: import('../_types').GeobloqueoConfig;
+  securityHeadersConfig?: import('../_types').SecurityHeadersConfig;
   saving?: boolean;
-  onSave?: () => void;
+  onSave?: (toolId: string) => Promise<void>;
   onUpdateGeobloqueo?: (updates: Partial<import('../_types').GeobloqueoConfig>) => void;
+  onUpdateSecurityHeaders?: (updates: Partial<import('../_types').SecurityHeadersConfig>) => void;
 }
 
 const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -41,7 +48,7 @@ const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   'Monitoreo': Gauge,
 };
 
-export function SidebarSecurity({ initialTool, geobloqueoConfig, saving, onSave, onUpdateGeobloqueo }: Props) {
+export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeadersConfig, saving, onSave, onUpdateGeobloqueo, onUpdateSecurityHeaders }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTool, setActiveTool] = useState<string>(initialTool || 'geobloqueo');
@@ -115,8 +122,17 @@ export function SidebarSecurity({ initialTool, geobloqueoConfig, saving, onSave,
           <GeobloqueoTool
             config={geobloqueoConfig}
             saving={saving}
-            onSave={onSave}
+            onSave={() => onSave?.('geobloqueo')}
             onUpdateGeobloqueo={onUpdateGeobloqueo}
+          />
+        );
+      case 'security_headers':
+        return (
+          <SecurityHeadersTool
+            config={securityHeadersConfig}
+            saving={saving}
+            onSave={() => onSave?.('security_headers')}
+            onUpdate={onUpdateSecurityHeaders}
           />
         );
       default:

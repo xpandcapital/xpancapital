@@ -6,8 +6,19 @@ export interface GeobloqueoConfig {
   mensaje_bloqueo: string
 }
 
+export interface SecurityHeaderDef {
+  habilitado: boolean
+  valor: string
+}
+
+export interface SecurityHeadersConfig {
+  habilitado: boolean
+  headers: Record<string, SecurityHeaderDef>
+}
+
 export interface SecurityConfig {
   geobloqueo?: GeobloqueoConfig
+  security_headers?: SecurityHeadersConfig
   // Future tools:
   // rate_limiting?: RateLimitingConfig
   // firewall?: FirewallConfig
@@ -56,6 +67,37 @@ export const defaultGeobloqueoConfig: GeobloqueoConfig = {
   mensaje_bloqueo: "Lo sentimos, este contenido no está disponible en tu región."
 }
 
+export const defaultSecurityHeadersConfig: SecurityHeadersConfig = {
+  habilitado: true,
+  headers: {
+    'content-security-policy': {
+      habilitado: true,
+      valor: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+    },
+    'strict-transport-security': {
+      habilitado: true,
+      valor: 'max-age=63072000; includeSubDomains; preload'
+    },
+    'x-frame-options': {
+      habilitado: true,
+      valor: 'DENY'
+    },
+    'x-content-type-options': {
+      habilitado: true,
+      valor: 'nosniff'
+    },
+    'referrer-policy': {
+      habilitado: true,
+      valor: 'strict-origin-when-cross-origin'
+    },
+    'permissions-policy': {
+      habilitado: false,
+      valor: 'camera=(), microphone=(), geolocation=()'
+    }
+  }
+}
+
 export const defaultSecurityConfig: SecurityConfig = {
   geobloqueo: defaultGeobloqueoConfig,
+  security_headers: defaultSecurityHeadersConfig,
 }

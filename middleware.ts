@@ -1,6 +1,7 @@
-// Middleware principal de autenticación, autorización y geobloqueo
+// Middleware principal de autenticación, autorización, geobloqueo y security headers
 import { updateSession } from '@/lib/supabase/middleware'
 import { shouldGeoBlock } from '@/lib/geoblock'
+import { getSecurityHeaders, injectHeaders } from '@/lib/security-headers'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
@@ -21,7 +22,20 @@ export async function middleware(request: NextRequest) {
   }
 
   // 2. Autenticación y autorización
-  return await updateSession(request)
+  const response = await updateSession(request)
+
+  // 3. Inyectar cabeceras de seguridad HTTP
+  try {
+    const secHeaders = await getSecurityHeaders()
+    if (secHeaders) {
+      injectHeaders(response, secHeaders)
+      if (IS_DEV) console.log('[Middleware] Security Headers inyectados')
+    }
+  } catch {
+    // Silencioso - no bloquear por fallo en headers
+  }
+
+  return response
 }
 
 export const config = {

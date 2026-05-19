@@ -1,4 +1,5 @@
 export { SidebarSecurity } from './SidebarSecurity'
 export { GeobloqueoTool } from './GeobloqueoTool'
+export { SecurityHeadersTool } from './SecurityHeadersTool'
 export { PlaceholderTool } from './PlaceholderTool'
 export { SECURITY_TOOLS } from './tool-index'

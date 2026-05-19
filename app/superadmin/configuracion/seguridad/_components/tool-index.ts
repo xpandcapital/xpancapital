@@ -11,6 +11,15 @@ export const SECURITY_TOOLS: SecurityToolDef[] = [
     configKey: 'geobloqueo',
   },
   {
+    id: 'security_headers',
+    name: 'Security Headers',
+    description: 'Cabeceras HTTP de seguridad contra XSS, clickjacking y MITM',
+    cat: 'Protección Web',
+    icon: 'ShieldCheck',
+    status: 'active',
+    configKey: 'security_headers',
+  },
+  {
     id: 'rate_limiting',
     name: 'Rate Limiting',
     description: 'Límite de peticiones por IP para prevenir abusos',

@@ -28,16 +28,14 @@ export function useSecurity() {
     }
   }, [])
 
-  const saveConfig = useCallback(async () => {
+  const saveConfig = useCallback(async (toolId: string) => {
     setSaving(true)
     try {
+      const toolConfig = (configRef.current as Record<string, unknown>)[toolId]
       const res = await fetch('/api/admin/seguridad', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          toolId: 'geobloqueo',
-          config: configRef.current.geobloqueo,
-        })
+        body: JSON.stringify({ toolId, config: toolConfig })
       })
       const data = await res.json()
       if (data.success) {
@@ -61,6 +59,15 @@ export function useSecurity() {
     }, []
   )
 
+  const updateSecurityHeaders = useCallback(
+    (updates: Partial<NonNullable<SecurityConfig['security_headers']>>) => {
+      setConfig(prev => ({
+        ...prev,
+        security_headers: { ...prev.security_headers!, ...updates } as SecurityConfig['security_headers']
+      }))
+    }, []
+  )
+
   useEffect(() => {
     loadConfig()
   }, [loadConfig])
@@ -72,5 +79,6 @@ export function useSecurity() {
     loadConfig,
     saveConfig,
     updateGeobloqueo,
+    updateSecurityHeaders,
   }
 }
