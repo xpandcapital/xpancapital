@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from 'react';
-import { Search, Shield, X, Plus, Check, Globe, AlertTriangle, Lock, Unlock } from 'lucide-react';
+import { Search, Shield, X, Check, AlertTriangle, Lock, Unlock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Flag from 'react-world-flags';
 import type { GeobloqueoConfig } from '../_types';
@@ -49,6 +49,8 @@ const PAISES: Record<string, string> = {
   VE: "Venezuela", VN: "Vietnam", YE: "Yemen", ZM: "Zambia", ZW: "Zimbabue",
 };
 
+const TOTAL_PAISES = Object.keys(PAISES).length;
+
 interface Props {
   config?: GeobloqueoConfig;
   saving?: boolean;
@@ -59,12 +61,10 @@ interface Props {
 export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: Props) {
   const geo = config || defaultGeobloqueoConfig;
   const [search, setSearch] = useState('');
-  const [showAddBlocked, setShowAddBlocked] = useState(false);
-  const [showAddAllowed, setShowAddAllowed] = useState(false);
-  const [addSearch, setAddSearch] = useState('');
 
   const bloquear_lista = geo.modo === 'bloquear_lista';
   const paisesActivos = bloquear_lista ? geo.paises_bloqueados : geo.paises_permitidos;
+  const totalSeleccionados = paisesActivos.length;
 
   const togglePais = (code: string) => {
     if (!onUpdateGeobloqueo) return;
@@ -81,48 +81,25 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
     }
   };
 
-  const addPais = (code: string) => {
-    if (!onUpdateGeobloqueo) return;
-    if (bloquear_lista) {
-      if (!geo.paises_bloqueados.includes(code)) {
-        onUpdateGeobloqueo({ paises_bloqueados: [...geo.paises_bloqueados, code] });
-      }
-    } else {
-      if (!geo.paises_permitidos.includes(code)) {
-        onUpdateGeobloqueo({ paises_permitidos: [...geo.paises_permitidos, code] });
-      }
-    }
-    setAddSearch('');
-    setShowAddBlocked(false);
-    setShowAddAllowed(false);
-  };
+  const sortedPaises = useMemo(() => {
+    const selectedSet = new Set(paisesActivos);
+    const q = search.toLowerCase().trim();
 
-  const filteredPaises = useMemo(() => {
-    const lista = bloquear_lista ? geo.paises_bloqueados : geo.paises_permitidos;
-    if (!search) return lista;
-    const q = search.toLowerCase();
-    return lista.filter(code =>
-      PAISES[code]?.toLowerCase().includes(q) || code.toLowerCase().includes(q)
-    );
-  }, [search, geo.paises_bloqueados, geo.paises_permitidos, bloquear_lista]);
-
-  const addFiltered = useMemo(() => {
-    if (!addSearch) return [];
-    const q = addSearch.toLowerCase();
-    const yaEnLista = bloquear_lista
-      ? new Set(geo.paises_bloqueados)
-      : new Set(geo.paises_permitidos);
     return Object.entries(PAISES)
-      .filter(([code, name]) =>
-        !yaEnLista.has(code) &&
-        (name.toLowerCase().includes(q) || code.toLowerCase().includes(q))
-      )
-      .slice(0, 20);
-  }, [addSearch, geo.paises_bloqueados, geo.paises_permitidos, bloquear_lista]);
+      .filter(([, name]) => {
+        if (!q) return true;
+        return name.toLowerCase().includes(q);
+      })
+      .sort((a, b) => {
+        const aSel = selectedSet.has(a[0]);
+        const bSel = selectedSet.has(b[0]);
+        if (aSel && !bSel) return -1;
+        if (!aSel && bSel) return 1;
+        return a[1].localeCompare(b[1]);
+      });
+  }, [search, paisesActivos]);
 
-  const totalPaises = bloquear_lista
-    ? geo.paises_bloqueados.length
-    : geo.paises_permitidos.length;
+  const visibleCount = sortedPaises.length;
 
   return (
     <div className="bg-zinc-950 rounded-xl border border-white/5">
@@ -179,15 +156,15 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
           </div>
           <span className="text-[10px] text-gray-600 ml-2">
             {bloquear_lista
-              ? 'Bloquea países específicos, permite el resto'
-              : 'Solo permite países específicos, bloquea el resto'}
+              ? 'Bloquea los seleccionados, permite el resto'
+              : 'Solo permite los seleccionados, bloquea el resto'}
           </span>
         </div>
       </div>
 
       {/* Content */}
       {geo.habilitado && (
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-4">
           {/* Stats y búsqueda */}
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2 bg-zinc-900 rounded-lg px-3 py-1.5">
@@ -197,7 +174,7 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
                 <Check className="w-3.5 h-3.5 text-green-400" />
               )}
               <span className="text-xs text-gray-300">
-                {bloquear_lista ? `${totalPaises} países bloqueados` : `${totalPaises} países permitidos`}
+                {totalSeleccionados} / {TOTAL_PAISES} países{bloquear_lista ? ' bloqueados' : ' permitidos'}
               </span>
             </div>
             <div className="relative flex-1 max-w-xs">
@@ -221,97 +198,44 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
           </div>
 
           {/* Grid de países */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[400px] overflow-y-auto pr-1">
-            {filteredPaises.map(code => (
-              <div
-                key={code}
-                className={`flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${
-                  paisesActivos.includes(code)
-                    ? 'bg-blis-red/5 border-blis-red/20 text-white'
-                    : 'bg-zinc-900 border-white/5 text-gray-500'
-                }`}
-              >
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <div className="w-7 h-5 rounded-sm overflow-hidden shrink-0 flex items-center justify-center bg-zinc-800/50">
-                    <Flag code={code} height="20" />
-                  </div>
-                  <span className="text-xs truncate">{PAISES[code] || code}</span>
-                  <span className="text-[10px] text-gray-500 shrink-0 ml-auto">{code}</span>
-                </div>
-                <button
-                  onClick={() => togglePais(code)}
-                  className={`w-8 h-5 rounded-full transition-colors relative shrink-0 ${
-                    paisesActivos.includes(code) ? 'bg-blis-red' : 'bg-zinc-700'
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 max-h-[420px] overflow-y-auto pr-1">
+            {sortedPaises.map(([code, name]) => {
+              const isActive = paisesActivos.includes(code);
+              return (
+                <div
+                  key={code}
+                  className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-blis-red/5 border-blis-red/20 text-white'
+                      : 'bg-zinc-900 border-white/5 text-gray-500 hover:bg-zinc-800/50'
                   }`}
+                  onClick={() => togglePais(code)}
                 >
-                  <motion.div
-                    animate={{ x: paisesActivos.includes(code) ? 14 : 2 }}
-                    className="w-4 h-4 bg-white rounded-full absolute top-0.5 shadow-md"
-                  />
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {filteredPaises.length === 0 && (
-            <div className="text-center py-8 text-gray-500 text-xs">
-              No se encontraron países con &quot;{search}&quot;
-            </div>
-          )}
-
-          {/* Agregar país */}
-          {bloquear_lista && (
-            <div className="border-t border-white/5 pt-4">
-              {!showAddBlocked ? (
-                <button
-                  onClick={() => setShowAddBlocked(true)}
-                  className="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Agregar país a la lista de bloqueo
-                </button>
-              ) : (
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Globe className="w-4 h-4 text-gray-400" />
-                    <span className="text-xs text-gray-300">Agregar país a bloqueados</span>
-                    <button
-                      onClick={() => { setShowAddBlocked(false); setAddSearch(''); }}
-                      className="ml-auto text-gray-500 hover:text-white"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className="w-6 h-4 rounded-sm overflow-hidden shrink-0 flex items-center justify-center bg-zinc-800/50">
+                      <Flag code={code} height="16" />
+                    </div>
+                    <span className="text-[11px] truncate">{name}</span>
+                    <span className="text-[10px] text-gray-600 shrink-0">{code}</span>
                   </div>
-                  <div className="relative mb-2">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
-                    <input
-                      type="text"
-                      placeholder="Escribe el nombre del país..."
-                      value={addSearch}
-                      onChange={(e) => setAddSearch(e.target.value)}
-                      className="w-full bg-zinc-900 rounded-lg pl-9 pr-3 py-2 text-xs text-white placeholder-gray-500 outline-none border border-white/5 focus:border-blis-red/30"
-                      autoFocus
+                  <div
+                    className={`w-7 h-4 rounded-full transition-colors relative shrink-0 ml-1 ${
+                      isActive ? 'bg-blis-red' : 'bg-zinc-700'
+                    }`}
+                  >
+                    <motion.div
+                      animate={{ x: isActive ? 12 : 1 }}
+                      className="w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 shadow-md"
                     />
                   </div>
-                  {addFiltered.length > 0 && (
-                    <div className="max-h-40 overflow-y-auto space-y-0.5">
-                      {addFiltered.map(([code, name]) => (
-                        <button
-                          key={code}
-                          onClick={() => addPais(code)}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-gray-300 hover:bg-blis-red/10 hover:text-white transition-colors text-left"
-                        >
-                          <div className="w-7 h-5 rounded-sm overflow-hidden shrink-0 flex items-center justify-center bg-zinc-800/50">
-                            <Flag code={code} height="20" />
-                          </div>
-                          <span>{name}</span>
-                          <span className="text-[10px] text-gray-600 ml-auto">{code}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              )}
+              );
+            })}
+          </div>
+
+          {visibleCount === 0 && (
+            <div className="text-center py-8 text-gray-500 text-xs">
+              No se encontraron países con &quot;{search}&quot;
             </div>
           )}
 
@@ -351,4 +275,3 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
     </div>
   );
 }
-

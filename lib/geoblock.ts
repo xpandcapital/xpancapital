@@ -6,7 +6,7 @@
  *
  * Política:
  * 1. Si GEOBLOCK_ENABLED=false → permitir todo
- * 2. Lee configuración de BD (site_config.security_config.geobloqueo) con caché 5s
+ * 2. Lee configuración de BD (site_config.security_config.geobloqueo) con caché 30s
  * 3. Si config BD habilitada → usar listas de BD
  * 4. Si no hay config BD → fallback a listas hardcodeadas
  */
@@ -32,7 +32,7 @@ function log(msg: string, ...args: unknown[]) {
 // ============================================================================
 let cachedDBConfig: GeobloqueoDBConfig | null = null
 let cacheTimestamp = 0
-const CACHE_TTL = 5 * 1000
+const CACHE_TTL = 30 * 1000
 
 // ============================================================================
 // Tipos
