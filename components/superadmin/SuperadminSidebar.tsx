@@ -149,6 +149,7 @@ const ALL_SECTIONS: Section[] = [
                     { icon: ShoppingCart, label: "Comercio", href: "/superadmin/ajustes/comercio", permission: "ajustes:ver" },
                     { icon: Shield, label: "Roles y Niveles", href: "/superadmin/ajustes/roles", permission: "roles:ver" },
                     { icon: Building2, label: "Empresas", href: "/superadmin/ajustes/empresas", permission: "empresas:ver" },
+                    { icon: Shield, label: "Seguridad", href: "/superadmin/configuracion/seguridad", permission: "configuracion:ver" },
                 ]
             },
             { icon: UserCircle, label: "Mi Perfil", href: "/superadmin/perfil", permission: "perfil:ver" },

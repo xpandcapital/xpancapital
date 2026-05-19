@@ -1,9 +1,19 @@
-// Middleware principal de autenticación y autorización
-// Delega la lógica de sesión a @supabase/ssr y redirige según rol
+// Middleware principal de autenticación, autorización y geobloqueo
 import { updateSession } from '@/lib/supabase/middleware'
-import type { NextRequest } from 'next/server'
+import { shouldGeoBlock } from '@/lib/geoblock'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // 1. Geobloqueo: verificar antes de cualquier otra lógica
+  const geoResult = await shouldGeoBlock(request)
+  if (geoResult.blocked) {
+    return new NextResponse('Acceso denegado desde tu ubicación', {
+      status: 403,
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    })
+  }
+
+  // 2. Autenticación y autorización
   return await updateSession(request)
 }
 
