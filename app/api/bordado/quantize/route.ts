@@ -8,13 +8,33 @@ function colorDistance(a: number[], b: number[]): number {
   return Math.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2 + (a[2]-b[2])**2)
 }
 
+// K-Means++ inicialización: elige centroides lejanos para evitar promedios sucios
+function kMeansInit(pixels: number[][], k: number): number[][] {
+  if (pixels.length === 0) return []
+  const centroids: number[][] = [[...pixels[Math.floor(Math.random() * pixels.length)]]]
+  for (let c = 1; c < k; c++) {
+    const dists = pixels.map(p => {
+      let minDist = Infinity
+      for (const ct of centroids) {
+        const d = colorDistance(p, ct)
+        if (d < minDist) minDist = d
+      }
+      return minDist * minDist
+    })
+    const total = dists.reduce((a, b) => a + b, 0)
+    if (total === 0) { centroids.push([...pixels[c % pixels.length]]); continue }
+    let r = Math.random() * total
+    for (let i = 0; i < pixels.length; i++) {
+      r -= dists[i]
+      if (r <= 0) { centroids.push([...pixels[i]]); break }
+    }
+  }
+  return centroids
+}
+
 function kMeans(pixels: number[][], k: number, maxIter = 10): number[][] {
   if (pixels.length === 0) return []
-  const centroids: number[][] = []
-  const step = Math.max(1, Math.floor(pixels.length / k))
-  for (let i = 0; i < k; i++) {
-    centroids.push([...pixels[Math.min(i * step, pixels.length - 1)]])
-  }
+  const centroids = kMeansInit(pixels, k)
   for (let iter = 0; iter < maxIter; iter++) {
     const clusters: number[][][] = Array.from({ length: k }, () => [])
     for (const pixel of pixels) {
@@ -43,7 +63,7 @@ async function createColorMask(
   sourceBuffer: Buffer,
   targetR: number, targetG: number, targetB: number,
   tolerance: number
-): Promise<{ buffer: Buffer; fillRatio: number }> {
+): Promise<{ buffer: Buffer; fillRatio: number; borderRatio: number }> {
   const { data, info } = await sharp(sourceBuffer)
     .resize(1024, 1024, { fit: 'inside', withoutEnlargement: true, kernel: 'lanczos3' })
     .ensureAlpha()
@@ -53,6 +73,7 @@ async function createColorMask(
   const total = info.width * info.height
   const maskData = Buffer.alloc(total * 4)
   let objectPixels = 0
+  let borderPixels = 0, borderObject = 0
 
   for (let i = 0; i < data.length; i += info.channels) {
     const r = data[i], g = data[i + 1], b = data[i + 2]
@@ -66,10 +87,17 @@ async function createColorMask(
     maskData[pixelIndex + 2] = v
     maskData[pixelIndex + 3] = 255
     if (isColor) objectPixels++
+
+    const px = (i / info.channels) % info.width
+    const py = Math.floor((i / info.channels) / info.width)
+    if (px === 0 || px === info.width - 1 || py === 0 || py === info.height - 1) {
+      borderPixels++
+      if (isColor) borderObject++
+    }
   }
 
   const buf = await sharp(maskData, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer()
-  return { buffer: buf, fillRatio: objectPixels / total }
+  return { buffer: buf, fillRatio: objectPixels / total, borderRatio: borderPixels > 0 ? borderObject / borderPixels : 0 }
 }
 
 export async function POST(request: NextRequest) {
@@ -95,7 +123,7 @@ export async function POST(request: NextRequest) {
     if (isIlustracion) {
       buffer = Buffer.from(await sharp(buffer)
         .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
-        .median(5).blur(2).toBuffer())
+        .median(3).blur(1).toBuffer())
     }
 
     // Leer píxeles
@@ -206,7 +234,7 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < results.length; i++) {
       const r = results[i]
       if (r.status !== 'fulfilled') continue
-      const { buffer: maskBuf, fillRatio } = r.value
+      const { buffer: maskBuf, fillRatio, borderRatio } = r.value
       const rgb = colorRGBs[i]
       const hex = `#${rgb.r.toString(16).padStart(2,'0')}${rgb.g.toString(16).padStart(2,'0')}${rgb.b.toString(16).padStart(2,'0')}`
 
@@ -214,6 +242,7 @@ export async function POST(request: NextRequest) {
       const minFill = isIlustracion ? 0.005 : 0.03
       if (fillRatio > maxFill) { discarded.push(`${hex}: fondo (${(fillRatio*100).toFixed(0)}%)`); continue }
       if (fillRatio < minFill) { discarded.push(`${hex}: ruido (${(fillRatio*100).toFixed(1)}%)`); continue }
+      if (borderRatio > 0.80) { discarded.push(`${hex}: borde (${(borderRatio*100).toFixed(0)}%)`); continue }
       if (hex === bgHex) { discarded.push(`${hex}: color de fondo`); continue }
 
       colors.push(hex)
