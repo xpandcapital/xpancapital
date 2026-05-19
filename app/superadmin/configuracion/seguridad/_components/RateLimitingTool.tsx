@@ -2,23 +2,24 @@
 
 import { useState } from 'react';
 import {
-  Gauge, Plus, Trash2, Edit3, Check, X, Zap, Clock, Route, Timer, ArrowUpDown
+  Gauge, Plus, Trash2, X, Zap, Route, Timer, ArrowUpDown,
+  ShieldAlert, ChevronDown, ChevronUp, AlertTriangle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { RateLimitingConfig, RateLimitRule } from '../_types';
 import { defaultRateLimitingConfig } from '../_types';
 
 const RUTAS_SUGERIDAS = [
-  { ruta: '/api/leads', metodo: 'POST', desc: 'Formularios de leads' },
-  { ruta: '/api/leads', metodo: 'GET', desc: 'Lectura de leads' },
-  { ruta: '/login', metodo: 'POST', desc: 'Inicio de sesión' },
-  { ruta: '/api/checkout', metodo: 'POST', desc: 'Checkout de compras' },
-  { ruta: '/api/blog/comments', metodo: 'POST', desc: 'Comentarios del blog' },
-  { ruta: '/api/postulantes/public', metodo: 'POST', desc: 'Postulaciones públicas' },
-  { ruta: '/api/formularios/public', metodo: 'POST', desc: 'Formularios públicos' },
-  { ruta: '/api/chat/send', metodo: 'POST', desc: 'Mensajes del chat' },
-  { ruta: '/api/cursos', metodo: 'GET', desc: 'Lectura de cursos' },
-  { ruta: '/api/productos', metodo: 'GET', desc: 'Lectura de productos' },
+  { ruta: '/api/leads', metodo: 'POST', descripcion: 'Formularios de leads', protege_contra: 'Spam masivo de leads falsos' },
+  { ruta: '/api/leads', metodo: 'GET', descripcion: 'Lectura de leads', protege_contra: 'Scraping de datos por bots' },
+  { ruta: '/login', metodo: 'POST', descripcion: 'Inicio de sesión', protege_contra: 'Ataques de fuerza bruta' },
+  { ruta: '/api/checkout', metodo: 'POST', descripcion: 'Checkout de pagos', protege_contra: 'Fraude con tarjetas robadas' },
+  { ruta: '/api/blog/comments', metodo: 'POST', descripcion: 'Comentarios del blog', protege_contra: 'Spam con links maliciosos' },
+  { ruta: '/api/postulantes/public', metodo: 'POST', descripcion: 'Postulaciones', protege_contra: 'CVs basura automatizados' },
+  { ruta: '/api/formularios/public', metodo: 'POST', descripcion: 'Formularios públicos', protege_contra: 'Relleno con datos falsos' },
+  { ruta: '/api/chat/send', metodo: 'POST', descripcion: 'Chat en vivo', protege_contra: 'Inundación con spam' },
+  { ruta: '/api/cursos', metodo: 'GET', descripcion: 'Lectura de cursos', protege_contra: 'Scraping de contenido educativo' },
+  { ruta: '/api/productos', metodo: 'GET', descripcion: 'Lectura de productos', protege_contra: 'Scraping de catálogo y precios' },
 ]
 
 const METODOS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
@@ -33,13 +34,21 @@ interface Props {
 export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
   const rl = config || defaultRateLimitingConfig
   const [showNewRule, setShowNewRule] = useState(false)
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null)
   const [newRuta, setNewRuta] = useState('')
   const [newMetodo, setNewMetodo] = useState('POST')
   const [newLimite, setNewLimite] = useState(10)
   const [newVentana, setNewVentana] = useState(60)
+  const [newDescripcion, setNewDescripcion] = useState('')
+  const [newProtege, setNewProtege] = useState('')
 
   const reglasActivas = rl.reglas.filter(r => r.habilitado).length
   const totalReglas = rl.reglas.length
+
+  const activarTodas = () => {
+    if (!onUpdate) return
+    onUpdate({ reglas: rl.reglas.map(r => ({ ...r, habilitado: true })) })
+  }
 
   const addRule = () => {
     if (!newRuta.trim() || !onUpdate) return
@@ -51,11 +60,15 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
           metodo: newMetodo,
           limite: newLimite,
           ventana_segundos: newVentana,
-          habilitado: true
+          habilitado: true,
+          descripcion: newDescripcion,
+          protege_contra: newProtege,
         }
       ]
     })
     setNewRuta('')
+    setNewDescripcion('')
+    setNewProtege('')
     setShowNewRule(false)
   }
 
@@ -68,6 +81,7 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
 
   const removeRule = (index: number) => {
     if (!onUpdate) return
+    if (expandedIndex === index) setExpandedIndex(null)
     onUpdate({ reglas: rl.reglas.filter((_, i) => i !== index) })
   }
 
@@ -78,7 +92,15 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
     onUpdate({
       reglas: [
         ...rl.reglas,
-        { ruta: sug.ruta, metodo: sug.metodo, limite: 10, ventana_segundos: 60, habilitado: true }
+        {
+          ruta: sug.ruta,
+          metodo: sug.metodo,
+          limite: 10,
+          ventana_segundos: 60,
+          habilitado: true,
+          descripcion: sug.descripcion,
+          protege_contra: sug.protege_contra,
+        }
       ]
     })
   }
@@ -114,9 +136,11 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 bg-zinc-900 rounded-lg px-3 py-1.5">
-            <Route className="w-3.5 h-3.5 text-blue-400" />
-            <span className="text-xs text-gray-300">
+          <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${
+            reglasActivas === 0 ? 'bg-red-500/10 border border-red-500/20' : 'bg-zinc-900'
+          }`}>
+            <Route className={`w-3.5 h-3.5 ${reglasActivas === 0 ? 'text-red-400' : 'text-blue-400'}`} />
+            <span className={`text-xs ${reglasActivas === 0 ? 'text-red-400' : 'text-gray-300'}`}>
               {reglasActivas} / {totalReglas} reglas activas
             </span>
           </div>
@@ -127,79 +151,156 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
             <Plus className="w-3.5 h-3.5" />
             Nueva regla
           </button>
+          {totalReglas > 0 && reglasActivas < totalReglas && (
+            <button
+              onClick={activarTodas}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-xs font-medium hover:bg-blue-500/20 transition-colors"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              Activar todas
+            </button>
+          )}
         </div>
       </div>
 
       {rl.habilitado && (
         <div className="p-6 space-y-4">
-          {/* Reglas activas */}
-          <div className="space-y-1.5">
-            {rl.reglas.length === 0 && (
-              <div className="text-center py-8 text-gray-500 text-xs">
-                No hay reglas configuradas. Agrega una nueva o selecciona una de las sugeridas.
+          {/* Warning banner */}
+          {reglasActivas === 0 && totalReglas > 0 && (
+            <div className="flex items-start gap-3 bg-red-500/5 border border-red-500/20 rounded-xl px-4 py-3">
+              <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-red-400">No hay reglas activas</p>
+                <p className="text-xs text-red-400/70 mt-0.5">
+                  Tus rutas no están protegidas contra abusos. Activa reglas individuales o usa <button onClick={activarTodas} className="underline hover:text-red-300">Activar todas</button>.
+                </p>
               </div>
-            )}
+            </div>
+          )}
 
-            {rl.reglas.map((regla, i) => (
-              <motion.div
-                key={`${regla.ruta}-${regla.metodo}-${i}`}
-                layout
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-colors ${
-                  regla.habilitado ? 'bg-blue-500/3 border-blue-500/10' : 'bg-zinc-900 border-white/5 opacity-60'
-                }`}
-              >
-                {/* Método badge */}
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 ${
-                  regla.metodo === 'POST' ? 'bg-green-500/20 text-green-400' :
-                  regla.metodo === 'GET' ? 'bg-blue-500/20 text-blue-400' :
-                  regla.metodo === 'PUT' ? 'bg-amber-500/20 text-amber-400' :
-                  regla.metodo === 'DELETE' ? 'bg-red-500/20 text-red-400' :
-                  'bg-zinc-700 text-gray-400'
-                }`}>
-                  {regla.metodo}
-                </span>
+          {totalReglas === 0 && (
+            <div className="flex items-start gap-3 bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
+              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-amber-400">Sin reglas configuradas</p>
+                <p className="text-xs text-amber-400/70 mt-0.5">
+                  Agrega una nueva regla o selecciona una de las rutas sugeridas abajo.
+                </p>
+              </div>
+            </div>
+          )}
 
-                {/* Ruta */}
-                <code className="text-xs text-gray-300 font-mono flex-1 min-w-0 truncate">
-                  {regla.ruta}
-                </code>
-
-                {/* Límite */}
-                <div className="flex items-center gap-1 text-[10px] text-gray-500 shrink-0">
-                  <ArrowUpDown className="w-3 h-3" />
-                  <span className="text-white font-bold">{regla.limite}</span>
-                  <span>req</span>
-                </div>
-
-                {/* Ventana */}
-                <div className="flex items-center gap-1 text-[10px] text-gray-500 shrink-0">
-                  <Timer className="w-3 h-3" />
-                  <span className="text-white font-bold">{regla.ventana_segundos}</span>
-                  <span>s</span>
-                </div>
-
-                {/* Toggle */}
-                <button
-                  onClick={() => updateRule(i, { habilitado: !regla.habilitado })}
-                  className={`w-8 h-4 rounded-full transition-colors relative shrink-0 ${
-                    regla.habilitado ? 'bg-blue-500' : 'bg-zinc-700'
+          {/* Reglas */}
+          <div className="space-y-1.5">
+            {rl.reglas.map((regla, i) => {
+              const isExpanded = expandedIndex === i
+              return (
+                <motion.div
+                  key={`${regla.ruta}-${regla.metodo}-${i}`}
+                  layout
+                  className={`rounded-lg border transition-colors ${
+                    regla.habilitado ? 'bg-blue-500/3 border-blue-500/10' : 'bg-zinc-900 border-white/5 opacity-60'
                   }`}
                 >
-                  <motion.div
-                    animate={{ x: regla.habilitado ? 14 : 1 }}
-                    className="w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 shadow-md"
-                  />
-                </button>
+                  {/* Header row */}
+                  <div
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none"
+                    onClick={() => setExpandedIndex(isExpanded ? null : i)}
+                  >
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 ${
+                      regla.metodo === 'POST' ? 'bg-green-500/20 text-green-400' :
+                      regla.metodo === 'GET' ? 'bg-blue-500/20 text-blue-400' :
+                      regla.metodo === 'PUT' ? 'bg-amber-500/20 text-amber-400' :
+                      regla.metodo === 'DELETE' ? 'bg-red-500/20 text-red-400' :
+                      'bg-zinc-700 text-gray-400'
+                    }`}>
+                      {regla.metodo}
+                    </span>
 
-                {/* Delete */}
-                <button
-                  onClick={() => removeRule(i)}
-                  className="text-gray-600 hover:text-red-400 transition-colors shrink-0"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </motion.div>
-            ))}
+                    <code className="text-xs text-gray-300 font-mono flex-1 min-w-0 truncate">
+                      {regla.ruta}
+                    </code>
+
+                    <div className="flex items-center gap-1 text-[10px] text-gray-500 shrink-0">
+                      <ArrowUpDown className="w-3 h-3" />
+                      <span className="text-white font-bold">{regla.limite}</span>
+                      <span>req</span>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-[10px] text-gray-500 shrink-0">
+                      <Timer className="w-3 h-3" />
+                      <span className="text-white font-bold">{regla.ventana_segundos}</span>
+                      <span>s</span>
+                    </div>
+
+                    <button
+                      onClick={(e) => { e.stopPropagation(); updateRule(i, { habilitado: !regla.habilitado }) }}
+                      className={`w-8 h-4 rounded-full transition-colors relative shrink-0 ${
+                        regla.habilitado ? 'bg-blue-500' : 'bg-zinc-700'
+                      }`}
+                    >
+                      <motion.div
+                        animate={{ x: regla.habilitado ? 14 : 1 }}
+                        className="w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 shadow-md"
+                      />
+                    </button>
+
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeRule(i) }}
+                      className="text-gray-600 hover:text-red-400 transition-colors shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+
+                    <div className="text-gray-600 shrink-0">
+                      {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </div>
+                  </div>
+
+                  {/* Expanded description */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 pb-4 border-t border-white/5 pt-3 mx-4">
+                          <div className="grid grid-cols-2 gap-3">
+                            {regla.descripcion ? (
+                              <div className="bg-zinc-900 rounded-lg p-3">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase">Descripción</span>
+                                <p className="text-[11px] text-gray-300 mt-1">{regla.descripcion}</p>
+                              </div>
+                            ) : (
+                              <div className="bg-zinc-900 rounded-lg p-3">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase">Descripción</span>
+                                <p className="text-[11px] text-gray-600 mt-1 italic">Sin descripción</p>
+                              </div>
+                            )}
+                            {regla.protege_contra ? (
+                              <div className="bg-zinc-900 rounded-lg p-3">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <ShieldAlert className="w-3 h-3 text-amber-400" />
+                                  <span className="text-[10px] font-bold text-gray-500 uppercase">Protege contra</span>
+                                </div>
+                                <p className="text-[11px] text-amber-400/80">{regla.protege_contra}</p>
+                              </div>
+                            ) : (
+                              <div className="bg-zinc-900 rounded-lg p-3">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase">Protege contra</span>
+                                <p className="text-[11px] text-gray-600 mt-1 italic">Sin especificar</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )
+            })}
           </div>
 
           {/* Form nueva regla */}
@@ -260,6 +361,26 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
                         min={1}
                         value={newVentana}
                         onChange={e => setNewVentana(parseInt(e.target.value) || 60)}
+                        className="w-full bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5 focus:border-blis-red/30"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-[10px] text-gray-500 mb-1">Descripción</label>
+                      <input
+                        type="text"
+                        value={newDescripcion}
+                        onChange={e => setNewDescripcion(e.target.value)}
+                        placeholder="Ej: Formularios de captación de leads"
+                        className="w-full bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5 focus:border-blis-red/30"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-[10px] text-gray-500 mb-1">Protege contra</label>
+                      <input
+                        type="text"
+                        value={newProtege}
+                        onChange={e => setNewProtege(e.target.value)}
+                        placeholder="Ej: Spam masivo de leads falsos"
                         className="w-full bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5 focus:border-blis-red/30"
                       />
                     </div>

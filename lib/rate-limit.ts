@@ -25,6 +25,8 @@ export interface RateLimitRule {
   limite: number
   ventana_segundos: number
   habilitado: boolean
+  descripcion: string
+  protege_contra: string
 }
 
 export interface RateLimitingConfig {

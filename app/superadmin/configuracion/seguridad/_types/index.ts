@@ -22,6 +22,8 @@ export interface RateLimitRule {
   limite: number
   ventana_segundos: number
   habilitado: boolean
+  descripcion: string
+  protege_contra: string
 }
 
 export interface RateLimitingConfig {
@@ -115,14 +117,14 @@ export const defaultRateLimitingConfig: RateLimitingConfig = {
   habilitado: false,
   mensaje_limite: 'Demasiadas peticiones. Intenta de nuevo en unos segundos.',
   reglas: [
-    { ruta: '/api/leads', metodo: 'POST', limite: 10, ventana_segundos: 60, habilitado: false },
-    { ruta: '/api/leads', metodo: 'GET', limite: 60, ventana_segundos: 60, habilitado: false },
-    { ruta: '/login', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
-    { ruta: '/api/checkout', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
-    { ruta: '/api/blog/comments', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
-    { ruta: '/api/postulantes/public', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
-    { ruta: '/api/formularios/public', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false },
-    { ruta: '/api/chat/send', metodo: 'POST', limite: 20, ventana_segundos: 60, habilitado: false },
+    { ruta: '/api/leads', metodo: 'POST', limite: 10, ventana_segundos: 60, habilitado: false, descripcion: 'Formularios de captación de leads', protege_contra: 'Spam masivo de leads falsos que saturan a tus asesores con notificaciones' },
+    { ruta: '/api/leads', metodo: 'GET', limite: 60, ventana_segundos: 60, habilitado: false, descripcion: 'Lectura de lista de leads', protege_contra: 'Scraping masivo de datos de leads por competidores o bots' },
+    { ruta: '/login', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false, descripcion: 'Inicio de sesión al panel', protege_contra: 'Ataques de fuerza bruta probando miles de contraseñas por minuto' },
+    { ruta: '/api/checkout', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false, descripcion: 'Procesamiento de pagos', protege_contra: 'Abuso del checkout con tarjetas robadas o pruebas de fraude' },
+    { ruta: '/api/blog/comments', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false, descripcion: 'Comentarios del blog', protege_contra: 'Spam de comentarios con links maliciosos y SEO tóxico' },
+    { ruta: '/api/postulantes/public', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false, descripcion: 'Formulario de postulaciones', protege_contra: 'Envío masivo de CVs basura por bots automatizados' },
+    { ruta: '/api/formularios/public', metodo: 'POST', limite: 5, ventana_segundos: 60, habilitado: false, descripcion: 'Formularios públicos genéricos', protege_contra: 'Relleno automatizado de formularios con datos falsos' },
+    { ruta: '/api/chat/send', metodo: 'POST', limite: 20, ventana_segundos: 60, habilitado: false, descripcion: 'Chat en vivo del sitio', protege_contra: 'Inundación del chat con mensajes de spam o bots conversacionales' },
   ]
 }
 
