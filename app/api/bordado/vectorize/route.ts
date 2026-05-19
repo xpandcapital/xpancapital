@@ -18,7 +18,7 @@ function traceImage(buffer: Buffer, designType: string): Promise<string> {
   const isIlustracion = designType === 'ilustracion'
   const options = isIlustracion
     ? {
-        alphaMax: 1,
+        alphaMax: 1.5,
         turdSize: 25,
         optTolerance: 0.4,
         threshold: 128,

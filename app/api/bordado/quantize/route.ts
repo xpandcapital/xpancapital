@@ -188,6 +188,11 @@ export async function POST(request: NextRequest) {
         raw: { width: info.width, height: info.height, channels: 4 }
       }).median(3).png().toBuffer())
 
+      // Upscale 4x post-quantización (nearest-neighbor: sin colores nuevos)
+      workingBuffer = Buffer.from(await sharp(workingBuffer)
+        .resize(info.width * 4, info.height * 4, { kernel: 'nearest' })
+        .png().toBuffer())
+
     } else {
       const colorCounts = new Map<number, { r: number; g: number; b: number; count: number }>()
       for (let i = 0; i < data.length; i += info.channels) {
