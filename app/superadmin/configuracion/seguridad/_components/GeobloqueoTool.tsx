@@ -231,10 +231,12 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
                     : 'bg-zinc-900 border-white/5 text-gray-500'
                 }`}
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <Flag code={code} height="14" className="rounded-sm shrink-0" />
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <div className="w-7 h-5 rounded-sm overflow-hidden shrink-0 flex items-center justify-center bg-zinc-800/50">
+                    <Flag code={code} height="20" />
+                  </div>
                   <span className="text-xs truncate">{PAISES[code] || code}</span>
-                  <span className="text-[10px] text-gray-600">{code}</span>
+                  <span className="text-[10px] text-gray-500 shrink-0 ml-auto">{code}</span>
                 </div>
                 <button
                   onClick={() => togglePais(code)}
@@ -299,7 +301,9 @@ export function GeobloqueoTool({ config, saving, onSave, onUpdateGeobloqueo }: P
                           onClick={() => addPais(code)}
                           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-gray-300 hover:bg-blis-red/10 hover:text-white transition-colors text-left"
                         >
-                          <Flag code={code} height="14" className="rounded-sm shrink-0" />
+                          <div className="w-7 h-5 rounded-sm overflow-hidden shrink-0 flex items-center justify-center bg-zinc-800/50">
+                            <Flag code={code} height="20" />
+                          </div>
                           <span>{name}</span>
                           <span className="text-[10px] text-gray-600 ml-auto">{code}</span>
                         </button>
