@@ -14,6 +14,7 @@ export default function SeguridadPage() {
     updateGeobloqueo,
     updateSecurityHeaders,
     updateRateLimiting,
+    updateBotProtection,
   } = useSecurity();
 
   return (
@@ -22,11 +23,13 @@ export default function SeguridadPage() {
       geobloqueoConfig={config.geobloqueo}
       securityHeadersConfig={config.security_headers}
       rateLimitingConfig={config.rate_limiting}
+      botProtectionConfig={config.bot_protection}
       saving={saving}
       onSave={saveConfig}
       onUpdateGeobloqueo={updateGeobloqueo}
       onUpdateSecurityHeaders={updateSecurityHeaders}
       onUpdateRateLimiting={updateRateLimiting}
+      onUpdateBotProtection={updateBotProtection}
     />
   );
 }

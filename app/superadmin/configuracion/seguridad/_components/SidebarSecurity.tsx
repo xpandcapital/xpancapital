@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   Bell,
   ScrollText,
+  Bot,
   Dot,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,8 +22,9 @@ import { GeobloqueoTool } from './GeobloqueoTool';
 import { SecurityHeadersTool } from './SecurityHeadersTool';
 import { RateLimitingTool } from './RateLimitingTool';
 import { AccessLogsTool } from './AccessLogsTool';
+import { BotProtectionTool } from './BotProtectionTool';
 import { PlaceholderTool } from './PlaceholderTool';
-import type { SecurityToolDef, SecurityHeadersConfig, RateLimitingConfig } from '../_types';
+import type { SecurityToolDef, SecurityHeadersConfig, RateLimitingConfig, BotProtectionConfig } from '../_types';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield,
@@ -32,6 +34,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Search,
   Bell,
   ScrollText,
+  Bot,
 };
 
 interface Props {
@@ -39,11 +42,13 @@ interface Props {
   geobloqueoConfig?: import('../_types').GeobloqueoConfig;
   securityHeadersConfig?: import('../_types').SecurityHeadersConfig;
   rateLimitingConfig?: import('../_types').RateLimitingConfig;
+  botProtectionConfig?: import('../_types').BotProtectionConfig;
   saving?: boolean;
   onSave?: (toolId: string) => Promise<void>;
   onUpdateGeobloqueo?: (updates: Partial<import('../_types').GeobloqueoConfig>) => void;
   onUpdateSecurityHeaders?: (updates: Partial<import('../_types').SecurityHeadersConfig>) => void;
   onUpdateRateLimiting?: (updates: Partial<import('../_types').RateLimitingConfig>) => void;
+  onUpdateBotProtection?: (updates: Partial<import('../_types').BotProtectionConfig>) => void;
 }
 
 const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -52,7 +57,7 @@ const CAT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   'Monitoreo': Gauge,
 };
 
-export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeadersConfig, rateLimitingConfig, saving, onSave, onUpdateGeobloqueo, onUpdateSecurityHeaders, onUpdateRateLimiting }: Props) {
+export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeadersConfig, rateLimitingConfig, botProtectionConfig, saving, onSave, onUpdateGeobloqueo, onUpdateSecurityHeaders, onUpdateRateLimiting, onUpdateBotProtection }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTool, setActiveTool] = useState<string>(initialTool || 'geobloqueo');
@@ -150,6 +155,15 @@ export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeaders
         );
       case 'access_logs':
         return <AccessLogsTool />;
+      case 'bot_protection':
+        return (
+          <BotProtectionTool
+            config={botProtectionConfig}
+            saving={saving}
+            onSave={() => onSave?.('bot_protection')}
+            onUpdate={onUpdateBotProtection}
+          />
+        );
       default:
         return <PlaceholderTool toolId={activeTool} />;
     }

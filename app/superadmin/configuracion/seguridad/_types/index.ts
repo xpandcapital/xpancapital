@@ -53,10 +53,24 @@ export interface AccessLogsStats {
   top_rutas: Array<{ ruta: string; count: number }>
 }
 
+export interface BotRouteConfig {
+  ruta: string
+  descripcion: string
+  habilitado: boolean
+}
+
+export interface BotProtectionConfig {
+  habilitado: boolean
+  site_key: string
+  secret_key: string
+  rutas: BotRouteConfig[]
+}
+
 export interface SecurityConfig {
   geobloqueo?: GeobloqueoConfig
   security_headers?: SecurityHeadersConfig
   rate_limiting?: RateLimitingConfig
+  bot_protection?: BotProtectionConfig
   // Future tools:
   // firewall?: FirewallConfig
 }
@@ -148,8 +162,23 @@ export const defaultRateLimitingConfig: RateLimitingConfig = {
   ]
 }
 
+export const defaultBotProtectionConfig: BotProtectionConfig = {
+  habilitado: false,
+  site_key: '',
+  secret_key: '',
+  rutas: [
+    { ruta: '/api/leads', descripcion: 'Formulario de leads y captación', habilitado: false },
+    { ruta: '/api/blog/comments', descripcion: 'Comentarios del blog', habilitado: false },
+    { ruta: '/api/postulantes/public', descripcion: 'Postulaciones públicas', habilitado: false },
+    { ruta: '/api/formularios/public', descripcion: 'Formularios públicos', habilitado: false },
+    { ruta: '/api/chat/send', descripcion: 'Chat en vivo', habilitado: false },
+    { ruta: '/login', descripcion: 'Inicio de sesión', habilitado: false },
+  ]
+}
+
 export const defaultSecurityConfig: SecurityConfig = {
   geobloqueo: defaultGeobloqueoConfig,
   security_headers: defaultSecurityHeadersConfig,
   rate_limiting: defaultRateLimitingConfig,
+  bot_protection: defaultBotProtectionConfig,
 }

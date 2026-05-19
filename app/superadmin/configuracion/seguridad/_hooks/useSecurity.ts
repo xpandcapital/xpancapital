@@ -77,6 +77,15 @@ export function useSecurity() {
     }, []
   )
 
+  const updateBotProtection = useCallback(
+    (updates: Partial<NonNullable<SecurityConfig['bot_protection']>>) => {
+      setConfig(prev => ({
+        ...prev,
+        bot_protection: { ...prev.bot_protection!, ...updates } as SecurityConfig['bot_protection']
+      }))
+    }, []
+  )
+
   useEffect(() => {
     loadConfig()
   }, [loadConfig])
@@ -90,5 +99,6 @@ export function useSecurity() {
     updateGeobloqueo,
     updateSecurityHeaders,
     updateRateLimiting,
+    updateBotProtection,
   }
 }

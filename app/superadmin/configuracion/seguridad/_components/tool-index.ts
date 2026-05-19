@@ -47,12 +47,13 @@ export const SECURITY_TOOLS: SecurityToolDef[] = [
     configKey: 'access_logs',
   },
   {
-    id: 'alerts',
-    name: 'Alertas',
-    description: 'Notificaciones ante intentos de acceso bloqueados',
-    cat: 'Monitoreo',
-    icon: 'Bell',
-    status: 'coming_soon',
-    configKey: 'alerts',
+    id: 'bot_protection',
+    name: 'Bot Protection',
+    description: 'CAPTCHA invisible con Cloudflare Turnstile para formularios',
+    cat: 'Protección Web',
+    icon: 'Bot',
+    status: 'active',
+    configKey: 'bot_protection',
   },
+  {
 ]
