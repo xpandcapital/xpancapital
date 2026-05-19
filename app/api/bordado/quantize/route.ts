@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
 
     const posterizedBuf = await sharp(buffer)
       .ensureAlpha()
-      .png({ palette: true, colours: Math.min(colors.length || 1, 8) })
+      .png({ palette: true, colours: Math.max(2, Math.min(colors.length || 2, 8)) })
       .toBuffer()
 
     return NextResponse.json({
