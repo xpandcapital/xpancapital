@@ -19,7 +19,7 @@ function traceImage(buffer: Buffer, designType: string): Promise<string> {
   const options = isIlustracion
     ? {
         alphaMax: 1,
-        turdSize: 15,
+        turdSize: 25,
         optTolerance: 0.4,
         threshold: 128,
         blackOnWhite: true,

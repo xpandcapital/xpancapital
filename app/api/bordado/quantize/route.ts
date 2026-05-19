@@ -99,8 +99,8 @@ export async function POST(request: NextRequest) {
     if (isIlustracion) {
       const filtered = await sharp(buffer)
         .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
-        .median(3)
-        .blur(1.5)
+        .median(5)
+        .blur(2)
         .toBuffer()
       buffer = Buffer.from(filtered)
     }
@@ -147,6 +147,29 @@ export async function POST(request: NextRequest) {
         .map((c, i) => ({ r: c[0], g: c[1], b: c[2], count: counts[i] }))
         .sort((a, b) => b.count - a.count)
         .map(({ r, g, b }) => ({ r, g, b }))
+
+      // Post-K-Means despeckle: mapear píxeles a centroide + median para eliminar islas
+      const flatData = Buffer.alloc(data.length)
+      for (let i = 0; i < data.length; i += info.channels) {
+        const r = data[i], g = data[i+1], b = data[i+2]
+        const a = info.channels === 4 ? data[i+3] : 255
+        if (a < 20) { flatData[i]=0; flatData[i+1]=0; flatData[i+2]=0; flatData[i+3]=0; continue }
+        let best = 0, bestDist = Infinity
+        for (let c = 0; c < colorRGBs.length; c++) {
+          const d = colorDistance([r,g,b], [colorRGBs[c].r, colorRGBs[c].g, colorRGBs[c].b])
+          if (d < bestDist) { bestDist = d; best = c }
+        }
+        flatData[i] = colorRGBs[best].r
+        flatData[i+1] = colorRGBs[best].g
+        flatData[i+2] = colorRGBs[best].b
+        flatData[i+3] = 255
+      }
+
+      // Median filter para eliminar píxeles aislados (confeti)
+      const filtered = await sharp(flatData, { raw: { width: info.width, height: info.height, channels: 4 } })
+        .median(3)
+        .toBuffer()
+      buffer = Buffer.from(filtered)
 
     } else {
       // === MODO LOGO: binarización por bines ===
