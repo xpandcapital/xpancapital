@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { Shield, Globe, Bell, Bot, Route, ChevronRight, RefreshCw, Cpu, Eye, Satellite, Activity, Zap } from 'lucide-react';
+import { Shield, ShieldCheck, Gauge as GaugeIcon, Globe, Bell, Bot, Route, ChevronRight, RefreshCw, Cpu, Eye, Satellite, Activity, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Flag from 'react-world-flags';
 import Link from 'next/link';
@@ -75,8 +75,8 @@ export function SecurityDashboard() {
   const maxHora = data?.por_hora?.reduce((m: number, h: { count: number }) => Math.max(m, h.count), 0) || 1
   const toolCards = [
     { id: 'geobloqueo', icon: Shield, label: 'Geobloqueo', desc: 'Control de acceso por pais' },
-    { id: 'security_headers', icon: Shield, label: 'Security Headers', desc: 'Cabeceras HTTP de seguridad' },
-    { id: 'rate_limiting', icon: Gauge, label: 'Rate Limiting', desc: 'Limite de peticiones por IP' },
+    { id: 'security_headers', icon: ShieldCheck, label: 'Security Headers', desc: 'Cabeceras HTTP de seguridad' },
+    { id: 'rate_limiting', icon: GaugeIcon, label: 'Rate Limiting', desc: 'Limite de peticiones por IP' },
     { id: 'bot_protection', icon: Bot, label: 'Bot Protection', desc: 'CAPTCHA invisible Turnstile' },
     { id: 'alerts', icon: Bell, label: 'Alertas', desc: 'Deteccion de amenazas' },
   ]
