@@ -10,6 +10,8 @@ import { Calculator } from "@/components/sections/Calculator";
 import { Process } from "@/components/sections/Process";
 import { Operations } from "@/components/sections/Operations";
 import { ProjectMap } from "@/components/sections/ProjectMap";
+import { Projects } from "@/components/sections/Projects";
+import { Catalog } from "@/components/sections/Catalog";
 import { Team } from "@/components/sections/Team";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { FAQ } from "@/components/sections/FAQ";
