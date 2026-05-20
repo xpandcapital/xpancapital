@@ -18,6 +18,16 @@ import { FooterSections } from "@/components/sections/Footer";
 import { ConstructionLoader } from "@/components/ui/ConstructionLoader";
 import { SectionSkeleton } from "@/components/ui/SectionSkeleton";
 
+const DynamicProjects = dynamic(() => import("@/components/sections/Projects").then(m => ({ default: m.Projects })), {
+  loading: () => <SectionSkeleton />,
+  ssr: true,
+});
+
+const DynamicCatalog = dynamic(() => import("@/components/sections/Catalog").then(m => ({ default: m.Catalog })), {
+  loading: () => <SectionSkeleton />,
+  ssr: true,
+});
+
 import { ThankYouHero } from "@/components/sections/ThankYouHero";
 import { ThankYouNextSteps } from "@/components/sections/ThankYouNextSteps";
 import { FunnelHero } from "@/components/sections/FunnelHero";
@@ -48,7 +58,7 @@ interface SectionData {
 }
 
 const SECTION_COMPONENTS: Record<string, { 
-component: React.ComponentType<{ data?: any }>; 
+component: React.ComponentType<any>; 
   id: string; 
   className?: string;
   needsData?: boolean;
@@ -61,8 +71,8 @@ component: React.ComponentType<{ data?: any }>;
   market: { component: InteractiveData, id: "insights", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center" },
   calculator: { component: Calculator, id: "calculadora", className: "scroll-mt-36 min-h-screen md:min-h-0 flex flex-col justify-center items-center bg-black relative z-10" },
   map: { component: ProjectMap, id: "mapa", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center" },
-  projects: { component: Projects, id: "projects", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center items-center" },
-  catalog: { component: Catalog, id: "catalog", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center" },
+  projects: { component: DynamicProjects, id: "projects", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center items-center", needsData: true },
+  catalog: { component: DynamicCatalog, id: "catalog", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center", needsData: true },
   team: { component: Team, id: "equipo", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center" },
   testimonials: { component: Testimonials, id: "testimonials", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center" },
   faq: { component: FAQ, id: "faq", className: "scroll-mt-36 min-h-[70vh] md:min-h-0 flex flex-col justify-center" },
@@ -129,13 +139,19 @@ interface DynamicSectionsProps {
   sectionOrder?: string[];
   sectionVisibility?: Record<string, boolean>;
   sections?: Record<string, SectionData>;
+  initialProjects?: any[];
+  initialProducts?: any[];
+  initialCategories?: any[];
 }
 
 export function DynamicSections({ 
   templateType = "landing",
   sectionOrder: externalOrder,
   sectionVisibility: externalVisibility,
-  sections: externalSections
+  sections: externalSections,
+  initialProjects,
+  initialProducts,
+  initialCategories,
 }: DynamicSectionsProps) {
   const { loading, isSectionVisible: contextIsSectionVisible, sectionOrder: contextOrder, templateData } = useLandingCMS();
 
@@ -184,6 +200,16 @@ export function DynamicSections({
     return null;
   };
 
+  const getExtraProps = (sectionKey: string): Record<string, any> => {
+    if (sectionKey === 'projects' && initialProjects) {
+      return { initialData: initialProjects };
+    }
+    if (sectionKey === 'catalog' && initialProducts) {
+      return { initialProducts, initialCategories: initialCategories || [] };
+    }
+    return {};
+  };
+
   return (
     <>
       {sectionOrder.map((sectionKey: string) => {
@@ -198,6 +224,7 @@ export function DynamicSections({
 
         const Component = sectionConfig.component;
         const sectionData = sectionConfig.needsData ? getSectionDataFromProps(sectionKey) : null;
+        const extraProps = getExtraProps(sectionKey);
 
         return (
           <section
@@ -205,11 +232,7 @@ export function DynamicSections({
             id={sectionConfig.id}
             className={sectionConfig.className}
           >
-            {sectionConfig.needsData ? (
-              <Component data={sectionData || {}} />
-            ) : (
-              <Component />
-            )}
+            <Component data={sectionData || {}} {...extraProps} />
           </section>
         );
       })}

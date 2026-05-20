@@ -8,9 +8,11 @@ import { useProducts } from "@/lib/hooks/useProducts";
 import { useShop } from "@/context/ShopContext";
 import Link from "next/link";
 
-export function Catalog() {
+export function Catalog({ data, initialProducts, initialCategories }: { data?: any; initialProducts?: any[]; initialCategories?: any[] }) {
     const { cmsData } = useLandingCMS();
-    const { products: dbProducts, categories, loading, fetchProducts, fetchCategories } = useProducts();
+    const { products: dbProducts, categories, loading, fetchProducts, fetchCategories } = useProducts(
+      initialProducts || initialCategories ? { products: initialProducts, categories: initialCategories } : undefined
+    );
     const { coinsEnabled } = useShop();
     const [activeCategoryId, setActiveCategoryId] = useState<string>("");
     const [currentIndex, setCurrentIndex] = useState(0);
