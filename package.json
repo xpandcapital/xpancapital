@@ -46,6 +46,7 @@
     "react": "19.2.3",
     "react-barcode": "^1.6.1",
     "react-dom": "19.2.3",
+    "react-is": "^19.2.6",
     "react-markdown": "^10.1.0",
     "react-simple-maps": "^3.0.0",
     "react-world-flags": "^1.6.0",
