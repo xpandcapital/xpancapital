@@ -152,7 +152,7 @@ export const defaultSecurityHeadersConfig: SecurityHeadersConfig = {
   headers: {
     'content-security-policy': {
       habilitado: true,
-      valor: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+      valor: "default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://*.supabase.co; frame-src 'self' https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
     },
     'strict-transport-security': {
       habilitado: true,
