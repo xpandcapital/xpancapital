@@ -146,7 +146,7 @@ function LoginForm() {
         )}
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="space-y-5 bg-white/[0.03] backdrop-blur-xl p-8 rounded-2xl border border-white/[0.06] shadow-2xl">
+        <form onSubmit={handleSubmit} className="space-y-5 bg-white/[0.03] backdrop-blur-xl p-8 rounded-2xl border border-white/[0.06] shadow-2xl relative">
           {/* Decoraciones de esquina */}
           <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-blis-red/30 rounded-tl-xl" />
           <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blis-red/30 rounded-tr-xl" />
