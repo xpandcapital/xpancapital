@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { UserPlus, LogIn, Coins, ArrowRight, ShieldCheck, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +20,31 @@ export default function StoreLogin() {
     const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
     const [turnstileToken, setTurnstileToken] = useState('');
     const [turnstileSolved, setTurnstileSolved] = useState(false);
+    const turnstileContainerRef = useRef<HTMLDivElement>(null);
+
+    const renderTurnstile = () => {
+        if (!turnstileSiteKey || !turnstileContainerRef.current) return
+        const el = turnstileContainerRef.current
+        if (el.hasAttribute('data-rendered')) return
+        const check = setInterval(() => {
+            if (window.turnstile) {
+                clearInterval(check)
+                window.turnstile.render(el, {
+                    sitekey: turnstileSiteKey,
+                    theme: 'dark',
+                    language: 'es',
+                    size: 'normal',
+                    appearance: 'interaction-only',
+                    callback: (token: string) => {
+                        setTurnstileToken(token)
+                        setTurnstileSolved(true)
+                    }
+                })
+                el.setAttribute('data-rendered', '1')
+            }
+        }, 100)
+        return () => clearInterval(check)
+    }
 
     useEffect(() => {
         fetch('/api/admin/seguridad').then(r => r.json()).then(d => {
@@ -32,7 +57,10 @@ export default function StoreLogin() {
                         script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
                         script.async = true
                         script.defer = true
+                        script.onload = () => renderTurnstile()
                         document.head.appendChild(script)
+                    } else {
+                        renderTurnstile()
                     }
                 }
             }
@@ -198,17 +226,7 @@ export default function StoreLogin() {
                                 ? 'border-emerald-500/60 shadow-[0_0_16px_rgba(16,185,129,0.4)] bg-emerald-500/5'
                                 : 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)] bg-red-500/[0.02]'
                         }`}>
-                            <div className="cf-turnstile"
-                                data-sitekey={turnstileSiteKey}
-                                data-theme="dark"
-                                data-language="es"
-                                data-size="normal"
-                                data-appearance="interaction-only"
-                                data-callback={(token: string) => {
-                                    setTurnstileToken(token)
-                                    setTurnstileSolved(true)
-                                }}
-                            />
+                            <div ref={turnstileContainerRef} />
                         </div>
                     )}
 
