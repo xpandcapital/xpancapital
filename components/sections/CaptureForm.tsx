@@ -375,12 +375,27 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
               )}
 
               {turnstileSiteKey && (
-                <div className={`rounded-xl border-2 transition-all duration-500 p-3 flex justify-center ${
-                  turnstileSolved
-                    ? 'border-emerald-500/60 shadow-[0_0_16px_rgba(16,185,129,0.4)]'
-                    : 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)]'
-                }`}>
-                  <div ref={turnstileContainerRef} />
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center gap-2">
+                    {turnstileSolved ? (
+                      <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5" />
+                        ✓ Humano verificado
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-red-400 font-bold uppercase tracking-wider animate-pulse">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-400 mr-1.5" />
+                        Escaneando conexión...
+                      </span>
+                    )}
+                  </div>
+                  <div className={`rounded-xl border-2 transition-all duration-500 flex justify-center ${
+                    turnstileSolved
+                      ? 'border-emerald-500/60 shadow-[0_0_16px_rgba(16,185,129,0.4)]'
+                      : 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)]'
+                  }`}>
+                    <div ref={turnstileContainerRef} className="[&>iframe]:rounded-lg" />
+                  </div>
                 </div>
               )}
 
