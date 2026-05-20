@@ -150,8 +150,8 @@ function LoginForm() {
           {/* Decoraciones de esquina */}
           <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-blis-red/30 rounded-tl-xl" />
           <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-blis-red/30 rounded-tr-xl" />
-          <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-blis-red/30 rounded-bl-xl" />
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-blis-red/30 rounded-br-xl" />
+          <div className="absolute bottom-[-2px] left-[-2px] w-4 h-4 border-b-2 border-l-2 border-blis-red/30 rounded-bl-xl" />
+          <div className="absolute bottom-[-2px] right-[-2px] w-4 h-4 border-b-2 border-r-2 border-blis-red/30 rounded-br-xl" />
 
           {/* Email */}
           <div>
