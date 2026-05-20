@@ -5,8 +5,6 @@ import { LayoutShell } from "@/components/layout/LayoutShell";
 import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/next";
 
-export const dynamic = 'force-dynamic'
-
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const montserrat = Montserrat({

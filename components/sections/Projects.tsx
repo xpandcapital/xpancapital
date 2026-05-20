@@ -42,49 +42,12 @@ interface ProjectWithComputed extends ProjectData {
   webLink: string;
 }
 
-function formatProject(project: any): ProjectWithComputed {
-  const color = project.primary_color || "#be0b3c";
-  const startDate = project.start_date ? new Date(project.start_date) : null;
-  const endDate = project.end_date ? new Date(project.end_date) : null;
-  let duration = "";
-  if (startDate && endDate) {
-    const months = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
-    duration = `${months} meses`;
-  }
-
-  const galleryImages = project.gallery_images || [];
-
-  return {
-    ...project,
-    totalLots: 0,
-    totalArea: 0,
-    soldLots: 0,
-    details: duration || "Proyecto",
-    color: `from-[${color}]/80 to-[${color}]/40`,
-    glowColor: `${color}35`,
-    carouselImages: galleryImages.length > 0
-      ? galleryImages
-      : project.cover_image
-        ? [project.cover_image]
-        : ["/images/arkadia-1.webp"],
-    fullDescription: project.description || "Proyecto inmobiliario de alta calidad.",
-    webLink: project.website || "#",
-  };
-}
-
-export function Projects({ data, initialData }: { data?: any; initialData?: any[] }) {
+export function Projects() {
   const { cmsData } = useLandingCMS();
   const { title, subtitle, description } = cmsData.projects;
   
-  const [projects, setProjects] = useState<ProjectWithComputed[]>(() => {
-    if (initialData && initialData.length > 0) {
-      return initialData.map((project: any) => formatProject(project));
-    }
-    return [];
-  });
-  const [loading, setLoading] = useState(() => {
-    return !(initialData && initialData.length > 0);
-  });
+  const [projects, setProjects] = useState<ProjectWithComputed[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<ProjectWithComputed | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isCooldown, setIsCooldown] = useState(false);
@@ -95,6 +58,8 @@ export function Projects({ data, initialData }: { data?: any; initialData?: any[
 
     async function fetchProjects() {
       try {
+        setLoading(true);
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -110,34 +75,57 @@ export function Projects({ data, initialData }: { data?: any; initialData?: any[
 
         if (error) {
           console.error("Supabase query error:", error);
-          if (!initialData || initialData.length === 0) setProjects([]);
+          setProjects([]);
           return;
         }
 
         if (!data || data.length === 0) {
-          if (!initialData || initialData.length === 0) setProjects([]);
+          setProjects([]);
           return;
         }
 
-        const formattedProjects: ProjectWithComputed[] = data.map((project: any) => formatProject(project));
+        const formattedProjects: ProjectWithComputed[] = data.map((project: any) => {
+          const color = project.primary_color || "#be0b3c";
+          const startDate = project.start_date ? new Date(project.start_date) : null;
+          const endDate = project.end_date ? new Date(project.end_date) : null;
+          let duration = "";
+          if (startDate && endDate) {
+            const months = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+            duration = `${months} meses`;
+          }
+
+          const galleryImages = project.gallery_images || [];
+
+          return {
+            ...project,
+            totalLots: 0,
+            totalArea: 0,
+            soldLots: 0,
+            details: duration || "Proyecto",
+            color: `from-[${color}]/80 to-[${color}]/40`,
+            glowColor: `${color}35`,
+            carouselImages: galleryImages.length > 0
+              ? galleryImages
+              : project.cover_image
+                ? [project.cover_image]
+                : ["/images/arkadia-1.webp"],
+            fullDescription: project.description || "Proyecto inmobiliario de alta calidad.",
+            webLink: project.website || "#",
+          };
+        });
 
         setProjects(formattedProjects);
       } catch (err) {
         if (!isCancelled) {
           console.error("Error loading projects:", err);
+          setProjects([]);
         }
       } finally {
         if (!isCancelled) setLoading(false);
       }
     }
 
-    // Si ya tenemos initialData, solo refrescar en segundo plano
-    if (initialData && initialData.length > 0) {
-      fetchProjects();
-    } else {
-      setLoading(true);
-      fetchProjects();
-    }
+    fetchProjects();
 
     return () => {
       isCancelled = true;

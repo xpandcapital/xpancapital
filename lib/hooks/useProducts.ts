@@ -34,13 +34,10 @@ export interface Producto {
   actualizado_en: string
 }
 
-export function useProducts(initialData?: {
-  products?: Producto[]
-  categories?: ProductoCategoria[]
-}) {
-  const [products, setProducts] = useState<Producto[]>(initialData?.products || [])
-  const [categories, setCategories] = useState<ProductoCategoria[]>(initialData?.categories || [])
-  const [loading, setLoading] = useState(!initialData?.products)
+export function useProducts() {
+  const [products, setProducts] = useState<Producto[]>([])
+  const [categories, setCategories] = useState<ProductoCategoria[]>([])
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const fetchProducts = useCallback(async (filters?: {
