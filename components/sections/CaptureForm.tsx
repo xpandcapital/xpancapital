@@ -375,10 +375,10 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
               )}
 
               {turnstileSiteKey && (
-                <div className={`rounded-xl border-2 transition-all duration-500 px-1 py-1 ${
+                <div className={`rounded-xl border-2 transition-all duration-500 p-3 flex justify-center ${
                   turnstileSolved
-                    ? 'border-emerald-500/60 shadow-[0_0_16px_rgba(16,185,129,0.4)] bg-emerald-500/5'
-                    : 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)] bg-red-500/[0.02]'
+                    ? 'border-emerald-500/60 shadow-[0_0_16px_rgba(16,185,129,0.4)]'
+                    : 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)]'
                 }`}>
                   <div ref={turnstileContainerRef} />
                 </div>
