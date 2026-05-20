@@ -17,6 +17,17 @@ export default function StoreLogin() {
     const [apellido, setApellido] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
+    const [turnstileToken, setTurnstileToken] = useState('');
+
+    useEffect(() => {
+        fetch('/api/admin/seguridad').then(r => r.json()).then(d => {
+            if (d?.data?.bot_protection?.habilitado) {
+                const key = d.data.bot_protection.site_key
+                if (key) setTurnstileSiteKey(key)
+            }
+        }).catch(() => {})
+    }, [])
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -170,6 +181,12 @@ export default function StoreLogin() {
                             className="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-blis-red transition-all tracking-[0.2em]" 
                         />
                     </div>
+
+                    {turnstileSiteKey && (
+                        <div className="flex justify-center">
+                            <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-callback={(token: string) => setTurnstileToken(token)} />
+                        </div>
+                    )}
 
                     <button 
                         type="submit" 

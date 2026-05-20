@@ -11,13 +11,24 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading, loginWithEmail } = useAuth()
-  const { defaultRoute, loading: permLoading } = usePermissions()
-
+  const { setPermissions } = usePermissions()
+  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
+
+  useEffect(() => {
+    fetch('/api/admin/seguridad').then(r => r.json()).then(d => {
+      if (d?.data?.bot_protection?.habilitado) {
+        const key = d.data.bot_protection.site_key
+        if (key) setTurnstileSiteKey(key)
+      }
+    }).catch(() => {})
+  }, [])
 
   const redirectTo = searchParams.get('redirect') || null
 
@@ -145,6 +156,12 @@ function LoginForm() {
               </button>
             </div>
           </div>
+
+          {turnstileSiteKey && (
+            <div className="flex justify-center">
+              <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-callback={(token: string) => setTurnstileToken(token)} />
+            </div>
+          )}
 
           {/* Botón de login */}
           <button

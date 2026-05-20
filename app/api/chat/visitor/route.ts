@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getAuthUser } from "@/lib/supabase/api-auth";
 import { randomUUID } from "crypto";
+import { verifyTurnstileToken } from '@/lib/bot-protection';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -82,7 +83,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { nombre, email, mensaje, session_id, pagina_origen } = body;
+    const { nombre, email, mensaje, session_id, pagina_origen, cf_turnstile_response: token } = body;
 
     if (!nombre || !mensaje) {
       return NextResponse.json(
@@ -93,6 +94,14 @@ export async function POST(request: NextRequest) {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     const empresaId = "6186f014-c8c7-4027-9f08-8acf2bae3eae";
+
+    // Verificación Turnstile
+    const { data: siteConfig } = await supabaseAdmin.from('site_config').select('security_config').eq('empresa_id', empresaId).single();
+    const bp = siteConfig?.security_config?.bot_protection;
+    if (bp?.habilitado && bp?.rutas?.some((r: { ruta: string; habilitado: boolean }) => r.habilitado && r.ruta === '/api/chat/send')) {
+      const result = await verifyTurnstileToken(token, bp.secret_key);
+      if (!result.success) return NextResponse.json({ success: false, error: 'Verificación de seguridad fallida' }, { status: 400 });
+    }
 
     let salaId: string;
     let visitorSessionId = session_id;

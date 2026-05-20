@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { createNotionPage } from '@/lib/integrations/notion'
 import { logger } from '@/lib/utils/logger'
+import { verifyTurnstileToken } from '@/lib/bot-protection'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -105,7 +106,16 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const body = await request.json()
-    
+
+    // Verificación Turnstile
+    const token = body.cf_turnstile_response
+    const { data: siteConfig } = await supabase.from('site_config').select('security_config').eq('empresa_id', DEFAULT_EMPRESA_ID).single()
+    const bp = siteConfig?.security_config?.bot_protection
+    if (bp?.habilitado && bp?.rutas?.some((r: { ruta: string; habilitado: boolean }) => r.habilitado && r.ruta === '/api/leads')) {
+      const result = await verifyTurnstileToken(token, bp.secret_key)
+      if (!result.success) return NextResponse.json({ success: false, error: 'Verificación de seguridad fallida' }, { status: 400 })
+    }
+
     const { 
       nombre, 
       email, 

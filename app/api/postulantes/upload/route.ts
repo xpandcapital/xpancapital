@@ -1,5 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { verifyTurnstileToken } from '@/lib/bot-protection'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,6 +13,16 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const folder = (formData.get('folder') as string) || 'cvs'
+    const token = formData.get('cf_turnstile_response') as string | null
+
+    // Verificación Turnstile
+    const serviceSupabase = createServiceClient(supabaseUrl, supabaseServiceKey)
+    const { data: siteConfig } = await serviceSupabase.from('site_config').select('security_config').eq('empresa_id', EMPRESA_ID).single()
+    const bp = siteConfig?.security_config?.bot_protection
+    if (bp?.habilitado && bp?.rutas?.some((r: { ruta: string; habilitado: boolean }) => r.habilitado && r.ruta === '/api/postulantes/upload')) {
+      const result = await verifyTurnstileToken(token || '', bp.secret_key)
+      if (!result.success) return NextResponse.json({ error: 'Verificación de seguridad fallida' }, { status: 400 })
+    }
 
     if (!file) return NextResponse.json({ error: 'No se proporcionó archivo' }, { status: 400 })
 

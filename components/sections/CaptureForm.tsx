@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, CheckCircle, User, Mail, Phone, MapPin, MessageSquare } from "lucide-react";
+
+declare global {
+  interface Window { turnstile: { render: (el: string | HTMLElement, opts: { sitekey: string; callback: (token: string) => void }) => string; remove: (id: string) => void; reset: (id: string) => void } }
+}
 
 interface FormField {
   name: string;
@@ -36,6 +40,19 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const turnstileRef = useState<string>('')[0];
+
+  // Cargar site_key de Turnstile desde BD
+  useEffect(() => {
+    fetch('/api/admin/seguridad').then(r => r.json()).then(d => {
+      if (d?.data?.bot_protection?.habilitado) {
+        const key = d.data.bot_protection.site_key
+        if (key) setTurnstileSiteKey(key)
+      }
+    }).catch(() => {})
+  }, [])
 
   const {
     title = "Regístrate Ahora",
@@ -129,7 +146,8 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
           asesor_id,
           template_id,
           fuente: 'formulario_web',
-          datos: leadData
+          datos: leadData,
+          cf_turnstile_response: turnstileToken || undefined
         })
       });
       
@@ -316,6 +334,12 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
 
               {errors.submit && (
                 <p className="text-red-400 text-sm text-center">{errors.submit}</p>
+              )}
+
+              {turnstileSiteKey && (
+                <div className="flex justify-center">
+                  <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-callback={(token: string) => setTurnstileToken(token)} />
+                </div>
               )}
 
               <button

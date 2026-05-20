@@ -1,12 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { verifyTurnstileToken } from '@/lib/bot-protection'
 
 const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
+
+    // Verificación Turnstile
+    const serviceSupabase = createServiceClient(supabaseUrl, supabaseServiceKey)
+    const token = body.cf_turnstile_response
+    const { data: siteConfig } = await serviceSupabase.from('site_config').select('security_config').eq('empresa_id', EMPRESA_ID).single()
+    const bp = siteConfig?.security_config?.bot_protection
+    if (bp?.habilitado && bp?.rutas?.some((r: { ruta: string; habilitado: boolean }) => r.habilitado && r.ruta === '/api/postulantes/public')) {
+      const result = await verifyTurnstileToken(token, bp.secret_key)
+      if (!result.success) return NextResponse.json({ error: 'Verificación de seguridad fallida' }, { status: 400 })
+    }
+
     const { respuestas, ...fields } = body
 
     const correo = fields.correo_contacto || fields.email || ''

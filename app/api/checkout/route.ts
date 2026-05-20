@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
+import { verifyTurnstileToken } from '@/lib/bot-protection';
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 
 // Cliente admin (service role - bypass RLS) - se usa para todas las operaciones de BD
 const supabase = createClient(
@@ -121,6 +123,17 @@ async function sendWelcomeEmail(to: string, nombre: string, password: string, pr
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    // Verificación Turnstile
+    const tb = supabase;
+    const token = body.cf_turnstile_response;
+    const { data: siteConfig } = await tb.from('site_config').select('security_config').eq('empresa_id', DEFAULT_EMPRESA_ID).single();
+    const bp = siteConfig?.security_config?.bot_protection;
+    if (bp?.habilitado && bp?.rutas?.some((r: { ruta: string; habilitado: boolean }) => r.habilitado && r.ruta === '/api/checkout')) {
+      const result = await verifyTurnstileToken(token, bp.secret_key);
+      if (!result.success) return NextResponse.json({ success: false, error: 'Verificación de seguridad fallida' }, { status: 400 });
+    }
+
     const {
       empresa_id,
       user_id,
