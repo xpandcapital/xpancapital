@@ -15,6 +15,7 @@ import {
   ScrollText,
   Bot,
   Cpu,
+  Globe,
   Dot,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
