@@ -49,7 +49,17 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
     fetch('/api/admin/seguridad').then(r => r.json()).then(d => {
       if (d?.data?.bot_protection?.habilitado) {
         const key = d.data.bot_protection.site_key
-        if (key) setTurnstileSiteKey(key)
+        if (key) {
+          setTurnstileSiteKey(key)
+          // Cargar script de Turnstile si no existe
+          if (!document.querySelector('script[src*="turnstile"]')) {
+            const script = document.createElement('script')
+            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+            script.async = true
+            script.defer = true
+            document.head.appendChild(script)
+          }
+        }
       }
     }).catch(() => {})
   }, [])
