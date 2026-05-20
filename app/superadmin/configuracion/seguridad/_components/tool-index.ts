@@ -72,4 +72,20 @@ export const SECURITY_TOOLS: SecurityToolDef[] = [
     status: 'active',
     configKey: 'alerts',
   },
+  {
+    id: 'scanner',
+    name: 'AI Scanner',
+    description: 'Escáner inteligente de código, cuentas, configuración y datos',
+    cat: 'Monitoreo',
+    icon: 'Search',
+    status: 'active',
+  },
+  {
+    id: 'login_geo',
+    name: 'Login Geo',
+    description: 'Detección de inicios de sesión desde ubicaciones inusuales',
+    cat: 'Monitoreo',
+    icon: 'Globe',
+    status: 'active',
+  },
 ]

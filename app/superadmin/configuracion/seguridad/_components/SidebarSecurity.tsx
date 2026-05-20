@@ -25,6 +25,8 @@ import { RateLimitingTool } from './RateLimitingTool';
 import { AccessLogsTool } from './AccessLogsTool';
 import { BotProtectionTool } from './BotProtectionTool';
 import { AlertsTool } from './AlertsTool';
+import { ScannerTool } from './ScannerTool';
+import { LoginGeoTool } from './LoginGeoTool';
 import { SecurityDashboard } from './SecurityDashboard';
 import { PlaceholderTool } from './PlaceholderTool';
 import type { SecurityToolDef, SecurityHeadersConfig, RateLimitingConfig, BotProtectionConfig, AlertsConfig } from '../_types';
@@ -39,6 +41,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   ScrollText,
   Bot,
   Cpu,
+  Search,
+  Globe,
 };
 
 interface Props {
@@ -182,6 +186,10 @@ export function SidebarSecurity({ initialTool, geobloqueoConfig, securityHeaders
             onUpdate={onUpdateAlerts}
           />
         );
+      case 'scanner':
+        return <ScannerTool />;
+      case 'login_geo':
+        return <LoginGeoTool />;
       default:
         return <PlaceholderTool toolId={activeTool} />;
     }
