@@ -8,6 +8,8 @@ import { BlogPremium } from "@/components/sections/BlogPremium";
 import { AutoSlider } from "@/components/ui/AutoSlider";
 import { ArrowRight } from "lucide-react";
 
+export const dynamic = 'force-dynamic'
+
 const getCachedBlogPosts = unstable_cache(
   async () => {
     const { data: posts } = await supabaseAdmin

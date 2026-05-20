@@ -5,12 +5,21 @@ import { CapturePopup } from "@/components/ui/CapturePopup";
 import { SideAnchorNav } from "@/components/ui/SideAnchorNav";
 
 export default async function Home() {
-  const [template, projects, products, categories] = await Promise.all([
-    getCachedLandingTemplate(),
-    getCachedProjects(),
-    getCachedProducts(),
-    getCachedCategories(),
-  ]);
+  const template = await getCachedLandingTemplate();
+
+  let projects: any[] = [];
+  let products: any[] = [];
+  let categories: any[] = [];
+
+  try {
+    [projects, products, categories] = await Promise.all([
+      getCachedProjects(),
+      getCachedProducts(),
+      getCachedCategories(),
+    ]);
+  } catch {
+    // Si falla la precarga, los componentes harán su propia carga en el cliente
+  }
 
   return (
     <main className="bg-black text-white min-h-screen relative">
@@ -21,9 +30,9 @@ export default async function Home() {
         sectionOrder={template?.sectionOrder}
         sectionVisibility={template?.sectionVisibility}
         sections={template?.secciones}
-        initialProjects={projects || []}
-        initialProducts={products || []}
-        initialCategories={categories || []}
+        initialProjects={projects}
+        initialProducts={products}
+        initialCategories={categories}
       />
     </main>
   );
