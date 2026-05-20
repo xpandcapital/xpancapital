@@ -42,6 +42,7 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileSolved, setTurnstileSolved] = useState(false);
   const turnstileRef = useState<string>('')[0];
 
   // Cargar site_key de Turnstile desde BD
@@ -347,8 +348,22 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
               )}
 
               {turnstileSiteKey && (
-                <div className="flex justify-center">
-                  <div className="cf-turnstile" data-sitekey={turnstileSiteKey} data-callback={(token: string) => setTurnstileToken(token)} />
+                <div className={`rounded-xl border-2 transition-all duration-500 px-1 py-1 ${
+                  turnstileSolved
+                    ? 'border-emerald-500/60 shadow-[0_0_16px_rgba(16,185,129,0.4)] bg-emerald-500/5'
+                    : 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)] bg-red-500/[0.02]'
+                }`}>
+                  <div className="cf-turnstile"
+                    data-sitekey={turnstileSiteKey}
+                    data-theme="dark"
+                    data-language="es"
+                    data-size="normal"
+                    data-appearance="interaction-only"
+                    data-callback={(token: string) => {
+                      setTurnstileToken(token)
+                      setTurnstileSolved(true)
+                    }}
+                  />
                 </div>
               )}
 
