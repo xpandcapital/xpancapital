@@ -44,7 +44,7 @@ export interface AccessLogEntry {
 }
 
 export interface AccessLogsStats {
-  total_hoy: number
+  total_bloqueos: number
   paises_unicos: number
   ips_unicas: number
   pico_hora: { hora: number; count: number } | null

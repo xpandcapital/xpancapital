@@ -4,6 +4,7 @@ import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const MAX_ROWS = 5000
 
 function getSupabase() {
   return createClient(supabaseUrl, supabaseServiceKey)
@@ -17,7 +18,6 @@ export async function GET(request: NextRequest) {
     const desde = new Date()
     desde.setDate(desde.getDate() - dias)
 
-    // Ayer para tendencia
     const ayerInicio = new Date()
     ayerInicio.setDate(ayerInicio.getDate() - 1)
     ayerInicio.setHours(0, 0, 0, 0)
@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
       { data: logsRecientes },
       { data: paisData },
       { data: rutaData },
+      { data: ipData },
       { data: porHora },
       { count: alertasNoLeidas },
       { data: ultimasAlertas },
@@ -41,9 +42,10 @@ export async function GET(request: NextRequest) {
       supabase.from('security_logs').select('pais,ruta,metodo,motivo,created_at,ip')
         .eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString())
         .order('created_at', { ascending: false }).limit(1000),
-      supabase.from('security_logs').select('pais').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()),
-      supabase.from('security_logs').select('ruta').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()),
-      supabase.from('security_logs').select('created_at').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()).order('created_at', { ascending: true }),
+      supabase.from('security_logs').select('pais').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()).limit(MAX_ROWS),
+      supabase.from('security_logs').select('ruta').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()).limit(MAX_ROWS),
+      supabase.from('security_logs').select('ip').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()).limit(MAX_ROWS),
+      supabase.from('security_logs').select('created_at').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()).order('created_at', { ascending: true }).limit(MAX_ROWS),
       supabase.from('security_alerts').select('*', { count: 'exact', head: true }).eq('empresa_id', DEFAULT_EMPRESA_ID).eq('leida', false),
       supabase.from('security_alerts').select('*').eq('empresa_id', DEFAULT_EMPRESA_ID).order('created_at', { ascending: false }).limit(5),
       supabase.from('site_config').select('security_config').eq('empresa_id', DEFAULT_EMPRESA_ID).single(),
@@ -53,24 +55,21 @@ export async function GET(request: NextRequest) {
         .eq('empresa_id', DEFAULT_EMPRESA_ID).eq('motivo', 'rate_limit').gte('created_at', desde.toISOString()),
     ])
 
-    // Países únicos
     const paisesUnicos = new Set((paisData || []).map(p => p.pais))
 
-    // Top países
     const paisCounts: Record<string, number> = {}
-    for (const p of (paisData || [])) {
-      paisCounts[p.pais] = (paisCounts[p.pais] || 0) + 1
-    }
+    for (const p of (paisData || [])) paisCounts[p.pais] = (paisCounts[p.pais] || 0) + 1
     const topPaises = Object.entries(paisCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([pais, count]) => ({ pais, count }))
 
-    // Top rutas
     const rutaCounts: Record<string, number> = {}
-    for (const r of (rutaData || [])) {
-      rutaCounts[r.ruta] = (rutaCounts[r.ruta] || 0) + 1
-    }
+    for (const r of (rutaData || [])) rutaCounts[r.ruta] = (rutaCounts[r.ruta] || 0) + 1
     const topRutas = Object.entries(rutaCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([ruta, count]) => ({ ruta, count }))
 
-    // Por hora
+    // Top IPs sobre todo el dataset del período (no solo 1000)
+    const ipCounts: Record<string, number> = {}
+    for (const l of (ipData || [])) { if (l.ip) ipCounts[l.ip] = (ipCounts[l.ip] || 0) + 1 }
+    const topIps = Object.entries(ipCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([ip, count]) => ({ ip, count }))
+
     const horaCounts: Record<string, number> = {}
     for (const l of (porHora || [])) {
       const h = new Date(l.created_at).getHours()
@@ -78,10 +77,6 @@ export async function GET(request: NextRequest) {
     }
     const barrasPorHora = Array.from({ length: 24 }, (_, h) => ({ hora: `${h}h`, count: horaCounts[`${h}h`] || 0 }))
 
-    // Últimos 5 logs
-    const ultimosLogs = (logsRecientes || []).slice(0, 10)
-
-    // Herramientas activas
     const sc = siteConfigData?.security_config
     const herramientas = {
       geobloqueo: sc?.geobloqueo?.habilitado === true,
@@ -91,19 +86,10 @@ export async function GET(request: NextRequest) {
       alerts: sc?.alerts?.habilitado === true,
     }
 
-    // Top IPs
-    const ipCounts: Record<string, number> = {}
-    for (const l of (logsRecientes || [])) {
-      if (l.ip) ipCounts[l.ip] = (ipCounts[l.ip] || 0) + 1
-    }
-    const topIps = Object.entries(ipCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([ip, count]) => ({ ip, count }))
-
-    // Rate limiting stats
     const rlConfig = sc?.rate_limiting
     const rlActivas = rlConfig?.reglas?.filter((r: { habilitado: boolean }) => r.habilitado).length || 0
     const rlTotal = rlConfig?.reglas?.length || 0
 
-    // Security headers grade
     const shConfig = sc?.security_headers
     const shActivos = shConfig?.headers ? Object.values(shConfig.headers as Record<string, { habilitado: boolean }>).filter((h) => h.habilitado).length : 0
     const shTotal = shConfig?.headers ? Object.keys(shConfig.headers).length : 6
@@ -128,7 +114,7 @@ export async function GET(request: NextRequest) {
         top_rutas: topRutas,
         top_ips: topIps,
         por_hora: barrasPorHora,
-        ultimos_logs: ultimosLogs,
+        ultimos_logs: (logsRecientes || []).slice(0, 10),
         ultimas_alertas: ultimasAlertas || [],
         logs_recientes: (logsRecientes || []).slice(0, 60),
       }
