@@ -23,13 +23,31 @@ function LoginForm() {
   const [turnstileSolved, setTurnstileSolved] = useState(false)
   const turnstileContainerRef = useRef<HTMLDivElement>(null)
 
-  const renderTurnstile = () => {
+  useEffect(() => {
+    fetch('/api/admin/seguridad').then(r => r.json()).then(d => {
+      if (d?.data?.bot_protection?.habilitado) {
+        const key = d.data.bot_protection.site_key
+        if (key) {
+          setTurnstileSiteKey(key)
+          if (!document.querySelector('script[src*="turnstile"]')) {
+            const script = document.createElement('script')
+            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+            script.async = true
+            script.defer = true
+            document.head.appendChild(script)
+          }
+        }
+      }
+    }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
     if (!turnstileSiteKey || !turnstileContainerRef.current) return
     const el = turnstileContainerRef.current
     if (el.hasAttribute('data-rendered')) return
-    const check = setInterval(() => {
+    let attempts = 0
+    const tryRender = () => {
       if (window.turnstile) {
-        clearInterval(check)
         window.turnstile.render(el, {
           sitekey: turnstileSiteKey,
           theme: 'dark',
@@ -42,31 +60,13 @@ function LoginForm() {
           }
         })
         el.setAttribute('data-rendered', '1')
+      } else if (attempts < 30) {
+        attempts++
+        setTimeout(tryRender, 200)
       }
-    }, 100)
-    return () => clearInterval(check)
-  }
-
-  useEffect(() => {
-    fetch('/api/admin/seguridad').then(r => r.json()).then(d => {
-      if (d?.data?.bot_protection?.habilitado) {
-        const key = d.data.bot_protection.site_key
-        if (key) {
-          setTurnstileSiteKey(key)
-          if (!document.querySelector('script[src*="turnstile"]')) {
-            const script = document.createElement('script')
-            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
-            script.async = true
-            script.defer = true
-            script.onload = () => renderTurnstile()
-            document.head.appendChild(script)
-          } else {
-            renderTurnstile()
-          }
-        }
-      }
-    }).catch(() => {})
-  }, [])
+    }
+    tryRender()
+  }, [turnstileSiteKey])
 
   const redirectTo = searchParams.get('redirect') || null
 
