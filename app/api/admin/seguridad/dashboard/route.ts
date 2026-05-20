@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
 
     // Security headers grade
     const shConfig = sc?.security_headers
-    const shActivos = shConfig?.headers ? Object.values(shConfig.headers).filter((h: { habilitado: boolean }) => h.habilitado).length : 0
+    const shActivos = shConfig?.headers ? Object.values(shConfig.headers as Record<string, { habilitado: boolean }>).filter((h) => h.habilitado).length : 0
     const shTotal = shConfig?.headers ? Object.keys(shConfig.headers).length : 6
     const shGrade = shActivos >= 6 ? 'A+' : shActivos >= 5 ? 'A' : shActivos >= 4 ? 'B' : shActivos >= 3 ? 'C' : 'D'
 
@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
         total_ayer: totalAyer || 0,
         paises_unicos: paisesUnicos.size,
         alertas_no_leidas: alertasNoLeidas || 0,
-        alertas_criticas: (ultimasAlertas || []).filter((a: { nivel: string }) => a.nivel === 'critical' && !a.leida).length,
+        alertas_criticas: (ultimasAlertas || []).filter((a: { nivel: string; leida: boolean }) => a.nivel === 'critical' && !a.leida).length,
         herramientas_activas: Object.values(herramientas).filter(Boolean).length,
         herramientas,
         rate_limit_bloqueos: rateLimitBloqueos || 0,
