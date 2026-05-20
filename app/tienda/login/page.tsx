@@ -52,7 +52,7 @@ export default function StoreLogin() {
                     theme: 'dark',
                     language: 'es',
                     size: 'normal',
-                    appearance: 'interaction-only',
+                    appearance: 'always',
                     callback: (token: string) => {
                         setTurnstileToken(token)
                         setTurnstileSolved(true)
