@@ -11,7 +11,7 @@ function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, loading, loginWithEmail } = useAuth()
-  const { setPermissions } = usePermissions()
+  const { defaultRoute, loading: permLoading } = usePermissions()
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
