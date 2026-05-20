@@ -389,12 +389,12 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
                       </span>
                     )}
                   </div>
-                  <div className={`rounded-xl border-2 transition-all duration-500 overflow-hidden w-fit mx-auto ${
+                  <div className={`border-2 transition-all duration-500 overflow-hidden w-fit mx-auto ${
                     turnstileSolved
                       ? 'border-emerald-500/60 shadow-[0_0_16px_rgba(16,185,129,0.4)]'
                       : 'border-red-500/40 shadow-[0_0_12px_rgba(239,68,68,0.3)]'
                   }`}>
-                    <div ref={turnstileContainerRef} className="[&>iframe]:block [&>iframe]:m-0" />
+                    <div ref={turnstileContainerRef} className="[&>iframe]:block [&>iframe]:m-0 leading-[0]" />
                   </div>
                 </div>
               )}
