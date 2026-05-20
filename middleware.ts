@@ -6,7 +6,6 @@ import { injectHeaders } from '@/lib/security-headers'
 import { matchRateLimit, checkInMemory } from '@/lib/rate-limit'
 import { logSecurityEvent } from '@/lib/access-logs'
 import { checkAlerts, dispatchAlerts } from '@/lib/security-alerts'
-import { recordLoginAttempt } from '@/lib/login-tracker'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
@@ -73,15 +72,13 @@ export async function middleware(request: NextRequest) {
   // 3. Autenticación y autorización
   const response = await updateSession(request)
 
-  // 3b. Registrar login exitoso (si es redirect a zona protegida)
-  if (pathname === '/login' && (response.status === 302 || response.status === 307 || response.status === 301)) {
-    const location = response.headers.get('location') || ''
-    if (location.startsWith('/superadmin') || location.startsWith('/miembros') || location.startsWith('/admin')) {
-      try {
-        await recordLoginAttempt(request, ip, country || 'XX', ua)
-      } catch { /* silencioso */ }
-    }
-  }
+  // 3b. Registrar login exitoso (desactivado - debug)
+  // if (pathname === '/login' && (response.status === 302 || response.status === 307)) {
+  //   const location = response.headers.get('location') || ''
+  //   if (location.startsWith('/superadmin') || location.startsWith('/miembros')) {
+  //     try { await recordLoginAttempt(request, ip, country || 'XX', ua) } catch {}
+  //   }
+  // }
 
   // 4. Security Headers
   if (secConfig.security_headers) {
