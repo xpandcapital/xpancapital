@@ -609,7 +609,7 @@ function ArticleDetailPage() {
                                                     </>
                                                 ) : (
                                                     <button
-                                                        onClick={() => router.push('/tienda/login')}
+                                                        onClick={() => router.push('/login')}
                                                         className="px-12 py-6 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] bg-emerald-600 text-white hover:bg-emerald-500 transition-all shadow-2xl"
                                                     >
                                                         Inicia Sesión para Desbloquear
@@ -652,7 +652,7 @@ function ArticleDetailPage() {
                                                     Solo los miembros registrados pueden participar en la comunidad.
                                                 </p>
                                                 <button
-                                                    onClick={() => router.push('/tienda/login')}
+                                                    onClick={() => router.push('/login')}
                                                     className="bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all"
                                                 >
                                                     Iniciar Sesión
