@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
@@ -9,14 +10,13 @@ import { Calculator } from "@/components/sections/Calculator";
 import { Process } from "@/components/sections/Process";
 import { Operations } from "@/components/sections/Operations";
 import { ProjectMap } from "@/components/sections/ProjectMap";
-import { Projects } from "@/components/sections/Projects";
-import { Catalog } from "@/components/sections/Catalog";
 import { Team } from "@/components/sections/Team";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { FAQ } from "@/components/sections/FAQ";
 import { BlogPremium } from "@/components/sections/BlogPremium";
 import { FooterSections } from "@/components/sections/Footer";
 import { ConstructionLoader } from "@/components/ui/ConstructionLoader";
+import { SectionSkeleton } from "@/components/ui/SectionSkeleton";
 
 import { ThankYouHero } from "@/components/sections/ThankYouHero";
 import { ThankYouNextSteps } from "@/components/sections/ThankYouNextSteps";

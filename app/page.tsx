@@ -1,10 +1,16 @@
 import { getCachedLandingTemplate } from "@/lib/cache/template";
+import { getCachedProjects, getCachedProducts, getCachedCategories } from "@/lib/cache/data";
 import { DynamicSections } from "@/components/layout/DynamicSections";
 import { CapturePopup } from "@/components/ui/CapturePopup";
 import { SideAnchorNav } from "@/components/ui/SideAnchorNav";
 
 export default async function Home() {
-  const template = await getCachedLandingTemplate();
+  const [template, projects, products, categories] = await Promise.all([
+    getCachedLandingTemplate(),
+    getCachedProjects(),
+    getCachedProducts(),
+    getCachedCategories(),
+  ]);
 
   return (
     <main className="bg-black text-white min-h-screen relative">
@@ -15,6 +21,9 @@ export default async function Home() {
         sectionOrder={template?.sectionOrder}
         sectionVisibility={template?.sectionVisibility}
         sections={template?.secciones}
+        initialProjects={projects || []}
+        initialProducts={products || []}
+        initialCategories={categories || []}
       />
     </main>
   );
