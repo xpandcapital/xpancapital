@@ -1,8 +1,8 @@
 "use client";
 
-import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
+import { motion } from "framer-motion";
 import { Quote, Star } from "lucide-react";
-import { useState, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 
 const floatingIcons = [
@@ -13,10 +13,7 @@ const floatingIcons = [
 const NeonStars = () => (
     <div className="flex gap-1 justify-center mb-3">
         {[1, 2, 3, 4, 5].map(i => (
-            <Star
-                key={i}
-                className="w-4 h-4 fill-blis-red text-blis-red drop-shadow-[0_0_6px_rgba(190,11,60,0.9)]"
-            />
+            <Star key={i} className="w-4 h-4 fill-blis-red text-blis-red drop-shadow-[0_0_6px_rgba(190,11,60,0.9)]" />
         ))}
     </div>
 );
@@ -27,26 +24,19 @@ export function Testimonials() {
 
     const [isPaused, setIsPaused] = useState(false);
     const [mobileIndex, setMobileIndex] = useState(0);
-    const x = useMotionValue(0);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const speedRef = useRef(0.6);
+    const trackRef = useRef<HTMLDivElement>(null);
 
-    // Marquee continua — pausa con hover/tap
-    useAnimationFrame(() => {
-        if (isPaused) return;
-        const currentX = x.get();
-        const nextX = currentX - speedRef.current;
-        // Cuando se ha desplazado media tira, reiniciamos (loop infinito)
-        if (nextX <= -50) {
-            x.set(nextX + 50);
-        } else {
-            x.set(nextX);
-        }
-    });
+    // Auto-avance móvil
+    useEffect(() => {
+        if (!testimonials || testimonials.length === 0 || isPaused) return;
+        const timer = setInterval(() => {
+            setMobileIndex(prev => (prev + 1) % testimonials.length);
+        }, 4000);
+        return () => clearInterval(timer);
+    }, [testimonials, isPaused]);
 
     if (!testimonials || testimonials.length === 0) return null;
 
-    // Duplicamos para loop infinito
     const doubled = [...testimonials, ...testimonials];
 
     const handleMobileTap = useCallback(() => {
@@ -55,6 +45,13 @@ export function Testimonials() {
 
     return (
         <section className="pt-10 md:pt-20 pb-24 bg-gradient-to-br from-zinc-950 via-black to-blis-red/5 relative cyber-texture overflow-hidden">
+            <style>{`
+                @keyframes testimonial-marquee {
+                    from { transform: translateX(0); }
+                    to   { transform: translateX(-50%); }
+                }
+            `}</style>
+
             {floatingIcons.map(({ icon: Icon, style, size, delay }, i) => (
                 <motion.div
                     key={i}
@@ -77,7 +74,6 @@ export function Testimonials() {
                         </h2>
                     </motion.div>
 
-                    {/* Pause indicator */}
                     <div className="flex items-center gap-3">
                         {isPaused && (
                             <span className="text-[10px] uppercase text-blis-red/60 tracking-widest font-mono animate-pulse">
@@ -87,7 +83,7 @@ export function Testimonials() {
                     </div>
                 </div>
 
-                {/* ====== MOBILE: tarjeta única + navegación táctil ====== */}
+                {/* ====== MOBILE: tarjeta única + auto-avance ====== */}
                 <div className="block md:hidden">
                     <motion.div
                         key={mobileIndex}
@@ -121,7 +117,7 @@ export function Testimonials() {
                         </div>
                     </motion.div>
 
-                    {/* Mobile dots */}
+                    {/* Dots + controles */}
                     <div className="flex justify-center gap-1.5 mt-6">
                         {testimonials.map((_, i) => (
                             <button
@@ -138,22 +134,25 @@ export function Testimonials() {
                     </p>
                 </div>
 
-                {/* ====== DESKTOP: marquee infinito ====== */}
+                {/* ====== DESKTOP: marquee CSS infinito ====== */}
                 <div
-                    ref={containerRef}
                     className="hidden md:block relative overflow-hidden"
                     onMouseEnter={() => setIsPaused(true)}
                     onMouseLeave={() => setIsPaused(false)}
                 >
-                    <motion.div
-                        style={{ x }}
-                        className="flex gap-8"
+                    <div
+                        ref={trackRef}
+                        className="flex gap-8 w-max"
+                        style={{
+                            animation: `testimonial-marquee ${Math.max(20, testimonials.length * 8)}s linear infinite`,
+                            animationPlayState: isPaused ? "paused" : "running",
+                        }}
                     >
                         {doubled.map((testimonial, idx) => (
                             <div
                                 key={idx}
                                 className="glass-card rounded-2xl p-8 relative flex-shrink-0 antigravity group hover:border-white/20 transition-all border-t border-white/5 bg-black/60 hover:bg-black/80"
-                                style={{ width: "calc(33.33% - 1.35rem)" }}
+                                style={{ width: "calc(33.33vw - 3rem)" }}
                             >
                                 <Quote className="w-10 h-10 text-white/5 absolute top-6 right-6 group-hover:text-blis-red/20 transition-colors" />
                                 <div className="flex gap-1 mb-3">
@@ -161,7 +160,7 @@ export function Testimonials() {
                                         <Star key={i} className="w-3.5 h-3.5 fill-blis-red text-blis-red drop-shadow-[0_0_4px_rgba(190,11,60,0.7)]" />
                                     ))}
                                 </div>
-                                <p className="text-gray-300 font-light italic leading-relaxed mb-8 relative z-10">
+                                <p className="text-gray-300 font-light italic leading-relaxed mb-8 relative z-10 line-clamp-5">
                                     &ldquo;{testimonial.quote}&rdquo;
                                 </p>
                                 <div className="flex items-center gap-4 opacity-80 group-hover:opacity-100 transition-opacity mt-auto">
@@ -181,7 +180,7 @@ export function Testimonials() {
                                 </div>
                             </div>
                         ))}
-                    </motion.div>
+                    </div>
                 </div>
             </div>
         </section>
