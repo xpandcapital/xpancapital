@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { LineChart, PenTool, HardHat, FileText, Search, Shield, Building, CheckCircle, Users, Map, Coins, Key, Target, TrendingUp, Zap, Star, Award, Heart } from "lucide-react";
 import { useRef, useEffect, useState } from "react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
@@ -10,7 +10,6 @@ const iconMap: Record<string, any> = {
     Users, Map, Coins, Key, Target, TrendingUp, Zap, Star, Award, Heart
 };
 
-// Hook for Intersection Observer scroll-activation
 function useScrollActive(threshold = 0.5) {
     const ref = useRef<HTMLDivElement>(null);
     const [isActive, setIsActive] = useState(false);
@@ -34,7 +33,14 @@ function TimelineStep({ step, index, totalSteps }: { step: any; index: number; t
     const Icon = iconMap[step.icon] || FileText;
 
     return (
-        <div ref={ref} className="flex gap-4 items-start group">
+        <motion.div
+            ref={ref}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, delay: index * 0.12, ease: [0.16, 1, 0.3, 1] }}
+            className="flex gap-4 items-start group"
+        >
             {/* Left: icon + vertical line */}
             <div className="flex flex-col items-center shrink-0 relative self-stretch">
                 <motion.div
@@ -57,7 +63,6 @@ function TimelineStep({ step, index, totalSteps }: { step: any; index: number; t
                         {index + 1}
                     </div>
                 </motion.div>
-                {/* Vertical connector - absolutely positioned to fill the space */}
                 {index < totalSteps - 1 && (
                     <motion.div
                         animate={{ backgroundColor: isActive ? 'rgba(190,11,60,0.5)' : 'rgba(255,255,255,0.08)' }}
@@ -92,19 +97,26 @@ function TimelineStep({ step, index, totalSteps }: { step: any; index: number; t
                     </div>
                 ) : null}
             </div>
-        </div>
+        </motion.div>
     );
 }
 
 export function Process() {
     const { cmsData } = useLandingCMS();
     const steps = cmsData.process.steps || [];
+    const sectionRef = useRef<HTMLElement>(null);
 
-    // Return null if no steps
+    const { scrollYProgress } = useScroll({
+        target: sectionRef,
+        offset: ["start 60%", "end 90%"]
+    });
+
+    const pathLength = useTransform(scrollYProgress, [0, 0.85], [0, 1]);
+
     if (steps.length === 0) return null;
 
     return (
-        <section className="py-24 bg-black relative">
+        <section ref={sectionRef} className="py-24 bg-black relative">
             <div className="container mx-auto px-6">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -127,10 +139,26 @@ export function Process() {
                     </div>
                 </div>
 
-                {/* ====== DESKTOP: steps grid ====== */}
+                {/* ====== DESKTOP: steps grid + SVG connector trace ====== */}
                 <div className="hidden lg:block relative">
-                    {/* Connector Line */}
-                    <div className="absolute top-[40px] left-[50px] right-[50px] h-[1px] bg-white/10" />
+                    {/* Animated SVG connector line — se dibuja con el scroll */}
+                    <svg
+                        className="absolute top-0 left-0 w-full h-[80px] pointer-events-none z-0"
+                        preserveAspectRatio="none"
+                        viewBox="0 0 1000 80"
+                    >
+                        <motion.line
+                            x1="50" y1="40" x2="950" y2="40"
+                            stroke="#be0b3c"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            style={{
+                                pathLength,
+                                filter: "drop-shadow(0 0 6px rgba(190,11,60,0.6))",
+                            }}
+                        />
+                    </svg>
+
                     <div className={`grid grid-cols-${Math.min(steps.length, 4)} gap-8`}>
                         {steps.map((step, index) => {
                             const Icon = iconMap[step.icon] || FileText;
@@ -139,11 +167,11 @@ export function Process() {
                                     key={index}
                                     initial={{ opacity: 0, y: 30 }}
                                     whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 1.2, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                                    viewport={{ once: true, margin: "-60px" }}
+                                    transition={{ duration: 0.6, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
                                     className="relative flex flex-col group"
                                 >
-                                    <div className="relative w-20 h-20 bg-black border border-white/20 flex items-center justify-center rounded-xl mb-6 shadow-[0_0_15px_rgba(255,255,255,0.05)] z-10 mx-0 hover:border-blis-red/60 hover:shadow-[0_0_20px_rgba(190,11,60,0.3)] transition-all">
+                                    <div className="relative w-20 h-20 bg-black border border-white/20 flex items-center justify-center rounded-xl mb-6 shadow-[0_0_15px_rgba(255,255,255,0.05)] z-10 mx-0 group-hover:border-blis-red/60 group-hover:shadow-[0_0_20px_rgba(190,11,60,0.3)] transition-all">
                                         <div className="absolute inset-0 bg-blis-red opacity-0 group-hover:opacity-20 transition-opacity rounded-xl" />
                                         <Icon className="w-8 h-8 text-white group-hover:text-blis-red transition-colors" />
                                         <div className="absolute -top-3 -right-3 text-xs font-black bg-blis-red text-white w-6 h-6 flex flex-col items-center justify-center rounded-sm">

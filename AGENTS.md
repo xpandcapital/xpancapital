@@ -434,3 +434,172 @@ export function Component({ title, children }: Props) {
 ---
 
 *Documento v2.0 - BLIS Corp Development Team*
+
+---
+
+### DIRECTRICES DE REFACTORIZACIÓN VISUAL Y UI AVANZADA
+
+**MISIÓN:** Refactorizar exclusivamente la capa visual y de interacción de la plataforma para lograr una UX inmersiva, cinematográfica y de altísima gama (estilo Awwwards).
+
+## 🚫 REGLAS CRÍTICAS DE "CERO CREACIÓN"
+
+1. **NO CREAR COMPONENTES NUEVOS:** Modificar los existentes en `components/sections/` y `components/ui/`.
+2. **NO MODIFICAR LÓGICA:** Mantener intacta la lógica de Supabase, enrutamiento, contextos globales, formularios y bases de datos.
+3. **CERO INSTALACIONES:** Usar estrictamente el ecosistema existente: `framer-motion`, `clsx`, `tailwind-merge`, `shadcn/ui` y las utilidades de animación configuradas.
+4. **REUTILIZAR RECURSOS:** Aplicar variables de color (`--color-blis-red`), clases globales (`.glass`, `.neon-text`), y la utilidad `cn()`.
+
+## 📱 REGLA DE ORO: ENFOQUE MOBILE-FIRST Y RENDIMIENTO TÁCTIL OBLIGATORIO
+
+El tráfico principal de Blis Corp proviene de dispositivos móviles. Al refactorizar con Tailwind CSS y Framer Motion, es obligatorio cumplir:
+
+1. **Prioridad Tailwind Mobile-First:** Todo el maquetado y espaciado base debe estar pensado para pantallas pequeñas. Usar los prefijos `md:`, `lg:`, `xl:` exclusivamente para escalar el diseño hacia escritorio, nunca al revés.
+2. **Interacciones Táctiles (Touch vs. Hover):** Los efectos avanzados que dependen del cursor (`onMouseMove`, `whileHover`, cursores magnéticos, tarjetas 3D que siguen al mouse) NO funcionan en móvil. Programar SIEMPRE un comportamiento de respaldo elegante para pantallas táctiles (usar `whileTap`, o reemplazar el hover por un revelado suave cuando el elemento entra en el viewport usando `whileInView`).
+3. **Rendimiento Móvil (60fps):** La experiencia en celular debe sentirse como una app nativa, rápida y fluida. Si un efecto de Parallax, Trazado SVG o grid de fondo es muy pesado para el procesador de un teléfono, simplificarlo o desactivarlo en pantallas pequeñas (usando CSS `hidden md:block` o detectando el viewport).
+
+## 🎨 SISTEMA DE DISEÑO AVANZADO (CIBER-LUJO)
+
+* **Estética Dominante:** Modo oscuro profundo (#050505) como fondo principal.
+* **Acentos e Iluminación:** Iluminación cinematográfica de fondo y destellos en rojo neón carmesí (`--color-blis-red-neon`). Efectos de borde con "tracing".
+* **Transiciones:** 'Staggered fade-ins' sutiles, microinteracciones de hover fluidas (scale, glow effects), y animaciones de scroll con propósito claro.
+
+## 📋 PLAN MAESTRO DE ANIMACIONES — SECCIÓN POR SECCIÓN
+
+### 1. Hero Sections (`Hero.tsx`, `CaptureHero.tsx`)
+* **Mecánica: Text Reveal Cinemático.**
+  * *Objetivo visual:* Título y subtítulo.
+  * *Implementación:* Contenedores con `overflow-hidden`. Dividir texto en palabras/letras y animar de `y: 20` a `y: 0`, con desenfoque inicial usando `filter: blur()`, con `staggerChildren` para efecto secuencial.
+* **Mecánica: Scroll Parallax en Capas.**
+  * *Objetivo visual:* Fondo tecnológico (grid, orbes con glow).
+  * *Implementación:* Usar `useScroll` vinculado al contenedor principal del Hero. Aplicar `useTransform` para mover los elementos del fondo (grid) verticalmente más lento que el contenido de texto, creando profundidad.
+
+### 2. Sección de Aliado Inmobiliario (`ConoceaBlis.tsx` o similar)
+* **Mecánica: Staggered Fade-In on Viewport.**
+  * *Objetivo visual:* Texto a la izquierda, bloque de imagen/video a la derecha.
+  * *Implementación:* `whileInView` con `variants` para que la columna de texto se deslice desde la izquierda y el bloque de medios desde la derecha/abajo, con retraso en cascada.
+* **Mecánica: Parallax de Imagen.**
+  * *Objetivo visual:* Imagen/Video de construcción.
+  * *Implementación:* Parallax sutil en la imagen dentro de su contenedor al hacer scroll, usando `useTransform` vinculado al progreso del scroll local.
+
+### 3. Pasos de Proyecto (`Process.tsx`, `Steps.tsx`)
+* **Mecánica: Trazado SVG por Scroll.**
+  * *Objetivo visual:* Línea de tiempo que conecta los pasos.
+  * *Implementación:* Animar `pathLength` de un `<motion.path>` SVG de 0 a 1, vinculado a `scrollYProgress`. La línea roja neón debe "dibujarse" a medida que el usuario baja.
+* **Mecánica: Revelado de Tarjetas en Cascada.**
+  * *Objetivo visual:* Tarjetas de pasos.
+  * *Implementación:* Secuenciar aparición de tarjetas de izquierda a derecha cuando entran en el viewport.
+
+### 4. Operaciones en Campo (`Operations.tsx`)
+* **Mecánica: Parallax de Capas de Profundidad.**
+  * *Objetivo visual:* Texto sobre imagen grande de maquinaria.
+  * *Implementación:* Aplicar parallax a la imagen de fondo (moverla más lento) y parallax inverso sutil a la caja de texto (moverla un poco más rápido), dando sensación de profundidad.
+
+### 5. Sección de Video de Trabajo (`SéTestigo.tsx`, `FunnelVideo.tsx`)
+* **Mecánica: Borde Neón Pulsante.**
+  * *Objetivo visual:* Contenedor del video central.
+  * *Implementación:* Agregar elemento absoluto con borde neón rojo carmesí (`neon-border`) que pulse sutilmente (`animate={{ scale: [1, 1.01, 1] }}`). El video debe tener transición suave de opacidad y escala al entrar en pantalla.
+
+### 6. Simulador de Precios (`Calculator.tsx`, `Pricing.tsx`)
+* **Mecánica: Contadores Dinámicos con "Slot Machine".**
+  * *Objetivo visual:* Números de precios y plazos.
+  * *Implementación:* Números que giran rápidamente de 0 a su valor real solo cuando la sección cruza el 50% de la pantalla (`viewport={{ amount: 0.5 }}`).
+* **Mecánica: Border Trace en Tarjetas.**
+  * *Objetivo visual:* Contenedores de opciones de precios.
+  * *Implementación:* Línea de borde delgada que se ilumine secuencialmente alrededor de la tarjeta activa o en hover.
+
+### 7. Aliado Territorial (`TrustBadges.tsx`)
+* **Mecánica: Marquee Infinito Suavizado.**
+  * *Objetivo visual:* Marquee de logotipos de confianza.
+  * *Implementación:* Carrusel de movimiento continuo horizontal que se pause automáticamente al hacer hover.
+
+### 8. Nuestros Proyectos (`Projects.tsx`, `Catalog.tsx`)
+* **Mecánica: Tarjetas 3D Magnéticas (Tilt Effect).**
+  * *Objetivo visual:* Cuadrícula de tarjetas de proyectos.
+  * *Implementación:* En hover, aplicar transformación 3D de inclinación (`rotateX`, `rotateY`) calculada según posición del cursor, con efecto `spring` sutil. El `.glass-card` debe intensificar su glow neón en el borde que mire hacia el mouse.
+
+### 9. Nuestros Agentes (`Team.tsx`)
+* **Mecánica: Revelado de Detalles Avanzado.**
+  * *Objetivo visual:* Fotos de los asesores.
+  * *Implementación:* En hover, imagen hace zoom in sutil (`scale: 1.05`), la superposición de gradiente oscuro se intensifica, y el texto con cargo/links de contacto se desliza desde abajo (`y: 10` a `y: 0`).
+
+### 10. Testimonios (`Testimonials.tsx`)
+* **Mecánica: Revelado Staggered on Enter.**
+  * *Objetivo visual:* Tarjetas de testimonios.
+  * *Implementación:* Secuenciar aparición de tarjetas al entrar en pantalla, con desplazamiento lateral o inferior.
+
+### 11. Componentes Globales (Botones, Navbar, Footer)
+* **Mecánica: Botones CTA Magnéticos.**
+  * *Objetivo visual:* Botones principales de acción en Hero, simulador y footer.
+  * *Implementación:* El botón debe ser "atraído" unos píxeles hacia el cursor cuando este se acerque, usando matemáticas de posición del mouse.
+* **Mecánica: Navbar Dinámica.**
+  * *Objetivo visual:* `CustomHeader`.
+  * *Implementación:* El navbar debe ocultarse (`y: -100`) en scroll hacia abajo y reaparecer deslizándose desde arriba (`y: 0`) en scroll hacia arriba, activando el fondo `.glass`.
+
+---
+
+## 🗺️ MAPA DE ANIMACIONES UI — LANDING COMPLETA (15 SECCIONES)
+
+Directrices exactas de refactorización visual para cada sección de la landing page principal.  
+**Enfoque obligatorio:** MOBILE-FIRST + estética "Cyber-Luxe" (Dark mode #050505 + Crimson Neon).
+
+### 1. INICIO (`Hero.tsx`)
+* **Text Reveal Cinemático:** Título y subtítulo suben desde `y: 40` con `blur(6px)` inicial usando `staggerChildren` por letra. Contenedor con `overflow-hidden`.
+* **Parallax de Fondo:** Grid tecnológico se mueve 30% más lento que el texto con `useScroll` + `useTransform`.
+* **Botones Magnéticos (desktop):** CTA principal atraído sutilmente hacia el cursor. En móvil, `whileTap={{ scale: 0.95 }}`.
+
+### 2. TRAYECTORIA (`About.tsx`)
+* **Sticky Scroll (desktop):** Columna de texto fija mientras imágenes de historia hacen scroll vertical al lado.
+* **Mobile:** Fade-in escalonado en ambas columnas al entrar al viewport.
+
+### 3. PROCESO (`Process.tsx`)
+* **Trazado SVG por Scroll:** Línea conectora `<motion.line>` con `pathLength` vinculado a `scrollYProgress`. Se dibuja en rojo neón al bajar.
+* **Cascada de Tarjetas:** Cada paso entra con `whileInView` y `delay` incremental (`index * 0.15`).
+
+### 4. BACKSTAGE (`Operations.tsx`)
+* **Parallax de Profundidad:** Imagen de maquinaria se mueve más lento que el texto usando `useTransform` con valores distintos.
+* **Reveal Asimétrico:** Texto desde izquierda, imagen desde derecha con `whileInView` en cascada.
+
+### 5. VIDEO (`VideoShowcase.tsx`, `FunnelVideo.tsx`)
+* **Scale-Up Suave:** Contenedor del video entra de `scale: 0.9` a `1`.
+* **Borde Neón Pulsante:** Elemento absoluto con `neon-border` que pulsa `scale: [1, 1.01, 1]` para incitar al clic.
+
+### 6. MERCADO (`Metrics.tsx`)
+* **Contadores Slot-Machine:** Números giran de 0 a su valor real solo cuando la sección está al 50% visible (`viewport={{ amount: 0.5 }}`).
+* **Easing cúbico:** `ease-out cubic` para desaceleración natural.
+
+### 7. PLUSVALÍA (`StatsSection.tsx`)
+* **Sparklines SVG:** Líneas de tendencia se dibujan con `pathLength` vinculado a scroll.
+* **Glow en Puntos Críticos:** `drop-shadow` rojo neón en los picos de datos.
+
+### 8. MAPA (`ProjectMap.tsx`)
+* **Fade del Mapa Base:** El mapa entra con opacidad de 0 a 1.
+* **Pines con Rebote:** Los marcadores caen desde `y: -20` con `type: "spring"` y `staggerChildren` para caída secuencial.
+
+### 9. PORTAFOLIO (`Projects.tsx`, `Catalog.tsx`)
+* **Tarjetas 3D Magnéticas (desktop):** Tilt effect con `rotateX`/`rotateY` (±10°) según posición del cursor. Glow tracker que sigue al mouse.
+* **Mobile:** Carrusel con `snap` nativo CSS + `whileInView` para entrada animada.
+
+### 10. TIENDA (`ProductGrid.tsx`, componentes en `components/tienda/`)
+* **Microinteracciones:** Hover → imagen zoom 1.05x + botón "Comprar" se desliza desde `y: 10` a `y: 0`.
+* **Mobile:** `whileTap` para feedback táctil inmediato.
+
+### 11. ALIANZA / TEAM (`Team.tsx`)
+* **Reveal de Detalles:** Hover → overlay oscuro se intensifica + cargo/links sociales se deslizan hacia arriba.
+* **Mobile:** Toque mantiene el estado "activo" para mostrar detalles sin hover.
+
+### 12. TESTIMONIOS (`Testimonials.tsx`)
+* **Marquee Infinito:** Movimiento horizontal constante con `animate={{ x: ["0%", "-50%"] }}`.
+* **Pausa al Hover:** `whileHover` detiene la animación. En móvil, `whileTap` pausa.
+
+### 13. FAQ (`FAQ.tsx`)
+* **Acordeones Fluidos:** `AnimatePresence` + `motion.div` con `animate={{ height: "auto" }}` para transiciones sin saltos.
+* **Ícono Rotatorio:** Flecha/chevron rota 180° al expandir con `animate={{ rotate: isOpen ? 180 : 0 }}`.
+
+### 14. BLOG (`BlogPosts.tsx`, `BlogHero.tsx`)
+* **Grid en Cascada:** Tarjetas entran con `whileInView` + `delay` incremental.
+* **Borde Neón al Hover:** `hover:border-blis-red-neon` + `hover:shadow-[0_0_15px_rgba(255,30,86,0.3)]`.
+
+### 15. CONTACTO (`Footer.tsx`, formularios en `CaptureForm.tsx`)
+* **Campos Secuenciales:** Inputs aparecen uno tras otro con `staggerChildren` (0.08s entre cada uno).
+* **Botón Enviar:** Animación de carga interna (spinner + texto cambia a "Enviando..."). `whileTap={{ scale: 0.95 }}`.
+
+---

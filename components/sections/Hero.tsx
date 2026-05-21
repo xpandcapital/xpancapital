@@ -1,11 +1,50 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, type Variants } from "framer-motion";
 import { ArrowRight, BarChart3, PieChart, Activity, TrendingUp } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useRef } from "react";
 
 import { TrustBadges } from "./TrustBadges";
 import { useLandingCMS } from "@/context/LandingCMSContext";
+import { cn } from "@/lib/utils";
+
+const charContainerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.025, delayChildren: 0.5 }
+  }
+};
+
+const charVariants: Variants = {
+  hidden: { y: 40, opacity: 0, filter: "blur(6px)" },
+  visible: {
+    y: 0,
+    opacity: 1,
+    filter: "blur(0px)",
+    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+  }
+};
+
+function CharReveal({ text, className }: { text: string; className?: string }) {
+  return (
+    <motion.span
+      className={cn("inline-flex overflow-hidden", className)}
+      variants={charContainerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {text.split("").map((char, i) => (
+        <motion.span
+          key={i}
+          variants={charVariants}
+          className={char === " " ? "w-[0.25em]" : undefined}
+        >
+          {char}
+        </motion.span>
+      ))}
+    </motion.span>
+  );
+}
 
 export function Hero() {
     const { cmsData } = useLandingCMS();
@@ -19,18 +58,22 @@ export function Hero() {
     const yText = useTransform(scrollYProgress, [0, 1], [0, 250]);
     const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
     const marqueeOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+    const yGrid = useTransform(scrollYProgress, [0, 1], [0, 75]);
 
     return (
         <section
             ref={ref}
             className="relative min-h-screen flex items-center justify-center overflow-hidden bg-zinc-950"
         >
-            {/* Tech Grid Background */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_10%,transparent_100%)] pointer-events-none" />
+            {/* Tech Grid Background — Parallax (30% más lento que el texto) */}
+            <motion.div
+              style={{ y: yGrid }}
+              className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_10%,transparent_100%)] pointer-events-none"
+            />
 
-            {/* Ambient glow */}
+            {/* Ambient glow — neón carmesí */}
             <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center">
-                <div className="absolute w-[600px] h-[600px] bg-blis-red/8 rounded-full blur-[100px] opacity-50" />
+                <div className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-50" style={{ background: "radial-gradient(circle, rgba(255,30,86,0.15) 0%, transparent 60%)" }} />
             </div>
 
             {/* Neon text animation styles */}
@@ -64,7 +107,6 @@ export function Hero() {
             <>
             {/* Widget 1: Ventas (Top Left) */}
             <motion.div
-
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0, y: [-10, 10, -10] }}
                 transition={{
@@ -141,7 +183,7 @@ export function Hero() {
                 </div>
             </motion.div>
 
-            {/* Widget 2: Plusvalía (Bottom Right) — subido en mobile */}
+            {/* Widget 2: Plusvalía (Bottom Right) */}
             <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0, y: [-15, 15, -15] }}
@@ -175,7 +217,6 @@ export function Hero() {
     {/* --- MAIN HERO CONTENT --- */}
 
     <motion.div
-
                 style={{ y: yText, opacity }}
                 className="relative z-30 container mx-auto px-6 flex flex-col items-center text-center mt-8 mb-20 sm:mb-32 pointer-events-none"
             >
@@ -185,22 +226,41 @@ export function Hero() {
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                     className="flex flex-col items-center w-full max-w-5xl pointer-events-auto"
                 >
-                    <span className="text-blis-red font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase mb-3 md:mb-5 text-xs sm:text-[8px] md:text-[9px] xl:text-sm [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[11px] [@media(min-width:1024px)_and_(max-width:1366px)]:!px-[1.2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!py-[0.5rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[1.2rem] bg-black/50 px-3 py-1.5 sm:px-5 sm:py-2 rounded-full border border-blis-red/30 backdrop-blur-xl shadow-[0_0_20px_rgba(190,11,60,0.2)]">
+                    <motion.span
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="text-blis-red font-bold tracking-[0.2em] sm:tracking-[0.3em] uppercase mb-3 md:mb-5 text-xs sm:text-[8px] md:text-[9px] xl:text-sm [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[11px] [@media(min-width:1024px)_and_(max-width:1366px)]:!px-[1.2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!py-[0.5rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[1.2rem] bg-black/50 px-3 py-1.5 sm:px-5 sm:py-2 rounded-full border border-blis-red/30 backdrop-blur-xl shadow-[0_0_20px_rgba(190,11,60,0.2)]"
+                    >
                         {cmsData.hero.subtitle}
-                    </span>
+                    </motion.span>
 
                     <h1 className="text-7xl sm:text-4xl md:text-[2.7rem] lg:text-[3.9rem] xl:text-[10rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[9rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!gap-[2rem] font-black tracking-tighter text-white mb-4 md:mb-5 uppercase flex flex-row items-center gap-3 md:gap-4 xl:gap-6 leading-none">
-                        <span className="neon-trace-blis">{cmsData.hero.title1}</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-300 to-gray-600 neon-trace-corp">{cmsData.hero.title2}</span>
+                        <span className="neon-trace-blis">
+                            <CharReveal text={cmsData.hero.title1} />
+                        </span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-300 to-gray-600 neon-trace-corp">
+                            <CharReveal text={cmsData.hero.title2} />
+                        </span>
                     </h1>
 
-                    <div className="mt-4 mb-6 md:mt-2 md:mb-8 px-4">
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 1.2 }}
+                        className="mt-4 mb-6 md:mt-2 md:mb-8 px-4"
+                    >
                         <p className="text-sm sm:text-sm md:text-base lg:text-lg xl:text-2xl [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[1rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!max-w-[550px] font-light text-gray-300 tracking-wide max-w-xl xl:max-w-4xl mx-auto leading-relaxed">
                             {cmsData.hero.description}
                         </p>
-                    </div>
+                    </motion.div>
 
-                    <div className="flex flex-row gap-3 sm:gap-4 w-full max-w-[90vw] sm:max-w-none sm:w-auto justify-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 1.4 }}
+                        className="flex flex-row gap-3 sm:gap-4 w-full max-w-[90vw] sm:max-w-none sm:w-auto justify-center"
+                    >
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
@@ -235,7 +295,7 @@ export function Hero() {
                                 {cmsData.hero.secondaryBtnText}
                             </span>
                         </motion.button>
-                    </div>
+                    </motion.div>
                     </motion.div>
             </motion.div>
 
