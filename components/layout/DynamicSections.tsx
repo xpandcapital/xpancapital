@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef, useEffect, useCallback } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useLandingCMS } from "@/context/LandingCMSContext";
@@ -146,35 +145,6 @@ export function DynamicSections({
   // Barra de progreso global (scroll de ventana)
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-
-  // Snap suave: detecta section activa y hace snap en límites designados
-  const snapPoints = ["trayectoria", "operaciones", "insights"];
-  const snapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current);
-      snapTimeoutRef.current = setTimeout(() => {
-        const viewCenter = window.innerHeight / 2;
-        for (const id of snapPoints) {
-          const el = document.getElementById(id);
-          if (!el) continue;
-          const rect = el.getBoundingClientRect();
-          const elCenter = rect.top + rect.height / 2;
-          const dist = Math.abs(elCenter - viewCenter);
-          if (dist < 150) {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-            break;
-          }
-        }
-      }, 400);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current);
-    };
-  }, []);
 
   const hasExternalData = !!(externalOrder && externalOrder.length > 0) || !!externalSections;
 

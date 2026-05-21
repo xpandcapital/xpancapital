@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence, useScroll, useTransform, type Variants } from "framer-motion";
-import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { useState, useEffect } from "react";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { TrendingUp, X } from "lucide-react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
@@ -26,15 +26,6 @@ export function About() {
         setIsMounted(true);
     }, []);
 
-    const sectionRef = useRef<HTMLElement>(null);
-    const { scrollYProgress } = useScroll({
-        target: sectionRef,
-        offset: ["start 80%", "end 30%"]
-    });
-
-    // Cortina bottom→top: revela el video desde abajo
-    const curtainY = useTransform(scrollYProgress, [0, 1], [0, -105]);
-
     const yearsExperience = cmsData.about.yearsExperience || '10+';
     const yearsLabel = cmsData.about.yearsLabel || 'Años Exp.';
     const stat1Value = cmsData.about.stat1Value || '100%';
@@ -43,7 +34,7 @@ export function About() {
     const stat2Label = cmsData.about.stat2Label || 'Lotes Entregados';
 
     return (
-        <section ref={sectionRef} id="trayectoria" className="relative py-16 md:pt-20 md:pb-32 bg-gradient-to-t from-black via-zinc-950 to-black overflow-hidden cyber-texture">
+        <section id="trayectoria" className="relative py-16 md:pt-20 md:pb-32 bg-gradient-to-t from-black via-zinc-950 to-black overflow-hidden cyber-texture">
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-900/10 rounded-full blur-[100px] mix-blend-screen pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blis-red/5 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
             <div className="absolute inset-0 opacity-5 pointer-events-none">
@@ -112,14 +103,6 @@ export function About() {
                             className="antigravity absolute inset-0 glass-card rounded-2xl overflow-hidden border border-[#209f89]/20 p-2 shadow-[0_0_30px_rgba(32,159,137,0.1)] cursor-pointer group"
                             onClick={() => setIsVideoOpen(true)}
                         >
-                            {/* Cortina bottom→top — revela la imagen */}
-                            <motion.div
-                                style={{ y: curtainY }}
-                                className="absolute inset-0 z-30 pointer-events-none"
-                            >
-                                <div className="w-full h-full bg-black/95 backdrop-blur-sm" />
-                            </motion.div>
-
                             <div className="relative w-full h-full bg-zinc-900 rounded-xl overflow-hidden">
                                 <div 
                                     className="absolute inset-0 bg-cover bg-center opacity-70 group-hover:opacity-50 transition-opacity duration-500 scale-105 group-hover:scale-100" 

@@ -27,10 +27,6 @@ export function Operations() {
     // Aura scroll: orbe rojo que baja creando profundidad
     const yOrb = useTransform(scrollYProgress, [0, 1], [-200, 300]);
 
-    // Máscara diagonal: wipe de esquina superior-izquierda a inferior-derecha
-    const wipeProgress = useTransform(scrollYProgress, [0.05, 0.7], [0, 100]);
-    const wipeClip = useTransform(wipeProgress, (v) => `polygon(0 0, ${v}% 0, 0 ${v}%)`);
-
     useEffect(() => {
         setIsMounted(true);
     }, []);
@@ -155,11 +151,6 @@ export function Operations() {
                                 />
                                 {/* Scanning Lines Overlay */}
                                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] pointer-events-none" />
-                                {/* Máscara diagonal wipe */}
-                                <motion.div
-                                    className="absolute inset-0 z-20 bg-black pointer-events-none"
-                                    style={{ clipPath: wipeClip }}
-                                />
                             </motion.div>
                         </AnimatePresence>
                     </div>
