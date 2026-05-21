@@ -206,7 +206,7 @@ export function CorreoLayout() {
   }
 
   return (
-    <div className={`flex h-[calc(100vh-120px)] bg-zinc-950/50 rounded-3xl border border-white/5 overflow-hidden ${splitVertical ? 'flex-col' : ''}`}>
+    <div className={`flex h-[calc(100vh-180px)] min-h-[500px] bg-zinc-950/50 rounded-3xl border border-white/5 overflow-hidden ${splitVertical ? 'flex-col' : ''}`}>
       <CorreoSidebar
         folders={folders}
         activeFolder={activeFolder}

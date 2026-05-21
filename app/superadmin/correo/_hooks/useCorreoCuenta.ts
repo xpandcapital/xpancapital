@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react'
 import type { EmailCuenta, EmailServerConfig } from '../_types'
 
+const CACHE_KEY = 'blis_correo_cuentas'
+
 function fetchWithTimeout(url: string, options?: RequestInit, timeoutMs = 10000): Promise<Response> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('Timeout: el servidor no responde')), timeoutMs)
@@ -8,8 +10,23 @@ function fetchWithTimeout(url: string, options?: RequestInit, timeoutMs = 10000)
   })
 }
 
+function cacheCuentas(cuentas: EmailCuenta[]) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cuentas))
+  } catch {}
+}
+
+function getCachedCuentas(): EmailCuenta[] {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
 export function useCorreoCuenta() {
-  const [cuentas, setCuentas] = useState<EmailCuenta[]>([])
+  const [cuentas, setCuentas] = useState<EmailCuenta[]>(() => getCachedCuentas())
   const [cuentaActiva, setCuentaActiva] = useState<EmailCuenta | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -22,9 +39,16 @@ export function useCorreoCuenta() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al cargar cuentas')
       setCuentas(data)
+      cacheCuentas(data)
       return data as EmailCuenta[]
     } catch (e: any) {
       setError(e.message)
+      // Fallback a localStorage si Supabase falla
+      const cached = getCachedCuentas()
+      if (cached.length > 0) {
+        setCuentas(cached)
+        return cached as EmailCuenta[]
+      }
       return []
     } finally {
       setLoading(false)
@@ -55,28 +79,23 @@ export function useCorreoCuenta() {
     setLoading(true)
     try {
       await fetch(`/api/correo/cuentas?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
-      setCuentas(prev => prev.filter(c => c.id !== id))
+      const nuevas = cuentas.filter(c => c.id !== id)
+      setCuentas(nuevas)
+      cacheCuentas(nuevas)
       if (cuentaActiva?.id === id) setCuentaActiva(null)
     } catch (e: any) {
       setError(e.message)
     } finally {
       setLoading(false)
     }
-  }, [cuentaActiva])
+  }, [cuentaActiva, cuentas])
 
   const seleccionarCuenta = useCallback((cuenta: EmailCuenta) => {
     setCuentaActiva(cuenta)
   }, [])
 
   return {
-    cuentas,
-    cuentaActiva,
-    loading,
-    error,
-    cargarCuentas,
-    conectarCuenta,
-    desconectarCuenta,
-    seleccionarCuenta,
-    setError,
+    cuentas, cuentaActiva, loading, error,
+    cargarCuentas, conectarCuenta, desconectarCuenta, seleccionarCuenta, setError,
   }
 }
