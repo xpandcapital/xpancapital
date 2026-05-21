@@ -1,5 +1,4 @@
-// Middleware unificado — 1 consulta a BD, distribuye a todos los módulos de seguridad
-// Con timeouts para no colapsar si Supabase está lento
+// Middleware unificado — Supabase con timeout corto, rutas publicas sin auth
 import { updateSession } from '@/lib/supabase/middleware'
 import { getSecurityConfig } from '@/lib/security-config'
 import { getCountryFromRequest, checkGeoBlock } from '@/lib/geoblock'
@@ -10,7 +9,7 @@ import { checkAlerts, dispatchAlerts } from '@/lib/security-alerts'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
-const SUPABASE_TIMEOUT_MS = 5000
+const SUPABASE_TIMEOUT_MS = 3000
 
 function timeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
   return Promise.race([
@@ -25,38 +24,43 @@ function getClientIP(request: NextRequest): string {
          '127.0.0.1'
 }
 
+function countryFromReq(request: NextRequest): string {
+  return request.headers.get('x-vercel-ip-country') || ''
+}
+
+const PUBLIC_PATHS = [
+  '/', '/blog', '/tienda', '/cursos', '/proyectos',
+  '/verificar', '/gracias', '/f', '/formulario', '/embudo',
+  '/calendario', '/certificado', '/login', '/embed', '/legal', '/s',
+]
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const method = request.method
   const ip = getClientIP(request)
   const ua = request.headers.get('user-agent') || ''
 
-  // 0. Consultar configuración de seguridad con timeout (5s max)
-  const secConfig = await timeout(
-    getSecurityConfig(),
-    SUPABASE_TIMEOUT_MS,
-    { geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null }
-  )
+  const isPublic = PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
+  const isProtected = pathname.startsWith('/superadmin') || pathname.startsWith('/miembros') || pathname.startsWith('/admin')
+  const hasSupabaseCookie = request.cookies.getAll().some(c => c.name.startsWith('sb-'))
 
-  // 1. Geobloqueo
-  const country = getCountryFromRequest(request)
-  const geoResult = checkGeoBlock(country || '', secConfig.geobloqueo)
-
-  if (IS_DEV && geoResult.country) {
-    console.log('[Middleware] GeoBlock:', JSON.stringify(geoResult))
+  // Rutas publicas sin cookie de sesion: SIN Supabase, respuesta inmediata
+  if (isPublic && !hasSupabaseCookie && !isProtected) {
+    return NextResponse.next()
   }
 
-  if (geoResult.blocked) {
-    logSecurityEvent({
-      ip, pais: geoResult.country || 'XX', ruta: pathname,
-      metodo: method, motivo: 'geobloqueo', user_agent: ua,
-    })
-    const alerts = checkAlerts('geobloqueo', geoResult.country || 'XX', ip, pathname, secConfig.alerts)
-    if (alerts) dispatchAlerts(alerts, secConfig.alerts!)
-    return new NextResponse('Acceso denegado desde tu ubicación', {
-      status: 403,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    })
+  // Solo carga security config si la ruta lo necesita o hay cookie
+  const fallbackSec = { geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null }
+  const secConfig = await timeout(getSecurityConfig(), SUPABASE_TIMEOUT_MS, fallbackSec)
+
+  // 1. Geobloqueo
+  if (secConfig.geobloqueo) {
+    const country = getCountryFromRequest(request)
+    const geoResult = checkGeoBlock(country || '', secConfig.geobloqueo)
+    if (geoResult.blocked) {
+      logSecurityEvent({ ip, pais: geoResult.country || 'XX', ruta: pathname, metodo: method, motivo: 'geobloqueo', user_agent: ua })
+      return new NextResponse('Acceso denegado desde tu ubicación', { status: 403, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
+    }
   }
 
   // 2. Rate Limiting
@@ -65,44 +69,24 @@ export async function middleware(request: NextRequest) {
     if (regla) {
       const result = checkInMemory(ip, pathname, method, regla.limite, regla.ventana_segundos)
       if (!result.allowed) {
-        logSecurityEvent({
-          ip, pais: country || 'XX', ruta: pathname,
-          metodo: method, motivo: 'rate_limit', user_agent: ua,
-        })
-        const rlAlerts = checkAlerts('rate_limit', country || 'XX', ip, pathname, secConfig.alerts)
-        if (rlAlerts) dispatchAlerts(rlAlerts, secConfig.alerts!)
-        return new NextResponse(secConfig.rate_limiting.mensaje_limite, {
-          status: 429,
-          headers: {
-            'Content-Type': 'text/plain; charset=utf-8',
-            'Retry-After': String(Math.ceil(result.resetMs / 1000)),
-          },
-        })
+        logSecurityEvent({ ip, pais: countryFromReq(request) || 'XX', ruta: pathname, metodo: method, motivo: 'rate_limit', user_agent: ua })
+        return new NextResponse(secConfig.rate_limiting.mensaje_limite, { status: 429, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Retry-After': String(Math.ceil(result.resetMs / 1000)) } })
       }
     }
   }
 
-  // 3. Autenticación y autorización (con timeout 5s)
-  const response = await timeout(
-    updateSession(request),
-    SUPABASE_TIMEOUT_MS,
-    NextResponse.next({ request })
-  )
-
-  // 3b. Registrar login exitoso (desactivado - debug)
-  // if (pathname === '/login' && (response.status === 302 || response.status === 307)) {
-  //   const location = response.headers.get('location') || ''
-  //   if (location.startsWith('/superadmin') || location.startsWith('/miembros')) {
-  //     try { await recordLoginAttempt(request, ip, country || 'XX', ua) } catch {}
-  //   }
-  // }
+  // 3. Auth (solo para rutas protegidas o con cookie)
+  const fallbackAuth = NextResponse.next({ request })
+  let response: NextResponse
+  if (isProtected || hasSupabaseCookie || pathname === '/login') {
+    response = await timeout(updateSession(request), SUPABASE_TIMEOUT_MS, fallbackAuth)
+  } else {
+    response = NextResponse.next({ request })
+  }
 
   // 4. Security Headers
   if (secConfig.security_headers) {
-    try {
-      injectHeaders(response, secConfig.security_headers)
-      if (IS_DEV) console.log('[Middleware] Security Headers inyectados')
-    } catch { /* silencioso */ }
+    try { injectHeaders(response, secConfig.security_headers) } catch {}
   }
 
   return response

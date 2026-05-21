@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { LegalPage } from "@/components/legal/LegalPage"
 import type { LegalPageData } from "@/components/legal/LegalPage"
 
