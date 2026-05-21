@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import type { EmailFolder, EmailMessageSummary } from '../_types'
 
 export function useCorreoBandeja() {
@@ -11,6 +11,8 @@ export function useCorreoBandeja() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+
+  const loadingRef = useRef(false)
 
   const cargarFolders = useCallback(async (cuentaId: string) => {
     try {
@@ -28,9 +30,12 @@ export function useCorreoBandeja() {
     folder?: string,
     pageNum?: number,
     search?: string
-  ) => {
+  ): Promise<void> => {
+    if (loadingRef.current) return
+    loadingRef.current = true
     setLoading(true)
     setError(null)
+
     const f = folder || activeFolder
     const p = pageNum || 1
     const s = search !== undefined ? search : searchQuery
@@ -61,6 +66,7 @@ export function useCorreoBandeja() {
       setError(e.message)
     } finally {
       setLoading(false)
+      loadingRef.current = false
     }
   }, [activeFolder, searchQuery])
 
@@ -84,20 +90,7 @@ export function useCorreoBandeja() {
   }, [hasMore, loading, page, activeFolder, searchQuery, cargarMensajes])
 
   return {
-    folders,
-    activeFolder,
-    messages,
-    total,
-    page,
-    hasMore,
-    loading,
-    error,
-    searchQuery,
-    cargarFolders,
-    cargarMensajes,
-    cambiarFolder,
-    buscar,
-    cargarMas,
-    setError,
+    folders, activeFolder, messages, total, page, hasMore, loading, error, searchQuery,
+    cargarFolders, cargarMensajes, cambiarFolder, buscar, cargarMas, setError,
   }
 }
