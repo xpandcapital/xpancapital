@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useSpring } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { Hero } from "@/components/sections/Hero";
