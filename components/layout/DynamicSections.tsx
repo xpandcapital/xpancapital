@@ -201,6 +201,11 @@ export function DynamicSections({
         <div className="h-full bg-gradient-to-r from-blis-red via-blis-red-neon to-blis-red shadow-[0_0_8px_rgba(255,30,86,0.7)]" />
       </motion.div>
 
+      {/* DIAGNÓSTICO: confirmar que el código se ejecuta */}
+      <div className="fixed bottom-4 right-4 z-[9998] bg-blis-red text-white text-[10px] px-3 py-1.5 rounded-full font-mono uppercase tracking-widest shadow-[0_0_15px_rgba(255,30,86,0.5)]">
+        BLIS v3.0 · Tier 1+2 activo
+      </div>
+
       {sectionOrder.map((sectionKey: string, idx: number) => {
         if (!checkVisibility(sectionKey)) {
           return null;
