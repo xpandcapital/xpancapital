@@ -10,6 +10,7 @@ export const UNIVERSAL_VARIABLES = [
   { var: '{{enlace_acceso}}', desc: 'Link de acceso al dashboard' },
   { var: '{{logo_url}}', desc: 'URL del logo de la empresa' },
   { var: '{{nombre_plataforma}}', desc: 'Nombre de la plataforma' },
+  { var: '{{respuesta-de-correo}}', desc: 'Texto de respuesta del agente en el cliente de correo corporativo' },
 ];
 
 export const EVENT_GROUPS = [

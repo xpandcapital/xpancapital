@@ -11,7 +11,7 @@ import {
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
     CalendarDays, Megaphone, ClipboardList, BookOpenCheck, Package, Bell,
-    MessageCircle, Library, DollarSign
+    MessageCircle, Library, DollarSign, Inbox
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { LucideProps } from "lucide-react"
@@ -108,6 +108,7 @@ const ALL_SECTIONS: Section[] = [
                 subItems: [
                     { icon: MessageCircle, label: "Chat", href: "/superadmin/chat", permission: "chat:ver" },
                     { icon: Mail, label: "Correos", href: "/superadmin/mails", permission: "mails:ver" },
+                    { icon: Inbox, label: "Correo IMAP", href: "/superadmin/correo", permission: "correo:ver" },
                     { icon: CalendarDays, label: "Calendarios", href: "/superadmin/calendarios", permission: "calendarios:ver" },
                     { icon: FileText, label: "Formularios", href: "/superadmin/formularios", permission: "formularios:ver" },
                     { icon: UsersRound, label: "Leads", href: "/superadmin/leads", permission: "leads:ver" },
