@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Play, Eye, TrendingUp, ShieldCheck } from "lucide-react";
+import { Play, Eye } from "lucide-react";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { extractVideoUrl } from "@/lib/utils/video";
@@ -16,12 +16,12 @@ export function VideoShowcase() {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-blis-red/10 via-transparent to-transparent pointer-events-none z-0" />
 
             <div className="container mx-auto px-6 relative z-10 flex flex-col items-center gap-10 md:gap-20">
-                {/* 1. Header with premium spacing */}
+                {/* 1. Header */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 1 }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     className="text-center w-full"
                 >
                     <h2 className="text-4xl md:text-6xl font-black uppercase tracking-widest text-white mb-6">
@@ -32,23 +32,32 @@ export function VideoShowcase() {
                     </p>
                 </motion.div>
 
-                {/* 2. Stabilized Video Player */}
+                {/* 2. Video Player — scale-up suave */}
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
+                    initial={{ opacity: 0, scale: 0.9 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.8 }}
+                    transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
                     className="relative w-full max-w-5xl aspect-video glass-card p-2 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.9)] group"
                 >
-                    <div className="relative w-full h-full bg-zinc-950 rounded-[1.2rem] md:rounded-[1.5rem] overflow-hidden border border-white/5 shadow-inner">
-                        {/* THE VIDEO IFRAME */}
+                    {/* Borde neón pulsante */}
+                    <motion.div
+                        animate={{ scale: [1, 1.008, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        className="absolute -inset-[3px] rounded-[1.6rem] md:rounded-[2.1rem] pointer-events-none z-0"
+                        style={{
+                            background: "linear-gradient(135deg, rgba(255,30,86,0.25) 0%, transparent 40%, transparent 60%, rgba(255,30,86,0.15) 100%)",
+                            filter: "blur(6px)",
+                        }}
+                    />
+
+                    <div className="relative w-full h-full bg-zinc-950 rounded-[1.2rem] md:rounded-[1.5rem] overflow-hidden border border-white/5 shadow-inner z-10">
                         <div className="absolute inset-0 w-full h-full">
                             <iframe
                                 src={extractVideoUrl(videoData.embedUrl) || "https://adilo.bigcommand.com/watch/LteCS2H5"}
                                 className="w-full h-full border-0"
                                 allowFullScreen
-                                //@ts-ignore
-                                allowtransparency="true"
+                                allowTransparency={true}
                                 scrolling="no"
                             ></iframe>
                         </div>
@@ -71,12 +80,13 @@ export function VideoShowcase() {
                     </div>
                 </motion.div>
 
-                {/* 3. Stats Section - Sole Prominent Widget */}
+                {/* 3. Stats Section */}
                 <div className="w-full max-w-xl px-4 md:px-0">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
+                        transition={{ duration: 0.7, delay: 0.3 }}
                         className="bg-zinc-950/60 border border-white/10 p-6 md:p-8 rounded-2xl md:rounded-3xl flex flex-col gap-5 group hover:border-blis-red/30 transition-all duration-500 shadow-2xl backdrop-blur-md"
                     >
                         <div className="flex items-center justify-between gap-2">

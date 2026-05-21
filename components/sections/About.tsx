@@ -1,24 +1,26 @@
 "use client";
 
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { useState, useEffect } from "react";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { TrendingUp, X } from "lucide-react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { extractVideoUrl } from "@/lib/utils/video";
 
+const fadeVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+};
+
+const containerVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12 } }
+};
+
 export function About() {
     const { cmsData } = useLandingCMS();
     const [isMounted, setIsMounted] = useState(false);
-    const ref = useRef(null);
     const [isVideoOpen, setIsVideoOpen] = useState(false);
-    const { scrollYProgress } = useScroll({
-        target: ref,
-        offset: ["start end", "end start"]
-    });
-
-    const yText = useTransform(scrollYProgress, [0, 1], [50, -50]);
-    const yVideo = useTransform(scrollYProgress, [0, 1], [-50, 50]);
 
     useEffect(() => {
         setIsMounted(true);
@@ -32,11 +34,9 @@ export function About() {
     const stat2Label = cmsData.about.stat2Label || 'Lotes Entregados';
 
     return (
-        <section ref={ref} id="trayectoria" className="relative py-16 md:pt-20 md:pb-32 bg-gradient-to-t from-black via-zinc-950 to-black overflow-hidden cyber-texture">
+        <section id="trayectoria" className="relative py-16 md:pt-20 md:pb-32 bg-gradient-to-t from-black via-zinc-950 to-black overflow-hidden cyber-texture">
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-teal-900/10 rounded-full blur-[100px] mix-blend-screen pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blis-red/5 rounded-full blur-[120px] mix-blend-screen pointer-events-none" />
-            
-            {/* Animated grid background instead of Lottie */}
             <div className="absolute inset-0 opacity-5 pointer-events-none">
                 <div className="absolute inset-0" style={{
                     backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(32, 159, 137, 0.3) 0%, transparent 50%)'
@@ -44,18 +44,17 @@ export function About() {
             </div>
 
             <div className="container mx-auto px-6 relative z-10">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
-                    {/* Left Column (Text) */}
+                    {/* Left Column (Text) — Sticky en desktop */}
                     <motion.div
-                        style={{ y: yText }}
-                        initial={{ opacity: 0, x: -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.8 }}
-                        className="flex flex-col space-y-4 md:space-y-8 bg-black/40 p-5 md:p-8 rounded-3xl backdrop-blur-md border border-white/5"
+                        className="lg:sticky lg:top-32 flex flex-col space-y-4 md:space-y-6 bg-black/40 p-5 md:p-8 rounded-3xl backdrop-blur-md border border-white/5"
                     >
-                        <div>
+                        <motion.div variants={fadeVariants}>
                             <h2 className="text-sm font-bold tracking-[0.2em] text-[#209f89] uppercase mb-4 flex items-center gap-2">
                                 <span className="w-8 h-[1px] bg-[#209f89]"></span> {cmsData.about.missionTitle || 'Trayectoria y Solidez'}
                             </h2>
@@ -65,13 +64,13 @@ export function About() {
                                     {cmsData.about.title2 || 'Valor Patrimonial'}
                                 </span>
                             </h3>
-                        </div>
+                        </motion.div>
 
-                        <p className="text-gray-400 text-sm md:text-lg leading-relaxed font-light">
+                        <motion.p variants={fadeVariants} className="text-gray-400 text-sm md:text-lg leading-relaxed font-light">
                             {cmsData.about.missionText}
-                        </p>
+                        </motion.p>
 
-                        <div className="flex items-center gap-4 md:gap-6 pt-2 md:pt-4">
+                        <motion.div variants={fadeVariants} className="flex items-center gap-4 md:gap-6 pt-2 md:pt-4">
                             <div className="flex flex-col">
                                 <span className="text-2xl md:text-4xl font-black text-white" suppressHydrationWarning>{yearsExperience}</span>
                                 <span className="text-[10px] md:text-xs uppercase tracking-widest text-[#209f89] mt-1">{yearsLabel}</span>
@@ -88,28 +87,23 @@ export function About() {
                                 </span>
                                 <span className="text-[10px] md:text-xs uppercase tracking-widest text-gray-500 mt-1">{stat2Label}</span>
                             </div>
-                        </div>
-
-
+                        </motion.div>
                     </motion.div>
 
 
-                    {/* Right Column (Floating Video Container) */}
+                    {/* Right Column (Video Container) — desliza desde derecha */}
                     <motion.div
-                        style={{ y: yVideo }}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
+                        initial={{ opacity: 0, x: 40 }}
+                        whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true, margin: "-100px" }}
-                        transition={{ duration: 0.8 }}
-                        className="relative h-[600px] w-full"
+                        transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        className="relative h-[500px] md:h-[600px] w-full"
                     >
-                        {/* Antigravity floating effect via CSS class */}
                         <div
                             className="antigravity absolute inset-0 glass-card rounded-2xl overflow-hidden border border-[#209f89]/20 p-2 shadow-[0_0_30px_rgba(32,159,137,0.1)] cursor-pointer group"
                             onClick={() => setIsVideoOpen(true)}
                         >
                             <div className="relative w-full h-full bg-zinc-900 rounded-xl overflow-hidden">
-                                {/* Thumbnail Image */}
                                 <div 
                                     className="absolute inset-0 bg-cover bg-center opacity-70 group-hover:opacity-50 transition-opacity duration-500 scale-105 group-hover:scale-100" 
                                     style={{ backgroundImage: cmsData.about.videoThumbnail ? `url('${cmsData.about.videoThumbnail}')` : 'none' }}
@@ -120,13 +114,11 @@ export function About() {
                                     </div>
                                 )}
 
-                                {/* Play Button Overlay */}
                                 <div className="absolute inset-0 flex items-center justify-center">
                                     <div className="w-24 h-24 rounded-full bg-[#209f89]/20 backdrop-blur-md border border-[#209f89]/50 flex items-center justify-center hover:scale-110 hover:bg-[#209f89]/40 transition-all duration-300 shadow-[0_0_20px_rgba(32,159,137,0.5)]">
                                         <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-white border-b-[12px] border-b-transparent ml-2" />
                                     </div>
                                 </div>
-                                {/* Decorative Elements */}
                                 <div className="absolute top-6 left-6 flex gap-2 items-center bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm border border-white/10">
                                     <div className="w-2 h-2 rounded-full bg-blis-red animate-pulse" />
                                     <span className="text-[10px] font-mono tracking-widest text-white/90 uppercase">Conoce Nuestra Historia</span>
@@ -134,10 +126,8 @@ export function About() {
                             </div>
                         </div>
 
-                        {/* Glow effect behind */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-[#209f89]/10 blur-[100px] -z-10" />
 
-                        {/* Floating Produced Widget */}
                         <motion.div
                             animate={{ y: [-15, 15, -15] }}
                             transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
@@ -198,8 +188,7 @@ export function About() {
                         >
                             <iframe
                                 style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
-                                // @ts-ignore
-                                allowtransparency="true"
+                                allowTransparency={true}
                                 src={extractVideoUrl(cmsData.about.videoUrl)}
                                 frameBorder="0"
                                 allowFullScreen

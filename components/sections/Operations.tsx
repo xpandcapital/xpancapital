@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 
@@ -13,15 +13,19 @@ export function Operations() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [progress, setProgress] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
     const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
+
+    const sectionRef = useRef<HTMLElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: sectionRef,
+        offset: ["start end", "end start"]
+    });
+
+    // Parallax de profundidad: imagen de fondo se mueve más lento que el contenido
+    const yImage = useTransform(scrollYProgress, [0, 1], [40, -40]);
 
     useEffect(() => {
         setIsMounted(true);
-        const check = () => setIsMobile(window.innerWidth < 768);
-        check();
-        window.addEventListener('resize', check);
-        return () => window.removeEventListener('resize', check);
     }, []);
 
     useEffect(() => {
@@ -45,10 +49,8 @@ export function Operations() {
         setProgress(0);
     }, [images.length]);
 
-    // Auto-play timer - siempre corriendo
     useEffect(() => {
         if (images.length === 0) return;
-        
         const timer = setInterval(() => {
             setProgress((prev) => {
                 if (prev >= 100) {
@@ -58,32 +60,36 @@ export function Operations() {
                 return prev + 1.25;
             });
         }, 50);
-
         return () => clearInterval(timer);
     }, [images.length]);
 
     if (!isMounted) return null;
 
-    // If no images but we have stats, still show the section with a placeholder
     const hasContent = images.length > 0 || cmsData.operations.stats;
-
     if (!hasContent) return null;
 
 
     return (
-        <section id="operaciones" className="pt-10 md:pt-20 pb-24 bg-black overflow-hidden relative">
-            {/* Header Content */}
+        <section ref={sectionRef} id="operaciones" className="pt-10 md:pt-20 pb-24 bg-black overflow-hidden relative">
+            {/* Header — reveal asimétrico desde izquierda */}
             <div className="container mx-auto px-6 mb-12 flex justify-between items-end">
                 <motion.div
                     initial={{ opacity: 0, x: -30 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
+                    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 >
                     <h2 className="text-sm font-bold tracking-[0.2em] text-blis-red uppercase mb-2">{cmsData.operations.title}</h2>
                     <h3 className="text-4xl font-black text-white uppercase tracking-wide">{cmsData.operations.subtitle}</h3>
                 </motion.div>
 
-                <div className="flex gap-3">
+                <motion.div
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, delay: 0.2 }}
+                    className="flex gap-3"
+                >
                     <button
                         onClick={prevSlide}
                         className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 transition-all group active:scale-90"
@@ -96,13 +102,19 @@ export function Operations() {
                     >
                         <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </button>
-                </div>
+                </motion.div>
             </div>
 
             <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
 
-                {/* Main Slider Area */}
-                <div className="relative w-full lg:col-span-8">
+                {/* Slider — entra desde izquierda */}
+                <motion.div
+                    className="relative w-full lg:col-span-8"
+                    initial={{ opacity: 0, x: -40 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                >
                     <div className="relative h-[400px] md:h-[600px] w-full rounded-2xl overflow-hidden glass-card p-1 cursor-grab active:cursor-grabbing">
                         <AnimatePresence mode="wait">
                             <motion.div
@@ -121,17 +133,21 @@ export function Operations() {
                                 }}
                                 className="absolute inset-0"
                             >
-                                <div
-                                    className={`w-full h-full bg-cover bg-center transition-all duration-700 ${!loadedImages.has(currentIndex) ? 'blur-sm scale-105' : ''}`}
-                                    style={{ backgroundImage: images[currentIndex] ? `url(${images[currentIndex]})` : 'none' }}
+                                {/* Capa de imagen con parallax de profundidad */}
+                                <motion.div
+                                    style={{
+                                        y: yImage,
+                                        backgroundImage: images[currentIndex] ? `url(${images[currentIndex]})` : 'none',
+                                    }}
+                                    className={`w-[110%] h-[110%] -inset-[5%] absolute bg-cover bg-center transition-all duration-700 ${!loadedImages.has(currentIndex) ? 'blur-sm scale-105' : ''}`}
                                 />
-                                {/* Scanning Lines Aesthetic Overlay */}
+                                {/* Scanning Lines Overlay */}
                                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9zdmc+')] pointer-events-none" />
                             </motion.div>
                         </AnimatePresence>
                     </div>
 
-                    {/* Progress Dots - Catalog Style */}
+                    {/* Progress Dots */}
                     <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-3 z-30 px-6">
                         {images.map((_, index) => {
                             const isActive = index === currentIndex;
@@ -158,15 +174,21 @@ export function Operations() {
                             );
                         })}
                     </div>
-                </div>
+                </motion.div>
 
-                {/* Stats Sidebar */}
-                <div className="lg:col-span-4 grid grid-cols-2 gap-4 h-full md:min-h-[600px]">
+                {/* Stats Sidebar — entra desde derecha */}
+                <motion.div
+                    className="lg:col-span-4 grid grid-cols-2 gap-4 h-full md:min-h-[600px]"
+                    initial={{ opacity: 0, x: 40 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                >
                     <StatCard label="En Ventas" value={stats.sales} delay={0} />
                     <StatCard label="Urbanizaciones" value={stats.urbanizations} delay={0.1} />
                     <StatCard label="Clientes" value={stats.clients} prefix="+" delay={0.2} />
                     <StatCard label="Conferencias" value={stats.conferences} delay={0.3} />
-                </div>
+                </motion.div>
             </div>
         </section>
     );
