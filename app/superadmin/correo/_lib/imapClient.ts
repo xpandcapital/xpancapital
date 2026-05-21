@@ -184,7 +184,8 @@ function hasAttachmentParts(structure: any): boolean {
 export async function fetchFullMessage(
   client: ImapFlow,
   folderPath: string,
-  uid: number
+  uid: number,
+  markRead: boolean = false
 ): Promise<ParsedEmail | null> {
   const lock = await client.getMailboxLock(folderPath)
   try {
@@ -197,6 +198,10 @@ export async function fetchFullMessage(
     }, { uid: true })
 
     if (!msg) return null
+
+    if (markRead && msg.flags && !msg.flags.has('\\Seen')) {
+      try { await client.messageFlagsAdd(`${uid}`, ['\\Seen'], { uid: true }) } catch {}
+    }
 
     const { default: PostalMime } = await import('postal-mime')
     // @ts-ignore

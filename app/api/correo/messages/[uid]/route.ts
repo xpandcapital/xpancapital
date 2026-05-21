@@ -46,7 +46,7 @@ export async function GET(
       pass: decrypt(cuenta.password_enc),
     })
 
-    const parsed = await fetchFullMessage(client, folder, uid)
+    const parsed = await fetchFullMessage(client, folder, uid, true)
     await client.logout()
 
     if (!parsed) {

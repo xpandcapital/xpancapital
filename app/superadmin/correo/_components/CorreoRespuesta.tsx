@@ -14,6 +14,7 @@ interface Props {
   mensajeOriginal?: EmailMessageFull | null
   cuentaEmail: string
   cuentaNombre: string
+  cuentaFirma?: string
   cuentaId: string
   activeFolder: string
   onClose: () => void
@@ -21,7 +22,7 @@ interface Props {
 }
 
 export function CorreoRespuesta({
-  open, modo, mensajeOriginal, cuentaEmail, cuentaNombre, cuentaId, activeFolder,
+  open, modo, mensajeOriginal, cuentaEmail, cuentaNombre, cuentaFirma, cuentaId, activeFolder,
   onClose, onEnviado,
 }: Props) {
   const [to, setTo] = useState('')
@@ -42,6 +43,7 @@ export function CorreoRespuesta({
       if (modo === 'reply' && mensajeOriginal) {
         setTo(mensajeOriginal.from || '')
         setSubject(`Re: ${mensajeOriginal.subject}`)
+        setBody(cuentaFirma ? `\n\n---\n${cuentaFirma}` : '')
       } else if (modo === 'replyAll' && mensajeOriginal) {
         const all = [mensajeOriginal.from, mensajeOriginal.to]
           .filter(Boolean)
@@ -49,14 +51,15 @@ export function CorreoRespuesta({
           .join(', ')
         setTo(all)
         setSubject(`Re: ${mensajeOriginal.subject}`)
+        setBody(cuentaFirma ? `\n\n---\n${cuentaFirma}` : '')
       } else if (modo === 'forward' && mensajeOriginal) {
         setTo('')
         setSubject(`Fwd: ${mensajeOriginal.subject}`)
-        setBody(`\n\n--- Mensaje reenviado ---\nDe: ${mensajeOriginal.fromName} <${mensajeOriginal.from}>\nFecha: ${mensajeOriginal.date}\nAsunto: ${mensajeOriginal.subject}\n\n${mensajeOriginal.text || ''}`)
+        setBody(`\n\n--- Mensaje reenviado ---\nDe: ${mensajeOriginal.fromName} <${mensajeOriginal.from}>\nFecha: ${mensajeOriginal.date}\nAsunto: ${mensajeOriginal.subject}\n\n${mensajeOriginal.text || ''}${cuentaFirma ? `\n\n---\n${cuentaFirma}` : ''}`)
       } else {
         setTo('')
         setSubject('')
-        setBody('')
+        setBody(cuentaFirma ? `\n\n---\n${cuentaFirma}` : '')
       }
       cargarTemplates()
     }
@@ -66,7 +69,7 @@ export function CorreoRespuesta({
     try {
       const res = await fetch('/api/email-templates')
       const data = await res.json()
-      if (Array.isArray(data)) setTemplates(data)
+      if (data.success && Array.isArray(data.data)) setTemplates(data.data)
     } catch {}
   }
 
@@ -119,7 +122,7 @@ export function CorreoRespuesta({
     try {
       const res = await fetch(`/api/email-templates`)
       const data = await res.json()
-      const template = Array.isArray(data) ? data.find((t: any) => t.id === templateId) : null
+      const template = (data.success && Array.isArray(data.data)) ? data.data.find((t: any) => t.id === templateId) : null
       if (template) {
         const { generateHTML } = await import('@/app/superadmin/mails/lib/htmlGenerator')
         let blocks = template.blocks

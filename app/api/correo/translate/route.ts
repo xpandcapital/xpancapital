@@ -1,31 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
-
-const GOOGLE_TRANSLATE_BASE = 'https://translate.googleapis.com/translate_a/single'
-
-async function translateText(text: string, targetLang: string, sourceLang: string): Promise<string> {
-  const params = new URLSearchParams({
-    client: 'gtx',
-    sl: sourceLang || 'auto',
-    tl: targetLang,
-    dt: 't',
-    q: text,
-  })
-
-  const url = `${GOOGLE_TRANSLATE_BASE}?${params.toString()}`
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    throw new Error('Error al contactar Google Translate')
-  }
-
-  const data = await response.json()
-  const translated = (data[0] || [])
-    .map((segment: any) => segment[0] || '')
-    .join('')
-
-  return translated
-}
+import { translate } from '@vitalets/google-translate-api'
 
 export async function POST(request: NextRequest) {
   const auth = await getAuthUser(request)
@@ -46,28 +21,13 @@ export async function POST(request: NextRequest) {
     let translatedText = ''
 
     if (html) {
-      const textParts = html.split(/(<[^>]+>)/g)
-      const parts: string[] = []
-
-      for (const part of textParts) {
-        if (part.startsWith('<')) {
-          parts.push(part)
-        } else {
-          const trimmed = part.trim()
-          if (trimmed) {
-            const translated = await translateText(trimmed, target, source)
-            parts.push(part.replace(trimmed, translated))
-          } else {
-            parts.push(part)
-          }
-        }
-      }
-
-      translatedHtml = parts.join('')
+      const result = await translate(html, { to: target, from: source })
+      translatedHtml = result.text
     }
 
     if (text) {
-      translatedText = await translateText(text, target, source)
+      const result = await translate(text, { to: target, from: source })
+      translatedText = result.text
     }
 
     return NextResponse.json({

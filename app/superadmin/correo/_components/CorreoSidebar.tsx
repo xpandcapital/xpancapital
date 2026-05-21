@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   Inbox, Send, FileText, AlertTriangle, Trash2, Archive, Star,
-  ChevronDown, Plus, Settings, LogOut, Loader2,
+  ChevronDown, Plus, LogOut, Loader2, Mail, Columns, Sun, Moon, FileDown, Keyboard,
 } from 'lucide-react'
-import type { EmailFolder } from '../_types'
+import type { EmailFolder, EmailCuenta } from '../_types'
 
 interface Props {
   folders: EmailFolder[]
@@ -14,139 +14,146 @@ interface Props {
   onFolderChange: (folder: string) => void
   onRedactar: () => void
   onDesconectar: () => void
+  onSwitchCuenta: (cuenta: EmailCuenta) => void
+  onToggleSplit: () => void
+  onToggleTheme: () => void
+  onExportPDF: () => void
+  cuentas: EmailCuenta[]
+  cuentaActiva: EmailCuenta | null
   loading?: boolean
+  splitVertical: boolean
+  themeLight: boolean
 }
 
-const FOLDER_ICONS: Record<string, any> = {
-  INBOX: Inbox,
-  SENT: Send,
-  DRAFTS: FileText,
-  SPAM: AlertTriangle,
-  JUNK: AlertTriangle,
-  TRASH: Trash2,
-  ARCHIVE: Archive,
-  FLAGGED: Star,
+const FOLDER_LABELS: Record<string, string> = {
+  INBOX: 'Bandeja', SENT: 'Enviados', DRAFTS: 'Borradores',
+  SPAM: 'Spam', JUNK: 'Spam', TRASH: 'Papelera', ARCHIVE: 'Archivados', FLAGGED: 'Destacados',
 }
 
 function getFolderIcon(name: string) {
-  const upper = name.toUpperCase()
-  for (const key of Object.keys(FOLDER_ICONS)) {
-    if (upper.includes(key)) return FOLDER_ICONS[key]
-  }
+  const u = name.toUpperCase()
+  if (u === 'INBOX' || u.includes('INBOX')) return Inbox
+  if (u.includes('SENT') || u.includes('ENVIADOS')) return Send
+  if (u.includes('DRAFT') || u.includes('BORRADOR')) return FileText
+  if (u.includes('SPAM') || u.includes('JUNK') || u.includes('NO DESEADO')) return AlertTriangle
+  if (u.includes('TRASH') || u.includes('PAPELERA') || u.includes('ELIMINADO')) return Trash2
+  if (u.includes('ARCHIVE') || u.includes('ARCHIVO')) return Archive
+  if (u.includes('FLAGGED') || u.includes('DESTACAD')) return Star
   return ChevronDown
 }
 
 function getFolderLabel(name: string): string {
-  const map: Record<string, string> = {
-    INBOX: 'Bandeja de Entrada',
-    SENT: 'Enviados',
-    DRAFTS: 'Borradores',
-    SPAM: 'Spam',
-    JUNK: 'Spam',
-    TRASH: 'Papelera',
-    ARCHIVE: 'Archivados',
-    FLAGGED: 'Destacados',
-  }
-  const upper = name.toUpperCase()
-  for (const key of Object.keys(map)) {
-    if (upper === key || upper === `INBOX.${key}`) return map[key]
+  const u = name.toUpperCase()
+  for (const [k, v] of Object.entries(FOLDER_LABELS)) {
+    if (u === k || u === `INBOX.${k}` || u.includes(k)) return v
   }
   return name
 }
 
-export function CorreoSidebar({ folders, activeFolder, onFolderChange, onRedactar, onDesconectar, loading }: Props) {
-  const [colapsado, setColapsado] = useState(false)
+function getInitials(email: string): string {
+  return email.substring(0, 2).toUpperCase()
+}
 
-  const carpetasPrincipales = folders.filter(f => {
-    const n = f.name.toUpperCase()
-    return n === 'INBOX' || n.includes('SENT') || n.includes('DRAFT') || n.includes('SPAM') || n.includes('JUNK') || n.includes('TRASH') || n.includes('ARCHIVE')
-  })
-
-  const otrasCarpetas = folders.filter(f => !carpetasPrincipales.includes(f))
+export function CorreoSidebar({
+  folders, activeFolder, onFolderChange, onRedactar, onDesconectar,
+  onSwitchCuenta, onToggleSplit, onToggleTheme, onExportPDF,
+  cuentas, cuentaActiva, loading, splitVertical, themeLight
+}: Props) {
+  const sortedFolders = () => {
+    const order = ['INBOX', 'SENT', 'DRAFTS', 'SPAM', 'JUNK', 'TRASH', 'ARCHIVE', 'FLAGGED']
+    return [...folders].sort((a, b) => {
+      const ai = order.findIndex(o => a.name.toUpperCase().includes(o))
+      const bi = order.findIndex(o => b.name.toUpperCase().includes(o))
+      if (ai >= 0 && bi >= 0) return ai - bi
+      if (ai >= 0) return -1
+      if (bi >= 0) return 1
+      return a.name.localeCompare(b.name)
+    })
+  }
 
   return (
     <div className="w-56 shrink-0 border-r border-white/5 bg-zinc-950/50 flex flex-col h-full">
+      {/* Multi-account tabs */}
+      {cuentas.length > 1 && (
+        <div className="p-2 border-b border-white/5 space-y-1">
+          {cuentas.map((c) => (
+            <motion.button
+              key={c.id}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onSwitchCuenta(c)}
+              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all
+                ${c.id === cuentaActiva?.id ? 'bg-white/10 text-white font-semibold' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
+            >
+              <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold ${c.id === cuentaActiva?.id ? 'bg-blis-red/20 text-blis-red' : 'bg-white/5 text-gray-500'}`}>
+                {getInitials(c.email)}
+              </span>
+              <span className="truncate">{c.email}</span>
+            </motion.button>
+          ))}
+        </div>
+      )}
+
+      {/* Redactar */}
       <div className="p-3">
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={onRedactar}
-          className="w-full py-2.5 rounded-xl bg-blis-red text-white text-sm font-semibold
-            hover:bg-blis-red-neon transition-all duration-300
-            flex items-center justify-center gap-2"
+          className="w-full py-2.5 rounded-xl bg-blis-red text-white text-sm font-semibold hover:bg-blis-red-neon transition-all flex items-center justify-center gap-2"
         >
-          <Plus className="w-4 h-4" />
-          Redactar
+          <Plus className="w-4 h-4" /> Redactar
         </motion.button>
       </div>
 
+      {/* Folders */}
       <div className="flex-1 overflow-y-auto px-2 scrollbar-hide">
         {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-5 h-5 animate-spin text-gray-500" />
-          </div>
+          <div className="flex items-center justify-center py-8"><Loader2 className="w-5 h-5 animate-spin text-gray-500" /></div>
         ) : (
           <div className="space-y-0.5">
-            {carpetasPrincipales.map((folder) => {
+            {sortedFolders().map((folder) => {
               const Icon = getFolderIcon(folder.name)
               const active = activeFolder === folder.path
-              const label = getFolderLabel(folder.name)
-
               return (
                 <motion.button
                   key={folder.path}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => onFolderChange(folder.path)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200
-                    ${active
-                      ? 'bg-white/10 text-white font-semibold'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
-                    }`}
+                    ${active ? 'bg-white/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                 >
                   <Icon className={`w-4 h-4 ${active ? 'text-blis-red' : ''}`} />
-                  <span className="truncate">{label}</span>
+                  <span className="truncate">{getFolderLabel(folder.name)}</span>
                 </motion.button>
               )
             })}
-
-            {otrasCarpetas.length > 0 && (
-              <>
-                <div className="h-px bg-white/5 mx-3 my-2" />
-                {otrasCarpetas.map((folder) => {
-                  const Icon = getFolderIcon(folder.name)
-                  const active = activeFolder === folder.path
-
-                  return (
-                    <motion.button
-                      key={folder.path}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => onFolderChange(folder.path)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200
-                        ${active
-                          ? 'bg-white/10 text-white font-semibold'
-                          : 'text-gray-400 hover:text-white hover:bg-white/5'
-                        }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span className="truncate">{folder.name}</span>
-                    </motion.button>
-                  )
-                })}
-              </>
-            )}
           </div>
         )}
       </div>
 
-      <div className="p-2 border-t border-white/5">
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={onDesconectar}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-500
-            hover:text-red-400 hover:bg-red-500/5 transition-all duration-200"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Desconectar</span>
-        </motion.button>
+      {/* Toolbar */}
+      <div className="p-2 border-t border-white/5 space-y-0.5">
+        <div className="flex items-center gap-0.5">
+          <button onClick={onToggleSplit} className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors flex-1 flex items-center justify-center" title={splitVertical ? 'Vista horizontal' : 'Vista vertical'}>
+            <Columns className="w-4 h-4" />
+          </button>
+          <button onClick={onToggleTheme} className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors flex-1 flex items-center justify-center" title={themeLight ? 'Modo oscuro' : 'Modo claro'}>
+            {themeLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
+          <button onClick={onExportPDF} className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors flex-1 flex items-center justify-center" title="Exportar a PDF">
+            <FileDown className="w-4 h-4" />
+          </button>
+          <button onClick={() => alert('Atajos:\nR=Responder  Shift+A=Responder todos\nF=Reenviar  N=Nuevo  Del=Eliminar\nS=Estrella  E=Archivar  /=Buscar\nEsc=Cerrar  ?=Ayuda')} className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors flex-1 flex items-center justify-center" title="Atajos de teclado">
+            <Keyboard className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Cuenta activa info */}
+        {cuentaActiva && (
+          <button onClick={onDesconectar} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-all">
+            <LogOut className="w-4 h-4" />
+            <span className="truncate">{cuentaActiva.email}</span>
+          </button>
+        )}
       </div>
     </div>
   )
