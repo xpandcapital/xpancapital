@@ -33,14 +33,14 @@ function ParticleDot({ baseX, baseY, mouseX, mouseY, index }: { baseX: number; b
 
     return (
         <motion.div
-            className="absolute w-[2px] h-[2px] rounded-full"
+            className="absolute w-[3px] h-[3px] rounded-full"
             style={{
                 left: `${baseX}%`,
                 top: `${baseY}%`,
                 x: dx,
                 y: dy,
-                backgroundColor: `rgba(255,${30 + (index % 50)},86,${0.3 + (index % 5) * 0.1})`,
-                boxShadow: `0 0 ${2 + (index % 3)}px rgba(255,30,86,0.5)`,
+                backgroundColor: `rgba(255,${30 + (index % 50)},86,${0.5 + (index % 5) * 0.08})`,
+                boxShadow: `0 0 ${4 + (index % 4)}px rgba(255,30,86,0.8)`,
             }}
         />
     );
@@ -192,7 +192,7 @@ export function Hero() {
         >
             {/* Tracker de partículas — oculto en móvil */}
             <div ref={heroRef} className="hidden md:block absolute inset-0 z-[2] pointer-events-none">
-                {Array.from({ length: 20 }).map((_, i) => {
+                {Array.from({ length: 30 }).map((_, i) => {
                     const baseX = 5 + (i * 4.7) % 95;
                     const baseY = 7 + (i * 7.3) % 90;
                     return (
@@ -223,25 +223,32 @@ export function Hero() {
             </div>
 
             {/* Wireframe 3D arquitectónico — planos rotando */}
-            <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.08] flex items-center justify-center"
+            <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.15] flex items-center justify-center"
                 style={{ animation: "hero-wireframe-rotate 40s linear infinite" }}>
-                <svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="100" y="80" width="250" height="180" stroke="white" strokeWidth="0.5" strokeDasharray="4 4" />
-                    <rect x="120" y="100" width="80" height="60" stroke="white" strokeWidth="0.3" />
-                    <rect x="220" y="100" width="60" height="60" stroke="white" strokeWidth="0.3" />
-                    <line x1="100" y1="170" x2="350" y2="170" stroke="white" strokeWidth="0.4" />
-                    <rect x="450" y="60" width="300" height="200" stroke="white" strokeWidth="0.5" strokeDasharray="6 3" />
-                    <line x1="450" y1="110" x2="750" y2="110" stroke="white" strokeWidth="0.3" />
-                    <line x1="600" y1="60" x2="600" y2="260" stroke="white" strokeWidth="0.3" />
-                    <rect x="200" y="320" width="180" height="120" stroke="white" strokeWidth="0.4" />
-                    <circle cx="290" cy="380" r="20" stroke="white" strokeWidth="0.3" strokeDasharray="2 3" />
-                    <line x1="180" y1="50" x2="300" y2="320" stroke="white" strokeWidth="0.2" />
-                    <line x1="420" y1="40" x2="620" y2="400" stroke="white" strokeWidth="0.2" />
-                    <polygon points="500,350 650,420 580,500 430,430" stroke="white" strokeWidth="0.4" strokeDasharray="3 3" />
-                    <line x1="500" y1="350" x2="650" y2="500" stroke="white" strokeWidth="0.2" />
-                    <circle cx="520" cy="370" r="8" stroke="white" strokeWidth="0.3" />
-                    <line x1="50" y1="55" x2="780" y2="55" stroke="white" strokeWidth="0.2" />
-                    <line x1="50" y1="60" x2="780" y2="60" stroke="white" strokeWidth="0.15" />
+                <svg width="700" height="500" viewBox="0 0 700 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Estructura principal tipo edificio */}
+                    <rect x="80" y="60" width="220" height="380" stroke="white" strokeWidth="0.8" strokeDasharray="8 4" />
+                    <line x1="80" y1="190" x2="300" y2="190" stroke="white" strokeWidth="0.6" />
+                    <line x1="80" y1="320" x2="300" y2="320" stroke="white" strokeWidth="0.6" />
+                    <line x1="190" y1="60" x2="190" y2="440" stroke="white" strokeWidth="0.5" strokeDasharray="4 2" />
+                    {/* Ala izquierda */}
+                    <rect x="20" y="140" width="60" height="160" stroke="white" strokeWidth="0.6" />
+                    <line x1="20" y1="220" x2="80" y2="220" stroke="white" strokeWidth="0.4" />
+                    {/* Ala derecha – terreno */}
+                    <polygon points="300,440 700,440 700,480 300,480" stroke="white" strokeWidth="0.5" strokeDasharray="6 3" />
+                    <line x1="350" y1="380" x2="350" y2="440" stroke="white" strokeWidth="0.4" />
+                    <line x1="500" y1="320" x2="500" y2="440" stroke="white" strokeWidth="0.4" />
+                    <line x1="650" y1="240" x2="650" y2="440" stroke="white" strokeWidth="0.4" />
+                    {/* Niveles en terreno */}
+                    <line x1="300" y1="400" x2="700" y2="400" stroke="white" strokeWidth="0.3" strokeDasharray="2 4" />
+                    {/* Círculo centrado – plano maestro */}
+                    <circle cx="350" cy="250" r="30" stroke="white" strokeWidth="0.5" strokeDasharray="3 3" />
+                    <line x1="320" y1="250" x2="380" y2="250" stroke="white" strokeWidth="0.3" />
+                    <line x1="350" y1="220" x2="350" y2="280" stroke="white" strokeWidth="0.3" />
+                    {/* Cotas */}
+                    <line x1="60" y1="480" x2="300" y2="480" stroke="white" strokeWidth="0.3" />
+                    <line x1="60" y1="476" x2="60" y2="484" stroke="white" strokeWidth="0.3" />
+                    <line x1="300" y1="476" x2="300" y2="484" stroke="white" strokeWidth="0.3" />
                 </svg>
             </div>
 
