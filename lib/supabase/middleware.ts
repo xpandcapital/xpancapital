@@ -116,6 +116,7 @@ export async function updateSession(request: NextRequest) {
 
   let user: any = null
   let profileRol: string | null = null
+  let profileEmpresaId: string | null = null
 
   try {
     const supabase = createServerClient(
@@ -145,10 +146,11 @@ export async function updateSession(request: NextRequest) {
     if (user?.id) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('rol')
+        .select('rol, empresa_id')
         .eq('id', user.id)
         .single()
       if (profile?.rol) profileRol = profile.rol
+      if (profile?.empresa_id) profileEmpresaId = profile.empresa_id
     }
   } catch (error) {
     console.error('[Middleware] Error al verificar sesión:', error)
@@ -216,6 +218,17 @@ export async function updateSession(request: NextRequest) {
       redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
     })
     return redirectResponse
+  }
+
+  // 6. Inyectar headers de sesion para que API routes no re-consulten Supabase
+  if (user?.id) {
+    supabaseResponse.headers.set('x-blis-user-id', user.id)
+    if (profileRol) supabaseResponse.headers.set('x-blis-user-rol', profileRol)
+    if (user.email) supabaseResponse.headers.set('x-blis-user-email', user.email)
+    // empresa_id desde profile (mas confiable que app_metadata)
+    // @ts-ignore
+    const empresaId = profileEmpresaId || user.app_metadata?.empresa_id
+    if (empresaId) supabaseResponse.headers.set('x-blis-empresa-id', empresaId)
   }
 
   return supabaseResponse

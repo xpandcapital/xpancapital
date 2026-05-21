@@ -9,22 +9,35 @@ export interface AuthUser {
 }
 
 /**
- * Obtiene el usuario autenticado desde cookies/JWT en API routes.
- * Usa el mismo patrón que el middleware con @supabase/ssr.
+ * Obtiene el usuario autenticado. 
+ * PRIMERO revisa headers inyectados por el middleware (0 llamadas a Supabase).
+ * Solo si no hay headers, consulta Supabase (fallback).
  */
 export async function getAuthUser(request: NextRequest): Promise<AuthUser | null> {
+  // Fast path: headers del middleware (ya autenticado, 0 consultas a Supabase)
+  const headerUserId = request.headers.get('x-blis-user-id')
+  const headerEmpresaId = request.headers.get('x-blis-empresa-id')
+  const headerRol = request.headers.get('x-blis-user-rol')
+  const headerEmail = request.headers.get('x-blis-user-email')
+
+  if (headerUserId && headerEmpresaId) {
+    return {
+      userId: headerUserId,
+      empresaId: headerEmpresaId,
+      rol: headerRol || 'usuario',
+      email: headerEmail || undefined,
+    }
+  }
+
+  // Slow path: consultar Supabase (solo si el middleware no paso los headers)
   try {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll() {
-            return request.cookies.getAll()
-          },
-          setAll() {
-            // No-op en API routes (no necesitamos setear cookies)
-          },
+          getAll() { return request.cookies.getAll() },
+          setAll() {},
         },
       }
     )
@@ -52,9 +65,6 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
   }
 }
 
-/**
- * Verifica si el usuario tiene rol admin o superadmin.
- */
 export function isAdmin(user: AuthUser | null): boolean {
   if (!user) return false
   return ['superadmin', 'admin'].includes(user.rol)
