@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform, type Variants } from "framer-motion";
 import { ArrowRight, BarChart3, PieChart, Activity, TrendingUp } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 
 import { TrustBadges } from "./TrustBadges";
 import { useLandingCMS } from "@/context/LandingCMSContext";
@@ -42,6 +42,59 @@ function CharReveal({ text, className }: { text: string; className?: string }) {
           {char}
         </motion.span>
       ))}
+    </motion.span>
+  );
+}
+
+function GlitchText({ children, text }: { children: React.ReactNode; text: string }) {
+  const [phase, setPhase] = useState<"entrance" | "soft">("entrance");
+
+  useEffect(() => {
+    const t = setTimeout(() => setPhase("soft"), 3500);
+    return () => clearTimeout(t);
+  }, []);
+
+  const isHard = phase === "entrance";
+
+  return (
+    <motion.span className="relative inline-flex">
+      {/* Capas de aberración cromática — solo desktop */}
+      <span className="hidden md:contents">
+        <motion.span
+          aria-hidden="true"
+          className="absolute inset-0 inline-flex pointer-events-none select-none text-cyan-400"
+          style={{ clipPath: "inset(15% 0 65% 0)" }}
+          animate={isHard
+            ? { x: [-4, 6, -3, 2, -1], opacity: [0.9, 0.3, 0.8, 0.2, 0.7], skewX: [0, -3, 0, -2, 0] }
+            : { x: [0, 1, -0.5, 0], opacity: [0, 0.06, 0] }
+          }
+          transition={isHard
+            ? { duration: 0.1, repeat: Infinity, ease: "linear" }
+            : { duration: 2, repeat: Infinity, ease: "linear" }
+          }
+        >
+          {text}
+        </motion.span>
+        <motion.span
+          aria-hidden="true"
+          className="absolute inset-0 inline-flex pointer-events-none select-none text-red-500"
+          style={{ clipPath: "inset(60% 0 18% 0)" }}
+          animate={isHard
+            ? { x: [3, -5, 4, -2, 1], opacity: [0.9, 0.4, 0.8, 0.3, 0.7], skewX: [0, 2, 0, 3, 0] }
+            : { x: [0, -0.5, 0.8, 0], opacity: [0, 0.05, 0] }
+          }
+          transition={isHard
+            ? { duration: 0.12, repeat: Infinity, ease: "linear" }
+            : { duration: 2.5, repeat: Infinity, ease: "linear" }
+          }
+        >
+          {text}
+        </motion.span>
+      </span>
+      {/* Texto principal */}
+      <span className="relative z-10">
+        {children}
+      </span>
     </motion.span>
   );
 }
@@ -100,6 +153,15 @@ export function Hero() {
                 }
                 .neon-trace-corp {
                     animation: neon-trace-corp 3s ease-in-out 1.5s infinite;
+                }
+                @keyframes cyber-flicker {
+                    0%, 90%, 100% { filter: brightness(1); }
+                    92%  { filter: brightness(1.08) hue-rotate(1.5deg); }
+                    95%  { filter: brightness(0.94) hue-rotate(-1deg); }
+                    98%  { filter: brightness(1.03); }
+                }
+                .cyber-flicker {
+                    animation: cyber-flicker 6s ease-in-out infinite;
                 }
             `}</style>
 
@@ -235,12 +297,23 @@ export function Hero() {
                         {cmsData.hero.subtitle}
                     </motion.span>
 
-                    <h1 className="text-7xl sm:text-4xl md:text-[2.7rem] lg:text-[3.9rem] xl:text-[10rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[9rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!gap-[2rem] font-black tracking-tighter text-white mb-4 md:mb-5 uppercase flex flex-row items-center gap-3 md:gap-4 xl:gap-6 leading-none">
+                    <h1 className="text-7xl sm:text-4xl md:text-[2.7rem] lg:text-[3.9rem] xl:text-[10rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[9rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!mb-[2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!gap-[2rem] font-black tracking-tighter text-white mb-4 md:mb-5 uppercase flex flex-row items-center gap-3 md:gap-4 xl:gap-6 leading-none cyber-flicker">
                         <span className="neon-trace-blis">
-                            <CharReveal text={cmsData.hero.title1} />
+                            <GlitchText text={cmsData.hero.title1}>
+                                <CharReveal text={cmsData.hero.title1} />
+                            </GlitchText>
                         </span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-300 to-gray-600 neon-trace-corp">
-                            <CharReveal text={cmsData.hero.title2} />
+                        <span className="neon-trace-corp">
+                            <GlitchText text={cmsData.hero.title2}>
+                                <motion.span
+                                    className="inline-flex overflow-hidden bg-clip-text text-transparent bg-gradient-to-br from-white via-gray-300 to-gray-600"
+                                    initial={{ y: 40, opacity: 0, filter: "blur(6px)" }}
+                                    animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                                    transition={{ duration: 0.7, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}
+                                >
+                                    {cmsData.hero.title2}
+                                </motion.span>
+                            </GlitchText>
                         </span>
                     </h1>
 
