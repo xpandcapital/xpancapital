@@ -9,16 +9,27 @@ import { useLandingCMS } from "@/context/LandingCMSContext";
 import { cn } from "@/lib/utils";
 
 function ParticleDot({ baseX, baseY, mouseX, mouseY, index }: { baseX: number; baseY: number; mouseX: any; mouseY: any; index: number }) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => { setMounted(true); }, []);
+
     const dx = useTransform(mouseX, (mx: number) => {
-        const dist = Math.abs(mx / window.innerWidth * 100 - baseX);
+        if (!mounted) return 0;
+        const w = window.innerWidth || 1920;
+        const mxPercent = mx / w * 100;
+        const dist = Math.abs(mxPercent - baseX);
         const force = Math.max(0, 1 - dist / 30);
-        return (mx / window.innerWidth * 100 - baseX) * force * 0.6;
+        return (mxPercent - baseX) * force * 0.6;
     });
     const dy = useTransform(mouseY, (my: number) => {
-        const dist = Math.abs(my / window.innerHeight * 100 - baseY);
+        if (!mounted) return 0;
+        const h = window.innerHeight || 1080;
+        const myPercent = my / h * 100;
+        const dist = Math.abs(myPercent - baseY);
         const force = Math.max(0, 1 - dist / 25);
-        return (my / window.innerHeight * 100 - baseY) * force * 0.6;
+        return (myPercent - baseY) * force * 0.6;
     });
+
+    if (!mounted) return null;
 
     return (
         <motion.div
@@ -176,6 +187,7 @@ export function Hero() {
     return (
         <section
             ref={ref}
+            onMouseMove={handleParticleMove}
             className="relative min-h-screen flex items-center justify-center overflow-hidden bg-zinc-950"
         >
             {/* Tracker de partículas — oculto en móvil */}

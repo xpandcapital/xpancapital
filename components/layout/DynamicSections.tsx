@@ -19,7 +19,6 @@ import { FAQ } from "@/components/sections/FAQ";
 import { BlogPremium } from "@/components/sections/BlogPremium";
 import { FooterSections } from "@/components/sections/Footer";
 import { ConstructionLoader } from "@/components/ui/ConstructionLoader";
-import { SectionSkeleton } from "@/components/ui/SectionSkeleton";
 
 import { ThankYouHero } from "@/components/sections/ThankYouHero";
 import { ThankYouNextSteps } from "@/components/sections/ThankYouNextSteps";
