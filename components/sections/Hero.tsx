@@ -113,6 +113,10 @@ export function Hero() {
     const marqueeOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
     const yGrid = useTransform(scrollYProgress, [0, 1], [0, 75]);
 
+    // Parallax multicapa: cada orbe a distinta velocidad para profundidad
+    const yOrb1 = useTransform(scrollYProgress, [0, 1], [0, 120]);
+    const yOrb2 = useTransform(scrollYProgress, [0, 1], [0, -30]);
+
     // Botón magnético: el CTA primario sigue sutilmente al cursor
     const btnRef = useRef<HTMLButtonElement>(null);
     const magnetX = useMotionValue(0);
@@ -142,9 +146,12 @@ export function Hero() {
               className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_10%,transparent_100%)] pointer-events-none"
             />
 
-            {/* Ambient glow — neón carmesí */}
+            {/* Ambient glow — neón carmesí (multicapa) */}
             <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center">
-                <div className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-50" style={{ background: "radial-gradient(circle, rgba(255,30,86,0.15) 0%, transparent 60%)" }} />
+                {/* Orbe principal */}
+                <motion.div style={{ y: yOrb1, background: "radial-gradient(circle, rgba(255,30,86,0.15) 0%, transparent 60%)" }} className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-50" />
+                {/* Orbe secundario */}
+                <motion.div style={{ y: yOrb2, background: "radial-gradient(circle, rgba(32,159,137,0.1) 0%, transparent 60%)" }} className="absolute w-[400px] h-[400px] rounded-full blur-[80px] opacity-30 top-1/3 right-1/4" />
             </div>
 
             {/* Neon text animation styles */}

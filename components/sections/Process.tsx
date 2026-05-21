@@ -162,13 +162,21 @@ export function Process() {
                     <div className={`grid grid-cols-${Math.min(steps.length, 4)} gap-8`}>
                         {steps.map((step, index) => {
                             const Icon = iconMap[step.icon] || FileText;
+                            // Ensamblaje desde 4 direcciones distintas
+                            const dirs = [
+                                { x: -40, y: 0, label: "izquierda" },
+                                { x: 0, y: -40, label: "arriba" },
+                                { x: 0, y: 40, label: "abajo" },
+                                { x: 40, y: 0, label: "derecha" },
+                            ];
+                            const dir = dirs[index % 4];
                             return (
                                 <motion.div
                                     key={index}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
+                                    initial={{ opacity: 0, x: dir.x, y: dir.y }}
+                                    whileInView={{ opacity: 1, x: 0, y: 0 }}
                                     viewport={{ once: true, margin: "-60px" }}
-                                    transition={{ duration: 0.6, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
+                                    transition={{ duration: 0.7, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
                                     className="relative flex flex-col group"
                                 >
                                     <div className="relative w-20 h-20 bg-black border border-white/20 flex items-center justify-center rounded-xl mb-6 shadow-[0_0_15px_rgba(255,255,255,0.05)] z-10 mx-0 group-hover:border-blis-red/60 group-hover:shadow-[0_0_20px_rgba(190,11,60,0.3)] transition-all">

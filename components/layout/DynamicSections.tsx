@@ -201,7 +201,7 @@ export function DynamicSections({
         <div className="h-full bg-gradient-to-r from-blis-red via-blis-red-neon to-blis-red shadow-[0_0_8px_rgba(255,30,86,0.7)]" />
       </motion.div>
 
-      {sectionOrder.map((sectionKey: string) => {
+      {sectionOrder.map((sectionKey: string, idx: number) => {
         if (!checkVisibility(sectionKey)) {
           return null;
         }
@@ -215,17 +215,22 @@ export function DynamicSections({
         const sectionData = sectionConfig.needsData ? getSectionDataFromProps(sectionKey) : null;
 
         return (
-          <section
-            key={sectionKey}
-            id={sectionConfig.id}
-            className={sectionConfig.className}
-          >
-            {sectionConfig.needsData ? (
-              <Component data={sectionData || {}} />
-            ) : (
-              <Component />
+          <div key={sectionKey}>
+            {/* Separador sutil entre secciones */}
+            {idx > 0 && (
+              <div className="h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
             )}
-          </section>
+            <section
+              id={sectionConfig.id}
+              className={sectionConfig.className}
+            >
+              {sectionConfig.needsData ? (
+                <Component data={sectionData || {}} />
+              ) : (
+                <Component />
+              )}
+            </section>
+          </div>
         );
       })}
     </div>
