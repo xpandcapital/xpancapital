@@ -146,6 +146,9 @@ export function DynamicSections({
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
 
+  // Letterbox: barras negras superior/inferior que aparecen al salir del Hero
+  const letterboxOpacity = useTransform(scrollYProgress, [0, 0.06, 0.1], [0, 0, 1]);
+
   const hasExternalData = !!(externalOrder && externalOrder.length > 0) || !!externalSections;
 
   // Solo mostrar skeleton si no hay datos externos (SSR) y el contexto aún está cargando
@@ -205,6 +208,22 @@ export function DynamicSections({
       <div className="fixed bottom-4 right-4 z-[9998] bg-blis-red text-white text-[10px] px-3 py-1.5 rounded-full font-mono uppercase tracking-widest shadow-[0_0_15px_rgba(255,30,86,0.5)]">
         BLIS v3.0 · Tier 1+2 activo
       </div>
+
+      {/* Letterbox cinematográfico — barras negras al salir del Hero */}
+      <motion.div
+        style={{ opacity: letterboxOpacity }}
+        className="fixed inset-x-0 top-0 h-[50px] z-[9997] pointer-events-none"
+      >
+        <div className="h-full bg-gradient-to-b from-black to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blis-red/60 to-transparent" />
+      </motion.div>
+      <motion.div
+        style={{ opacity: letterboxOpacity }}
+        className="fixed inset-x-0 bottom-0 h-[40px] z-[9997] pointer-events-none"
+      >
+        <div className="h-full bg-gradient-to-t from-black to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blis-red/40 to-transparent" />
+      </motion.div>
 
       {sectionOrder.map((sectionKey: string, idx: number) => {
         if (!checkVisibility(sectionKey)) {

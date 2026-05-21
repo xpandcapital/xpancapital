@@ -8,6 +8,33 @@ import { TrustBadges } from "./TrustBadges";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { cn } from "@/lib/utils";
 
+function ParticleDot({ baseX, baseY, mouseX, mouseY, index }: { baseX: number; baseY: number; mouseX: any; mouseY: any; index: number }) {
+    const dx = useTransform(mouseX, (mx: number) => {
+        const dist = Math.abs(mx / window.innerWidth * 100 - baseX);
+        const force = Math.max(0, 1 - dist / 30);
+        return (mx / window.innerWidth * 100 - baseX) * force * 0.6;
+    });
+    const dy = useTransform(mouseY, (my: number) => {
+        const dist = Math.abs(my / window.innerHeight * 100 - baseY);
+        const force = Math.max(0, 1 - dist / 25);
+        return (my / window.innerHeight * 100 - baseY) * force * 0.6;
+    });
+
+    return (
+        <motion.div
+            className="absolute w-[2px] h-[2px] rounded-full"
+            style={{
+                left: `${baseX}%`,
+                top: `${baseY}%`,
+                x: dx,
+                y: dy,
+                backgroundColor: `rgba(255,${30 + (index % 50)},86,${0.3 + (index % 5) * 0.1})`,
+                boxShadow: `0 0 ${2 + (index % 3)}px rgba(255,30,86,0.5)`,
+            }}
+        />
+    );
+}
+
 const charContainerVariants: Variants = {
   hidden: {},
   visible: {
@@ -135,11 +162,40 @@ export function Hero() {
     };
     const handleMagnetLeave = () => { magnetX.set(0); magnetY.set(0); };
 
+    // Partículas reactivas al cursor
+    const heroRef = useRef<HTMLDivElement>(null);
+    const pMouseX = useMotionValue(0);
+    const pMouseY = useMotionValue(0);
+    const handleParticleMove = (e: React.MouseEvent) => {
+        const r = heroRef.current?.getBoundingClientRect();
+        if (!r) return;
+        pMouseX.set(e.clientX - r.left);
+        pMouseY.set(e.clientY - r.top);
+    };
+
     return (
         <section
             ref={ref}
             className="relative min-h-screen flex items-center justify-center overflow-hidden bg-zinc-950"
         >
+            {/* Tracker de partículas — oculto en móvil */}
+            <div ref={heroRef} className="hidden md:block absolute inset-0 z-[2] pointer-events-none">
+                {Array.from({ length: 20 }).map((_, i) => {
+                    const baseX = 5 + (i * 4.7) % 95;
+                    const baseY = 7 + (i * 7.3) % 90;
+                    return (
+                        <ParticleDot
+                            key={i}
+                            baseX={baseX}
+                            baseY={baseY}
+                            mouseX={pMouseX}
+                            mouseY={pMouseY}
+                            index={i}
+                        />
+                    );
+                })}
+            </div>
+
             {/* Tech Grid Background — Parallax (30% más lento que el texto) */}
             <motion.div
               style={{ y: yGrid }}
@@ -152,6 +208,29 @@ export function Hero() {
                 <motion.div style={{ y: yOrb1, background: "radial-gradient(circle, rgba(255,30,86,0.15) 0%, transparent 60%)" }} className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-50" />
                 {/* Orbe secundario */}
                 <motion.div style={{ y: yOrb2, background: "radial-gradient(circle, rgba(32,159,137,0.1) 0%, transparent 60%)" }} className="absolute w-[400px] h-[400px] rounded-full blur-[80px] opacity-30 top-1/3 right-1/4" />
+            </div>
+
+            {/* Wireframe 3D arquitectónico — planos rotando */}
+            <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.08] flex items-center justify-center"
+                style={{ animation: "hero-wireframe-rotate 40s linear infinite" }}>
+                <svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="100" y="80" width="250" height="180" stroke="white" strokeWidth="0.5" strokeDasharray="4 4" />
+                    <rect x="120" y="100" width="80" height="60" stroke="white" strokeWidth="0.3" />
+                    <rect x="220" y="100" width="60" height="60" stroke="white" strokeWidth="0.3" />
+                    <line x1="100" y1="170" x2="350" y2="170" stroke="white" strokeWidth="0.4" />
+                    <rect x="450" y="60" width="300" height="200" stroke="white" strokeWidth="0.5" strokeDasharray="6 3" />
+                    <line x1="450" y1="110" x2="750" y2="110" stroke="white" strokeWidth="0.3" />
+                    <line x1="600" y1="60" x2="600" y2="260" stroke="white" strokeWidth="0.3" />
+                    <rect x="200" y="320" width="180" height="120" stroke="white" strokeWidth="0.4" />
+                    <circle cx="290" cy="380" r="20" stroke="white" strokeWidth="0.3" strokeDasharray="2 3" />
+                    <line x1="180" y1="50" x2="300" y2="320" stroke="white" strokeWidth="0.2" />
+                    <line x1="420" y1="40" x2="620" y2="400" stroke="white" strokeWidth="0.2" />
+                    <polygon points="500,350 650,420 580,500 430,430" stroke="white" strokeWidth="0.4" strokeDasharray="3 3" />
+                    <line x1="500" y1="350" x2="650" y2="500" stroke="white" strokeWidth="0.2" />
+                    <circle cx="520" cy="370" r="8" stroke="white" strokeWidth="0.3" />
+                    <line x1="50" y1="55" x2="780" y2="55" stroke="white" strokeWidth="0.2" />
+                    <line x1="50" y1="60" x2="780" y2="60" stroke="white" strokeWidth="0.15" />
+                </svg>
             </div>
 
             {/* Neon text animation styles */}
@@ -187,6 +266,10 @@ export function Hero() {
                 }
                 .cyber-flicker {
                     animation: cyber-flicker 6s ease-in-out infinite;
+                }
+                @keyframes hero-wireframe-rotate {
+                    from { transform: rotate(0deg); }
+                    to   { transform: rotate(360deg); }
                 }
             `}</style>
 
