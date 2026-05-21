@@ -177,7 +177,8 @@ export async function POST(
       })
 
       let sentFolder = 'INBOX.Sent'
-      for await (const f of clientAppend.list()) {
+      const sentList = await clientAppend.list()
+      for (const f of sentList) {
         const name = f.name.toUpperCase()
         if (name === 'SENT' || name === 'ENVIADOS' || name === 'INBOX.SENT') {
           sentFolder = f.path

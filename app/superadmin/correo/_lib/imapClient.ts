@@ -80,7 +80,8 @@ export async function connectImap(config: ImapConfig): Promise<ImapFlow> {
 
 export async function listFolders(client: ImapFlow): Promise<FolderInfo[]> {
   const folders: FolderInfo[] = []
-  for await (const folder of client.list()) {
+  const list = await client.list()
+  for (const folder of list) {
     folders.push({
       path: folder.path,
       name: folder.name,

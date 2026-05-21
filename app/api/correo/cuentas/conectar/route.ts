@@ -49,7 +49,8 @@ export async function POST(request: NextRequest) {
     })
 
     const folders: string[] = []
-    for await (const f of client.list()) {
+    const list = await client.list()
+    for (const f of list) {
       if (f.subscribed) folders.push(f.path)
     }
 

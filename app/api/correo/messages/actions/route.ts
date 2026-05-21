@@ -67,7 +67,8 @@ export async function POST(request: NextRequest) {
           break
         case 'moveToSpam': {
           let spamFolder = 'INBOX.Spam'
-          for await (const f of client.list()) {
+          const spamList = await client.list()
+          for (const f of spamList) {
             if (f.name.toUpperCase() === 'SPAM' || f.name.toUpperCase() === 'JUNK') {
               spamFolder = f.path
               break
@@ -78,7 +79,8 @@ export async function POST(request: NextRequest) {
         }
         case 'moveToTrash': {
           let trashFolder = 'INBOX.Trash'
-          for await (const f of client.list()) {
+          const trashList = await client.list()
+          for (const f of trashList) {
             if (f.name.toUpperCase() === 'TRASH' || f.name.toUpperCase() === 'PAPELERA') {
               trashFolder = f.path
               break
@@ -89,7 +91,8 @@ export async function POST(request: NextRequest) {
         }
         case 'moveToArchive': {
           let archiveFolder = 'INBOX.Archive'
-          for await (const f of client.list()) {
+          const archList = await client.list()
+          for (const f of archList) {
             if (f.name.toUpperCase() === 'ARCHIVE' || f.name.toUpperCase() === 'ARCHIVO') {
               archiveFolder = f.path
               break
