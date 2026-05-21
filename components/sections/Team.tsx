@@ -1,15 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ShieldCheck, Crosshair, ArrowRight, Briefcase, Activity, Facebook, Instagram, Linkedin, Twitter, Youtube, MessageCircle, Mail, Phone, MapPin, Video as VideoIcon } from "lucide-react";
-import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
+import { ShieldCheck, Crosshair, Activity, Linkedin, Instagram, Facebook, Twitter, MessageCircle, Mail } from "lucide-react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
+import { useState } from "react";
 
 export function Team() {
     const { cmsData } = useLandingCMS();
     const { ceoName, ceoRole, ceoQuote, ceoDescription1, ceoDescription2, ceoImage, title, members, widget1Label, widget1Value, widget2Label, widget2Value } = cmsData.team;
 
-    // Use socials from the first member if available
     const socials = members[0]?.socials || {};
 
     const ceoLinks = [
@@ -23,32 +22,35 @@ export function Team() {
 
     const activeCeoLinks = ceoLinks.filter(link => link.url !== "");
 
-    // Widget values with defaults
+    const [isRevealed, setIsRevealed] = useState(false);
+
     const widgetLeft = { label: widget1Label || 'Cap. Administrado', value: widget1Value || '+$10M' };
     const widgetRight = { label: widget2Label || 'Garantía Fiduciaria', value: widget2Value || 'Cero Litigios' };
 
     return (
         <section className="pt-10 md:pt-20 pb-24 bg-gradient-to-t from-black via-zinc-950 to-black relative overflow-hidden">
-            {/* Minimalist Background Lines */}
             <div className="absolute inset-0 top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/5" />
 
             <div className="container mx-auto px-6 relative z-10 max-w-6xl">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
 
-                    {/* Left: C.E.O. Image / Silhouette Placeholder */}
+                    {/* Left: CEO Image — reveal de detalles */}
                     <div className="lg:col-span-5 relative">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                            className="relative lg:h-[700px] w-full rounded-2xl overflow-hidden glass-card p-2 border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] antigravity"
+                            onMouseEnter={() => setIsRevealed(true)}
+                            onMouseLeave={() => setIsRevealed(false)}
+                            onTouchStart={() => setIsRevealed(r => !r)}
+                            className="relative lg:h-[700px] w-full rounded-2xl overflow-hidden glass-card p-2 border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] antigravity group"
                         >
                             <div className="w-full h-full rounded-xl overflow-hidden relative bg-black min-h-[620px]">
-                                {/* Real CEO Photo */}
+                                {/* CEO Photo */}
                                 <div 
-                                    className="absolute inset-0 bg-cover bg-center bg-top opacity-90 hover:opacity-100 transition-all duration-700"
+                                    className="absolute inset-0 bg-cover bg-center bg-top opacity-90 transition-all duration-700 group-hover:opacity-100 group-hover:scale-105"
                                     style={{ backgroundImage: ceoImage ? `url('${ceoImage}')` : 'none' }}
                                 />
                                 {(!ceoImage || ceoImage === '') && (
@@ -56,28 +58,61 @@ export function Team() {
                                         <span className="text-gray-600 text-sm">Sin imagen</span>
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-70" />
 
+                                {/* Overlay — se intensifica al revelar */}
+                                <motion.div
+                                    className="absolute inset-0 pointer-events-none"
+                                    animate={{
+                                        background: isRevealed
+                                            ? "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, transparent 70%)"
+                                            : "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 40%, transparent 70%)"
+                                    }}
+                                    transition={{ duration: 0.4 }}
+                                />
+
+                                {/* Bottom info — siempre visible */}
                                 <div className="absolute bottom-6 left-6 right-6 z-10">
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 mb-2">
                                         <div className="w-12 h-[1px] bg-blis-red" />
                                         <span className="text-blis-red uppercase tracking-widest text-xs font-bold font-mono">{title}</span>
                                     </div>
-                                    <h3 className="text-3xl font-black text-white uppercase mt-2">{ceoName}</h3>
-                                    <p className="text-gray-300 font-light mt-1 text-sm tracking-wide mb-5">{ceoRole}</p>
+                                    <h3 className="text-3xl font-black text-white uppercase">{ceoName}</h3>
 
-                                    <div className="flex flex-wrap gap-2.5">
-                                        {activeCeoLinks.map((link, i) => (
-                                            <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" title={link.name} className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-gray-300 hover:text-white hover:border-white transition-all bg-black/40 backdrop-blur-md hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)]">
-                                                <link.icon className="w-4 h-4" />
-                                            </a>
-                                        ))}
-                                    </div>
+                                    {/* Cargo + Social Links — se deslizan hacia arriba al revelar */}
+                                    <motion.div
+                                        animate={{
+                                            y: isRevealed ? 0 : 8,
+                                            opacity: isRevealed ? 1 : 0.6,
+                                        }}
+                                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                                    >
+                                        <p className="text-gray-300 font-light mt-1 text-sm tracking-wide mb-4">
+                                            {ceoRole}
+                                        </p>
+
+                                        <div className="flex flex-wrap gap-2.5">
+                                            {activeCeoLinks.map((link, i) => (
+                                                <motion.a
+                                                    key={i}
+                                                    href={link.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    title={link.name}
+                                                    initial={{ opacity: 0, y: 6 }}
+                                                    animate={isRevealed ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
+                                                    transition={{ delay: i * 0.04, duration: 0.3 }}
+                                                    className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-gray-300 hover:text-white hover:border-white transition-all bg-black/40 backdrop-blur-md hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                                                >
+                                                    <link.icon className="w-4 h-4" />
+                                                </motion.a>
+                                            ))}
+                                        </div>
+                                    </motion.div>
                                 </div>
                             </div>
                         </motion.div>
 
-                        {/* Widget 1: Capital Administrado — top-left on mobile */}
+                        {/* Widget 1: Capital Administrado */}
                         <motion.div
                             animate={{ y: [-10, 10, -10] }}
                             transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
@@ -100,6 +135,7 @@ export function Team() {
                             </div>
                         </motion.div>
 
+                        {/* Widget 2: Garantía Fiduciaria */}
                         <motion.div
                             animate={{ y: [-10, 10, -10] }}
                             transition={{ repeat: Infinity, duration: 7, ease: "easeInOut", delay: 1 }}
@@ -123,7 +159,7 @@ export function Team() {
                         </motion.div>
                     </div>
 
-                    {/* Right: Copy & Vision */}
+                    {/* Right: Quote & Vision */}
                     <div className="lg:col-span-7">
                         <motion.div
                             initial={{ opacity: 0, x: 30 }}

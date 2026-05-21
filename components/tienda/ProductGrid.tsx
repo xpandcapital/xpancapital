@@ -79,15 +79,29 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
+            whileHover="hover"
+            whileTap={{ scale: 0.97 }}
             className="group relative flex flex-col glass-card rounded-2xl overflow-hidden border border-white/5 hover:border-blis-red/30 transition-colors"
         >
             {/* Square Image 1:1 Aspect Ratio Container */}
-            <div className="relative w-full aspect-square bg-[#0A0D11]">
+            <div className="relative w-full aspect-square bg-[#0A0D11] overflow-hidden">
                 <Image
                     src={product.image}
                     alt={product.title}
                     fill
                     className="object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                />
+
+                {/* Shine sweep on hover */}
+                <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    variants={{
+                        initial: { opacity: 0 },
+                        hover: { opacity: [0, 0.15, 0], transition: { duration: 0.8 } }
+                    }}
+                    style={{
+                        background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.1) 45%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.1) 55%, transparent 60%)",
+                    }}
                 />
 
                 {/* Visual Overlays & Badges */}
@@ -122,7 +136,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                         <span className="text-gray-500 text-xs">Exclusivo Blis</span>
                     </div>
 
-                    {/* Price and Action Line */}
+                    {/* Price and Action Line — botón deslizante */}
                     <div className="flex items-center justify-between">
                         <div className="flex flex-col">
                             {product.originalPrice && (
@@ -130,14 +144,23 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                                     ${product.originalPrice.toFixed(2)}
                                 </span>
                             )}
-                            <span className="text-white font-black text-xl tracking-tighter shadow-white/20 drop-shadow-md">
+                            <span className="text-white font-black text-xl tracking-tighter drop-shadow-md">
                                 ${product.price.toFixed(2)}
                             </span>
                         </div>
 
-                        <button className="w-10 h-10 rounded-xl bg-blis-red/20 text-blis-red border border-blis-red/30 flex items-center justify-center group-hover:bg-blis-red group-hover:text-white group-hover:shadow-[0_0_20px_rgba(190,11,60,0.4)] transition-all">
-                            <ShoppingCart className="w-5 h-5" />
-                        </button>
+                        <div className="relative overflow-hidden rounded-xl">
+                            <motion.button
+                                variants={{
+                                    initial: { y: 6, opacity: 0.7 },
+                                    hover: { y: 0, opacity: 1 }
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                className="w-10 h-10 rounded-xl bg-blis-red/20 text-blis-red border border-blis-red/30 flex items-center justify-center hover:bg-blis-red hover:text-white hover:shadow-[0_0_20px_rgba(190,11,60,0.4)] transition-colors"
+                            >
+                                <ShoppingCart className="w-5 h-5" />
+                            </motion.button>
+                        </div>
                     </div>
                 </div>
             </div>
