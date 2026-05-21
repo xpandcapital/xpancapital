@@ -8,39 +8,51 @@ import { TrustBadges } from "./TrustBadges";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { cn } from "@/lib/utils";
 
-function ParticleDot({ baseX, baseY, mouseX, mouseY, index }: { baseX: number; baseY: number; mouseX: any; mouseY: any; index: number }) {
+function ParticleDot({ mouseX, mouseY, index, seed }: { mouseX: any; mouseY: any; index: number; seed: number }) {
     const [mounted, setMounted] = useState(false);
     useEffect(() => { setMounted(true); }, []);
+
+    // Posiciones pseudo-aleatorias basadas en seed para que no cambien en cada render
+    const rng = (s: number) => { const x = Math.sin(s) * 10000; return x - Math.floor(x); };
+    const baseX = useRef(rng(seed * 1.3) * 92 + 4).current;
+    const baseY = useRef(rng(seed * 1.7) * 88 + 6).current;
+    const size = useRef(2 + rng(seed * 3.1) * 3).current;
+    const alpha = useRef(0.4 + rng(seed * 2.4) * 0.5).current;
+    const glow = useRef(3 + rng(seed * 5.2) * 6).current;
 
     const dx = useTransform(mouseX, (mx: number) => {
         if (!mounted) return 0;
         const w = window.innerWidth || 1920;
         const mxPercent = mx / w * 100;
         const dist = Math.abs(mxPercent - baseX);
-        const force = Math.max(0, 1 - dist / 30);
-        return (mxPercent - baseX) * force * 0.6;
+        const force = Math.max(0, 1 - dist / 25);
+        return (mxPercent - baseX) * force * 0.5;
     });
     const dy = useTransform(mouseY, (my: number) => {
         if (!mounted) return 0;
         const h = window.innerHeight || 1080;
         const myPercent = my / h * 100;
         const dist = Math.abs(myPercent - baseY);
-        const force = Math.max(0, 1 - dist / 25);
-        return (myPercent - baseY) * force * 0.6;
+        const force = Math.max(0, 1 - dist / 22);
+        return (myPercent - baseY) * force * 0.5;
     });
 
     if (!mounted) return null;
 
     return (
         <motion.div
-            className="absolute w-[3px] h-[3px] rounded-full"
+            className="absolute rounded-full"
+            animate={{ opacity: [alpha * 0.5, alpha, alpha * 0.6, alpha] }}
+            transition={{ duration: 4 + (index % 3) * 1.5, repeat: Infinity, ease: "easeInOut", delay: index * 0.2 }}
             style={{
                 left: `${baseX}%`,
                 top: `${baseY}%`,
+                width: size,
+                height: size,
                 x: dx,
                 y: dy,
-                backgroundColor: `rgba(255,${30 + (index % 50)},86,${0.5 + (index % 5) * 0.08})`,
-                boxShadow: `0 0 ${4 + (index % 4)}px rgba(255,30,86,0.8)`,
+                backgroundColor: `rgba(255,${25 + (index % 55)},86,${alpha})`,
+                boxShadow: `0 0 ${glow}px rgba(255,30,86,0.7)`,
             }}
         />
     );
@@ -192,20 +204,9 @@ export function Hero() {
         >
             {/* Tracker de partículas — oculto en móvil */}
             <div ref={heroRef} className="hidden md:block absolute inset-0 z-[2] pointer-events-none">
-                {Array.from({ length: 30 }).map((_, i) => {
-                    const baseX = 5 + (i * 4.7) % 95;
-                    const baseY = 7 + (i * 7.3) % 90;
-                    return (
-                        <ParticleDot
-                            key={i}
-                            baseX={baseX}
-                            baseY={baseY}
-                            mouseX={pMouseX}
-                            mouseY={pMouseY}
-                            index={i}
-                        />
-                    );
-                })}
+                {Array.from({ length: 35 }).map((_, i) => (
+                    <ParticleDot key={i} mouseX={pMouseX} mouseY={pMouseY} index={i} seed={i * 7 + 13} />
+                ))}
             </div>
 
             {/* Tech Grid Background — Parallax (30% más lento que el texto) */}
@@ -220,36 +221,6 @@ export function Hero() {
                 <motion.div style={{ y: yOrb1, background: "radial-gradient(circle, rgba(255,30,86,0.15) 0%, transparent 60%)" }} className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-50" />
                 {/* Orbe secundario */}
                 <motion.div style={{ y: yOrb2, background: "radial-gradient(circle, rgba(32,159,137,0.1) 0%, transparent 60%)" }} className="absolute w-[400px] h-[400px] rounded-full blur-[80px] opacity-30 top-1/3 right-1/4" />
-            </div>
-
-            {/* Wireframe 3D arquitectónico — planos rotando */}
-            <div className="absolute inset-0 pointer-events-none z-[1] opacity-[0.15] flex items-center justify-center"
-                style={{ animation: "hero-wireframe-rotate 40s linear infinite" }}>
-                <svg width="700" height="500" viewBox="0 0 700 500" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    {/* Estructura principal tipo edificio */}
-                    <rect x="80" y="60" width="220" height="380" stroke="white" strokeWidth="0.8" strokeDasharray="8 4" />
-                    <line x1="80" y1="190" x2="300" y2="190" stroke="white" strokeWidth="0.6" />
-                    <line x1="80" y1="320" x2="300" y2="320" stroke="white" strokeWidth="0.6" />
-                    <line x1="190" y1="60" x2="190" y2="440" stroke="white" strokeWidth="0.5" strokeDasharray="4 2" />
-                    {/* Ala izquierda */}
-                    <rect x="20" y="140" width="60" height="160" stroke="white" strokeWidth="0.6" />
-                    <line x1="20" y1="220" x2="80" y2="220" stroke="white" strokeWidth="0.4" />
-                    {/* Ala derecha – terreno */}
-                    <polygon points="300,440 700,440 700,480 300,480" stroke="white" strokeWidth="0.5" strokeDasharray="6 3" />
-                    <line x1="350" y1="380" x2="350" y2="440" stroke="white" strokeWidth="0.4" />
-                    <line x1="500" y1="320" x2="500" y2="440" stroke="white" strokeWidth="0.4" />
-                    <line x1="650" y1="240" x2="650" y2="440" stroke="white" strokeWidth="0.4" />
-                    {/* Niveles en terreno */}
-                    <line x1="300" y1="400" x2="700" y2="400" stroke="white" strokeWidth="0.3" strokeDasharray="2 4" />
-                    {/* Círculo centrado – plano maestro */}
-                    <circle cx="350" cy="250" r="30" stroke="white" strokeWidth="0.5" strokeDasharray="3 3" />
-                    <line x1="320" y1="250" x2="380" y2="250" stroke="white" strokeWidth="0.3" />
-                    <line x1="350" y1="220" x2="350" y2="280" stroke="white" strokeWidth="0.3" />
-                    {/* Cotas */}
-                    <line x1="60" y1="480" x2="300" y2="480" stroke="white" strokeWidth="0.3" />
-                    <line x1="60" y1="476" x2="60" y2="484" stroke="white" strokeWidth="0.3" />
-                    <line x1="300" y1="476" x2="300" y2="484" stroke="white" strokeWidth="0.3" />
-                </svg>
             </div>
 
             {/* Neon text animation styles */}
@@ -285,10 +256,6 @@ export function Hero() {
                 }
                 .cyber-flicker {
                     animation: cyber-flicker 6s ease-in-out infinite;
-                }
-                @keyframes hero-wireframe-rotate {
-                    from { transform: rotate(0deg); }
-                    to   { transform: rotate(360deg); }
                 }
             `}</style>
 
