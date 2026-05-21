@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { CorreoLogin } from './CorreoLogin'
 import { CorreoSidebar } from './CorreoSidebar'
 import { CorreoLista } from './CorreoLista'
@@ -12,10 +12,10 @@ import { useCorreoMensaje } from '../_hooks/useCorreoMensaje'
 import { useCorreoEnvio } from '../_hooks/useCorreoEnvio'
 
 export function CorreoLayout() {
-  const { cuentaActiva, cuentas, loading: cuentaLoading, cargarCuentas, desconectarCuenta, seleccionarCuenta } = useCorreoCuenta()
+  const { cuentaActiva, cuentas, cargarCuentas, desconectarCuenta, seleccionarCuenta } = useCorreoCuenta()
   const {
-    folders, activeFolder, messages, total, hasMore, loading: bandejaLoading,
-    searchQuery, cargarFolders, cargarMensajes, cambiarFolder, buscar, cargarMas,
+    folders, activeFolder, messages, total, hasMore, loading: bandejaLoading, searchQuery,
+    cargarFolders, cargarMensajes, cambiarFolder, buscar, cargarMas,
   } = useCorreoBandeja()
   const {
     mensaje, loading: mensajeLoading, traduciendo, mostrarTraduccion, traduccion,
@@ -30,20 +30,14 @@ export function CorreoLayout() {
   const [selectedUids, setSelectedUids] = useState<number[]>([])
   const [splitVertical, setSplitVertical] = useState(false)
   const [themeLight, setThemeLight] = useState(false)
-  const [initialized, setInitialized] = useState(false)
+  const [neverLoaded, setNeverLoaded] = useState(true)
 
-  // Ref to prevent concurrent fetches
   const fetchingRef = useRef(false)
-  const cuentaRef = useRef(cuentaActiva)
-  cuentaRef.current = cuentaActiva
-  const activeFolderRef = useRef(activeFolder)
-  activeFolderRef.current = activeFolder
-  const searchRef = useRef(searchQuery)
-  searchRef.current = searchQuery
-  const selectedUidRef = useRef(selectedUid)
-  selectedUidRef.current = selectedUid
-  const mensajeRef = useRef(mensaje)
-  mensajeRef.current = mensaje
+  const cuentaRef = useRef(cuentaActiva); cuentaRef.current = cuentaActiva
+  const activeFolderRef = useRef(activeFolder); activeFolderRef.current = activeFolder
+  const selectedUidRef = useRef(selectedUid); selectedUidRef.current = selectedUid
+  const mensajeRef = useRef(mensaje); mensajeRef.current = mensaje
+  const messagesRef = useRef(messages); messagesRef.current = messages
 
   // Auto-detect theme (once on mount)
   useEffect(() => {
@@ -54,7 +48,7 @@ export function CorreoLayout() {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
-  // Keyboard shortcuts (stable, no state deps needed via refs)
+  // Keyboard shortcuts (stable via refs, only registered once)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return
@@ -63,10 +57,6 @@ export function CorreoLayout() {
       else if (key === 'a' && e.ctrlKey && !e.shiftKey) { e.preventDefault(); setRespuestaModo('replyAll'); setRespuestaOpen(true) }
       else if (key === 'f' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setRespuestaModo('forward'); setRespuestaOpen(true) }
       else if (key === 'n' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setRespuestaModo('compose'); setRespuestaOpen(true) }
-      else if (key === 'delete' && selectedUidRef.current) { e.preventDefault(); handleAccionInterna('delete', selectedUidRef.current) }
-      else if (key === 's' && selectedUidRef.current && !e.ctrlKey) { e.preventDefault(); handleAccionInterna(mensajeRef.current?.isFlagged ? 'unflag' : 'flag', selectedUidRef.current) }
-      else if (key === 'e' && selectedUidRef.current) { e.preventDefault(); handleAccionInterna('moveToArchive', selectedUidRef.current) }
-      else if (key === '/' && !e.ctrlKey) { e.preventDefault(); buscar('') }
       else if (key === 'escape') { setRespuestaOpen(false); setSelectedUids([]) }
       else if (key === '?' && e.shiftKey) { alert('Atajos:\nR=Responder  Shift+A=Responder todos  F=Reenviar  N=Nuevo\nDel=Eliminar  S=Estrella  E=Archivar  /=Buscar  Esc=Cerrar') }
     }
@@ -74,55 +64,20 @@ export function CorreoLayout() {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  // Load cuentas once on mount
+  // SOLO carga lista de cuentas al montar. NADA de IMAP.
   useEffect(() => {
     let cancelled = false
     cargarCuentas().then((list) => {
       if (cancelled) return
       if (list && list.length > 0) {
-        const primera = list[0]
-        seleccionarCuenta(primera)
+        seleccionarCuenta(list[0])
         setConectado(true)
-        cargarFolders(primera.id)
-        cargarMensajes(primera.id, 'INBOX', 1)
-        setInitialized(true)
       }
     })
     return () => { cancelled = true }
   }, [])
 
-  // Cuando cambia activeFolder (solo si ya inicializado y no es trigger de conectado)
-  useEffect(() => {
-    if (!cuentaActiva || !initialized || fetchingRef.current) return
-    fetchingRef.current = true
-    cargarMensajes(cuentaActiva.id, activeFolder, 1).finally(() => {
-      fetchingRef.current = false
-    })
-  }, [activeFolder, initialized])
-
-  // Busqueda con debounce (solo si ya inicializado)
-  useEffect(() => {
-    if (!cuentaActiva || !initialized || searchQuery === undefined) return
-    if (fetchingRef.current) return
-    const timer = setTimeout(() => {
-      if (fetchingRef.current) return
-      fetchingRef.current = true
-      cargarMensajes(cuentaActiva.id, activeFolder, 1, searchQuery).finally(() => {
-        fetchingRef.current = false
-      })
-    }, 400)
-    return () => clearTimeout(timer)
-  }, [searchQuery, initialized])
-
-  const handleAccionInterna = async (action: string, uid: number) => {
-    const cta = cuentaRef.current
-    if (!cta) return
-    try {
-      await ejecutarAccion(cta.id, activeFolderRef.current, action, [uid])
-      cargarMensajes(cta.id, activeFolderRef.current, 1)
-    } catch {}
-  }
-
+  // Al conectar una cuenta nueva via login
   const handleConectado = async (result: any) => {
     const list = await cargarCuentas()
     if (list && list.length > 0) {
@@ -130,23 +85,54 @@ export function CorreoLayout() {
       if (cuentaConectada) {
         seleccionarCuenta(cuentaConectada)
         setConectado(true)
-        setInitialized(true)
+        // Despues de conectar, cargar carpetas pero NO mensajes
         cargarFolders(cuentaConectada.id)
-        cargarMensajes(cuentaConectada.id, 'INBOX', 1)
       }
     }
   }
 
+  // Refresh manual — unico lugar donde se cargan mensajes
+  const handleRefresh = async () => {
+    const cta = cuentaRef.current
+    if (!cta || fetchingRef.current) return
+    fetchingRef.current = true
+    setNeverLoaded(false)
+    try {
+      if (folders.length === 0) await cargarFolders(cta.id)
+      await cargarMensajes(cta.id, activeFolderRef.current, 1)
+    } finally {
+      fetchingRef.current = false
+    }
+  }
+
+  // Cambiar carpeta: solo cambia el estado, no carga nada. El usuario debe hacer refresh.
+  const handleFolderChange = (folder: string) => {
+    cambiarFolder(folder)
+    setSelectedUids([])
+    setSelectedUid(null)
+  }
+
+  // Busqueda: solo al presionar Enter
+  const handleSearch = (query: string) => {
+    buscar(query)
+  }
+
+  const handleSearchSubmit = async () => {
+    const cta = cuentaRef.current
+    if (!cta || fetchingRef.current || !searchQuery) return
+    fetchingRef.current = true
+    try {
+      await cargarMensajes(cta.id, activeFolderRef.current, 1, searchQuery)
+    } finally {
+      fetchingRef.current = false
+    }
+  }
+
+  // Abrir mensaje: carga individual bajo demanda
   const handleSelectMessage = async (uid: number) => {
     if (!cuentaActiva) return
     setSelectedUid(uid)
     cargarMensaje(cuentaActiva.id, uid, activeFolder)
-  }
-
-  const handleRefresh = () => {
-    if (!cuentaActiva || fetchingRef.current) return
-    fetchingRef.current = true
-    cargarMensajes(cuentaActiva.id, activeFolder, 1).finally(() => { fetchingRef.current = false })
   }
 
   const handleLoadMore = () => {
@@ -159,19 +145,21 @@ export function CorreoLayout() {
   }
 
   const handleAccion = async (action: string, uid: number) => {
-    if (!cuentaActiva) return
+    const cta = cuentaRef.current
+    if (!cta) return
     try {
-      await ejecutarAccion(cuentaActiva.id, activeFolder, action, [uid])
-      cargarMensajes(cuentaActiva.id, activeFolder, 1)
+      await ejecutarAccion(cta.id, activeFolderRef.current, action, [uid])
+      if (messagesRef.current.length > 0) cargarMensajes(cta.id, activeFolderRef.current, 1)
     } catch {}
   }
 
   const handleBulkAction = async (action: string) => {
-    if (!cuentaActiva || selectedUids.length === 0) return
+    const cta = cuentaRef.current
+    if (!cta || selectedUids.length === 0) return
     try {
-      await ejecutarAccion(cuentaActiva.id, activeFolder, action, selectedUids)
+      await ejecutarAccion(cta.id, activeFolderRef.current, action, selectedUids)
       setSelectedUids([])
-      cargarMensajes(cuentaActiva.id, activeFolder, 1)
+      if (messagesRef.current.length > 0) cargarMensajes(cta.id, activeFolderRef.current, 1)
     } catch {}
   }
 
@@ -179,8 +167,8 @@ export function CorreoLayout() {
     seleccionarCuenta(cuenta)
     setSelectedUid(null)
     setSelectedUids([])
+    // Al cambiar cuenta: carga carpetas, NO mensajes
     cargarFolders(cuenta.id)
-    cargarMensajes(cuenta.id, 'INBOX', 1)
   }
 
   const handleToggleSplit = () => setSplitVertical(!splitVertical)
@@ -194,8 +182,6 @@ export function CorreoLayout() {
       const remaining = (cuentas || []).filter(c => c.id !== id)
       if (remaining.length > 0) {
         seleccionarCuenta(remaining[0])
-        cargarFolders(remaining[0].id)
-        cargarMensajes(remaining[0].id, 'INBOX', 1)
       } else {
         setConectado(false)
       }
@@ -211,7 +197,7 @@ export function CorreoLayout() {
       <CorreoSidebar
         folders={folders}
         activeFolder={activeFolder}
-        onFolderChange={(f) => { cambiarFolder(f); setSelectedUids([]) }}
+        onFolderChange={handleFolderChange}
         onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true) }}
         onDesconectar={handleDesconectar}
         onSwitchCuenta={handleSwitchCuenta}
@@ -220,7 +206,7 @@ export function CorreoLayout() {
         onExportPDF={handleExportPDF}
         cuentas={cuentas || []}
         cuentaActiva={cuentaActiva}
-        loading={bandejaLoading && messages.length === 0}
+        loading={false}
         splitVertical={splitVertical}
         themeLight={themeLight}
       />
@@ -229,7 +215,8 @@ export function CorreoLayout() {
         messages={messages}
         loading={bandejaLoading}
         searchQuery={searchQuery}
-        onSearch={buscar}
+        onSearch={handleSearch}
+        onSearchSubmit={handleSearchSubmit}
         onSelectMessage={handleSelectMessage}
         onLoadMore={handleLoadMore}
         hasMore={hasMore}
@@ -239,6 +226,7 @@ export function CorreoLayout() {
         selectedUids={selectedUids}
         onSelectUids={setSelectedUids}
         onBulkAction={handleBulkAction}
+        neverLoaded={neverLoaded}
       />
 
       <CorreoVisor
@@ -266,9 +254,7 @@ export function CorreoLayout() {
         cuentaId={cuentaActiva?.id || ''}
         activeFolder={activeFolder}
         onClose={() => setRespuestaOpen(false)}
-        onEnviado={() => {
-          if (cuentaActiva) cargarMensajes(cuentaActiva.id, activeFolder, 1)
-        }}
+        onEnviado={() => {}}
       />
     </div>
   )

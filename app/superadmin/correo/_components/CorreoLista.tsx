@@ -2,8 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Loader2, Inbox, RefreshCw, Trash2, Archive, AlertTriangle, CheckSquare, Square, Mail } from 'lucide-react'
-import { CorreoSearchBar } from './CorreoSearchBar'
+import { Loader2, Inbox, RefreshCw, Trash2, Archive, AlertTriangle, CheckSquare, Square, Mail, Search } from 'lucide-react'
 import { CorreoItem } from './CorreoItem'
 import type { EmailMessageSummary } from '../_types'
 
@@ -12,6 +11,7 @@ interface Props {
   loading: boolean
   searchQuery: string
   onSearch: (query: string) => void
+  onSearchSubmit: () => void
   onSelectMessage: (uid: number) => void
   onLoadMore: () => void
   hasMore: boolean
@@ -21,6 +21,7 @@ interface Props {
   selectedUids: number[]
   onSelectUids: (uids: number[]) => void
   onBulkAction: (action: string) => void
+  neverLoaded: boolean
 }
 
 const FILTERS = [
@@ -30,8 +31,8 @@ const FILTERS = [
 ]
 
 export function CorreoLista({
-  messages, loading, searchQuery, onSearch, onSelectMessage, onLoadMore,
-  hasMore, onRefresh, total, activeFolder, selectedUids, onSelectUids, onBulkAction,
+  messages, loading, searchQuery, onSearch, onSearchSubmit, onSelectMessage, onLoadMore,
+  hasMore, onRefresh, total, activeFolder, selectedUids, onSelectUids, onBulkAction, neverLoaded,
 }: Props) {
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
@@ -48,18 +49,17 @@ export function CorreoLista({
   }
 
   const handleCheck = (uid: number) => {
-    onSelectUids(
-      selectedUids.includes(uid)
-        ? selectedUids.filter(id => id !== uid)
-        : [...selectedUids, uid]
-    )
+    onSelectUids(selectedUids.includes(uid) ? selectedUids.filter(id => id !== uid) : [...selectedUids, uid])
   }
 
   const handleSelectAll = () => {
-    if (selectedUids.length === messages.length) {
-      onSelectUids([])
-    } else {
-      onSelectUids(messages.map(m => m.uid))
+    onSelectUids(selectedUids.length === messages.length ? [] : messages.map(m => m.uid))
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      e.preventDefault()
+      onSearchSubmit()
     }
   }
 
@@ -74,58 +74,92 @@ export function CorreoLista({
 
   return (
     <div className="flex flex-col h-full w-96 shrink-0 border-r border-white/5 bg-zinc-950/30">
-      {/* Header */}
       <div className="p-3 border-b border-white/5 space-y-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-white truncate">
             {activeFolder === 'INBOX' ? 'Bandeja' : (activeFolder.split('.').pop() || activeFolder)}
           </h2>
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-gray-600 font-mono">{total}</span>
-            <motion.button whileTap={{ scale: 0.9, rotate: -180 }} transition={{ duration: 0.4 }}
-              onClick={onRefresh} className="p-1 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors">
+            {!neverLoaded && <span className="text-[10px] text-gray-600 font-mono">{total}</span>}
+            <motion.button
+              whileTap={{ scale: 0.9, rotate: -180 }}
+              transition={{ duration: 0.4 }}
+              onClick={onRefresh}
+              className="p-1 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors"
+              title="Cargar correos"
+            >
               <RefreshCw className="w-3.5 h-3.5" />
             </motion.button>
           </div>
         </div>
-        <CorreoSearchBar value={searchQuery} onChange={onSearch} />
 
-        {/* Filter chips */}
-        <div className="flex items-center gap-1 flex-wrap">
-          {FILTERS.map(f => (
-            <button
-              key={f.key}
-              onClick={() => setActiveFilter(activeFilter === f.key ? null : f.key)}
-              className={`px-2 py-0.5 rounded-md text-[10px] font-medium transition-all
-                ${activeFilter === f.key ? 'bg-blis-red/20 text-blis-red' : 'bg-white/5 text-gray-500 hover:text-gray-300'}`}
-            >
-              {f.label}
-            </button>
-          ))}
+        {/* Search: solo busca al Enter */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Buscar correos... (Enter para buscar)"
+            className="w-full bg-white/[0.02] border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white
+              placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all"
+          />
         </div>
+
+        {/* Filters (only show if messages loaded) */}
+        {!neverLoaded && (
+          <div className="flex items-center gap-1 flex-wrap">
+            {FILTERS.map(f => (
+              <button
+                key={f.key}
+                onClick={() => setActiveFilter(activeFilter === f.key ? null : f.key)}
+                className={`px-2 py-0.5 rounded-md text-[10px] font-medium transition-all
+                  ${activeFilter === f.key ? 'bg-blis-red/20 text-blis-red' : 'bg-white/5 text-gray-500 hover:text-gray-300'}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Bulk actions */}
         <AnimatePresence>
           {selectedUids.length > 0 && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-              className="flex items-center gap-1 overflow-hidden">
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex items-center gap-1 overflow-hidden">
               <button onClick={handleSelectAll} className="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-400 hover:text-white transition-colors">
                 {selectedUids.length === messages.length ? 'Deseleccionar' : 'Seleccionar todo'}
               </button>
               <span className="text-[10px] text-gray-600">{selectedUids.length} selec.</span>
               <div className="flex-1" />
-              <button onClick={() => onBulkAction('markRead')} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-white transition-colors" title="Marcar leído"><Mail className="w-3 h-3" /></button>
-              <button onClick={() => onBulkAction('moveToArchive')} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-white transition-colors" title="Archivar"><Archive className="w-3 h-3" /></button>
-              <button onClick={() => onBulkAction('moveToSpam')} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-white transition-colors" title="Spam"><AlertTriangle className="w-3 h-3" /></button>
-              <button onClick={() => onBulkAction('delete')} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-red-400 transition-colors" title="Eliminar"><Trash2 className="w-3 h-3" /></button>
+              <button onClick={() => onBulkAction('markRead')} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-white" title="Marcar leído"><Mail className="w-3 h-3" /></button>
+              <button onClick={() => onBulkAction('moveToArchive')} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-white" title="Archivar"><Archive className="w-3 h-3" /></button>
+              <button onClick={() => onBulkAction('moveToSpam')} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-white" title="Spam"><AlertTriangle className="w-3 h-3" /></button>
+              <button onClick={() => onBulkAction('delete')} className="p-1 rounded hover:bg-white/5 text-gray-400 hover:text-red-400" title="Eliminar"><Trash2 className="w-3 h-3" /></button>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Message list */}
+      {/* List area */}
       <div ref={listRef} onScroll={handleScroll} className="flex-1 overflow-y-auto scrollbar-hide">
-        {loading && messages.length === 0 ? (
+        {/* Never loaded state - show prompt */}
+        {neverLoaded ? (
+          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+            <Inbox className="w-16 h-16 mb-4 opacity-20" />
+            <p className="text-base font-medium text-gray-400">Sin correos cargados</p>
+            <p className="text-sm text-gray-600 mt-1 text-center px-6">
+              Presiona el botón de actualizar <RefreshCw className="w-3 h-3 inline text-gray-500" /> para cargar tus correos
+            </p>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={onRefresh}
+              className="mt-4 px-5 py-2 rounded-xl bg-blis-red text-white text-sm font-semibold hover:bg-blis-red-neon transition-all"
+            >
+              Cargar correos ahora
+            </motion.button>
+          </div>
+        ) : loading && messages.length === 0 ? (
           <div className="space-y-1 p-2">
             {[1,2,3,4,5,6].map(i => (
               <div key={i} className="flex items-start gap-3 px-4 py-3 animate-pulse">
@@ -133,7 +167,6 @@ export function CorreoLista({
                 <div className="flex-1 space-y-2">
                   <div className="h-3 bg-white/5 rounded w-1/3" />
                   <div className="h-3 bg-white/5 rounded w-2/3" />
-                  <div className="h-2 bg-white/5 rounded w-1/4" />
                 </div>
               </div>
             ))}
@@ -141,7 +174,7 @@ export function CorreoLista({
         ) : filteredMessages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-500">
             <Inbox className="w-12 h-12 mb-3 opacity-30" />
-            <p className="text-sm">{searchQuery || activeFilter ? 'Sin resultados' : 'Bandeja vacía'}</p>
+            <p className="text-sm">Sin mensajes</p>
           </div>
         ) : (
           <AnimatePresence mode="popLayout">
