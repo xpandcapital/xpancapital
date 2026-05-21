@@ -1,4 +1,5 @@
 // Middleware unificado — 1 consulta a BD, distribuye a todos los módulos de seguridad
+// Con timeouts para no colapsar si Supabase está lento
 import { updateSession } from '@/lib/supabase/middleware'
 import { getSecurityConfig } from '@/lib/security-config'
 import { getCountryFromRequest, checkGeoBlock } from '@/lib/geoblock'
@@ -9,6 +10,14 @@ import { checkAlerts, dispatchAlerts } from '@/lib/security-alerts'
 import { NextResponse, type NextRequest } from 'next/server'
 
 const IS_DEV = process.env.NODE_ENV === 'development'
+const SUPABASE_TIMEOUT_MS = 5000
+
+function timeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+  ])
+}
 
 function getClientIP(request: NextRequest): string {
   return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
@@ -22,8 +31,12 @@ export async function middleware(request: NextRequest) {
   const ip = getClientIP(request)
   const ua = request.headers.get('user-agent') || ''
 
-  // 0. Consultar configuración de seguridad UNA SOLA VEZ (caché 30s)
-  const secConfig = await getSecurityConfig()
+  // 0. Consultar configuración de seguridad con timeout (5s max)
+  const secConfig = await timeout(
+    getSecurityConfig(),
+    SUPABASE_TIMEOUT_MS,
+    { geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null }
+  )
 
   // 1. Geobloqueo
   const country = getCountryFromRequest(request)
@@ -69,8 +82,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 3. Autenticación y autorización
-  const response = await updateSession(request)
+  // 3. Autenticación y autorización (con timeout 5s)
+  const response = await timeout(
+    updateSession(request),
+    SUPABASE_TIMEOUT_MS,
+    NextResponse.next({ request })
+  )
 
   // 3b. Registrar login exitoso (desactivado - debug)
   // if (pathname === '/login' && (response.status === 302 || response.status === 307)) {
