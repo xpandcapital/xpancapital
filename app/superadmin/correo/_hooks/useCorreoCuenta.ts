@@ -1,6 +1,13 @@
 import { useState, useCallback } from 'react'
 import type { EmailCuenta, EmailServerConfig } from '../_types'
 
+function fetchWithTimeout(url: string, options?: RequestInit, timeoutMs = 10000): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Timeout: el servidor no responde')), timeoutMs)
+    fetch(url, options).then(res => { clearTimeout(timer); resolve(res) }).catch(e => { clearTimeout(timer); reject(e) })
+  })
+}
+
 export function useCorreoCuenta() {
   const [cuentas, setCuentas] = useState<EmailCuenta[]>([])
   const [cuentaActiva, setCuentaActiva] = useState<EmailCuenta | null>(null)
@@ -11,7 +18,7 @@ export function useCorreoCuenta() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/correo/cuentas')
+      const res = await fetchWithTimeout('/api/correo/cuentas')
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al cargar cuentas')
       setCuentas(data)
@@ -28,11 +35,11 @@ export function useCorreoCuenta() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/correo/cuentas/conectar', {
+      const res = await fetchWithTimeout('/api/correo/cuentas/conectar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-      })
+      }, 15000)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al conectar')
       return data

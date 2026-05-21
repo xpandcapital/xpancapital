@@ -1,6 +1,13 @@
 import { useState, useCallback, useRef } from 'react'
 import type { EmailFolder, EmailMessageSummary } from '../_types'
 
+function fetchWithTimeout(url: string, timeoutMs = 10000): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Timeout')), timeoutMs)
+    fetch(url).then(res => { clearTimeout(timer); resolve(res) }).catch(e => { clearTimeout(timer); reject(e) })
+  })
+}
+
 export function useCorreoBandeja() {
   const [folders, setFolders] = useState<EmailFolder[]>([])
   const [activeFolder, setActiveFolder] = useState('INBOX')
@@ -16,7 +23,7 @@ export function useCorreoBandeja() {
 
   const cargarFolders = useCallback(async (cuentaId: string) => {
     try {
-      const res = await fetch(`/api/correo/folders?cuenta_id=${encodeURIComponent(cuentaId)}`)
+      const res = await fetchWithTimeout(`/api/correo/folders?cuenta_id=${encodeURIComponent(cuentaId)}`)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al cargar carpetas')
       setFolders(data)
@@ -49,7 +56,7 @@ export function useCorreoBandeja() {
       })
       if (s) params.set('search', s)
 
-      const res = await fetch(`/api/correo/messages?${params.toString()}`)
+      const res = await fetchWithTimeout(`/api/correo/messages?${params.toString()}`)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al cargar mensajes')
 

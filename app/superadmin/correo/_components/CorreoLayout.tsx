@@ -33,6 +33,7 @@ export function CorreoLayout() {
   const [neverLoaded, setNeverLoaded] = useState(true)
 
   const fetchingRef = useRef(false)
+  const conectadoRef = useRef(false)
   const cuentaRef = useRef(cuentaActiva); cuentaRef.current = cuentaActiva
   const activeFolderRef = useRef(activeFolder); activeFolderRef.current = activeFolder
   const selectedUidRef = useRef(selectedUid); selectedUidRef.current = selectedUid
@@ -64,17 +65,29 @@ export function CorreoLayout() {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  // SOLO carga lista de cuentas al montar. NADA de IMAP.
+  // SOLO carga lista de cuentas al montar con timeout. NADA de IMAP.
   useEffect(() => {
     let cancelled = false
+    const timer = setTimeout(() => {
+      if (!cancelled && !conectadoRef.current) {
+        // Timeout: Supabase no responde, mostrar login de todas formas
+        setConectado(false)
+      }
+    }, 8000)
+
     cargarCuentas().then((list) => {
+      clearTimeout(timer)
       if (cancelled) return
       if (list && list.length > 0) {
         seleccionarCuenta(list[0])
         setConectado(true)
       }
+      // Si no hay cuentas, mostrar login (conectado=false)
+    }).catch(() => {
+      clearTimeout(timer)
+      if (!cancelled) setConectado(false)
     })
-    return () => { cancelled = true }
+    return () => { cancelled = true; clearTimeout(timer) }
   }, [])
 
   // Al conectar una cuenta nueva via login
