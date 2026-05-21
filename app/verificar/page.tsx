@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, ShieldCheck, QrCode, Award, ExternalLink, ArrowRight, BookOpen, User, Calendar, MapPin, Globe, Share2, X } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";

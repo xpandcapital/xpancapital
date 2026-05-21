@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { getCachedLandingTemplate } from "@/lib/cache/template";
 import { getCachedProjects, getCachedProducts, getCachedCategories } from "@/lib/cache/data";
 import { DynamicSections } from "@/components/layout/DynamicSections";
