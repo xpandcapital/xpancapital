@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { Facebook, Instagram, Linkedin, Twitter, PlayCircle, Youtube, MessageCircle, Mail, Phone, MapPin, Video as VideoIcon } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useLandingCMS } from "@/context/LandingCMSContext";
@@ -13,13 +13,23 @@ interface Project {
     name: string;
 }
 
+const formFieldVariants: Variants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }
+};
+
+const formContainerVariants: Variants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } }
+};
+
 export function FooterSections() {
     const { cmsData, templateData, siteConfig } = useLandingCMS();
     const { showToast } = useToast();
     const [projects, setProjects] = useState<Project[]>([]);
     const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+    const [isVipSubmitting, setIsVipSubmitting] = useState(false);
     
-    // Footer video content
     const footerVideo = {
         title: cmsData?.footer?.videoTitle || "Dentro de la Fábrica",
         subtitle: cmsData?.footer?.videoSubtitle || "Conoce nuestro rigor metodológico",
@@ -27,7 +37,6 @@ export function FooterSections() {
         thumbnail: cmsData?.footer?.videoThumbnail || undefined
     };
     
-    // Use siteConfig for socials, with fallbacks
     const socials = {
         whatsapp: siteConfig?.socialWhatsapp || cmsData?.footer?.socials?.whatsapp || "",
         instagram: siteConfig?.socialInstagram || cmsData?.footer?.socials?.instagram || "",
@@ -38,7 +47,6 @@ export function FooterSections() {
         twitter: siteConfig?.socialTwitter || cmsData?.footer?.socials?.twitter || "",
     };
     
-    // Footer content from siteConfig with cmsData fallbacks
     const footer = cmsData?.footer || {};
     const description = siteConfig?.footerDescription || footer.description || "Liderando la transformación digital.";
     const copyright = siteConfig?.footerCopyright || footer.copyright || "© 2026 BLIS Corp. Todos los derechos reservados.";
@@ -57,7 +65,6 @@ export function FooterSections() {
         { text: "Reclamaciones", href: "/legal/reclamaciones" }
     ];
 
-    // Main navigation links
     const navLinks = [
         { text: "Inicio", href: "/" },
         { text: "Tienda", href: "/tienda" },
@@ -66,7 +73,6 @@ export function FooterSections() {
         { text: "Academia", href: "/tienda#cursos" },
     ];
 
-    // Sitemap sections
     const sitemapSections = [
         {
             title: "Explorar",
@@ -94,7 +100,6 @@ export function FooterSections() {
     const logoVertical = siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical || footer.logoVertical;
     const logoHorizontal = siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal || footer.logoHorizontal;
 
-    // Fetch projects from database
     useEffect(() => {
         if (showProjects) {
             async function fetchProjects() {
@@ -128,11 +133,19 @@ export function FooterSections() {
 
     const activeLinks = globalLinks.filter(link => link.url !== "" && link.url !== "#");
     
-    // Contact info from siteConfig
     const contactInfo = {
         email: siteConfig?.contactEmail || "",
         phone: siteConfig?.contactPhone || "",
         address: siteConfig?.contactAddress || ""
+    };
+
+    const handleVipSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsVipSubmitting(true);
+        setTimeout(() => {
+            setIsVipSubmitting(false);
+            showToast("Suscripción exitosa.", "success");
+        }, 1200);
     };
 
     return (
@@ -200,7 +213,6 @@ export function FooterSections() {
                             )}
                             <p className="text-gray-500 font-light text-sm max-w-xs mb-4">{description}</p>
 
-                            {/* Navegación principal móvil */}
                             <div className="flex flex-wrap gap-3 justify-center mb-6">
                                 {navLinks.map((link, i) => (
                                     <a key={i} href={link.href} className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-blis-red transition-colors">
@@ -220,7 +232,6 @@ export function FooterSections() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-6 mb-10">
-                            {/* Mapa del sitio */}
                             {sitemapSections.map((section, si) => (
                                 <div key={si} className="text-center">
                                     <h4 className="text-white font-bold uppercase tracking-widest text-[10px] mb-4">{section.title}</h4>
@@ -241,26 +252,48 @@ export function FooterSections() {
                             </div>
                         </div>
 
-                        <div className="flex flex-col items-center text-center mb-10">
-                            <h4 className="text-white font-bold uppercase tracking-widest text-xs mb-3">{vipTitle}</h4>
-                            <p className="text-gray-500 font-light text-sm mb-4 max-w-xs">{vipDescription}</p>
-                            <form className="flex flex-col gap-3 w-full max-w-xs" onSubmit={(e) => { e.preventDefault(); showToast("Suscripción exitosa.", "success"); }}>
-                                <input
+                        {/* Formulario VIP — campos secuenciales */}
+                        <motion.div
+                            variants={formContainerVariants}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            className="flex flex-col items-center text-center mb-10"
+                        >
+                            <motion.h4 variants={formFieldVariants} className="text-white font-bold uppercase tracking-widest text-xs mb-3">{vipTitle}</motion.h4>
+                            <motion.p variants={formFieldVariants} className="text-gray-500 font-light text-sm mb-4 max-w-xs">{vipDescription}</motion.p>
+                            <form className="flex flex-col gap-3 w-full max-w-xs" onSubmit={handleVipSubmit}>
+                                <motion.input
+                                    variants={formFieldVariants}
                                     type="email"
                                     placeholder={vipPlaceholder}
                                     className="px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:border-blis-red text-white transition-colors text-sm text-center"
                                     required
                                 />
-                                <button type="submit" className="px-4 py-3 bg-blis-red text-white uppercase text-xs font-bold tracking-widest rounded-lg hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)]">
-                                    {vipButtonText}
-                                </button>
+                                <motion.button
+                                    variants={formFieldVariants}
+                                    whileTap={{ scale: 0.95 }}
+                                    type="submit"
+                                    disabled={isVipSubmitting}
+                                    className="px-4 py-3 bg-blis-red text-white uppercase text-xs font-bold tracking-widest rounded-lg hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)] disabled:opacity-60 flex items-center justify-center gap-2"
+                                >
+                                    {isVipSubmitting ? (
+                                        <>
+                                            <motion.span
+                                                animate={{ rotate: 360 }}
+                                                transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                                                className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+                                            />
+                                            Enviando...
+                                        </>
+                                    ) : vipButtonText}
+                                </motion.button>
                             </form>
-                        </div>
+                        </motion.div>
                     </div>
 
                     {/* ---- DESKTOP LAYOUT ---- */}
                     <div className="hidden lg:grid lg:grid-cols-12 gap-8 mb-16">
-                        {/* Col 1: Logo + Nav + Socials */}
                         <div className="lg:col-span-3 flex flex-col items-start">
                             {logoHorizontal ? (
                                 <img src={logoHorizontal} alt="Logo" className="h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-4" />
@@ -268,7 +301,6 @@ export function FooterSections() {
                                 <span className="text-xl font-black text-white tracking-wider mb-4">BLIS CORP</span>
                             )}
                             <p className="text-gray-500 font-light text-xs leading-relaxed mb-5 max-w-[220px]">{description}</p>
-                            {/* Main Nav */}
                             <div className="flex flex-wrap gap-x-4 gap-y-2 mb-5">
                                 {navLinks.map((link, i) => (
                                     <a key={i} href={link.href} className="text-[11px] font-bold uppercase tracking-widest text-gray-400 hover:text-blis-red transition-colors">
@@ -286,7 +318,6 @@ export function FooterSections() {
                             </div>
                         </div>
 
-                        {/* Col 2-3: Mapa del sitio */}
                         {sitemapSections.map((section, si) => (
                             <div key={si} className="lg:col-span-2">
                                 <h4 className="text-white font-bold uppercase tracking-[0.15em] text-[10px] mb-5 flex items-center gap-2">
@@ -306,7 +337,6 @@ export function FooterSections() {
                             </div>
                         ))}
 
-                        {/* Col 4: Legal */}
                         <div className="lg:col-span-2">
                             <h4 className="text-white font-bold uppercase tracking-[0.15em] text-[10px] mb-5 flex items-center gap-2">
                                 <span className="w-1 h-4 rounded-full bg-amber-500/60" />
@@ -324,29 +354,54 @@ export function FooterSections() {
                             </ul>
                         </div>
 
-                        {/* Col 5: VIP */}
-                        <div className="lg:col-span-3">
-                            <h4 className="text-white font-bold uppercase tracking-[0.15em] text-[10px] mb-5 flex items-center gap-2">
+                        {/* VIP form — campos secuenciales desktop */}
+                        <motion.div
+                            variants={formContainerVariants}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            className="lg:col-span-3"
+                        >
+                            <motion.h4 variants={formFieldVariants} className="text-white font-bold uppercase tracking-[0.15em] text-[10px] mb-5 flex items-center gap-2">
                                 <span className="w-1 h-4 rounded-full bg-emerald-500/60" />
                                 {vipTitle}
-                            </h4>
-                            <p className="text-gray-500 font-light text-xs leading-relaxed mb-4">{vipDescription}</p>
-                            <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); showToast("Suscripción exitosa.", "success"); }}>
-                                <input type="email" placeholder={vipPlaceholder} className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-blis-red text-white text-xs transition-colors" required />
-                                <button type="submit" className="px-5 py-2.5 bg-blis-red text-white uppercase text-[10px] font-bold tracking-widest rounded-xl hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)] whitespace-nowrap">
-                                    {vipButtonText}
-                                </button>
+                            </motion.h4>
+                            <motion.p variants={formFieldVariants} className="text-gray-500 font-light text-xs leading-relaxed mb-4">{vipDescription}</motion.p>
+                            <form className="flex gap-2" onSubmit={handleVipSubmit}>
+                                <motion.input
+                                    variants={formFieldVariants}
+                                    type="email"
+                                    placeholder={vipPlaceholder}
+                                    className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-blis-red text-white text-xs transition-colors"
+                                    required
+                                />
+                                <motion.button
+                                    variants={formFieldVariants}
+                                    whileTap={{ scale: 0.95 }}
+                                    type="submit"
+                                    disabled={isVipSubmitting}
+                                    className="px-5 py-2.5 bg-blis-red text-white uppercase text-[10px] font-bold tracking-widest rounded-xl hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)] whitespace-nowrap disabled:opacity-60 flex items-center gap-2"
+                                >
+                                    {isVipSubmitting ? (
+                                        <>
+                                            <motion.span
+                                                animate={{ rotate: 360 }}
+                                                transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                                                className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full"
+                                            />
+                                            ...
+                                        </>
+                                    ) : vipButtonText}
+                                </motion.button>
                             </form>
-                        </div>
+                        </motion.div>
                     </div>
 
-                    {/* Bottom bar */}
                     <div className="border-t border-white/10 pt-8 flex flex-col items-center md:flex-row justify-between md:items-center gap-3 text-xs font-mono text-gray-600 uppercase tracking-widest">
                         <p className="text-center md:text-left">{copyright}</p>
                         <p className="text-center md:text-right" dangerouslySetInnerHTML={{ __html: locationText }} />
                     </div>
                     
-                    {/* Contact Info */}
                     {(contactInfo.email || contactInfo.phone || contactInfo.address) && (
                         <div className="mt-8 pt-6 border-t border-white/5 flex flex-wrap justify-center gap-6 text-xs text-gray-500">
                             {contactInfo.email && (

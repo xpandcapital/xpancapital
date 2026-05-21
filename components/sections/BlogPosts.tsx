@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { AutoSlider } from "@/components/ui/AutoSlider";
@@ -15,6 +15,16 @@ interface BlogPostsProps {
     layout?: 'grid' | 'slider';
   };
 }
+
+const containerVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } }
+};
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+};
 
 export function BlogPosts({ data = {} }: BlogPostsProps) {
   const {
@@ -56,7 +66,7 @@ export function BlogPosts({ data = {} }: BlogPostsProps) {
     
     fetchBlog();
     return () => { isMounted = false; };
-  }, []); // Solo al montar
+  }, []);
 
   const getArticleSlug = (art: any) => art.slug || art.id;
 
@@ -77,34 +87,41 @@ export function BlogPosts({ data = {} }: BlogPostsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+    >
       {articles.map((art, idx) => (
-        <Link 
-          key={idx} 
-          href={`/blog/articulo/${getArticleSlug(art)}`} 
-          className={`group bg-white/5 border border-white/5 hover:border-emerald-500/40 rounded-[32px] p-6 transition-all duration-500 shadow-2xl relative ${art.isPremium ? 'border-amber-500/20 shadow-amber-500/5' : ''}`}
-        >
-          <div className="aspect-square rounded-2xl overflow-hidden mb-6 relative">
-            <img src={art.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={art.title} />
-            {art.isPremium && (
-              <div className="absolute top-4 right-4 flex items-center gap-1.5 p-2.5 bg-amber-500 text-black rounded-xl font-black shadow-xl z-10">
-                <Sparkles className="w-4 h-4" />
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2 mb-3">
-            <span className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-lg border 
-              ${art.isPremium 
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-600' 
-                : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600'}`}>
-              {art.category}
-            </span>
-            {art.isPremium && <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest italic group-hover:translate-x-1 transition-transform">Premium</span>}
-          </div>
-          <h3 className="text-xl font-black uppercase mb-4 group-hover:text-emerald-400 transition-colors leading-tight">{art.title}</h3>
-          <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">{art.excerpt}</p>
-        </Link>
+        <motion.div key={idx} variants={cardVariants}>
+          <Link 
+            href={`/blog/articulo/${getArticleSlug(art)}`} 
+            className={`group bg-white/5 border border-white/5 rounded-[32px] p-6 transition-all duration-500 shadow-2xl relative block hover:border-blis-red-neon hover:shadow-[0_0_25px_rgba(255,30,86,0.15)] ${art.isPremium ? 'border-amber-500/20 shadow-amber-500/5' : ''}`}
+          >
+            <div className="aspect-square rounded-2xl overflow-hidden mb-6 relative">
+              <img src={art.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={art.title} />
+              {art.isPremium && (
+                <div className="absolute top-4 right-4 flex items-center gap-1.5 p-2.5 bg-amber-500 text-black rounded-xl font-black shadow-xl z-10">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <span className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-lg border 
+                ${art.isPremium 
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-600' 
+                  : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600'}`}>
+                {art.category}
+              </span>
+              {art.isPremium && <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest italic group-hover:translate-x-1 transition-transform">Premium</span>}
+            </div>
+            <h3 className="text-xl font-black uppercase mb-4 group-hover:text-emerald-400 transition-colors leading-tight">{art.title}</h3>
+            <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">{art.excerpt}</p>
+          </Link>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

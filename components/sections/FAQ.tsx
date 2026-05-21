@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Minus, HelpCircle, CheckCircle } from "lucide-react";
+import { ChevronDown, HelpCircle, CheckCircle } from "lucide-react";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
-
 import { useLandingCMS } from "@/context/LandingCMSContext";
 
 export function FAQ() {
@@ -18,7 +17,6 @@ export function FAQ() {
 
     return (
         <section className="pt-10 pb-24 bg-black relative overflow-hidden" style={{ isolation: 'isolate' }}>
-            {/* Ambient Background */}
             <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] pointer-events-none" />
 
             <div className="container mx-auto px-6 relative z-10">
@@ -37,7 +35,7 @@ export function FAQ() {
                         </h2>
                     </motion.div>
 
-                    {/* Produced FAQ Widget */}
+                    {/* Widget Satisfacción */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
@@ -56,7 +54,6 @@ export function FAQ() {
                             </div>
                             <span className="text-gray-400 text-xs uppercase tracking-widest font-mono">/ 5.0</span>
                         </div>
-
                         <div className="flex gap-1 mt-2">
                             {[1, 2, 3, 4, 5].map((star) => (
                                 <div key={star} className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
@@ -80,23 +77,32 @@ export function FAQ() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                            className={`rounded-2xl border transition-all duration-300 overflow-hidden ${activeIndex === index
-                                ? 'border-blis-red !bg-blis-red/20 shadow-[0_0_20px_rgba(190,11,60,0.2)] backdrop-blur-md'
-                                : 'glass-card border-white/10 hover:border-blis-red/50 hover:bg-blis-red/10'
-                                }`}
+                            className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
+                                activeIndex === index
+                                    ? 'border-blis-red bg-blis-red/10 shadow-[0_0_20px_rgba(190,11,60,0.2)]'
+                                    : 'glass-card border-white/10 hover:border-blis-red/50 hover:bg-blis-red/5'
+                            }`}
                         >
                             <button
                                 onClick={() => toggleAccordion(index)}
-                                className="w-full text-left p-6 flex items-center justify-between focus:outline-none"
+                                className="w-full text-left p-6 flex items-center justify-between focus:outline-none group"
                             >
-                                <h3 className={`text-sm md:text-base lg:text-lg font-bold uppercase transition-colors pr-8 leading-snug ${activeIndex === index ? 'text-white' : 'text-gray-300'
-                                    }`}>
+                                <h3 className={`text-sm md:text-base lg:text-lg font-bold uppercase transition-colors pr-8 leading-snug ${
+                                    activeIndex === index ? 'text-white drop-shadow-[0_0_8px_rgba(190,11,60,0.3)]' : 'text-gray-300'
+                                }`}>
                                     {faq.question}
                                 </h3>
-                                <div className={`flex-shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${activeIndex === index ? 'border-blis-red bg-blis-red text-white' : 'border-white/20 text-white/50'
-                                    }`}>
-                                    {activeIndex === index ? <Minus className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                                </div>
+                                <motion.div
+                                    animate={{ rotate: activeIndex === index ? 180 : 0 }}
+                                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                                    className={`flex-shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
+                                        activeIndex === index
+                                            ? 'border-blis-red bg-blis-red text-white shadow-[0_0_10px_rgba(190,11,60,0.4)]'
+                                            : 'border-white/20 text-white/50 group-hover:border-blis-red/50 group-hover:text-blis-red'
+                                    }`}
+                                >
+                                    <ChevronDown className="w-4 h-4" />
+                                </motion.div>
                             </button>
 
                             <AnimatePresence initial={false}>
@@ -105,7 +111,7 @@ export function FAQ() {
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: "auto", opacity: 1 }}
                                         exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                                     >
                                         <div className="px-6 pb-6 pt-0 text-gray-400 font-light leading-relaxed border-t border-white/5 mt-2 pt-4">
                                             {faq.answer}
@@ -137,7 +143,6 @@ export function FAQ() {
                         {ctaText || 'Habla con un Asesor'} →
                     </a>
                 </motion.div>
-
             </div>
         </section>
     );

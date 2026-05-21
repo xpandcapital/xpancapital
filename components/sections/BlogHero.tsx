@@ -52,7 +52,7 @@ export function BlogHero({ data = {} }: BlogHeroProps) {
     
     fetchBlog();
     return () => { isMounted = false; };
-  }, []); // Solo al montar
+  }, []);
 
   useEffect(() => {
     if (featuredArticles.length > 0) {
@@ -71,7 +71,12 @@ export function BlogHero({ data = {} }: BlogHeroProps) {
   return (
     <div className="relative w-full min-h-screen bg-[#050505] text-white overflow-hidden flex flex-col justify-between pt-20 pb-0 border-b border-white/5">
       <div className="relative flex-grow flex items-center w-full py-10">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.15] bg-blis-red pointer-events-none" />
+        <motion.div
+          className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.15] pointer-events-none"
+          animate={{ opacity: [0.12, 0.2, 0.12] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          style={{ background: "radial-gradient(circle, rgba(255,30,86,0.4) 0%, transparent 60%)" }}
+        />
         <div className="max-w-[1600px] mx-auto px-4 md:px-8 xl:px-16 flex flex-col md:flex-row items-center gap-12 lg:gap-20 w-full relative z-10">
           <div className="w-full md:w-5/12 flex flex-col justify-center min-h-[500px]">
             <div className="mb-10 cursor-default">
@@ -87,7 +92,8 @@ export function BlogHero({ data = {} }: BlogHeroProps) {
                   key={currentSlide} 
                   initial={{ opacity: 0, x: -20 }} 
                   animate={{ opacity: 1, x: 0 }} 
-                  exit={{ opacity: 0, x: 20 }} 
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   className="flex flex-col justify-start"
                 >
                   <div className="flex items-center gap-3 mb-8">
@@ -113,8 +119,8 @@ export function BlogHero({ data = {} }: BlogHeroProps) {
                     </Link>
                     
                     <div className="flex items-center gap-2">
-                      <button onClick={() => setCurrentSlide(p => (p - 1 + featuredArticles.length) % featuredArticles.length)} className="p-3 border border-white/10 rounded-full hover:bg-white/5 transition-colors"><ChevronLeft className="w-5 h-5" /></button>
-                      <button onClick={() => setCurrentSlide(p => (p + 1) % featuredArticles.length)} className="p-3 border border-white/10 rounded-full hover:bg-white/5 transition-colors"><ChevronRight className="w-5 h-5" /></button>
+                      <button onClick={() => setCurrentSlide(p => (p - 1 + featuredArticles.length) % featuredArticles.length)} className="p-3 border border-white/10 rounded-full hover:bg-white/5 hover:border-blis-red/30 transition-all"><ChevronLeft className="w-5 h-5" /></button>
+                      <button onClick={() => setCurrentSlide(p => (p + 1) % featuredArticles.length)} className="p-3 border border-white/10 rounded-full hover:bg-white/5 hover:border-blis-red/30 transition-all"><ChevronRight className="w-5 h-5" /></button>
                     </div>
                   </div>
                 </motion.div>
@@ -122,7 +128,18 @@ export function BlogHero({ data = {} }: BlogHeroProps) {
             </div>
           </div>
           <div className="w-full md:w-7/12 relative h-[350px] md:h-[500px] lg:h-[600px] rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
-            <img src={currentArt?.image} className="w-full h-full object-cover" alt="Hero" />
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentSlide}
+                src={currentArt?.image}
+                className="w-full h-full object-cover absolute inset-0"
+                alt="Hero"
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6 }}
+              />
+            </AnimatePresence>
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
           </div>
         </div>

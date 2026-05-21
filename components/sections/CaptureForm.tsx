@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { Send, Loader2, CheckCircle, User, Mail, Phone, MapPin, MessageSquare } from "lucide-react";
 
 declare global {
-  interface Window { turnstile: { render: (el: string | HTMLElement, opts: { sitekey: string; callback: (token: string) => void }) => string; remove: (id: string) => void; reset: (id: string) => void } }
+  interface Window { turnstile: { render: (el: string | HTMLElement, opts: { sitekey: string; callback: (token: string) => void; theme?: string; language?: string; size?: string; appearance?: string }) => string; remove: (id: string) => void; reset: (id: string) => void } }
 }
 
 interface FormField {
@@ -35,6 +35,16 @@ interface CaptureFormProps {
   };
 }
 
+const fieldContainerVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } }
+};
+
+const fieldVariants: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }
+};
+
 export function CaptureForm({ data = {} }: CaptureFormProps) {
   const [formData, setFormData] = useState<Record<string, string | boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +55,6 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
   const [turnstileSolved, setTurnstileSolved] = useState(false);
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
 
-  // Cargar script + site_key
   useEffect(() => {
     fetch('/api/admin/seguridad').then(r => r.json()).then(d => {
       if (d?.data?.bot_protection?.habilitado) {
@@ -64,7 +73,6 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
     }).catch(() => {})
   }, [])
 
-  // Renderizar widget cuando siteKey está lista
   useEffect(() => {
     if (!turnstileSiteKey || !turnstileContainerRef.current) return
     const el = turnstileContainerRef.current
@@ -160,7 +168,6 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
     setIsSubmitting(true);
     
     try {
-      // Convert formData to proper format
       const leadData: Record<string, string | boolean> = {};
       fields.forEach(field => {
         if (formData[field.name] !== undefined) {
@@ -192,7 +199,6 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
       if (response.ok) {
         setIsSuccess(true);
         
-        // Handle redirect
         const redirectTarget = externalRedirectUrl || redirectUrl;
         if (redirectTarget) {
           setTimeout(() => {
@@ -353,22 +359,29 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {fields.map((field, index) => (
-                <div key={field.name || index}>
-                  {field.type !== 'checkbox' && field.type !== 'radio' && (
-                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
-                      {field.label}
-                      {field.required && <span style={{ color: accentColor }}>*</span>}
-                    </label>
-                  )}
-                  
-                  {renderField(field, index)}
-                  
-                  {errors[field.name] && (
-                    <p className="text-red-400 text-xs mt-1">{errors[field.name]}</p>
-                  )}
-                </div>
-              ))}
+              <motion.div
+                variants={fieldContainerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-4"
+              >
+                {fields.map((field, index) => (
+                  <motion.div key={field.name || index} variants={fieldVariants}>
+                    {field.type !== 'checkbox' && field.type !== 'radio' && (
+                      <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                        {field.label}
+                        {field.required && <span style={{ color: accentColor }}>*</span>}
+                      </label>
+                    )}
+                    
+                    {renderField(field, index)}
+                    
+                    {errors[field.name] && (
+                      <p className="text-red-400 text-xs mt-1">{errors[field.name]}</p>
+                    )}
+                  </motion.div>
+                ))}
+              </motion.div>
 
               {errors.submit && (
                 <p className="text-red-400 text-sm text-center">{errors.submit}</p>
@@ -399,9 +412,10 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
                 </div>
               )}
 
-              <button
+              <motion.button
                 type="submit"
                 disabled={isSubmitting}
+                whileTap={{ scale: 0.95 }}
                 className="w-full py-4 rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.02] disabled:opacity-50 disabled:hover:scale-100 shadow-2xl"
                 style={{ backgroundColor: accentColor, color: '#fff' }}
               >
@@ -416,7 +430,7 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
                     <Send className="w-5 h-5" />
                   </>
                 )}
-              </button>
+              </motion.button>
 
               {privacyText && (
                 <p className="text-center text-[10px] text-gray-500 mt-4">
