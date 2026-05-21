@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useTemplateByTipo } from "@/lib/hooks/useTemplate";
 import { DynamicSections } from "@/components/layout/DynamicSections";
 import { Header } from "@/components/sections/Header";
