@@ -158,6 +158,14 @@ export function StatsSection({ data = {} }: StatsSectionProps) {
     return IconComponent ? <IconComponent className="w-6 h-6" /> : null;
   };
 
+  // Aura scroll: gradiente que pulsa al entrar/salir
+  const gridSectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: gridScrollY } = useScroll({
+    target: gridSectionRef,
+    offset: ["start 90%", "end 10%"],
+  });
+  const glowOpacity = useTransform(gridScrollY, [0, 0.5, 1], [0.04, 0.22, 0.04]);
+
   if (layout === "horizontal") {
     return (
       <section className="py-12 border-y border-white/10" style={{ backgroundColor: `${accentColor}05` }}>
@@ -272,8 +280,13 @@ export function StatsSection({ data = {} }: StatsSectionProps) {
 
   // Grid layout (default) — con sparklines
   return (
-    <section className="py-20 md:py-32 bg-zinc-950">
-      <div className="w-full max-w-7xl mx-auto px-4 md:px-8">
+    <section ref={gridSectionRef} className="py-20 md:py-32 bg-zinc-950 relative overflow-hidden">
+      {/* Aura gradiente pulsante */}
+      <motion.div
+        style={{ opacity: glowOpacity, background: "radial-gradient(ellipse at 50% 40%, rgba(255,30,86,0.15) 0%, transparent 60%)" }}
+        className="absolute inset-0 pointer-events-none z-0"
+      />
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 relative z-10">
         {(title || subtitle || description) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}

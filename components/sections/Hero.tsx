@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform, type Variants } from "framer-motion";
+import { motion, useScroll, useTransform, useMotionValue, useSpring, type Variants } from "framer-motion";
 import { ArrowRight, BarChart3, PieChart, Activity, TrendingUp } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 
@@ -112,6 +112,24 @@ export function Hero() {
     const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
     const marqueeOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
     const yGrid = useTransform(scrollYProgress, [0, 1], [0, 75]);
+
+    // Botón magnético: el CTA primario sigue sutilmente al cursor
+    const btnRef = useRef<HTMLButtonElement>(null);
+    const magnetX = useMotionValue(0);
+    const magnetY = useMotionValue(0);
+    const smoothX = useSpring(magnetX, { stiffness: 150, damping: 15 });
+    const smoothY = useSpring(magnetY, { stiffness: 150, damping: 15 });
+
+    const handleMagnetMove = (e: React.MouseEvent) => {
+        const rect = btnRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const cx = e.clientX - rect.left - rect.width / 2;
+        const cy = e.clientY - rect.top - rect.height / 2;
+        // Máximo 6px de atracción en cada eje
+        magnetX.set(Math.max(-6, Math.min(6, cx * 0.2)));
+        magnetY.set(Math.max(-6, Math.min(6, cy * 0.2)));
+    };
+    const handleMagnetLeave = () => { magnetX.set(0); magnetY.set(0); };
 
     return (
         <section
@@ -335,6 +353,10 @@ export function Hero() {
                         className="flex flex-row gap-3 sm:gap-4 w-full max-w-[90vw] sm:max-w-none sm:w-auto justify-center"
                     >
                         <motion.button
+                            ref={btnRef}
+                            onMouseMove={handleMagnetMove}
+                            onMouseLeave={handleMagnetLeave}
+                            style={{ x: smoothX, y: smoothY }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => window.location.href = cmsData.hero.primaryBtnLink}

@@ -1,5 +1,7 @@
 "use client";
 
+import { useRef, useEffect, useCallback } from "react";
+import { motion, useScroll, useSpring } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { Hero } from "@/components/sections/Hero";
@@ -141,6 +143,39 @@ export function DynamicSections({
 }: DynamicSectionsProps) {
   const { loading, isSectionVisible: contextIsSectionVisible, sectionOrder: contextOrder, templateData } = useLandingCMS();
 
+  // Barra de progreso global (scroll de ventana)
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+
+  // Snap suave: detecta section activa y hace snap en límites designados
+  const snapPoints = ["trayectoria", "operaciones", "insights"];
+  const snapTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current);
+      snapTimeoutRef.current = setTimeout(() => {
+        const viewCenter = window.innerHeight / 2;
+        for (const id of snapPoints) {
+          const el = document.getElementById(id);
+          if (!el) continue;
+          const rect = el.getBoundingClientRect();
+          const elCenter = rect.top + rect.height / 2;
+          const dist = Math.abs(elCenter - viewCenter);
+          if (dist < 150) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+            break;
+          }
+        }
+      }, 400);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (snapTimeoutRef.current) clearTimeout(snapTimeoutRef.current);
+    };
+  }, []);
+
   const hasExternalData = !!(externalOrder && externalOrder.length > 0) || !!externalSections;
 
   // Solo mostrar skeleton si no hay datos externos (SSR) y el contexto aún está cargando
@@ -187,7 +222,15 @@ export function DynamicSections({
   };
 
   return (
-    <>
+    <div>
+      {/* Scroll Progress Bar — 2px rojo neón */}
+      <motion.div
+        style={{ scaleX, transformOrigin: "left" }}
+        className="fixed top-0 left-0 right-0 h-[2px] z-[9999] pointer-events-none"
+      >
+        <div className="h-full bg-gradient-to-r from-blis-red via-blis-red-neon to-blis-red shadow-[0_0_8px_rgba(255,30,86,0.7)]" />
+      </motion.div>
+
       {sectionOrder.map((sectionKey: string) => {
         if (!checkVisibility(sectionKey)) {
           return null;
@@ -215,6 +258,6 @@ export function DynamicSections({
           </section>
         );
       })}
-    </>
+    </div>
   );
 }

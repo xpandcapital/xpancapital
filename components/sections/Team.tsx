@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ShieldCheck, Crosshair, Activity, Linkedin, Instagram, Facebook, Twitter, MessageCircle, Mail } from "lucide-react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export function Team() {
     const { cmsData } = useLandingCMS();
@@ -24,11 +24,20 @@ export function Team() {
 
     const [isRevealed, setIsRevealed] = useState(false);
 
+    // Iris circular: máscara que se expande desde el centro
+    const teamSectionRef = useRef<HTMLElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: teamSectionRef,
+        offset: ["start 75%", "end 25%"],
+    });
+    const irisRadius = useTransform(scrollYProgress, [0, 1], [0, 70]);
+    const irisClip = useTransform(irisRadius, (r) => `circle(${r}% at 50% 50%)`);
+
     const widgetLeft = { label: widget1Label || 'Cap. Administrado', value: widget1Value || '+$10M' };
     const widgetRight = { label: widget2Label || 'Garantía Fiduciaria', value: widget2Value || 'Cero Litigios' };
 
     return (
-        <section className="pt-10 md:pt-20 pb-24 bg-gradient-to-t from-black via-zinc-950 to-black relative overflow-hidden">
+        <section ref={teamSectionRef} className="pt-10 md:pt-20 pb-24 bg-gradient-to-t from-black via-zinc-950 to-black relative overflow-hidden">
             <div className="absolute inset-0 top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/5" />
 
@@ -48,6 +57,11 @@ export function Team() {
                             className="relative lg:h-[700px] w-full rounded-2xl overflow-hidden glass-card p-2 border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] antigravity group"
                         >
                             <div className="w-full h-full rounded-xl overflow-hidden relative bg-black min-h-[620px]">
+                                {/* Iris circular — revela desde el centro */}
+                                <motion.div
+                                    className="absolute inset-0 z-20 bg-black pointer-events-none"
+                                    style={{ clipPath: irisClip }}
+                                />
                                 {/* CEO Photo */}
                                 <div 
                                     className="absolute inset-0 bg-cover bg-center bg-top opacity-90 transition-all duration-700 group-hover:opacity-100 group-hover:scale-105"

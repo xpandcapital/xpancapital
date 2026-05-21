@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
 import { ChevronDown, HelpCircle, CheckCircle } from "lucide-react";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { useLandingCMS } from "@/context/LandingCMSContext";
@@ -13,6 +13,21 @@ export function FAQ() {
 
     const toggleAccordion = (index: number) => {
         setActiveIndex(activeIndex === index ? null : index);
+    };
+
+    // Widget magnético: sigue sutilmente al cursor
+    const widgetRef = useRef<HTMLDivElement>(null);
+    const wX = useMotionValue(0);
+    const wY = useMotionValue(0);
+    const sX = useSpring(wX, { stiffness: 100, damping: 20 });
+    const sY = useSpring(wY, { stiffness: 100, damping: 20 });
+    const handleWidgetMove = (e: React.MouseEvent) => {
+        const r = widgetRef.current?.getBoundingClientRect();
+        if (!r) return;
+        const cx = e.clientX - r.left - r.width / 2;
+        const cy = e.clientY - r.top - r.height / 2;
+        wX.set(Math.max(-5, Math.min(5, cx * 0.15)));
+        wY.set(Math.max(-5, Math.min(5, cy * 0.15)));
     };
 
     return (
@@ -37,6 +52,10 @@ export function FAQ() {
 
                     {/* Widget Satisfacción */}
                     <motion.div
+                        ref={widgetRef}
+                        onMouseMove={handleWidgetMove}
+                        onMouseLeave={() => { wX.set(0); wY.set(0); }}
+                        style={{ x: sX, y: sY }}
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}

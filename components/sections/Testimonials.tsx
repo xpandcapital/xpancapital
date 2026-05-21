@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Quote, Star } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLandingCMS } from "@/context/LandingCMSContext";
@@ -25,6 +25,10 @@ export function Testimonials() {
     const [isPaused, setIsPaused] = useState(false);
     const [mobileIndex, setMobileIndex] = useState(0);
     const trackRef = useRef<HTMLDivElement>(null);
+    const sectionRef = useRef<HTMLElement>(null);
+
+    const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start end", "end start"] });
+    const glowIntensity = useTransform(scrollYProgress, [0, 0.4, 0.7, 1], [0.02, 0.18, 0.12, 0.02]);
 
     // Auto-avance móvil
     useEffect(() => {
@@ -44,7 +48,12 @@ export function Testimonials() {
     }, []);
 
     return (
-        <section className="pt-10 md:pt-20 pb-24 bg-gradient-to-br from-zinc-950 via-black to-blis-red/5 relative cyber-texture overflow-hidden">
+        <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-gradient-to-br from-zinc-950 via-black to-blis-red/5 relative cyber-texture overflow-hidden">
+            {/* Aura ambiental que pulsa con el scroll */}
+            <motion.div
+                style={{ opacity: glowIntensity, background: "radial-gradient(ellipse at 50% 60%, rgba(255,30,86,0.12) 0%, transparent 70%)" }}
+                className="absolute inset-0 pointer-events-none z-0 blur-[60px]"
+            />
             <style>{`
                 @keyframes testimonial-marquee {
                     from { transform: translateX(0); }
