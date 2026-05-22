@@ -208,7 +208,7 @@ export function CorreoLayout() {
       </div>
 
       {/* ===== MOBILE LAYOUT (< md) ===== */}
-      <div className="flex md:hidden flex-col h-full">
+      <div className="flex md:hidden flex-col h-full" style={{ maxWidth: '100%', contain: 'layout style' }}>
         {/* Top bar */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
           <div className="flex items-center gap-2">
@@ -265,9 +265,9 @@ export function CorreoLayout() {
         {sidebarOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-y-0 left-16 right-0 z-[1001] bg-black/60 md:hidden" onClick={() => setSidebarOpen(false)} />
+              className="fixed inset-y-0 left-16 right-0 z-[997] bg-black/60 md:hidden" onClick={() => setSidebarOpen(false)} />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed left-16 top-0 bottom-0 z-[1002] w-72 md:hidden overflow-hidden shadow-2xl bg-zinc-950 pt-24 flex flex-col">
+              className="fixed left-16 top-20 bottom-0 z-[998] w-72 md:hidden overflow-hidden shadow-2xl bg-zinc-950 pt-4 flex flex-col">
               {sidebarContent}
             </motion.div>
           </>
