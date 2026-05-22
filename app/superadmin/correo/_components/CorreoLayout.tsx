@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { CorreoLogin } from './CorreoLogin'
 import { CorreoSidebar } from './CorreoSidebar'
 import { CorreoLista } from './CorreoLista'
@@ -17,7 +18,7 @@ export function CorreoLayout() {
   const { cuentaActiva, cuentas, cargarCuentas, desconectarCuenta, seleccionarCuenta, moverCuentaArriba, moverCuentaAbajo } = useCorreoCuenta()
   const {
     folders, activeFolder, messages, total, page, totalPages, hasMore, loading: bandejaLoading, searchQuery,
-    cargarFolders, cargarMensajes, cargarDesdeCache, cambiarFolder, buscar, irPagina, optimisticUpdate,
+    cargarFolders, cargarMensajes, cargarDesdeCache, cambiarFolder, buscar, irPagina, setPageOptimistic, optimisticUpdate,
   } = useCorreoBandeja()
   const {
     mensaje, loading: mensajeLoading, traduciendo, mostrarTraduccion, traduccion,
@@ -35,6 +36,7 @@ export function CorreoLayout() {
   const [splitVertical, setSplitVertical] = useState(false)
   const [showAddCuenta, setShowAddCuenta] = useState(false)
   const [showConfigCuenta, setShowConfigCuenta] = useState(false)
+  const [undoAction, setUndoAction] = useState<{ action: string; uid: number; timer: number } | null>(null)
 
   const fetchingRef = useRef(false)
   const cuentaRef = useRef(cuentaActiva); cuentaRef.current = cuentaActiva
@@ -108,6 +110,8 @@ export function CorreoLayout() {
   const handleSelectMessage = async (uid: number) => {
     if (!cuentaActiva) return
     setSelectedUid(uid)
+    // Optimistic: marcar como leido al instante
+    optimisticUpdate(uid, { isRead: true } as any)
     cargarMensaje(cuentaActiva.id, uid, activeFolder)
   }
 
@@ -121,11 +125,14 @@ export function CorreoLayout() {
 
   const handlePageChange = (newPage: number) => {
     if (!cuentaActiva || newPage < 1 || newPage > totalPages) return
-    // Cancelar click anterior si viene uno nuevo rapido
+    // Actualizar numero de pagina al instante (visible)
+    setPageOptimistic(newPage)
+    // Cancelar fetch pendiente, solo ejecutar la ultima pagina tras 250ms
     if (pageQueueRef.current) clearTimeout(pageQueueRef.current)
     pageQueueRef.current = setTimeout(() => {
-      irPagina(cuentaActiva!.id, newPage)
-    }, 200)
+      if (!cuentaActiva) return
+      irPagina(cuentaActiva.id, newPage)
+    }, 250)
   }
 
   const handleFolderChange = (folder: string) => {
@@ -157,8 +164,30 @@ export function CorreoLayout() {
     else if (action === 'unflag') optimisticUpdate(uid, { isFlagged: false } as any)
     else if (action === 'markRead') optimisticUpdate(uid, { isRead: true } as any)
     else if (action === 'markUnread') optimisticUpdate(uid, { isRead: false } as any)
+
+    // Mostrar boton deshacer para acciones destructivas
+    if (['delete', 'moveToSpam', 'moveToArchive'].includes(action)) {
+      const undoRef = { action, uid, timer: 5 }
+      setUndoAction(undoRef)
+      const interval = setInterval(() => {
+        setUndoAction(prev => {
+          if (!prev || prev.uid !== uid) { clearInterval(interval); return null }
+          const next = prev.timer - 1
+          if (next <= 0) { ejecutarAccion(cuentaActiva!.id, activeFolder, action, [uid]).catch(() => {}); clearInterval(interval); return null }
+          return { ...prev, timer: next }
+        })
+      }, 1000)
+      return
+    }
+
     // API en background sin esperar
     ejecutarAccion(cuentaActiva.id, activeFolder, action, [uid]).catch(() => {})
+  }
+
+  const handleUndo = () => {
+    setUndoAction(null)
+    // Refrescar lista para restaurar el mensaje
+    if (cuentaActiva) cargarMensajes(cuentaActiva.id, activeFolder, 1)
   }
 
   const handleBulkAction = async (action: string) => {
@@ -285,6 +314,26 @@ export function CorreoLayout() {
         cuentaFirma={cuentaActiva?.firma || ''}
         cuentaPlantillaDefault={cuentaActiva?.plantilla_default_id || ''}
       />
+
+      {/* Toast de deshacer */}
+      {undoAction && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium shadow-lg shadow-red-600/30"
+          >
+            <span>
+              {undoAction.action === 'delete' ? 'Eliminado' : undoAction.action === 'moveToSpam' ? 'Movido a spam' : 'Archivado'}
+            </span>
+            <button
+              onClick={handleUndo}
+              className="px-2 py-0.5 rounded-md bg-white/20 hover:bg-white/30 text-xs font-semibold transition-colors"
+            >
+              Deshacer ({undoAction.timer}s)
+            </button>
+          </motion.div>
+        </div>
+      )}
 
       {showAddCuenta && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">

@@ -16,6 +16,8 @@ export function useCorreoBandeja() {
   const [messages, setMessages] = useState<EmailMessageSummary[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
+  const pageRef = useRef(1)
+  pageRef.current = page
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -130,6 +132,10 @@ export function useCorreoBandeja() {
     setMessages([])
   }, [])
 
+  const setPageOptimistic = useCallback((n: number) => {
+    setPage(n)
+  }, [])
+
   const irPagina = useCallback((cuentaId: string, pageNum: number) => {
     cargarMensajes(cuentaId, activeFolder, pageNum, searchQuery)
   }, [activeFolder, searchQuery, cargarMensajes])
@@ -140,6 +146,6 @@ export function useCorreoBandeja() {
 
   return {
     folders, activeFolder, messages, total, page, totalPages, hasMore, loading, error, searchQuery,
-    cargarFolders, cargarMensajes, cargarDesdeCache, cambiarFolder, buscar, irPagina, optimisticUpdate, setError,
+    cargarFolders, cargarMensajes, cargarDesdeCache, cambiarFolder, buscar, irPagina, setPageOptimistic, optimisticUpdate, setError,
   }
 }
