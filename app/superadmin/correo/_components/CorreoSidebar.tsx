@@ -1,11 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
-import {
-  Inbox, Send, FileText, AlertTriangle, Trash2, Archive, Star,
-  ChevronDown, Plus, LogOut, Loader2, Mail, Columns, Sun, Moon, FileDown, Keyboard,
-} from 'lucide-react'
+import { Inbox, Send, FileText, AlertTriangle, Trash2, Archive, Star, ChevronDown, Plus, LogOut, Loader2, Mail, UserPlus } from 'lucide-react'
 import type { EmailFolder, EmailCuenta } from '../_types'
 
 interface Props {
@@ -15,6 +11,7 @@ interface Props {
   onRedactar: () => void
   onDesconectar: () => void
   onSwitchCuenta: (cuenta: EmailCuenta) => void
+  onAgregarCuenta: () => void
   onToggleSplit: () => void
   onToggleTheme: () => void
   onExportPDF: () => void
@@ -56,7 +53,7 @@ function getInitials(email: string): string {
 
 export function CorreoSidebar({
   folders, activeFolder, onFolderChange, onRedactar, onDesconectar,
-  onSwitchCuenta, onToggleSplit, onToggleTheme, onExportPDF,
+  onSwitchCuenta, onAgregarCuenta, onToggleSplit, onToggleTheme, onExportPDF,
   cuentas, cuentaActiva, loading, splitVertical, themeLight
 }: Props) {
   const sortedFolders = () => {
@@ -73,25 +70,31 @@ export function CorreoSidebar({
 
   return (
     <div className="w-56 shrink-0 border-r border-white/5 bg-zinc-950/50 flex flex-col h-full">
-      {/* Multi-account tabs */}
-      {cuentas.length > 1 && (
-        <div className="p-2 border-b border-white/5 space-y-1">
-          {cuentas.map((c) => (
-            <motion.button
-              key={c.id}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onSwitchCuenta(c)}
-              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all
-                ${c.id === cuentaActiva?.id ? 'bg-white/10 text-white font-semibold' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
-            >
-              <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold ${c.id === cuentaActiva?.id ? 'bg-blis-red/20 text-blis-red' : 'bg-white/5 text-gray-500'}`}>
-                {getInitials(c.email)}
-              </span>
-              <span className="truncate">{c.email}</span>
-            </motion.button>
-          ))}
-        </div>
-      )}
+      {/* Cuentas activas */}
+      <div className="p-2 border-b border-white/5 space-y-1">
+        {cuentas.map((c) => (
+          <motion.button
+            key={c.id}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onSwitchCuenta(c)}
+            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all
+              ${c.id === cuentaActiva?.id ? 'bg-white/10 text-white font-semibold' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
+          >
+            <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold ${c.id === cuentaActiva?.id ? 'bg-blis-red/20 text-blis-red' : 'bg-white/5 text-gray-500'}`}>
+              {getInitials(c.email)}
+            </span>
+            <span className="truncate">{c.email.split('@')[0]}</span>
+          </motion.button>
+        ))}
+        <motion.button
+          whileTap={{ scale: 0.98 }}
+          onClick={onAgregarCuenta}
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-gray-500 hover:text-white hover:bg-white/5 transition-all border border-dashed border-white/10"
+        >
+          <UserPlus className="w-3.5 h-3.5" />
+          <span>Agregar cuenta</span>
+        </motion.button>
+      </div>
 
       {/* Redactar */}
       <div className="p-3">
@@ -130,24 +133,8 @@ export function CorreoSidebar({
         )}
       </div>
 
-      {/* Toolbar */}
-      <div className="p-2 border-t border-white/5 space-y-0.5">
-        <div className="flex items-center gap-0.5">
-          <button onClick={onToggleSplit} className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors flex-1 flex items-center justify-center" title={splitVertical ? 'Vista horizontal' : 'Vista vertical'}>
-            <Columns className="w-4 h-4" />
-          </button>
-          <button onClick={onToggleTheme} className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors flex-1 flex items-center justify-center" title={themeLight ? 'Modo oscuro' : 'Modo claro'}>
-            {themeLight ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </button>
-          <button onClick={onExportPDF} className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors flex-1 flex items-center justify-center" title="Exportar a PDF">
-            <FileDown className="w-4 h-4" />
-          </button>
-          <button onClick={() => alert('Atajos:\nR=Responder  Shift+A=Responder todos\nF=Reenviar  N=Nuevo  Del=Eliminar\nS=Estrella  E=Archivar  /=Buscar\nEsc=Cerrar  ?=Ayuda')} className="p-2 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors flex-1 flex items-center justify-center" title="Atajos de teclado">
-            <Keyboard className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Cuenta activa info */}
+      {/* Bottom bar */}
+      <div className="p-2 border-t border-white/5">
         {cuentaActiva && (
           <button onClick={onDesconectar} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-all">
             <LogOut className="w-4 h-4" />

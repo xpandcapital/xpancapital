@@ -31,7 +31,7 @@ export function CorreoVisorAdjuntos({ attachments }: Props) {
   const realAttachments = attachments.filter(a => !a.inline && a.filename)
 
   return (
-    <div className="mt-4 pt-4 border-t border-white/10">
+    <div className="mt-4 pt-4 border-t border-gray-200">
       <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">
         {realAttachments.length} adjunto{realAttachments.length !== 1 ? 's' : ''}
       </p>
@@ -44,22 +44,22 @@ export function CorreoVisorAdjuntos({ attachments }: Props) {
 
           return (
             <div key={id}>
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5
-                hover:bg-white/[0.06] transition-colors group">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-200
+                hover:bg-gray-100 transition-colors group">
                 <div className="w-10 h-10 rounded-lg bg-blis-red/10 flex items-center justify-center shrink-0">
                   <span className="text-[10px] font-bold text-blis-red uppercase">
                     {att.mimeType.split('/')[1]?.substring(0, 4) || 'FILE'}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white truncate">{att.filename}</p>
+                  <p className="text-sm text-gray-900 truncate">{att.filename}</p>
                   <p className="text-[11px] text-gray-500">{formatSize(att.size)}</p>
                 </div>
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   {(isPdf || isImg) && (
                     <button
                       onClick={() => isImg ? setImagePreview(att.content) : setPreviewId(id)}
-                      className="px-3 py-1.5 rounded-lg bg-white/5 text-xs text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                      className="px-3 py-1.5 rounded-lg bg-gray-200 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-300 transition-colors"
                     >
                       Previsualizar
                     </button>

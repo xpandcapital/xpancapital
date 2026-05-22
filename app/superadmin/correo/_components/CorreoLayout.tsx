@@ -31,6 +31,7 @@ export function CorreoLayout() {
   const [splitVertical, setSplitVertical] = useState(false)
   const [themeLight, setThemeLight] = useState(false)
   const [neverLoaded, setNeverLoaded] = useState(true)
+  const [showAddCuenta, setShowAddCuenta] = useState(false)
 
   const fetchingRef = useRef(false)
   const conectadoRef = useRef(false)
@@ -98,10 +99,14 @@ export function CorreoLayout() {
       if (cuentaConectada) {
         seleccionarCuenta(cuentaConectada)
         setConectado(true)
-        // Despues de conectar, cargar carpetas pero NO mensajes
         cargarFolders(cuentaConectada.id)
       }
     }
+    setShowAddCuenta(false)
+  }
+
+  const handleAgregarCuenta = () => {
+    setShowAddCuenta(true)
   }
 
   // Refresh manual — unico lugar donde se cargan mensajes
@@ -214,6 +219,7 @@ export function CorreoLayout() {
         onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true) }}
         onDesconectar={handleDesconectar}
         onSwitchCuenta={handleSwitchCuenta}
+        onAgregarCuenta={handleAgregarCuenta}
         onToggleSplit={handleToggleSplit}
         onToggleTheme={handleToggleTheme}
         onExportPDF={handleExportPDF}
@@ -269,6 +275,21 @@ export function CorreoLayout() {
         onClose={() => setRespuestaOpen(false)}
         onEnviado={() => {}}
       />
+
+      {/* Modal para agregar nueva cuenta (sin cerrar sesion actual) */}
+      {showAddCuenta && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="relative w-full max-w-md">
+            <button
+              onClick={() => setShowAddCuenta(false)}
+              className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-zinc-800 text-gray-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+            <CorreoLogin onConectado={handleConectado} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
