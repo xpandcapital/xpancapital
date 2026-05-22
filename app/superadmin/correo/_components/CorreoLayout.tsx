@@ -14,7 +14,7 @@ import { useCorreoMensaje } from '../_hooks/useCorreoMensaje'
 import { useCorreoEnvio } from '../_hooks/useCorreoEnvio'
 
 export function CorreoLayout() {
-  const { cuentaActiva, cuentas, cargarCuentas, desconectarCuenta, seleccionarCuenta } = useCorreoCuenta()
+  const { cuentaActiva, cuentas, cargarCuentas, desconectarCuenta, seleccionarCuenta, moverCuentaArriba, moverCuentaAbajo } = useCorreoCuenta()
   const {
     folders, activeFolder, messages, total, hasMore, loading: bandejaLoading,
     searchQuery, cargarFolders, cargarMensajes, cargarDesdeCache, cambiarFolder, buscar, cargarMas,
@@ -202,8 +202,11 @@ export function CorreoLayout() {
     seleccionarCuenta(cuenta)
     setSelectedUid(null)
     setSelectedUids([])
-    // Al cambiar cuenta: carga carpetas, NO mensajes
+    // Cargar folders y cache de mensajes para la nueva cuenta
     cargarFolders(cuenta.id)
+    buscar('') // limpiar busqueda anterior
+    const encontro = cargarDesdeCache(cuenta.id, 'INBOX')
+    setNeverLoaded(!encontro)
   }
 
   const handleToggleSplit = () => setSplitVertical(!splitVertical)
@@ -247,6 +250,8 @@ export function CorreoLayout() {
         onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true) }}
         onDesconectar={handleDesconectar}
         onSwitchCuenta={handleSwitchCuenta}
+        moverCuentaArriba={moverCuentaArriba}
+        moverCuentaAbajo={moverCuentaAbajo}
         onAgregarCuenta={handleAgregarCuenta}
         onConfigCuenta={handleConfigCuenta}
         onToggleSplit={handleToggleSplit}

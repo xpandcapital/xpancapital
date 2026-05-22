@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Inbox, Send, FileText, AlertTriangle, Trash2, Archive, Star, ChevronDown, Plus, LogOut, Loader2, Mail, UserPlus, Settings } from 'lucide-react'
+import { Inbox, Send, FileText, AlertTriangle, Trash2, Archive, Star, ChevronDown, Plus, LogOut, Loader2, Mail, UserPlus, Settings, ChevronUp } from 'lucide-react'
 import type { EmailFolder, EmailCuenta } from '../_types'
 
 interface Props {
@@ -13,6 +13,8 @@ interface Props {
   onSwitchCuenta: (cuenta: EmailCuenta) => void
   onAgregarCuenta: () => void
   onConfigCuenta: () => void
+  moverCuentaArriba: (id: string) => void
+  moverCuentaAbajo: (id: string) => void
   onToggleSplit: () => void
   onToggleTheme: () => void
   onExportPDF: () => void
@@ -54,7 +56,8 @@ function getInitials(email: string): string {
 
 export function CorreoSidebar({
   folders, activeFolder, onFolderChange, onRedactar, onDesconectar,
-  onSwitchCuenta, onAgregarCuenta, onConfigCuenta, onToggleSplit, onToggleTheme, onExportPDF,
+  onSwitchCuenta, onAgregarCuenta, onConfigCuenta, moverCuentaArriba, moverCuentaAbajo,
+  onToggleSplit, onToggleTheme, onExportPDF,
   cuentas, cuentaActiva, loading, splitVertical, themeLight
 }: Props) {
   const sortedFolders = () => {
@@ -73,24 +76,42 @@ export function CorreoSidebar({
     <div className="w-56 shrink-0 border-r border-white/5 bg-zinc-950/50 flex flex-col h-full">
       {/* Cuentas activas */}
       <div className="p-2 border-b border-white/5 space-y-1">
-        {cuentas.map((c) => (
-          <motion.button
-            key={c.id}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onSwitchCuenta(c)}
-            className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all
-              ${c.id === cuentaActiva?.id ? 'bg-white/10 text-white font-semibold' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
-          >
-            {c.avatar_url ? (
-              <img src={c.avatar_url} alt="" className="w-5 h-5 rounded-md object-cover" />
-            ) : (
-              <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold`}
-                style={c.id === cuentaActiva?.id ? { backgroundColor: (c.color || '#be0b3c') + '30', color: c.color || '#be0b3c' } : { backgroundColor: 'rgba(255,255,255,0.05)', color: '#6b7280' }}>
-                {getInitials(c.nombre_mostrado || c.email)}
-              </span>
-            )}
-            <span className="truncate">{c.nombre_mostrado || c.email.split('@')[0]}</span>
-          </motion.button>
+        {cuentas.map((c, idx) => (
+          <div key={c.id} className="group flex items-center gap-0.5">
+            <motion.button
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onSwitchCuenta(c)}
+              className={`flex-1 flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all
+                ${c.id === cuentaActiva?.id ? 'bg-white/10 text-white font-semibold' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
+            >
+              {c.avatar_url ? (
+                <img src={c.avatar_url} alt="" className="w-5 h-5 rounded-md object-cover" />
+              ) : (
+                <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold`}
+                  style={c.id === cuentaActiva?.id ? { backgroundColor: (c.color || '#be0b3c') + '30', color: c.color || '#be0b3c' } : { backgroundColor: 'rgba(255,255,255,0.05)', color: '#6b7280' }}>
+                  {getInitials(c.nombre_mostrado || c.email)}
+                </span>
+              )}
+              <span className="truncate">{c.nombre_mostrado || c.email.split('@')[0]}</span>
+            </motion.button>
+            {/* Flechas de orden */}
+            <div className="hidden group-hover:flex flex-col opacity-60">
+              <button
+                onClick={(e) => { e.stopPropagation(); moverCuentaArriba(c.id) }}
+                disabled={idx === 0}
+                className="p-0.5 hover:text-white disabled:opacity-20"
+              >
+                <ChevronUp className="w-3 h-3" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); moverCuentaAbajo(c.id) }}
+                disabled={idx === cuentas.length - 1}
+                className="p-0.5 hover:text-white disabled:opacity-20"
+              >
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
         ))}
         <motion.button
           whileTap={{ scale: 0.98 }}
