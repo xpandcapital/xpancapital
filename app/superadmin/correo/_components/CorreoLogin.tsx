@@ -13,6 +13,7 @@ export function CorreoLogin({ onConectado }: Props) {
   const { conectarCuenta, loading, error } = useCorreoCuenta()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [nombreMostrado, setNombreMostrado] = useState('')
   const [paso, setPaso] = useState<'form' | 'connecting' | 'success'>('form')
   const [dominio, setDominio] = useState('')
 
@@ -24,7 +25,7 @@ export function CorreoLogin({ onConectado }: Props) {
 
     setPaso('connecting')
     try {
-      const result = await conectarCuenta(email, password)
+      const result = await conectarCuenta(email, password, nombreMostrado || undefined)
       setDominio(result.dominio)
       setPaso('success')
       setTimeout(() => onConectado(result), 800)
@@ -89,6 +90,20 @@ export function CorreoLogin({ onConectado }: Props) {
                     <span>Dominio: @{dominioDetectado}</span>
                   </div>
                 )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wider">
+                  Nombre para mostrar (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={nombreMostrado}
+                  onChange={(e) => setNombreMostrado(e.target.value)}
+                  placeholder="Central Blis Corp"
+                  className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
+                  disabled={loading}
+                />
               </div>
 
               <div>

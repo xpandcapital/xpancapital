@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('email_cuentas')
-    .select('id, email, nombre_mostrado, firma, last_sync, creado_en, servidor_id, servidor:email_servidores(dominio,nombre)')
+    .select('id, email, nombre_mostrado, firma, departamento, avatar_url, color, plantilla_default_id, last_sync, creado_en, servidor_id, servidor:email_servidores(dominio,nombre)')
     .eq('user_id', auth.userId)
     .order('creado_en', { ascending: false })
 
@@ -23,7 +23,11 @@ export async function GET(request: NextRequest) {
     id: c.id,
     email: c.email,
     nombre_mostrado: c.nombre_mostrado,
+    departamento: c.departamento,
+    avatar_url: c.avatar_url,
+    color: c.color,
     firma: c.firma,
+    plantilla_default_id: c.plantilla_default_id,
     last_sync: c.last_sync,
     creado_en: c.creado_en,
     dominio: (c as any).servidor?.dominio || '',
@@ -38,13 +42,21 @@ export async function PUT(request: NextRequest) {
   if (!auth) return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
 
   const body = await request.json()
-  const { id, nombre_mostrado, firma } = body
+  const { id, nombre_mostrado, firma, departamento, avatar_url, color, plantilla_default_id } = body
 
   if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
+  const updates: Record<string, unknown> = { actualizado_en: new Date().toISOString() }
+  if (nombre_mostrado !== undefined) updates.nombre_mostrado = nombre_mostrado
+  if (firma !== undefined) updates.firma = firma
+  if (departamento !== undefined) updates.departamento = departamento
+  if (avatar_url !== undefined) updates.avatar_url = avatar_url
+  if (color !== undefined) updates.color = color
+  if (plantilla_default_id !== undefined) updates.plantilla_default_id = plantilla_default_id
+
   const { data, error } = await supabase
     .from('email_cuentas')
-    .update({ nombre_mostrado, firma })
+    .update(updates)
     .eq('id', id)
     .eq('user_id', auth.userId)
     .select()

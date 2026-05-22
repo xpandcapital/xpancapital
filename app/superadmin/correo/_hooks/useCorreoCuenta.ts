@@ -55,14 +55,14 @@ export function useCorreoCuenta() {
     }
   }, [])
 
-  const conectarCuenta = useCallback(async (email: string, password: string) => {
+  const conectarCuenta = useCallback(async (email: string, password: string, nombre_mostrado?: string) => {
     setLoading(true)
     setError(null)
     try {
       const res = await fetchWithTimeout('/api/correo/cuentas/conectar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, nombre_mostrado }),
       }, 15000)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al conectar')

@@ -17,7 +17,11 @@ export interface EmailCuenta {
   id: string
   email: string
   nombre_mostrado: string
+  departamento?: string
+  avatar_url?: string
+  color?: string
   firma?: string
+  plantilla_default_id?: string
   last_sync?: string
   creado_en: string
   dominio: string

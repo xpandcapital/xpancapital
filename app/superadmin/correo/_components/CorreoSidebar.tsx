@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Inbox, Send, FileText, AlertTriangle, Trash2, Archive, Star, ChevronDown, Plus, LogOut, Loader2, Mail, UserPlus } from 'lucide-react'
+import { Inbox, Send, FileText, AlertTriangle, Trash2, Archive, Star, ChevronDown, Plus, LogOut, Loader2, Mail, UserPlus, Settings } from 'lucide-react'
 import type { EmailFolder, EmailCuenta } from '../_types'
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
   onDesconectar: () => void
   onSwitchCuenta: (cuenta: EmailCuenta) => void
   onAgregarCuenta: () => void
+  onConfigCuenta: () => void
   onToggleSplit: () => void
   onToggleTheme: () => void
   onExportPDF: () => void
@@ -53,7 +54,7 @@ function getInitials(email: string): string {
 
 export function CorreoSidebar({
   folders, activeFolder, onFolderChange, onRedactar, onDesconectar,
-  onSwitchCuenta, onAgregarCuenta, onToggleSplit, onToggleTheme, onExportPDF,
+  onSwitchCuenta, onAgregarCuenta, onConfigCuenta, onToggleSplit, onToggleTheme, onExportPDF,
   cuentas, cuentaActiva, loading, splitVertical, themeLight
 }: Props) {
   const sortedFolders = () => {
@@ -80,10 +81,15 @@ export function CorreoSidebar({
             className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all
               ${c.id === cuentaActiva?.id ? 'bg-white/10 text-white font-semibold' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'}`}
           >
-            <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold ${c.id === cuentaActiva?.id ? 'bg-blis-red/20 text-blis-red' : 'bg-white/5 text-gray-500'}`}>
-              {getInitials(c.email)}
-            </span>
-            <span className="truncate">{c.email.split('@')[0]}</span>
+            {c.avatar_url ? (
+              <img src={c.avatar_url} alt="" className="w-5 h-5 rounded-md object-cover" />
+            ) : (
+              <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold`}
+                style={c.id === cuentaActiva?.id ? { backgroundColor: (c.color || '#be0b3c') + '30', color: c.color || '#be0b3c' } : { backgroundColor: 'rgba(255,255,255,0.05)', color: '#6b7280' }}>
+                {getInitials(c.nombre_mostrado || c.email)}
+              </span>
+            )}
+            <span className="truncate">{c.nombre_mostrado || c.email.split('@')[0]}</span>
           </motion.button>
         ))}
         <motion.button
@@ -134,12 +140,18 @@ export function CorreoSidebar({
       </div>
 
       {/* Bottom bar */}
-      <div className="p-2 border-t border-white/5">
+      <div className="p-2 border-t border-white/5 space-y-1">
         {cuentaActiva && (
-          <button onClick={onDesconectar} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-all">
-            <LogOut className="w-4 h-4" />
-            <span className="truncate">{cuentaActiva.email}</span>
-          </button>
+          <>
+            <button onClick={onConfigCuenta} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">
+              <Settings className="w-4 h-4" />
+              <span>Configurar cuenta</span>
+            </button>
+            <button onClick={onDesconectar} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-all">
+              <LogOut className="w-4 h-4" />
+              <span className="truncate">{cuentaActiva.nombre_mostrado || cuentaActiva.email}</span>
+            </button>
+          </>
         )}
       </div>
     </div>

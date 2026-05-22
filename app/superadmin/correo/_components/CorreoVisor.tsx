@@ -10,6 +10,7 @@ import type { EmailMessageFull, EmailTranslateResult } from '../_types'
 import { sanitizeHtml } from '../_lib/sanitizer'
 import { CorreoVisorAdjuntos } from './CorreoVisorAdjuntos'
 import { CorreoTraductorBanner } from './CorreoTraductorBanner'
+import { CorreoRespuesta } from './CorreoRespuesta'
 
 interface Props {
   mensaje: EmailMessageFull | null
@@ -25,11 +26,21 @@ interface Props {
   onResponder: (modo: 'reply' | 'replyAll' | 'forward') => void
   onAccion: (action: string, uid: number) => void
   onExportPDF: () => void
+  respuestaOpen: boolean
+  respuestaModo: 'reply' | 'replyAll' | 'forward' | 'compose'
+  onRespuestaEnviada: () => void
+  onRespuestaClose: () => void
+  cuentaEmail: string
+  cuentaNombre: string
+  cuentaFirma?: string
+  cuentaPlantillaDefault?: string
 }
 
 export function CorreoVisor({
   mensaje, loading, traduciendo, mostrandoTraduccion, traduccion,
-  toggleTraduccion, verOriginal, cuentaId, activeFolder, onBack, onResponder, onAccion, onExportPDF
+  toggleTraduccion, verOriginal, cuentaId, activeFolder, onBack, onResponder, onAccion, onExportPDF,
+  respuestaOpen, respuestaModo, onRespuestaEnviada, onRespuestaClose,
+  cuentaEmail, cuentaNombre, cuentaFirma, cuentaPlantillaDefault,
 }: Props) {
   const [showFullHeaders, setShowFullHeaders] = useState(false)
 
@@ -175,6 +186,21 @@ export function CorreoVisor({
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Respuesta inline (se muestra debajo del contenido) */}
+      <CorreoRespuesta
+        open={respuestaOpen && !!mensaje}
+        modo={respuestaModo}
+        mensajeOriginal={mensaje}
+        cuentaEmail={cuentaEmail}
+        cuentaNombre={cuentaNombre}
+        cuentaFirma={cuentaFirma}
+        cuentaPlantillaDefault={cuentaPlantillaDefault}
+        cuentaId={cuentaId}
+        activeFolder={activeFolder}
+        onClose={onRespuestaClose}
+        onEnviado={onRespuestaEnviada}
+      />
     </div>
   )
 }

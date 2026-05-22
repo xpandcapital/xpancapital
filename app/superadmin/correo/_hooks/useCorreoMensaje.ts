@@ -14,6 +14,19 @@ export function useCorreoMensaje() {
     uid: number,
     folder?: string
   ) => {
+    const cacheKey = `blis_correo_full_${cuentaId}_${uid}`
+
+    // Mostrar cache al instante
+    try {
+      const cached = localStorage.getItem(cacheKey)
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        setMensaje(parsed)
+        setMostrarTraduccion(false)
+        setTraduccion(null)
+      }
+    } catch {}
+
     setLoading(true)
     setError(null)
     setMostrarTraduccion(false)
@@ -28,6 +41,9 @@ export function useCorreoMensaje() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al cargar mensaje')
       setMensaje(data)
+
+      // Guardar en cache local
+      try { localStorage.setItem(cacheKey, JSON.stringify(data)) } catch {}
       return data as EmailMessageFull
     } catch (e: any) {
       setError(e.message)

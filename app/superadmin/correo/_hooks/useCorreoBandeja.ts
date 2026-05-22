@@ -46,6 +46,22 @@ export function useCorreoBandeja() {
     const f = folder || activeFolder
     const p = pageNum || 1
     const s = search !== undefined ? search : searchQuery
+    const cacheKey = `blis_correo_msg_${cuentaId}_${f}`
+
+    // Mostrar cache local al instante mientras carga IMAP
+    if (p === 1 && !s) {
+      try {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          if (Array.isArray(parsed)) {
+            setMessages(parsed)
+            setTotal(parsed.length)
+            setHasMore(true)
+          }
+        }
+      } catch {}
+    }
 
     try {
       const params = new URLSearchParams({
@@ -69,6 +85,13 @@ export function useCorreoBandeja() {
       setTotal(data.total)
       setPage(data.page)
       setHasMore(data.hasMore)
+
+      // Guardar en cache local (solo pagina 1 sin busqueda)
+      if (p === 1 && !s && data.messages?.length > 0) {
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify(data.messages.slice(0, 50)))
+        } catch {}
+      }
     } catch (e: any) {
       setError(e.message)
     } finally {

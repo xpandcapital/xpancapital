@@ -6,6 +6,7 @@ import { CorreoSidebar } from './CorreoSidebar'
 import { CorreoLista } from './CorreoLista'
 import { CorreoVisor } from './CorreoVisor'
 import { CorreoRespuesta } from './CorreoRespuesta'
+import { CorreoConfigCuenta } from './CorreoConfigCuenta'
 import { useCorreoCuenta } from '../_hooks/useCorreoCuenta'
 import { useCorreoBandeja } from '../_hooks/useCorreoBandeja'
 import { useCorreoMensaje } from '../_hooks/useCorreoMensaje'
@@ -32,6 +33,7 @@ export function CorreoLayout() {
   const [themeLight, setThemeLight] = useState(false)
   const [neverLoaded, setNeverLoaded] = useState(true)
   const [showAddCuenta, setShowAddCuenta] = useState(false)
+  const [showConfigCuenta, setShowConfigCuenta] = useState(false)
 
   const fetchingRef = useRef(false)
   const conectadoRef = useRef(false)
@@ -107,6 +109,14 @@ export function CorreoLayout() {
 
   const handleAgregarCuenta = () => {
     setShowAddCuenta(true)
+  }
+
+  const handleConfigCuenta = () => {
+    setShowConfigCuenta(true)
+  }
+
+  const handleConfigGuardado = () => {
+    cargarCuentas()
   }
 
   // Refresh manual — unico lugar donde se cargan mensajes
@@ -220,6 +230,7 @@ export function CorreoLayout() {
         onDesconectar={handleDesconectar}
         onSwitchCuenta={handleSwitchCuenta}
         onAgregarCuenta={handleAgregarCuenta}
+        onConfigCuenta={handleConfigCuenta}
         onToggleSplit={handleToggleSplit}
         onToggleTheme={handleToggleTheme}
         onExportPDF={handleExportPDF}
@@ -261,35 +272,35 @@ export function CorreoLayout() {
         onResponder={handleResponder}
         onAccion={handleAccion}
         onExportPDF={handleExportPDF}
-      />
-
-      <CorreoRespuesta
-        open={respuestaOpen}
-        modo={respuestaModo}
-        mensajeOriginal={mensaje}
+        respuestaOpen={respuestaOpen}
+        respuestaModo={respuestaModo}
+        onRespuestaEnviada={() => {
+          if (cuentaActiva) cargarMensajes(cuentaActiva.id, activeFolder, 1)
+        }}
+        onRespuestaClose={() => setRespuestaOpen(false)}
         cuentaEmail={cuentaActiva?.email || ''}
         cuentaNombre={cuentaActiva?.nombre_mostrado || ''}
         cuentaFirma={cuentaActiva?.firma || ''}
-        cuentaId={cuentaActiva?.id || ''}
-        activeFolder={activeFolder}
-        onClose={() => setRespuestaOpen(false)}
-        onEnviado={() => {}}
+        cuentaPlantillaDefault={cuentaActiva?.plantilla_default_id || ''}
       />
 
-      {/* Modal para agregar nueva cuenta (sin cerrar sesion actual) */}
+      {/* Modal para agregar nueva cuenta */}
       {showAddCuenta && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="relative w-full max-w-md">
-            <button
-              onClick={() => setShowAddCuenta(false)}
-              className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-zinc-800 text-gray-400 hover:text-white transition-colors"
-            >
-              ✕
-            </button>
+            <button onClick={() => setShowAddCuenta(false)} className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-zinc-800 text-gray-400 hover:text-white">✕</button>
             <CorreoLogin onConectado={handleConectado} />
           </div>
         </div>
       )}
+
+      {/* Modal de configuracion de cuenta */}
+      <CorreoConfigCuenta
+        open={showConfigCuenta}
+        cuenta={cuentaActiva}
+        onClose={() => setShowConfigCuenta(false)}
+        onGuardado={handleConfigGuardado}
+      />
     </div>
   )
 }

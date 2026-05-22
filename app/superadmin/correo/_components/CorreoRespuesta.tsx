@@ -15,6 +15,7 @@ interface Props {
   cuentaEmail: string
   cuentaNombre: string
   cuentaFirma?: string
+  cuentaPlantillaDefault?: string
   cuentaId: string
   activeFolder: string
   onClose: () => void
@@ -22,7 +23,7 @@ interface Props {
 }
 
 export function CorreoRespuesta({
-  open, modo, mensajeOriginal, cuentaEmail, cuentaNombre, cuentaFirma, cuentaId, activeFolder,
+  open, modo, mensajeOriginal, cuentaEmail, cuentaNombre, cuentaFirma, cuentaPlantillaDefault, cuentaId, activeFolder,
   onClose, onEnviado,
 }: Props) {
   const [to, setTo] = useState('')
@@ -30,7 +31,7 @@ export function CorreoRespuesta({
   const [showCc, setShowCc] = useState(false)
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
-  const [templateId, setTemplateId] = useState('none')
+  const [templateId, setTemplateId] = useState(cuentaPlantillaDefault || 'none')
   const [showIA, setShowIA] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
   const [templates, setTemplates] = useState<any[]>([])
@@ -71,6 +72,15 @@ export function CorreoRespuesta({
       const data = await res.json()
       if (data.success && Array.isArray(data.data)) setTemplates(data.data)
     } catch {}
+  }
+
+  const handleGuardarBorrador = () => {
+    try {
+      const borrador = { to, cc, subject, body, templateId, timestamp: Date.now() }
+      localStorage.setItem(`blis_correo_draft_${cuentaId}`, JSON.stringify(borrador))
+      alert('Borrador guardado localmente.')
+    } catch {}
+    onClose()
   }
 
   const handleEnviar = async () => {
@@ -140,29 +150,20 @@ export function CorreoRespuesta({
     <AnimatePresence>
       {open && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="border-t border-gray-200 bg-white overflow-hidden"
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-full max-w-2xl max-h-[90vh] bg-zinc-950 border border-white/10 rounded-3xl
-              shadow-2xl shadow-blis-red/5 overflow-hidden flex flex-col"
-          >
-            <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0">
-              <h3 className="text-sm font-bold text-white">
+          <div className="p-4 space-y-3 max-w-3xl mx-auto w-full">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900">
                 {modo === 'reply' ? 'Responder' : modo === 'replyAll' ? 'Responder a Todos' : modo === 'forward' ? 'Reenviar' : 'Nuevo Correo'}
               </h3>
-              <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/5 text-gray-500 hover:text-white transition-colors">
+              <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
               <div>
                 <label className="block text-[10px] font-medium text-gray-500 uppercase mb-1">Para</label>
                 <input
@@ -302,11 +303,21 @@ export function CorreoRespuesta({
               )}
             </div>
 
-            <div className="flex items-center justify-between p-4 border-t border-white/5 shrink-0">
-              <span className="text-[10px] text-gray-600">
-                Enviando como {cuentaEmail}
-              </span>
-              <motion.button
+            <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-gray-400">Enviando como {cuentaEmail}</span>
+                <button
+                  onClick={handleGuardarBorrador}
+                  className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  Guardar borrador
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={onClose} className="px-4 py-2 rounded-xl text-sm text-gray-500 hover:text-gray-700 transition-colors">
+                  Cancelar
+                </button>
+                <motion.button
                 whileTap={{ scale: 0.97 }}
                 onClick={handleEnviar}
                 disabled={sending || !to.trim()}
@@ -326,7 +337,7 @@ export function CorreoRespuesta({
                 )}
               </motion.button>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { email, password } = body
+    const { email, password, nombre_mostrado } = body
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
@@ -36,7 +36,9 @@ export async function POST(request: NextRequest) {
 
     if (serverError || !servidor) {
       return NextResponse.json({
-        error: `No hay servidor configurado para el dominio @${dominio}. Contacta al administrador.`
+        error: `Dominio @${dominio} no configurado.`,
+        dominio_no_configurado: true,
+        config_url: '/superadmin/configuracion/correo',
       }, { status: 404 })
     }
 
@@ -79,7 +81,7 @@ export async function POST(request: NextRequest) {
           user_id: auth.userId,
           email,
           password_enc: encrypt(password),
-          nombre_mostrado: auth.email?.split('@')[0] || email.split('@')[0],
+          nombre_mostrado: nombre_mostrado || auth.email?.split('@')[0] || email.split('@')[0],
           last_sync: new Date().toISOString(),
         }])
     }
