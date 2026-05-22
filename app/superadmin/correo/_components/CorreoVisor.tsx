@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Reply, ReplyAll, Forward, Archive, AlertTriangle, Trash2, Star, Loader2,
-  ChevronDown, Paperclip, FileDown,
+  ChevronDown, Paperclip, FileDown, Image as ImageIcon,
 } from 'lucide-react'
 import { useState } from 'react'
 import type { EmailMessageFull, EmailTranslateResult } from '../_types'
@@ -43,6 +43,7 @@ export function CorreoVisor({
   cuentaEmail, cuentaNombre, cuentaFirma, cuentaPlantillaDefault,
 }: Props) {
   const [showFullHeaders, setShowFullHeaders] = useState(false)
+  const [showImages, setShowImages] = useState(false)
 
   if (loading && !mensaje) {
     return (
@@ -66,7 +67,19 @@ export function CorreoVisor({
   const htmlContent = mostrandoTraduccion && traduccion?.translatedHtml
     ? traduccion.translatedHtml
     : (mensaje.html || mensaje.text || '')
-  const sanitizedHtml = sanitizeHtml(htmlContent)
+  let finalHtml = sanitizeHtml(htmlContent)
+
+  // Si no se muestran imagenes, reemplazar src por placeholder
+  if (!showImages) {
+    finalHtml = finalHtml.replace(/<img\s+[^>]*src="https?:\/\/[^"]*"[^>]*>/gi, (match) => {
+      const alt = match.match(/alt="([^"]*)"/)?.[1] || 'Imagen no cargada'
+      return match.replace(/src="[^"]*"/, `src="" alt="${alt}" style="display:none"`)
+    })
+  }
+
+  const sanitizedHtml = finalHtml
+  const hasImages = /<img[^>]+src="https?:\/\//i.test(sanitizeHtml(htmlContent))
+  const blockedCount = !showImages && hasImages
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -154,18 +167,27 @@ export function CorreoVisor({
 
             {/* Reply buttons */}
             <div className="flex items-center gap-1">
-              <button onClick={() => onResponder('reply')}
+              <button onClick={() => onResponder('reply')} title="Responder (R)"
                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 text-xs text-gray-700 hover:bg-gray-200 transition-colors">
                 <Reply className="w-3 h-3" /> Responder
               </button>
-              <button onClick={() => onResponder('replyAll')}
+              <button onClick={() => onResponder('replyAll')} title="Responder a todos (Ctrl+A)"
                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
                 <ReplyAll className="w-3.5 h-3.5" />
               </button>
-              <button onClick={() => onResponder('forward')}
+              <button onClick={() => onResponder('forward')} title="Reenviar (F)"
                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
                 <Forward className="w-3.5 h-3.5" />
               </button>
+              {blockedCount && (
+                <button
+                  onClick={() => setShowImages(true)}
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 border border-blue-200 text-[10px] text-blue-600 font-medium hover:bg-blue-100 transition-colors"
+                  title="Mostrar imágenes bloqueadas"
+                >
+                  <ImageIcon className="w-3 h-3" /> Mostrar imágenes
+                </button>
+              )}
             </div>
           </div>
 

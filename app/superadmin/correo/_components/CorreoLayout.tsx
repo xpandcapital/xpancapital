@@ -117,9 +117,15 @@ export function CorreoLayout() {
     cargarMensajes(cuentaActiva.id, activeFolder, 1).finally(() => { fetchingRef.current = false })
   }
 
+  const pageQueueRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
   const handlePageChange = (newPage: number) => {
     if (!cuentaActiva || newPage < 1 || newPage > totalPages) return
-    irPagina(cuentaActiva.id, newPage)
+    // Cancelar click anterior si viene uno nuevo rapido
+    if (pageQueueRef.current) clearTimeout(pageQueueRef.current)
+    pageQueueRef.current = setTimeout(() => {
+      irPagina(cuentaActiva!.id, newPage)
+    }, 200)
   }
 
   const handleFolderChange = (folder: string) => {
@@ -143,27 +149,27 @@ export function CorreoLayout() {
     setRespuestaOpen(true)
   }
 
-  // Optimistic: actualizar UI al instante, API en background
+  // Optimistic: actualizar UI al instante, API en background sin refrescar lista
   const handleAccion = async (action: string, uid: number) => {
     if (!cuentaActiva) return
-    // Optimistic: actualizar UI al instante
+    // Optimistic instantaneo
     if (action === 'flag') optimisticUpdate(uid, { isFlagged: true } as any)
     else if (action === 'unflag') optimisticUpdate(uid, { isFlagged: false } as any)
     else if (action === 'markRead') optimisticUpdate(uid, { isRead: true } as any)
     else if (action === 'markUnread') optimisticUpdate(uid, { isRead: false } as any)
-    // API en background (las acciones de mover/eliminar refrescan la lista despues)
-    try { await ejecutarAccion(cuentaActiva.id, activeFolder, action, [uid]) } catch {}
-    // Refrescar para acciones que modifican la lista
-    if (['delete', 'moveToSpam', 'moveToArchive', 'moveToTrash'].includes(action)) {
-      cargarMensajes(cuentaActiva.id, activeFolder, 1)
-    }
+    // API en background sin esperar
+    ejecutarAccion(cuentaActiva.id, activeFolder, action, [uid]).catch(() => {})
   }
 
   const handleBulkAction = async (action: string) => {
     if (!cuentaActiva || selectedUids.length === 0) return
     setSelectedUids([])
-    try { await ejecutarAccion(cuentaActiva.id, activeFolder, action, selectedUids) } catch {}
-    cargarMensajes(cuentaActiva.id, activeFolder, 1)
+    // Fire and forget, que IMAP lo procese en background
+    ejecutarAccion(cuentaActiva.id, activeFolder, action, selectedUids).catch(() => {})
+    // Solo refrescar si fue delete o move
+    if (['delete', 'moveToSpam', 'moveToArchive', 'moveToTrash'].includes(action)) {
+      setTimeout(() => cargarMensajes(cuentaActiva!.id, activeFolder, 1), 800)
+    }
   }
 
   const handleSwitchCuenta = (cuenta: any) => {
