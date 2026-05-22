@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   X, Send, Loader2, ChevronDown, Sparkles, Eye, FileText,
+  Paperclip, Bold, Italic, Underline, Link, Image as ImageIcon,
 } from 'lucide-react'
 import { CorreoRedactorIA } from './CorreoRedactorIA'
 import type { EmailMessageFull } from '../_types'
@@ -38,6 +39,9 @@ export function CorreoRespuesta({
   const [sending, setSending] = useState(false)
   const [previewHtml, setPreviewHtml] = useState('')
   const [error, setError] = useState('')
+  const [archivos, setArchivos] = useState<Array<{ filename: string; content: string; contentType: string; size: number }>>([])
+  const [uploadingAdjunto, setUploadingAdjunto] = useState(false)
+  const adjuntoRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (open) {
@@ -74,6 +78,27 @@ export function CorreoRespuesta({
     } catch {}
   }
 
+  const handleAdjuntarArchivo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+    setUploadingAdjunto(true)
+    const nuevos: typeof archivos = []
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i]
+      try {
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve((reader.result as string).split(',')[1])
+          reader.readAsDataURL(f)
+        })
+        nuevos.push({ filename: f.name, content: base64, contentType: f.type, size: f.size })
+      } catch {}
+    }
+    setArchivos(prev => [...prev, ...nuevos])
+    setUploadingAdjunto(false)
+    if (adjuntoRef.current) adjuntoRef.current.value = ''
+  }
+
   const handleGuardarBorrador = () => {
     try {
       const borrador = { to, cc, subject, body, templateId, timestamp: Date.now() }
@@ -100,6 +125,7 @@ export function CorreoRespuesta({
         respuesta_texto: body,
         to_email: to,
         subject,
+        attachments: archivos.length > 0 ? archivos : undefined,
       }
 
       const uid = mensajeOriginal?.uid || Date.now()
@@ -171,8 +197,8 @@ export function CorreoRespuesta({
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
                   placeholder="correo@dominio.com"
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2 text-sm text-white
-                    placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900
+                    placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all"
                 />
               </div>
 
@@ -189,8 +215,8 @@ export function CorreoRespuesta({
                       value={cc}
                       onChange={(e) => setCc(e.target.value)}
                       placeholder="cc@dominio.com"
-                      className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2 text-sm text-white
-                        placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900
+                        placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all"
                     />
                   </motion.div>
                 )}
@@ -198,7 +224,7 @@ export function CorreoRespuesta({
 
               <button
                 onClick={() => setShowCc(!showCc)}
-                className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
               >
                 {showCc ? 'Ocultar CC' : 'Añadir CC/BCC'}
               </button>
@@ -209,8 +235,8 @@ export function CorreoRespuesta({
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2 text-sm text-white
-                    placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900
+                    placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all"
                 />
               </div>
 
@@ -286,14 +312,90 @@ export function CorreoRespuesta({
                 <label className="block text-[10px] font-medium text-gray-500 uppercase mb-1">
                   {templateId !== 'none' ? 'Tu Respuesta (se inserta en {{respuesta-de-correo}})' : 'Mensaje'}
                 </label>
+                {/* HTML Toolbar */}
+                <div className="flex items-center gap-0.5 p-1.5 bg-gray-50 border border-gray-200 border-b-0 rounded-t-xl">
+                  {[
+                    { icon: Bold, tag: 'b', title: 'Negrita' },
+                    { icon: Italic, tag: 'i', title: 'Cursiva' },
+                    { icon: Underline, tag: 'u', title: 'Subrayado' },
+                  ].map(({ icon: Icon, tag, title }) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        const ta = document.getElementById('respuesta-textarea') as HTMLTextAreaElement
+                        if (!ta) return
+                        const s = ta.selectionStart, e = ta.selectionEnd
+                        const sel = body.substring(s, e)
+                        const wrapped = `<${tag}>${sel}</${tag}>`
+                        const nuevo = body.substring(0, s) + wrapped + body.substring(e)
+                        setBody(nuevo)
+                        setTimeout(() => { ta.selectionStart = s; ta.selectionEnd = s + wrapped.length }, 0)
+                      }}
+                      title={title}
+                      className="p-1 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-900 transition-colors"
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </button>
+                  ))}
+                  <div className="w-px h-4 bg-gray-300 mx-1" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const ta = document.getElementById('respuesta-textarea') as HTMLTextAreaElement
+                      if (!ta) return
+                      const url = prompt('URL:') || ''
+                      if (!url) return
+                      const s = ta.selectionStart, e = ta.selectionEnd
+                      const sel = body.substring(s, e) || url
+                      const wrapped = `<a href="${url}">${sel}</a>`
+                      const nuevo = body.substring(0, s) + wrapped + body.substring(e)
+                      setBody(nuevo)
+                    }}
+                    title="Insertar enlace"
+                    className="p-1 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-900 transition-colors"
+                  >
+                    <Link className="w-3.5 h-3.5" />
+                  </button>
+                  <div className="w-px h-4 bg-gray-300 mx-1" />
+                  <input
+                    type="file" ref={adjuntoRef} accept="*/*" multiple
+                    onChange={handleAdjuntarArchivo}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => adjuntoRef.current?.click()}
+                    disabled={uploadingAdjunto}
+                    title="Adjuntar archivos"
+                    className="flex items-center gap-1 p-1 rounded hover:bg-gray-200 text-gray-500 hover:text-gray-900 transition-colors"
+                  >
+                    {uploadingAdjunto ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Paperclip className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
                 <textarea
+                  id="respuesta-textarea"
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   placeholder="Escribe tu respuesta aquí..."
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl p-3 text-sm text-white
-                    placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all
+                  className="w-full bg-white border border-gray-200 border-t-0 rounded-b-xl p-3 text-sm text-gray-900
+                    placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all
                     resize-none min-h-[200px]"
                 />
+                {/* Adjuntos */}
+                {archivos.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">{archivos.length} adjunto(s)</p>
+                    {archivos.map((a, i) => (
+                      <div key={i} className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-xs">
+                        <span className="text-gray-700 truncate flex items-center gap-1.5">
+                          <Paperclip className="w-3 h-3 text-gray-400" /> {a.filename} ({(a.size / 1024).toFixed(1)} KB)
+                        </span>
+                        <button onClick={() => setArchivos(prev => prev.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500 ml-2">✕</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {error && (

@@ -32,6 +32,24 @@ export function useCorreoBandeja() {
     }
   }, [])
 
+  const cargarDesdeCache = useCallback((cuentaId: string, folder: string) => {
+    try {
+      const cacheKey = `blis_correo_msg_${cuentaId}_${folder}`
+      const cached = localStorage.getItem(cacheKey)
+      if (cached) {
+        const parsed = JSON.parse(cached)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed)
+          setTotal(parsed.length)
+          setHasMore(true)
+          setPage(1)
+          return true
+        }
+      }
+    } catch {}
+    return false
+  }, [])
+
   const cargarMensajes = useCallback(async (
     cuentaId: string,
     folder?: string,
@@ -121,6 +139,6 @@ export function useCorreoBandeja() {
 
   return {
     folders, activeFolder, messages, total, page, hasMore, loading, error, searchQuery,
-    cargarFolders, cargarMensajes, cambiarFolder, buscar, cargarMas, setError,
+    cargarFolders, cargarMensajes, cargarDesdeCache, cambiarFolder, buscar, cargarMas, setError,
   }
 }

@@ -11,7 +11,7 @@ import {
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
     CalendarDays, Megaphone, ClipboardList, BookOpenCheck, Package, Bell,
-    MessageCircle, Library, DollarSign, Inbox
+    MessageCircle, Library, DollarSign, Inbox, Server
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { LucideProps } from "lucide-react"
@@ -151,6 +151,7 @@ const ALL_SECTIONS: Section[] = [
                     { icon: Shield, label: "Roles y Niveles", href: "/superadmin/ajustes/roles", permission: "roles:ver" },
                     { icon: Building2, label: "Empresas", href: "/superadmin/ajustes/empresas", permission: "empresas:ver" },
                     { icon: Shield, label: "Seguridad", href: "/superadmin/configuracion/seguridad", permission: "configuracion:ver" },
+                    { icon: Server, label: "Config Correo", href: "/superadmin/configuracion/correo", permission: "configuracion:ver" },
                 ]
             },
             { icon: UserCircle, label: "Mi Perfil", href: "/superadmin/perfil", permission: "perfil:ver" },

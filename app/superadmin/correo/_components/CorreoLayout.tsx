@@ -15,8 +15,8 @@ import { useCorreoEnvio } from '../_hooks/useCorreoEnvio'
 export function CorreoLayout() {
   const { cuentaActiva, cuentas, cargarCuentas, desconectarCuenta, seleccionarCuenta } = useCorreoCuenta()
   const {
-    folders, activeFolder, messages, total, hasMore, loading: bandejaLoading, searchQuery,
-    cargarFolders, cargarMensajes, cambiarFolder, buscar, cargarMas,
+    folders, activeFolder, messages, total, hasMore, loading: bandejaLoading,
+    searchQuery, cargarFolders, cargarMensajes, cargarDesdeCache, cambiarFolder, buscar, cargarMas,
   } = useCorreoBandeja()
   const {
     mensaje, loading: mensajeLoading, traduciendo, mostrarTraduccion, traduccion,
@@ -84,6 +84,10 @@ export function CorreoLayout() {
       if (list && list.length > 0) {
         seleccionarCuenta(list[0])
         setConectado(true)
+        // Cargar folders y mostrar cache local al instante
+        cargarFolders(list[0].id)
+        const encontroCache = cargarDesdeCache(list[0].id, 'INBOX')
+        if (encontroCache) setNeverLoaded(false)
       }
       // Si no hay cuentas, mostrar login (conectado=false)
     }).catch(() => {

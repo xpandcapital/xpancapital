@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { X, Save, Loader2, Camera, Palette } from 'lucide-react'
+import { X, Save, Loader2, Camera, Palette, Upload } from 'lucide-react'
 import type { EmailCuenta } from '../_types'
 
 interface Props {
@@ -28,6 +28,8 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
   const [templates, setTemplates] = useState<any[]>([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (open && cuenta) {
@@ -47,6 +49,25 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
       const data = await res.json()
       if (data.success && Array.isArray(data.data)) setTemplates(data.data)
     } catch {}
+  }
+
+  const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('bucket', 'media')
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al subir')
+      setAvatarUrl(data.url || data.publicUrl || '')
+    } catch (e: any) {
+      setError('Error al subir imagen: ' + e.message)
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleGuardar = async () => {
@@ -118,13 +139,27 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
           {/* Avatar URL */}
           <div>
             <label className="block text-[10px] font-medium text-gray-500 uppercase mb-1 flex items-center gap-1">
-              <Camera className="w-3 h-3" /> URL de imagen / logo
+              <Camera className="w-3 h-3" /> Imagen / Logo
             </label>
-            <input
-              type="url" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)}
-              placeholder="https://...logo.png"
-              className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all"
-            />
+            <div className="flex items-center gap-3">
+              <input
+                type="url" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)}
+                placeholder="https://...logo.png"
+                className="flex-1 bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all"
+              />
+              <input
+                type="file" ref={fileRef} accept="image/*" onChange={handleUploadAvatar}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="flex items-center gap-1 px-3 py-2 rounded-xl bg-white/5 text-xs text-gray-300 hover:text-white hover:bg-white/10 disabled:opacity-40 transition-colors"
+              >
+                {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                {uploading ? 'Subiendo...' : 'Archivo'}
+              </button>
+            </div>
             {avatarUrl && (
               <div className="mt-2 w-12 h-12 rounded-xl overflow-hidden border border-white/10">
                 <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />

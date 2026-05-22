@@ -56,6 +56,7 @@ export async function POST(
       to_name,
       subject,
       reply_all,
+      attachments = [],
     } = body
 
     if (!cuenta_id) return NextResponse.json({ error: 'cuenta_id requerido' }, { status: 400 })
@@ -148,6 +149,11 @@ export async function POST(
       to: to_email || '',
       subject: subject || '(Sin asunto)',
       html: htmlBody,
+      attachments: (attachments || []).map((a: any) => ({
+        filename: a.filename,
+        content: Buffer.from(a.content || '', 'base64'),
+        contentType: a.contentType || 'application/octet-stream',
+      })),
       headers: {
         'Message-ID': messageId,
         ...(inReplyTo && { 'In-Reply-To': inReplyTo }),
