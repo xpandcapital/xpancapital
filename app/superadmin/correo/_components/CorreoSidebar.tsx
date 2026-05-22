@@ -73,7 +73,7 @@ export function CorreoSidebar({
   }
 
   return (
-    <div className="w-full md:w-56 shrink-0 border-r border-white/5 bg-zinc-950 flex flex-col h-full">
+    <div className="w-full shrink-0 border-r border-white/5 bg-zinc-950 flex flex-col h-full">
       {/* Cuentas activas */}
       <div className="p-2 border-b border-white/5 space-y-1">
         {cuentas.map((c, idx) => (

@@ -159,14 +159,23 @@ export function CorreoLayout() {
   if (!conectado) return <CorreoLogin onConectado={handleConectado} />
 
   const sidebarContent = (
-    <CorreoSidebar
-      folders={folders} activeFolder={activeFolder} onFolderChange={handleFolderChange}
-      onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true); setSidebarOpen(false) }}
-      onDesconectar={handleDesconectar} onSwitchCuenta={handleSwitchCuenta} onAgregarCuenta={handleAgregarCuenta}
-      onConfigCuenta={handleConfigCuenta} moverCuentaArriba={moverCuentaArriba} moverCuentaAbajo={moverCuentaAbajo}
-      onToggleSplit={() => {}} onToggleTheme={() => {}} onExportPDF={() => window.print()}
-      cuentas={cuentas || []} cuentaActiva={cuentaActiva} loading={false} splitVertical={false} themeLight={false}
-    />
+    <div className="flex flex-col h-full w-full md:w-56">
+      {/* Mobile close button */}
+      <div className="flex items-center justify-between p-3 border-b border-white/5 md:hidden">
+        <span className="text-sm font-bold text-white">Menú</span>
+        <button onClick={() => setSidebarOpen(false)} className="p-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+      </div>
+      <CorreoSidebar
+        folders={folders} activeFolder={activeFolder} onFolderChange={handleFolderChange}
+        onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true); setSidebarOpen(false) }}
+        onDesconectar={handleDesconectar} onSwitchCuenta={handleSwitchCuenta} onAgregarCuenta={handleAgregarCuenta}
+        onConfigCuenta={handleConfigCuenta} moverCuentaArriba={moverCuentaArriba} moverCuentaAbajo={moverCuentaAbajo}
+        onToggleSplit={() => {}} onToggleTheme={() => {}} onExportPDF={() => window.print()}
+        cuentas={cuentas || []} cuentaActiva={cuentaActiva} loading={false} splitVertical={false} themeLight={false}
+      />
+    </div>
   )
 
   return (
@@ -221,7 +230,7 @@ export function CorreoLayout() {
         </div>
 
         {/* Mobile content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-h-0 overflow-hidden w-full">
           {mobileView === 'list' && (
             <CorreoLista
               messages={messages} loading={bandejaLoading} searchQuery={searchQuery} onSearch={handleSearch}
@@ -252,9 +261,9 @@ export function CorreoLayout() {
         {sidebarOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[1001] bg-black/60 md:hidden" onClick={() => setSidebarOpen(false)} />
+              className="fixed inset-y-0 left-16 right-0 z-[1001] bg-black/60 md:hidden" onClick={() => setSidebarOpen(false)} />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed left-0 top-0 bottom-0 z-[1002] w-72 md:hidden overflow-y-auto">
+              className="fixed left-16 top-0 bottom-0 z-[1002] w-72 md:hidden overflow-y-auto shadow-2xl">
               {sidebarContent}
             </motion.div>
           </>
