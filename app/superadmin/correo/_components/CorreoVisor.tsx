@@ -114,7 +114,7 @@ export function CorreoVisor({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide bg-white">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide bg-white">
         <div className="p-4 max-w-3xl mx-auto">
           {/* From/To header */}
           <div className="flex items-start justify-between mb-3">
@@ -263,9 +263,9 @@ export function CorreoVisor({
           {/* Email body */}
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
-            className="prose prose-sm max-w-none text-gray-900
+            className="prose prose-sm max-w-none text-gray-900 overflow-hidden
               [&_a]:text-blis-red [&_a]:no-underline [&_a:hover]:underline
-              [&_img]:max-w-full [&_img]:rounded-xl"
+              [&_img]:max-w-full [&_img]:rounded-xl [&_table]:max-w-full [&_table]:block [&_table]:overflow-x-auto"
           >
             {sanitizedHtml ? (
               <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
