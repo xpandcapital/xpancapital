@@ -173,7 +173,13 @@ export function CorreoLayout() {
         setUndoAction(prev => {
           if (!prev || prev.uid !== uid) { clearInterval(interval); return null }
           const next = prev.timer - 1
-          if (next <= 0) { ejecutarAccion(cuentaActiva!.id, activeFolder, action, [uid]).catch(() => {}); clearInterval(interval); return null }
+          if (next <= 0) {
+            ejecutarAccion(cuentaActiva!.id, activeFolder, action, [uid])
+              .then(() => cargarMensajes(cuentaActiva!.id, activeFolder, 1))
+              .catch(() => {})
+            clearInterval(interval)
+            return null
+          }
           return { ...prev, timer: next }
         })
       }, 1000)

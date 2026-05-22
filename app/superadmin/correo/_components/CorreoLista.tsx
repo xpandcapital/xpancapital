@@ -146,43 +146,42 @@ export function CorreoLista({
         )}
       </div>
 
-      {/* Pagination footer */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-3 py-2 border-t border-white/5 shrink-0 bg-zinc-950/50 gap-2">
-          <button
-            onClick={() => onPageChange(page - 1)}
-            disabled={page <= 1}
-            className="flex items-center gap-0.5 px-2 py-1 rounded-md text-[11px] text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors shrink-0"
-          >
-            <ChevronLeft className="w-3 h-3" />
-          </button>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-gray-600">Pág</span>
-            <input
-              type="number"
-              min={1}
-              max={totalPages}
-              defaultValue={page}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const val = parseInt((e.target as HTMLInputElement).value)
-                  if (val >= 1 && val <= totalPages) onPageChange(val)
-                }
-              }}
-              className="w-12 bg-white/[0.03] border border-white/5 rounded-md px-2 py-1 text-xs text-white text-center
-                focus:outline-none focus:border-blis-red/30 transition-all"
-            />
-            <span className="text-[10px] text-gray-600">de {totalPages}</span>
-          </div>
-          <button
-            onClick={() => onPageChange(page + 1)}
-            disabled={page >= totalPages}
-            className="flex items-center gap-0.5 px-2 py-1 rounded-md text-[11px] text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors shrink-0"
-          >
-            <ChevronRight className="w-3 h-3" />
-          </button>
+      {/* Pagination footer — siempre visible */}
+      <div className="flex items-center justify-between px-3 py-2 border-t border-white/5 shrink-0 bg-zinc-950/50 gap-2">
+        <button
+          onClick={() => onPageChange(page - 1)}
+          disabled={page <= 1}
+          className="flex items-center gap-0.5 px-2 py-1 rounded-md text-[11px] text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors shrink-0"
+        >
+          <ChevronLeft className="w-3 h-3" />
+        </button>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-gray-600">Pág</span>
+          <input
+            type="number"
+            min={1}
+            max={totalPages}
+            defaultValue={page}
+            key={page}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = parseInt((e.target as HTMLInputElement).value)
+                if (val >= 1 && val <= totalPages) onPageChange(val)
+              }
+            }}
+            className="w-12 bg-white/[0.03] border border-white/5 rounded-md px-2 py-1 text-xs text-white text-center
+              focus:outline-none focus:border-blis-red/30 transition-all"
+          />
+          <span className="text-[10px] text-gray-600">de {totalPages}</span>
         </div>
-      )}
+        <button
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= totalPages}
+          className="flex items-center gap-0.5 px-2 py-1 rounded-md text-[11px] text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors shrink-0"
+        >
+          <ChevronRight className="w-3 h-3" />
+        </button>
+      </div>
     </div>
   )
 }

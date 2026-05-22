@@ -1,18 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
-import { translate } from '@vitalets/google-translate-api'
 
 function cleanHtmlForTranslation(html: string): string {
   let cleaned = html
-  // Eliminar <style> blocks completamente
   cleaned = cleaned.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-  // Eliminar comentarios HTML
   cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '')
   return cleaned
 }
 
 function wrapWithModernFont(html: string): string {
   return `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #1a1a1a;">${html}</div>`
+}
+
+async function translateViaGoogleDirect(text: string, target: string, source: string): Promise<string> {
+  const params = new URLSearchParams({ client: 'gtx', sl: source || 'auto', tl: target, dt: 't', q: text })
+  const url = `https://translate.googleapis.com/translate_a/single?${params.toString()}`
+  const response = await fetch(url)
+  if (!response.ok) throw new Error('Google Translate directo falló')
+  const data = await response.json()
+  return (data[0] || []).map((s: any) => s[0] || '').join('')
 }
 
 export async function POST(request: NextRequest) {
@@ -33,15 +39,25 @@ export async function POST(request: NextRequest) {
     let translatedHtml = ''
     let translatedText = ''
 
+    // Intentar con @vitalets/google-translate-api primero, fallback a endpoint directo
+    async function translateText(input: string): Promise<string> {
+      try {
+        const { translate } = await import('@vitalets/google-translate-api')
+        const result = await translate(input, { to: target, from: source })
+        return result.text
+      } catch {
+        return translateViaGoogleDirect(input, target, source)
+      }
+    }
+
     if (html) {
       const cleanedHtml = cleanHtmlForTranslation(html)
-      const result = await translate(cleanedHtml, { to: target, from: source })
-      translatedHtml = wrapWithModernFont(result.text)
+      const result = await translateText(cleanedHtml)
+      translatedHtml = wrapWithModernFont(result)
     }
 
     if (text) {
-      const result = await translate(text, { to: target, from: source })
-      translatedText = result.text
+      translatedText = await translateText(text)
     }
 
     return NextResponse.json({

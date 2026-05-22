@@ -86,6 +86,12 @@ export interface EmailMessageFull {
   references: string
   size: number
   attachments: EmailAttachment[]
+  returnPath?: string
+  receivedHeaders?: string[]
+  authResults?: string
+  senderIP?: string
+  spoofing?: boolean
+  spoofingDetail?: { visibleFrom: string; realSender: string; senderIP: string; severity: string } | null
 }
 
 export interface EmailTranslateResult {

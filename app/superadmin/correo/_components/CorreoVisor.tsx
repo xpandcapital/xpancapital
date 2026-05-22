@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft, Reply, ReplyAll, Forward, Archive, Trash2, Star, Loader2,
-  ChevronDown, Paperclip, Image as ImageIcon, Shield, Globe, Clock, Server,
+  ChevronDown, Paperclip, Image as ImageIcon, Shield,
 } from 'lucide-react'
 import { useState } from 'react'
 import type { EmailMessageFull, EmailTranslateResult } from '../_types'
@@ -138,6 +138,99 @@ export function CorreoVisor({
                     onVerOriginal={verOriginal}
                   />
                 </p>
+
+                {/* Alerta de suplantacion (spoofing) */}
+                {mensaje.spoofing && mensaje.spoofingDetail && (
+                  <div className="mt-2 mb-1 p-3 rounded-xl bg-red-50 border border-red-200">
+                    <p className="text-xs font-bold text-red-700 mb-1 flex items-center gap-1">
+                      <Shield className="w-3.5 h-3.5" /> ALERTA: Posible suplantación de identidad
+                    </p>
+                    <div className="space-y-1 text-[11px]">
+                      <p className="text-red-600">
+                        <span className="font-medium">Remitente visible (From):</span> {mensaje.spoofingDetail.visibleFrom}
+                      </p>
+                      <p className="text-red-600">
+                        <span className="font-medium">Remitente real (Return-Path):</span> {mensaje.spoofingDetail.realSender}
+                      </p>
+                      {mensaje.spoofingDetail.senderIP && (
+                        <p className="text-red-500">
+                          <span className="font-medium">IP de origen:</span> {mensaje.spoofingDetail.senderIP}
+                        </p>
+                      )}
+                      <p className="text-red-400 mt-1 text-[10px]">
+                        El remitente visible no coincide con el remitente real del sobre SMTP. 
+                        Este correo fue enviado desde un servidor externo haciéndose pasar por {mensaje.from?.split('@')[1] || 'este dominio'}.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Detalles forenses (colapsable) */}
+                <button onClick={() => setShowFullHeaders(!showFullHeaders)}
+                  className="flex items-center gap-1 mt-2 text-[11px] text-gray-400 hover:text-gray-600 transition-colors">
+                  <ChevronDown className={`w-2.5 h-2.5 transition-transform ${showFullHeaders ? 'rotate-180' : ''}`} />
+                  {showFullHeaders ? 'Ocultar análisis' : 'Ver análisis forense'}
+                </button>
+
+                <AnimatePresence>
+                  {showFullHeaders && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                      className="mt-2 overflow-hidden">
+                      <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 space-y-2 text-[11px]">
+                        {/* Return-Path vs From */}
+                        {mensaje.returnPath && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Return-Path</span>
+                            <span className={`font-mono ${mensaje.returnPath !== mensaje.from ? 'text-red-600' : 'text-gray-600'}`}>{mensaje.returnPath}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Message-ID</span>
+                          <span className="text-gray-500 font-mono text-[10px] truncate max-w-[300px]">{mensaje.messageId || '—'}</span>
+                        </div>
+                        {mensaje.senderIP && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">IP origen</span>
+                            <span className="text-gray-600 font-mono">{mensaje.senderIP}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Tamaño</span>
+                          <span className="text-gray-600">{(mensaje.size / 1024).toFixed(1)} KB</span>
+                        </div>
+                        {/* Authentication Results */}
+                        {mensaje.authResults && (
+                          <div>
+                            <p className="text-gray-400 mb-1">Authentication-Results</p>
+                            <p className="text-gray-500 font-mono text-[10px] break-all">{mensaje.authResults}</p>
+                          </div>
+                        )}
+                        {/* Received chain */}
+                        {mensaje.receivedHeaders && mensaje.receivedHeaders.length > 0 && (
+                          <div>
+                            <p className="text-gray-400 mb-1">Cadena de servidores ({mensaje.receivedHeaders.length} saltos)</p>
+                            <div className="space-y-1 max-h-32 overflow-y-auto">
+                              {mensaje.receivedHeaders.map((h, i) => (
+                                <p key={i} className="text-gray-500 font-mono text-[10px] leading-relaxed">
+                                  <span className="text-gray-400">{i + 1}.</span> {h}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {/* Metadata */}
+                        <div className="pt-1.5 border-t border-gray-200 flex justify-between">
+                          <span className="text-gray-400">Flags IMAP</span>
+                          <span className="text-gray-600 font-mono text-[10px]">{(mensaje.flags || []).join(', ') || '—'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Attachments</span>
+                          <span className="text-gray-600">{(mensaje.attachments || []).length} archivos</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
@@ -183,107 +276,6 @@ export function CorreoVisor({
 
           {/* Attachments */}
           <CorreoVisorAdjuntos attachments={mensaje.attachments || []} />
-
-          {/* Full headers — info forense */}
-          <button onClick={() => setShowFullHeaders(!showFullHeaders)}
-            className="flex items-center gap-1 mt-4 text-xs text-gray-400 hover:text-gray-600 transition-colors">
-            <ChevronDown className={`w-3 h-3 transition-transform ${showFullHeaders ? 'rotate-180' : ''}`} />
-            {showFullHeaders ? 'Ocultar detalles' : 'Ver detalles completos'}
-          </button>
-
-          <AnimatePresence>
-            {showFullHeaders && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
-                className="mt-3 overflow-hidden">
-                <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 space-y-3 text-xs">
-                  {/* Info básica */}
-                  <div>
-                    <p className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
-                      <Server className="w-3.5 h-3.5 text-gray-500" /> Información del mensaje
-                    </p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                      {mensaje.messageId && <><span className="text-gray-400">Message-ID</span><span className="text-gray-700 font-mono truncate">{mensaje.messageId}</span></>}
-                      {mensaje.inReplyTo && <><span className="text-gray-400">In-Reply-To</span><span className="text-gray-700 font-mono truncate">{mensaje.inReplyTo}</span></>}
-                      <span className="text-gray-400">Tamaño</span><span className="text-gray-700">{(mensaje.size / 1024).toFixed(1)} KB</span>
-                      <span className="text-gray-400">UID</span><span className="text-gray-700 font-mono">{mensaje.uid}</span>
-                      <span className="text-gray-400">Fecha</span><span className="text-gray-700">{new Date(mensaje.date).toLocaleString('es-ES')}</span>
-                    </div>
-                  </div>
-
-                  {/* Seguridad */}
-                  <div className="pt-2 border-t border-gray-200">
-                    <p className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
-                      <Shield className="w-3.5 h-3.5 text-gray-500" /> Seguridad y autenticación
-                    </p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                      <span className="text-gray-400">TLS</span>
-                      <span className="text-green-600 font-medium">✓ Cifrado</span>
-                      <span className="text-gray-400">SPF</span>
-                      {mensaje.from ? (
-                        <span className="text-green-600 font-medium">✓ Pass</span>
-                      ) : <span className="text-gray-500">—</span>}
-                      <span className="text-gray-400">DKIM</span>
-                      <span className="text-green-600 font-medium">✓ Firmado</span>
-                      <span className="text-gray-400">DMARC</span>
-                      <span className="text-green-600 font-medium">✓ Alineado</span>
-                    </div>
-                    <p className="text-[10px] text-gray-400 mt-2 leading-relaxed">
-                      Este correo pasó la verificación SPF/DKIM/DMARC del servidor receptor. 
-                      La conexión SMTP fue cifrada con TLS. El remitente está autorizado por el dominio {mensaje.from?.split('@')[1] || 'desconocido'}.
-                    </p>
-                  </div>
-
-                  {/* Routing */}
-                  <div className="pt-2 border-t border-gray-200">
-                    <p className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5 text-gray-500" /> Ruta del mensaje
-                    </p>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500" />
-                        <span className="text-gray-600">De:</span>
-                        <span className="text-gray-800 font-medium">{mensaje.fromName || mensaje.from}</span>
-                        <span className="text-gray-400 font-mono text-[10px]">&lt;{mensaje.from}&gt;</span>
-                      </div>
-                      <div className="border-l-2 border-gray-200 ml-1 pl-3 py-1 space-y-1">
-                        <div className="flex items-center gap-2 text-[10px]">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                          <span className="text-gray-500">Servidor SMTP origen</span>
-                          <span className="text-gray-400 font-mono">→</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px]">
-                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                          <span className="text-gray-500">Servidor receptor IMAP</span>
-                          <span className="text-gray-400 font-mono">→</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-blis-red" />
-                        <span className="text-gray-600">Para:</span>
-                        <span className="text-gray-800 font-medium">{mensaje.to || 'Destinatario'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Metadata */}
-                  <div className="pt-2 border-t border-gray-200">
-                    <p className="font-semibold text-gray-900 mb-2 flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-gray-500" /> Metadatos
-                    </p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
-                      <span className="text-gray-400">Flags IMAP</span>
-                      <span className="text-gray-700 font-mono">{(mensaje.flags || []).join(', ') || '—'}</span>
-                      <span className="text-gray-400">Leído</span>
-                      <span className={mensaje.isRead ? 'text-green-600' : 'text-amber-600'}>{mensaje.isRead ? '✓ Sí' : '✗ No'}</span>
-                      {mensaje.cc && <><span className="text-gray-400">CC</span><span className="text-gray-700 truncate">{mensaje.cc}</span></>}
-                      <span className="text-gray-400">Attachments</span>
-                      <span className="text-gray-700">{(mensaje.attachments || []).length} archivos</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       </div>
 

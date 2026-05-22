@@ -60,6 +60,12 @@ export interface ParsedEmail {
     disposition: string
     inline: boolean
   }>
+  returnPath: string
+  receivedHeaders: string[]
+  authResults: string
+  senderIP: string
+  spoofing: boolean
+  spoofingDetail: any | null
 }
 
 export async function connectImap(config: ImapConfig): Promise<ImapFlow> {
@@ -219,6 +225,47 @@ export async function fetchFullMessage(
       inline: (att.contentId && att.disposition !== 'attachment') || false,
     }))
 
+    // Analisis forense: extraer cabeceras del source para deteccion de spoofing
+    const sourceStr = msg.source instanceof Buffer ? msg.source.toString('utf-8') : String(msg.source || '')
+    const headersPart = sourceStr.split('\r\n\r\n')[0] || sourceStr.split('\n\n')[0] || ''
+
+    // Extraer Return-Path
+    const returnPathMatch = headersPart.match(/^Return-Path:\s*<?([^>\s]+)>?/m)
+    const returnPath = returnPathMatch?.[1] || ''
+
+    // Extraer headers Received
+    const receivedHeaders: string[] = []
+    const receivedRegex = /^Received:\s*(.+)$/gm
+    let rm: RegExpExecArray | null
+    while ((rm = receivedRegex.exec(headersPart)) !== null) {
+      receivedHeaders.push(rm[1].trim())
+    }
+
+    // Extraer Authentication-Results
+    const authResultsMatch = headersPart.match(/^Authentication-Results:\s*(.+)$/m)
+    const authResults = authResultsMatch?.[1] || ''
+
+    // Extraer IP del remitente del ultimo Received (el mas cercano al origen)
+    let senderIP = ''
+    if (receivedHeaders.length > 0) {
+      const lastReceived = receivedHeaders[receivedHeaders.length - 1]
+      const ipMatch = lastReceived.match(/\[?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\]?/)
+      if (ipMatch) senderIP = ipMatch[1]
+    }
+
+    // Detectar suplantacion: si From visible != Return-Path real
+    const fromAddress = msg.envelope.from?.[0]?.address || ''
+    const fromDomain = fromAddress.split('@')[1] || ''
+    const returnDomain = returnPath.split('@')[1] || ''
+    const spoofing = !!returnPath && returnPath !== fromAddress && returnDomain !== fromDomain
+
+    const spoofingDetail = spoofing ? {
+      visibleFrom: fromAddress,
+      realSender: returnPath,
+      senderIP,
+      severity: returnDomain ? 'ALTA' : 'MEDIA',
+    } : null
+
     return {
       uid: msg.uid,
       envelope: msg.envelope,
@@ -238,6 +285,12 @@ export async function fetchFullMessage(
       references: '',
       size: msg.size || 0,
       attachments,
+      returnPath,
+      receivedHeaders,
+      authResults,
+      senderIP,
+      spoofing,
+      spoofingDetail,
     }
   } finally {
     lock.release()
