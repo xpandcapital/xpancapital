@@ -53,7 +53,7 @@ export function CorreoItem({ message, isSelected, isChecked, onCheck, onSelect, 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.15 }}
       className={`group relative flex items-start gap-2 px-3 py-2.5 cursor-pointer border-b border-white/[0.03] transition-all duration-150
-        ${isChecked ? 'bg-blis-red/5' : message.isRead ? '' : 'bg-white/[0.02]'}
+        ${isChecked ? 'bg-blis-red/10' : isSelected ? 'bg-blis-red/8' : message.isRead ? '' : 'bg-white/[0.02]'}
         hover:bg-white/[0.03]`}
     >
       <button

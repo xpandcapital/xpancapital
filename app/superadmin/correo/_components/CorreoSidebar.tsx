@@ -170,7 +170,7 @@ export function CorreoSidebar({
             </button>
             <button onClick={onDesconectar} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-all">
               <LogOut className="w-4 h-4" />
-              <span className="truncate">{cuentaActiva.nombre_mostrado || cuentaActiva.email}</span>
+              <span>Cerrar sesión</span>
             </button>
           </>
         )}
