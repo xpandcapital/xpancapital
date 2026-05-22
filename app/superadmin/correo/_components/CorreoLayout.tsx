@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Loader2 } from 'lucide-react'
 import { CorreoLogin } from './CorreoLogin'
 import { CorreoSidebar } from './CorreoSidebar'
 import { CorreoLista } from './CorreoLista'
@@ -24,7 +25,9 @@ export function CorreoLayout() {
   } = useCorreoMensaje()
   const { ejecutarAccion } = useCorreoEnvio()
 
-  const [conectado, setConectado] = useState(false)
+  const [conectado, setConectado] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('blis_correo_cuentas') || '[]').length > 0 } catch { return false }
+  })
   const [respuestaOpen, setRespuestaOpen] = useState(false)
   const [respuestaModo, setRespuestaModo] = useState<'reply' | 'replyAll' | 'forward' | 'compose'>('reply')
   const [selectedUid, setSelectedUid] = useState<number | null>(null)
@@ -220,7 +223,18 @@ export function CorreoLayout() {
     }
   }
 
-  if (!conectado || !cuentaActiva) {
+  if (!cuentaActiva) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-180px)]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-500 mx-auto mb-3" />
+          <p className="text-sm text-gray-400">Conectando al servidor...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!conectado) {
     return <CorreoLogin onConectado={handleConectado} />
   }
 

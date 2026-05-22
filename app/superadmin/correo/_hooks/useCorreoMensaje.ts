@@ -15,22 +15,25 @@ export function useCorreoMensaje() {
     folder?: string
   ) => {
     const cacheKey = `blis_correo_full_${cuentaId}_${uid}`
+    let gotCache = false
 
-    // Mostrar cache al instante
+    // Mostrar cache al instante (sin loading si ya tenemos algo)
     try {
       const cached = localStorage.getItem(cacheKey)
       if (cached) {
         const parsed = JSON.parse(cached)
-        setMensaje(parsed)
-        setMostrarTraduccion(false)
-        setTraduccion(null)
+        if (parsed.uid === uid) {
+          setMensaje(parsed)
+          setMostrarTraduccion(false)
+          setTraduccion(null)
+          gotCache = true
+        }
       }
     } catch {}
 
-    setLoading(true)
+    // Solo mostrar spinner si no hay cache
+    if (!gotCache) setLoading(true)
     setError(null)
-    setMostrarTraduccion(false)
-    setTraduccion(null)
 
     try {
       const params = new URLSearchParams({
@@ -64,9 +67,7 @@ export function useCorreoMensaje() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cuenta_id: cuentaId, folder: folder || 'INBOX' }),
       })
-    } catch {
-      // Silencioso
-    }
+    } catch {}
   }, [])
 
   const traducirMensaje = useCallback(async (
@@ -115,17 +116,7 @@ export function useCorreoMensaje() {
   }, [])
 
   return {
-    mensaje,
-    loading,
-    error,
-    traduccion,
-    traduciendo,
-    mostrarTraduccion,
-    cargarMensaje,
-    marcarComoLeido,
-    traducirMensaje,
-    toggleTraduccion,
-    verOriginal,
-    setError,
+    mensaje, loading, error, traduccion, traduciendo, mostrarTraduccion,
+    cargarMensaje, marcarComoLeido, traducirMensaje, toggleTraduccion, verOriginal, setError,
   }
 }

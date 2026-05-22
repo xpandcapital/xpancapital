@@ -44,7 +44,7 @@ export function CorreoVisor({
 }: Props) {
   const [showFullHeaders, setShowFullHeaders] = useState(false)
 
-  if (loading) {
+  if (loading && !mensaje) {
     return (
       <div className="flex-1 flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-gray-500" />
@@ -79,11 +79,32 @@ export function CorreoVisor({
             </button>
           )}
           <h3 className="text-sm font-bold text-gray-900 truncate">{mensaje.subject}</h3>
+          {loading && mensaje && (
+            <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md inline-flex items-center gap-1">
+              <Loader2 className="w-2.5 h-2.5 animate-spin" /> actualizando
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-0.5">
           <button onClick={() => onAccion(mensaje.isFlagged ? 'unflag' : 'flag', mensaje.uid)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title={mensaje.isFlagged ? 'Quitar estrella' : 'Marcar con estrella'}>
             <Star className={`w-3.5 h-3.5 ${mensaje.isFlagged ? 'text-amber-500 fill-amber-500' : 'text-gray-400'}`} />
+          </button>
+          <button onClick={() => onAccion('moveToArchive', mensaje.uid)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors" title="Archivar">
+            <Archive className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => onAccion('moveToSpam', mensaje.uid)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors" title="Mover a spam">
+            <AlertTriangle className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => onAccion('delete', mensaje.uid)}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-red-500 transition-colors" title="Eliminar">
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={onExportPDF}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors" title="Imprimir / Exportar PDF">
+            <FileDown className="w-3.5 h-3.5" />
           </button>
           <button onClick={() => onAccion('moveToArchive', mensaje.uid)}
             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
