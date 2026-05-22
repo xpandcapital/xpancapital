@@ -159,22 +159,24 @@ export function CorreoLayout() {
   if (!conectado) return <CorreoLogin onConectado={handleConectado} />
 
   const sidebarContent = (
-    <div className="flex flex-col h-full w-full md:w-56">
+    <div className="flex flex-col flex-1 min-h-0">
       {/* Mobile close button */}
-      <div className="flex items-center justify-between p-3 border-b border-white/5 md:hidden">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 md:hidden shrink-0">
         <span className="text-sm font-bold text-white">Menú</span>
         <button onClick={() => setSidebarOpen(false)} className="p-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
       </div>
-      <CorreoSidebar
-        folders={folders} activeFolder={activeFolder} onFolderChange={handleFolderChange}
-        onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true); setSidebarOpen(false) }}
-        onDesconectar={handleDesconectar} onSwitchCuenta={handleSwitchCuenta} onAgregarCuenta={handleAgregarCuenta}
-        onConfigCuenta={handleConfigCuenta} moverCuentaArriba={moverCuentaArriba} moverCuentaAbajo={moverCuentaAbajo}
-        onToggleSplit={() => {}} onToggleTheme={() => {}} onExportPDF={() => window.print()}
-        cuentas={cuentas || []} cuentaActiva={cuentaActiva} loading={false} splitVertical={false} themeLight={false}
-      />
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <CorreoSidebar
+          folders={folders} activeFolder={activeFolder} onFolderChange={handleFolderChange}
+          onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true); setSidebarOpen(false) }}
+          onDesconectar={handleDesconectar} onSwitchCuenta={handleSwitchCuenta} onAgregarCuenta={handleAgregarCuenta}
+          onConfigCuenta={handleConfigCuenta} moverCuentaArriba={moverCuentaArriba} moverCuentaAbajo={moverCuentaAbajo}
+          onToggleSplit={() => {}} onToggleTheme={() => {}} onExportPDF={() => window.print()}
+          cuentas={cuentas || []} cuentaActiva={cuentaActiva} loading={false} splitVertical={false} themeLight={false}
+        />
+      </div>
     </div>
   )
 
@@ -182,7 +184,9 @@ export function CorreoLayout() {
     <div className="w-full h-[calc(100vh-180px)] min-h-[500px] bg-zinc-950/50 rounded-3xl border border-white/5 overflow-hidden">
       {/* ===== DESKTOP LAYOUT (md+) ===== */}
       <div className="hidden md:flex h-full">
-        {sidebarContent}
+        <div className="w-56 shrink-0 border-r border-white/5 bg-zinc-950">
+          {sidebarContent}
+        </div>
         <CorreoLista
           messages={messages} loading={bandejaLoading} searchQuery={searchQuery} onSearch={handleSearch}
           onSearchSubmit={handleSearchSubmit} onSelectMessage={handleSelectMessage} onLoadMore={() => {}}
@@ -263,7 +267,7 @@ export function CorreoLayout() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="fixed inset-y-0 left-16 right-0 z-[1001] bg-black/60 md:hidden" onClick={() => setSidebarOpen(false)} />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed left-16 top-0 bottom-0 z-[1002] w-72 md:hidden overflow-y-auto shadow-2xl">
+              className="fixed left-16 top-0 bottom-0 z-[1002] w-72 md:hidden overflow-hidden shadow-2xl bg-zinc-950 pt-24 flex flex-col">
               {sidebarContent}
             </motion.div>
           </>

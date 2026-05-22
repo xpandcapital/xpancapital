@@ -268,7 +268,7 @@ export function CorreoVisor({
               [&_img]:max-w-full [&_img]:rounded-xl [&_table]:max-w-full [&_table]:block [&_table]:overflow-x-auto"
           >
             {sanitizedHtml ? (
-              <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />
+              <div dangerouslySetInnerHTML={{ __html: `<style>img{max-width:100%!important;height:auto!important}table{max-width:100%!important;display:block!important;overflow-x:auto!important}*{max-width:100%!important;box-sizing:border-box!important;word-wrap:break-word!important}</style><div style="max-width:100%;overflow:hidden">${sanitizedHtml}</div>` }} />
             ) : (
               <p className="text-gray-500 italic">(Sin contenido)</p>
             )}
