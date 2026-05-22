@@ -70,7 +70,7 @@ export function CorreoLista({
 
   // Fix the useState import
   return (
-    <div className="flex flex-col h-full w-96 shrink-0 border-r border-white/5 bg-zinc-950/30">
+    <div className="flex flex-col h-full w-full md:w-96 shrink-0 border-r border-white/5 bg-zinc-950/30">
       <div className="p-3 border-b border-white/5 space-y-2">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-white truncate">

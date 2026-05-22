@@ -87,7 +87,7 @@ export function CorreoVisor({
       <div className="p-3 border-b border-gray-200 bg-white flex items-center justify-between shrink-0 gap-2">
         <div className="flex items-center gap-2 min-w-0">
           {onBack && (
-            <button onClick={onBack} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 lg:hidden">
+            <button onClick={onBack} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 md:hidden">
               <ArrowLeft className="w-4 h-4" />
             </button>
           )}
