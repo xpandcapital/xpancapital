@@ -181,7 +181,7 @@ export function CorreoLayout() {
   )
 
   return (
-    <div className="w-full h-[calc(100vh-180px)] min-h-[500px] bg-zinc-950/50 rounded-3xl border border-white/5 overflow-hidden">
+    <div className="w-full h-[calc(100vh-180px)] min-h-[500px] bg-zinc-950/50 md:rounded-3xl md:border md:border-white/5 overflow-hidden">
       {/* ===== DESKTOP LAYOUT (md+) ===== */}
       <div className="hidden md:flex h-full">
         <div className="w-56 shrink-0 border-r border-white/5 bg-zinc-950">

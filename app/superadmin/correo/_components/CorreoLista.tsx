@@ -70,8 +70,8 @@ export function CorreoLista({
 
   // Fix the useState import
   return (
-    <div className="flex flex-col h-full w-full md:w-96 md:shrink-0 md:border-r border-b md:border-b-0 border-white/5 bg-zinc-950/30 overflow-hidden" style={{ maxWidth: '100%' }}>
-      <div className="p-3 border-b border-white/5 space-y-2">
+    <div className="flex flex-col h-full w-full md:w-96 md:shrink-0 md:border-r border-white/5 bg-zinc-950/30" style={{ overflow: 'hidden', maxWidth: '100%', contain: 'paint layout' }}>
+      <div className="p-3 border-b border-white/5 space-y-2" style={{ maxWidth: '100%', overflow: 'hidden' }}>
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-white truncate">
             {activeFolder === 'INBOX' ? 'Bandeja' : (activeFolder.split('.').pop() || activeFolder)}
@@ -118,7 +118,7 @@ export function CorreoLista({
         </AnimatePresence>
       </div>
 
-      <div ref={listRef} className="flex-1 overflow-y-auto scrollbar-hide">
+      <div ref={listRef} className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide" style={{ maxWidth: '100%', contain: 'layout' }}>
         {loading && messages.length === 0 ? (
           <div className="space-y-1 p-2">
             {[1,2,3,4,5,6].map(i => (
