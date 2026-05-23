@@ -114,7 +114,7 @@ export function CorreoVisor({
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto bg-white max-w-full">
+      <div className="flex-1 min-h-0 overflow-y-auto bg-white max-w-full" style={{ overflowX: 'clip', contain: 'layout style', maxWidth: '100%' }}>
         <div className="p-4 max-w-3xl mx-auto">
           {/* From/To header */}
           <div className="flex items-start justify-between mb-3">
@@ -263,14 +263,15 @@ export function CorreoVisor({
           {/* Email body */}
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
-            className="prose prose-sm max-w-none text-gray-900 overflow-hidden
+            className="prose prose-sm max-w-none text-gray-900 overflow-hidden break-words
               [&_a]:text-blis-red [&_a]:no-underline [&_a:hover]:underline
               [&_img]:max-w-full [&_img]:rounded-xl [&_table]:max-w-full [&_table]:block [&_table]:overflow-x-auto"
+            style={{ maxWidth: '100%', overflowX: 'clip', wordBreak: 'break-word' }}
           >
             {sanitizedHtml ? (
               <div
                 style={{ maxWidth: '100%', overflow: 'hidden', contain: 'layout' }}
-                dangerouslySetInnerHTML={{ __html: `<style>img{max-width:100%!important;height:auto!important}table{max-width:100%!important;display:block!important;overflow-x:auto!important}*{max-width:100%!important;box-sizing:border-box!important;word-wrap:break-word!important}</style><div style="max-width:100%;overflow:hidden">${sanitizedHtml}</div>` }} />
+                dangerouslySetInnerHTML={{ __html: `<style>div,p,table,td,tr,th,img,a,span,body,html,ul,ol,li,h1,h2,h3,h4,h5,h6,blockquote,pre{max-width:100%!important;word-wrap:break-word!important;overflow-wrap:break-word!important}img{max-width:100%!important;height:auto!important}table{max-width:100%!important;display:block!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}*{box-sizing:border-box!important}</style><div style="max-width:100%;overflow:hidden;word-break:break-word">${sanitizedHtml}</div>` }} />
             ) : (
               <p className="text-gray-500 italic">(Sin contenido)</p>
             )}
