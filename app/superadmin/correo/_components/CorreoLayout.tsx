@@ -207,7 +207,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
       </div>
 
       {/* ===== MOBILE LAYOUT (< md) ===== */}
-      <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden">
+      <div className="flex md:hidden flex-col h-full max-w-full" style={{ overflow: 'hidden', flexShrink: 1 }}>
         {/* Mobile top bar: hamburger + search + avatar */}
         {mobileView === 'list' && (
           <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 shrink-0">
@@ -241,7 +241,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
           </div>
         )}
         {/* Mobile content */}
-        <div className="flex-1 min-h-0 w-full overflow-hidden">
+        <div className="flex-1 min-h-0 w-full" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           {mobileView === 'list' && (
             <CorreoLista
               messages={messages} loading={bandejaLoading} searchQuery={searchQuery} onSearch={handleSearch}
