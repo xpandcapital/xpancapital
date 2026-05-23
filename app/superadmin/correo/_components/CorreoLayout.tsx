@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Loader2, ArrowLeft, Menu } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { CorreoLogin } from './CorreoLogin'
 import { CorreoSidebar } from './CorreoSidebar'
 import { CorreoLista } from './CorreoLista'
@@ -15,6 +16,8 @@ import { useCorreoMensaje } from '../_hooks/useCorreoMensaje'
 import { useCorreoEnvio } from '../_hooks/useCorreoEnvio'
 
 export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: boolean; onToggleSidebar: (v: boolean) => void }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const { cuentaActiva, cuentas, cargarCuentas, desconectarCuenta, seleccionarCuenta, moverCuentaArriba, moverCuentaAbajo } = useCorreoCuenta()
   const {
     folders, activeFolder, messages, total, page, totalPages, hasMore, loading: bandejaLoading, searchQuery,
@@ -56,6 +59,31 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
       if (!cuentaActiva) return
       irPagina(cuentaActiva.id, trackedPageRef.current)
     }, 250)
+    // Actualizar URL
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('page', String(newPage))
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }
+
+  const handleSelectMessage = async (uid: number) => {
+    if (!cuentaActiva) return
+    setSelectedUid(uid)
+    optimisticUpdate(uid, { isRead: true } as any)
+    cargarMensaje(cuentaActiva.id, uid, activeFolder)
+    setMobileView('detail')
+    onToggleSidebar(false)
+    // Actualizar URL con el mensaje abierto
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('msg', String(uid))
+    router.replace(`?${params.toString()}`, { scroll: false })
+  }
+
+  const handleBackToList = () => {
+    setMobileView('list')
+    setSelectedUid(null)
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('msg')
+    router.replace(`?${params.toString()}`, { scroll: false })
   }
 
   // Keyboard shortcuts
@@ -105,20 +133,6 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
       if (cuentaConectada) { seleccionarCuenta(cuentaConectada); setConectado(true); cargarFolders(cuentaConectada.id); cargarMensajes(cuentaConectada.id, 'INBOX', 1) }
     }
     setShowAddCuenta(false)
-  }
-
-  const handleSelectMessage = async (uid: number) => {
-    if (!cuentaActiva) return
-    setSelectedUid(uid)
-    optimisticUpdate(uid, { isRead: true } as any)
-    cargarMensaje(cuentaActiva.id, uid, activeFolder)
-    setMobileView('detail')
-    onToggleSidebar(false)
-  }
-
-  const handleBackToList = () => {
-    setMobileView('list')
-    setSelectedUid(null)
   }
 
   const handleRefresh = () => { if (cuentaActiva && !fetchingRef.current) { fetchingRef.current = true; cargarMensajes(cuentaActiva.id, activeFolder, 1).finally(() => { fetchingRef.current = false }) } }
@@ -199,6 +213,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
           hasMore={false} onRefresh={handleRefresh} total={total} activeFolder={activeFolder}
           selectedUids={selectedUids} onSelectUids={setSelectedUids} onBulkAction={handleBulkAction}
           neverLoaded={false} selectedUid={selectedUid} page={page} totalPages={totalPages} onPageChange={handlePageChange}
+          onStar={(uid) => handleAccion(messages.find(m => m.uid === uid)?.isFlagged ? 'unflag' : 'flag', uid)}
         />
         <CorreoVisor
           mensaje={mensaje} loading={mensajeLoading} traduciendo={traduciendo} mostrandoTraduccion={mostrarTraduccion}
@@ -256,6 +271,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
               hasMore={false} onRefresh={handleRefresh} total={total} activeFolder={activeFolder}
               selectedUids={selectedUids} onSelectUids={setSelectedUids} onBulkAction={handleBulkAction}
               neverLoaded={false} selectedUid={selectedUid} page={page} totalPages={totalPages} onPageChange={handlePageChange}
+              onStar={(uid) => handleAccion(messages.find(m => m.uid === uid)?.isFlagged ? 'unflag' : 'flag', uid)}
             />
           )}
           {mobileView === 'detail' && (

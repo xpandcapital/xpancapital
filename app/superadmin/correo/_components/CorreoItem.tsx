@@ -11,6 +11,7 @@ interface Props {
   onCheck: (uid: number) => void
   onSelect: (uid: number) => void
   onClick: (uid: number) => void
+  onStar: (uid: number) => void
 }
 
 function formatDate(dateStr: string): string {
@@ -42,7 +43,7 @@ function avatarColor(name: string): string {
   return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length]
 }
 
-export function CorreoItem({ message, isSelected, isChecked, onCheck, onSelect, onClick }: Props) {
+export function CorreoItem({ message, isSelected, isChecked, onCheck, onSelect, onClick, onStar }: Props) {
   const name = message.fromName || message.from
   const initials = getInitials(name)
 
@@ -70,18 +71,15 @@ export function CorreoItem({ message, isSelected, isChecked, onCheck, onSelect, 
           transition={{ duration: 0.25 }}
           style={{ transformStyle: 'preserve-3d' }}
         >
-          {/* Front: avatar */}
           <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-bold ${avatarColor(name)}`}
             style={{ backfaceVisibility: 'hidden' }}>
             {initials}
           </div>
-          {/* Back: check */}
           <div className="absolute inset-0 w-9 h-9 rounded-xl bg-blis-red flex items-center justify-center"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
             <Check className="w-4 h-4 text-white" />
           </div>
         </motion.div>
-        {/* Dot de no leido */}
         {!message.isRead && (
           <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.6)] ring-1 ring-zinc-950" />
         )}
@@ -93,16 +91,24 @@ export function CorreoItem({ message, isSelected, isChecked, onCheck, onSelect, 
             <span className={`text-sm line-clamp-2 leading-snug ${message.isRead ? 'text-gray-400 font-normal' : 'text-gray-100 font-semibold'}`}>
               {name}
             </span>
-            <span className="text-[11px] text-gray-500 shrink-0">{formatDate(message.date)}</span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {message.hasAttachments && <Paperclip className="w-3 h-3 text-gray-500" />}
+              <span className="text-[11px] text-gray-500">{formatDate(message.date)}</span>
+            </div>
           </div>
           <div className="flex items-center justify-between gap-2 mt-0.5">
             <span className={`text-sm line-clamp-3 leading-snug ${message.isRead ? 'text-gray-500 font-normal' : 'text-gray-200 font-medium'}`}>
               {message.subject}
             </span>
-            <div className="flex items-center gap-1 shrink-0">
-              {message.isFlagged && <Star className="w-3 h-3 text-amber-500 fill-amber-500" />}
-              {message.hasAttachments && <Paperclip className="w-3 h-3 text-gray-500" />}
-            </div>
+          </div>
+          {/* Estrella debajo de fecha */}
+          <div className="flex items-center gap-1 mt-1">
+            <button
+              onClick={(e) => { e.stopPropagation(); onStar(message.uid) }}
+              className="p-0.5 rounded hover:bg-white/5 transition-colors"
+            >
+              <Star className={`w-3.5 h-3.5 ${message.isFlagged ? 'text-amber-400 fill-amber-400' : 'text-gray-600'}`} />
+            </button>
           </div>
         </div>
       </div>

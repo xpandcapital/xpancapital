@@ -102,7 +102,6 @@ export function CorreoVisor({
   }
 
   const sanitizedHtml = finalHtml
-  const blockedCount = !showImages && hasImages
 
   return (
     <div className="flex-1 min-h-0 flex flex-col overflow-hidden max-w-full">
@@ -266,13 +265,13 @@ export function CorreoVisor({
                 className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
                 <Forward className="w-4 h-4" />
               </button>
-              {blockedCount && (
+              {hasImages && (
                 <button
-                  onClick={() => setShowImages(true)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-600 font-medium hover:bg-blue-100 transition-colors"
-                  title="Mostrar imágenes bloqueadas"
+                  onClick={() => setShowImages(!showImages)}
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${showImages ? 'bg-gray-100 border border-gray-200 text-gray-500 hover:bg-gray-200' : 'bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-100'}`}
+                  title={showImages ? 'Ocultar imágenes' : 'Mostrar imágenes bloqueadas'}
                 >
-                  <ImageIcon className="w-3 h-3" /> Mostrar imágenes
+                  <ImageIcon className="w-3 h-3" /> {showImages ? 'Ocultar imágenes' : 'Mostrar imágenes'}
                 </button>
               )}
             </div>
