@@ -17,6 +17,12 @@ export function useCorreoMensaje() {
     const cacheKey = `blis_correo_full_${cuentaId}_${uid}`
     let gotCache = false
 
+    // Si es un mensaje nuevo (diferente UID), limpiar el anterior y mostrar skeleton
+    setMensaje(prev => {
+      if (prev && prev.uid !== uid) return null
+      return prev
+    })
+
     // Mostrar cache al instante (sin loading si ya tenemos algo)
     try {
       const cached = localStorage.getItem(cacheKey)

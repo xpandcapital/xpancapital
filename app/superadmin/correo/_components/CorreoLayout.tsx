@@ -44,6 +44,19 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
   const selectedUidRef = useRef(selectedUid); selectedUidRef.current = selectedUid
   const mensajeRef = useRef(mensaje); mensajeRef.current = mensaje
   const pageQueueRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const trackedPageRef = useRef(page)
+  trackedPageRef.current = page
+
+  const handlePageChange = (newPage: number) => {
+    if (!cuentaActiva || newPage < 1 || newPage > totalPages) return
+    trackedPageRef.current = newPage
+    setPageOptimistic(newPage)
+    if (pageQueueRef.current) clearTimeout(pageQueueRef.current)
+    pageQueueRef.current = setTimeout(() => {
+      if (!cuentaActiva) return
+      irPagina(cuentaActiva.id, trackedPageRef.current)
+    }, 250)
+  }
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -55,7 +68,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
       else if (key === 'f' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setRespuestaModo('forward'); setRespuestaOpen(true) }
       else if (key === 'n' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setRespuestaModo('compose'); setRespuestaOpen(true) }
       else if (key === 'escape') { setRespuestaOpen(false); setSelectedUids([]); onToggleSidebar(false) }
-      else if (key === '?' && e.shiftKey) { alert('Atajos:\nR=Responder  F=Reenviar\nDel=Eliminar  S=Estrella  E=Archivar  /=Buscar  Esc=Cerrar') }
+      else if (key === '?' && e.shiftKey) { alert('Atajos:\nR=Responder  F=Reenviar  N=Nuevo\nDel=Eliminar  S=Estrella  E=Archivar  /=Buscar  Esc=Cerrar') }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -109,12 +122,6 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
   }
 
   const handleRefresh = () => { if (cuentaActiva && !fetchingRef.current) { fetchingRef.current = true; cargarMensajes(cuentaActiva.id, activeFolder, 1).finally(() => { fetchingRef.current = false }) } }
-  const handlePageChange = (newPage: number) => {
-    if (!cuentaActiva || newPage < 1 || newPage > totalPages) return
-    setPageOptimistic(newPage)
-    if (pageQueueRef.current) clearTimeout(pageQueueRef.current)
-    pageQueueRef.current = setTimeout(() => { if (cuentaActiva) irPagina(cuentaActiva.id, newPage) }, 250)
-  }
   const handleFolderChange = (f: string) => { cambiarFolder(f); setSelectedUids([]); setSelectedUid(null); onToggleSidebar(false) }
   const handleSearch = (q: string) => buscar(q)
   const handleSearchSubmit = () => { if (cuentaActiva && searchQuery) cargarMensajes(cuentaActiva.id, activeFolder, 1, searchQuery) }
