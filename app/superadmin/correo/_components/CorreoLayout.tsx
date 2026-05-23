@@ -207,10 +207,10 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
       </div>
 
       {/* ===== MOBILE LAYOUT (< md) ===== */}
-      <div className="flex md:hidden flex-col h-full max-w-full" style={{ overflow: 'hidden', flexShrink: 1 }}>
+      <div className="flex md:hidden flex-col h-full max-w-full">
         {/* Mobile top bar: hamburger + search + avatar */}
         {mobileView === 'list' && (
-          <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 shrink-0">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 shrink-0 sticky top-0 bg-black z-10">
             <button onClick={() => onToggleSidebar(true)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors shrink-0">
               <Menu className="w-5 h-5" />
             </button>
