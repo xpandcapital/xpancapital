@@ -67,18 +67,22 @@ export function CorreoVisor({
   const htmlContent = mostrandoTraduccion && traduccion?.translatedHtml
     ? traduccion.translatedHtml
     : (mensaje.html || mensaje.text || '')
-  let finalHtml = sanitizeHtml(htmlContent)
+  const rawSanitized = sanitizeHtml(htmlContent)
 
-  // Si no se muestran imagenes, reemplazar src por placeholder
-  if (!showImages) {
-    finalHtml = finalHtml.replace(/<img\s+[^>]*src="https?:\/\/[^"]*"[^>]*>/gi, (match) => {
-      const alt = match.match(/alt="([^"]*)"/)?.[1] || 'Imagen no cargada'
-      return match.replace(/src="[^"]*"/, `src="" alt="${alt}" style="display:none"`)
+  // Detectar si hay imágenes
+  const hasImages = /<img\b/i.test(rawSanitized)
+
+  // Si no se muestran imagenes, remover src de TODOS los <img>
+  let finalHtml = rawSanitized
+  if (!showImages && hasImages) {
+    finalHtml = finalHtml.replace(/<img\b[^>]*>/gi, (match) => {
+      // Quitar src y srcset, mantener alt
+      const alt = match.match(/alt\s*=\s*["']([^"']*)["']/i)?.[1] || 'Imagen bloqueada'
+      return `<div style="background:#f3f4f6;border-radius:6px;padding:16px;text-align:center;color:#9ca3af;font-size:12px;margin:8px 0">🖼 ${alt}</div>`
     })
   }
 
   const sanitizedHtml = finalHtml
-  const hasImages = /<img[^>]+src\s*=\s*["']/i.test(sanitizeHtml(htmlContent))
   const blockedCount = !showImages && hasImages
 
   return (
@@ -266,7 +270,8 @@ export function CorreoVisor({
             {sanitizedHtml ? (
               <div
                 style={{ maxWidth: '100%', overflow: 'hidden', contain: 'layout' }}
-                dangerouslySetInnerHTML={{ __html: `<style>div,p,table,td,tr,th,img,a,span,body,html,ul,ol,li,h1,h2,h3,h4,h5,h6,blockquote,pre{max-width:100%!important;word-wrap:break-word!important;overflow-wrap:break-word!important}img{max-width:100%!important;height:auto!important}table{max-width:100%!important;display:block!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}*{box-sizing:border-box!important}</style><div style="max-width:100%;overflow:hidden;word-break:break-word">${sanitizedHtml}</div>` }} />
+                dangerouslySetInnerHTML={{ __html: `<style>div,p,table,td,tr,th,img,a,span,body,html,ul,ol,li,h1,h2,h3,h4,h5,h6,blockquote,pre{max-width:100%!important;word-wrap:break-word!important;overflow-wrap:break-word!important}img{max-width:100%!important;height:auto!important}table{max-width:100%!important;display:block!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}*{box-sizing:border-box!important}</style><div style="max-width:100%;overflow:hidden;word-break:break-word">${sanitizedHtml}</div>` }}
+                key={`msg-${mensaje.uid}-img-${showImages ? '1' : '0'}-tr-${mostrandoTraduccion ? '1' : '0'}`} />
             ) : (
               <p className="text-gray-500 italic">(Sin contenido)</p>
             )}
