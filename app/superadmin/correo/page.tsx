@@ -45,12 +45,17 @@ export default function CorreoPage() {
   }
 
   return (
-    <div className="max-w-full overflow-hidden -mt-3 -mx-4 md:mt-0 md:mx-0 md:space-y-4">
-      <div className="flex items-center justify-between hidden md:flex">
+    <div className="max-w-full overflow-hidden md:overflow-visible md:space-y-4">
+      <div className="hidden md:flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Correo Corporativo</h1>
           <p className="text-sm text-gray-400 mt-1">Gestiona tus correos empresariales con IMAP</p>
         </div>
+      </div>
+      <div className="-mt-3 -mx-4 md:mt-0 md:mx-0">
+        <CorreoLayout sidebarOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />
+      </div>
+    </div>
       </div>
       <CorreoLayout sidebarOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />
     </div>
