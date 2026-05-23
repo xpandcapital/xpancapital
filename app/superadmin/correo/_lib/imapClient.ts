@@ -266,6 +266,18 @@ export async function fetchFullMessage(
       severity: returnDomain ? 'ALTA' : 'MEDIA',
     } : null
 
+    // Reemplazar cid: URLs por data: URLs de attachments inline
+    let html = parsed.html || ''
+    if (html && attachments.length > 0) {
+      attachments.forEach((att: any) => {
+        if (att.contentId && att.content) {
+          const cid = att.contentId.replace(/^<|>$/g, '')
+          const dataUri = `data:${att.mimeType};base64,${att.content}`
+          html = html.replace(new RegExp(`cid:${cid.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi'), dataUri)
+        }
+      })
+    }
+
     return {
       uid: msg.uid,
       envelope: msg.envelope,
@@ -278,7 +290,7 @@ export async function fetchFullMessage(
       to: (msg.envelope.to || []).map((t: any) => t.address).join(', '),
       cc: (msg.envelope.cc || []).map((c: any) => c.address).join(', '),
       date: msg.envelope.date?.toISOString() || '',
-      html: parsed.html || '',
+      html: html,
       text: parsed.text || '',
       messageId: msg.envelope.messageId || '',
       inReplyTo: msg.envelope.inReplyTo || '',
