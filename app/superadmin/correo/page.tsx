@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { CorreoLayout } from './_components/CorreoLayout'
-import { Server, Loader2 } from 'lucide-react'
+import { Server, Loader2, Menu } from 'lucide-react'
 
 export default function CorreoPage() {
   const [supabaseStatus, setSupabaseStatus] = useState<'checking' | 'ok' | 'down'>('checking')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const check = async () => {
@@ -36,20 +37,8 @@ export default function CorreoPage() {
         <div className="text-center max-w-md">
           <Server className="w-16 h-16 text-amber-500 mx-auto mb-4 opacity-50" />
           <h2 className="text-xl font-bold text-white mb-2">Supabase en recuperación</h2>
-          <p className="text-gray-400 text-sm mb-4">
-            La base de datos está restableciéndose después de un reinicio del proyecto.
-            Esto puede tomar hasta 5 minutos.
-          </p>
-          <p className="text-gray-600 text-xs mb-6">
-            Servicios afectados: PostgREST (consultas), Auth (sesiones).
-            Storage, Realtime y Edge Functions están operativos.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2.5 rounded-xl bg-blis-red text-white text-sm font-semibold hover:bg-blis-red-neon transition-all"
-          >
-            Reintentar
-          </button>
+          <p className="text-gray-400 text-sm mb-4">La base de datos está restableciéndose después de un reinicio del proyecto. Esto puede tomar hasta 5 minutos.</p>
+          <button onClick={() => window.location.reload()} className="px-6 py-2.5 rounded-xl bg-blis-red text-white text-sm font-semibold hover:bg-blis-red-neon transition-all">Reintentar</button>
         </div>
       </div>
     )
@@ -58,12 +47,20 @@ export default function CorreoPage() {
   return (
     <div className="space-y-4 max-w-full overflow-hidden">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Correo Corporativo</h1>
-          <p className="text-sm text-gray-400 mt-1 hidden sm:block">Gestiona tus correos empresariales con IMAP</p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-1.5 -ml-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors md:hidden"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Correo Corporativo</h1>
+            <p className="text-sm text-gray-400 mt-1 hidden sm:block">Gestiona tus correos empresariales con IMAP</p>
+          </div>
         </div>
       </div>
-      <CorreoLayout />
+      <CorreoLayout sidebarOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />
     </div>
   )
 }

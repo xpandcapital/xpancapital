@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Loader2, Menu, ArrowLeft } from 'lucide-react'
+import { Loader2, ArrowLeft } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CorreoLogin } from './CorreoLogin'
 import { CorreoSidebar } from './CorreoSidebar'
@@ -14,7 +14,7 @@ import { useCorreoBandeja } from '../_hooks/useCorreoBandeja'
 import { useCorreoMensaje } from '../_hooks/useCorreoMensaje'
 import { useCorreoEnvio } from '../_hooks/useCorreoEnvio'
 
-export function CorreoLayout() {
+export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: boolean; onToggleSidebar: (v: boolean) => void }) {
   const { cuentaActiva, cuentas, cargarCuentas, desconectarCuenta, seleccionarCuenta, moverCuentaArriba, moverCuentaAbajo } = useCorreoCuenta()
   const {
     folders, activeFolder, messages, total, page, totalPages, hasMore, loading: bandejaLoading, searchQuery,
@@ -36,7 +36,6 @@ export function CorreoLayout() {
   const [showAddCuenta, setShowAddCuenta] = useState(false)
   const [showConfigCuenta, setShowConfigCuenta] = useState(false)
   const [undoAction, setUndoAction] = useState<{ action: string; uid: number; timer: number } | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mobileView, setMobileView] = useState<'list' | 'detail'>('list')
 
   const fetchingRef = useRef(false)
@@ -55,7 +54,7 @@ export function CorreoLayout() {
       else if (key === 'a' && e.ctrlKey && !e.shiftKey) { e.preventDefault(); setRespuestaModo('replyAll'); setRespuestaOpen(true) }
       else if (key === 'f' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setRespuestaModo('forward'); setRespuestaOpen(true) }
       else if (key === 'n' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); setRespuestaModo('compose'); setRespuestaOpen(true) }
-      else if (key === 'escape') { setRespuestaOpen(false); setSelectedUids([]); setSidebarOpen(false) }
+      else if (key === 'escape') { setRespuestaOpen(false); setSelectedUids([]); onToggleSidebar(false) }
       else if (key === '?' && e.shiftKey) { alert('Atajos:\nR=Responder  F=Reenviar\nDel=Eliminar  S=Estrella  E=Archivar  /=Buscar  Esc=Cerrar') }
     }
     window.addEventListener('keydown', handler)
@@ -101,7 +100,7 @@ export function CorreoLayout() {
     optimisticUpdate(uid, { isRead: true } as any)
     cargarMensaje(cuentaActiva.id, uid, activeFolder)
     setMobileView('detail')
-    setSidebarOpen(false)
+    onToggleSidebar(false)
   }
 
   const handleBackToList = () => {
@@ -116,7 +115,7 @@ export function CorreoLayout() {
     if (pageQueueRef.current) clearTimeout(pageQueueRef.current)
     pageQueueRef.current = setTimeout(() => { if (cuentaActiva) irPagina(cuentaActiva.id, newPage) }, 250)
   }
-  const handleFolderChange = (f: string) => { cambiarFolder(f); setSelectedUids([]); setSelectedUid(null); setSidebarOpen(false) }
+  const handleFolderChange = (f: string) => { cambiarFolder(f); setSelectedUids([]); setSelectedUid(null); onToggleSidebar(false) }
   const handleSearch = (q: string) => buscar(q)
   const handleSearchSubmit = () => { if (cuentaActiva && searchQuery) cargarMensajes(cuentaActiva.id, activeFolder, 1, searchQuery) }
   const handleResponder = (m: 'reply' | 'replyAll' | 'forward') => { setRespuestaModo(m); setRespuestaOpen(true) }
@@ -149,7 +148,7 @@ export function CorreoLayout() {
   }
   const handleSwitchCuenta = (cuenta: any) => { seleccionarCuenta(cuenta); setSelectedUid(null); setSelectedUids([]); buscar(''); cargarFolders(cuenta.id); cargarMensajes(cuenta.id, 'INBOX', 1) }
   const handleAgregarCuenta = () => setShowAddCuenta(true)
-  const handleConfigCuenta = () => { setShowConfigCuenta(true); setSidebarOpen(false) }
+  const handleConfigCuenta = () => { setShowConfigCuenta(true); onToggleSidebar(false) }
   const handleConfigGuardado = () => cargarCuentas()
   const handleDesconectar = () => {
     if (cuentaActiva) { const id = cuentaActiva.id; desconectarCuenta(id); const r = (cuentas || []).filter(c => c.id !== id); if (r.length > 0) { seleccionarCuenta(r[0]); cargarFolders(r[0].id); cargarMensajes(r[0].id, 'INBOX', 1) } else setConectado(false) }
@@ -163,14 +162,14 @@ export function CorreoLayout() {
       {/* Mobile close button */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 md:hidden shrink-0">
         <span className="text-sm font-bold text-white">Menú</span>
-        <button onClick={() => setSidebarOpen(false)} className="p-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+        <button onClick={() => onToggleSidebar(false)} className="p-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">
         <CorreoSidebar
           folders={folders} activeFolder={activeFolder} onFolderChange={handleFolderChange}
-          onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true); setSidebarOpen(false) }}
+          onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true); onToggleSidebar(false) }}
           onDesconectar={handleDesconectar} onSwitchCuenta={handleSwitchCuenta} onAgregarCuenta={handleAgregarCuenta}
           onConfigCuenta={handleConfigCuenta} moverCuentaArriba={moverCuentaArriba} moverCuentaAbajo={moverCuentaAbajo}
           onToggleSplit={() => {}} onToggleTheme={() => {}} onExportPDF={() => window.print()}
@@ -209,29 +208,27 @@ export function CorreoLayout() {
 
       {/* ===== MOBILE LAYOUT (< md) ===== */}
       <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden" style={{ overflowX: 'clip' }}>
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
-          <div className="flex items-center gap-2">
-            <button onClick={() => setSidebarOpen(true)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
-              <Menu className="w-5 h-5" />
+        {/* Mobile header: solo back en detalle o folder en lista */}
+        {mobileView === 'detail' ? (
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
+            <button onClick={handleBackToList} className="p-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+              <ArrowLeft className="w-5 h-5" />
             </button>
-            {mobileView === 'detail' ? (
-              <button onClick={handleBackToList} className="p-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
-                <ArrowLeft className="w-5 h-5" />
+            <span className="text-sm font-bold text-white truncate">{mensaje?.subject || 'Correo'}</span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
+            <span className="text-sm font-bold text-white truncate">
+              {activeFolder === 'INBOX' ? 'Bandeja' : activeFolder.split('.').pop()}
+            </span>
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] text-gray-600 font-mono">{total}</span>
+              <button onClick={handleRefresh} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
+                <Loader2 className={`w-4 h-4 ${bandejaLoading ? 'animate-spin' : ''}`} />
               </button>
-            ) : (
-              <span className="text-sm font-bold text-white truncate max-w-[180px]">
-                {activeFolder === 'INBOX' ? 'Bandeja' : activeFolder.split('.').pop()}
-              </span>
-            )}
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            {mobileView === 'list' && <span className="text-[10px] text-gray-600 font-mono">{total}</span>}
-            <button onClick={handleRefresh} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
-              <Loader2 className={`w-4 h-4 ${bandejaLoading ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* Mobile content */}
         <div className="flex-1 min-h-0 w-full" style={{ overflow: 'clip' }}>
@@ -265,7 +262,7 @@ export function CorreoLayout() {
         {sidebarOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-y-0 left-16 right-0 z-[997] bg-black/60 md:hidden" onClick={() => setSidebarOpen(false)} />
+              className="fixed inset-y-0 left-16 right-0 z-[997] bg-black/60 md:hidden" onClick={() => onToggleSidebar(false)} />
             <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed left-16 top-20 bottom-0 z-[998] w-72 md:hidden overflow-hidden shadow-2xl bg-zinc-950 pt-4 flex flex-col">
               {sidebarContent}
