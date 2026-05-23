@@ -66,17 +66,11 @@ export function CorreoItem({ message, isSelected, isChecked, onCheck, onSelect, 
         onClick={(e) => { e.stopPropagation(); onCheck(message.uid) }}
         style={{ perspective: '400px' }}
       >
-        <motion.div
-          animate={{ rotateY: isChecked ? 180 : 0 }}
-          transition={{ duration: 0.25 }}
-          style={{ transformStyle: 'preserve-3d' }}
-        >
-          <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-bold ${avatarColor(name)}`}
-            style={{ backfaceVisibility: 'hidden' }}>
+        <motion.div animate={{ rotateY: isChecked ? 180 : 0 }} transition={{ duration: 0.25 }} style={{ transformStyle: 'preserve-3d' }}>
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-bold ${avatarColor(name)}`} style={{ backfaceVisibility: 'hidden' }}>
             {initials}
           </div>
-          <div className="absolute inset-0 w-9 h-9 rounded-xl bg-blis-red flex items-center justify-center"
-            style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+          <div className="absolute inset-0 w-9 h-9 rounded-xl bg-blis-red flex items-center justify-center" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
             <Check className="w-4 h-4 text-white" />
           </div>
         </motion.div>
@@ -85,30 +79,26 @@ export function CorreoItem({ message, isSelected, isChecked, onCheck, onSelect, 
         )}
       </div>
 
-      <div onClick={() => onClick(message.uid)} className="flex-1 min-w-0 flex items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <span className={`text-sm line-clamp-2 leading-snug ${message.isRead ? 'text-gray-400 font-normal' : 'text-gray-100 font-semibold'}`}>
-              {name}
-            </span>
-            <div className="flex flex-col items-end gap-1 shrink-0">
-              <div className="flex items-center gap-1.5">
-                {message.hasAttachments && <Paperclip className="w-3 h-3 text-gray-500" />}
-                <span className="text-[11px] text-gray-500">{formatDate(message.date)}</span>
-              </div>
-              <button
-                onClick={(e) => { e.stopPropagation(); onStar(message.uid) }}
-                className="p-0.5 rounded hover:bg-white/5 transition-colors"
-              >
-                <Star className={`w-4 h-4 ${message.isFlagged ? 'text-amber-400 fill-amber-400' : 'text-gray-600'}`} />
-              </button>
-            </div>
-          <div className="flex items-center justify-between gap-2 mt-0.5">
-            <span className={`text-sm line-clamp-3 leading-snug ${message.isRead ? 'text-gray-500 font-normal' : 'text-gray-200 font-medium'}`}>
-              {message.subject}
-            </span>
+      <div onClick={() => onClick(message.uid)} className="flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <span className={`text-sm line-clamp-2 leading-snug ${message.isRead ? 'text-gray-400 font-normal' : 'text-gray-100 font-semibold'}`}>
+            {name}
+          </span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {message.hasAttachments && <Paperclip className="w-3 h-3 text-gray-500" />}
+            <span className="text-[11px] text-gray-500">{formatDate(message.date)}</span>
           </div>
-          </div>
+        </div>
+        <div className="flex items-start justify-between gap-2 mt-0.5">
+          <span className={`text-sm line-clamp-3 leading-snug flex-1 ${message.isRead ? 'text-gray-500 font-normal' : 'text-gray-200 font-medium'}`}>
+            {message.subject}
+          </span>
+          <button
+            onClick={(e) => { e.stopPropagation(); onStar(message.uid) }}
+            className="p-0.5 rounded hover:bg-white/5 transition-colors shrink-0 mt-0.5"
+          >
+            <Star className={`w-4 h-4 ${message.isFlagged ? 'text-amber-400 fill-amber-400' : 'text-gray-600'}`} />
+          </button>
         </div>
       </div>
     </motion.div>
