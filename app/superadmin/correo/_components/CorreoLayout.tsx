@@ -208,6 +208,35 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
 
       {/* ===== MOBILE LAYOUT (< md) ===== */}
       <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden">
+        {/* Mobile top bar: search + avatar */}
+        {mobileView === 'list' && (
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSearchSubmit() }}
+                placeholder="Buscar correos..."
+                className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-4 pr-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blis-red/30 transition-all"
+              />
+            </div>
+            {/* Account avatar */}
+            {cuentaActiva && (
+              <div className="shrink-0">
+                {cuentaActiva.avatar_url ? (
+                  <img src={cuentaActiva.avatar_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold text-white"
+                    style={{ backgroundColor: (cuentaActiva.color || '#be0b3c') }}>
+                    {cuentaActiva.email.substring(0, 2).toUpperCase()}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
         {/* Mobile content */}
         <div className="flex-1 min-h-0 w-full overflow-hidden">
           {mobileView === 'list' && (

@@ -85,7 +85,7 @@ export function CorreoLista({
           </div>
         </div>
 
-        <div className="relative">
+        <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input
             type="text" value={searchQuery} onChange={(e) => onSearch(e.target.value)} onKeyDown={handleKeyDown}
