@@ -180,7 +180,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
   )
 
   return (
-    <div className="w-full max-w-[calc(100vw-4rem)] md:max-w-full h-full min-h-[400px] bg-zinc-950/50 md:rounded-3xl md:border md:border-white/5 overflow-hidden flex flex-col">
+    <div className="w-full max-w-[calc(100vw-4rem)] md:max-w-full mx-auto md:mx-0 h-full min-h-[400px] md:bg-zinc-950/50 md:rounded-3xl md:border md:border-white/5 overflow-hidden flex flex-col">
       {/* ===== DESKTOP LAYOUT (md+) ===== */}
       <div className="hidden md:flex h-full max-w-full overflow-hidden">
         <div className="w-56 shrink-0 border-r border-white/5 bg-zinc-950 h-full overflow-hidden">
@@ -210,7 +210,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
       <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden">
         {/* Mobile top bar: hamburger + search + avatar */}
         {mobileView === 'list' && (
-          <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 shrink-0">
             <button onClick={() => onToggleSidebar(true)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors shrink-0">
               <Menu className="w-5 h-5" />
             </button>
