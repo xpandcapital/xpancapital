@@ -159,7 +159,7 @@ export function CorreoLayout() {
   if (!conectado) return <CorreoLogin onConectado={handleConectado} />
 
   const sidebarContent = (
-    <div className="flex flex-col flex-1 min-h-0">
+    <div className="flex flex-col flex-1 min-h-0 h-full">
       {/* Mobile close button */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 md:hidden shrink-0">
         <span className="text-sm font-bold text-white">Menú</span>
@@ -181,10 +181,10 @@ export function CorreoLayout() {
   )
 
   return (
-    <div className="w-full max-w-full h-[calc(100vh-180px)] min-h-[500px] bg-zinc-950/50 md:rounded-3xl md:border md:border-white/5 overflow-hidden">
+    <div className="w-full max-w-full h-[calc(100dvh-120px)] min-h-[400px] bg-zinc-950/50 md:rounded-3xl md:border md:border-white/5 overflow-hidden flex flex-col">
       {/* ===== DESKTOP LAYOUT (md+) ===== */}
-      <div className="hidden md:flex h-full">
-        <div className="w-56 shrink-0 border-r border-white/5 bg-zinc-950">
+      <div className="hidden md:flex h-full max-w-full overflow-hidden">
+        <div className="w-56 shrink-0 border-r border-white/5 bg-zinc-950 h-full overflow-hidden">
           {sidebarContent}
         </div>
         <CorreoLista

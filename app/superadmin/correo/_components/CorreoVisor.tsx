@@ -82,7 +82,7 @@ export function CorreoVisor({
   const blockedCount = !showImages && hasImages
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden max-w-full">
       {/* Toolbar */}
       <div className="p-3 border-b border-gray-200 bg-white flex items-center justify-between shrink-0 gap-2">
         <div className="flex items-center gap-2 min-w-0">
