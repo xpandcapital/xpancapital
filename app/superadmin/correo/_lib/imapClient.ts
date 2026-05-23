@@ -130,19 +130,55 @@ export async function fetchMessageHeaders(
     if (options.searchQuery) {
       const searchQuery = options.searchQuery.trim()
       if (searchQuery) {
-        const searchResults = await client.search({ or: [
-          { subject: searchQuery },
-          { from: searchQuery },
-          { body: searchQuery },
-        ]}, { uid: true })
-        fetchOptions.uid = true
-        const uidList = searchResults.slice(-limit)
+        const uidSet = new Set<number>()
+
+        // 1. Busqueda principal: TEXT (busca en TODO el mensaje: cabeceras + cuerpo)
+        try {
+          const textResults = await client.search({ text: searchQuery }, { uid: true })
+          if (Array.isArray(textResults)) textResults.forEach((uid: number) => uidSet.add(uid))
+        } catch {}
+
+        // 2. Busqueda adicional: OR de subject, from y body (por si TEXT no funciona en el servidor)
+        try {
+          const orResults = await client.search({ or: [
+            { subject: searchQuery },
+            { from: searchQuery },
+            { body: searchQuery },
+          ]}, { uid: true })
+          if (Array.isArray(orResults)) orResults.forEach((uid: number) => uidSet.add(uid))
+        } catch {}
+
+        // 3. Tolerancia a errores: dividir query en palabras y buscar cada una
+        if (uidSet.size === 0) {
+          const words = searchQuery.split(/\s+/).filter((w: string) => w.length >= 3)
+          for (const word of words) {
+            try {
+              const wordResults = await client.search({ text: word }, { uid: true })
+              if (Array.isArray(wordResults)) wordResults.forEach((uid: number) => uidSet.add(uid))
+            } catch {}
+            try {
+              const wordOrResults = await client.search({ or: [
+                { subject: word },
+                { from: word },
+              ]}, { uid: true })
+              if (Array.isArray(wordOrResults)) wordOrResults.forEach((uid: number) => uidSet.add(uid))
+            } catch {}
+          }
+        }
+
+        const allUids = Array.from(uidSet).sort((a, b) => b - a)
+        const uidList = allUids.slice(0, limit)
+
         if (uidList.length > 0) {
+          fetchOptions.uid = true
           for await (const msg of client.fetch(uidList, fetchOptions)) {
             messages.push(mapMessageHeader(msg))
           }
         }
-        return { messages, total }
+
+        // Ordenar: mas reciente primero (como en bandeja normal)
+        messages.reverse()
+        return { messages: messages.slice(0, limit), total: uidSet.size }
       }
     }
 
