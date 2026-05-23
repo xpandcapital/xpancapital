@@ -214,6 +214,8 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
           selectedUids={selectedUids} onSelectUids={setSelectedUids} onBulkAction={handleBulkAction}
           neverLoaded={false} selectedUid={selectedUid} page={page} totalPages={totalPages} onPageChange={handlePageChange}
           onStar={(uid) => handleAccion(messages.find(m => m.uid === uid)?.isFlagged ? 'unflag' : 'flag', uid)}
+          onSwipeDelete={(uid) => handleAccion('delete', uid)}
+          onSwipeSpam={(uid) => handleAccion('moveToSpam', uid)}
         />
         <CorreoVisor
           mensaje={mensaje} loading={mensajeLoading} traduciendo={traduciendo} mostrandoTraduccion={mostrarTraduccion}
@@ -272,6 +274,8 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
               selectedUids={selectedUids} onSelectUids={setSelectedUids} onBulkAction={handleBulkAction}
               neverLoaded={false} selectedUid={selectedUid} page={page} totalPages={totalPages} onPageChange={handlePageChange}
               onStar={(uid) => handleAccion(messages.find(m => m.uid === uid)?.isFlagged ? 'unflag' : 'flag', uid)}
+              onSwipeDelete={(uid) => handleAccion('delete', uid)}
+              onSwipeSpam={(uid) => handleAccion('moveToSpam', uid)}
             />
           )}
           {mobileView === 'detail' && (

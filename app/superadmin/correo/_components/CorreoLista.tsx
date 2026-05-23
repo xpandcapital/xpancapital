@@ -27,6 +27,8 @@ interface Props {
   totalPages: number
   onPageChange: (page: number) => void
   onStar: (uid: number) => void
+  onSwipeDelete?: (uid: number) => void
+  onSwipeSpam?: (uid: number) => void
 }
 
 const FILTERS = [
@@ -38,7 +40,7 @@ const FILTERS = [
 export function CorreoLista({
   messages, loading, searchQuery, onSearch, onSearchSubmit, onSelectMessage, onLoadMore,
   hasMore, onRefresh, total, activeFolder, selectedUids, onSelectUids, onBulkAction, neverLoaded, selectedUid,
-  page, totalPages, onPageChange, onStar,
+  page, totalPages, onPageChange, onStar, onSwipeDelete, onSwipeSpam,
 }: Props) {
   const [activeFilter, setActiveFilterState] = useState<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
@@ -137,7 +139,7 @@ export function CorreoLista({
         ) : (
           <AnimatePresence mode="popLayout">
             {filteredMessages.map((msg) => (
-              <CorreoItem key={msg.uid} message={msg} isSelected={selectedUid === msg.uid} isChecked={selectedUids.includes(msg.uid)} onCheck={handleCheck} onSelect={() => {}} onClick={handleClick} onStar={onStar} />
+              <CorreoItem key={msg.uid} message={msg} isSelected={selectedUid === msg.uid} isChecked={selectedUids.includes(msg.uid)} onCheck={handleCheck} onSelect={() => {}} onClick={handleClick} onStar={onStar} onSwipeDelete={onSwipeDelete} onSwipeSpam={onSwipeSpam} />
             ))}
           </AnimatePresence>
         )}

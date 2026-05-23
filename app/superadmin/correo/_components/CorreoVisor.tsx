@@ -43,7 +43,7 @@ export function CorreoVisor({
   cuentaEmail, cuentaNombre, cuentaFirma, cuentaPlantillaDefault,
 }: Props) {
   const [showFullHeaders, setShowFullHeaders] = useState(false)
-  const [showImages, setShowImages] = useState(false)
+  const [showImages, setShowImages] = useState(true)
 
   if (loading && !mensaje) {
     return (
