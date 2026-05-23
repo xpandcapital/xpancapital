@@ -115,21 +115,23 @@ export function CorreoVisor({
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto bg-white max-w-full" style={{ overflowX: 'clip', contain: 'layout style', maxWidth: '100%' }}>
-        <div className="p-4 max-w-3xl mx-auto">
+        <div className="p-3 md:p-4 max-w-full mx-auto">
           {/* From/To header */}
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blis-red/20 flex items-center justify-center text-xs font-bold text-blis-red shrink-0">
+          <div className="flex flex-col gap-3 mb-3">
+            <div className="flex items-start gap-2.5 md:gap-3">
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-blis-red/20 flex items-center justify-center text-[10px] md:text-xs font-bold text-blis-red shrink-0">
                 {(mensaje.fromName || mensaje.from).substring(0, 2).toUpperCase()}
               </div>
-              <div>
-                <p className="text-sm font-semibold text-gray-900">{mensaje.fromName || mensaje.from}</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+              <div className="min-w-0 flex-1">
+
+
+                <p className="text-sm font-semibold text-gray-900 truncate">{mensaje.fromName || mensaje.from}</p>
+                <p className="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">
                   {mensaje.from}
                   {mensaje.to && mensaje.to !== mensaje.from && <span className="ml-2 text-gray-400">para {mensaje.to}</span>}
                 </p>
-                <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-2 flex-wrap">
-                  {new Date(mensaje.date).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                <p className="text-[10px] md:text-[11px] text-gray-400 mt-1 flex items-center gap-2 flex-wrap">
+                  {new Date(mensaje.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   <span className="text-gray-300">·</span>
                   <CorreoTraductorBanner
                     traduciendo={traduciendo}
@@ -235,10 +237,10 @@ export function CorreoVisor({
             </div>
 
             {/* Reply buttons */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-wrap">
               <button onClick={() => onResponder('reply')} title="Responder (R)"
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 text-xs text-gray-700 hover:bg-gray-200 transition-colors">
-                <Reply className="w-3 h-3" /> Responder
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 text-[11px] md:text-xs text-gray-700 hover:bg-gray-200 transition-colors">
+                <Reply className="w-3 h-3" /> <span className="hidden sm:inline">Responder</span>
               </button>
               <button onClick={() => onResponder('replyAll')} title="Responder a todos (Ctrl+A)"
                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
@@ -254,7 +256,7 @@ export function CorreoVisor({
                   className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 border border-blue-200 text-[10px] text-blue-600 font-medium hover:bg-blue-100 transition-colors"
                   title="Mostrar imágenes bloqueadas"
                 >
-                  <ImageIcon className="w-3 h-3" /> Mostrar imágenes
+                  <ImageIcon className="w-3 h-3" /> <span className="hidden sm:inline">Imágenes</span>
                 </button>
               )}
             </div>
