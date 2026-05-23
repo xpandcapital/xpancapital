@@ -56,8 +56,5 @@ export default function CorreoPage() {
         <CorreoLayout sidebarOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />
       </div>
     </div>
-      </div>
-      <CorreoLayout sidebarOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />
-    </div>
   )
 }
