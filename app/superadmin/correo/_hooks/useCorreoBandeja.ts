@@ -21,6 +21,8 @@ export function useCorreoBandeja() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const activeFolderRef = useRef(activeFolder); activeFolderRef.current = activeFolder
+  const searchRef = useRef(searchQuery); searchRef.current = searchQuery
 
   const loadingRef = useRef(false)
   const messagesRef = useRef(messages)
@@ -67,9 +69,9 @@ export function useCorreoBandeja() {
     setLoading(true)
     setError(null)
 
-    const f = folder || activeFolder
+    const f = folder || activeFolderRef.current
     const p = pageNum || 1
-    const s = search !== undefined ? search : searchQuery
+    const s = search !== undefined ? search : searchRef.current
     const cacheKey = `blis_correo_msg_${cuentaId}_${f}`
 
     // Mostrar cache local al instante en pagina 1 sin busqueda
@@ -115,7 +117,7 @@ export function useCorreoBandeja() {
       setLoading(false)
       loadingRef.current = false
     }
-  }, [activeFolder, searchQuery])
+  }, [])  // sin deps: usa refs para activeFolder y searchQuery
 
   const [hasMore, setHasMore] = useState(false)
 
@@ -137,8 +139,8 @@ export function useCorreoBandeja() {
   }, [])
 
   const irPagina = useCallback((cuentaId: string, pageNum: number) => {
-    cargarMensajes(cuentaId, activeFolder, pageNum, searchQuery)
-  }, [activeFolder, searchQuery, cargarMensajes])
+    cargarMensajes(cuentaId, activeFolderRef.current, pageNum, searchRef.current)
+  }, [cargarMensajes])
 
   const optimisticUpdate = useCallback((uid: number, changes: Partial<EmailMessageSummary>) => {
     setMessages(prev => prev.map(m => m.uid === uid ? { ...m, ...changes } : m))
