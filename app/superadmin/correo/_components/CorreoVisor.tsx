@@ -95,7 +95,7 @@ export function CorreoVisor({
               <ArrowLeft className="w-4 h-4" />
             </button>
           )}
-          <h3 className="text-sm font-bold text-gray-900 leading-snug break-words line-clamp-2 md:truncate">{mensaje.subject}</h3>
+          <h3 className="text-sm font-bold text-gray-900 leading-snug break-words">{mensaje.subject}</h3>
           {loading && mensaje && (
             <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md inline-flex items-center gap-1">
               <Loader2 className="w-2.5 h-2.5 animate-spin" /> actualizando
@@ -137,20 +137,20 @@ export function CorreoVisor({
                     </span>
                   )}
                 </p>
-                <p className="text-[11px] md:text-xs text-gray-500 mt-0.5 break-all">
-                  {mensaje.from}
-                  {mensaje.to && mensaje.to !== mensaje.from && <span className="ml-2 text-gray-400 break-words">para {mensaje.to}</span>}
-                </p>
-                <p className="text-[10px] md:text-[11px] text-gray-400 mt-1 flex items-center gap-2 flex-wrap">
-                  {new Date(mensaje.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  <span className="text-gray-300">·</span>
+                <div className="text-[11px] md:text-xs text-gray-500 mt-1.5 space-y-0.5">
+                  <div className="flex items-baseline gap-1.5"><span className="text-gray-400 font-medium shrink-0 w-10">De:</span><span className="break-all text-gray-700">{mensaje.from}</span></div>
+                  <div className="flex items-baseline gap-1.5"><span className="text-gray-400 font-medium shrink-0 w-10">Para:</span><span className="break-all text-gray-700">{mensaje.to || mensaje.from}</span></div>
+                  {mensaje.cc && <div className="flex items-baseline gap-1.5"><span className="text-gray-400 font-medium shrink-0 w-10">CC:</span><span className="break-all text-gray-600">{mensaje.cc}</span></div>}
+                  <div className="flex items-baseline gap-1.5"><span className="text-gray-400 font-medium shrink-0 w-10">Fecha:</span><span className="text-gray-600">{new Date(mensaje.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div>
+                </div>
+                <div className="mt-1.5">
                   <CorreoTraductorBanner
                     traduciendo={traduciendo}
                     mostrandoTraduccion={mostrandoTraduccion}
                     onTraducir={() => toggleTraduccion()}
                     onVerOriginal={verOriginal}
                   />
-                </p>
+                </div>
 
                 {/* Detalles forenses (colapsable) */}
                 <button onClick={() => setShowFullHeaders(!showFullHeaders)}

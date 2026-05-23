@@ -90,13 +90,13 @@ export function CorreoItem({ message, isSelected, isChecked, onCheck, onSelect, 
       <div onClick={() => onClick(message.uid)} className="flex-1 min-w-0 flex items-start gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <span className={`text-sm truncate ${message.isRead ? 'text-gray-400 font-normal' : 'text-gray-100 font-semibold'}`}>
+            <span className={`text-sm line-clamp-2 leading-snug ${message.isRead ? 'text-gray-400 font-normal' : 'text-gray-100 font-semibold'}`}>
               {name}
             </span>
             <span className="text-[11px] text-gray-500 shrink-0">{formatDate(message.date)}</span>
           </div>
           <div className="flex items-center justify-between gap-2 mt-0.5">
-            <span className={`text-sm truncate ${message.isRead ? 'text-gray-500 font-normal' : 'text-gray-200 font-medium'}`}>
+            <span className={`text-sm line-clamp-3 leading-snug ${message.isRead ? 'text-gray-500 font-normal' : 'text-gray-200 font-medium'}`}>
               {message.subject}
             </span>
             <div className="flex items-center gap-1 shrink-0">
