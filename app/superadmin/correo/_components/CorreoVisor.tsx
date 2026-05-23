@@ -104,7 +104,7 @@ export function CorreoVisor({
   const sanitizedHtml = finalHtml
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col overflow-hidden max-w-full">
+    <div className="flex-1 min-h-0 flex flex-col max-w-full">
       {/* Toolbar */}
       <div className="p-3 border-b border-gray-200 bg-white flex items-center justify-between shrink-0 gap-2">
         <div className="flex items-center gap-2 min-w-0">
@@ -136,7 +136,7 @@ export function CorreoVisor({
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto bg-white max-w-full" style={{ overflowX: 'clip', contain: 'layout style', maxWidth: '100%' }}>
+      <div className="flex-1 min-h-0 overflow-y-auto bg-white max-w-full" style={{ maxWidth: '100%' }}>
         <div className="p-3 md:p-4 max-w-full mx-auto">
           {/* From/To header */}
           <div className="flex flex-col gap-3 mb-3">
