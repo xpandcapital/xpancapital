@@ -45,7 +45,7 @@ export default function CorreoPage() {
   }
 
   return (
-    <div className="max-w-full overflow-hidden -mt-3 -mx-4 md:mt-0 md:mx-0 md:space-y-4">
+    <div className="max-w-full overflow-hidden md:space-y-4">
       <div className="flex items-center justify-between hidden md:flex">
         <div>
           <h1 className="text-2xl font-bold text-white">Correo Corporativo</h1>
