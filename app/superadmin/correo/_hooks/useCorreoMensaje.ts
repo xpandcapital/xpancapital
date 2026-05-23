@@ -124,5 +124,6 @@ export function useCorreoMensaje() {
   return {
     mensaje, loading, error, traduccion, traduciendo, mostrarTraduccion,
     cargarMensaje, marcarComoLeido, traducirMensaje, toggleTraduccion, verOriginal, setError,
+    setMensaje,
   }
 }

@@ -25,7 +25,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
   } = useCorreoBandeja()
   const {
     mensaje, loading: mensajeLoading, traduciendo, mostrarTraduccion, traduccion,
-    cargarMensaje, toggleTraduccion, verOriginal,
+    cargarMensaje, toggleTraduccion, verOriginal, setMensaje,
   } = useCorreoMensaje()
   const { ejecutarAccion } = useCorreoEnvio()
 
@@ -143,11 +143,23 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
 
   const handleAccion = async (action: string, uid: number) => {
     if (!cuentaActiva) return
-    if (action === 'flag') optimisticUpdate(uid, { isFlagged: true } as any)
-    else if (action === 'unflag') optimisticUpdate(uid, { isFlagged: false } as any)
-    else if (action === 'markRead') optimisticUpdate(uid, { isRead: true } as any)
-    else if (action === 'markUnread') optimisticUpdate(uid, { isRead: false } as any)
+    // Optimistic UI inmediato
+    if (action === 'flag') {
+      optimisticUpdate(uid, { isFlagged: true } as any)
+      if (mensaje?.uid === uid) setMensaje({ ...mensaje, isFlagged: true, flags: [...(mensaje.flags || []), '\\Flagged'] })
+    } else if (action === 'unflag') {
+      optimisticUpdate(uid, { isFlagged: false } as any)
+      if (mensaje?.uid === uid) setMensaje({ ...mensaje, isFlagged: false })
+    } else if (action === 'markRead') {
+      optimisticUpdate(uid, { isRead: true } as any)
+      if (mensaje?.uid === uid) setMensaje({ ...mensaje, isRead: true })
+    } else if (action === 'markUnread') {
+      optimisticUpdate(uid, { isRead: false } as any)
+      if (mensaje?.uid === uid) setMensaje({ ...mensaje, isRead: false })
+    }
     if (['delete', 'moveToSpam', 'moveToArchive'].includes(action)) {
+      // Cerrar visor si estamos borrando/moviendo el mensaje actual
+      if (uid === selectedUid) { setSelectedUid(null); setMensaje(null) }
       const undoRef = { action, uid, timer: 5 }
       setUndoAction(undoRef)
       const interval = setInterval(() => {
@@ -214,8 +226,8 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
           selectedUids={selectedUids} onSelectUids={setSelectedUids} onBulkAction={handleBulkAction}
           neverLoaded={false} selectedUid={selectedUid} page={page} totalPages={totalPages} onPageChange={handlePageChange}
           onStar={(uid) => handleAccion(messages.find(m => m.uid === uid)?.isFlagged ? 'unflag' : 'flag', uid)}
-          onSwipeDelete={(uid) => handleAccion('delete', uid)}
-          onSwipeSpam={(uid) => handleAccion('moveToSpam', uid)}
+          onSwipeDelete={(uid) => { if (uid === selectedUid) { setSelectedUid(null); setMensaje(null) }; handleAccion('delete', uid) }}
+          onSwipeSpam={(uid) => { if (uid === selectedUid) { setSelectedUid(null); setMensaje(null) }; handleAccion('moveToSpam', uid) }}
         />
         <CorreoVisor
           mensaje={mensaje} loading={mensajeLoading} traduciendo={traduciendo} mostrandoTraduccion={mostrarTraduccion}
@@ -274,8 +286,8 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
               selectedUids={selectedUids} onSelectUids={setSelectedUids} onBulkAction={handleBulkAction}
               neverLoaded={false} selectedUid={selectedUid} page={page} totalPages={totalPages} onPageChange={handlePageChange}
               onStar={(uid) => handleAccion(messages.find(m => m.uid === uid)?.isFlagged ? 'unflag' : 'flag', uid)}
-              onSwipeDelete={(uid) => handleAccion('delete', uid)}
-              onSwipeSpam={(uid) => handleAccion('moveToSpam', uid)}
+              onSwipeDelete={(uid) => { if (uid === selectedUid) { setSelectedUid(null); setMensaje(null) }; handleAccion('delete', uid) }}
+              onSwipeSpam={(uid) => { if (uid === selectedUid) { setSelectedUid(null); setMensaje(null) }; handleAccion('moveToSpam', uid) }}
             />
           )}
           {mobileView === 'detail' && (
