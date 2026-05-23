@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { CorreoLayout } from './_components/CorreoLayout'
-import { Server, Loader2, Menu } from 'lucide-react'
+import { Server, Loader2 } from 'lucide-react'
 
 export default function CorreoPage() {
   const [supabaseStatus, setSupabaseStatus] = useState<'checking' | 'ok' | 'down'>('checking')
@@ -47,17 +47,9 @@ export default function CorreoPage() {
   return (
     <div className="space-y-4 max-w-full overflow-hidden">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-1.5 -ml-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors md:hidden"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-white hidden md:block">Correo Corporativo</h1>
-            <p className="text-sm text-gray-400 mt-1 hidden sm:block">Gestiona tus correos empresariales con IMAP</p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold text-white hidden md:block">Correo Corporativo</h1>
+          <p className="text-sm text-gray-400 mt-1 hidden sm:block">Gestiona tus correos empresariales con IMAP</p>
         </div>
       </div>
       <CorreoLayout sidebarOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Loader2, ArrowLeft } from 'lucide-react'
+import { Loader2, ArrowLeft, Menu } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CorreoLogin } from './CorreoLogin'
 import { CorreoSidebar } from './CorreoSidebar'
@@ -208,9 +208,12 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
 
       {/* ===== MOBILE LAYOUT (< md) ===== */}
       <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden">
-        {/* Mobile top bar: search + avatar */}
+        {/* Mobile top bar: hamburger + search + avatar */}
         {mobileView === 'list' && (
           <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
+            <button onClick={() => onToggleSidebar(true)} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors shrink-0">
+              <Menu className="w-5 h-5" />
+            </button>
             {/* Search */}
             <div className="flex-1 relative">
               <input
@@ -219,10 +222,10 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
                 onChange={(e) => handleSearch(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSearchSubmit() }}
                 placeholder="Buscar correos..."
-                className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-4 pr-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blis-red/30 transition-all"
+                className="w-full bg-white/[0.04] border border-white/10 rounded-xl pl-3 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blis-red/30 transition-all"
               />
             </div>
-            {/* Account avatar */}
+            {/* Avatar */}
             {cuentaActiva && (
               <div className="shrink-0">
                 {cuentaActiva.avatar_url ? (
