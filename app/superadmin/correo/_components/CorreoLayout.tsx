@@ -208,28 +208,6 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
 
       {/* ===== MOBILE LAYOUT (< md) ===== */}
       <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden" style={{ overflowX: 'clip' }}>
-        {/* Mobile header: solo back en detalle o folder en lista */}
-        {mobileView === 'detail' ? (
-          <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
-            <button onClick={handleBackToList} className="p-1 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <span className="text-sm font-bold text-white truncate">{mensaje?.subject || 'Correo'}</span>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
-            <span className="text-sm font-bold text-white truncate">
-              {activeFolder === 'INBOX' ? 'Bandeja' : activeFolder.split('.').pop()}
-            </span>
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] text-gray-600 font-mono">{total}</span>
-              <button onClick={handleRefresh} className="p-1.5 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors">
-                <Loader2 className={`w-4 h-4 ${bandejaLoading ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Mobile content */}
         <div className="flex-1 min-h-0 w-full" style={{ overflow: 'clip' }}>
           {mobileView === 'list' && (
