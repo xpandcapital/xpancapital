@@ -50,6 +50,15 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
   const trackedPageRef = useRef(page)
   trackedPageRef.current = page
 
+  // Actualizar URL manteniendo folder/page/msg
+  const updateUrl = (overrides: Record<string, string>) => {
+    const p = new URLSearchParams(searchParams.toString())
+    Object.entries(overrides).forEach(([k, v]) => { if (v) p.set(k, v); else p.delete(k) })
+    if (!overrides.folder && activeFolderRef.current) p.set('folder', activeFolderRef.current)
+    const str = p.toString()
+    router.replace(str ? `?${str}` : window.location.pathname, { scroll: false })
+  }
+
   const handlePageChange = (newPage: number) => {
     if (!cuentaActiva || newPage < 1 || newPage > totalPages) return
     trackedPageRef.current = newPage
@@ -59,10 +68,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
       if (!cuentaActiva) return
       irPagina(cuentaActiva.id, trackedPageRef.current)
     }, 250)
-    // Actualizar URL
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('page', String(newPage))
-    router.replace(`?${params.toString()}`, { scroll: false })
+    updateUrl({ page: String(newPage) })
   }
 
   const handleSelectMessage = async (uid: number) => {
@@ -72,18 +78,26 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
     cargarMensaje(cuentaActiva.id, uid, activeFolder)
     setMobileView('detail')
     onToggleSidebar(false)
-    // Actualizar URL con el mensaje abierto
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('msg', String(uid))
-    router.replace(`?${params.toString()}`, { scroll: false })
+    updateUrl({ msg: String(uid) })
   }
 
   const handleBackToList = () => {
     setMobileView('list')
     setSelectedUid(null)
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete('msg')
-    router.replace(`?${params.toString()}`, { scroll: false })
+    updateUrl({ msg: '' })
+  }
+
+  const handleFolderChange = (f: string) => {
+    cambiarFolder(f)
+    setSelectedUids([])
+    setSelectedUid(null)
+    onToggleSidebar(false)
+    updateUrl({ folder: f, page: '1', msg: '' })
+  }
+
+  const handleSwitchCuentaExt = (cuenta: any) => {
+    handleSwitchCuenta(cuenta)
+    updateUrl({ folder: 'INBOX', page: '1', msg: '' })
   }
 
   // Keyboard shortcuts
@@ -102,10 +116,11 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  // Montar: cargar cuentas y si existen -> auto-conectar + cargar bandeja
+  // Montar: cargar cuentas y si existen -> auto-conectar + cargar bandeja (respetando URL)
   useEffect(() => {
     let cancelled = false
     const timer = setTimeout(() => { if (!cancelled && !cuentaRef.current) setConectado(false) }, 8000)
+    const urlFolder = searchParams.get('folder') || 'INBOX'
     cargarCuentas().then((list) => {
       clearTimeout(timer)
       if (cancelled) return
@@ -113,7 +128,9 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
         seleccionarCuenta(list[0])
         setConectado(true)
         cargarFolders(list[0].id)
-        cargarMensajes(list[0].id, 'INBOX', 1)
+        // Iniciar en la carpeta de la URL o INBOX
+        if (urlFolder !== 'INBOX') cambiarFolder(urlFolder)
+        cargarMensajes(list[0].id, urlFolder, 1)
       }
     }).catch(() => { clearTimeout(timer); if (!cancelled) setConectado(false) })
     return () => { cancelled = true; clearTimeout(timer) }
@@ -136,7 +153,6 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
   }
 
   const handleRefresh = () => { if (cuentaActiva && !fetchingRef.current) { fetchingRef.current = true; cargarMensajes(cuentaActiva.id, activeFolder, 1).finally(() => { fetchingRef.current = false }) } }
-  const handleFolderChange = (f: string) => { cambiarFolder(f); setSelectedUids([]); setSelectedUid(null); onToggleSidebar(false) }
   const handleSearch = (q: string) => buscar(q)
   const handleSearchSubmit = () => { if (cuentaActiva && searchQuery) cargarMensajes(cuentaActiva.id, activeFolder, 1, searchQuery) }
   const handleResponder = (m: 'reply' | 'replyAll' | 'forward') => { setRespuestaModo(m); setRespuestaOpen(true) }
@@ -203,7 +219,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
         <CorreoSidebar
           folders={folders} activeFolder={activeFolder} onFolderChange={handleFolderChange}
           onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true); onToggleSidebar(false) }}
-          onDesconectar={handleDesconectar} onSwitchCuenta={handleSwitchCuenta} onAgregarCuenta={handleAgregarCuenta}
+          onDesconectar={handleDesconectar} onSwitchCuenta={handleSwitchCuentaExt} onAgregarCuenta={handleAgregarCuenta}
           onConfigCuenta={handleConfigCuenta} moverCuentaArriba={moverCuentaArriba} moverCuentaAbajo={moverCuentaAbajo}
           onToggleSplit={() => {}} onToggleTheme={() => {}} onExportPDF={() => window.print()}
           cuentas={cuentas || []} cuentaActiva={cuentaActiva} loading={false} splitVertical={false} themeLight={false}
