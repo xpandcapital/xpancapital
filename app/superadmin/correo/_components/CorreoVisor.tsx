@@ -114,7 +114,7 @@ export function CorreoVisor({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide bg-white">
+      <div className="flex-1 overflow-y-auto bg-white max-w-full" style={{ overflowX: 'clip' }}>
         <div className="p-4 max-w-3xl mx-auto">
           {/* From/To header */}
           <div className="flex items-start justify-between mb-3">

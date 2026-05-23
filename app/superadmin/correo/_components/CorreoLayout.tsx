@@ -208,7 +208,7 @@ export function CorreoLayout() {
       </div>
 
       {/* ===== MOBILE LAYOUT (< md) ===== */}
-      <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden">
+      <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden" style={{ overflowX: 'clip' }}>
         {/* Top bar */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-zinc-950 shrink-0">
           <div className="flex items-center gap-2">
@@ -234,7 +234,7 @@ export function CorreoLayout() {
         </div>
 
         {/* Mobile content */}
-        <div className="flex-1 min-h-0 overflow-hidden w-full">
+        <div className="flex-1 min-h-0 w-full" style={{ overflow: 'clip' }}>
           {mobileView === 'list' && (
             <CorreoLista
               messages={messages} loading={bandejaLoading} searchQuery={searchQuery} onSearch={handleSearch}

@@ -70,7 +70,7 @@ export function CorreoLista({
 
   // Fix the useState import
   return (
-    <div className="flex flex-col min-h-0 flex-1 w-full md:w-96 md:shrink-0 md:border-r border-white/5 bg-zinc-950/30 overflow-hidden max-w-full">
+    <div className="flex flex-col flex-1 w-full md:w-96 md:shrink-0 md:border-r border-white/5 bg-zinc-950/30 max-w-full" style={{ overflow: 'clip' }}>
       <div className="p-3 border-b border-white/5 space-y-2 overflow-hidden max-w-full">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-white truncate">
@@ -118,7 +118,7 @@ export function CorreoLista({
         </AnimatePresence>
       </div>
 
-      <div ref={listRef} className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide max-w-full">
+      <div ref={listRef} className="flex-1 overflow-y-auto scrollbar-hide max-w-full" style={{ overflowX: 'clip' }}>
         {loading && messages.length === 0 ? (
           <div className="space-y-1 p-2">
             {[1,2,3,4,5,6].map(i => (
