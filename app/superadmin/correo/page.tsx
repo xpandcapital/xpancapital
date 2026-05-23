@@ -16,21 +16,14 @@ export default function CorreoPage() {
         const res = await fetch('/api/correo/cuentas', { signal: ctrl.signal })
         clearTimeout(timer)
         setSupabaseStatus(res.ok || res.status === 401 ? 'ok' : 'down')
-      } catch {
-        setSupabaseStatus('down')
-      }
+      } catch { setSupabaseStatus('down') }
     }
     check()
   }, [])
 
   if (supabaseStatus === 'checking') {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-500" />
-      </div>
-    )
+    return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="w-8 h-8 animate-spin text-gray-500" /></div>
   }
-
   if (supabaseStatus === 'down') {
     return (
       <div className="flex items-center justify-center min-h-[60vh] p-6">
@@ -45,16 +38,14 @@ export default function CorreoPage() {
   }
 
   return (
-    <div className="max-w-full overflow-hidden md:overflow-visible md:space-y-4">
+    <div className="space-y-4 max-w-full overflow-hidden">
       <div className="hidden md:flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Correo Corporativo</h1>
           <p className="text-sm text-gray-400 mt-1">Gestiona tus correos empresariales con IMAP</p>
         </div>
       </div>
-      <div className="-mt-3 -mx-4 md:mt-0 md:mx-0">
-        <CorreoLayout sidebarOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />
-      </div>
+      <CorreoLayout sidebarOpen={sidebarOpen} onToggleSidebar={setSidebarOpen} />
     </div>
   )
 }
