@@ -180,7 +180,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
   )
 
   return (
-    <div className="w-full max-w-full h-[calc(100dvh-120px)] min-h-[400px] bg-zinc-950/50 md:rounded-3xl md:border md:border-white/5 overflow-hidden flex flex-col">
+    <div className="w-full max-w-[calc(100vw-4rem)] md:max-w-full h-[calc(100dvh-120px)] min-h-[400px] bg-zinc-950/50 md:rounded-3xl md:border md:border-white/5 overflow-hidden flex flex-col">
       {/* ===== DESKTOP LAYOUT (md+) ===== */}
       <div className="hidden md:flex h-full max-w-full overflow-hidden">
         <div className="w-56 shrink-0 border-r border-white/5 bg-zinc-950 h-full overflow-hidden">
@@ -207,9 +207,9 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
       </div>
 
       {/* ===== MOBILE LAYOUT (< md) ===== */}
-      <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden" style={{ overflowX: 'clip' }}>
+      <div className="flex md:hidden flex-col h-full max-w-full overflow-hidden">
         {/* Mobile content */}
-        <div className="flex-1 min-h-0 w-full" style={{ overflow: 'clip' }}>
+        <div className="flex-1 min-h-0 w-full overflow-hidden">
           {mobileView === 'list' && (
             <CorreoLista
               messages={messages} loading={bandejaLoading} searchQuery={searchQuery} onSearch={handleSearch}
