@@ -78,7 +78,7 @@ export function CorreoVisor({
   }
 
   const sanitizedHtml = finalHtml
-  const hasImages = /<img[^>]+src="https?:\/\//i.test(sanitizeHtml(htmlContent))
+  const hasImages = /<img[^>]+src\s*=\s*["']/i.test(sanitizeHtml(htmlContent))
   const blockedCount = !showImages && hasImages
 
   return (
@@ -91,7 +91,7 @@ export function CorreoVisor({
               <ArrowLeft className="w-4 h-4" />
             </button>
           )}
-          <h3 className="text-sm font-bold text-gray-900 truncate">{mensaje.subject}</h3>
+          <h3 className="text-sm font-bold text-gray-900 leading-snug break-words line-clamp-2 md:truncate">{mensaje.subject}</h3>
           {loading && mensaje && (
             <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-md inline-flex items-center gap-1">
               <Loader2 className="w-2.5 h-2.5 animate-spin" /> actualizando
@@ -125,10 +125,17 @@ export function CorreoVisor({
               <div className="min-w-0 flex-1">
 
 
-                <p className="text-sm font-semibold text-gray-900 truncate">{mensaje.fromName || mensaje.from}</p>
-                <p className="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">
+                <p className="text-sm font-semibold text-gray-900 break-words inline-flex items-center gap-1.5">
+                  {mensaje.fromName || mensaje.from}
+                  {mensaje.spoofing && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 font-bold flex items-center gap-0.5">
+                      <Shield className="w-2.5 h-2.5" /> SPOOF
+                    </span>
+                  )}
+                </p>
+                <p className="text-[11px] md:text-xs text-gray-500 mt-0.5 break-all">
                   {mensaje.from}
-                  {mensaje.to && mensaje.to !== mensaje.from && <span className="ml-2 text-gray-400">para {mensaje.to}</span>}
+                  {mensaje.to && mensaje.to !== mensaje.from && <span className="ml-2 text-gray-400 break-words">para {mensaje.to}</span>}
                 </p>
                 <p className="text-[10px] md:text-[11px] text-gray-400 mt-1 flex items-center gap-2 flex-wrap">
                   {new Date(mensaje.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -141,37 +148,12 @@ export function CorreoVisor({
                   />
                 </p>
 
-                {/* Alerta de suplantacion (spoofing) */}
-                {mensaje.spoofing && mensaje.spoofingDetail && (
-                  <div className="mt-2 mb-1 p-3 rounded-xl bg-red-50 border border-red-200">
-                    <p className="text-xs font-bold text-red-700 mb-1 flex items-center gap-1">
-                      <Shield className="w-3.5 h-3.5" /> ALERTA: Posible suplantación de identidad
-                    </p>
-                    <div className="space-y-1 text-[11px]">
-                      <p className="text-red-600">
-                        <span className="font-medium">Remitente visible (From):</span> {mensaje.spoofingDetail.visibleFrom}
-                      </p>
-                      <p className="text-red-600">
-                        <span className="font-medium">Remitente real (Return-Path):</span> {mensaje.spoofingDetail.realSender}
-                      </p>
-                      {mensaje.spoofingDetail.senderIP && (
-                        <p className="text-red-500">
-                          <span className="font-medium">IP de origen:</span> {mensaje.spoofingDetail.senderIP}
-                        </p>
-                      )}
-                      <p className="text-red-400 mt-1 text-[10px]">
-                        El remitente visible no coincide con el remitente real del sobre SMTP. 
-                        Este correo fue enviado desde un servidor externo haciéndose pasar por {mensaje.from?.split('@')[1] || 'este dominio'}.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
                 {/* Detalles forenses (colapsable) */}
                 <button onClick={() => setShowFullHeaders(!showFullHeaders)}
-                  className="flex items-center gap-1 mt-2 text-[11px] text-gray-400 hover:text-gray-600 transition-colors">
+                  className={`flex items-center gap-1 mt-2 text-[11px] transition-colors ${mensaje.spoofing ? 'text-red-500 hover:text-red-600 font-medium' : 'text-gray-400 hover:text-gray-600'}`}>
                   <ChevronDown className={`w-2.5 h-2.5 transition-transform ${showFullHeaders ? 'rotate-180' : ''}`} />
                   {showFullHeaders ? 'Ocultar análisis' : 'Ver análisis forense'}
+                  {mensaje.spoofing && <span className="w-1.5 h-1.5 rounded-full bg-red-500 ml-1" />}
                 </button>
 
                 <AnimatePresence>
@@ -179,6 +161,17 @@ export function CorreoVisor({
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                       className="mt-2 overflow-hidden">
                       <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 space-y-2 text-[11px]">
+                        {/* Spoofing info */}
+                        {mensaje.spoofing && mensaje.spoofingDetail && (
+                          <div className="p-2 rounded-lg bg-red-50 border border-red-200">
+                            <p className="text-xs font-bold text-red-700 mb-1">Suplantación de identidad detectada</p>
+                            <div className="space-y-0.5 text-[10px]">
+                              <p className="text-red-600"><span className="font-medium">Visible:</span> {mensaje.spoofingDetail.visibleFrom}</p>
+                              <p className="text-red-600"><span className="font-medium">Real:</span> {mensaje.spoofingDetail.realSender}</p>
+                              {mensaje.spoofingDetail.senderIP && <p className="text-red-500"><span className="font-medium">IP:</span> {mensaje.spoofingDetail.senderIP}</p>}
+                            </div>
+                          </div>
+                        )}
                         {/* Return-Path vs From */}
                         {mensaje.returnPath && (
                           <div className="flex justify-between">
@@ -237,26 +230,26 @@ export function CorreoVisor({
             </div>
 
             {/* Reply buttons */}
-            <div className="flex items-center gap-1 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <button onClick={() => onResponder('reply')} title="Responder (R)"
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 text-[11px] md:text-xs text-gray-700 hover:bg-gray-200 transition-colors">
-                <Reply className="w-3 h-3" /> <span className="hidden sm:inline">Responder</span>
+                className="flex items-center gap-1 px-3 py-2 rounded-lg bg-gray-100 text-xs text-gray-700 hover:bg-gray-200 transition-colors font-medium">
+                <Reply className="w-3.5 h-3.5" /> Responder
               </button>
               <button onClick={() => onResponder('replyAll')} title="Responder a todos (Ctrl+A)"
-                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
-                <ReplyAll className="w-3.5 h-3.5" />
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+                <ReplyAll className="w-4 h-4" />
               </button>
               <button onClick={() => onResponder('forward')} title="Reenviar (F)"
-                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
-                <Forward className="w-3.5 h-3.5" />
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors">
+                <Forward className="w-4 h-4" />
               </button>
               {blockedCount && (
                 <button
                   onClick={() => setShowImages(true)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 border border-blue-200 text-[10px] text-blue-600 font-medium hover:bg-blue-100 transition-colors"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-[11px] text-blue-600 font-medium hover:bg-blue-100 transition-colors"
                   title="Mostrar imágenes bloqueadas"
                 >
-                  <ImageIcon className="w-3 h-3" /> <span className="hidden sm:inline">Imágenes</span>
+                  <ImageIcon className="w-3 h-3" /> Mostrar imágenes
                 </button>
               )}
             </div>
