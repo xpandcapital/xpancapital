@@ -87,28 +87,27 @@ export function CorreoItem({ message, isSelected, isChecked, onCheck, onSelect, 
 
       <div onClick={() => onClick(message.uid)} className="flex-1 min-w-0 flex items-start gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-start justify-between gap-2">
             <span className={`text-sm line-clamp-2 leading-snug ${message.isRead ? 'text-gray-400 font-normal' : 'text-gray-100 font-semibold'}`}>
               {name}
             </span>
-            <div className="flex items-center gap-1.5 shrink-0">
-              {message.hasAttachments && <Paperclip className="w-3 h-3 text-gray-500" />}
-              <span className="text-[11px] text-gray-500">{formatDate(message.date)}</span>
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              <div className="flex items-center gap-1.5">
+                {message.hasAttachments && <Paperclip className="w-3 h-3 text-gray-500" />}
+                <span className="text-[11px] text-gray-500">{formatDate(message.date)}</span>
+              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); onStar(message.uid) }}
+                className="p-0.5 rounded hover:bg-white/5 transition-colors"
+              >
+                <Star className={`w-4 h-4 ${message.isFlagged ? 'text-amber-400 fill-amber-400' : 'text-gray-600'}`} />
+              </button>
             </div>
-          </div>
           <div className="flex items-center justify-between gap-2 mt-0.5">
             <span className={`text-sm line-clamp-3 leading-snug ${message.isRead ? 'text-gray-500 font-normal' : 'text-gray-200 font-medium'}`}>
               {message.subject}
             </span>
           </div>
-          {/* Estrella debajo de fecha */}
-          <div className="flex items-center gap-1 mt-1">
-            <button
-              onClick={(e) => { e.stopPropagation(); onStar(message.uid) }}
-              className="p-0.5 rounded hover:bg-white/5 transition-colors"
-            >
-              <Star className={`w-3.5 h-3.5 ${message.isFlagged ? 'text-amber-400 fill-amber-400' : 'text-gray-600'}`} />
-            </button>
           </div>
         </div>
       </div>
