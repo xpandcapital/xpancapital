@@ -155,10 +155,8 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
   const handleRefresh = () => { if (cuentaActiva && !fetchingRef.current) { fetchingRef.current = true; cargarMensajes(cuentaActiva.id, activeFolder, 1).finally(() => { fetchingRef.current = false }) } }
   const handleSearch = (q: string) => buscar(q)
   const handleSearchSubmit = () => { if (cuentaActiva && searchQuery) cargarMensajes(cuentaActiva.id, activeFolder, 1, searchQuery) }
-  const handleResponder = (m: 'reply' | 'replyAll' | 'forward') => { console.log('handleResponder called', m); setRespuestaModo(m); setRespuestaOpen(true) }
-
+  const handleResponder = (m: 'reply' | 'replyAll' | 'forward') => { setRespuestaModo(m); setRespuestaOpen(true) }
   const handleAccion = async (action: string, uid: number) => {
-    console.log('handleAccion called', action, uid, 'cuentaActiva:', !!cuentaActiva)
     if (!cuentaActiva) return
     // Optimistic UI inmediato
     if (action === 'flag') {

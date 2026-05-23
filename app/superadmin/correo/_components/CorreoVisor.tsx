@@ -121,15 +121,15 @@ export function CorreoVisor({
           )}
         </div>
         <div className="flex items-center gap-0.5">
-          <button onClick={() => { console.log('star clicked', mensaje.isFlagged); onAccion(mensaje.isFlagged ? 'unflag' : 'flag', mensaje.uid) }}
+          <button onClick={() => onAccion(mensaje.isFlagged ? 'unflag' : 'flag', mensaje.uid)}
             className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" title={mensaje.isFlagged ? 'Quitar estrella' : 'Marcar con estrella'}>
             <Star className={`w-3.5 h-3.5 ${mensaje.isFlagged ? 'text-amber-500 fill-amber-500' : 'text-gray-400'}`} />
           </button>
-          <button onClick={() => { console.log('archive clicked'); onAccion('moveToArchive', mensaje.uid) }}
+          <button onClick={() => onAccion('moveToArchive', mensaje.uid)}
             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors" title="Archivar">
             <Archive className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => { console.log('delete clicked'); onAccion('delete', mensaje.uid) }}
+          <button onClick={() => onAccion('delete', mensaje.uid)}
             className="p-1.5 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-500 transition-colors" title="Eliminar">
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -253,7 +253,7 @@ export function CorreoVisor({
 
             {/* Reply buttons */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <button onClick={() => { console.log('reply clicked'); onResponder('reply') }} title="Responder (R)"
+              <button onClick={() => onResponder('reply')} title="Responder (R)"
                 className="flex items-center gap-1 px-3 py-2 rounded-lg bg-gray-100 text-xs text-gray-700 hover:bg-gray-200 transition-colors font-medium">
                 <Reply className="w-3.5 h-3.5" /> Responder
               </button>
@@ -277,6 +277,21 @@ export function CorreoVisor({
             </div>
           </div>
 
+          {/* Respuesta inline: aparece justo debajo de los botones de accion */}
+          <CorreoRespuesta
+            open={respuestaOpen && !!mensaje}
+            modo={respuestaModo}
+            mensajeOriginal={mensaje}
+            cuentaEmail={cuentaEmail}
+            cuentaNombre={cuentaNombre}
+            cuentaFirma={cuentaFirma}
+            cuentaPlantillaDefault={cuentaPlantillaDefault}
+            cuentaId={cuentaId}
+            activeFolder={activeFolder}
+            onClose={onRespuestaClose}
+            onEnviado={onRespuestaEnviada}
+          />
+
           {/* Email body */}
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}
@@ -299,21 +314,6 @@ export function CorreoVisor({
           <CorreoVisorAdjuntos attachments={mensaje.attachments || []} />
         </div>
       </div>
-
-      {/* Respuesta inline (se muestra debajo del contenido) */}
-      <CorreoRespuesta
-        open={respuestaOpen && !!mensaje}
-        modo={respuestaModo}
-        mensajeOriginal={mensaje}
-        cuentaEmail={cuentaEmail}
-        cuentaNombre={cuentaNombre}
-        cuentaFirma={cuentaFirma}
-        cuentaPlantillaDefault={cuentaPlantillaDefault}
-        cuentaId={cuentaId}
-        activeFolder={activeFolder}
-        onClose={onRespuestaClose}
-        onEnviado={onRespuestaEnviada}
-      />
     </div>
   )
 }
