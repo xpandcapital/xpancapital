@@ -188,14 +188,20 @@ function CheckoutContent() {
                 /* Campos de tarjeta - bordes redondeados */
                 .kr-embedded .kr-pan,
                 .kr-embedded .kr-expiry,
-                .kr-embedded .kr-security-code {
+                .kr-embedded .kr-security-code,
+                .kr-embedded .kr-installment-number,
+                .kr-embedded .kr-first-installment-delay,
+                .kr-embedded .kr-card-holder-name {
                     margin-bottom: 12px !important;
                     border-radius: 14px !important;
                     overflow: hidden !important;
                 }
                 .kr-embedded .kr-pan iframe,
                 .kr-embedded .kr-expiry iframe,
-                .kr-embedded .kr-security-code iframe {
+                .kr-embedded .kr-security-code iframe,
+                .kr-embedded .kr-installment-number iframe,
+                .kr-embedded .kr-first-installment-delay iframe,
+                .kr-embedded .kr-card-holder-name iframe {
                     border-radius: 14px !important;
                 }
                 /* Footer del popin */
