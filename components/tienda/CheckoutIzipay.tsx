@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Shield, Loader2, AlertCircle, CheckCircle2, ExternalLink } from "lucide-react"
 import Link from "next/link"
@@ -21,65 +21,38 @@ const scriptId = 'izipay-kr-sdk'
 export function CheckoutIzipay({ formToken, publicKey, ordenId, totalUSD, onSuccess, onError }: CheckoutIzipayProps) {
   const [formState, setFormState] = useState<FormState>('loading')
   const [errorMsg, setErrorMsg] = useState('')
-  const krReadyRef = useRef(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  const initializeKR = useCallback(() => {
-    if (krReadyRef.current) return
-    if (typeof window === 'undefined') return
-    if (!window.KR) {
-      setTimeout(initializeKR, 200)
-      return
-    }
-
-    krReadyRef.current = true
-
-    window.KR.setPublicKey(publicKey)
-    window.KR.setFormToken(formToken)
-
-    window.KR.onSubmit((response) => {
-      setFormState('processing')
-      const status = response.clientAnswer?.orderStatus
-
-      if (status === 'PAID') {
-        setFormState('success')
-        onSuccess?.()
-      } else {
-        setFormState('error')
-        setErrorMsg('El pago no pudo ser procesado.')
-        onError?.('El pago fue rechazado por la entidad bancaria.')
-      }
-
-      return true
-    })
-
-    window.KR.onError((error) => {
-      console.error('[KR] Error:', error)
-      setFormState('error')
-      setErrorMsg(error.message || 'Error al procesar el pago.')
-      onError?.(error.message || 'Error en la pasarela de pago.')
-      return true
-    })
-
-    window.KR.onFormReady(() => {
-      setFormState('ready')
-    })
-
-    window.KR.addForm('#izipay-form-container')
-  }, [formToken, publicKey, onSuccess, onError])
+  const scriptLoadedRef = useRef(false)
 
   useEffect(() => {
-    if (document.getElementById(scriptId)) {
-      initializeKR()
+    if (typeof window === 'undefined') return
+
+    const container = document.getElementById('izipay-form-container')
+    if (!container) return
+
+    // Crear el div kr-embedded que el SDK necesita
+    container.innerHTML = ''
+    const krDiv = document.createElement('div')
+    krDiv.className = 'kr-embedded'
+    krDiv.setAttribute('kr-form-token', formToken)
+    krDiv.setAttribute('kr-public-key', publicKey)
+    krDiv.setAttribute('kr-language', 'es-ES')
+    container.appendChild(krDiv)
+
+    // Configurar callbacks antes de cargar el script
+    if (window.KR) {
+      setupKRCallbacks()
       return
     }
+
+    if (scriptLoadedRef.current) return
+    scriptLoadedRef.current = true
 
     const script = document.createElement('script')
     script.id = scriptId
     script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
     script.async = true
     script.onload = () => {
-      initializeKR()
+      setupKRCallbacks()
     }
     script.onerror = () => {
       setFormState('error')
@@ -91,14 +64,55 @@ export function CheckoutIzipay({ formToken, publicKey, ordenId, totalUSD, onSucc
       if (window.KR && typeof window.KR.removeForms === 'function') {
         window.KR.removeForms()
       }
+      const oldDiv = document.querySelector('.kr-embedded')
+      if (oldDiv) oldDiv.remove()
     }
-  }, [initializeKR])
+  }, [formToken, publicKey])
+
+  const setupKRCallbacks = () => {
+    if (!window.KR) {
+      setTimeout(setupKRCallbacks, 200)
+      return
+    }
+
+    try {
+      window.KR.onSubmit((response: any) => {
+        setFormState('processing')
+        const status = response?.clientAnswer?.orderStatus || response?.orderStatus
+
+        if (status === 'PAID') {
+          setFormState('success')
+          onSuccess?.()
+        } else {
+          setFormState('error')
+          setErrorMsg('El pago no pudo ser procesado.')
+          onError?.('El pago fue rechazado por la entidad bancaria.')
+        }
+
+        return true
+      })
+
+      window.KR.onError((error: any) => {
+        console.error('[KR] Error:', error)
+        setFormState('error')
+        setErrorMsg(error?.message || error?.toString() || 'Error al procesar el pago.')
+        onError?.(error?.message || 'Error en la pasarela de pago.')
+        return true
+      })
+
+      window.KR.onFormReady(() => {
+        setFormState('ready')
+      })
+    } catch (e) {
+      console.error('[KR] setup error:', e)
+    }
+  }
 
   const handleRetry = () => {
     setFormState('loading')
     setErrorMsg('')
-    krReadyRef.current = false
-    setTimeout(() => initializeKR(), 500)
+    scriptLoadedRef.current = false
+    window.location.reload()
   }
 
   return (
@@ -126,28 +140,14 @@ export function CheckoutIzipay({ formToken, publicKey, ordenId, totalUSD, onSucc
           </motion.div>
         )}
 
-        {formState === 'ready' && (
+        {(formState === 'ready' || formState === 'processing') && (
           <motion.div
             key="ready"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="w-full"
           >
-            <div id="izipay-form-container" ref={containerRef} className="w-full min-h-[400px]" />
-          </motion.div>
-        )}
-
-        {formState === 'processing' && (
-          <motion.div
-            key="processing"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center py-12 space-y-4"
-          >
-            <Loader2 className="w-8 h-8 text-blis-red animate-spin" />
-            <p className="text-gray-600 font-medium">Procesando tu pago...</p>
-            <p className="text-xs text-gray-400">No cierres esta ventana</p>
+            <div id="izipay-form-container" className="w-full min-h-[400px]" />
           </motion.div>
         )}
 
