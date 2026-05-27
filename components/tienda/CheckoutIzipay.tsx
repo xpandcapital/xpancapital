@@ -28,10 +28,41 @@ export function CheckoutIzipay({ formToken, publicKey, ordenId, totalUSD, onSucc
       if (scriptLoadedRef.current) return
       scriptLoadedRef.current = true
 
+      // Configurar KR antes de cargar el script
+      try {
+        if (window.KR && typeof window.KR.setFormConfig === 'function') {
+          window.KR.setFormConfig({
+            formToken: formToken,
+            'kr-public-key': publicKey,
+            'kr-language': 'es-ES',
+          })
+        }
+      } catch {}
+
+      // Precargar config en window para que el SDK la lea
+      // La public key puede venir con prefijo "shopId:" — el SDK solo necesita la clave
+      const cleanPublicKey = publicKey.includes(':') ? publicKey.split(':').slice(1).join(':') : publicKey
+      ;(window as any).__kr_config = {
+        formToken,
+        publicKey: cleanPublicKey,
+        language: 'es-ES',
+      }
+
       const script = document.createElement('script')
       script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
       script.async = true
-      script.onload = () => setupKRCallbacks()
+      script.onload = () => {
+        try {
+          if (window.KR && typeof window.KR.setFormConfig === 'function') {
+            window.KR.setFormConfig({
+              formToken: formToken,
+              'kr-public-key': cleanPublicKey,
+              'kr-language': 'es-ES',
+            })
+          }
+        } catch {}
+        setupKRCallbacks()
+      }
       script.onerror = () => {
         setFormState('error')
         setErrorMsg('No se pudo cargar la pasarela de pago.')
@@ -99,7 +130,6 @@ export function CheckoutIzipay({ formToken, publicKey, ordenId, totalUSD, onSucc
         className="kr-embedded w-full"
         style={{ minHeight: formState === 'loading' || formState === 'error' ? '100px' : '400px' }}
         kr-form-token={formToken}
-        kr-public-key={publicKey}
         kr-language="es-ES"
       />
 
