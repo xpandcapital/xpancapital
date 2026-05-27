@@ -21,10 +21,17 @@ async function getIzipayConfig(supabase: ReturnType<typeof createClient>) {
 
   const map: Record<string, string> = {}
   for (const row of keys || []) {
-    const value = row.key_name === 'izipay_environment'
-      ? (row.key_value || 'sandbox')
-      : decryptApiKey(row.key_value || '')
-    map[row.key_name] = value
+    if (row.key_name === 'izipay_environment') {
+      const raw = (row.key_value || 'sandbox').toLowerCase()
+      map[row.key_name] = raw.includes('prod') ? 'production' : 'sandbox'
+    } else {
+      const decrypted = decryptApiKey(row.key_value || '')
+      if (decrypted && decrypted.startsWith('enc:')) {
+        console.error(`[Izipay] No se pudo desencriptar ${row.key_name}: API_ENCRYPTION_KEY no configurada`)
+        console.error('[Izipay] Ejecuta: DELETE FROM api_keys WHERE key_name LIKE \'%izipay%\' y vuelve a ingresar las claves')
+      }
+      map[row.key_name] = decrypted
+    }
   }
 
   const shopId = map['izipay_shop_id']
