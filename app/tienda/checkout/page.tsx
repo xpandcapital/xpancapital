@@ -413,6 +413,9 @@ function CheckoutContent() {
     }
 
     // ── Formulario de checkout ─────────────────────────────────────────────────
+    const inputCls = "w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-white outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 placeholder-gray-600 transition-all";
+    const labelCls = "text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2 block";
+
     return (
         <main className="min-h-screen bg-[#050505] text-white">
             <Header />
