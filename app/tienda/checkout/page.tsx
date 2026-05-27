@@ -272,6 +272,7 @@ function CheckoutContent() {
                 .kr-embedded:not([kr-popin]) {
                     max-width: 420px !important;
                     margin: 0 auto !important;
+                    padding: 4px 0 !important;
                 }
             `
             document.head.appendChild(customCss)
@@ -914,13 +915,11 @@ function CheckoutContent() {
                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">PCI-DSS L1</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2.5 relative z-10">
-                      {[
-                        { label: 'VISA', color: '#1a1f71' }, { label: 'MC', color: '#eb001b' },
-                        { label: 'AMEX', color: '#2e77bb' }, { label: 'DINERS', color: '#0079be' }
-                      ].map(card => (
-                        <span key={card.label} className="text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded" style={{ color: card.color, backgroundColor: card.color + '15' }}>{card.label}</span>
-                      ))}
+                    <div className="flex items-center gap-2 relative z-10">
+                      <img src="/visa-svgrepo-com.svg" alt="Visa" className="h-4 w-auto opacity-70" />
+                      <img src="/mastercard-full-svgrepo-com.svg" alt="Mastercard" className="h-4 w-auto opacity-70" />
+                      <img src="/amex-svgrepo-com.svg" alt="Amex" className="h-4 w-auto opacity-70" />
+                      <img src="/diners-3-svgrepo-com.svg" alt="Diners" className="h-4 w-auto opacity-70" />
                     </div>
                   </motion.div>
 
@@ -944,7 +943,7 @@ function CheckoutContent() {
                     </div>
 
                     {/* Formulario */}
-                    <div className="bg-[#f1f2f4] rounded-2xl p-4" style={{ minHeight: '420px' }}>
+                    <div className="bg-[#f1f2f4] rounded-2xl p-4">
                       <div className="kr-embedded" key={krKey} kr-form-token={izipayFormToken} kr-language="es-ES">
                         <div className="kr-pan"></div>
                         <div className="kr-expiry"></div>
@@ -988,18 +987,11 @@ function CheckoutContent() {
                           )
                         })}
                       </div>
-                      <div className="flex items-center justify-center gap-4 pt-1">
-                        {['VISA', 'MASTERCARD', 'AMEX', 'DINERS'].map((brand, i) => (
-                          <motion.span
-                            key={brand}
-                            initial={{ opacity: 0, y: 5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="text-[9px] font-black text-gray-300 tracking-widest"
-                          >
-                            {brand}
-                          </motion.span>
-                        ))}
+                      <div className="flex items-center justify-center gap-5 pt-1">
+                        <img src="/visa-svgrepo-com.svg" alt="Visa" className="h-6 w-auto opacity-30" />
+                        <img src="/mastercard-full-svgrepo-com.svg" alt="MC" className="h-6 w-auto opacity-30" />
+                        <img src="/amex-svgrepo-com.svg" alt="Amex" className="h-6 w-auto opacity-30" />
+                        <img src="/diners-3-svgrepo-com.svg" alt="Diners" className="h-6 w-auto opacity-30" />
                       </div>
                     </div>
 
