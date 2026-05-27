@@ -50,17 +50,16 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = '
     krDiv.setAttribute('kr-form-token', formToken)
     krDiv.setAttribute('kr-public-key', publicKey)
     krDiv.setAttribute('kr-language', 'es-ES')
-    krDiv.setAttribute('kr-theme', 'classic')
     krDiv.style.width = '100%'
     krDiv.style.minHeight = displayMode === 'embedded' ? '500px' : '0'
-    if (displayMode === 'popup') {
-      krDiv.setAttribute('kr-popin', '')
-    }
     container.appendChild(krDiv)
 
     const loadScript = () => {
       const script = document.createElement('script')
-      script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
+      const baseUrl = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
+      script.src = displayMode === 'embedded'
+        ? `${baseUrl}?mode=embedded&container=.kr-embedded`
+        : `${baseUrl}?mode=popup`
       script.async = true
       script.onload = () => {
         let attempts = 0
