@@ -150,6 +150,29 @@ export async function POST(req: NextRequest) {
             }
         }
 
+        // --- Pasarela: PayPal ---
+        if (service === 'paypal') {
+            if (!activeKey || !merchant_id) return NextResponse.json({ ok: false, msg: 'PayPal: Falta Client ID o Secret' });
+            const authString = Buffer.from(`${merchant_id}:${activeKey}`).toString('base64');
+            try {
+                const r = await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Basic ${authString}`,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'grant_type=client_credentials',
+                    next: { revalidate: 0 }
+                });
+                const data = await r.json().catch(() => ({}));
+                if (data.access_token) return NextResponse.json({ ok: true, msg: 'PayPal: Conectado (Sandbox) - Token obtenido' });
+                if (r.status === 401 || data.error) return NextResponse.json({ ok: false, msg: `PayPal: ${data.error_description || 'Credenciales inválidas'}` });
+                return NextResponse.json({ ok: false, msg: `PayPal: Error ${r.status}` });
+            } catch {
+                return NextResponse.json({ ok: false, msg: 'PayPal: Error de conexión' });
+            }
+        }
+
         // --- Ecuador: ApiConsult (Zampisoft) ---
         if (service === 'apiconsult') {
             const r = await fetch(`https://apiconsult.zampisoft.com/api/consultar?identificacion=0900000000&token=${encodeURIComponent(activeKey)}`, {

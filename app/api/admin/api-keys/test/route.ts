@@ -285,11 +285,11 @@ const TESTERS: Record<string, (value: string, extra?: Record<string, string>) =>
 
   paypal_client_id: (v, extra) => {
     if (!extra?.paypal_secret) return Promise.resolve({ valid: false, error: 'Falta paypal_secret' })
-    return testBasicAuth('https://api-m.paypal.com/v1/oauth2/token', v, extra.paypal_secret)
+    return testBasicAuth('https://api-m.sandbox.paypal.com/v1/oauth2/token', v, extra.paypal_secret)
   },
   paypal_secret: (v, extra) => {
     if (!extra?.paypal_client_id) return Promise.resolve({ valid: false, error: 'Falta paypal_client_id' })
-    return testBasicAuth('https://api-m.paypal.com/v1/oauth2/token', extra.paypal_client_id, v)
+    return testBasicAuth('https://api-m.sandbox.paypal.com/v1/oauth2/token', extra.paypal_client_id, v)
   },
 
   // ── Crypto ─────────────────────────────────────────────────────

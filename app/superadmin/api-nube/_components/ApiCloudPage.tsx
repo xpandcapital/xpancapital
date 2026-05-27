@@ -47,6 +47,14 @@ export function ApiCloudPage() {
             extraValues = {
                 supabase_anon_key: config.apiValues['supabase_anon_key'] || '',
             }
+        } else if (field.id === 'paypal_client_id') {
+            extraValues = {
+                paypal_secret: config.apiValues['paypal_secret'] || '',
+            }
+        } else if (field.id === 'paypal_secret') {
+            extraValues = {
+                paypal_client_id: config.apiValues['paypal_client_id'] || '',
+            }
         }
         await config.testApiConnection(field.id, value, extraValues)
     }
