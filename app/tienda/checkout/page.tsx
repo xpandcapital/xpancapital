@@ -969,7 +969,7 @@ function CheckoutContent() {
             {/* ── Modal Izipay ───────────────────────────────────────────── */}
             {isIzipayModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col overflow-hidden">
                   {/* Barra de confianza superior con animación */}
                   <motion.div
                     className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-emerald-50 via-emerald-100/50 to-emerald-50 border-b border-emerald-200 rounded-t-3xl relative overflow-hidden"
@@ -1001,7 +1001,7 @@ function CheckoutContent() {
                     </div>
                   </motion.div>
 
-                  <div className="p-6">
+                  <div className="p-6 overflow-y-auto flex-1">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-5">
                       <div className="flex items-center gap-3">
