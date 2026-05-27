@@ -95,18 +95,6 @@ function CheckoutContent() {
         notas: ''
     });
 
-    // Restaurar datos del formulario después de cerrar modal Izipay
-    useEffect(() => {
-        const saved = sessionStorage.getItem('checkout_form')
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved)
-                setForm(prev => ({ ...prev, ...parsed }))
-            } catch {}
-            sessionStorage.removeItem('checkout_form')
-        }
-    }, []);
-
     const totalUSD = getCartTotal();
     const totalCoins = cart.reduce((sum, item) =>
         sum + (item.precio_coins || Math.round((item.price || 0) * 10)), 0);
@@ -428,9 +416,11 @@ function CheckoutContent() {
         try { document.getElementById('izipay-kr-modal-script')?.remove() } catch {}
         try { (window as any).KR = undefined } catch {}
         try { (window as any).KR_CONFIGURATION = undefined } catch {}
-        // Guardar datos del usuario y refrescar para limpiar el SDK
-        sessionStorage.setItem('checkout_form', JSON.stringify(form))
-        window.location.reload()
+        // Reabrir el modal en 500ms con SDK fresco
+        setTimeout(() => {
+            setKrKey(k => k + 1)
+            setIsIzipayModal(true)
+        }, 500)
     }
 
     // ── Formulario de checkout ─────────────────────────────────────────────────
