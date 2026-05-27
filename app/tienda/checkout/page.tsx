@@ -869,8 +869,8 @@ function CheckoutContent() {
                                     }
                                     // izipay, paypal y otras pasarelas
                                     const imap: Record<string, any> = { izipay: CreditCard, paypal: Wallet };
-                                    const cmap: Record<string, string> = { izipay: "bg-blis-red/10 border-blis-red/40", paypal: "bg-blue-500/10 border-blue-500/40" };
-                                    const tmap: Record<string, string> = { izipay: "text-blis-red", paypal: "text-blue-400" };
+                                    const cmap: Record<string, string> = { izipay: "bg-emerald-500/10 border-emerald-500/40", paypal: "bg-blue-500/10 border-blue-500/40" };
+                                    const tmap: Record<string, string> = { izipay: "text-emerald-400", paypal: "text-blue-400" };
                                     const Ic = imap[fp.slug] || CreditCard;
                                     return <PayOption key={fp.id} selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
                                         icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
