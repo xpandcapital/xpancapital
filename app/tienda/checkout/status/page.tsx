@@ -48,10 +48,14 @@ function CheckoutStatusLoading() {
 function CheckoutStatusContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
-  const [state, setState] = useState<PaymentState>("loading");
+  const izipaySuccess = searchParams.get("izipay_success");
+  const totalIzipay = searchParams.get("total");
+  const [state, setState] = useState<PaymentState>(izipaySuccess === "1" ? "paid" : "loading");
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
+    if (izipaySuccess === "1") return;
+
     if (!orderId) {
       setState("failed");
       setErrorMsg("No se encontró la orden.");
@@ -165,10 +169,14 @@ function CheckoutStatusContent() {
               ¡Pago Exitoso!
             </h1>
             <p className="text-gray-400 text-lg">
-              Tu pago fue procesado por Cryptomus. Recibirás un email con los detalles.
+              {izipaySuccess === "1"
+                ? `Tu pago de $${totalIzipay} USD fue procesado por Izipay.`
+                : "Tu pago fue procesado por Cryptomus. Recibirás un email con los detalles."}
             </p>
             <p className="text-emerald-500/60 text-sm font-bold">
-              Pago convertido a USDT · Recibirás acceso inmediato
+              {izipaySuccess === "1"
+                ? "Pago confirmado · Recibirás acceso inmediato"
+                : "Pago convertido a USDT · Recibirás acceso inmediato"}
             </p>
           </motion.div>
 

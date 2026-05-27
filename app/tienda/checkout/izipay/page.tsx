@@ -147,7 +147,9 @@ function IzipayContent() {
                 ordenId={ordenId}
                 totalUSD={totalUSD}
                 displayMode={displayMode}
-                onSuccess={() => showToast('¡Pago procesado con éxito!', 'success')}
+                onSuccess={() => {
+                  window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${ordenId}&total=${totalUSD.toFixed(2)}`
+                }}
                 onError={(msg) => showToast(msg, 'error')}
               />
             </div>
