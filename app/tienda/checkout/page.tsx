@@ -82,6 +82,7 @@ function CheckoutContent() {
     const [izipayOrderId, setIzipayOrderId] = useState('');
     const [izipayTotal, setIzipayTotal] = useState(0);
     const [izipayScriptLoaded, setIzipayScriptLoaded] = useState(false);
+    const [krKey, setKrKey] = useState(0);
 
     const [form, setForm] = useState<CheckoutForm>({
         nombre: user?.name?.split(" ")[0] || '',
@@ -267,12 +268,11 @@ function CheckoutContent() {
 
                 isRedirectingRef.current = true;
 
-                isRedirectingRef.current = true;
-
                 setIzipayFormToken(data.formToken)
                 setIzipayPublicKey(data.publicKey || '')
                 setIzipayOrderId(data.ordenId)
                 setIzipayTotal(totalUSD)
+                setKrKey(k => k + 1)
                 setIsIzipayModal(true)
                 setIsProcessing(false)
                 return;
@@ -742,7 +742,7 @@ function CheckoutContent() {
                       <button onClick={() => closeIzipayModal()} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
                     </div>
                     <div className="bg-[#f1f2f4] rounded-2xl p-4" style={{ minHeight: '420px' }}>
-                      <div className="kr-embedded" kr-form-token={izipayFormToken} kr-language="es-ES">
+                      <div className="kr-embedded" key={krKey} kr-form-token={izipayFormToken} kr-language="es-ES">
                         <div className="kr-pan"></div>
                         <div className="kr-expiry"></div>
                         <div className="kr-security-code"></div>
