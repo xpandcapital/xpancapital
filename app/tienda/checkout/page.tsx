@@ -242,14 +242,48 @@ function CheckoutContent() {
 
                 isRedirectingRef.current = true;
 
-                const params = new URLSearchParams({
-                    form_token: data.formToken,
-                    public_key: data.publicKey || '',
-                    order_id: data.ordenId,
-                    total: totalUSD.toFixed(2),
-                    mode: data.displayMode || 'popup',
-                });
-                window.location.href = `/tienda/checkout/izipay?${params.toString()}`;
+                // Abrir el formulario Izipay en popup sobre la misma página
+                const izipayScript = document.createElement('script')
+                izipayScript.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js?mode=popup'
+                izipayScript.async = true
+                izipayScript.onload = () => {
+                  if (window.KR) {
+                    // Crear el div kr-embedded para el popup
+                    const container = document.createElement('div')
+                    container.className = 'kr-embedded'
+                    container.setAttribute('kr-form-token', data.formToken)
+                    container.setAttribute('kr-public-key', data.publicKey || '')
+                    container.setAttribute('kr-language', 'es-ES')
+                    container.style.display = 'none'
+                    document.body.appendChild(container)
+
+                    window.KR.onSubmit((r: any) => {
+                      const st = r?.clientAnswer?.orderStatus || r?.orderStatus
+                      document.body.removeChild(container)
+                      if (st === 'PAID') {
+                        window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${data.ordenId}&total=${totalUSD.toFixed(2)}`
+                      } else {
+                        setIsProcessing(false)
+                        showToast('El pago fue rechazado. Intenta de nuevo.', 'error')
+                      }
+                      return true
+                    })
+                    window.KR.onError(() => {
+                      document.body.removeChild(container)
+                      setIsProcessing(false)
+                      showToast('Error en la pasarela de pago.', 'error')
+                      return true
+                    })
+                  } else {
+                    setIsProcessing(false)
+                    showToast('No se pudo cargar la pasarela de pago.', 'error')
+                  }
+                }
+                izipayScript.onerror = () => {
+                  setIsProcessing(false)
+                  showToast('No se pudo cargar la pasarela de pago.', 'error')
+                }
+                document.head.appendChild(izipayScript)
                 return;
             }
 
