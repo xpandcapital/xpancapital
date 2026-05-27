@@ -714,12 +714,14 @@ function CheckoutContent() {
                       </div>
                       <button onClick={() => { setIsIzipayModal(false); setIsProcessing(false) }} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
                     </div>
-                    <div className="kr-embedded w-full bg-[#f1f2f4] rounded-2xl p-4" {...{ 'kr-popin': '' }} kr-form-token={izipayFormToken} kr-language="es-ES" style={{ minHeight: '420px' }}>
-                      <div className="kr-pan"></div>
-                      <div className="kr-expiry"></div>
-                      <div className="kr-security-code"></div>
-                      <button className="kr-payment-button"></button>
-                      <div className="kr-form-error"></div>
+                    <div className="bg-[#f1f2f4] rounded-2xl p-4" style={{ minHeight: '420px' }}>
+                      <div className="kr-embedded" {...{ 'kr-popin': '' }} kr-form-token={izipayFormToken} kr-language="es-ES">
+                        <div className="kr-pan"></div>
+                        <div className="kr-expiry"></div>
+                        <div className="kr-security-code"></div>
+                        <button className="kr-payment-button"></button>
+                        <div className="kr-form-error"></div>
+                      </div>
                     </div>
                     <IzipayScriptLoader
                       loaded={izipayScriptLoaded}
@@ -806,6 +808,7 @@ function IzipayScriptLoader({ loaded, onLoad, onSuccess, onError, publicKey }: {
 
     // 3. SDK KR (lee KR_CONFIGURATION si existe)
     const initSDK = () => {
+      if (document.getElementById('izipay-kr-modal-script')) return
       const script = document.createElement('script')
       script.id = 'izipay-kr-modal-script'
       script.src = `${baseUrl}/stable/kr-payment-form.min.js`
