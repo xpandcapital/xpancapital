@@ -12,7 +12,7 @@ interface PaymentPanelProps {
     currency: string;
     total: number;
     paymentMethod: string;
-    setPaymentMethod: (m: 'cash' | 'card' | 'bliscoins' | 'transfer' | 'helio') => void;
+    setPaymentMethod: (m: 'cash' | 'card' | 'bliscoins' | 'transfer') => void;
     receivedAmount: string;
     setReceivedAmount: (v: string) => void;
     isIssuingInvoice: boolean;

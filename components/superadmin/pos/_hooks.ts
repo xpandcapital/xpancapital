@@ -74,8 +74,8 @@ interface POSReturnValue {
   repDniSearch: string;
   setRepDniSearch: (v: string) => void;
   isSearchingRep: boolean;
-  paymentMethod: 'cash' | 'card' | 'bliscoins' | 'transfer' | 'helio';
-  setPaymentMethod: (v: 'cash' | 'card' | 'bliscoins' | 'transfer' | 'helio') => void;
+  paymentMethod: 'cash' | 'card' | 'bliscoins' | 'transfer';
+  setPaymentMethod: (v: 'cash' | 'card' | 'bliscoins' | 'transfer') => void;
   receivedAmount: string;
   setReceivedAmount: (v: string) => void;
   isIssuingInvoice: boolean;
@@ -169,7 +169,7 @@ export function usePOS(): POSReturnValue | POSErrorReturn {
     const [repDniSearch, setRepDniSearch] = useState('');
     const [isSearchingRep, setIsSearchingRep] = useState(false);
 
-    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'bliscoins' | 'transfer' | 'helio'>('cash');
+    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'bliscoins' | 'transfer'>('cash');
     const [receivedAmount, setReceivedAmount] = useState<string>('');
     const [isIssuingInvoice, setIsIssuingInvoice] = useState(false);
     const [invoiceResult, setInvoiceResult] = useState<{ success: boolean; msg: string; detail?: string } | null>(null);

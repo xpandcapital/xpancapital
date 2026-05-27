@@ -511,7 +511,7 @@ export interface ReferidoComision {
 // COMPRAS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export type MetodoPagoCompra = 'coins' | 'stripe' | 'paypal' | 'manual' | 'helio_card' | 'helio_crypto'
+export type MetodoPagoCompra = 'coins' | 'transfer' | 'crypto_manual' | 'izipay'
 export type EstadoCompra = 'pendiente' | 'completado' | 'cancelado' | 'reembolsado'
 
 export interface Compra {

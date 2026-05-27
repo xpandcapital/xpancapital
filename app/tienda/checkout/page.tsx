@@ -20,7 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/Toast";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 
-type PaymentMethod = 'coins' | 'helio_card' | 'helio_crypto' | 'transfer' | 'crypto_manual';
+type PaymentMethod = 'coins' | 'izipay' | 'transfer' | 'crypto_manual';
 
 interface CheckoutForm {
     nombre: string;
@@ -68,7 +68,7 @@ function CheckoutContent() {
     const searchParams = useSearchParams();
     const isRedeemFlow = searchParams.get('redeem') === '1';
 
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('helio_card');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('izipay');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
     const [orderEmail, setOrderEmail] = useState("");
@@ -203,20 +203,20 @@ function CheckoutContent() {
                 } : null,
             };
 
-            // Flujo Hel.io (tarjeta o crypto)
-            if (paymentMethod === 'helio_card' || paymentMethod === 'helio_crypto') {
+            // Flujo Izipay
+            if (paymentMethod === 'izipay') {
                 const controller = new AbortController();
                 const timeout = setTimeout(() => controller.abort(), 15000);
 
                 let res: Response;
                 try {
-                    res = await fetch('/api/helio/create-charge', {
+                    res = await fetch('/api/get-izipay-token', {
                         method: 'POST',
                         headers,
                         body: JSON.stringify({
                             ...commonPayload,
-                            mode: paymentMethod === 'cryptomus_card' ? 'card' : 'crypto',
-                            monto_usd: totalUSD,
+                            total_usd: totalUSD,
+                            pais: form.pais,
                         }),
                         signal: controller.signal,
                     });
@@ -225,7 +225,7 @@ function CheckoutContent() {
                     if (fetchErr.name === 'AbortError') {
                         throw new Error('El servicio de pago está tardando demasiado. Intenta de nuevo en unos minutos.');
                     }
-                    throw new Error('No se pudo conectar con el servicio de pago. Verifica tu conexión.');
+                    throw new Error('No se pudo conectar con la pasarela de pago. Verifica tu conexión.');
                 }
                 clearTimeout(timeout);
 
@@ -236,16 +236,19 @@ function CheckoutContent() {
                     if (errMsg.includes('no está configurado') || errMsg.includes('configura')) {
                         throw new Error('Medio de pago no disponible por el momento. Por favor intenta con otro método.');
                     }
-                    if (errMsg.includes('forbidden') || errMsg.includes('bloquead')) {
-                        throw new Error('Medio de pago no disponible por el momento. Por favor intenta con otro método.');
-                    }
-                    throw new Error(data.error || 'Error al conectar con el servicio de pago');
+                    throw new Error(data.error || 'Error al conectar con la pasarela de pago');
                 }
 
                 setOrderEmail(form.email);
                 clearCart();
 
-                window.location.href = data.paymentUrl;
+                const params = new URLSearchParams({
+                    form_token: data.formToken,
+                    public_key: data.publicKey || '',
+                    order_id: data.ordenId,
+                    total: totalUSD.toFixed(2),
+                });
+                router.push(`/tienda/checkout/izipay?${params.toString()}`);
                 return;
             }
 
@@ -591,10 +594,10 @@ function CheckoutContent() {
                                             })()}
                                         </div>);
                                     }
-                                    // helio_card, helio_crypto, etc.
-                                    const imap: Record<string, any> = { helio_card: CreditCard, helio_crypto: Coins };
-                                    const cmap: Record<string, string> = { helio_card: "bg-emerald-500/10 border-emerald-500/40", helio_crypto: "bg-yellow-500/10 border-yellow-500/40" };
-                                    const tmap: Record<string, string> = { helio_card: "text-emerald-400", helio_crypto: "text-yellow-400" };
+                                    // izipay y otras pasarelas
+                                    const imap: Record<string, any> = { izipay: CreditCard };
+                                    const cmap: Record<string, string> = { izipay: "bg-blis-red/10 border-blis-red/40" };
+                                    const tmap: Record<string, string> = { izipay: "text-blis-red" };
                                     const Ic = imap[fp.slug] || CreditCard;
                                     return <PayOption key={fp.id} selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
                                         icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}

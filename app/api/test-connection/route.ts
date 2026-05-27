@@ -121,10 +121,33 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ ok: r.ok, msg: r.ok ? 'ApiSunat: Conectado (Sandbox)' : `ApiSunat Error: ${r.status}` });
         }
 
-        // --- Pasarela: Izipay ---
+        // --- Pasarela: Izipay (Micuentaveb) ---
         if (service === 'izipay') {
-            if (!activeKey || !merchant_id) return NextResponse.json({ ok: false, msg: 'Izipay: Falta Merchant ID o Key' });
-            return NextResponse.json({ ok: true, msg: 'Izipay: Configuración Validada (Proxy)' });
+            if (!activeKey || !merchant_id) return NextResponse.json({ ok: false, msg: 'Izipay: Falta Shop ID o Secret Key' });
+            const authString = Buffer.from(`${merchant_id}:${activeKey}`).toString('base64');
+            const env = extra?.izipay_environment || 'sandbox';
+            try {
+                const r = await fetch('https://api.micuentaweb.pe/api-payment/v4/Charge/CreatePayment', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Basic ${authString}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        amount: 100,
+                        currency: 'USD',
+                        orderId: `TEST-${Date.now()}`,
+                        customer: { email: 'test@blis-corp.com' },
+                    }),
+                    next: { revalidate: 0 }
+                });
+                const data = await r.json().catch(() => ({}));
+                if (r.status === 401 || r.status === 403) return NextResponse.json({ ok: false, msg: 'Izipay: Credenciales inválidas (401/403)' });
+                if (data.status === 'ERROR') return NextResponse.json({ ok: false, msg: `Izipay: ${data.answer?.errorMessage || 'Error del servidor'}` });
+                return NextResponse.json({ ok: true, msg: `Izipay: Conectado (${env}) - API responde correctamente` });
+            } catch {
+                return NextResponse.json({ ok: false, msg: 'Izipay: Error de conexión' });
+            }
         }
 
         // --- Ecuador: ApiConsult (Zampisoft) ---

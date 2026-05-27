@@ -294,23 +294,6 @@ const TESTERS: Record<string, (value: string, extra?: Record<string, string>) =>
 
   // ── Crypto ─────────────────────────────────────────────────────
 
-  helio_secret_key: (v, extra) => {
-    if (!extra?.helio_public_key || !extra?.helio_paylink_id) return Promise.resolve({ valid: false, error: 'Falta helio_public_key o helio_paylink_id' })
-    return fetch(`https://api.hel.io/v1/paylink/get/api-key?apiKey=${encodeURIComponent(extra.helio_public_key)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${v}`,
-      },
-      body: JSON.stringify({ id: extra.helio_paylink_id }),
-    }).then(async (res) => {
-      const data = await res.json().catch(() => ({}))
-      if (data.id) return { valid: true }
-      if (res.status === 401) return { valid: false, error: 'API Key inválida' }
-      return { valid: false, error: data.message || `HTTP ${res.status}` }
-    }).catch((e: any) => ({ valid: false, error: e.message || 'Error de red' }))
-  },
-
   coinbase_api_key: (v) => testBearer('https://api.coinbase.com/v2/accounts', v),
 
   // ── Trading & Bots ─────────────────────────────────────────────

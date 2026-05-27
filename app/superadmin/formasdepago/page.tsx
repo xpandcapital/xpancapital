@@ -21,8 +21,8 @@ interface FormaPago {
     activo: boolean; config: Record<string, any>; orden: number;
 }
 
-const ICONOS: Record<string, any> = { helio_card: CreditCard, helio_crypto: Wallet, coins: Coins, transfer: Building2, crypto_manual: Globe };
-const COLORES: Record<string, string> = { helio_card: "bg-blue-500/10 border-blue-500/20 text-blue-400", helio_crypto: "bg-purple-500/10 border-purple-500/20 text-purple-400", coins: "bg-amber-500/10 border-amber-500/20 text-amber-400", transfer: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", crypto_manual: "bg-orange-500/10 border-orange-500/20 text-orange-400" };
+const ICONOS: Record<string, any> = { izipay: CreditCard, coins: Coins, transfer: Building2, crypto_manual: Globe };
+const COLORES: Record<string, string> = { izipay: "bg-blis-red/10 border-blis-red/20 text-blis-red", coins: "bg-amber-500/10 border-amber-500/20 text-amber-400", transfer: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", crypto_manual: "bg-orange-500/10 border-orange-500/20 text-orange-400" };
 
 export default function FormasPagoAdminPage() {
     const { showToast } = useToast();
@@ -290,18 +290,12 @@ export default function FormasPagoAdminPage() {
                                                         </div>
                                                     )}
 
-                                                    {/* Helio API configs */}
-                                                    {forma.slug === 'helio_card' && (
-                                                        <div className="grid grid-cols-1 gap-3">
-                                                            <Input value={forma.config?.api_key || ""} onChange={e => updateSimple(forma.id, 'api_key', e.target.value)} placeholder="Helio API Key (pk_live_...)" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
-                                                            <Input value={forma.config?.secret_key || ""} onChange={e => updateSimple(forma.id, 'secret_key', e.target.value)} placeholder="Helio Secret Key" type="password" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
-                                                        </div>
-                                                    )}
-                                                    {forma.slug === 'helio_crypto' && (
-                                                        <div className="grid grid-cols-1 gap-3">
-                                                            <Input value={forma.config?.api_key || ""} onChange={e => updateSimple(forma.id, 'api_key', e.target.value)} placeholder="Helio API Key" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
-                                                            <Input value={forma.config?.secret_key || ""} onChange={e => updateSimple(forma.id, 'secret_key', e.target.value)} placeholder="Helio Secret Key" type="password" className="bg-white/5 border-white/10 text-white text-xs font-mono" />
-                                                            <Input value={forma.config?.webhook_url || ""} onChange={e => updateSimple(forma.id, 'webhook_url', e.target.value)} placeholder="Webhook URL" className="bg-white/5 border-white/10 text-white text-xs" />
+                                                    {/* Izipay — configurado en API Nube */}
+                                                    {forma.slug === 'izipay' && (
+                                                        <div className="p-3 bg-blis-red/5 border border-blis-red/10 rounded-xl">
+                                                            <p className="text-xs text-gray-400">
+                                                                Las credenciales de Izipay se gestionan en <span className="text-white font-bold">API Nube</span> → Pagos Perú → Izipay.
+                                                            </p>
                                                         </div>
                                                     )}
                                                     {forma.slug === 'coins' && (

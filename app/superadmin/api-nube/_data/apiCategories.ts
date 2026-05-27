@@ -778,12 +778,14 @@ export const categories: ApiCategory[] = [
                 icon: CreditCard,
                 color: "text-blue-400",
                 bg: "bg-blue-500/10",
-                description: "Pasarela de pago peruana. Soporta tarjetas, Yape, Plin, PagoEfectivo. Integración fácil.",
-                website: "izipay.pe",
+                description: "Pasarela de pago peruana. Soporta tarjetas, Yape, Plin, PagoEfectivo. Integración via Micuentaveb/Krypton.",
+                website: "micuentaweb.pe",
                 fields: [
-                    { id: "izipay_merchant_id", label: "Merchant ID", type: "text", description: "Identificador único de tu comercio en Izipay.", getFrom: "izipay.pe → Dashboard → Configuración → Comercio", accessType: "Pública", cost: "pagado" },
-                    { id: "izipay_public_key", label: "Public Key", type: "password", description: "Clave pública para integración frontend.", getFrom: "izipay.pe → Dashboard → API Keys → Public Key", accessType: "Pública", cost: "pagado" },
-                    { id: "izipay_client_secret", label: "Client Secret", type: "password", description: "Secreto para backend. ⚠️ Nunca exponer en frontend.", getFrom: "izipay.pe → Dashboard → API Keys → Secret Key", accessType: "Privada", cost: "pagado" },
+                    { id: "izipay_shop_id", label: "Shop ID (Usuario)", type: "text", description: "Identificador de tienda. Visible en Panel Micuentaveb → Claves.", getFrom: "secure.micuentaweb.pe → Configuración → Claves → Usuario", accessType: "Pública", cost: "pagado" },
+                    { id: "izipay_secret_key", label: "Contraseña (Secret Key)", type: "password", description: "Contraseña de test o producción para Basic Auth en backend. ⚠️ Solo backend.", getFrom: "secure.micuentaweb.pe → Configuración → Claves → Contraseña", accessType: "Privada", cost: "pagado" },
+                    { id: "izipay_public_key", label: "Clave Pública JS", type: "password", description: "Clave pública para el cliente JavaScript (KR). Formato: usuario:publickey_...", getFrom: "secure.micuentaweb.pe → Configuración → Claves → Clave pública", accessType: "Pública", cost: "pagado" },
+                    { id: "izipay_hmac_key", label: "Clave HMAC-SHA-256", type: "password", description: "Clave para verificar firma kr-hash en webhooks IPN. ⚠️ Solo backend.", getFrom: "secure.micuentaweb.pe → Configuración → Claves → Clave HMAC-SHA-256", accessType: "Privada", cost: "pagado" },
+                    { id: "izipay_environment", label: "Entorno", type: "select", options: [{ value: "sandbox", label: "Sandbox (Pruebas)" }, { value: "production", label: "Producción" }], description: "Sandbox para pruebas con tarjetas de test. Producción para transacciones reales.", getFrom: "Panel Micuentaveb", accessType: "Pública", cost: "pagado" },
                 ]
             },
             {
@@ -892,20 +894,6 @@ export const categories: ApiCategory[] = [
                 fields: [
                     { id: "paypal_client_id", label: "Client ID", type: "text", description: "ID público de tu app PayPal para frontend.", getFrom: "developer.paypal.com → Dashboard → My Apps → Tu app → Client ID", accessType: "Pública", cost: "pagado" },
                     { id: "paypal_secret", label: "Client Secret", type: "password", description: "Secreto de tu app PayPal. ⚠️ Solo backend.", getFrom: "developer.paypal.com → Dashboard → My Apps → Tu app → Secret", accessType: "Privada", cost: "pagado" },
-                ]
-            },
-            {
-                id: "helio",
-                name: "Hel.io (MoonPay)",
-                icon: Coins,
-                color: "text-yellow-400",
-                bg: "bg-yellow-500/10",
-                description: "Pasarela de pago crypto y fiat. Acepta tarjetas y criptomonedas. Convierte automáticamente a USDC. Webhooks y charges.",
-                website: "hel.io",
-                fields: [
-                    { id: "helio_public_key", label: "Public API Key", type: "text", description: "Clave pública de API. Visible en el dashboard de Hel.io.", getFrom: "hel.io → Settings → API Keys → Public Key", accessType: "Pública", cost: "pagado" },
-                    { id: "helio_secret_key", label: "Secret API Key", type: "password", description: "Clave secreta para crear charges. ⚠️ Solo backend.", getFrom: "hel.io → Settings → API Keys → Secret Key", accessType: "Privada", cost: "pagado" },
-                    { id: "helio_paylink_id", label: "Pay Link ID", type: "text", description: "ID del Pay Link base. Se usa para crear charges dinámicos.", getFrom: "hel.io → Pay Links → Tu Pay Link → ID", accessType: "Pública", cost: "pagado" },
                 ]
             },
         ]
