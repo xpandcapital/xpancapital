@@ -20,21 +20,22 @@ export async function POST(request: NextRequest) {
       .select('key_name, key_value')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .eq('is_global', true)
-      .in('key_name', ['paypal_client_id', 'paypal_secret'])
+      .in('key_name', ['paypal_client_id', 'paypal_secret', 'paypal_client_id_prod', 'paypal_secret_prod', 'paypal_environment'])
 
     const keyMap: Record<string, string> = {}
     for (const row of keys || []) {
-      keyMap[row.key_name] = decryptApiKey(row.key_value || '')
+      keyMap[row.key_name] = row.key_name === 'paypal_environment' ? (row.key_value || 'sandbox') : decryptApiKey(row.key_value || '')
     }
 
-    const clientId = keyMap['paypal_client_id']
-    const secret = keyMap['paypal_secret']
+    const isProduction = keyMap['paypal_environment'] === 'production'
+    const clientId = isProduction ? keyMap['paypal_client_id_prod'] : keyMap['paypal_client_id']
+    const secret = isProduction ? keyMap['paypal_secret_prod'] : keyMap['paypal_secret']
 
     if (!clientId || !secret) {
       return NextResponse.json({ success: false, error: 'PayPal no configurado' }, { status: 500 })
     }
 
-    const result = await captureOrder(orderID, clientId, secret)
+    const result = await captureOrder(orderID, clientId, secret, isProduction)
 
     if (result.status !== 'COMPLETED') {
       return NextResponse.json({ success: false, error: `Pago no completado: ${result.status}` }, { status: 502 })

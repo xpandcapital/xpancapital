@@ -893,8 +893,11 @@ export const categories: ApiCategory[] = [
                 description: "Pasarela global con checkout familiar. Soporta subscripciones y pagos internacionales.",
                 website: "developer.paypal.com",
                 fields: [
-                    { id: "paypal_client_id", label: "Client ID", type: "text", description: "ID público de tu app PayPal para frontend.", getFrom: "developer.paypal.com → Dashboard → My Apps → Tu app → Client ID", accessType: "Pública", cost: "pagado" },
-                    { id: "paypal_secret", label: "Client Secret", type: "password", description: "Secreto de tu app PayPal. ⚠️ Solo backend.", getFrom: "developer.paypal.com → Dashboard → My Apps → Tu app → Secret", accessType: "Privada", cost: "pagado" },
+                    { id: "paypal_environment", label: "Entorno", type: "select", options: [{ value: "sandbox", label: "Sandbox (Pruebas)" }, { value: "production", label: "Producción" }], description: "Sandbox para pruebas. Producción para transacciones reales.", getFrom: "developer.paypal.com → Dashboard", accessType: "Pública", cost: "gratis" },
+                    { id: "paypal_client_id", label: "Client ID (Sandbox)", type: "text", description: "ID público de tu app PayPal para pruebas.", getFrom: "developer.paypal.com → Dashboard → Sandbox → App → Client ID", accessType: "Pública", cost: "gratis" },
+                    { id: "paypal_secret", label: "Client Secret (Sandbox)", type: "password", description: "Secreto de tu app PayPal sandbox. ⚠️ Solo backend.", getFrom: "developer.paypal.com → Dashboard → Sandbox → App → Secret", accessType: "Privada", cost: "gratis" },
+                    { id: "paypal_client_id_prod", label: "Client ID (Producción)", type: "text", description: "ID público de tu app PayPal LIVE.", getFrom: "developer.paypal.com → Dashboard → Live → App → Client ID", accessType: "Pública", cost: "pagado" },
+                    { id: "paypal_secret_prod", label: "Client Secret (Producción)", type: "password", description: "Secreto de tu app PayPal LIVE. ⚠️ Solo backend.", getFrom: "developer.paypal.com → Dashboard → Live → App → Secret", accessType: "Privada", cost: "pagado" },
                 ]
             },
         ]
