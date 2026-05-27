@@ -106,9 +106,12 @@ function CheckoutContent() {
         [cart]
     );
 
-    // Redirigir si carrito vacío
+    // Redirigir si carrito vacío (excepto si estamos en flujo Izipay)
     useEffect(() => {
-        if (cart.length === 0 && !isComplete && !isRedirectingRef.current) router.push('/tienda');
+        const izipayFlow = sessionStorage.getItem('izipay_flow_active')
+        if (cart.length === 0 && !isComplete && !isRedirectingRef.current && !izipayFlow) {
+            router.push('/tienda')
+        }
     }, [cart.length, isComplete, router]);
 
     // En flujo canje BLISCOINS, redirigir si no hay usuario
@@ -267,6 +270,7 @@ function CheckoutContent() {
                 }
 
                 isRedirectingRef.current = true;
+                sessionStorage.setItem('izipay_flow_active', '1')
 
                 setIzipayFormToken(data.formToken)
                 setIzipayPublicKey(data.publicKey || '')
@@ -732,8 +736,8 @@ function CheckoutContent() {
 
             {/* ── Modal Izipay ───────────────────────────────────────────── */}
             {isIzipayModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) { closeIzipayModal() } }}>
-                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
@@ -742,7 +746,7 @@ function CheckoutContent() {
                         </div>
                         <span className="font-bold text-gray-900">Pago Seguro — Izipay</span>
                       </div>
-                      <button onClick={() => closeIzipayModal()} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+                      <button onClick={() => closeIzipayModal()} className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 hover:text-gray-800 text-lg font-bold transition-colors" title="Cerrar">&times;</button>
                     </div>
                     <div className="bg-[#f1f2f4] rounded-2xl p-4" style={{ minHeight: '420px' }}>
                       <div className="kr-embedded" key={krKey} kr-form-token={izipayFormToken} kr-language="es-ES">
@@ -758,6 +762,7 @@ function CheckoutContent() {
                       publicKey={izipayPublicKey}
                       onLoad={() => setIzipayScriptLoaded(true)}
                       onSuccess={() => {
+                        sessionStorage.removeItem('izipay_flow_active')
                         clearCart()
                         setIsIzipayModal(false)
                         window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${izipayOrderId}&total=${izipayTotal.toFixed(2)}`
