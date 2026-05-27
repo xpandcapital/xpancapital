@@ -781,7 +781,20 @@ export function ApiCloudPage() {
                                                                                                         {config.apiValues[field.id] ? 'Cambiar' : 'Subir'}
                                                                                                     </label>
                                                                                                 </div>
-                                                                                            ) : (
+                                                                                             ) : field.type === 'select' ? (
+                                                                                                <select
+                                                                                                    value={config.apiValues[field.id] || ''}
+                                                                                                    onChange={(e) => config.handleKeyChange(field.id, e.target.value)}
+                                                                                                    className="w-full bg-white/[0.03] border border-white/10 rounded px-2.5 py-1.5 md:px-3 md:py-2 text-xs md:text-sm text-gray-300 focus:outline-none focus:border-blis-red/30 transition-all appearance-none cursor-pointer"
+                                                                                                    style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', paddingRight: '2.5rem' }}
+                                                                                                >
+                                                                                                    {(field as any).options?.map((opt: { value: string; label: string }) => (
+                                                                                                        <option key={opt.value} value={opt.value} className="bg-[#1a1a1a] text-white">
+                                                                                                            {opt.label}
+                                                                                                        </option>
+                                                                                                    ))}
+                                                                                                </select>
+                                                                                             ) : (
                                                                                                 <div className="relative">
                                                                                                     <input
                                                                                                         type={field.type === 'password' && !config.showKeys[field.id] ? 'password' : 'text'}
