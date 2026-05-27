@@ -186,15 +186,17 @@ function CheckoutContent() {
                     opacity: 0.5 !important;
                 }
                 /* Campos de tarjeta - bordes redondeados */
-                .kr-embedded .kr-pan .kr-field-element,
-                .kr-embedded .kr-expiry .kr-field-element,
-                .kr-embedded .kr-security-code .kr-field-element {
-                    border-radius: 14px !important;
-                }
                 .kr-embedded .kr-pan,
                 .kr-embedded .kr-expiry,
                 .kr-embedded .kr-security-code {
                     margin-bottom: 12px !important;
+                    border-radius: 14px !important;
+                    overflow: hidden !important;
+                }
+                .kr-embedded .kr-pan iframe,
+                .kr-embedded .kr-expiry iframe,
+                .kr-embedded .kr-security-code iframe {
+                    border-radius: 14px !important;
                 }
                 /* Footer del popin */
                 .kr-embedded .kr-popin-modal-footer {
