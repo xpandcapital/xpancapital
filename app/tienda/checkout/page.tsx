@@ -470,43 +470,51 @@ function CheckoutContent() {
                 isRedirectingRef.current = true;
                 sessionStorage.setItem('izipay_flow_active', '1')
 
-                // Cargar SDK de PayPal dinámicamente
-                const script = document.createElement('script')
-                script.src = `https://www.paypal.com/sdk/js?client-id=${data.clientId}&currency=USD&intent=capture`
-                script.onload = () => {
-                    if ((window as any).paypal) {
-                        const btnContainer = document.getElementById('paypal-btn-container')
-                        if (btnContainer) {
-                            btnContainer.innerHTML = ''
-                            ;(window as any).paypal.Buttons({
-                                style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'paypal' },
-                                createOrder: () => data.orderID,
-                                onApprove: async (paypalData: any) => {
-                                    const capRes = await fetch('/api/paypal/capture-order', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ orderID: paypalData.orderID, ordenId: data.ordenId }),
-                                    })
-                                    const capData = await capRes.json()
-                                    if (capData.success) {
-                                        clearCart()
-                                        window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${data.ordenId}&total=${totalUSD.toFixed(2)}`
-                                    } else {
-                                        showToast('Error al confirmar el pago.', 'error')
-                                        setIsProcessing(false)
-                                    }
-                                },
-                                onCancel: () => { setIsProcessing(false); showToast('Pago cancelado.', 'error') },
-                                onError: () => { setIsProcessing(false); showToast('Error en PayPal.', 'error') },
-                            }).render('#paypal-btn-container')
-                        }
-                    }
-                }
-                document.head.appendChild(script)
                 setIzipayTotal(totalUSD)
                 setKrKey(k => k + 1)
                 setIsIzipayModal(true)
                 setIsProcessing(false)
+
+                // Cargar SDK de PayPal con delay para que el modal renderice
+                setTimeout(() => {
+                    const existingScript = document.getElementById('paypal-sdk-script')
+                    if (existingScript) existingScript.remove()
+                    const script = document.createElement('script')
+                    script.id = 'paypal-sdk-script'
+                    script.src = `https://www.paypal.com/sdk/js?client-id=${data.clientId}&currency=USD&intent=capture`
+                    script.onload = () => {
+                        const btnContainer = document.getElementById('paypal-btn-container')
+                        if (!btnContainer || !(window as any).paypal) return
+                        btnContainer.innerHTML = ''
+                        ;(window as any).paypal.Buttons({
+                            style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'paypal' },
+                            createOrder: () => data.orderID,
+                            onApprove: async (paypalData: any) => {
+                                const capRes = await fetch('/api/paypal/capture-order', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ orderID: paypalData.orderID, ordenId: data.ordenId }),
+                                })
+                                const capData = await capRes.json()
+                                if (capData.success) {
+                                    clearCart()
+                                    window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${data.ordenId}&total=${totalUSD.toFixed(2)}`
+                                } else {
+                                    showToast('Error al confirmar el pago.', 'error')
+                                    setIsProcessing(false)
+                                }
+                            },
+                            onCancel: () => { setIsProcessing(false); showToast('Pago cancelado.', 'error') },
+                            onError: () => { setIsProcessing(false); showToast('Error en PayPal.', 'error') },
+                        }).render('#paypal-btn-container')
+                    }
+                    script.onerror = () => {
+                        setIsProcessing(false)
+                        showToast('Error al cargar PayPal SDK.', 'error')
+                    }
+                    document.head.appendChild(script)
+                }, 300)
+                return;
                 return;
             }
 
