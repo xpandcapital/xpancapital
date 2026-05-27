@@ -96,27 +96,34 @@ export async function POST(request: NextRequest) {
     const finalEmpresaId = empresa_id || DEFAULT_EMPRESA_ID
     const amountInCents = Math.round(total_usd * 100)
 
+    const insertData = {
+      empresa_id: finalEmpresaId,
+      user_id: user_id || null,
+      producto_id: productos?.[0]?.producto_id || null,
+      metodo_pago: 'izipay',
+      monto_coins: 0,
+      monto_usd: total_usd,
+      moneda: 'USD',
+      comision_generada: 0,
+      comision_estado: 'pendiente',
+      estado: 'pendiente',
+      metadata: {
+        productos,
+        email_cliente: email.toLowerCase(),
+        nombre_cliente: `${nombre} ${apellido || ''}`.trim(),
+        pais_cliente: pais || 'PE',
+        tiene_fisicos: tiene_fisicos || false,
+        direccion_envio: direccion_envio || null,
+        izipay_environment: config.environment,
+      },
+      creado_en: new Date().toISOString(),
+    }
+
+    console.log('[Izipay] Insertando orden:', JSON.stringify(insertData, null, 2))
+
     const { data: orden, error: ordenError } = await supabase
       .from('compras')
-      .insert({
-        empresa_id: finalEmpresaId,
-        user_id: user_id || null,
-        producto_id: productos?.[0]?.producto_id || null,
-        metodo_pago: 'izipay',
-        monto_coins: 0,
-        monto_usd: total_usd,
-        estado: 'pendiente',
-        metadata: {
-          productos,
-          email_cliente: email.toLowerCase(),
-          nombre_cliente: `${nombre} ${apellido || ''}`.trim(),
-          pais_cliente: pais || 'PE',
-          tiene_fisicos: tiene_fisicos || false,
-          direccion_envio: direccion_envio || null,
-          izipay_environment: config.environment,
-        },
-        creado_en: new Date().toISOString(),
-      })
+      .insert(insertData)
       .select()
       .single()
 
@@ -145,6 +152,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    console.log('[Izipay] Config encontrada. Enviando createPayment...')
+    console.log('[Izipay] Config:', { shopId: config.shopId, env: config.environment, hasSecret: !!config.secretKey, hasPublic: !!config.publicKey, hasHMAC: !!config.hmacKey })
+
     const paymentResponse = await createPayment(
       {
         amount: amountInCents,
@@ -153,11 +163,6 @@ export async function POST(request: NextRequest) {
         customer: {
           email: email.toLowerCase(),
           reference: user_id || undefined,
-          shippingDetails: {
-            firstName: nombre,
-            lastName: apellido || '',
-            country: pais || 'PE',
-          },
         },
       },
       config

@@ -13,12 +13,20 @@ export async function createPayment(
   const authString = Buffer.from(`${config.shopId}:${config.secretKey}`).toString('base64')
   const apiUrl = `${MICUENTAWEB_URLS[config.environment].api}/api-payment/v4/Charge/CreatePayment`
 
-  const body = {
+  const body: Record<string, unknown> = {
     amount: params.amount,
     currency: params.currency,
     orderId: params.orderId,
-    customer: params.customer,
+    customer: {
+      email: params.customer.email,
+    },
   }
+
+  if (params.customer.reference) {
+    (body.customer as Record<string, unknown>).reference = params.customer.reference
+  }
+
+  console.log('[Izipay] CreatePayment request:', JSON.stringify({ url: apiUrl, body }, null, 2))
 
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 12000)
@@ -35,10 +43,11 @@ export async function createPayment(
     })
     clearTimeout(timeout)
 
-    const data = await response.json()
+    const data = await response.json().catch(() => null)
+    console.log('[Izipay] CreatePayment response:', { status: response.status, ok: response.ok, data })
 
-    if (!response.ok || data.status === 'ERROR') {
-      console.error('[Izipay] CreatePayment error:', data)
+    if (!data || !response.ok || data.status === 'ERROR') {
+      console.error('[Izipay] CreatePayment error:', { status: response.status, data })
       return {
         webService: 'Charge',
         version: '4.0',
@@ -51,7 +60,7 @@ export async function createPayment(
     return data as IzipayCreatePaymentResponse
   } catch (err: any) {
     clearTimeout(timeout)
-    console.error('[Izipay] CreatePayment exception:', err)
+    console.error('[Izipay] CreatePayment exception:', err.message || err)
     return {
       webService: 'Charge',
       version: '4.0',
