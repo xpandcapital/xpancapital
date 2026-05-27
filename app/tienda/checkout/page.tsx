@@ -1021,9 +1021,9 @@ function CheckoutContent() {
                     </div>
 
                     {/* Formulario */}
-                    <div className="bg-[#f1f2f4] rounded-2xl p-4">
+                    <div className="bg-[#f1f2f4] rounded-2xl p-4" style={{ maxHeight: '55vh', overflow: 'hidden' }}>
                       {paymentMethod === 'paypal' ? (
-                        <div id="paypal-btn-container" key={krKey} style={{ minHeight: '200px' }} />
+                        <div id="paypal-btn-container" key={krKey} style={{ minHeight: '150px', maxHeight: '50vh', overflowY: 'auto' }} />
                       ) : (
                         <div className="kr-embedded" key={krKey} kr-form-token={izipayFormToken} kr-language="es-ES">
                           <div className="kr-pan"></div>
