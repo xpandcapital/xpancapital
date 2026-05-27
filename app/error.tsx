@@ -8,8 +8,7 @@ export default function GlobalError({
   reset: () => void
 }) {
   return (
-    <html lang="es">
-      <body className="bg-zinc-950 min-h-screen flex items-center justify-center">
+    <div className="bg-zinc-950 min-h-screen flex items-center justify-center">
         <div className="max-w-md w-full text-center space-y-6 p-8">
           <div className="w-20 h-20 rounded-full bg-blis-red/10 flex items-center justify-center mx-auto">
             <svg className="w-10 h-10 text-blis-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -25,7 +24,6 @@ export default function GlobalError({
             Recargar Página
           </button>
         </div>
-      </body>
-    </html>
+      </div>
   )
 }
