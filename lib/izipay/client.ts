@@ -11,7 +11,7 @@ export async function createPayment(
   config: IzipayConfig
 ): Promise<IzipayCreatePaymentResponse> {
   const authString = Buffer.from(`${config.shopId}:${config.secretKey}`).toString('base64')
-  const apiUrl = `${MICUENTAWEB_URLS[config.environment].api}/api-payment/v4/Charge/CreatePayment`
+  const apiUrl = `${MICUENTAWEB_URLS[config.environment].api}/api-payment/V4/Charge/CreatePayment`
 
   const body: Record<string, unknown> = {
     amount: params.amount,
