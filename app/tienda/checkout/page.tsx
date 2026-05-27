@@ -916,10 +916,10 @@ function CheckoutContent() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 relative z-10">
-                      <img src="/visa-svgrepo-com.svg" alt="Visa" className="h-4 w-auto opacity-70" />
-                      <img src="/mastercard-full-svgrepo-com.svg" alt="Mastercard" className="h-4 w-auto opacity-70" />
-                      <img src="/amex-svgrepo-com.svg" alt="Amex" className="h-4 w-auto opacity-70" />
-                      <img src="/diners-3-svgrepo-com.svg" alt="Diners" className="h-4 w-auto opacity-70" />
+                      <img src="/visa-svgrepo-com.svg" alt="Visa" className="h-6 w-auto" />
+                      <img src="/mastercard-full-svgrepo-com.svg" alt="Mastercard" className="h-6 w-auto" />
+                      <img src="/amex-svgrepo-com.svg" alt="Amex" className="h-6 w-auto" />
+                      <img src="/diners-3-svgrepo-com.svg" alt="Diners" className="h-6 w-auto" />
                     </div>
                   </motion.div>
 
@@ -988,10 +988,10 @@ function CheckoutContent() {
                         })}
                       </div>
                       <div className="flex items-center justify-center gap-5 pt-1">
-                        <img src="/visa-svgrepo-com.svg" alt="Visa" className="h-6 w-auto opacity-30" />
-                        <img src="/mastercard-full-svgrepo-com.svg" alt="MC" className="h-6 w-auto opacity-30" />
-                        <img src="/amex-svgrepo-com.svg" alt="Amex" className="h-6 w-auto opacity-30" />
-                        <img src="/diners-3-svgrepo-com.svg" alt="Diners" className="h-6 w-auto opacity-30" />
+                        <img src="/visa-svgrepo-com.svg" alt="Visa" className="h-8 w-auto" />
+                        <img src="/mastercard-full-svgrepo-com.svg" alt="MC" className="h-8 w-auto" />
+                        <img src="/amex-svgrepo-com.svg" alt="Amex" className="h-8 w-auto" />
+                        <img src="/diners-3-svgrepo-com.svg" alt="Diners" className="h-8 w-auto" />
                       </div>
                     </div>
 
