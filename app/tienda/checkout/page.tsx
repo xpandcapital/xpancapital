@@ -76,6 +76,12 @@ function CheckoutContent() {
     const [formasPago, setFormasPago] = useState<any[]>([]);
     const [selectedCountry, setSelectedCountry] = useState("");
     const isRedirectingRef = useRef(false);
+    const [isIzipayModal, setIsIzipayModal] = useState(false);
+    const [izipayFormToken, setIzipayFormToken] = useState('');
+    const [izipayPublicKey, setIzipayPublicKey] = useState('');
+    const [izipayOrderId, setIzipayOrderId] = useState('');
+    const [izipayTotal, setIzipayTotal] = useState(0);
+    const [izipayScriptLoaded, setIzipayScriptLoaded] = useState(false);
 
     const [form, setForm] = useState<CheckoutForm>({
         nombre: user?.name?.split(" ")[0] || '',
@@ -242,53 +248,13 @@ function CheckoutContent() {
 
                 isRedirectingRef.current = true;
 
-                // Crear el contenedor ANTES de cargar el script
-                const krContainer = document.createElement('div')
-                krContainer.className = 'kr-embedded'
-                krContainer.setAttribute('kr-form-token', data.formToken)
-                krContainer.setAttribute('kr-public-key', data.publicKey || '')
-                krContainer.setAttribute('kr-language', 'es-ES')
-                document.body.appendChild(krContainer)
+                isRedirectingRef.current = true;
 
-                // Cargar el script con modo popup
-                const izipayScript = document.createElement('script')
-                izipayScript.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js?mode=popup'
-                izipayScript.async = true
-                izipayScript.onload = () => {
-                  if (window.KR) {
-                    window.KR.onSubmit((r: any) => {
-                      const st = r?.clientAnswer?.orderStatus || r?.orderStatus
-                      try { document.body.removeChild(krContainer) } catch {}
-                      if (st === 'PAID') {
-                        window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${data.ordenId}&total=${totalUSD.toFixed(2)}`
-                      } else {
-                        setIsProcessing(false)
-                        showToast('El pago fue rechazado. Intenta de nuevo.', 'error')
-                      }
-                      return true
-                    })
-                    window.KR.onError(() => {
-                      try { document.body.removeChild(krContainer) } catch {}
-                      setIsProcessing(false)
-                      showToast('Error en la pasarela de pago.', 'error')
-                      return true
-                    })
-
-                    // Si el SDK no abre el popup solo, intentar con setFormToken
-                    setTimeout(() => {
-                      try { window.KR.setFormToken?.(data.formToken) } catch {}
-                    }, 500)
-                  } else {
-                    try { document.body.removeChild(krContainer) } catch {}
-                    setIsProcessing(false)
-                    showToast('No se pudo cargar la pasarela de pago.', 'error')
-                  }
-                }
-                izipayScript.onerror = () => {
-                  setIsProcessing(false)
-                  showToast('No se pudo cargar la pasarela de pago.', 'error')
-                }
-                document.head.appendChild(izipayScript)
+                setIzipayFormToken(data.formToken)
+                setIzipayPublicKey(data.publicKey || '')
+                setIzipayOrderId(data.ordenId)
+                setIzipayTotal(totalUSD)
+                setIsIzipayModal(true)
                 return;
             }
 
@@ -733,6 +699,39 @@ function CheckoutContent() {
                 </div>
             </div>
 
+            {/* ── Modal Izipay ───────────────────────────────────────────── */}
+            {isIzipayModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) { setIsIzipayModal(false); setIsProcessing(false) } }}>
+                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                          <Shield className="w-4 h-4 text-emerald-500" />
+                        </div>
+                        <span className="font-bold text-gray-900">Pago Seguro — Izipay</span>
+                      </div>
+                      <button onClick={() => { setIsIzipayModal(false); setIsProcessing(false) }} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+                    </div>
+                    <div className="kr-embedded w-full" kr-form-token={izipayFormToken} kr-public-key={izipayPublicKey} kr-language="es-ES" style={{ minHeight: '400px' }} />
+                    <IzipayScriptLoader
+                      loaded={izipayScriptLoaded}
+                      onLoad={() => setIzipayScriptLoaded(true)}
+                      onSuccess={() => {
+                        setIsIzipayModal(false)
+                        window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${izipayOrderId}&total=${izipayTotal.toFixed(2)}`
+                      }}
+                      onError={(msg) => {
+                        setIsIzipayModal(false)
+                        setIsProcessing(false)
+                        showToast(msg, 'error')
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <FooterSections />
         </main>
     );
@@ -771,4 +770,41 @@ function PayOption({ selected, onClick, icon, bg, label, sublabel, amount, badge
             </div>
         </button>
     );
+}
+
+// ── Cargador del SDK KR para modal Izipay ────────────────────────────────────
+function IzipayScriptLoader({ loaded, onLoad, onSuccess, onError }: {
+  loaded: boolean; onLoad: () => void; onSuccess: () => void; onError: (msg: string) => void;
+}) {
+  useEffect(() => {
+    if (loaded || typeof window === 'undefined') return
+    if (document.getElementById('izipay-kr-modal-script')) return
+
+    const script = document.createElement('script')
+    script.id = 'izipay-kr-modal-script'
+    script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
+    script.async = true
+    script.onload = () => {
+      let a = 0
+      const w = () => {
+        a++
+        if (window.KR) {
+          window.KR.onSubmit((r: any) => {
+            const st = r?.clientAnswer?.orderStatus || r?.orderStatus
+            if (st === 'PAID') onSuccess()
+            else onError('Pago rechazado.')
+            return true
+          })
+          window.KR.onError((e: any) => { onError(e?.message || 'Error en la pasarela.'); return true })
+          onLoad()
+        } else if (a < 20) setTimeout(w, 300)
+        else onError('La pasarela no respondió.')
+      }
+      w()
+    }
+    script.onerror = () => onError('Error al cargar SDK.')
+    document.head.appendChild(script)
+    return () => { try { window.KR?.removeForms() } catch {} }
+  }, [loaded])
+  return null
 }
