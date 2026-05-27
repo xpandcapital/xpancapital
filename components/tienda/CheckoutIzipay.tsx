@@ -10,13 +10,14 @@ interface CheckoutIzipayProps {
   publicKey: string
   ordenId: string
   totalUSD: number
+  displayMode?: 'popup' | 'embedded'
   onSuccess?: () => void
   onError?: (msg: string) => void
 }
 
 type FormState = 'loading' | 'ready' | 'success' | 'error'
 
-export function CheckoutIzipay({ formToken, publicKey, totalUSD, onSuccess }: CheckoutIzipayProps) {
+export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = 'popup', onSuccess }: CheckoutIzipayProps) {
   const [formState, setFormState] = useState<FormState>('loading')
   const [errorMsg, setErrorMsg] = useState('')
   const loadedRef = useRef(false)
@@ -123,7 +124,7 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, onSuccess }: Ch
         className="kr-embedded"
         kr-form-token={formToken}
         kr-public-key={publicKey}
-        kr-popin
+        {...(displayMode === 'popup' ? { 'kr-popin': '' } : {})}
         kr-language="es-ES"
       />
 
@@ -135,7 +136,11 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, onSuccess }: Ch
       )}
 
       {formState === 'ready' && (
-        <p className="text-gray-400 text-xs">El formulario de pago se abrirá en una ventana emergente.</p>
+        <p className="text-gray-400 text-xs">
+          {displayMode === 'popup'
+            ? 'El formulario de pago se abrirá en una ventana emergente.'
+            : 'Completa los datos de tu tarjeta para realizar el pago.'}
+        </p>
       )}
     </div>
   )

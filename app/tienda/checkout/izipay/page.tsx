@@ -46,6 +46,7 @@ function IzipayContent() {
   const publicKey = searchParams.get('public_key') || ''
   const ordenId = searchParams.get('order_id') || ''
   const totalUSD = parseFloat(searchParams.get('total') || '0')
+  const displayMode = (searchParams.get('mode') || 'popup') as 'popup' | 'embedded'
 
   if (!formToken || !publicKey || !ordenId) {
     return (
@@ -103,6 +104,7 @@ function IzipayContent() {
               publicKey={publicKey}
               ordenId={ordenId}
               totalUSD={totalUSD}
+              displayMode={displayMode}
               onSuccess={() => {
                 showToast('¡Pago procesado con éxito!', 'success')
               }}

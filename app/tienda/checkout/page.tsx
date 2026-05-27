@@ -247,6 +247,7 @@ function CheckoutContent() {
                     public_key: data.publicKey || '',
                     order_id: data.ordenId,
                     total: totalUSD.toFixed(2),
+                    mode: data.displayMode || 'popup',
                 });
                 window.location.href = `/tienda/checkout/izipay?${params.toString()}`;
                 return;

@@ -17,6 +17,7 @@ async function getIzipayConfig(supabase: ReturnType<typeof createClient>) {
       'izipay_public_key',
       'izipay_hmac_key',
       'izipay_environment',
+      'izipay_display_mode',
     ])
 
   const map: Record<string, string> = {}
@@ -24,6 +25,8 @@ async function getIzipayConfig(supabase: ReturnType<typeof createClient>) {
     if (row.key_name === 'izipay_environment') {
       const raw = (row.key_value || 'sandbox').toLowerCase()
       map[row.key_name] = raw.includes('prod') ? 'production' : 'sandbox'
+    } else if (row.key_name === 'izipay_display_mode') {
+      map[row.key_name] = row.key_value || 'popup'
     } else {
       const decrypted = decryptApiKey(row.key_value || '')
       if (decrypted && decrypted.startsWith('enc:')) {
@@ -38,6 +41,7 @@ async function getIzipayConfig(supabase: ReturnType<typeof createClient>) {
   const secretKey = map['izipay_secret_key']
   const publicKey = map['izipay_public_key']
   const hmacKey = map['izipay_hmac_key']
+  const displayMode = map['izipay_display_mode'] || 'popup'
 
   if (!shopId || !secretKey || !publicKey || !hmacKey) return null
 
@@ -46,6 +50,7 @@ async function getIzipayConfig(supabase: ReturnType<typeof createClient>) {
     secretKey,
     publicKey,
     hmacKey,
+    displayMode,
     environment: (map['izipay_environment'] || 'sandbox') as IzipayEnvironment,
   }
 }
@@ -195,6 +200,7 @@ export async function POST(request: NextRequest) {
       formToken: paymentResponse.answer.formToken,
       publicKey: config.publicKey,
       environment: config.environment,
+      displayMode: config.displayMode,
     })
   } catch (err) {
     console.error('[Izipay] Error en get-izipay-token:', err)

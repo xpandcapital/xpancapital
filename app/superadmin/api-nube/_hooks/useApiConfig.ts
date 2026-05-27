@@ -105,6 +105,7 @@ const DEFAULT_VALUES: Record<string, string> = {
   izipay_secret_key: '',
   izipay_hmac_key: '',
   izipay_environment: 'sandbox',
+  izipay_display_mode: 'popup',
   culqi_public_key: '',
   culqi_secret_key: '',
   plin_api: '',

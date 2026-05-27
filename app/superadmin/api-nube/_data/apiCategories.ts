@@ -786,6 +786,7 @@ export const categories: ApiCategory[] = [
                     { id: "izipay_public_key", label: "Clave Pública JS", type: "password", description: "Clave pública para el cliente JavaScript (KR). Formato: usuario:publickey_...", getFrom: "secure.micuentaweb.pe → Configuración → Claves → Clave pública", accessType: "Pública", cost: "pagado" },
                     { id: "izipay_hmac_key", label: "Clave HMAC-SHA-256", type: "password", description: "Clave para verificar firma kr-hash en webhooks IPN. ⚠️ Solo backend.", getFrom: "secure.micuentaweb.pe → Configuración → Claves → Clave HMAC-SHA-256", accessType: "Privada", cost: "pagado" },
                     { id: "izipay_environment", label: "Entorno", type: "select", options: [{ value: "sandbox", label: "Sandbox (Pruebas)" }, { value: "production", label: "Producción" }], description: "Sandbox para pruebas con tarjetas de test. Producción para transacciones reales.", getFrom: "Panel Micuentaveb", accessType: "Pública", cost: "pagado" },
+                    { id: "izipay_display_mode", label: "Modo de visualización", type: "select", options: [{ value: "popup", label: "Popup (Ventana emergente)" }, { value: "embedded", label: "Embebido (Integrado en página)" }], description: "Popup: formulario en ventana modal. Embebido: formulario incrustado en la página.", getFrom: "Preferencia de diseño", accessType: "Pública", cost: "pagado" },
                 ]
             },
             {
