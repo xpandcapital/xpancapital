@@ -1021,7 +1021,7 @@ function CheckoutContent() {
                     </div>
 
                     {/* Formulario */}
-                    <div className="bg-[#f1f2f4] rounded-2xl p-4 relative" style={paymentMethod === 'paypal' ? { minHeight: '180px', maxHeight: '300px', overflowY: 'auto' } : { maxHeight: '50vh', overflow: 'auto' }}>
+                    <div className="bg-[#f1f2f4] rounded-2xl p-4 relative" style={paymentMethod === 'paypal' ? { minHeight: '180px' } : { maxHeight: '50vh', overflow: 'auto' }}>
                       {paymentMethod === 'paypal' ? (
                         <div id="paypal-btn-container" key={krKey} style={{ minHeight: '150px', maxHeight: '50vh', overflowY: 'auto' }} />
                       ) : (
