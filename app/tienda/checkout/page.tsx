@@ -404,10 +404,15 @@ function CheckoutContent() {
         );
     }
 
-    // ── Formulario de checkout ─────────────────────────────────────────────────
-    const inputCls = "w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-white outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 placeholder-gray-600 transition-all";
-    const labelCls = "text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2 block";
+    const closeIzipayModal = () => {
+        setIsIzipayModal(false)
+        setIsProcessing(false)
+        setIzipayScriptLoaded(false)
+        try { window.KR?.removeForms() } catch {}
+        try { document.getElementById('izipay-kr-modal-script')?.remove() } catch {}
+    }
 
+    // ── Formulario de checkout ─────────────────────────────────────────────────
     return (
         <main className="min-h-screen bg-[#050505] text-white">
             <Header />
@@ -721,7 +726,7 @@ function CheckoutContent() {
 
             {/* ── Modal Izipay ───────────────────────────────────────────── */}
             {isIzipayModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) { setIsIzipayModal(false); setIsProcessing(false) } }}>
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) { closeIzipayModal() } }}>
                 <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -731,7 +736,7 @@ function CheckoutContent() {
                         </div>
                         <span className="font-bold text-gray-900">Pago Seguro — Izipay</span>
                       </div>
-                      <button onClick={() => { setIsIzipayModal(false); setIsProcessing(false) }} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+                      <button onClick={() => closeIzipayModal()} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
                     </div>
                     <div className="bg-[#f1f2f4] rounded-2xl p-4" style={{ minHeight: '420px' }}>
                       <div className="kr-embedded" kr-form-token={izipayFormToken} kr-language="es-ES">
