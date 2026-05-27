@@ -20,7 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/Toast";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 
-type PaymentMethod = 'coins' | 'izipay' | 'transfer' | 'crypto_manual';
+type PaymentMethod = 'coins' | 'izipay' | 'paypal' | 'transfer' | 'crypto_manual';
 
 interface CheckoutForm {
     nombre: string;
@@ -440,6 +440,76 @@ function CheckoutContent() {
                 return;
             }
 
+            // Flujo PayPal
+            if (paymentMethod === 'paypal') {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+
+                let res: Response;
+                try {
+                    res = await fetch('/api/paypal/create-order', {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({ ...commonPayload, total_usd: totalUSD }),
+                        signal: controller.signal,
+                    });
+                } catch (fetchErr: any) {
+                    clearTimeout(timeout);
+                    if (fetchErr.name === 'AbortError') {
+                        throw new Error('El servicio de pago está tardando demasiado. Intenta de nuevo.');
+                    }
+                    throw new Error('No se pudo conectar con PayPal.');
+                }
+                clearTimeout(timeout);
+
+                const data = await res.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Error al conectar con PayPal');
+                }
+
+                isRedirectingRef.current = true;
+                sessionStorage.setItem('izipay_flow_active', '1')
+
+                // Cargar SDK de PayPal dinámicamente
+                const script = document.createElement('script')
+                script.src = `https://www.paypal.com/sdk/js?client-id=${data.clientId}&currency=USD&intent=capture`
+                script.onload = () => {
+                    if ((window as any).paypal) {
+                        const btnContainer = document.getElementById('paypal-btn-container')
+                        if (btnContainer) {
+                            btnContainer.innerHTML = ''
+                            ;(window as any).paypal.Buttons({
+                                style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'paypal' },
+                                createOrder: () => data.orderID,
+                                onApprove: async (paypalData: any) => {
+                                    const capRes = await fetch('/api/paypal/capture-order', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ orderID: paypalData.orderID, ordenId: data.ordenId }),
+                                    })
+                                    const capData = await capRes.json()
+                                    if (capData.success) {
+                                        clearCart()
+                                        window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${data.ordenId}&total=${totalUSD.toFixed(2)}`
+                                    } else {
+                                        showToast('Error al confirmar el pago.', 'error')
+                                        setIsProcessing(false)
+                                    }
+                                },
+                                onCancel: () => { setIsProcessing(false); showToast('Pago cancelado.', 'error') },
+                                onError: () => { setIsProcessing(false); showToast('Error en PayPal.', 'error') },
+                            }).render('#paypal-btn-container')
+                        }
+                    }
+                }
+                document.head.appendChild(script)
+                setIzipayTotal(totalUSD)
+                setKrKey(k => k + 1)
+                setIsIzipayModal(true)
+                setIsProcessing(false)
+                return;
+            }
+
             // Flujo BLIS Coins y Transferencia (checkout tradicional)
             const res = await fetch('/api/checkout', {
                 method: 'POST',
@@ -789,10 +859,10 @@ function CheckoutContent() {
                                             })()}
                                         </div>);
                                     }
-                                    // izipay y otras pasarelas
-                                    const imap: Record<string, any> = { izipay: CreditCard };
-                                    const cmap: Record<string, string> = { izipay: "bg-blis-red/10 border-blis-red/40" };
-                                    const tmap: Record<string, string> = { izipay: "text-blis-red" };
+                                    // izipay, paypal y otras pasarelas
+                                    const imap: Record<string, any> = { izipay: CreditCard, paypal: Wallet };
+                                    const cmap: Record<string, string> = { izipay: "bg-blis-red/10 border-blis-red/40", paypal: "bg-blue-500/10 border-blue-500/40" };
+                                    const tmap: Record<string, string> = { izipay: "text-blis-red", paypal: "text-blue-400" };
                                     const Ic = imap[fp.slug] || CreditCard;
                                     return <PayOption key={fp.id} selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
                                         icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
@@ -944,13 +1014,17 @@ function CheckoutContent() {
 
                     {/* Formulario */}
                     <div className="bg-[#f1f2f4] rounded-2xl p-4">
-                      <div className="kr-embedded" key={krKey} kr-form-token={izipayFormToken} kr-language="es-ES">
-                        <div className="kr-pan"></div>
-                        <div className="kr-expiry"></div>
-                        <div className="kr-security-code"></div>
-                        <button className="kr-payment-button"></button>
-                        <div className="kr-form-error"></div>
-                      </div>
+                      {paymentMethod === 'paypal' ? (
+                        <div id="paypal-btn-container" key={krKey} style={{ minHeight: '200px' }} />
+                      ) : (
+                        <div className="kr-embedded" key={krKey} kr-form-token={izipayFormToken} kr-language="es-ES">
+                          <div className="kr-pan"></div>
+                          <div className="kr-expiry"></div>
+                          <div className="kr-security-code"></div>
+                          <button className="kr-payment-button"></button>
+                          <div className="kr-form-error"></div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Footer de confianza con animaciones */}
@@ -995,22 +1069,24 @@ function CheckoutContent() {
                       </div>
                     </div>
 
-                    <IzipayScriptLoader
-                      loaded={izipayScriptLoaded}
-                      publicKey={izipayPublicKey}
-                      onLoad={() => setIzipayScriptLoaded(true)}
-                      onSuccess={() => {
-                        sessionStorage.removeItem('izipay_flow_active')
-                        clearCart()
-                        setIsIzipayModal(false)
-                        window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${izipayOrderId}&total=${izipayTotal.toFixed(2)}`
-                      }}
-                      onError={(msg) => {
-                        setIsIzipayModal(false)
-                        setIsProcessing(false)
-                        showToast(msg, 'error')
-                      }}
-                    />
+                    {paymentMethod === 'izipay' && (
+                      <IzipayScriptLoader
+                        loaded={izipayScriptLoaded}
+                        publicKey={izipayPublicKey}
+                        onLoad={() => setIzipayScriptLoaded(true)}
+                        onSuccess={() => {
+                          sessionStorage.removeItem('izipay_flow_active')
+                          clearCart()
+                          setIsIzipayModal(false)
+                          window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${izipayOrderId}&total=${izipayTotal.toFixed(2)}`
+                        }}
+                        onError={(msg) => {
+                          setIsIzipayModal(false)
+                          setIsProcessing(false)
+                          showToast(msg, 'error')
+                        }}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
