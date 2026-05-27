@@ -715,7 +715,7 @@ function CheckoutContent() {
                       <button onClick={() => { setIsIzipayModal(false); setIsProcessing(false) }} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
                     </div>
                     <div className="bg-[#f1f2f4] rounded-2xl p-4" style={{ minHeight: '420px' }}>
-                      <div className="kr-embedded" {...{ 'kr-popin': '' }} kr-form-token={izipayFormToken} kr-language="es-ES">
+                      <div className="kr-embedded" kr-form-token={izipayFormToken} kr-language="es-ES">
                         <div className="kr-pan"></div>
                         <div className="kr-expiry"></div>
                         <div className="kr-security-code"></div>
