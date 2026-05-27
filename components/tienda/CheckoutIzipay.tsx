@@ -96,7 +96,7 @@ export function CheckoutIzipay({ formToken, publicKey, ordenId, totalUSD, onSucc
             className="w-full"
           >
             <div
-              className="kr-embedded w-full min-h-[400px]"
+              className="kr-embedded w-full min-h-[400px] bg-[#f1f2f4] rounded-xl p-2"
               kr-form-token={formToken}
               kr-public-key={publicKey}
               kr-language="es-ES"
