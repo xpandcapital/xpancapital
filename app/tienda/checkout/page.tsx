@@ -891,38 +891,59 @@ function CheckoutContent() {
             {isIzipayModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
                 <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-                  {/* Barra de confianza superior */}
-                  <div className="flex items-center justify-between px-6 py-3 bg-emerald-50 border-b border-emerald-100 rounded-t-3xl">
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-1.5 text-emerald-700">
-                        <Lock className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">SSL</span>
+                  {/* Barra de confianza superior con animación */}
+                  <motion.div
+                    className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-emerald-50 via-emerald-100/50 to-emerald-50 border-b border-emerald-200 rounded-t-3xl relative overflow-hidden"
+                    animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                    style={{ backgroundSize: '200% 100%' }}
+                  >
+                    <div className="absolute inset-0 opacity-10"
+                      style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(16,185,129,0.3) 20px, rgba(16,185,129,0.3) 21px)' }} />
+                    <div className="flex items-center gap-5 relative z-10">
+                      <div className="flex items-center gap-1.5">
+                        <motion.div animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                          <Lock className="w-3 h-3 text-emerald-600" />
+                        </motion.div>
+                        <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">SSL 256-bit</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-emerald-700">
-                        <Shield className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">PCI-DSS</span>
+                      <div className="flex items-center gap-1.5">
+                        <motion.div animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity, delay: 1 }}>
+                          <Shield className="w-3 h-3 text-emerald-600" />
+                        </motion.div>
+                        <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">PCI-DSS L1</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3 opacity-50">
-                      <span className="text-[9px] font-bold text-gray-400 tracking-wider">VISA</span>
-                      <span className="text-[9px] font-bold text-gray-400 tracking-wider">MC</span>
-                      <span className="text-[9px] font-bold text-gray-400 tracking-wider">AMEX</span>
-                      <span className="text-[9px] font-bold text-gray-400 tracking-wider">DINERS</span>
+                    <div className="flex items-center gap-2.5 relative z-10">
+                      {[
+                        { label: 'VISA', color: '#1a1f71' }, { label: 'MC', color: '#eb001b' },
+                        { label: 'AMEX', color: '#2e77bb' }, { label: 'DINERS', color: '#0079be' }
+                      ].map(card => (
+                        <span key={card.label} className="text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded" style={{ color: card.color, backgroundColor: card.color + '15' }}>{card.label}</span>
+                      ))}
                     </div>
-                  </div>
+                  </motion.div>
+
                   <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 flex items-center justify-center">
-                          <CreditCard className="w-5 h-5 text-emerald-500" />
-                        </div>
+                        <motion.div
+                          className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-[0_0_25px_rgba(16,185,129,0.3)]"
+                          animate={{ boxShadow: ['0 0 20px rgba(16,185,129,0.2)', '0 0 35px rgba(16,185,129,0.4)', '0 0 20px rgba(16,185,129,0.2)'] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <CreditCard className="w-6 h-6 text-white" />
+                        </motion.div>
                         <div>
-                          <span className="font-black text-gray-900 text-lg">Pago Seguro</span>
-                          <p className="text-[10px] text-gray-400 uppercase tracking-wider">Procesado por Izipay</p>
+                          <span className="font-black text-gray-900 text-xl tracking-tight">Blis Bank</span>
+                          <p className="text-[10px] text-gray-400 uppercase tracking-widest">Pasarela de pago segura</p>
                         </div>
                       </div>
-                      <button onClick={() => closeIzipayModal()} className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 hover:text-gray-800 text-lg font-bold transition-colors" title="Cerrar">&times;</button>
+                      <button onClick={() => closeIzipayModal()} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 text-lg font-bold transition-colors" title="Cerrar">&times;</button>
                     </div>
+
+                    {/* Formulario */}
                     <div className="bg-[#f1f2f4] rounded-2xl p-4" style={{ minHeight: '420px' }}>
                       <div className="kr-embedded" key={krKey} kr-form-token={izipayFormToken} kr-language="es-ES">
                         <div className="kr-pan"></div>
@@ -932,6 +953,56 @@ function CheckoutContent() {
                         <div className="kr-form-error"></div>
                       </div>
                     </div>
+
+                    {/* Footer de confianza con animaciones */}
+                    <div className="mt-5 space-y-3">
+                      <div className="flex items-center justify-between px-3">
+                        <div className="flex items-center gap-2">
+                          <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
+                            className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
+                          <span className="text-[11px] text-gray-500 font-medium">Conexión cifrada activa</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-gray-400">
+                          <Lock className="w-3 h-3" />
+                          <span>E2E Encryption</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 px-1">
+                        {[
+                          { icon: Shield, text: 'Datos encriptados', color: 'emerald' },
+                          { icon: Zap, text: 'Pago instantáneo', color: 'amber' },
+                          { icon: Building2, text: 'Respaldo bancario', color: 'blue' },
+                        ].map(({ icon: Icon, text, color }) => {
+                          const colors: Record<string, string> = {
+                            emerald: 'bg-emerald-50 border-emerald-100 text-emerald-700',
+                            amber: 'bg-amber-50 border-amber-100 text-amber-700',
+                            blue: 'bg-blue-50 border-blue-100 text-blue-700',
+                          }
+                          return (
+                            <div key={text} className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border ${colors[color]}`}>
+                              <motion.div animate={{ y: [0, -2, 0] }} transition={{ duration: 2, repeat: Infinity, delay: Math.random() }}>
+                                <Icon className="w-4 h-4" />
+                              </motion.div>
+                              <span className="text-[9px] font-bold text-center leading-tight">{text}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      <div className="flex items-center justify-center gap-4 pt-1">
+                        {['VISA', 'MASTERCARD', 'AMEX', 'DINERS'].map((brand, i) => (
+                          <motion.span
+                            key={brand}
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="text-[9px] font-black text-gray-300 tracking-widest"
+                          >
+                            {brand}
+                          </motion.span>
+                        ))}
+                      </div>
+                    </div>
+
                     <IzipayScriptLoader
                       loaded={izipayScriptLoaded}
                       publicKey={izipayPublicKey}
