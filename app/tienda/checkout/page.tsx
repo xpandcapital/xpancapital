@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { useState, useEffect, useMemo, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -75,6 +75,7 @@ function CheckoutContent() {
     const [isNewUser, setIsNewUser] = useState(false);
     const [formasPago, setFormasPago] = useState<any[]>([]);
     const [selectedCountry, setSelectedCountry] = useState("");
+    const isRedirectingRef = useRef(false);
 
     const [form, setForm] = useState<CheckoutForm>({
         nombre: user?.name?.split(" ")[0] || '',
@@ -100,7 +101,7 @@ function CheckoutContent() {
 
     // Redirigir si carrito vacío
     useEffect(() => {
-        if (cart.length === 0 && !isComplete) router.push('/tienda');
+        if (cart.length === 0 && !isComplete && !isRedirectingRef.current) router.push('/tienda');
     }, [cart.length, isComplete, router]);
 
     // En flujo canje BLISCOINS, redirigir si no hay usuario
@@ -239,8 +240,7 @@ function CheckoutContent() {
                     throw new Error(data.error || 'Error al conectar con la pasarela de pago');
                 }
 
-                setOrderEmail(form.email);
-                setIsComplete(true);
+                isRedirectingRef.current = true;
                 clearCart();
 
                 const params = new URLSearchParams({
