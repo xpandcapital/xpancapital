@@ -124,6 +124,25 @@ function CheckoutContent() {
             .then(r => r.json()).then(d => { if (d.success) setFormasPago(d.formas || []); }).catch(() => {});
     }, []);
 
+    // Precargar tema classic de Izipay (para que esté listo antes del SDK)
+    useEffect(() => {
+        const baseUrl = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0'
+        if (!document.getElementById('izipay-kr-classic-css')) {
+            const link = document.createElement('link')
+            link.id = 'izipay-kr-classic-css'
+            link.rel = 'stylesheet'
+            link.href = `${baseUrl}/ext/classic-reset.css`
+            document.head.appendChild(link)
+        }
+        if (!document.getElementById('izipay-kr-classic-js')) {
+            const s = document.createElement('script')
+            s.id = 'izipay-kr-classic-js'
+            s.src = `${baseUrl}/ext/classic.js`
+            s.async = true
+            document.head.appendChild(s)
+        }
+    }, []);
+
     // Pre-llenar con datos del usuario
     useEffect(() => {
         if (user) {
@@ -791,61 +810,32 @@ function IzipayScriptLoader({ loaded, onLoad, onSuccess, onError, publicKey }: {
     if (loaded || typeof window === 'undefined') return
     if (document.getElementById('izipay-kr-modal-script')) return
 
-    const baseUrl = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0'
-
-    // 1. CSS del tema
-    const link = document.createElement('link')
-    link.id = 'izipay-kr-classic-css'
-    link.rel = 'stylesheet'
-    link.href = `${baseUrl}/ext/classic-reset.css`
-    document.head.appendChild(link)
-
-    // 2. JS del tema (window.KR_CONFIGURATION — se lee antes del SDK)
-    const themeScript = document.createElement('script')
-    themeScript.id = 'izipay-kr-classic-js'
-    themeScript.src = `${baseUrl}/ext/classic.js`
-    themeScript.async = true
-
-    // 3. SDK KR (lee KR_CONFIGURATION si existe)
-    const initSDK = () => {
-      if (document.getElementById('izipay-kr-modal-script')) return
-      const script = document.createElement('script')
-      script.id = 'izipay-kr-modal-script'
-      script.src = `${baseUrl}/stable/kr-payment-form.min.js`
-      script.setAttribute('kr-public-key', publicKey)
-      script.async = true
-      script.onload = () => {
-        let a = 0
-        const w = () => {
-          a++
-          if (window.KR) {
-            window.KR.onSubmit((r: any) => {
-              const st = r?.clientAnswer?.orderStatus || r?.orderStatus
-              if (st === 'PAID') onSuccess()
-              else onError('Pago rechazado.')
-              return true
-            })
-            window.KR.onError((e: any) => { onError(e?.message || 'Error en la pasarela.'); return true })
-            onLoad()
-          } else if (a < 20) setTimeout(w, 300)
-          else onError('La pasarela no respondió.')
-        }
-        w()
+    const script = document.createElement('script')
+    script.id = 'izipay-kr-modal-script'
+    script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
+    script.setAttribute('kr-public-key', publicKey)
+    script.async = true
+    script.onload = () => {
+      let a = 0
+      const w = () => {
+        a++
+        if (window.KR) {
+          window.KR.onSubmit((r: any) => {
+            const st = r?.clientAnswer?.orderStatus || r?.orderStatus
+            if (st === 'PAID') onSuccess()
+            else onError('Pago rechazado.')
+            return true
+          })
+          window.KR.onError((e: any) => { onError(e?.message || 'Error en la pasarela.'); return true })
+          onLoad()
+        } else if (a < 20) setTimeout(w, 300)
+        else onError('La pasarela no respondió.')
       }
-      script.onerror = () => onError('Error al cargar SDK.')
-      document.head.appendChild(script)
+      w()
     }
-
-    // Cargar theme JS → SDK después
-    themeScript.onload = () => initSDK()
-    themeScript.onerror = () => initSDK() // fallback: cargar SDK aunque falle el tema
-    document.head.appendChild(themeScript)
-
-    return () => {
-      try { window.KR?.removeForms() } catch {}
-      try { document.getElementById('izipay-kr-classic-css')?.remove() } catch {}
-      try { document.getElementById('izipay-kr-classic-js')?.remove() } catch {}
-    }
+    script.onerror = () => onError('Error al cargar SDK.')
+    document.head.appendChild(script)
+    return () => { try { window.KR?.removeForms() } catch {} }
   }, [loaded])
   return null
 }
