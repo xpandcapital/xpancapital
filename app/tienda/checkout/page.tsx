@@ -255,6 +255,7 @@ function CheckoutContent() {
                 setIzipayOrderId(data.ordenId)
                 setIzipayTotal(totalUSD)
                 setIsIzipayModal(true)
+                setIsProcessing(false)
                 return;
             }
 
@@ -713,11 +714,12 @@ function CheckoutContent() {
                       </div>
                       <button onClick={() => { setIsIzipayModal(false); setIsProcessing(false) }} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
                     </div>
-                    <div className="kr-embedded w-full" kr-form-token={izipayFormToken} kr-public-key={izipayPublicKey} kr-language="es-ES" style={{ minHeight: '400px' }} />
+                    <div className="kr-embedded w-full bg-[#f1f2f4] rounded-2xl p-2" kr-form-token={izipayFormToken} kr-public-key={izipayPublicKey} kr-language="es-ES" style={{ minHeight: '420px' }} />
                     <IzipayScriptLoader
                       loaded={izipayScriptLoaded}
                       onLoad={() => setIzipayScriptLoaded(true)}
                       onSuccess={() => {
+                        clearCart()
                         setIsIzipayModal(false)
                         window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${izipayOrderId}&total=${izipayTotal.toFixed(2)}`
                       }}
