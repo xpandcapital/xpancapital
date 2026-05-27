@@ -126,8 +126,6 @@ export async function POST(request: NextRequest) {
       creado_en: new Date().toISOString(),
     }
 
-    console.log('[Izipay] Insertando orden:', JSON.stringify(insertData, null, 2))
-
     const { data: orden, error: ordenError } = await supabase
       .from('compras')
       .insert(insertData)
@@ -158,9 +156,6 @@ export async function POST(request: NextRequest) {
         if (itemsError) console.error('[Izipay] Error creando items:', itemsError)
       }
     }
-
-    console.log('[Izipay] Config encontrada. Enviando createPayment...')
-    console.log('[Izipay] Config:', { shopId: config.shopId, env: config.environment, hasSecret: !!config.secretKey, hasPublic: !!config.publicKey, hasHMAC: !!config.hmacKey })
 
     const paymentResponse = await createPayment(
       {

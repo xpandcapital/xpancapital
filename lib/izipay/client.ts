@@ -26,8 +26,6 @@ export async function createPayment(
     (body.customer as Record<string, unknown>).reference = params.customer.reference
   }
 
-  console.log('[Izipay] CreatePayment request:', JSON.stringify({ url: apiUrl, body }, null, 2))
-
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 12000)
 
@@ -44,7 +42,6 @@ export async function createPayment(
     clearTimeout(timeout)
 
     const data = await response.json().catch(() => null)
-    console.log('[Izipay] CreatePayment response:', { status: response.status, ok: response.ok, data })
 
     if (!data || !response.ok || data.status === 'ERROR') {
       console.error('[Izipay] CreatePayment error:', { status: response.status, data })
