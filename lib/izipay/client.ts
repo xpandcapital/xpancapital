@@ -17,6 +17,7 @@ export async function createPayment(
     amount: params.amount,
     currency: params.currency,
     orderId: params.orderId,
+    formAction: 'REGISTER_PAY',
     customer: {
       email: params.customer.email,
     },
