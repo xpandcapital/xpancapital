@@ -240,6 +240,7 @@ function CheckoutContent() {
                 }
 
                 setOrderEmail(form.email);
+                setIsComplete(true);
                 clearCart();
 
                 const params = new URLSearchParams({
@@ -248,7 +249,7 @@ function CheckoutContent() {
                     order_id: data.ordenId,
                     total: totalUSD.toFixed(2),
                 });
-                router.push(`/tienda/checkout/izipay?${params.toString()}`);
+                window.location.href = `/tienda/checkout/izipay?${params.toString()}`;
                 return;
             }
 
