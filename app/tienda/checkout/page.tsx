@@ -969,7 +969,7 @@ function CheckoutContent() {
             {/* ── Modal Izipay ───────────────────────────────────────────── */}
             {isIzipayModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col overflow-hidden">
+                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col overflow-hidden">
                   {/* Barra de confianza superior con animación */}
                   <motion.div
                     className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-emerald-50 via-emerald-100/50 to-emerald-50 border-b border-emerald-200 rounded-t-3xl relative overflow-hidden"
@@ -1021,7 +1021,7 @@ function CheckoutContent() {
                     </div>
 
                     {/* Formulario */}
-                    <div className="bg-[#f1f2f4] rounded-2xl p-4" style={{ maxHeight: '55vh', overflow: 'hidden' }}>
+                    <div className="bg-[#f1f2f4] rounded-2xl p-4 relative" style={paymentMethod === 'paypal' ? { minHeight: '180px', maxHeight: '300px', overflow: 'hidden' } : { maxHeight: '50vh', overflow: 'auto' }}>
                       {paymentMethod === 'paypal' ? (
                         <div id="paypal-btn-container" key={krKey} style={{ minHeight: '150px', maxHeight: '50vh', overflowY: 'auto' }} />
                       ) : (
