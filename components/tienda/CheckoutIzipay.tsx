@@ -16,7 +16,7 @@ interface CheckoutIzipayProps {
 
 type FormState = 'loading' | 'ready' | 'processing' | 'success' | 'error'
 
-export function CheckoutIzipay({ formToken, ordenId, totalUSD, onSuccess }: CheckoutIzipayProps) {
+export function CheckoutIzipay({ formToken, publicKey, ordenId, totalUSD, onSuccess }: CheckoutIzipayProps) {
   const [formState, setFormState] = useState<FormState>('loading')
   const [errorMsg, setErrorMsg] = useState('')
   const loadedRef = useRef(false)
@@ -84,6 +84,7 @@ export function CheckoutIzipay({ formToken, ordenId, totalUSD, onSuccess }: Chec
         className="kr-embedded w-full"
         style={{ minHeight: formState === 'loading' || formState === 'error' ? '100px' : '400px' }}
         kr-form-token={formToken}
+        kr-public-key={publicKey}
         kr-language="es-ES"
       />
 
