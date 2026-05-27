@@ -241,7 +241,6 @@ function CheckoutContent() {
                 }
 
                 isRedirectingRef.current = true;
-                clearCart();
 
                 const params = new URLSearchParams({
                     form_token: data.formToken,
