@@ -104,14 +104,11 @@ export interface IzipayIPNAnswer {
 declare global {
   interface Window {
     KR: {
-      setFormToken: (token: string) => void
-      setPublicKey: (key: string) => void
-      addForm: (selector: string) => void
-      removeForms: () => void
-      embeddedFormSubmit: () => void
-      onSubmit: (callback: (response: KROnSubmitResponse) => void) => boolean
-      onError: (callback: (error: { message: string }) => void) => boolean
+      onSubmit: (callback: (response: any) => boolean) => boolean
+      onError: (callback: (error: any) => boolean) => boolean
       onFormReady: (callback: () => void) => boolean
+      removeForms: () => void
+      [key: string]: any
     }
   }
 }
