@@ -714,7 +714,7 @@ function CheckoutContent() {
                       </div>
                       <button onClick={() => { setIsIzipayModal(false); setIsProcessing(false) }} className="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
                     </div>
-                    <div className="kr-embedded w-full bg-[#f1f2f4] rounded-2xl p-4" kr-popin kr-form-token={izipayFormToken} kr-language="es-ES" style={{ minHeight: '420px' }}>
+                    <div className="kr-embedded w-full bg-[#f1f2f4] rounded-2xl p-4" {...{ 'kr-popin': '' }} kr-form-token={izipayFormToken} kr-language="es-ES" style={{ minHeight: '420px' }}>
                       <div className="kr-pan"></div>
                       <div className="kr-expiry"></div>
                       <div className="kr-security-code"></div>
@@ -791,32 +791,27 @@ function IzipayScriptLoader({ loaded, onLoad, onSuccess, onError, publicKey }: {
 
     const baseUrl = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0'
 
-    // 1. Cargar el SDK KR
-    const script = document.createElement('script')
-    script.id = 'izipay-kr-modal-script'
-    script.src = `${baseUrl}/stable/kr-payment-form.min.js`
-    script.setAttribute('kr-public-key', publicKey)
-    script.async = true
-
-    // 2. Cargar CSS del tema classic
+    // 1. CSS del tema
     const link = document.createElement('link')
     link.id = 'izipay-kr-classic-css'
     link.rel = 'stylesheet'
     link.href = `${baseUrl}/ext/classic-reset.css`
+    document.head.appendChild(link)
 
-    // 3. Cargar JS del tema classic (después del SDK y CSS)
+    // 2. JS del tema (window.KR_CONFIGURATION — se lee antes del SDK)
     const themeScript = document.createElement('script')
     themeScript.id = 'izipay-kr-classic-js'
     themeScript.src = `${baseUrl}/ext/classic.js`
     themeScript.async = true
 
-    // Cargar CSS inmediatamente
-    document.head.appendChild(link)
-
-    // Cargar SDK, luego theme JS, luego callbacks
-    script.onload = () => {
-      document.head.appendChild(themeScript)
-      themeScript.onload = () => {
+    // 3. SDK KR (lee KR_CONFIGURATION si existe)
+    const initSDK = () => {
+      const script = document.createElement('script')
+      script.id = 'izipay-kr-modal-script'
+      script.src = `${baseUrl}/stable/kr-payment-form.min.js`
+      script.setAttribute('kr-public-key', publicKey)
+      script.async = true
+      script.onload = () => {
         let a = 0
         const w = () => {
           a++
@@ -834,13 +829,14 @@ function IzipayScriptLoader({ loaded, onLoad, onSuccess, onError, publicKey }: {
         }
         w()
       }
-      themeScript.onerror = () => {
-        let a = 0
-        const w = () => { a++; if (window.KR) { onLoad(); return } else if (a < 20) setTimeout(w, 300); else onError('La pasarela no respondió.') }; w()
-      }
+      script.onerror = () => onError('Error al cargar SDK.')
+      document.head.appendChild(script)
     }
-    script.onerror = () => onError('Error al cargar SDK.')
-    document.head.appendChild(script)
+
+    // Cargar theme JS → SDK después
+    themeScript.onload = () => initSDK()
+    themeScript.onerror = () => initSDK() // fallback: cargar SDK aunque falle el tema
+    document.head.appendChild(themeScript)
 
     return () => {
       try { window.KR?.removeForms() } catch {}
