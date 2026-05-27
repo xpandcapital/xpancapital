@@ -27,7 +27,10 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = '
     loadedRef.current = true
 
     const script = document.createElement('script')
-    script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
+    const baseUrl = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
+    script.src = displayMode === 'embedded'
+      ? `${baseUrl}?mode=embedded&container=.kr-embedded`
+      : baseUrl
     script.async = true
 
     script.onload = () => {
