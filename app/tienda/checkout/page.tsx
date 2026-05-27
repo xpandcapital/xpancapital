@@ -156,59 +156,67 @@ function CheckoutContent() {
             const customCss = document.createElement('style')
             customCss.id = 'izipay-kr-blis-css'
             customCss.textContent = `
+                .kr-embedded {
+                    --kr-global-color-primary: #10b981;
+                }
+                /* Header del popin */
                 .kr-embedded[kr-popin] .kr-popin-modal-header {
                     background-color: #1a1a1a !important;
                 }
                 .kr-embedded[kr-popin] .kr-popin-modal-header span.kr-popin-shop-name span {
-                    color: #ff1e56 !important;
+                    color: #10b981 !important;
                     font-family: 'Montserrat', sans-serif !important;
                 }
-                .kr-embedded {
-                    --kr-global-color-primary: #ff1e56;
-                }
+                /* Botón de pago estilo checkout */
                 .kr-embedded .kr-payment-button {
+                    background-color: #10b981 !important;
+                    color: #fff !important;
                     font-family: 'Montserrat', sans-serif !important;
                     font-weight: 700 !important;
                     text-transform: uppercase !important;
                     letter-spacing: 0.05em !important;
-                    border-radius: 14px !important;
+                    border-radius: 16px !important;
                     transition: all 0.3s !important;
                 }
                 .kr-embedded .kr-payment-button:hover {
-                    opacity: 0.9 !important;
-                    box-shadow: 0 0 30px rgba(255,30,86,0.3) !important;
+                    background-color: #059669 !important;
+                    box-shadow: 0 0 30px rgba(16,185,129,0.3) !important;
                 }
                 .kr-embedded .kr-payment-button:disabled {
                     opacity: 0.5 !important;
                 }
+                /* Campos de tarjeta - bordes redondeados */
+                .kr-embedded .kr-pan .kr-field-element,
+                .kr-embedded .kr-expiry .kr-field-element,
+                .kr-embedded .kr-security-code .kr-field-element {
+                    border-radius: 14px !important;
+                }
+                .kr-embedded .kr-pan,
+                .kr-embedded .kr-expiry,
+                .kr-embedded .kr-security-code {
+                    margin-bottom: 12px !important;
+                }
+                /* Footer del popin */
                 .kr-embedded .kr-popin-modal-footer {
                     background-color: #1a1a1a !important;
                 }
                 .kr-embedded[kr-popin] {
                     background-color: #f8f9fa !important;
                 }
+                /* Errores */
                 .kr-embedded .kr-form-error {
                     font-family: 'Montserrat', sans-serif !important;
                     font-size: 13px !important;
                 }
+                /* Marcas de tarjeta */
                 .kr-brand-buttons .kr-brand-button .kr-brand-button-label {
                     font-family: 'Montserrat', sans-serif !important;
                     font-size: 11px !important;
                 }
+                /* Centrado para modo embebido */
                 .kr-embedded:not([kr-popin]) {
-                    display: flex !important;
-                    flex-direction: column !important;
-                    align-items: center !important;
-                }
-                .kr-embedded:not([kr-popin]) .kr-pan,
-                .kr-embedded:not([kr-popin]) .kr-expiry,
-                .kr-embedded:not([kr-popin]) .kr-security-code {
-                    width: 100% !important;
-                    max-width: 400px !important;
-                }
-                .kr-embedded:not([kr-popin]) .kr-payment-button {
-                    width: 100% !important;
-                    max-width: 400px !important;
+                    max-width: 420px !important;
+                    margin: 0 auto !important;
                 }
             `
             document.head.appendChild(customCss)
@@ -224,23 +232,16 @@ function CheckoutContent() {
                 if ((window as any).KR_CONFIGURATION) {
                     const cfg = (window as any).KR_CONFIGURATION
                     if (cfg.button) {
-                        cfg.button.template = '<span style="font-family:Montserrat,sans-serif;font-weight:700;text-transform:uppercase">{label} {price}</span>'
+                        cfg.button.template = '<span style="font-family:Montserrat,sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:0.05em">{label} {price}</span>'
                     }
                     if (cfg.merchant?.header) {
                         cfg.merchant.header.backgroundColor = '#1a1a1a'
                         if (cfg.merchant.header.shopName) {
-                            cfg.merchant.header.shopName.color = '#ff1e56'
-                        }
-                        if (cfg.merchant.header.amount) {
-                            cfg.merchant.header.amount.color = '#ffffff'
-                            cfg.merchant.header.amount.visibility = true
+                            cfg.merchant.header.shopName.color = '#10b981'
                         }
                     }
                     if (cfg.popin?.form) {
                         cfg.popin.form.layout = 'compact'
-                    }
-                    if (cfg.form?.placeholdersMinWidth) {
-                        cfg.form.placeholdersMinWidth.securityCode = 117
                     }
                 }
             }
