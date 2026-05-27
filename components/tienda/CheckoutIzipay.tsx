@@ -90,6 +90,7 @@ export function CheckoutIzipay({ formToken, publicKey, ordenId, totalUSD, onSucc
       <div
         className="kr-embedded w-full"
         style={{ minHeight: formState === 'loading' || formState === 'error' ? '100px' : '400px' }}
+        kr-form-token={formToken}
         kr-language="es-ES"
       />
 
