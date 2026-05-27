@@ -29,42 +29,49 @@ export function CheckoutIzipay({ formToken, publicKey, ordenId, totalUSD, onSucc
     script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
     script.async = true
 
-    script.onload = () => {
-      let attempts = 0
-      const waitForKR = () => {
-        attempts++
-        if (window.KR) {
-          window.KR.onSubmit((response: any) => {
-            setFormState('processing')
-            const status = response?.clientAnswer?.orderStatus || response?.orderStatus
-            if (status === 'PAID') {
-              setFormState('success')
-              onSuccess?.()
-            } else {
-              setFormState('error')
-              setErrorMsg('El pago fue rechazado.')
-            }
-            return true
-          })
+      script.onload = () => {
+        let attempts = 0
+        const waitForKR = () => {
+          attempts++
+          if (window.KR) {
+            // Probar con KR.setFormToken (API JS en vez de atributo HTML)
+            try {
+              if (typeof window.KR.setFormToken === 'function') {
+                window.KR.setFormToken(formToken)
+              }
+            } catch {}
 
-          window.KR.onError((error: any) => {
-            setErrorMsg(error?.message || 'Error en la pasarela.')
-            return true
-          })
+            window.KR.onSubmit((response: any) => {
+              setFormState('processing')
+              const status = response?.clientAnswer?.orderStatus || response?.orderStatus
+              if (status === 'PAID') {
+                setFormState('success')
+                onSuccess?.()
+              } else {
+                setFormState('error')
+                setErrorMsg('El pago fue rechazado.')
+              }
+              return true
+            })
 
-          window.KR.onFormReady(() => {
-            setFormState('ready')
-          })
+            window.KR.onError((error: any) => {
+              setErrorMsg(error?.message || 'Error en la pasarela.')
+              return true
+            })
 
-          setTimeout(() => {
-            if (formState === 'loading') setFormState('ready')
-          }, 10000)
-        } else if (attempts < 30) {
-          setTimeout(waitForKR, 300)
+            window.KR.onFormReady(() => {
+              setFormState('ready')
+            })
+
+            setTimeout(() => {
+              if (formState === 'loading') setFormState('ready')
+            }, 10000)
+          } else if (attempts < 30) {
+            setTimeout(waitForKR, 300)
+          }
         }
+        waitForKR()
       }
-      waitForKR()
-    }
 
     script.onerror = () => {
       setFormState('error')
