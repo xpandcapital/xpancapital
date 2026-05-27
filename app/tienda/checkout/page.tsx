@@ -422,13 +422,9 @@ function CheckoutContent() {
 
     const closeIzipayModal = () => {
         try { window.KR?.removeForms() } catch {}
-        try { document.getElementById('izipay-kr-modal-script')?.remove() } catch {}
-        try { (window as any).KR = undefined } catch {}
-        try { (window as any).KR_CONFIGURATION = undefined } catch {}
-        // Guardar datos del formulario
+        // Guardar datos antes del reload
         sessionStorage.setItem('checkout_form', JSON.stringify(form))
-        // Navegación SPA instantánea — remonta el checkout limpio
-        router.replace('/tienda/checkout')
+        window.location.reload()
     }
 
     // ── Formulario de checkout ─────────────────────────────────────────────────
