@@ -18,7 +18,7 @@ interface CheckoutIzipayProps {
   onError?: (msg: string) => void
 }
 
-type FormState = 'loading' | 'ready' | 'success' | 'error'
+type FormState = 'loading' | 'ready' | 'processing' | 'success' | 'error'
 
 export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = 'popup', onSuccess }: CheckoutIzipayProps) {
   const [formState, setFormState] = useState<FormState>('loading')
@@ -71,9 +71,10 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = '
 
             window.KR.onFormReady(() => setFormState('ready'))
             window.KR.onSubmit((response: any) => {
+              console.log('[KR] onSubmit:', response)
               const st = response?.clientAnswer?.orderStatus || response?.orderStatus
               if (st === 'PAID') { setFormState('success'); onSuccess?.() }
-              else { setFormState('error'); setErrorMsg('El pago fue rechazado.') }
+              else { setFormState('error'); setErrorMsg(st ? `Pago rechazado (${st})` : 'El pago fue rechazado.') }
               return true
             })
             window.KR.onError((error: any) => {
@@ -169,6 +170,13 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = '
       <AnimatePresence mode="wait">
         {formState === 'loading' && shared.loading}
         {formState === 'ready' && displayMode === 'popup' && shared.popup}
+        {formState === 'processing' && (
+          <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-8">
+            <Loader2 className="w-8 h-8 text-blis-red animate-spin mx-auto mb-4" />
+            <p className="text-gray-600 font-medium">Procesando tu pago...</p>
+            <p className="text-xs text-gray-400 mt-1">No cierres esta ventana</p>
+          </motion.div>
+        )}
         {formState === 'success' && shared.success}
         {formState === 'error' && shared.error}
       </AnimatePresence>
