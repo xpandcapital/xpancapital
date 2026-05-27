@@ -185,7 +185,7 @@ function CheckoutContent() {
                 .kr-embedded .kr-payment-button:disabled {
                     opacity: 0.5 !important;
                 }
-                /* Campos de tarjeta - bordes redondeados */
+                /* Campos de tarjeta - bordes redondeados y estilo */
                 .kr-embedded .kr-pan,
                 .kr-embedded .kr-expiry,
                 .kr-embedded .kr-security-code,
@@ -195,6 +195,17 @@ function CheckoutContent() {
                     margin-bottom: 12px !important;
                     border-radius: 14px !important;
                     overflow: hidden !important;
+                    border: 1px solid #e5e7eb !important;
+                    background: #fff !important;
+                    transition: border-color 0.2s, box-shadow 0.2s !important;
+                }
+                .kr-embedded .kr-pan.kr-field-focused,
+                .kr-embedded .kr-expiry.kr-field-focused,
+                .kr-embedded .kr-security-code.kr-field-focused,
+                .kr-embedded .kr-card-holder-name.kr-field-focused,
+                .kr-embedded .kr-installment-number.kr-field-focused {
+                    border-color: #10b981 !important;
+                    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
                 }
                 .kr-embedded .kr-pan iframe,
                 .kr-embedded .kr-expiry iframe,
@@ -203,6 +214,42 @@ function CheckoutContent() {
                 .kr-embedded .kr-first-installment-delay iframe,
                 .kr-embedded .kr-card-holder-name iframe {
                     border-radius: 14px !important;
+                }
+                /* Placeholders */
+                .kr-embedded input::placeholder {
+                    color: #9ca3af !important;
+                    font-family: 'Montserrat', sans-serif !important;
+                    font-size: 14px !important;
+                }
+                /* Labels */
+                .kr-embedded .kr-field-label {
+                    font-family: 'Montserrat', sans-serif !important;
+                    font-size: 12px !important;
+                    font-weight: 600 !important;
+                    color: #6b7280 !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 0.05em !important;
+                }
+                /* Errores */
+                .kr-embedded .kr-form-error {
+                    font-family: 'Montserrat', sans-serif !important;
+                    font-size: 13px !important;
+                    color: #ef4444 !important;
+                    background: #fef2f2 !important;
+                    padding: 12px 16px !important;
+                    border-radius: 12px !important;
+                    border: 1px solid #fecaca !important;
+                    margin-top: 8px !important;
+                }
+                .kr-embedded .kr-form-error.kr-form-error-visible {
+                    display: block !important;
+                }
+                /* Campos con error */
+                .kr-embedded .kr-field-error .kr-pan,
+                .kr-embedded .kr-field-error .kr-expiry,
+                .kr-embedded .kr-field-error .kr-security-code {
+                    border-color: #ef4444 !important;
+                    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
                 }
                 /* Footer del popin */
                 .kr-embedded .kr-popin-modal-footer {
@@ -844,13 +891,35 @@ function CheckoutContent() {
             {isIzipayModal && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
                 <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+                  {/* Barra de confianza superior */}
+                  <div className="flex items-center justify-between px-6 py-3 bg-emerald-50 border-b border-emerald-100 rounded-t-3xl">
+                    <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-1.5 text-emerald-700">
+                        <Lock className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">SSL</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-emerald-700">
+                        <Shield className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">PCI-DSS</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 opacity-50">
+                      <span className="text-[9px] font-bold text-gray-400 tracking-wider">VISA</span>
+                      <span className="text-[9px] font-bold text-gray-400 tracking-wider">MC</span>
+                      <span className="text-[9px] font-bold text-gray-400 tracking-wider">AMEX</span>
+                      <span className="text-[9px] font-bold text-gray-400 tracking-wider">DINERS</span>
+                    </div>
+                  </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                          <Shield className="w-4 h-4 text-emerald-500" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 flex items-center justify-center">
+                          <CreditCard className="w-5 h-5 text-emerald-500" />
                         </div>
-                        <span className="font-bold text-gray-900">Pago Seguro — Izipay</span>
+                        <div>
+                          <span className="font-black text-gray-900 text-lg">Pago Seguro</span>
+                          <p className="text-[10px] text-gray-400 uppercase tracking-wider">Procesado por Izipay</p>
+                        </div>
                       </div>
                       <button onClick={() => closeIzipayModal()} className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600 hover:text-gray-800 text-lg font-bold transition-colors" title="Cerrar">&times;</button>
                     </div>
