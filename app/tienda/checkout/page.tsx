@@ -410,6 +410,9 @@ function CheckoutContent() {
         setIzipayScriptLoaded(false)
         try { window.KR?.removeForms() } catch {}
         try { document.getElementById('izipay-kr-modal-script')?.remove() } catch {}
+        // Limpiar el objeto global KR para que se reinicialice
+        try { (window as any).KR = undefined } catch {}
+        try { (window as any).KR_CONFIGURATION = undefined } catch {}
     }
 
     // ── Formulario de checkout ─────────────────────────────────────────────────
@@ -820,7 +823,7 @@ function IzipayScriptLoader({ loaded, onLoad, onSuccess, onError, publicKey }: {
 
     const script = document.createElement('script')
     script.id = 'izipay-kr-modal-script'
-    script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js'
+    script.src = 'https://static.micuentaweb.pe/static/js/krypton-client/V4.0/stable/kr-payment-form.min.js?t=' + Date.now()
     script.setAttribute('kr-public-key', publicKey)
     script.async = true
     script.onload = () => {
