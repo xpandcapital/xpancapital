@@ -123,43 +123,42 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = '
             key="ready"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center"
+            className={displayMode === 'embedded' ? '' : 'text-center'}
           >
-            {/* Hidden KR div for SDK */}
+            {/* KR div — en popup: oculto (el SDK crea su overlay). En embebido: visible con altura. */}
             <div
-              className="kr-embedded"
+              className="kr-embedded w-full"
+              style={displayMode === 'embedded' ? { minHeight: '500px', maxWidth: '100%' } : { height: 0, overflow: 'hidden' }}
               kr-form-token={formToken}
               kr-public-key={publicKey}
               {...(displayMode === 'popup' ? { 'kr-popin': '' } : {})}
               kr-language="es-ES"
             />
 
-            <div className="py-6 space-y-5">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-blis-red/5 border border-blis-red/10 flex items-center justify-center">
-                <Shield className="w-8 h-8 text-blis-red" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-black text-gray-900">Verificación de pago</h3>
-                <p className="text-sm text-gray-500 max-w-sm mx-auto leading-relaxed">
-                  {displayMode === 'popup'
-                    ? 'Se abrirá una ventana emergente con el formulario de pago seguro de Izipay. Completa los datos de tu tarjeta para finalizar la compra.'
-                    : 'Completa los datos de tu tarjeta en el formulario seguro de Izipay para finalizar la compra.'}
-                </p>
-              </div>
-              {displayMode === 'popup' && (
+            {displayMode === 'popup' ? (
+              <div className="py-6 space-y-5">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-blis-red/5 border border-blis-red/10 flex items-center justify-center">
+                  <Shield className="w-8 h-8 text-blis-red" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-black text-gray-900">Verificación de pago</h3>
+                  <p className="text-sm text-gray-500 max-w-sm mx-auto leading-relaxed">
+                    Se abrirá una ventana emergente con el formulario de pago seguro de Izipay. Completa los datos de tu tarjeta para finalizar la compra.
+                  </p>
+                </div>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-blis-red/5 border border-blis-red/10 rounded-full">
                   <div className="w-2 h-2 bg-blis-red rounded-full animate-pulse" />
                   <span className="text-xs text-blis-red font-bold">Esperando pasarela de pago...</span>
                 </div>
-              )}
-            </div>
-
-            <div className="border-t border-gray-100 pt-4">
-              <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
-                <Lock className="w-3 h-3" />
-                <span>Tus datos están protegidos con encriptación de extremo a extremo</span>
               </div>
-            </div>
+            ) : (
+              <div className="border-t border-gray-100 pt-4 mt-2">
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+                  <Lock className="w-3 h-3" />
+                  <span>Tus datos están protegidos con encriptación de extremo a extremo</span>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
 
