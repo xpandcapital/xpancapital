@@ -50,6 +50,7 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = '
     krDiv.setAttribute('kr-form-token', formToken)
     krDiv.setAttribute('kr-public-key', publicKey)
     krDiv.setAttribute('kr-language', 'es-ES')
+    krDiv.setAttribute('kr-theme', 'classic')
     krDiv.style.width = '100%'
     krDiv.style.minHeight = displayMode === 'embedded' ? '500px' : '0'
     if (displayMode === 'popup') {
