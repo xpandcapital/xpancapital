@@ -90,10 +90,13 @@ export default function VentasAdminPage() {
             method: "PUT", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id, estado, ...(notas ? { notas } : {}) }),
         });
-        if (res.ok) {
+        const data = await res.json();
+        if (res.ok && data.success) {
             setVentas(prev => prev.map(v => v.id === id ? { ...v, estado } : v));
             setModalVerificar(null);
             setNotasVerificacion("");
+        } else {
+            alert(data.error || 'Error al actualizar estado');
         }
     };
 
