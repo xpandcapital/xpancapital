@@ -190,6 +190,10 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
     }
     
+    // 1. Eliminar de Auth (si existe)
+    await supabase.auth.admin.deleteUser(id).catch(() => {})
+    
+    // 2. Eliminar de profiles
     const { error } = await supabase
       .from('profiles')
       .delete()
