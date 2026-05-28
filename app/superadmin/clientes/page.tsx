@@ -7,7 +7,7 @@ import {
     Coins, TrendingUp, Brain, Trophy,
     Plus, LayoutGrid, LayoutList, Shield,
     Edit3, Smartphone, ChevronRight, Loader2,
-    ArrowRightLeft as ArrowRightLeftIcon
+    ArrowRightLeft as ArrowRightLeftIcon, Trash2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
@@ -288,6 +288,22 @@ export default function AdminClientes() {
         return amount.toLocaleString();
     };
 
+    const handleDelete = async (clientId: string, clientName: string) => {
+        if (!confirm(`¿Eliminar permanentemente a "${clientName}"?\n\nEsta acción no se puede deshacer.`)) return;
+        try {
+            const res = await fetch(`/api/admin/clientes?id=${clientId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) {
+                setClients(prev => prev.filter(c => c.id !== clientId));
+                showToast('Cliente eliminado', 'error');
+            } else {
+                showToast(data.error || 'Error al eliminar', 'error');
+            }
+        } catch {
+            showToast('Error al eliminar cliente', 'error');
+        }
+    };
+
     const filteredClients = clients.filter(c => {
         const fullName = `${c.firstName} ${c.lastName}`.toLowerCase();
         return (fullName.includes(searchTerm.toLowerCase()) || c.email.toLowerCase().includes(searchTerm.toLowerCase())) && (activityFilter === "Todos" || c.status === activityFilter);
@@ -426,6 +442,7 @@ export default function AdminClientes() {
                                             <td className="px-8 py-6 text-right" onClick={e => e.stopPropagation()}>
                                                 <div className="flex justify-end gap-2">
                                                     <a href={`https://wa.me/${c.phone.replace(/\+/g, '').replace(/\s/g, '')}?text=Hola%20${c.firstName},%20un%20gusto%20saludarte.`} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-emerald-600/10 text-emerald-500 border border-emerald-500/10 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-xl shadow-emerald-900/10"><Smartphone className="w-4 h-4" /></a>
+                                                    <button onClick={() => handleDelete(c.id, `${c.firstName} ${c.lastName}`)} className="p-2.5 bg-red-500/10 text-red-500 border border-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
                                                     <button onClick={() => router.push(`/superadmin/clientes/${c.id}`)} className="p-2.5 bg-white/5 text-gray-500 border border-white/10 rounded-xl hover:bg-blis-red hover:text-white transition-all shadow-xl"><Edit3 className="w-4 h-4" /></button>
                                                     <button onClick={() => router.push(`/superadmin/clientes/${c.id}`)} className="p-2.5 bg-white/5 text-gray-800 border border-white/10 rounded-xl hover:bg-white hover:text-black transition-all shadow-xl"><ChevronRight className="w-4 h-4" /></button>
                                                 </div>
@@ -451,7 +468,8 @@ export default function AdminClientes() {
                         ) : (
                             filteredClients.map(c => (
                                 <div key={c.id} onClick={() => router.push(`/superadmin/clientes/${c.id}`)} className="relative p-8 bg-zinc-900 border border-white/5 rounded-[3rem] hover:border-blis-red/50 transition-all cursor-pointer group flex flex-col items-center text-center space-y-4 shadow-3xl hover:shadow-blis-red/5">
-                                    <div className="absolute top-6 right-6">
+                                    <div className="absolute top-4 right-4 flex gap-1">
+                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id, `${c.firstName} ${c.lastName}`); }} className="p-1.5 bg-red-500/10 text-red-500 border border-red-500/10 rounded-lg hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
                                         <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-lg border ${
                                             c.tier.includes('Gold') ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
                                             c.tier.includes('Platinum') ? 'bg-neutral-800 border-neutral-700 text-neutral-300' :
