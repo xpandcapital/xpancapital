@@ -24,6 +24,7 @@ interface CreateUserResult {
 }
 
 export async function createUserAndNotify(params: CreateUserParams): Promise<CreateUserResult> {
+  console.log('[createUserAndNotify] Iniciando para:', params.email)
   const supabase = createClient()
   const empresa_id = params.empresa_id || DEFAULT_EMPRESA_ID
   const email = params.email.toLowerCase()
@@ -74,7 +75,7 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
 
     if (isNewUser && tempPassword) {
-      // Email de bienvenida con contraseña (fallback simple)
+      console.log('[createUserAndNotify] Enviando email de bienvenida a:', email)
       await sendEmailRaw({
         to: email,
         subject: '🎉 ¡Tu cuenta BLIS Corp fue creada!',

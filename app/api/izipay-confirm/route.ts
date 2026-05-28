@@ -37,6 +37,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Error al actualizar' }, { status: 500 })
     }
 
+    console.log('[Izipay Confirm] Recibido para ordenId:', ordenId, 'email:', email)
+
     // Crear usuario (si es invitado) + enviar email
     const meta = (orden.metadata || {}) as Record<string, unknown>
     const email = (meta.email_cliente as string) || ''
