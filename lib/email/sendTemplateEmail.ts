@@ -41,6 +41,9 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
       // 2. Generar HTML desde la plantilla
       try {
         let blocks = typeof template.blocks === 'string' ? JSON.parse(template.blocks) : template.blocks
+        const settings = typeof template.settings === 'string' ? JSON.parse(template.settings) : template.settings
+
+        console.log('[sendTemplateEmail] Plantilla encontrada:', template.nombre, '| blocks length:', blocks?.length, '| settings keys:', Object.keys(settings || {}))
 
         // Inyectar productos en bloques receipt
         if (products && products.length > 0) {
@@ -79,7 +82,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
         html = buildFallbackHTML(variables)
       }
     } else {
-      console.log(`[sendTemplateEmail] No hay template para evento "${evento}", usando fallback`)
+      console.log(`[sendTemplateEmail] No hay template para evento "${evento}". template:`, !!template, 'settings:', !!template?.settings, 'blocks:', !!template?.blocks, 'empresa:', empresa_id)
       html = buildFallbackHTML(variables)
     }
 
