@@ -10,11 +10,12 @@ function generatePassword(length = 10): string {
 interface CreateUserParams {
   email: string
   nombre: string
-  productos: string[] // nombres de productos
+  productos: string[]
   total: string
   metodo_pago: string
   empresa_id?: string
   telefono?: string
+  productPrices?: Array<{ nombre: string; precio: string; cantidad?: number; categoria?: string }>
 }
 
 interface CreateUserResult {
@@ -97,6 +98,7 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
           fecha_compra: new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }),
           enlace_acceso: `<a href="${siteUrl}/miembros" target="_blank">Acceder a Mis Productos →</a>`,
         },
+        products: params.productPrices || params.productos.map(p => ({ nombre: p, precio: '0', categoria: '' })),
       })
     }
 

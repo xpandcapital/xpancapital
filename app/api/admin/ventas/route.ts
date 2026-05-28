@@ -106,11 +106,19 @@ export async function PUT(request: NextRequest) {
         const productos = (meta.productos as Array<{ nombre: string }>) || []
 
         if (email && productos.length > 0) {
+          const prodNames = productos.map((p: any) => p.nombre || 'Producto')
+          const prodPrices = productos.map((p: any) => ({
+            nombre: p.nombre || 'Producto',
+            precio: p.precio_unitario?.toFixed(2) || data.monto_usd?.toFixed(2) || '0',
+            cantidad: p.cantidad || 1,
+            categoria: p.productType || '',
+          }))
           const { userId } = await createUserAndNotify({
             email, nombre,
-            productos: productos.map((p: any) => p.nombre || 'Producto'),
+            productos: prodNames,
             total: `$${data.monto_usd?.toFixed(2) || '0'} USD`,
             metodo_pago: data.metodo_pago || 'Manual',
+            productPrices: prodPrices,
           }).catch(() => ({ userId: null, isNewUser: false, tempPassword: '' }))
 
           if (userId && !data.user_id) {

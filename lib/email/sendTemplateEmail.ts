@@ -18,10 +18,11 @@ interface TemplateEmailParams {
   to: string
   subject?: string
   variables: Record<string, string>
+  products?: Array<{ nombre: string; precio: string; imagen?: string; categoria?: string; cantidad?: number }>
 }
 
 export async function sendTemplateEmail(params: TemplateEmailParams): Promise<boolean> {
-  const { evento, empresa_id = DEFAULT_EMPRESA_ID, to, subject, variables } = params
+  const { evento, empresa_id = DEFAULT_EMPRESA_ID, to, subject, variables, products } = params
 
   try {
     const supabase = createClient()
@@ -39,9 +40,31 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
     if (template?.settings && template?.blocks) {
       // 2. Generar HTML desde la plantilla
       try {
+        let blocks = typeof template.blocks === 'string' ? JSON.parse(template.blocks) : template.blocks
+
+        // Inyectar productos en bloques receipt
+        if (products && products.length > 0) {
+          blocks = blocks.map((block: any) => {
+            if (block.type === 'receipt' && block.content) {
+              return {
+                ...block,
+                content: {
+                  ...block.content,
+                  items: products.map(p => ({
+                    nombre: p.nombre || 'Producto',
+                    precio: p.precio || '0',
+                    imagen: p.imagen || '',
+                    categoria: p.categoria || '',
+                  })),
+                },
+              }
+            }
+            return block
+          })
+        }
+
         const generateHTML = await getGenerateHTML()
-        html = generateHTML(
-          typeof template.blocks === 'string' ? JSON.parse(template.blocks) : template.blocks,
+        html = generateHTML(blocks,
           typeof template.settings === 'string' ? JSON.parse(template.settings) : template.settings
         )
 

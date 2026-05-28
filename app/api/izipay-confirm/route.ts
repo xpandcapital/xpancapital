@@ -47,11 +47,19 @@ export async function POST(request: NextRequest) {
 
     if (email && productos.length > 0) {
       console.log('[Izipay Confirm] Llamando createUserAndNotify...')
+      const prodNames = productos.map((p: any) => p.nombre || 'Producto')
+      const prodPrices = productos.map((p: any) => ({
+        nombre: p.nombre || 'Producto',
+        precio: p.precio_unitario?.toFixed(2) || orden.monto_usd?.toFixed(2) || '0',
+        cantidad: p.cantidad || 1,
+        categoria: p.productType || '',
+      }))
       const { userId } = await createUserAndNotify({
         email, nombre,
-        productos: productos.map((p: any) => p.nombre || 'Producto'),
+        productos: prodNames,
         total: `$${orden.monto_usd?.toFixed(2) || '0'} USD`,
         metodo_pago: orden.metodo_pago === 'izipay' ? 'Izipay (Tarjeta)' : (orden.metodo_pago || ''),
+        productPrices: prodPrices,
       })
       console.log('[Izipay Confirm] createUserAndNotify result:', { userId })
 

@@ -156,11 +156,19 @@ export async function POST(request: NextRequest) {
         if (email && productos.length > 0) {
           console.log('[Izipay Webhook] Creando usuario y enviando email a:', email)
           console.log('[Izipay Webhook] Llamando createUserAndNotify...')
+          const productosNombres = productos.map((p: any) => p.nombre || 'Producto')
+          const productPrices = productos.map((p: any) => ({
+            nombre: p.nombre || 'Producto',
+            precio: p.precio_unitario?.toFixed(2) || ordenActual.monto_usd?.toFixed(2) || '0',
+            cantidad: p.cantidad || 1,
+            categoria: p.productType || '',
+          }))
           const { userId } = await createUserAndNotify({
             email, nombre,
-            productos: productos.map((p: any) => p.nombre || 'Producto'),
+            productos: productosNombres,
             total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
             metodo_pago: 'Izipay (Tarjeta)',
+            productPrices,
           })
           console.log('[Izipay Webhook] createUserAndNotify result:', { userId, isNewUser: true })
 
