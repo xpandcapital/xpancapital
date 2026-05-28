@@ -46,12 +46,14 @@ export async function POST(request: NextRequest) {
     const productos = (meta.productos as Array<{ nombre: string }>) || []
 
     if (email && productos.length > 0) {
+      console.log('[Izipay Confirm] Llamando createUserAndNotify...')
       const { userId } = await createUserAndNotify({
         email, nombre,
         productos: productos.map((p: any) => p.nombre || 'Producto'),
         total: `$${orden.monto_usd?.toFixed(2) || '0'} USD`,
         metodo_pago: orden.metodo_pago === 'izipay' ? 'Izipay (Tarjeta)' : (orden.metodo_pago || ''),
       })
+      console.log('[Izipay Confirm] createUserAndNotify result:', { userId })
 
       // Vincular usuario a la orden si se creó
       if (userId && !orden.user_id) {

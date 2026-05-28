@@ -171,12 +171,14 @@ export async function POST(request: NextRequest) {
 
         if (email && productos.length > 0) {
           console.log('[Izipay Webhook] Creando usuario y enviando email a:', email)
+          console.log('[Izipay Webhook] Llamando createUserAndNotify...')
           const { userId } = await createUserAndNotify({
             email, nombre,
             productos: productos.map((p: any) => p.nombre || 'Producto'),
             total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
             metodo_pago: 'Izipay (Tarjeta)',
-          }).catch((e) => { console.error('[Izipay Webhook] createUserAndNotify error:', e); return { userId: null, isNewUser: false, tempPassword: '' } })
+          })
+          console.log('[Izipay Webhook] createUserAndNotify result:', { userId, isNewUser: true })
 
           if (userId && !ordenActual.user_id) {
             await supabase.from('compras').update({ user_id: userId }).eq('id', ordenActual.id)
