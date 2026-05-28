@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { decryptApiKey } from '@/lib/api-crypto'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { verifyKRHash } from '@/lib/izipay/client'
+import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
 
 export async function POST(request: NextRequest) {
   try {
@@ -101,36 +102,34 @@ export async function POST(request: NextRequest) {
             izipay_transaction_uuid: tx?.uuid || '',
             izipay_payment_method: tx?.paymentMethodType || '',
             izipay_card_brand: cardDetails?.brand || '',
-            izipay_card_last4: cardDetails?.pan || '',
+          izipay_card_last4: cardDetails?.pan || '',
+        },
+      })
+      .eq('id', orderId)
+
+      // Enviar email de confirmación
+      const meta = (ordenActual.metadata as Record<string, unknown>) || {}
+      const email = (meta.email_cliente as string) || ''
+      const nombre = (meta.nombre_cliente as string) || 'Cliente'
+      const productos = (meta.productos as Array<{ nombre: string }>) || []
+
+      if (email && productos.length > 0) {
+        const nombresList = productos
+          .map((p: any) => `<li style="margin-bottom:6px;font-size:14px;color:#e5e7eb;">✅ ${p.nombre || 'Producto'}</li>`)
+          .join('')
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
+        await sendTemplateEmail({
+          evento: ordenActual.user_id ? 'transaccion_compra_completada_logueado' : 'transaccion_compra_completada_invitado',
+          to: email,
+          variables: {
+            nombre, email,
+            productos: `<ul style="margin:0;padding:0;list-style:none;">${nombresList}</ul>`,
+            total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
+            metodo_pago: 'Izipay (Tarjeta)',
+            fecha_compra: new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }),
+            enlace_acceso: `<a href="${siteUrl}/miembros" target="_blank">Acceder a Mis Productos →</a>`,
           },
         })
-        .eq('id', orderId)
-
-      if (tx?.paymentMethodToken && ordenActual.user_id) {
-        const cardToken = tx.paymentMethodToken as string
-        const existing = await supabase
-          .from('izipay_card_tokens')
-          .select('id')
-          .eq('card_token', cardToken)
-          .eq('user_id', ordenActual.user_id)
-          .maybeSingle()
-
-        if (!existing) {
-          await supabase.from('izipay_card_tokens').insert({
-            empresa_id: ordenActual.empresa_id || DEFAULT_EMPRESA_ID,
-            user_id: ordenActual.user_id,
-            card_token: cardToken,
-            merchant_buyer_id: String(ordenActual.user_id),
-            card_brand: cardDetails?.brand as string || '',
-            card_last4: String(cardDetails?.pan || '').slice(-4),
-            card_expiry_month: cardDetails?.expiryMonth as string || '',
-            card_expiry_year: cardDetails?.expiryYear as string || '',
-            order_id: orderId,
-            alias: cardDetails?.brand
-              ? `${cardDetails.brand} ****${String(cardDetails.pan || '').slice(-4)}`
-              : 'Tarjeta guardada',
-          })
-        }
       }
 
       console.log(`[Izipay Webhook] Orden ${orderId} COMPLETADA`)

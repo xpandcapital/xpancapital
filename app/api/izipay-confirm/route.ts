@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import nodemailer from 'nodemailer'
+import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     const { data: orden, error: selectError } = await supabase
       .from('compras')
-      .select('id, estado, metadata, user_id, monto_usd')
+      .select('id, estado, metadata, user_id, monto_usd, metodo_pago, creado_en')
       .eq('id', ordenId)
       .maybeSingle()
 
@@ -37,50 +38,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Error al actualizar' }, { status: 500 })
     }
 
-    // Enviar email de confirmación
+    // Enviar email con plantilla
     const meta = (orden.metadata || {}) as Record<string, unknown>
     const email = (meta.email_cliente as string) || ''
     const nombre = (meta.nombre_cliente as string) || 'Cliente'
     const productos = (meta.productos as Array<{ nombre: string }>) || []
-    const nombres = productos.map((p: any) => p.nombre || 'Producto').filter(Boolean)
 
-    if (email && nombres.length > 0) {
-      try {
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST || 'smtp.gmail.com',
-          port: parseInt(process.env.SMTP_PORT || '587'),
-          secure: false,
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        })
+    if (email && productos.length > 0) {
+      const nombresList = productos
+        .map((p: any) => `<li style="margin-bottom:6px;font-size:14px;color:#e5e7eb;">✅ ${p.nombre || 'Producto'}</li>`)
+        .join('')
 
-        const list = nombres.map(p => `<li style="margin-bottom:6px;">✅ ${p}</li>`).join('')
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
+      const fecha = orden.creado_en
+        ? new Date(orden.creado_en).toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' })
+        : ''
 
-        await transporter.sendMail({
-          from: `"BLIS Corp" <${process.env.SMTP_USER}>`,
-          to: email,
-          subject: '✅ Pago confirmado — BLIS Corp',
-          html: `
-            <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#050505;color:#fff;font-family:Arial,sans-serif;">
-              <div style="text-align:center;margin-bottom:24px;">
-                <span style="background:#be0b24;padding:12px 24px;border-radius:12px;font-size:20px;font-weight:900;letter-spacing:2px;">BLIS Corp</span>
-              </div>
-              <h1 style="font-size:24px;font-weight:900;text-transform:uppercase;text-align:center;">¡Pago Confirmado!</h1>
-              <p style="text-align:center;color:#9ca3af;">Gracias <strong style="color:#fff">${nombre}</strong>, hemos recibido tu pago de <strong style="color:#4ade80">$${orden.monto_usd?.toFixed(2) || '0'}</strong>.</p>
-              <div style="background:#111;border:1px solid #222;border-radius:16px;padding:24px;margin:24px 0;">
-                <h3 style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#6b7280;margin:0 0 16px;">Productos Adquiridos</h3>
-                <ul style="margin:0;padding:0;list-style:none;font-size:14px;color:#e5e7eb;">${list}</ul>
-              </div>
-              <div style="text-align:center;">
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'}/miembros" style="display:inline-block;background:#16a34a;color:#fff;text-decoration:none;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:2px;padding:16px 40px;border-radius:12px;">Acceder a Mis Productos →</a>
-              </div>
-              <p style="text-align:center;color:#4b5563;font-size:11px;margin-top:24px;">BLIS Corp · Gracias por tu compra</p>
-            </div>
-          `,
-        })
-        console.log(`[Izipay Confirm] Email enviado a ${email}`)
-      } catch (e) {
-        console.error('[Izipay Confirm] Error enviando email:', e)
-      }
+      await sendTemplateEmail({
+        evento: orden.user_id ? 'transaccion_compra_completada_logueado' : 'transaccion_compra_completada_invitado',
+        empresa_id: DEFAULT_EMPRESA_ID,
+        to: email,
+        variables: {
+          nombre,
+          email,
+          productos: `<ul style="margin:0;padding:0;list-style:none;">${nombresList}</ul>`,
+          total: `$${orden.monto_usd?.toFixed(2) || '0'} USD`,
+          metodo_pago: orden.metodo_pago === 'izipay' ? 'Izipay (Tarjeta de débito/crédito)' : (orden.metodo_pago || ''),
+          fecha_compra: fecha,
+          enlace_acceso: `<a href="${siteUrl}/miembros" target="_blank">Acceder a Mis Productos →</a>`,
+        },
+      })
     }
 
     return NextResponse.json({ success: true })
