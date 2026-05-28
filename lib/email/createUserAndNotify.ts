@@ -47,18 +47,6 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
     console.error('[createUserAndNotify] Error buscando en profiles:', e)
   }
 
-  // Fallback: buscar en auth si no encontró en profiles
-  if (!userId) {
-    try {
-      const { data: existingUsers } = await supabase.auth.admin.listUsers()
-      const existingUser = existingUsers?.users?.find(u => u.email === email)
-      if (existingUser) userId = existingUser.id
-      console.log('[createUserAndNotify] Usuario encontrado en auth:', !!userId)
-    } catch (e) {
-      console.error('[createUserAndNotify] Error en listUsers:', e)
-    }
-  }
-
   // 2. Crear nuevo usuario si no existe
   if (!userId) {
     try {
@@ -80,19 +68,13 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
           telefono: params.telefono || '', empresa_id,
           creado_en: new Date().toISOString(),
         }, { onConflict: 'id' })
-      } else if (createError?.status === 422 || createError?.message?.includes('already')) {
-        // Ya existe en auth pero no en profiles — buscar id
-        console.log('[createUserAndNotify] Usuario ya existe en auth, buscando id...')
-        try {
-          const { data: existingUsers } = await supabase.auth.admin.listUsers()
-          const existingUser = existingUsers?.users?.find(u => u.email === email)
-          if (existingUser) {
-            userId = existingUser.id
-            console.log('[createUserAndNotify] ID recuperado de auth:', userId)
-          }
-        } catch {}
       } else if (createError) {
-        console.error('[createUserAndNotify] Error creando usuario:', createError)
+        console.error('[createUserAndNotify] Error creando usuario:', createError?.message)
+        // Intentar recuperar el ID desde profiles (por si el usuario ya existe)
+        try {
+          const { data: p } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle()
+          if (p) userId = p.id
+        } catch {}
       }
     } catch (e) {
       console.error('[createUserAndNotify] Error creando usuario:', e)
