@@ -305,6 +305,29 @@ export default function FormasPagoAdminPage() {
                                                         </div>
                                                     )}
 
+                                                    {/* Costo de procesamiento */}
+                                                    <div className="border-t border-white/5 pt-3 mt-2">
+                                                        <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2">Costo de procesamiento</p>
+                                                        <div className="grid grid-cols-4 gap-2">
+                                                            <select value={forma.config?.processing_fee_type || ''}
+                                                                onChange={e => updateSimple(forma.id, 'processing_fee_type', e.target.value)}
+                                                                className="bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white col-span-1">
+                                                                <option value="">Sin costo</option>
+                                                                <option value="fixed">Fijo ($)</option>
+                                                                <option value="percentage">%</option>
+                                                            </select>
+                                                            <Input value={forma.config?.processing_fee_value || ''}
+                                                                onChange={e => updateSimple(forma.id, 'processing_fee_value', e.target.value)}
+                                                                type="number" step="0.01" placeholder="Valor"
+                                                                className="bg-white/5 border-white/10 text-white text-xs col-span-1" />
+                                                            <Input value={forma.config?.processing_fee_label || ''}
+                                                                onChange={e => updateSimple(forma.id, 'processing_fee_label', e.target.value)}
+                                                                placeholder="Etiqueta" maxLength={25}
+                                                                className="bg-white/5 border-white/10 text-white text-xs col-span-2"
+                                                                title="Ej: Costo de procesamiento" />
+                                                        </div>
+                                                    </div>
+
                                                     <Button onClick={() => guardarConfig(forma)} disabled={guardando === forma.id} className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs">
                                                         <Save className="w-3 h-3 mr-1" /> Guardar Configuración
                                                     </Button>

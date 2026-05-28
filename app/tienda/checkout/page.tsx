@@ -112,6 +112,21 @@ function CheckoutContent() {
         sum + (item.precio_coins || Math.round((item.price || 0) * 10)), 0);
     const canPayWithCoins = blisCoins >= totalCoins && totalCoins > 0;
 
+    // Costo de procesamiento según método de pago
+    const processingFee = useMemo(() => {
+        const fp = formasPago.find((f: any) => f.slug === paymentMethod)
+        const cfg = fp?.config || {}
+        const type = cfg.processing_fee_type
+        const value = parseFloat(cfg.processing_fee_value || '0')
+        const label = cfg.processing_fee_label || 'Costo de procesamiento'
+        if (!type || !value || value <= 0) return { amount: 0, label: '', type: '' }
+        if (type === 'fixed') return { amount: value, label, type: 'fixed' }
+        if (type === 'percentage') return { amount: Math.round(totalUSD * value) / 100, label, type: 'percentage' }
+        return { amount: 0, label: '', type: '' }
+    }, [paymentMethod, formasPago, totalUSD])
+
+    const grandTotal = totalUSD + processingFee.amount
+
     // Detectar si hay productos físicos
     const hasPhysicalProducts = useMemo(() =>
         cart.some(item => item.productType === 'pack' || (item as any).tipo === 'fisico'),
@@ -383,6 +398,7 @@ function CheckoutContent() {
                 telefono: form.telefono,
                 productos: productosPayload,
                 tiene_fisicos: hasPhysicalProducts,
+                processing_fee: processingFee,
                 direccion_envio: hasPhysicalProducts ? {
                     direccion: form.direccion,
                     ciudad: form.ciudad,
@@ -403,7 +419,7 @@ function CheckoutContent() {
                         headers,
                         body: JSON.stringify({
                             ...commonPayload,
-                            total_usd: totalUSD,
+                            total_usd: grandTotal,
                             pais: form.pais,
                         }),
                         signal: controller.signal,
@@ -481,7 +497,7 @@ function CheckoutContent() {
                     if (existingScript) existingScript.remove()
                     const script = document.createElement('script')
                     script.id = 'paypal-sdk-script'
-                    script.src = `https://www.paypal.com/sdk/js?client-id=${data.clientId}&currency=USD&intent=capture`
+                    script.src = `https://www.paypal.com/sdk/js?client-id=${data.clientId}&currency=USD&intent=capture&enable-funding=applepay`
                     script.onload = () => {
                         const btnContainer = document.getElementById('paypal-btn-container')
                         if (!btnContainer || !(window as any).paypal) return
@@ -526,7 +542,7 @@ function CheckoutContent() {
                     ...commonPayload,
                     metodo_pago: paymentMethod,
                     monto_coins: paymentMethod === 'coins' ? totalCoins : 0,
-                    monto_usd: paymentMethod === 'coins' ? 0 : totalUSD,
+                    monto_usd: paymentMethod === 'coins' ? 0 : grandTotal,
                 })
             });
 
@@ -922,11 +938,20 @@ function CheckoutContent() {
                                         {hasPhysicalProducts ? "A calcular" : "Gratis (Digital)"}
                                     </span>
                                 </div>
+                                {processingFee.amount > 0 && (
+                                    <div className="flex justify-between text-sm text-gray-400">
+                                        <span>{processingFee.label}</span>
+                                        <span>+${processingFee.amount.toFixed(2)}</span>
+                                    </div>
+                                )}
                                 <div className="h-px bg-white/5 my-2" />
                                 <div className="flex justify-between items-end">
                                     <span className="font-black uppercase tracking-widest text-sm">Total</span>
                                     <div className="text-right">
-                                        <p className="text-2xl font-black">${totalUSD.toFixed(2)}</p>
+                                        <p className="text-2xl font-black">${grandTotal.toFixed(2)}</p>
+                                        {processingFee.amount > 0 && (
+                                            <p className="text-[10px] text-gray-400">Incluye costo de procesamiento</p>
+                                        )}
                                         {paymentMethod === 'coins' && canPayWithCoins && (
                                             <p className="text-[10px] text-amber-400 font-bold">{totalCoins.toLocaleString()} COINS</p>
                                         )}
