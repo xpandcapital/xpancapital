@@ -67,13 +67,13 @@ export async function POST(request: NextRequest) {
     console.log('[Izipay Webhook] customer:', JSON.stringify(answerData.customer || {}).substring(0, 200))
     console.log('[Izipay Webhook] tx keys:', tx ? Object.keys(tx) : 'none')
 
-    // Buscar nuestro UUID en múltiples ubicaciones del IPN
+    // Buscar nuestro UUID: orderDetails.orderId es nuestro UUID (lo enviamos en CreatePayment)
     const orderDetails = answerData.orderDetails as Record<string, unknown> | undefined
     const customer = answerData.customer as Record<string, unknown> | undefined
-    const txOrderNumber = tx?.orderNumber as string || tx?.orderId as string
-    const ddOrderNumber = orderDetails?.orderNumber as string || orderDetails?.orderId as string || orderDetails?.orderReference as string
-    const customerRef = customer?.reference as string
-    const nuestroOrderNumber = customerRef || ddOrderNumber || txOrderNumber || (answerData.orderId as string) || ''
+    const nuestroOrderNumber = (orderDetails?.orderId as string) ||
+                              (orderDetails?.orderNumber as string) ||
+                              ((customer?.reference as string) || '').split('|').pop() ||
+                              (tx?.orderNumber as string) || ''
 
     console.log(`[Izipay Webhook] Buscando orden. orderNumber=${nuestroOrderNumber}`)
 
