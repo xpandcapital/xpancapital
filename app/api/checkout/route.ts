@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 import { verifyTurnstileToken } from '@/lib/bot-protection';
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
+import { createUserAndNotify } from '@/lib/email/createUserAndNotify';
 
 // Cliente admin (service role - bypass RLS) - se usa para todas las operaciones de BD
 const supabase = createClient(
@@ -424,42 +425,26 @@ export async function POST(request: NextRequest) {
       console.log(`[Checkout] Cursos asignados: ${coursesAssigned}, errores: ${courseAssignmentError}`);
     }
 
-    // ── Enviar email ─────────────────────────────────────────────────────────
+    // ── Enviar email vía plantilla ─────────────────────────────────────────
     const nombreProductos = productos.map((p: any) => p.nombre || `Producto #${p.producto_id?.substring(0, 6)}`);
+    const prodPrices = productos.map((p: any) => ({
+      nombre: p.nombre || 'Producto',
+      precio: p.precio_unitario?.toFixed(2) || '0',
+      cantidad: p.cantidad || 1,
+      categoria: p.productType || '',
+    }));
 
-    if (isNewUser && tempPassword) {
-      await sendWelcomeEmail(email, nombre, tempPassword, nombreProductos);
-    } else {
-      // Email de confirmación sin contraseña para usuarios existentes
-      try {
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST || 'smtp.gmail.com',
-          port: parseInt(process.env.SMTP_PORT || '587'),
-          secure: false,
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-
-        const productList = nombreProductos.map((p: string) => `<li style="margin-bottom:6px;">✅ ${p}</li>`).join('');
-
-        await transporter.sendMail({
-          from: `"BLIS Corp" <${process.env.SMTP_USER}>`,
-          to: email,
-          subject: '✅ Confirmación de compra — BLIS Corp',
-          html: `
-            <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#050505;color:#fff;font-family:Arial,sans-serif;">
-              <h1 style="font-size:24px;font-weight:900;text-transform:uppercase;">¡Compra Confirmada!</h1>
-              <p>Hola <strong>${nombre}</strong>, gracias por tu compra.</p>
-              <div style="background:#111;border-radius:12px;padding:20px;margin:20px 0;">
-                <ul style="margin:0;padding:0;list-style:none;">${productList}</ul>
-              </div>
-              <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'}/miembros" style="display:inline-block;background:#16a34a;color:#fff;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:900;text-transform:uppercase;">
-                Ver Mis Productos →
-              </a>
-            </div>
-          `,
-        });
-      } catch { /* Silent fail */ }
-    }
+    try {
+      await createUserAndNotify({
+        isGuest: !finalUserId,
+        email: email.toLowerCase(),
+        nombre: nombre || email.split('@')[0],
+        productos: nombreProductos,
+        total: `$${monto_usd?.toFixed(2) || '0'} USD`,
+        metodo_pago: metodo_pago || 'Manual',
+        productPrices: prodPrices,
+      })
+    } catch { /* Non-blocking */ }
 
     return NextResponse.json({
       success: true,

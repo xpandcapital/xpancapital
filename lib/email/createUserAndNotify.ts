@@ -15,6 +15,7 @@ interface CreateUserParams {
   metodo_pago: string
   empresa_id?: string
   telefono?: string
+  isGuest?: boolean
   productPrices?: Array<{ nombre: string; precio: string; cantidad?: number; categoria?: string }>
 }
 
@@ -105,9 +106,9 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
 
-  const evento = userId
-    ? 'transaccion_compra_completada_logueado'
-    : 'transaccion_compra_completada_invitado'
+  const evento = params.isGuest
+    ? 'transaccion_compra_completada_invitado'
+    : 'transaccion_compra_completada_logueado'
 
   const extraVars: Record<string, string> = {}
   if (isNewUser && tempPassword) {

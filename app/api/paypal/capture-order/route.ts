@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { decryptApiKey } from '@/lib/api-crypto'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { captureOrder } from '@/lib/paypal/client'
+import { createUserAndNotify } from '@/lib/email/createUserAndNotify'
 
 export async function POST(request: NextRequest) {
   try {
@@ -68,6 +69,29 @@ export async function POST(request: NextRequest) {
       .eq('id', ordenId)
 
     console.log(`[PayPal] Orden ${ordenId} COMPLETADA — tx: ${txId}`)
+
+    const { data: orden } = await supabase.from('compras').select('metadata, user_id, monto_usd, metodo_pago').eq('id', ordenId).maybeSingle()
+    if (orden) {
+      const meta = (orden.metadata || {}) as Record<string, unknown>
+      const emailN = (meta.email_cliente as string) || payerEmail || ''
+      const nombreN = (meta.nombre_cliente as string) || 'Cliente'
+      const productosN = (meta.productos as Array<{ nombre: string }>) || []
+      if (emailN && productosN.length > 0) {
+        await createUserAndNotify({
+          isGuest: !orden.user_id,
+          email: emailN, nombre: nombreN,
+          productos: productosN.map((p: any) => p.nombre || 'Producto'),
+          total: `$${orden.monto_usd?.toFixed(2) || '0'} USD`,
+          metodo_pago: 'PayPal',
+          productPrices: productosN.map((p: any) => ({
+            nombre: p.nombre || 'Producto',
+            precio: p.precio_unitario?.toFixed(2) || '0',
+            cantidad: p.cantidad || 1,
+          })),
+        }).catch(() => {})
+      }
+    }
+
     return NextResponse.json({ success: true, status: 'COMPLETED' })
   } catch (err) {
     console.error('[PayPal] Error en capture-order:', err)

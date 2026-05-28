@@ -172,6 +172,7 @@ export async function POST(request: NextRequest) {
           }))
           const { userId, isNewUser } = await createUserAndNotify({
             email, nombre,
+            isGuest: !ordenActual.user_id,
             productos: productosNombres,
             total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
             metodo_pago: 'Izipay (Tarjeta)',
