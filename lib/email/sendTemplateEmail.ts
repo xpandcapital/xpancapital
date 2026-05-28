@@ -73,13 +73,14 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
 
     // 5. Enviar
     if (sender?.provider === 'smtp' || !sender) {
+      const port = parseInt(sender?.smtp_port || process.env.SMTP_PORT || '465')
       const transporter = nodemailer.createTransport({
-        host: sender?.host || process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: parseInt(sender?.port || process.env.SMTP_PORT || '587'),
-        secure: sender?.secure || false,
+        host: sender?.smtp_host || process.env.SMTP_HOST || '',
+        port,
+        secure: port === 465,
         auth: {
-          user: sender?.username || process.env.SMTP_USER,
-          pass: sender?.password || process.env.SMTP_PASS,
+          user: sender?.smtp_user || process.env.SMTP_USER || '',
+          pass: sender?.smtp_pass || process.env.SMTP_PASS || '',
         },
       })
 
@@ -88,16 +89,19 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
 
       const finalSubject = subject || template?.settings?.subject || 'Confirmación de compra — BLIS Corp'
 
-      await transporter.sendMail({
-        from: `"${fromName}" <${fromEmail}>`,
-        to,
-        subject: finalSubject,
-        html,
-      })
-
-      console.log(`[sendTemplateEmail] Enviado a ${to} (evento: ${evento})`)
-      return true
-    }
+      try {
+        await transporter.sendMail({
+          from: `"${fromName}" <${fromEmail}>`,
+          to,
+          subject: finalSubject,
+          html,
+        })
+        console.log(`[sendTemplateEmail] Enviado a ${to} (evento: ${evento})`)
+        return true
+      } catch (mailErr: any) {
+        console.error('[sendTemplateEmail] Error SMTP:', mailErr.message)
+        return false
+      }
 
     // Resend o SendGrid — usar fetch
     if (sender?.provider === 'resend' && sender.api_key) {

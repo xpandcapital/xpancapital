@@ -105,18 +105,24 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
 
 async function sendEmailRaw(opts: { to: string; subject: string; html: string }) {
   const nodemailer = await import('nodemailer')
+  const port = parseInt(process.env.SMTP_PORT || '465')
   const transporter = nodemailer.default.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    host: process.env.SMTP_HOST || '',
+    port,
+    secure: port === 465,
+    auth: { user: process.env.SMTP_USER || '', pass: process.env.SMTP_PASS || '' },
   })
-  await transporter.sendMail({
-    from: `"BLIS Corp" <${process.env.SMTP_USER}>`,
-    to: opts.to,
-    subject: opts.subject,
-    html: opts.html,
-  }).catch((e: any) => console.error('[sendEmailRaw] Error:', e))
+  try {
+    await transporter.sendMail({
+      from: `"BLIS Corp" <${process.env.SMTP_USER}>`,
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+    })
+    console.log('[sendEmailRaw] Enviado a:', opts.to)
+  } catch (e: any) {
+    console.error('[sendEmailRaw] Error:', e.message)
+  }
 }
 
 function buildWelcomeHTML(nombre: string, email: string, password: string, productos: string[], siteUrl: string): string {
