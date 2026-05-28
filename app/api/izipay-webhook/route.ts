@@ -106,7 +106,9 @@ export async function POST(request: NextRequest) {
     console.log(`[Izipay Webhook] Orden encontrada: ${ordenActual.id} estado=${ordenActual.estado}`)
 
     if (orderStatus === 'PAID') {
-      if (ordenActual.estado !== 'completado') {
+      const yaCompletada = ordenActual.estado === 'completado'
+      
+      if (!yaCompletada) {
         await supabase
           .from('compras')
           .update({
@@ -150,43 +152,42 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Enviar email + crear usuario
-        const meta = (ordenActual.metadata as Record<string, unknown>) || {}
-        const email = (meta.email_cliente as string) || ''
-        const nombre = (meta.nombre_cliente as string) || 'Cliente'
-        const productos = (meta.productos as Array<Record<string, unknown>>) || []
+      } // fin if (!yaCompletada)
 
-        if (email && productos.length > 0) {
-          try {
-            console.log('[Izipay Webhook] Creando usuario y enviando email a:', email)
-            const productosNombres = productos.map((p: any) => p.nombre || 'Producto')
-            const productPrices = productos.map((p: any) => ({
-              nombre: p.nombre || 'Producto',
-              precio: p.precio_unitario?.toFixed(2) || ordenActual.monto_usd?.toFixed(2) || '0',
-              cantidad: p.cantidad || 1,
-              categoria: p.productType || '',
-            }))
-            const { userId, isNewUser } = await createUserAndNotify({
-              email, nombre,
-              productos: productosNombres,
-              total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
-              metodo_pago: 'Izipay (Tarjeta)',
-              productPrices,
-            })
-            console.log('[Izipay Webhook] createUserAndNotify result:', { userId, isNewUser })
+      // Enviar email + crear usuario (siempre, incluso si ya estaba completada)
+      const meta = (ordenActual.metadata as Record<string, unknown>) || {}
+      const email = (meta.email_cliente as string) || ''
+      const nombre = (meta.nombre_cliente as string) || 'Cliente'
+      const productos = (meta.productos as Array<Record<string, unknown>>) || []
 
-            if (userId && !ordenActual.user_id) {
-              await supabase.from('compras').update({ user_id: userId }).eq('id', ordenActual.id)
-            }
-          } catch (userErr: any) {
-            console.error('[Izipay Webhook] Error en createUserAndNotify:', userErr?.message)
+      if (email && productos.length > 0) {
+        try {
+          console.log('[Izipay Webhook] Creando usuario y enviando email a:', email)
+          const productosNombres = productos.map((p: any) => p.nombre || 'Producto')
+          const productPrices = productos.map((p: any) => ({
+            nombre: p.nombre || 'Producto',
+            precio: p.precio_unitario?.toFixed(2) || ordenActual.monto_usd?.toFixed(2) || '0',
+            cantidad: p.cantidad || 1,
+            categoria: p.productType || '',
+          }))
+          const { userId, isNewUser } = await createUserAndNotify({
+            email, nombre,
+            productos: productosNombres,
+            total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
+            metodo_pago: 'Izipay (Tarjeta)',
+            productPrices,
+          })
+          console.log('[Izipay Webhook] createUserAndNotify result:', { userId, isNewUser })
+
+          if (userId && !ordenActual.user_id) {
+            await supabase.from('compras').update({ user_id: userId }).eq('id', ordenActual.id)
           }
+        } catch (userErr: any) {
+          console.error('[Izipay Webhook] Error en createUserAndNotify:', userErr?.message)
         }
-
-        console.log(`[Izipay Webhook] Orden ${ordenActual.id} COMPLETADA`)
-      } else {
-        console.log('[Izipay Webhook] Orden ya estaba completada')
       }
+
+      console.log(`[Izipay Webhook] Orden ${ordenActual.id} COMPLETADA`)
     } else if (orderStatus === 'UNPAID' || orderStatus === 'CANCELLED') {
       await supabase
         .from('compras')
