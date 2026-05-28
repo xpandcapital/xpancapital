@@ -62,17 +62,19 @@ export async function POST(request: NextRequest) {
     const tx = (answerData.transactions as Array<Record<string, unknown>>)?.[0]
     const cardDetails = tx?.cardDetails as Record<string, unknown> | undefined
 
-    // Extraer nuestro UUID: el orderId de Izipay NO es nuestro UUID.
-    // Nuestro UUID está en order.orderNumber o en la response
+    // Extraer nuestro UUID: orderId de Izipay NO es nuestro UUID.
+    // Nuestro UUID está en orderDetails.orderNumber (formato actual del IPN)
+    const orderDetails = answerData.orderDetails as Record<string, unknown> | undefined
     const responseObj = answerData.response as Record<string, unknown> | undefined
     const orderArray = responseObj?.order as Array<Record<string, unknown>> | undefined
-    const nuestroOrderNumber = (orderArray?.[0]?.orderNumber as string) ||
-                              (answerData.order?.orderNumber as string) ||
+    const nuestroOrderNumber = (answerData.orderId as string) ||
+                              (orderDetails?.orderNumber as string) ||
+                              (orderArray?.[0]?.orderNumber as string) ||
                               (tx?.orderNumber as string) || ''
 
-    console.log(`[Izipay Webhook] Buscando orden. Izipay orderId=${answerData.orderId}, nuestro orderNumber=${nuestroOrderNumber}`)
+    console.log(`[Izipay Webhook] Buscando orden. orderId=${answerData.orderId}, orderNumber=${nuestroOrderNumber}`)
 
-    // Buscar orden por nuestro UUID, luego por transaction_id, luego por monto
+    // Buscar orden por nuestro UUID (id), luego por transaction_id
     let ordenActual: any = null
 
     if (nuestroOrderNumber) {
@@ -81,38 +83,20 @@ export async function POST(request: NextRequest) {
         .select('id, metadata, user_id, empresa_id, monto_usd, estado')
         .eq('id', nuestroOrderNumber)
         .maybeSingle()
-      if (porId) { ordenActual = porId; console.log('[Izipay Webhook] Encontrada por nuestro UUID') }
+      if (porId) { ordenActual = porId; console.log('[Izipay Webhook] Encontrada por nuestro UUID (id)') }
     }
 
     if (!ordenActual) {
-      const izipayUuid = answerData.orderId as string
       const { data: porTx } = await supabase
         .from('compras')
         .select('id, metadata, user_id, empresa_id, monto_usd, estado')
-        .eq('transaction_id', izipayUuid)
+        .eq('transaction_id', nuestroOrderNumber)
         .maybeSingle()
       if (porTx) { ordenActual = porTx; console.log('[Izipay Webhook] Encontrada por transaction_id') }
     }
 
     if (!ordenActual) {
-      const monto = tx?.amount as number || 0
-      if (monto > 0) {
-        const { data: porMonto } = await supabase
-          .from('compras')
-          .select('id, metadata, user_id, empresa_id, monto_usd, estado')
-          .eq('estado', 'pendiente')
-          .eq('metodo_pago', 'izipay')
-          .gte('monto_usd', monto / 100 - 1)
-          .lte('monto_usd', monto / 100 + 1)
-          .order('creado_en', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-        if (porMonto) { ordenActual = porMonto; console.log('[Izipay Webhook] Encontrada por monto') }
-      }
-    }
-
-    if (!ordenActual) {
-      console.error(`[Izipay Webhook] Orden no encontrada. orderId=${answerData.orderId} orderNumber=${nuestroOrderNumber}`)
+      console.error(`[Izipay Webhook] Orden no encontrada. orderNumber=${nuestroOrderNumber}`)
       return NextResponse.json({ error: 'Orden no encontrada' }, { status: 404 })
     }
 

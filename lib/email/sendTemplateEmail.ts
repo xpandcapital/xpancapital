@@ -87,7 +87,11 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
       if (sender?.from_name) fromName = sender.from_name
       if (sender?.from_email) fromEmail = sender.from_email
 
-      const finalSubject = subject || template?.settings?.subject || 'Confirmación de compra — BLIS Corp'
+      let finalSubject = subject || template?.settings?.subject || 'Confirmación de compra — BLIS Corp'
+      for (const [key, value] of Object.entries(variables)) {
+        finalSubject = finalSubject.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value)
+      }
+      finalSubject = finalSubject.replace(/\{\{[^}]+\}\}/g, '')
 
       try {
         await transporter.sendMail({

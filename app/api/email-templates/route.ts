@@ -85,6 +85,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
     const { id, nombre, descripcion, settings, blocks } = body
+    const empresaId = body.empresa_id || DEFAULT_EMPRESA_ID
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'ID requerido' }, { status: 400 })
@@ -95,6 +96,21 @@ export async function PUT(request: NextRequest) {
     if (descripcion !== undefined) updateData.descripcion = descripcion
     if (settings !== undefined) updateData.settings = settings
     if (blocks !== undefined) updateData.blocks = blocks
+
+    // Leer evento del settings o del body
+    const evento = settings?.evento || body.evento
+    if (evento !== undefined) {
+      // Si hay evento y no es 'ninguno', limpiarlo de otras plantillas
+      if (evento && evento !== 'ninguno') {
+        await supabase
+          .from('email_templates')
+          .update({ evento: null })
+          .eq('empresa_id', empresaId)
+          .eq('evento', evento)
+          .neq('id', id)
+      }
+      updateData.evento = evento && evento !== 'ninguno' ? evento : null
+    }
 
     const { data, error } = await supabase
       .from('email_templates')

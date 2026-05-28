@@ -186,6 +186,7 @@ export async function POST(request: NextRequest) {
     await supabase
       .from('compras')
       .update({
+        transaction_id: orden.id,
         metadata: {
           ...(orden.metadata as Record<string, unknown> || {}),
           izipay_form_token: paymentResponse.answer.formToken,
