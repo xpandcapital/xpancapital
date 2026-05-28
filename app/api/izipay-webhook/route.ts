@@ -151,31 +151,34 @@ export async function POST(request: NextRequest) {
         const meta = (ordenActual.metadata as Record<string, unknown>) || {}
         const email = (meta.email_cliente as string) || ''
         const nombre = (meta.nombre_cliente as string) || 'Cliente'
-        const productos = (meta.productos as Array<{ nombre: string }>) || []
+        const productos = (meta.productos as Array<Record<string, unknown>>) || []
 
         if (email && productos.length > 0) {
-          console.log('[Izipay Webhook] Creando usuario y enviando email a:', email)
-          console.log('[Izipay Webhook] Llamando createUserAndNotify...')
-          const productosNombres = productos.map((p: any) => p.nombre || 'Producto')
-          const productPrices = productos.map((p: any) => ({
-            nombre: p.nombre || 'Producto',
-            precio: p.precio_unitario?.toFixed(2) || ordenActual.monto_usd?.toFixed(2) || '0',
-            cantidad: p.cantidad || 1,
-            categoria: p.productType || '',
-          }))
-          const result = await createUserAndNotify({
-            email, nombre,
-            productos: productosNombres,
-            total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
-            metodo_pago: 'Izipay (Tarjeta)',
-            productPrices,
-          })
-          const { userId } = result
-          console.log('[Izipay Webhook] createUserAndNotify result:', { userId, isNewUser: result.isNewUser })
+          try {
+            console.log('[Izipay Webhook] Creando usuario y enviando email a:', email)
+            const productosNombres = productos.map((p: any) => p.nombre || 'Producto')
+            const productPrices = productos.map((p: any) => ({
+              nombre: p.nombre || 'Producto',
+              precio: p.precio_unitario?.toFixed(2) || ordenActual.monto_usd?.toFixed(2) || '0',
+              cantidad: p.cantidad || 1,
+              categoria: p.productType || '',
+            }))
+            const result = await createUserAndNotify({
+              email, nombre,
+              productos: productosNombres,
+              total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
+              metodo_pago: 'Izipay (Tarjeta)',
+              productPrices,
+            })
+            console.log('[Izipay Webhook] createUserAndNotify result:', { userId: result.userId, isNewUser: result.isNewUser })
 
-          if (userId && !ordenActual.user_id) {
-            await supabase.from('compras').update({ user_id: userId }).eq('id', ordenActual.id)
+            if (result.userId && !ordenActual.user_id) {
+              await supabase.from('compras').update({ user_id: result.userId }).eq('id', ordenActual.id)
+            }
+          } catch (userErr: any) {
+            console.error('[Izipay Webhook] Error en createUserAndNotify:', userErr?.message)
           }
+        }
         }
 
         console.log(`[Izipay Webhook] Orden ${ordenActual.id} COMPLETADA`)
@@ -191,8 +194,9 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true })
-  } catch (err) {
-    console.error('[Izipay Webhook] Error:', err)
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
+  } catch (err: any) {
+    const msg = err?.message || String(err)
+    console.error('[Izipay Webhook] Error:', msg, err?.stack?.substring(0, 300))
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
