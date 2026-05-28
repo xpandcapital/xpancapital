@@ -102,6 +102,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
         console.error('[sendTemplateEmail] Error SMTP:', mailErr.message)
         return false
       }
+    }
 
     // Resend o SendGrid — usar fetch
     if (sender?.provider === 'resend' && sender.api_key) {
