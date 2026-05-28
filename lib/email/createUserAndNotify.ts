@@ -33,13 +33,29 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
   let isNewUser = false
   let tempPassword = ''
 
-  // 1. Buscar si ya existe usuario con ese email
+  // 1. Buscar si ya existe usuario con ese email (directo en profiles)
   try {
-    const { data: existingUsers } = await supabase.auth.admin.listUsers()
-    const existingUser = existingUsers?.users?.find(u => u.email === email)
-    if (existingUser) userId = existingUser.id
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle()
+    if (profile) userId = profile.id
+    console.log('[createUserAndNotify] Usuario encontrado en profiles:', !!userId)
   } catch (e) {
-    console.error('[createUserAndNotify] Error buscando usuario:', e)
+    console.error('[createUserAndNotify] Error buscando en profiles:', e)
+  }
+
+  // Fallback: buscar en auth si no encontró en profiles
+  if (!userId) {
+    try {
+      const { data: existingUsers } = await supabase.auth.admin.listUsers()
+      const existingUser = existingUsers?.users?.find(u => u.email === email)
+      if (existingUser) userId = existingUser.id
+      console.log('[createUserAndNotify] Usuario encontrado en auth:', !!userId)
+    } catch (e) {
+      console.error('[createUserAndNotify] Error en listUsers:', e)
+    }
   }
 
   // 2. Crear nuevo usuario si no existe
@@ -56,12 +72,26 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
       if (!createError && newUser.user?.id) {
         userId = newUser.user.id
         isNewUser = true
+        console.log('[createUserAndNotify] Usuario nuevo creado:', userId)
 
         await supabase.from('profiles').upsert({
           id: userId, email, nombre: params.nombre,
           telefono: params.telefono || '', empresa_id,
           creado_en: new Date().toISOString(),
         }, { onConflict: 'id' })
+      } else if (createError?.status === 422 || createError?.message?.includes('already')) {
+        // Ya existe en auth pero no en profiles — buscar id
+        console.log('[createUserAndNotify] Usuario ya existe en auth, buscando id...')
+        try {
+          const { data: existingUsers } = await supabase.auth.admin.listUsers()
+          const existingUser = existingUsers?.users?.find(u => u.email === email)
+          if (existingUser) {
+            userId = existingUser.id
+            console.log('[createUserAndNotify] ID recuperado de auth:', userId)
+          }
+        } catch {}
+      } else if (createError) {
+        console.error('[createUserAndNotify] Error creando usuario:', createError)
       }
     } catch (e) {
       console.error('[createUserAndNotify] Error creando usuario:', e)

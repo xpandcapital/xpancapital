@@ -163,14 +163,15 @@ export async function POST(request: NextRequest) {
             cantidad: p.cantidad || 1,
             categoria: p.productType || '',
           }))
-          const { userId } = await createUserAndNotify({
+          const result = await createUserAndNotify({
             email, nombre,
             productos: productosNombres,
             total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
             metodo_pago: 'Izipay (Tarjeta)',
             productPrices,
           })
-          console.log('[Izipay Webhook] createUserAndNotify result:', { userId, isNewUser: true })
+          const { userId } = result
+          console.log('[Izipay Webhook] createUserAndNotify result:', { userId, isNewUser: result.isNewUser })
 
           if (userId && !ordenActual.user_id) {
             await supabase.from('compras').update({ user_id: userId }).eq('id', ordenActual.id)
