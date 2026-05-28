@@ -112,9 +112,9 @@ function CheckoutContent() {
         sum + (item.precio_coins || Math.round((item.price || 0) * 10)), 0);
     const canPayWithCoins = blisCoins >= totalCoins && totalCoins > 0;
 
-    // Costo de procesamiento según método de pago
-    const processingFee = useMemo(() => {
-        const fp = formasPago.find((f: any) => f.slug === paymentMethod)
+    // Costo de procesamiento por método (independiente de la selección)
+    function getMethodFee(slug: string) {
+        const fp = formasPago.find((f: any) => f.slug === slug)
         const cfg = fp?.config || {}
         const type = cfg.processing_fee_type
         const value = parseFloat(cfg.processing_fee_value || '0')
@@ -123,8 +123,12 @@ function CheckoutContent() {
         if (type === 'fixed') return { amount: value, label, type: 'fixed' }
         if (type === 'percentage') return { amount: Math.round(totalUSD * value) / 100, label, type: 'percentage' }
         return { amount: 0, label: '', type: '' }
-    }, [paymentMethod, formasPago, totalUSD])
+    }
 
+    const getMethodTotal = (slug: string) => (totalUSD || 0) + getMethodFee(slug).amount
+
+    // Fee del método seleccionado
+    const processingFee = useMemo(() => getMethodFee(paymentMethod), [paymentMethod, formasPago, totalUSD])
     const grandTotal = (totalUSD || 0) + processingFee.amount
 
     // Detectar si hay productos físicos
@@ -850,7 +854,7 @@ function CheckoutContent() {
                                             <div key={fp.id}>
                                                 <PayOption selected={paymentMethod === 'transfer'} onClick={() => setPaymentMethod('transfer')}
                                                     icon={<Building2 className="w-5 h-5 text-sky-400" />} bg="bg-sky-500/10 border-sky-500/40"
-                                                    label="Transferencia Bancaria" sublabel="Selecciona tu país" amount={`$${grandTotal.toFixed(2)}`} />
+                                                    label="Transferencia Bancaria" sublabel="Selecciona tu país" amount={`$${getMethodTotal('transfer').toFixed(2)}`} />
                                                 {paymentMethod === 'transfer' && (() => {
                                                     const cts: Record<string, any> = fp.config?.countries || {};
                                                     const keys = Object.keys(cts);
@@ -886,7 +890,7 @@ function CheckoutContent() {
                                         return (<div key={fp.id}>
                                             <PayOption selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
                                                 icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
-                                                label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${grandTotal.toFixed(2)}`} />
+                                                label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${getMethodTotal(fp.slug).toFixed(2)}`} />
                                             {paymentMethod === 'crypto_manual' && (() => {
                                                 const wls: any[] = fp.config?.wallets || [];
                                                 const wpp = fp.config?.whatsapp || "";
@@ -916,7 +920,7 @@ function CheckoutContent() {
                                     const Ic = imap[fp.slug] || CreditCard;
                                     return <PayOption key={fp.id} selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
                                         icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
-                                        label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${grandTotal.toFixed(2)}`} />;
+                                        label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${getMethodTotal(fp.slug).toFixed(2)}`} />;
                                 })}
                             </div>
                         </div>
