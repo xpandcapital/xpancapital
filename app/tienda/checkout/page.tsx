@@ -453,7 +453,7 @@ function CheckoutContent() {
                 setIzipayFormToken(data.formToken)
                 setIzipayPublicKey(data.publicKey || '')
                 setIzipayOrderId(data.ordenId)
-                setIzipayTotal(totalUSD)
+                setIzipayTotal(grandTotal)
                 setKrKey(k => k + 1)
                 setIsIzipayModal(true)
                 setIsProcessing(false)
@@ -490,7 +490,7 @@ function CheckoutContent() {
                 isRedirectingRef.current = true;
                 sessionStorage.setItem('izipay_flow_active', '1')
 
-                setIzipayTotal(totalUSD)
+                setIzipayTotal(grandTotal)
                 setKrKey(k => k + 1)
                 setIsIzipayModal(true)
                 setIsProcessing(false)
@@ -1137,11 +1137,16 @@ function CheckoutContent() {
                         loaded={izipayScriptLoaded}
                         publicKey={izipayPublicKey}
                         onLoad={() => setIzipayScriptLoaded(true)}
-                        onSuccess={() => {
+                        onSuccess={async () => {
+                          await fetch('/api/izipay-confirm', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ordenId: izipayOrderId }),
+                          }).catch(() => {})
                           sessionStorage.removeItem('izipay_flow_active')
                           clearCart()
                           setIsIzipayModal(false)
-                          window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${izipayOrderId}&total=${izipayTotal.toFixed(2)}`
+                          window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${izipayOrderId}&total=${izipayGrandTotal.toFixed(2)}`
                         }}
                         onError={(msg) => {
                           setIsIzipayModal(false)

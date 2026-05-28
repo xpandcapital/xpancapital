@@ -216,8 +216,12 @@ export default function VentasAdminPage() {
                                                         {venta.cliente?.nombre?.[0] || "U"}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-bold text-white">{venta.cliente?.nombre || "N/A"}</p>
-                                                        <p className="text-[10px] text-gray-500">{venta.cliente?.email || ""}</p>
+                                                        <p className="text-sm font-bold text-white">
+                                                            {venta.cliente?.nombre || venta.metadata?.nombre_cliente || "N/A"}
+                                                        </p>
+                                                        <p className="text-[10px] text-gray-500">
+                                                            {venta.cliente?.email || venta.metadata?.email_cliente || ""}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </td>
