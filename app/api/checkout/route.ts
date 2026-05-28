@@ -146,6 +146,7 @@ export async function POST(request: NextRequest) {
       monto_usd,
       tiene_fisicos,
       direccion_envio,
+      estado,
     } = body;
 
     if (!email || !productos?.length) {
@@ -268,7 +269,7 @@ export async function POST(request: NextRequest) {
         metodo_pago,
         monto_coins: monto_coins || 0,
         monto_usd: monto_usd || 0,
-        estado: 'completado',
+        estado: estado || 'completado',
         metadata: {
           productos,
           email_cliente: email.toLowerCase(),

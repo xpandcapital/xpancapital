@@ -125,7 +125,7 @@ function CheckoutContent() {
         return { amount: 0, label: '', type: '' }
     }, [paymentMethod, formasPago, totalUSD])
 
-    const grandTotal = totalUSD + processingFee.amount
+    const grandTotal = (totalUSD || 0) + processingFee.amount
 
     // Detectar si hay productos físicos
     const hasPhysicalProducts = useMemo(() =>
@@ -531,10 +531,36 @@ function CheckoutContent() {
                     document.head.appendChild(script)
                 }, 300)
                 return;
+            }
+
+            // Flujo transferencia y crypto manual
+            if (paymentMethod === 'transfer' || paymentMethod === 'crypto_manual') {
+                const fp = formasPago.find((f: any) => f.slug === paymentMethod)
+                const banco = encodeURIComponent(JSON.stringify({
+                    config: fp?.config,
+                    country: selectedCountry || form.pais,
+                    total: grandTotal,
+                    metodo: paymentMethod,
+                }))
+
+                const res = await fetch('/api/checkout', {
+                    method: 'POST', headers,
+                    body: JSON.stringify({
+                        ...commonPayload,
+                        metodo_pago: paymentMethod,
+                        monto_coins: 0,
+                        monto_usd: grandTotal,
+                        estado: 'pendiente',
+                    })
+                })
+                const data = await res.json()
+                if (!data.success) throw new Error(data.error || 'Error al procesar')
+                clearCart()
+                window.location.href = `/tienda/checkout/transfer-gracias?info=${banco}`
                 return;
             }
 
-            // Flujo BLIS Coins y Transferencia (checkout tradicional)
+            // Flujo BLIS Coins
             const res = await fetch('/api/checkout', {
                 method: 'POST',
                 headers,
