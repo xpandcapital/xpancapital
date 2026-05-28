@@ -466,7 +466,7 @@ function CheckoutContent() {
                     res = await fetch('/api/paypal/create-order', {
                         method: 'POST',
                         headers,
-                        body: JSON.stringify({ ...commonPayload, total_usd: totalUSD }),
+                        body: JSON.stringify({ ...commonPayload, total_usd: grandTotal }),
                         signal: controller.signal,
                     });
                 } catch (fetchErr: any) {
@@ -850,7 +850,7 @@ function CheckoutContent() {
                                             <div key={fp.id}>
                                                 <PayOption selected={paymentMethod === 'transfer'} onClick={() => setPaymentMethod('transfer')}
                                                     icon={<Building2 className="w-5 h-5 text-sky-400" />} bg="bg-sky-500/10 border-sky-500/40"
-                                                    label="Transferencia Bancaria" sublabel="Selecciona tu país" amount={`$${totalUSD.toFixed(2)}`} />
+                                                    label="Transferencia Bancaria" sublabel="Selecciona tu país" amount={`$${grandTotal.toFixed(2)}`} />
                                                 {paymentMethod === 'transfer' && (() => {
                                                     const cts: Record<string, any> = fp.config?.countries || {};
                                                     const keys = Object.keys(cts);
@@ -886,7 +886,7 @@ function CheckoutContent() {
                                         return (<div key={fp.id}>
                                             <PayOption selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
                                                 icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
-                                                label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${totalUSD.toFixed(2)}`} />
+                                                label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${grandTotal.toFixed(2)}`} />
                                             {paymentMethod === 'crypto_manual' && (() => {
                                                 const wls: any[] = fp.config?.wallets || [];
                                                 const wpp = fp.config?.whatsapp || "";
@@ -916,7 +916,7 @@ function CheckoutContent() {
                                     const Ic = imap[fp.slug] || CreditCard;
                                     return <PayOption key={fp.id} selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
                                         icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
-                                        label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${totalUSD.toFixed(2)}`} />;
+                                        label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${grandTotal.toFixed(2)}`} />;
                                 })}
                             </div>
                         </div>
