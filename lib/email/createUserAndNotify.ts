@@ -32,98 +32,72 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
   let tempPassword = ''
 
   // 1. Buscar si ya existe usuario con ese email
-  const { data: existingUsers } = await supabase.auth.admin.listUsers()
-  const existingUser = existingUsers?.users?.find(u => u.email === email)
+  try {
+    const { data: existingUsers } = await supabase.auth.admin.listUsers()
+    const existingUser = existingUsers?.users?.find(u => u.email === email)
+    if (existingUser) userId = existingUser.id
+  } catch (e) {
+    console.error('[createUserAndNotify] Error buscando usuario:', e)
+  }
 
-  if (existingUser) {
-    userId = existingUser.id
-  } else {
-    // 2. Crear nuevo usuario con contraseña temporal
-    tempPassword = generatePassword()
-    const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-      email,
-      password: tempPassword,
-      email_confirm: true,
-      user_metadata: { nombre: params.nombre, telefono: params.telefono || '' },
-    })
-
-    if (!createError && newUser.user?.id) {
-      userId = newUser.user.id
-      isNewUser = true
-
-      // Crear perfil
-      await supabase.from('profiles').upsert({
-        id: userId,
+  // 2. Crear nuevo usuario si no existe
+  if (!userId) {
+    try {
+      tempPassword = generatePassword()
+      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email,
-        nombre: params.nombre,
-        telefono: params.telefono || '',
-        empresa_id,
-        creado_en: new Date().toISOString(),
-      }, { onConflict: 'id' }).catch(() => {})
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { nombre: params.nombre, telefono: params.telefono || '' },
+      })
+
+      if (!createError && newUser.user?.id) {
+        userId = newUser.user.id
+        isNewUser = true
+
+        await supabase.from('profiles').upsert({
+          id: userId, email, nombre: params.nombre,
+          telefono: params.telefono || '', empresa_id,
+          creado_en: new Date().toISOString(),
+        }, { onConflict: 'id' })
+      }
+    } catch (e) {
+      console.error('[createUserAndNotify] Error creando usuario:', e)
     }
   }
 
   // 3. Enviar email
-  const nombresList = params.productos
-    .map(p => `<li style="margin-bottom:6px;font-size:14px;color:#e5e7eb;">✅ ${p}</li>`)
-    .join('')
+    const nombresList = params.productos
+      .map(p => `<li style="margin-bottom:6px;font-size:14px;color:#e5e7eb;">✅ ${p}</li>`)
+      .join('')
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
 
-  if (isNewUser && tempPassword) {
-    // Email de bienvenida con contraseña
-    const { data: welcomeTemplate } = await supabase
-      .from('email_templates')
-      .select('settings, blocks')
-      .eq('empresa_id', empresa_id)
-      .eq('evento', 'cuenta_bienvenida')
-      .maybeSingle()
-
-    if (welcomeTemplate?.settings && welcomeTemplate?.blocks) {
-      // Usar plantilla de bienvenida
-      let html = ''
-      try {
-        const mod = await import('../../../app/superadmin/mails/lib/htmlGenerator.js')
-        html = mod.generateHTML(
-          typeof welcomeTemplate.blocks === 'string' ? JSON.parse(welcomeTemplate.blocks) : welcomeTemplate.blocks,
-          typeof welcomeTemplate.settings === 'string' ? JSON.parse(welcomeTemplate.settings) : welcomeTemplate.settings
-        )
-      } catch { /* fallback */ }
-
-      const vars: Record<string, string> = {
-        nombre: params.nombre, email, empresa: 'BLIS Corp',
-        productos: `<ul style="margin:0;padding:0;list-style:none;">${nombresList}</ul>`,
-        password: tempPassword,
-        enlace_acceso: `<a href="${siteUrl}/miembros" target="_blank">Acceder a Mis Productos →</a>`,
-      }
-      for (const [k, v] of Object.entries(vars)) {
-        html = html.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), v)
-      }
-      html = html.replace(/\{\{[^}]+\}\}/g, '')
-
-      await sendEmailRaw({ to: email, subject: '🎉 ¡Tu cuenta BLIS Corp fue creada!', html })
-    } else {
-      // Fallback: email con contraseña hardcodeado
+    if (isNewUser && tempPassword) {
+      // Email de bienvenida con contraseña (fallback simple)
       await sendEmailRaw({
         to: email,
         subject: '🎉 ¡Tu cuenta BLIS Corp fue creada!',
         html: buildWelcomeHTML(params.nombre, email, tempPassword, params.productos, siteUrl),
       })
+    } else {
+      // Email de confirmación (usuario existente)
+      const nombresList2 = params.productos
+        .map(p => `<li style="margin-bottom:6px;font-size:14px;color:#e5e7eb;">✅ ${p}</li>`)
+        .join('')
+
+      await sendTemplateEmail({
+        evento: userId ? 'transaccion_compra_completada_logueado' : 'transaccion_compra_completada_invitado',
+        to: email,
+        variables: {
+          nombre: params.nombre, email,
+          productos: `<ul style="margin:0;padding:0;list-style:none;">${nombresList2}</ul>`,
+          total: params.total, metodo_pago: params.metodo_pago,
+          fecha_compra: new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }),
+          enlace_acceso: `<a href="${siteUrl}/miembros" target="_blank">Acceder a Mis Productos →</a>`,
+        },
+      })
     }
-  } else {
-    // Email de confirmación (usuario existente o sin cuenta nueva)
-    await sendTemplateEmail({
-      evento: userId ? 'transaccion_compra_completada_logueado' : 'transaccion_compra_completada_invitado',
-      to: email,
-      variables: {
-        nombre: params.nombre, email,
-        productos: `<ul style="margin:0;padding:0;list-style:none;">${nombresList}</ul>`,
-        total: params.total, metodo_pago: params.metodo_pago,
-        fecha_compra: new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }),
-        enlace_acceso: `<a href="${siteUrl}/miembros" target="_blank">Acceder a Mis Productos →</a>`,
-      },
-    })
-  }
 
   return { userId, isNewUser, tempPassword }
 }

@@ -1146,7 +1146,7 @@ function CheckoutContent() {
                           sessionStorage.removeItem('izipay_flow_active')
                           clearCart()
                           setIsIzipayModal(false)
-                          window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${izipayOrderId}&total=${izipayGrandTotal.toFixed(2)}`
+                          window.location.href = `/tienda/checkout/status?izipay_success=1&order_id=${izipayOrderId}&total=${izipayTotal.toFixed(2)}`
                         }}
                         onError={(msg) => {
                           setIsIzipayModal(false)
