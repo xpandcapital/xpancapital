@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getAuthUser } from "@/lib/supabase/api-auth";
+import { createUserAndNotify } from "@/lib/email/createUserAndNotify";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -96,6 +97,27 @@ export async function PUT(request: NextRequest) {
         estado_nuevo: estado,
         notas: notas || null,
       });
+
+      // Si se confirma como completado, crear usuario (si es invitado) y enviar email
+      if (estado === 'completado') {
+        const meta = (data.metadata || {}) as Record<string, unknown>
+        const email = (meta.email_cliente as string) || ''
+        const nombre = (meta.nombre_cliente as string) || 'Cliente'
+        const productos = (meta.productos as Array<{ nombre: string }>) || []
+
+        if (email && productos.length > 0) {
+          const { userId } = await createUserAndNotify({
+            email, nombre,
+            productos: productos.map((p: any) => p.nombre || 'Producto'),
+            total: `$${data.monto_usd?.toFixed(2) || '0'} USD`,
+            metodo_pago: data.metodo_pago || 'Manual',
+          }).catch(() => ({ userId: null, isNewUser: false, tempPassword: '' }))
+
+          if (userId && !data.user_id) {
+            await supabase.from('compras').update({ user_id: userId }).eq('id', id)
+          }
+        }
+      }
     }
 
     return NextResponse.json({ success: true, venta: data });

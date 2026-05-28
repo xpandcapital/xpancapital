@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { decryptApiKey } from '@/lib/api-crypto'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { verifyKRHash } from '@/lib/izipay/client'
-import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
+import { createUserAndNotify } from '@/lib/email/createUserAndNotify'
 
 export async function POST(request: NextRequest) {
   try {
@@ -107,29 +107,22 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', orderId)
 
-      // Enviar email de confirmación
+      // Enviar email de confirmación + crear usuario si es invitado
       const meta = (ordenActual.metadata as Record<string, unknown>) || {}
-      const email = (meta.email_cliente as string) || ''
-      const nombre = (meta.nombre_cliente as string) || 'Cliente'
-      const productos = (meta.productos as Array<{ nombre: string }>) || []
+      const emailW = (meta.email_cliente as string) || ''
+      const nombreW = (meta.nombre_cliente as string) || 'Cliente'
+      const productosW = (meta.productos as Array<{ nombre: string }>) || []
 
-      if (email && productos.length > 0) {
-        const nombresList = productos
-          .map((p: any) => `<li style="margin-bottom:6px;font-size:14px;color:#e5e7eb;">✅ ${p.nombre || 'Producto'}</li>`)
-          .join('')
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
-        await sendTemplateEmail({
-          evento: ordenActual.user_id ? 'transaccion_compra_completada_logueado' : 'transaccion_compra_completada_invitado',
-          to: email,
-          variables: {
-            nombre, email,
-            productos: `<ul style="margin:0;padding:0;list-style:none;">${nombresList}</ul>`,
-            total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
-            metodo_pago: 'Izipay (Tarjeta)',
-            fecha_compra: new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }),
-            enlace_acceso: `<a href="${siteUrl}/miembros" target="_blank">Acceder a Mis Productos →</a>`,
-          },
+      if (emailW && productosW.length > 0) {
+        const { userId } = await createUserAndNotify({
+          email: emailW, nombre: nombreW,
+          productos: productosW.map((p: any) => p.nombre || 'Producto'),
+          total: `$${ordenActual.monto_usd?.toFixed(2) || '0'} USD`,
+          metodo_pago: 'Izipay (Tarjeta)',
         })
+        if (userId && !ordenActual.user_id) {
+          await supabase.from('compras').update({ user_id: userId }).eq('id', orderId)
+        }
       }
 
       console.log(`[Izipay Webhook] Orden ${orderId} COMPLETADA`)
