@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
         orderId: orden.id,
         customer: {
           email: email.toLowerCase(),
-          reference: user_id || undefined,
+          reference: `${user_id || 'guest'}|${orden.id}`,
         },
       },
       config

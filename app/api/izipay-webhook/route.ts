@@ -62,17 +62,20 @@ export async function POST(request: NextRequest) {
     const tx = (answerData.transactions as Array<Record<string, unknown>>)?.[0]
     const cardDetails = tx?.cardDetails as Record<string, unknown> | undefined
 
-    // Extraer nuestro UUID: orderId de Izipay NO es nuestro UUID.
-    // Nuestro UUID está en orderDetails.orderNumber (formato actual del IPN)
-    const orderDetails = answerData.orderDetails as Record<string, unknown> | undefined
-    const responseObj = answerData.response as Record<string, unknown> | undefined
-    const orderArray = responseObj?.order as Array<Record<string, unknown>> | undefined
-    const nuestroOrderNumber = (answerData.orderId as string) ||
-                              (orderDetails?.orderNumber as string) ||
-                              (orderArray?.[0]?.orderNumber as string) ||
-                              (tx?.orderNumber as string) || ''
+    // Log completo para entender la estructura del IPN
+    console.log('[Izipay Webhook] orderDetails:', JSON.stringify(answerData.orderDetails || {}).substring(0, 400))
+    console.log('[Izipay Webhook] customer:', JSON.stringify(answerData.customer || {}).substring(0, 200))
+    console.log('[Izipay Webhook] tx keys:', tx ? Object.keys(tx) : 'none')
 
-    console.log(`[Izipay Webhook] Buscando orden. orderId=${answerData.orderId}, orderNumber=${nuestroOrderNumber}`)
+    // Buscar nuestro UUID en múltiples ubicaciones del IPN
+    const orderDetails = answerData.orderDetails as Record<string, unknown> | undefined
+    const customer = answerData.customer as Record<string, unknown> | undefined
+    const txOrderNumber = tx?.orderNumber as string || tx?.orderId as string
+    const ddOrderNumber = orderDetails?.orderNumber as string || orderDetails?.orderId as string || orderDetails?.orderReference as string
+    const customerRef = customer?.reference as string
+    const nuestroOrderNumber = customerRef || ddOrderNumber || txOrderNumber || (answerData.orderId as string) || ''
+
+    console.log(`[Izipay Webhook] Buscando orden. orderNumber=${nuestroOrderNumber}`)
 
     // Buscar orden por nuestro UUID (id), luego por transaction_id
     let ordenActual: any = null
