@@ -230,13 +230,13 @@ function PagoPendienteContent() {
                         <span className={`text-[10px] font-black uppercase tracking-widest ${step.done ? "text-emerald-400" : "text-gray-500"}`}>
                           Paso {step.num}
                         </span>
-                        {!step.done && <span className="text-[10px] text-amber-400 font-bold">⏳ Pendiente</span>}
+                        {state === "pendiente" && <span className="text-[10px] text-amber-400 font-bold">⏳ Pendiente</span>}
                       </div>
                       <h3 className="text-sm font-black text-white uppercase tracking-tight">{step.title}</h3>
                       <p className="text-xs text-gray-400 mt-1">{step.desc}</p>
 
                       {/* Payment method details */}
-                      {step.num === 1 && !step.done && (
+                      {step.num === 1 && state === "pendiente" && (
                         <div className="mt-4 space-y-3">
                           {/* WhatsApp: show asesor */}
                           {metodoPago === "whatsapp" && paymentDetails?.asesor_foto && (
@@ -295,10 +295,10 @@ function PagoPendienteContent() {
                       )}
 
                       {/* Step 1 action buttons */}
-                      {step.num === 1 && !step.done && step1Action && (
+                      {step.num === 1 && state === "pendiente" && step1Action && (
                         <div className="mt-3">
                           <button onClick={step1Action.onClick} className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:text-white transition-all">
-                            {step1Action.icon === "whatsapp" && <img src="/icons/brands/whatsapp.svg" className="w-4 h-4" alt="" />}
+                            {step1Action.icon === "whatsapp" && <img src="/icons/brands/whatsapp.svg" className="w-4 h-4" alt="" style={{ filter: 'brightness(0) invert(1)' }} />}
                             {step1Action.icon === "copy" && <Copy className="w-4 h-4" />}
                             {step1Action.label}
                           </button>
@@ -323,8 +323,8 @@ function PagoPendienteContent() {
                 </Link>
               ) : (
                 step1Action && (
-                  <button onClick={step1Action.onClick} className="flex items-center justify-center gap-3 w-full px-8 py-4 bg-amber-600 hover:bg-amber-500 text-white font-black uppercase rounded-2xl transition-all">
-                    {step1Action.icon === "whatsapp" && <img src="/icons/brands/whatsapp.svg" className="w-5 h-5" alt="" />}
+                  <button onClick={step1Action.onClick} className="flex items-center justify-center gap-3 w-full px-8 py-4 bg-green-600 hover:bg-green-500 text-white font-black uppercase rounded-2xl transition-all">
+                    {step1Action.icon === "whatsapp" && <img src="/icons/brands/whatsapp.svg" className="w-5 h-5" alt="" style={{ filter: 'brightness(0) invert(1)' }} />}
                     {step1Action.icon === "copy" && <Copy className="w-5 h-5" />}
                     {step1Action.label}
                   </button>
