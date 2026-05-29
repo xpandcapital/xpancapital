@@ -6,14 +6,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useCompras } from "@/lib/hooks/useCompras";
-import { useProducts } from "@/lib/hooks/useProducts";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/Toast";
 
 export default function ProductsPage() {
     const { user } = useAuth();
     const { compras, loading: comprasLoading, fetchUserPurchases } = useCompras();
-    const { products, loading: productsLoading, fetchProducts } = useProducts();
     const { showToast } = useToast();
     const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
@@ -21,8 +19,7 @@ export default function ProductsPage() {
         if (user?.id) {
             fetchUserPurchases(user.id);
         }
-        fetchProducts();
-    }, [user?.id, fetchUserPurchases, fetchProducts]);
+    }, [user?.id, fetchUserPurchases]);
 
     const handleDownload = async (product: typeof purchasedProducts[0]) => {
         if (!product.archivoUrl) {
@@ -64,7 +61,7 @@ export default function ProductsPage() {
             };
         }));
 
-    if (comprasLoading || productsLoading) {
+    if (comprasLoading) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-blis-red" />

@@ -8,13 +8,13 @@ import {
     ChevronRight,
     Clock,
     Star,
-    Trophy,
-    TrendingUp,
-    Zap,
-    DownloadCloud,
     Package,
     BookOpen,
-    Loader2
+    Loader2,
+    DownloadCloud,
+    ShoppingBag,
+    Target,
+    TrendingUp
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,24 +33,40 @@ export default function UserDashboard() {
     const { compras, loading: comprasLoading, fetchUserPurchases } = useCompras();
     const { coinsEnabled } = useShop();
 
-    const staticStats = [
-        { title: "Cursos Completados", value: "0", icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
-        { title: "Documentos Listos", value: "0", icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10" },
-        { title: "Tiempo de Estudio", value: "0h", icon: Clock, color: "text-purple-500", bg: "bg-purple-500/10" },
-        { title: "Plusvalía Estimada", value: "+0%", icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-        { title: "BLISCOINS", value: "0", icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
-        { title: "Nivel de Inversor", value: "Bronze", icon: Zap, color: "text-blis-red", bg: "bg-blis-red/10" },
+    const widgetColors = [
+        { icon: Package, label: "Productos Adquiridos", color: "text-purple-500", bg: "bg-purple-500/10" },
+        { icon: Target, label: "Cursos Completados", color: "text-amber-500", bg: "bg-amber-500/10" },
+        { icon: Play, label: "Curso Activo", color: "text-blue-500", bg: "bg-blue-500/10" },
+        { icon: Star, label: "BLISCOINS", color: "text-yellow-500", bg: "bg-yellow-500/10" },
+        { icon: TrendingUp, label: "Inversión Total", color: "text-emerald-500", bg: "bg-emerald-500/10" },
     ];
 
-    const displayStats = stats ? [
-        { title: "Cursos Completados", value: `${stats.cursosCompletados}/${stats.cursosInscritos}`, icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
-        { title: "Documentos Listos", value: stats.documentosDescargados.toString(), icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10" },
-        { title: "Tiempo de Estudio", value: `${stats.tiempoEstudio}h`, icon: Clock, color: "text-purple-500", bg: "bg-purple-500/10" },
-        { title: "Compras Realizadas", value: stats.documentosDescargados.toString(), icon: Package, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-        { title: "BLISCOINS", value: stats.blisCoins.toLocaleString(), icon: Star, color: "text-yellow-500", bg: "bg-yellow-500/10" },
-        { title: "Nivel de Inversor", value: stats.nivelInversor, icon: Zap, color: "text-blis-red", bg: "bg-blis-red/10" },
-    ] : staticStats;
-    const visibleStats = coinsEnabled ? displayStats : displayStats.filter(s => s.title !== 'BLISCOINS');
+    const widgetValue = (i: number) => {
+        if (!stats) {
+            if (i === 0) return "—"
+            if (i === 1) return "— / —"
+            if (i === 2) return "—"
+            if (i === 3) return "—"
+            if (i === 4) return "—"
+            return "—"
+        }
+        switch (i) {
+            case 0: return stats.productosAdquiridos.toString()
+            case 1: return `${stats.cursosCompletados} / ${stats.cursosInscritos}`
+            case 2: return stats.cursoActivo ? `${stats.cursoActivo.progreso}%` : "—"
+            case 3: return stats.blisCoins.toLocaleString()
+            case 4: return `$${stats.totalInvertido.toLocaleString()} USD`
+        }
+    }
+
+    const widgetSub = (i: number) => {
+        if (!stats) return ""
+        if (i === 2 && stats.cursoActivo) return stats.cursoActivo.nombre
+        if (i === 4) return `+valía ×10: $${stats.plusvaliaEstimada.toLocaleString()} USD`
+        return ""
+    }
+
+    const visibleWidgets = coinsEnabled ? widgetColors : widgetColors.filter((_, i) => i !== 3);
 
     const enrolledCourses = userCursos.map(curso => ({
         id: curso.id,
@@ -98,7 +114,7 @@ export default function UserDashboard() {
                 isCourse: isService,
                 isDownloadable: hasDownload && !isService
             };
-        }));
+        })).filter(item => item.isDownloadable);
 
     useEffect(() => {
         if (user?.id) {
@@ -141,9 +157,11 @@ export default function UserDashboard() {
                         Bienvenido, <span className="text-blis-red">{user.name || 'Usuario'}</span>
                     </h1>
                     <p className="text-gray-400 font-medium text-xs sm:text-sm max-w-xl">
-                        {allCourses.length > 0
-                            ? `Tienes ${allCourses.filter(c => c.progress < 100).length} cursos pendientes por terminar.`
-                            : 'Explora nuestros cursos y productos disponibles.'}
+                        {stats?.cursoActivo
+                            ? `Estás en "${stats.cursoActivo.nombre}" al ${stats.cursoActivo.progreso}%. ¡Sigue así!`
+                            : allCourses.length > 0
+                                ? `Tienes ${allCourses.filter(c => c.progress < 100).length} cursos pendientes por terminar.`
+                                : 'Explora tu academia y productos disponibles.'}
                     </p>
                 </motion.div>
 
@@ -158,26 +176,26 @@ export default function UserDashboard() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-6">
-                {visibleStats.map((stat, i) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
+                {visibleWidgets.map((widget, i) => (
                     <motion.div
                         key={i}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-black/40 border border-white/5 py-2 px-3 sm:py-4 sm:px-6 rounded-xl sm:rounded-2xl group hover:border-white/10 transition-all relative overflow-hidden"
+                        className="bg-black/40 border border-white/5 py-3 px-4 sm:py-4 sm:px-6 rounded-xl sm:rounded-2xl group hover:border-white/10 transition-all relative overflow-hidden"
                     >
-                        <div className="flex items-center gap-3 sm:gap-4">
-                            <div className={`p-1.5 sm:p-3 rounded-lg sm:rounded-xl w-max ${stat.bg} ${stat.color} flex-shrink-0`}>
-                                <stat.icon className="w-4 h-4 sm:w-6 h-6" />
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <div className={`p-1.5 sm:p-2.5 rounded-lg sm:rounded-xl w-max ${widget.bg} ${widget.color} flex-shrink-0`}>
+                                    <widget.icon className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+                                </div>
+                                <p className="text-gray-500 font-bold uppercase tracking-widest text-[7px] sm:text-[9px] leading-tight line-clamp-2">{widget.label}</p>
                             </div>
-                            <div className="min-w-0">
-                                <p className="text-gray-500 font-bold uppercase tracking-widest text-[7px] sm:text-xs mb-0 sm:mb-1 line-clamp-2 h-[1.8em] sm:h-[2.5em] leading-tight flex items-end">{stat.title}</p>
-                                <h3 className="text-lg sm:text-2xl font-black text-white leading-none">{stat.value}</h3>
-                            </div>
-                        </div>
-                        <div className="absolute bottom-4 right-6 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
-                            <Zap className="w-8 h-8 text-white/5" />
+                            <h3 className="text-lg sm:text-xl font-black text-white leading-none">{widgetValue(i)}</h3>
+                            {widgetSub(i) ? (
+                                <p className="text-[8px] sm:text-[9px] text-gray-500 font-bold uppercase tracking-wider truncate leading-tight">{widgetSub(i)}</p>
+                            ) : null}
                         </div>
                     </motion.div>
                 ))}

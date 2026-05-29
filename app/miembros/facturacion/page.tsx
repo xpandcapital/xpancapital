@@ -16,7 +16,7 @@ export default function BillingPage() {
 
     const totalInvertido = compras?.reduce((sum, c) => sum + (c.monto_usd || 0), 0) || 0;
     const blisCoins = stats?.blisCoins || 0;
-    const nivel = stats?.nivelInversor || "Bronze";
+    const nivel = blisCoins >= 5000 ? "Platinum" : blisCoins >= 2000 ? "Gold" : blisCoins >= 500 ? "Silver" : "Bronze";
 
     return (
         <div className="space-y-10 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">

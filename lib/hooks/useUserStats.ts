@@ -1,14 +1,20 @@
 import { useState, useCallback } from 'react'
 
+export interface CursoActivo {
+  nombre: string
+  slug: string
+  progreso: number
+  imagen_principal?: string
+}
+
 export interface UserStats {
+  productosAdquiridos: number
   cursosCompletados: number
   cursosInscritos: number
-  documentosDescargados: number
-  tiempoEstudio: number // en horas
+  cursoActivo: CursoActivo | null
   blisCoins: number
-  nivelInversor: string
-  totalCompras: number
-  totalGastado: number
+  totalInvertido: number
+  plusvaliaEstimada: number
 }
 
 export function useUserStats() {
@@ -34,7 +40,19 @@ export function useUserStats() {
         (c: { estado: string }) => c.estado === 'completado'
       )
 
-      const cursosInscritos = (cursosData.data || []).filter(
+      const totalInvertido = completedPurchases.reduce(
+        (acc: number, c: { monto_usd: number }) => acc + (c.monto_usd || 0), 0
+      )
+
+      const productosIds = new Set<string>()
+      completedPurchases.forEach((c: { items?: Array<{ producto_id: string }> }) =>
+        (c.items || []).forEach(i => { if (i.producto_id) productosIds.add(i.producto_id) })
+      )
+
+      const productosAdquiridos = productosIds.size
+
+      const cursosUsuario = cursosData.data || []
+      const cursosInscritos = cursosUsuario.filter(
         (c: { progreso?: { progreso: number } }) => c.progreso && c.progreso.progreso > 0
       )
 
@@ -42,25 +60,28 @@ export function useUserStats() {
         (c: { progreso?: { progreso: number } }) => c.progreso && c.progreso.progreso >= 100
       )
 
+      const cursoEnProgreso = cursosInscritos.find(
+        (c: { progreso?: { progreso: number } }) => c.progreso && c.progreso.progreso < 100
+      )
+
+      const cursoActivo: CursoActivo | null = cursoEnProgreso ? {
+        nombre: cursoEnProgreso.nombre,
+        slug: cursoEnProgreso.slug,
+        progreso: cursoEnProgreso.progreso?.progreso || 0,
+        imagen_principal: cursoEnProgreso.imagen_principal
+      } : null
+
       const blisCoins = profileData?.data?.blis_coins || 0
-      const nivelInversor = blisCoins >= 5000 ? 'Platinum' : 
-                           blisCoins >= 2000 ? 'Gold' : 
-                           blisCoins >= 500 ? 'Silver' : 'Bronze'
+      const plusvaliaEstimada = totalInvertido * 10
 
       const userStats: UserStats = {
+        productosAdquiridos,
         cursosCompletados: cursosCompletados.length,
         cursosInscritos: cursosInscritos.length,
-        documentosDescargados: completedPurchases.filter(
-          (p: { items?: Array<{ producto: { tipo: string } }> }) => 
-            p.items?.some(i => i.producto?.tipo === 'digital')
-        ).length,
-        tiempoEstudio: cursosCompletados.length * 2,
+        cursoActivo,
         blisCoins,
-        nivelInversor,
-        totalCompras: profileData?.data?.total_compras || completedPurchases.length,
-        totalGastado: profileData?.data?.total_gastado_usd || completedPurchases.reduce(
-          (acc: number, p: { monto_usd: number }) => acc + (p.monto_usd || 0), 0
-        )
+        totalInvertido,
+        plusvaliaEstimada
       }
 
       setStats(userStats)
