@@ -578,7 +578,7 @@ export async function POST(request: NextRequest) {
       console.log(`[Checkout] Cursos asignados: ${coursesAssigned}, errores: ${courseAssignmentError}`);
     }
 
-    // ── Enviar email vía plantilla ─────────────────────────────────────────
+    // ── Enviar email vía plantilla (fire-and-forget, no bloquea) ──────────
     const nombreProductos = productos.map((p: any) => p.nombre || `Producto #${p.producto_id?.substring(0, 6)}`);
     const prodPrices = productos.map((p: any) => ({
       nombre: p.nombre || 'Producto',
@@ -588,17 +588,15 @@ export async function POST(request: NextRequest) {
       imagen: p.imagen || '',
     }));
 
-    try {
-      await createUserAndNotify({
-        isGuest: !finalUserId,
-        email: email.toLowerCase(),
-        nombre: nombre || email.split('@')[0],
-        productos: nombreProductos,
-        total: `$${monto_usd?.toFixed(2) || '0'} USD`,
-        metodo_pago: metodo_pago || 'Manual',
-        productPrices: prodPrices,
-      })
-    } catch { /* Non-blocking */ }
+    createUserAndNotify({
+      isGuest: !finalUserId,
+      email: email.toLowerCase(),
+      nombre: nombre || email.split('@')[0],
+      productos: nombreProductos,
+      total: `$${monto_usd?.toFixed(2) || '0'} USD`,
+      metodo_pago: metodo_pago || 'Manual',
+      productPrices: prodPrices,
+    }).catch(() => {})
 
     return NextResponse.json({
       success: true,
