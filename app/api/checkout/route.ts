@@ -288,7 +288,7 @@ export async function POST(request: NextRequest) {
 
     if (ordenError) {
       console.error('Error creando orden:', ordenError);
-      return NextResponse.json({ success: false, error: 'Error al crear la orden' }, { status: 500 });
+      return NextResponse.json({ success: false, error: `Error al crear la orden: ${ordenError.message || ordenError.details || JSON.stringify(ordenError)}` }, { status: 500 });
     }
 
     if (!orden) {
