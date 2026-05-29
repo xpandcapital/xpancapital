@@ -52,7 +52,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, data })
+    // Buscar productos vinculados (curso_id → producto.id)
+    const linkedProductos = await supabase
+      .from('productos')
+      .select('id, curso_id')
+      .eq('empresa_id', DEFAULT_EMPRESA_ID)
+      .not('curso_id', 'is', null)
+
+    const productMap = new Map()
+    linkedProductos?.data?.forEach((p: any) => productMap.set(p.curso_id, p.id))
+
+    const dataWithLinks = data.map(c => ({
+      ...c,
+      linked_product_id: productMap.get(c.id) || null
+    }))
+
+    return NextResponse.json({ success: true, data: dataWithLinks })
   } catch {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }

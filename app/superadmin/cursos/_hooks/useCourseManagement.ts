@@ -33,8 +33,7 @@ export function useCourseManagement() {
           sequential_progress?: boolean
           require_completion?: boolean
           imagen_principal?: string
-          vender_en_tienda?: boolean
-          producto_id?: string
+          linked_product_id?: string | null
         }) => ({
           id: c.id,
           title: c.nombre,
@@ -50,8 +49,8 @@ export function useCourseManagement() {
           paraEquipo: c.para_equipo || false,
           sequentialProgress: c.sequential_progress || false,
           requireCompletion: c.require_completion || false,
-          venderEnTienda: c.vender_en_tienda || false,
-          productoId: c.producto_id || null
+          venderEnTienda: !!c.linked_product_id,
+          productoId: c.linked_product_id || null
         }))
         setCourses(mappedCourses)
       }
