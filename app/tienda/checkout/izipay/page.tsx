@@ -157,13 +157,11 @@ function IzipayContent() {
             </div>
 
             {/* Footer: card brands on mobile */}
-            <div className="sm:hidden px-6 pb-6 flex items-center justify-center gap-4 opacity-30">
-              <span className="text-[10px] text-gray-500 font-bold tracking-wider">VISA</span>
-              <span className="text-[10px] text-gray-500 font-bold tracking-wider">MC</span>
-              <span className="text-[10px] text-gray-500 font-bold tracking-wider">AMEX</span>
-              <span className="text-[10px] text-gray-500 font-bold tracking-wider">DINERS</span>
-              <span className="text-[10px] text-gray-500 font-bold tracking-wider">YAPE</span>
-              <span className="text-[10px] text-gray-500 font-bold tracking-wider">PLIN</span>
+            <div className="sm:hidden px-6 pb-6 flex items-center justify-center gap-3 opacity-40">
+              <img src="/icons/brands/visa.svg" alt="Visa" className="h-4 w-auto brightness-0 invert" />
+              <img src="/icons/brands/mastercard.svg" alt="Mastercard" className="h-4 w-auto brightness-0 invert" />
+              <img src="/icons/brands/amex.svg" alt="Amex" className="h-4 w-auto brightness-0 invert" />
+              <img src="/icons/brands/diners-club.svg" alt="Diners" className="h-4 w-auto brightness-0 invert" />
             </div>
           </div>
         </motion.div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
-import { Facebook, Instagram, Linkedin, Twitter, PlayCircle, Youtube, MessageCircle, Mail, Phone, MapPin, Video as VideoIcon } from "lucide-react";
+import { Mail, Phone, MapPin, PlayCircle } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import { useState, useEffect } from "react";
@@ -121,14 +121,16 @@ export function FooterSections() {
         }
     }, [showProjects]);
 
+    const brandIcon = (name: string) => `/icons/brands/${name}.svg`
+
     const globalLinks = [
-        { icon: MessageCircle, url: socials.whatsapp, name: "WhatsApp" },
-        { icon: Instagram, url: socials.instagram, name: "Instagram" },
-        { icon: Facebook, url: socials.facebook, name: "Facebook" },
-        { icon: Youtube, url: socials.youtube, name: "YouTube" },
-        { icon: VideoIcon, url: socials.tiktok, name: "TikTok" },
-        { icon: Linkedin, url: socials.linkedin, name: "LinkedIn" },
-        { icon: Twitter, url: socials.twitter, name: "X (Twitter)" },
+        { iconUrl: brandIcon('whatsapp'), url: socials.whatsapp, name: "WhatsApp" },
+        { iconUrl: brandIcon('instagram'), url: socials.instagram, name: "Instagram" },
+        { iconUrl: brandIcon('facebook'), url: socials.facebook, name: "Facebook" },
+        { iconUrl: brandIcon('youtube'), url: socials.youtube, name: "YouTube" },
+        { iconUrl: brandIcon('tiktok'), url: socials.tiktok, name: "TikTok", isLight: true },
+        { iconUrl: brandIcon('linkedin'), url: socials.linkedin, name: "LinkedIn" },
+        { iconUrl: brandIcon('x'), url: socials.twitter, name: "X (Twitter)" },
     ];
 
     const activeLinks = globalLinks.filter(link => link.url !== "" && link.url !== "#");
@@ -225,7 +227,7 @@ export function FooterSections() {
                                 {activeLinks.map((link, i) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" title={link.name}
                                         className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-gray-400 hover:text-blis-red hover:border-blis-red hover:bg-blis-red/10 transition-all">
-                                        <link.icon className="w-4 h-4" />
+                                        <img src={link.iconUrl} alt={link.name} className="w-4 h-4 brightness-0 invert opacity-60 group-hover:opacity-100" style={{ filter: 'brightness(0) invert(1)' }} />
                                     </a>
                                 ))}
                             </div>
@@ -312,7 +314,7 @@ export function FooterSections() {
                                 {activeLinks.map((link, i) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" title={link.name}
                                         className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-gray-500 hover:text-blis-red hover:border-blis-red/50 hover:bg-blis-red/10 transition-all">
-                                        <link.icon className="w-3.5 h-3.5" />
+                                        <img src={link.iconUrl} alt={link.name} className="w-3.5 h-3.5" style={{ filter: 'brightness(0) invert(1)' }} />
                                     </a>
                                 ))}
                             </div>

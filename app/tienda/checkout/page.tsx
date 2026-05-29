@@ -979,12 +979,13 @@ function CheckoutContent() {
                                         );
                                     }
                                     // izipay, paypal y otras pasarelas
-                                    const imap: Record<string, any> = { izipay: CreditCard, paypal: Wallet };
+                                    const imap: Record<string, any> = { izipay: CreditCard, paypal: null };
                                     const cmap: Record<string, string> = { izipay: "bg-emerald-500/10 border-emerald-500/40", paypal: "bg-blue-500/10 border-blue-500/40" };
                                     const tmap: Record<string, string> = { izipay: "text-emerald-400", paypal: "text-blue-400" };
                                     const Ic = imap[fp.slug] || CreditCard;
+                                    const brandIcon = fp.slug === 'paypal' ? <img src="/icons/brands/paypal.svg" alt="PayPal" className="w-5 h-5" /> : <Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />;
                                     return <PayOption key={fp.id} selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
-                                        icon={<Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
+                                        icon={brandIcon} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
                                         label={fp.nombre} sublabel={fp.descripcion || ""} amount={`$${getMethodTotal(fp.slug).toFixed(2)}`} />;
                                 })}
                             </div>
@@ -1113,11 +1114,11 @@ function CheckoutContent() {
                         <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">PCI-DSS L1</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 relative z-10">
-                      <img src="/visa-svgrepo-com.svg" alt="Visa" className="h-6 w-auto" />
-                      <img src="/mastercard-full-svgrepo-com.svg" alt="Mastercard" className="h-6 w-auto" />
-                      <img src="/amex-svgrepo-com.svg" alt="Amex" className="h-6 w-auto" />
-                      <img src="/diners-3-svgrepo-com.svg" alt="Diners" className="h-6 w-auto" />
+                    <div className="flex items-center gap-1.5 relative z-10">
+                      <div className="w-9 h-7 rounded-lg bg-white/80 flex items-center justify-center"><img src="/icons/brands/visa.svg" alt="Visa" className="h-4 w-auto" /></div>
+                      <div className="w-9 h-7 rounded-lg bg-white/80 flex items-center justify-center"><img src="/icons/brands/mastercard.svg" alt="Mastercard" className="h-4 w-auto" /></div>
+                      <div className="w-9 h-7 rounded-lg bg-white/80 flex items-center justify-center"><img src="/icons/brands/amex.svg" alt="Amex" className="h-4 w-auto" /></div>
+                      <div className="w-9 h-7 rounded-lg bg-white/80 flex items-center justify-center"><img src="/icons/brands/diners-club.svg" alt="Diners" className="h-4 w-auto" /></div>
                     </div>
                   </motion.div>
 
@@ -1189,11 +1190,11 @@ function CheckoutContent() {
                           )
                         })}
                       </div>
-                      <div className="flex items-center justify-center gap-5 pt-1">
-                        <img src="/visa-svgrepo-com.svg" alt="Visa" className="h-8 w-auto" />
-                        <img src="/mastercard-full-svgrepo-com.svg" alt="MC" className="h-8 w-auto" />
-                        <img src="/amex-svgrepo-com.svg" alt="Amex" className="h-8 w-auto" />
-                        <img src="/diners-3-svgrepo-com.svg" alt="Diners" className="h-8 w-auto" />
+                      <div className="flex items-center justify-center gap-2 pt-1">
+                        <div className="w-11 h-9 rounded-xl bg-white/10 flex items-center justify-center"><img src="/icons/brands/visa.svg" alt="Visa" className="h-4 w-auto" /></div>
+                        <div className="w-11 h-9 rounded-xl bg-white/10 flex items-center justify-center"><img src="/icons/brands/mastercard.svg" alt="MC" className="h-4 w-auto" /></div>
+                        <div className="w-11 h-9 rounded-xl bg-white/10 flex items-center justify-center"><img src="/icons/brands/amex.svg" alt="Amex" className="h-4 w-auto" /></div>
+                        <div className="w-11 h-9 rounded-xl bg-white/10 flex items-center justify-center"><img src="/icons/brands/diners-club.svg" alt="Diners" className="h-4 w-auto" /></div>
                       </div>
                     </div>
 
