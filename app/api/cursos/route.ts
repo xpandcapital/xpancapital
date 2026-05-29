@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 
     const { data: cursos, error } = await supabase
       .from('cursos')
-      .select('id, nombre, slug, descripcion, precio_coins, precio_usd, creado_en')
+      .select('id, nombre, slug, descripcion, precio_coins, precio_usd, creado_en, imagen_principal, modulos')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .eq('activo', true)
       .neq('para_equipo', true)
@@ -68,15 +68,57 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Filtrar solo cursos matriculados del usuario
+    // Filtrar solo cursos matriculados del usuario + añadir progreso
     if (userId && cursos) {
       const { data: enrolled } = await supabase
         .from('equipo_cursos')
-        .select('curso_id')
+        .select('curso_id, progreso')
         .eq('user_id', userId)
 
-      const enrolledIds = (enrolled || []).map(e => e.curso_id)
-      const filtered = cursos.filter(c => enrolledIds.includes(c.id))
+      const enrolledMap = new Map()
+      enrolled?.forEach(e => enrolledMap.set(e.curso_id, e.progreso || 0))
+
+      const filtered = cursos
+        .filter(c => enrolledMap.has(c.id))
+        .map(c => ({
+          ...c,
+          progreso: enrolledMap.get(c.id) || 0,
+          matriculado: true,
+        }))
+
+      // Si el usuario no tiene cursos en equipo_cursos, buscar en compras
+      if (filtered.length === 0) {
+        const { data: comprasUser } = await supabase
+          .from('compras')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('estado', 'completado')
+
+        if (comprasUser?.length) {
+          const { data: compraItems } = await supabase
+            .from('compra_items')
+            .select('producto_id')
+            .in('compra_id', comprasUser.map(c => c.id))
+
+          const productoIds = compraItems?.map(ci => ci.producto_id).filter(Boolean) || []
+
+          const { data: linkedCursos } = await supabase
+            .from('productos')
+            .select('curso_id')
+            .in('id', productoIds)
+            .not('curso_id', 'is', null)
+
+          const cursoIds = linkedCursos?.map(p => p.curso_id) || []
+          const purchased = cursos.filter(c => cursoIds.includes(c.id)).map(c => ({
+            ...c,
+            progreso: 0,
+            matriculado: false,
+          }))
+
+          return NextResponse.json({ success: true, data: [...filtered, ...purchased] })
+        }
+      }
+
       return NextResponse.json({ success: true, data: filtered })
     }
 
