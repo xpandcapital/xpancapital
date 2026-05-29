@@ -319,11 +319,15 @@ export async function POST(request: NextRequest) {
     if (metodo_pago === 'whatsapp' && orden) {
       const asesorId = body.asesor_id
       if (asesorId) {
-        const { data: fpData } = await supabase
+        const { data: fpData, error: fpError } = await supabase
           .from('formas_pago')
           .select('config')
           .eq('slug', 'whatsapp')
-          .single()
+          .maybeSingle()
+
+        if (fpError) {
+          console.error('[Checkout] Error buscando forma de pago whatsapp:', fpError)
+        }
 
         const asesoresWhatsApp: any[] = fpData?.config?.asesores_whatsapp || []
         const asesor = asesoresWhatsApp.find((a: any) => a.id === asesorId)

@@ -541,18 +541,21 @@ function CheckoutContent() {
 
             // Flujo WhatsApp
             if (paymentMethod === 'whatsapp') {
+                const payload = {
+                    ...commonPayload,
+                    metodo_pago: 'whatsapp',
+                    asesor_id: selectedAsesor,
+                    monto_coins: 0,
+                    monto_usd: grandTotal,
+                    estado: 'pendiente',
+                }
+                console.log('[WhatsApp Checkout] Enviando:', { asesorId: selectedAsesor, total: grandTotal, productos: payload.productos?.length })
                 const res = await fetch('/api/checkout', {
                     method: 'POST', headers,
-                    body: JSON.stringify({
-                        ...commonPayload,
-                        metodo_pago: 'whatsapp',
-                        asesor_id: selectedAsesor,
-                        monto_coins: 0,
-                        monto_usd: grandTotal,
-                        estado: 'pendiente',
-                    })
+                    body: JSON.stringify(payload),
                 })
                 const data = await res.json()
+                console.log('[WhatsApp Checkout] Respuesta:', { success: data.success, ordenId: data.ordenId, error: data.error, status: res.status })
                 if (!data.success) throw new Error(data.error || 'Error al procesar')
                 clearCart()
                 setIsProcessing(false)
@@ -619,7 +622,8 @@ function CheckoutContent() {
             setIsComplete(true);
         } catch (err) {
             console.error('Checkout error:', err);
-            showToast('Error al procesar. Intenta de nuevo.', 'error');
+            const msg = err instanceof Error ? err.message : 'Error desconocido';
+            showToast(msg, 'error');
         } finally {
             setIsProcessing(false);
         }
