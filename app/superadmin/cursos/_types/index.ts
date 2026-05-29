@@ -41,6 +41,8 @@ export interface Course {
   paraEquipo: boolean
   sequentialProgress: boolean
   requireCompletion: boolean
+  venderEnTienda: boolean
+  productoId: string | null
 }
 
 export interface CertificateTemplate {

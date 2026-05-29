@@ -130,7 +130,7 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const body = await request.json()
-    const { id, ...updates } = body
+    const { id, vender_en_tienda, ...updates } = body
 
     if (!id) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
@@ -171,12 +171,67 @@ export async function PUT(request: NextRequest) {
         if (retryError) {
           return NextResponse.json({ error: retryError.message }, { status: 500 })
         }
-        return NextResponse.json({ success: true, data: retryData })
+        return NextResponse.json({ success: true, data: retryData, producto_id: null })
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, data })
+    // Gestionar producto en tienda según toggle
+    let producto_id = null
+    const categoriaCursos = await supabase
+      .from('producto_categorias')
+      .select('id')
+      .eq('slug', 'cursos')
+      .maybeSingle()
+
+    const categoriaId = categoriaCursos?.data?.id || null
+
+    if (vender_en_tienda && data) {
+      // UPSERT producto vinculado al curso
+      const productData = {
+        empresa_id: DEFAULT_EMPRESA_ID,
+        curso_id: data.id,
+        nombre: data.nombre || 'Curso',
+        precio_usd: data.precio_usd || 0,
+        precio_coins: data.precio_coins || 0,
+        imagen_principal: data.imagen_principal || null,
+        tipo: 'servicio',
+        activo: data.activo || false,
+        categoria_id: categoriaId,
+      }
+
+      // Buscar si ya existe un producto vinculado
+      const { data: existingProduct } = await supabase
+        .from('productos')
+        .select('id')
+        .eq('curso_id', data.id)
+        .maybeSingle()
+
+      if (existingProduct) {
+        await supabase.from('productos').update(productData).eq('id', existingProduct.id)
+        producto_id = existingProduct.id
+      } else {
+        const slug = data.slug || data.nombre?.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+        const { data: newProduct } = await supabase
+          .from('productos')
+          .insert({ ...productData, slug })
+          .select('id')
+          .single()
+        if (newProduct) producto_id = newProduct.id
+      }
+    } else if (vender_en_tienda === false) {
+      // Desactivar producto si existe
+      const { data: existingProduct } = await supabase
+        .from('productos')
+        .select('id')
+        .eq('curso_id', id)
+        .maybeSingle()
+      if (existingProduct) {
+        await supabase.from('productos').update({ activo: false }).eq('id', existingProduct.id)
+      }
+    }
+
+    return NextResponse.json({ success: true, data, producto_id })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Error del servidor' }, { status: 500 })
   }

@@ -33,6 +33,8 @@ export function useCourseManagement() {
           sequential_progress?: boolean
           require_completion?: boolean
           imagen_principal?: string
+          vender_en_tienda?: boolean
+          producto_id?: string
         }) => ({
           id: c.id,
           title: c.nombre,
@@ -47,7 +49,9 @@ export function useCourseManagement() {
           certificateTemplateId: c.certificado_template_id || null,
           paraEquipo: c.para_equipo || false,
           sequentialProgress: c.sequential_progress || false,
-          requireCompletion: c.require_completion || false
+          requireCompletion: c.require_completion || false,
+          venderEnTienda: c.vender_en_tienda || false,
+          productoId: c.producto_id || null
         }))
         setCourses(mappedCourses)
       }
@@ -123,6 +127,8 @@ export function useCourseManagement() {
         para_equipo: currentCourse.paraEquipo || false,
         sequential_progress: currentCourse.sequentialProgress || false,
         require_completion: currentCourse.requireCompletion || false,
+        vender_en_tienda: currentCourse.venderEnTienda || false,
+        producto_id: currentCourse.productoId || null,
       }
 
       if (currentCourse.image) courseData.imagen_principal = currentCourse.image
@@ -141,11 +147,12 @@ export function useCourseManagement() {
       if (currentVersion !== saveVersionRef.current) return
 
       if (data.success) {
+        const productoId = data.producto_id || currentCourse.productoId
         if (isNew && data.data?.id) {
-          setCurrentCourse(prev => prev ? { ...prev, id: data.data.id, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null)
+          setCurrentCourse(prev => prev ? { ...prev, id: data.data.id, status: effectiveStatus, productoId, lastSaved: new Date().toLocaleTimeString() } : null)
           await fetchCourses()
         } else if (!isNew) {
-          setCurrentCourse(prev => prev ? { ...prev, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null)
+          setCurrentCourse(prev => prev ? { ...prev, status: effectiveStatus, productoId, lastSaved: new Date().toLocaleTimeString() } : null)
         }
         return true
       } else if (data.error?.includes('slug') || data.error?.includes('duplicate')) {
@@ -209,7 +216,9 @@ export function useCourseManagement() {
       certificateTemplateId: null,
       paraEquipo: false,
       sequentialProgress: false,
-      requireCompletion: false
+      requireCompletion: false,
+      venderEnTienda: false,
+      productoId: null
     }
     setCourses(prev => [...prev, newCourse])
     setCurrentCourse(newCourse)

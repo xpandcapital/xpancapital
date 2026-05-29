@@ -12,6 +12,7 @@ import { LessonEditor } from './LessonEditor'
 import { PreviewModal } from './PreviewModal'
 import { ConfirmationModal } from './ConfirmationModal'
 import { ImageCropper } from './ImageCropper'
+import { TiendaSection } from './TiendaSection'
 
 interface CourseEditorProps {
   course: Course
@@ -170,6 +171,11 @@ export function CourseEditor({
               reader.readAsDataURL(file)
             }}
             fileInputRef={fileInputRef}
+          />
+
+          <TiendaSection
+            course={course}
+            onUpdate={(c) => onSetCurrentCourse(c)}
           />
 
           {course.modules.map((module, mIdx) => (
