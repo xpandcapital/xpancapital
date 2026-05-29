@@ -227,7 +227,7 @@ export function FooterSections() {
                                 {activeLinks.map((link, i) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" title={link.name}
                                         className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-gray-400 hover:text-blis-red hover:border-blis-red hover:bg-blis-red/10 transition-all">
-                                        <img src={link.iconUrl} alt={link.name} className="w-4 h-4 brightness-0 invert opacity-60 group-hover:opacity-100" style={{ filter: 'brightness(0) invert(1)' }} />
+                                        <img src={link.iconUrl} alt={link.name} className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity" />
                                     </a>
                                 ))}
                             </div>
@@ -314,7 +314,7 @@ export function FooterSections() {
                                 {activeLinks.map((link, i) => (
                                     <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" title={link.name}
                                         className="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-gray-500 hover:text-blis-red hover:border-blis-red/50 hover:bg-blis-red/10 transition-all">
-                                        <img src={link.iconUrl} alt={link.name} className="w-3.5 h-3.5" style={{ filter: 'brightness(0) invert(1)' }} />
+                                        <img src={link.iconUrl} alt={link.name} className="w-3.5 h-3.5 opacity-60 hover:opacity-100 transition-opacity" />
                                     </a>
                                 ))}
                             </div>
