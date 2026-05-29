@@ -43,7 +43,6 @@ export function mapProductoToProductDef(producto: Producto): ProductDef {
   const productType = tipoMapping[producto.tipo] || 'ebook';
   
   const categoryMapping: Record<string, string> = {
-    'capacitaciones': 'Cursos',
     'cursos': 'Cursos',
     'curso': 'Cursos',
     'ebooks': 'Ebooks',

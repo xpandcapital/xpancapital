@@ -80,7 +80,7 @@ const ALL_SECTIONS: Section[] = [
                 subItems: [
                     { icon: GraduationCap, label: "Cursos", href: "/superadmin/cursos", permission: "cursos:ver" },
                     { icon: Library, label: "Biblioteca", href: "/superadmin/biblioteca", permission: "biblioteca:ver" },
-                    { icon: BookOpenCheck, label: "Capacitaciones", href: "/superadmin/mis-capacitaciones", permission: "capacitaciones:ver" },
+                    { icon: BookOpenCheck, label: "Cursos", href: "/superadmin/mis-capacitaciones", permission: "capacitaciones:ver" },
                     { icon: Award, label: "Certificados", href: "/superadmin/certificados", permission: "certificados:ver" },
                 ]
             },
