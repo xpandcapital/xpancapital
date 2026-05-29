@@ -930,7 +930,7 @@ function CheckoutContent() {
                                                             {w.qr_url && <img src={w.qr_url} alt="QR" className="w-20 h-20 rounded-xl object-cover border border-white/10 flex-shrink-0" />}
                                                         </div>
                                                     ))}</div> : <p className="text-xs text-gray-500 italic">No hay wallets configuradas aún</p>}
-                                                    {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><img src="/icons/brands/whatsapp.svg" className="w-4 h-4" alt="" />Enviar Comprobante por WhatsApp</a>}
+                                                    <p className="text-[10px] text-gray-500 text-center">Podrás enviar tu comprobante en el siguiente paso.</p>
                                                     {ins && <p className="text-[10px] text-gray-500 text-center">{ins}</p>}
                                                 </div>);
                                             })()}

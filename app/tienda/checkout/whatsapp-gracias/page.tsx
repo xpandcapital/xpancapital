@@ -104,7 +104,14 @@ function WhatsAppGraciasContent() {
 
   const handleWhatsApp = () => {
     const url = metadata?.whatsapp_url;
-    if (url) window.open(url, "_blank");
+    if (!url) return;
+    const sep = '?text='
+    const idx = url.indexOf(sep)
+    if (idx === -1) { window.open(url, '_blank'); return }
+    const base = url.substring(0, idx + sep.length)
+    const text = url.substring(idx + sep.length)
+    const decoded = decodeURIComponent(text)
+    window.open(base + encodeURIComponent(decoded), '_blank')
   };
 
   const asesorNombre = metadata?.asesor_nombre || "Blis Expert Team";

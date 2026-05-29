@@ -121,13 +121,24 @@ function PagoPendienteContent() {
     }
   };
 
+  const openWhatsAppSafe = (rawUrl: string) => {
+    const sep = '?text='
+    const idx = rawUrl.indexOf(sep)
+    if (idx === -1) { window.open(rawUrl, '_blank'); return }
+    const base = rawUrl.substring(0, idx + sep.length)
+    const text = rawUrl.substring(idx + sep.length)
+    const decoded = decodeURIComponent(text)
+    const safe = base + encodeURIComponent(decoded)
+    window.open(safe, '_blank')
+  }
+
   const getStep1Action = () => {
     switch (metodoPago) {
       case "whatsapp":
-        return { label: "Abrir WhatsApp", icon: "whatsapp", onClick: () => { const url = paymentDetails?.whatsapp_url; if (url) window.open(url, "_blank"); } };
+        return { label: "Abrir WhatsApp", icon: "whatsapp", onClick: () => { const url = paymentDetails?.whatsapp_url; if (url) openWhatsAppSafe(url); } };
       case "transfer":
       case "crypto_manual":
-        return { label: "Abrir WhatsApp", icon: "whatsapp", onClick: () => { const url = paymentDetails?.whatsapp_url; if (url) window.open(url, "_blank"); } };
+        return { label: "Abrir WhatsApp", icon: "whatsapp", onClick: () => { const url = paymentDetails?.whatsapp_url; if (url) openWhatsAppSafe(url); } };
       default: return null;
     }
   };
