@@ -154,7 +154,7 @@ export default function AdminUsers() {
                         <select
                             value={roleFilter}
                             onChange={(e) => setRoleFilter(e.target.value)}
-                            className="bg-transparent text-sm text-white focus:outline-none appearance-none pr-6"
+                            className="bg-white/5 text-sm text-white focus:outline-none appearance-none pr-6 rounded-lg cursor-pointer"
                         >
                             <option value="Todos">Todos los roles</option>
                             {ROLE_OPTIONS.map(r => (
@@ -167,7 +167,7 @@ export default function AdminUsers() {
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="bg-transparent text-sm text-white focus:outline-none appearance-none pr-6"
+                            className="bg-white/5 text-sm text-white focus:outline-none appearance-none pr-6 rounded-lg cursor-pointer"
                         >
                             <option value="Todos">Todos los estados</option>
                             <option value="Activo">Activos</option>

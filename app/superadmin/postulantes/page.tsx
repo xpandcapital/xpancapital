@@ -181,7 +181,7 @@ export default function AdminPostulantes() {
         <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
           <Filter className="w-4 h-4 text-gray-500" />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-transparent text-sm text-white focus:outline-none appearance-none pr-6">
+            className="bg-white/5 text-sm text-white focus:outline-none appearance-none pr-6 rounded-lg cursor-pointer">
             <option value="Todos">Todos los estados</option>
             {ESTADOS_CONST.map((e) => <option key={e} value={e}>{ESTADO_LABELS[e]}</option>)}
           </select>

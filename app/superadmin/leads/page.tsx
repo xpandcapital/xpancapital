@@ -290,7 +290,7 @@ export default function LeadsPage() {
                         <select
                           value={lead.estado}
                           onChange={(e) => updateLeadEstado(lead.id, e.target.value)}
-                          className={`text-xs px-2 py-1 rounded-full border-0 ${getEstadoColor(lead.estado)}`}
+                          className={`text-xs px-2 py-1 rounded-full border border-white/10 cursor-pointer ${getEstadoColor(lead.estado)}`}
                         >
                           {ESTADOS.map(e => (
                             <option key={e.value} value={e.value}>{e.label}</option>

@@ -90,7 +90,7 @@ const CustomDatePicker = ({ value, onChange, label }: { value: string, onChange:
                             <div className="flex gap-2 items-center">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-white">{months[viewDate.getMonth()]}</span>
                                 <select
-                                    className="bg-transparent text-[10px] font-black uppercase tracking-widest outline-none text-blis-red cursor-pointer"
+                                    className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-widest outline-none text-blis-red cursor-pointer appearance-none"
                                     value={viewDate.getFullYear()}
                                     onChange={handleYearChange}
                                 >
