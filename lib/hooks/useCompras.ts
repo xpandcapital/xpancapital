@@ -27,6 +27,7 @@ export interface CompraWithItems extends Compra {
       imagen_principal?: string
       tipo?: string
       archivo_url?: string
+      curso_id?: string | null
       categoria?: { nombre: string }
     }
   }>
