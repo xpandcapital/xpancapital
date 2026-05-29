@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Search as SearchIcon, Facebook, Music2, ShoppingCart, Bell, Heart, LogOut, LayoutDashboard, User, ShieldCheck, ChevronDown } from "lucide-react"
+import { X, Search as SearchIcon, Instagram, Youtube, Facebook, Music2, ShoppingCart, Bell, Heart, LogOut, LayoutDashboard, User, ShieldCheck, ChevronDown } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"
@@ -51,10 +51,10 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     ]
 
     const socialLinks = [
-        { iconUrl: '/icons/brands/facebook.svg', href: "#", label: "Facebook" },
-        { iconUrl: '/icons/brands/instagram.svg', href: "#", label: "Instagram" },
-        { iconUrl: '/icons/brands/youtube.svg', href: "#", label: "YouTube" },
-        { iconUrl: '/icons/brands/tiktok.svg', href: "#", label: "TikTok" },
+        { icon: Facebook, href: "#", label: "Facebook" },
+        { icon: Instagram, href: "#", label: "Instagram" },
+        { icon: Youtube, href: "#", label: "YouTube" },
+        { icon: Music2, href: "#", label: "TikTok" },
     ]
 
     const isActiveLink = (href: string) => {
@@ -704,14 +704,14 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                     Conecta con nosotros
                                 </p>
                                 <div className="flex justify-center gap-3">
-                                    {socialLinks.map(({ iconUrl, href, label }) => (
+                                    {socialLinks.map(({ icon: Icon, href, label }) => (
                                         <a
                                             key={label}
                                             href={href}
                                             aria-label={label}
                                             className="w-9 h-9 rounded-full border border-white/10 bg-white/5 flex items-center justify-center text-gray-400 hover:text-white hover:border-blis-red/50 hover:bg-blis-red/10 transition-all duration-200"
                                         >
-                                            <img src={iconUrl} alt={label} className="w-3.5 h-3.5 opacity-60 hover:opacity-100 transition-opacity" />
+                                            <Icon className="w-3.5 h-3.5" />
                                         </a>
                                     ))}
                                 </div>
