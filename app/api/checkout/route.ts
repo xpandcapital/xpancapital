@@ -367,14 +367,15 @@ export async function POST(request: NextRequest) {
 
         if (asesor?.telefono) {
           const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+          const E = (code: number) => String.fromCodePoint(code)
           const lines: string[] = []
-          lines.push('*NUEVO PEDIDO - BLIS Corp*')
+          lines.push(`${E(0x1F6D2)} *NUEVO PEDIDO - BLIS Corp*`)
           lines.push('')
-          lines.push(`*Cliente:* ${nombre || 'Invitado'}`)
-          lines.push(`Email: ${email}`)
-          if (telefono) lines.push(`Tel: ${telefono}`)
+          lines.push(`${E(0x1F464)} *Cliente:* ${nombre || 'Invitado'}`)
+          lines.push(`${E(0x1F4E7)} ${email}`)
+          if (telefono) lines.push(`${E(0x1F4F1)} ${telefono}`)
           lines.push('')
-          lines.push('*Productos:*')
+          lines.push(`${E(0x1F4E6)} *Productos:*`)
 
           for (const p of productos) {
             const pName = p.nombre || `Producto`
@@ -401,15 +402,15 @@ export async function POST(request: NextRequest) {
                   codigo = Math.random().toString(36).substring(2, 8)
                   await supabase.from('short_links').insert({ codigo, url_destino: prodUrl })
                 }
-                lines.push(`  ${baseUrl}/s/${codigo}`)
+                lines.push(`  ${E(0x1F517)} ${baseUrl}/s/${codigo}`)
               } catch { /* non-blocking: skip short link if it fails */ }
             }
           }
 
           lines.push('')
-          lines.push(`$ *Total:* $${(monto_usd || 0).toFixed(2)} USD`)
-          if (monto_coins > 0) lines.push(`BLISCOINS: ${monto_coins}`)
-          lines.push(`# *Orden:* ${orden.id.substring(0, 8)}`)
+          lines.push(`${E(0x1F4B0)} *Total:* $${(monto_usd || 0).toFixed(2)} USD`)
+          if (monto_coins > 0) lines.push(`${E(0x1FAB6)} BLISCOINS: ${monto_coins}`)
+          lines.push(`${E(0x1F4CB)} *Orden:* ${orden.id.substring(0, 8)}`)
           lines.push('')
           lines.push('_Por favor coordina el pago con el cliente._')
 
@@ -435,23 +436,24 @@ export async function POST(request: NextRequest) {
       const pd = (orden.metadata as any)?.payment_details || {}
       const wpp = pd?.whatsapp || ''
       if (wpp) {
+        const E = (code: number) => String.fromCodePoint(code)
         const lines: string[] = []
-        lines.push('*COMPROBANTE DE PAGO - BLIS Corp*')
+        lines.push(`${E(0x1F4B0)} *COMPROBANTE DE PAGO - BLIS Corp*`)
         lines.push('')
-        lines.push(`*Cliente:* ${nombre || 'Invitado'}`)
-        lines.push(`Email: ${email}`)
-        if (telefono) lines.push(`Tel: ${telefono}`)
+        lines.push(`${E(0x1F464)} *Cliente:* ${nombre || 'Invitado'}`)
+        lines.push(`${E(0x1F4E7)} ${email}`)
+        if (telefono) lines.push(`${E(0x1F4F1)} ${telefono}`)
         lines.push('')
-        lines.push('*Productos:*')
+        lines.push(`${E(0x1F4E6)} *Productos:*`)
         for (const p of productos) {
           const pName = p.nombre || 'Producto'
           const price = p.precio_unitario ? `$${p.precio_unitario.toFixed(2)} USD` : ''
-          lines.push(`- ${pName} — ${price}`)
+          lines.push(`- ${pName} - ${price}`)
         }
         lines.push('')
-        lines.push(`$ *Total:* $${(monto_usd || 0).toFixed(2)} USD`)
-        lines.push(`# *Orden:* ${orden.id.substring(0, 8)}`)
-        lines.push(`Método: ${metodo_pago === 'transfer' ? 'Transferencia' : 'Cripto'}`)
+        lines.push(`${E(0x1F4B0)} *Total:* $${(monto_usd || 0).toFixed(2)} USD`)
+        lines.push(`${E(0x1F4CB)} *Orden:* ${orden.id.substring(0, 8)}`)
+        lines.push(`${E(0x1F4B3)} Método: ${metodo_pago === 'transfer' ? 'Transferencia' : 'Cripto'}`)
         lines.push('')
         lines.push('_Adjunto mi comprobante de pago. Por favor verificar._')
         
