@@ -26,16 +26,14 @@ export async function GET(request: NextRequest) {
 
       const enriched = await Promise.all(formas.map(async (f: any) => {
         if (f.slug !== 'whatsapp') return f
-        const asesorIds = f.config?.asesor_ids || []
-        if (asesorIds.length === 0) return f
-
-        const { data: asesores } = await supabase
-          .from('asesores')
-          .select('id, nombre, foto_url')
-          .in('id', asesorIds)
-          .eq('activo', true)
-
-        return { ...f, asesores: asesores || [] }
+        const asesoresData = f.config?.asesores_whatsapp || []
+        if (asesoresData.length === 0) return f
+        const asesoresPublic = asesoresData.map((a: any) => ({
+          id: a.id,
+          nombre: a.nombre,
+          foto_url: a.foto_url || '',
+        }))
+        return { ...f, asesores: asesoresPublic }
       }))
 
       return NextResponse.json({ success: true, formas: enriched });

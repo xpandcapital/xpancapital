@@ -31,7 +31,6 @@ export default function FormasPagoAdminPage() {
     const [guardando, setGuardando] = useState<string | null>(null);
     const [expanded, setExpanded] = useState<string | null>(null);
     const [expandedPais, setExpandedPais] = useState<Record<string, boolean>>({});
-    const [asesores, setAsesores] = useState<any[]>([]);
 
     const cargar = async () => {
         setLoading(true);
@@ -44,12 +43,7 @@ export default function FormasPagoAdminPage() {
         finally { setLoading(false); }
     };
 
-    useEffect(() => {
-        cargar();
-        fetch("/api/admin/asesores").then(r => r.json()).then(d => {
-            if (d.success || Array.isArray(d)) setAsesores(d.data || d || []);
-        }).catch(() => {});
-    }, []);
+    useEffect(() => { cargar(); }, []);
 
     const toggleActivo = async (forma: FormaPago) => {
         setGuardando(forma.id);
@@ -327,40 +321,64 @@ export default function FormasPagoAdminPage() {
                                                                 </select>
                                                             </div>
                                                             <div>
-                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-2">Asesores disponibles</label>
-                                                                {asesores.length === 0 ? (
-                                                                    <p className="text-xs text-gray-600">No hay asesores configurados. Créalos en Campañas → Asesores.</p>
-                                                                ) : (
-                                                                    <div className="space-y-1 max-h-48 overflow-y-auto">
-                                                                        {asesores.map((a: any) => {
-                                                                            const selected = (forma.config?.asesor_ids || []).includes(a.id)
-                                                                            return (
-                                                                                <button
-                                                                                    key={a.id}
-                                                                                    onClick={() => {
-                                                                                        const ids: string[] = forma.config?.asesor_ids || []
-                                                                                        const next = selected ? ids.filter((id: string) => id !== a.id) : [...ids, a.id]
-                                                                                        updateForma(forma.id, { asesor_ids: next })
-                                                                                    }}
-                                                                                    className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-all text-xs ${selected ? 'bg-green-500/10 border border-green-500/20' : 'bg-white/5 border border-white/5 hover:bg-white/10'}`}
-                                                                                >
-                                                                                    {a.foto_url ? (
-                                                                                        <img src={a.foto_url} alt={a.nombre} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
-                                                                                    ) : (
-                                                                                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                                                                                            <MessageCircle className="w-4 h-4 text-gray-500" />
-                                                                                        </div>
-                                                                                    )}
-                                                                                    <div className="min-w-0 flex-1">
-                                                                                        <p className="text-white font-bold truncate">{a.nombre}</p>
-                                                                                        <p className="text-gray-500 text-[10px] truncate">{a.email || a.telefono || ''}</p>
+                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-2">Asesores WhatsApp (ficticios)</label>
+                                                                <div className="space-y-2">
+                                                                    {(forma.config?.asesores_whatsapp || []).map((a: any, idx: number) => (
+                                                                        <div key={idx} className="bg-black/30 border border-white/10 rounded-xl p-3 space-y-2">
+                                                                            <div className="flex items-center gap-3">
+                                                                                {a.foto_url ? (
+                                                                                    <img src={a.foto_url} alt="" className="w-10 h-10 rounded-full object-cover flex-shrink-0 border border-white/10" />
+                                                                                ) : (
+                                                                                    <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                                                                                        <img src="/icons/brands/whatsapp.svg" className="w-5 h-5" alt="" />
                                                                                     </div>
-                                                                                    {selected && <div className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />}
-                                                                                </button>
-                                                                            )
-                                                                        })}
-                                                                    </div>
-                                                                )}
+                                                                                )}
+                                                                                <div className="flex-1 grid grid-cols-2 gap-2">
+                                                                                    <Input value={a.nombre || ''} onChange={e => {
+                                                                                        const list = [...(forma.config?.asesores_whatsapp || [])]
+                                                                                        list[idx] = { ...list[idx], nombre: e.target.value }
+                                                                                        updateForma(forma.id, { asesores_whatsapp: list })
+                                                                                    }} placeholder="Nombre" className="bg-white/5 border-white/10 text-white text-[10px] h-7" />
+                                                                                    <Input value={a.telefono || ''} onChange={e => {
+                                                                                        const list = [...(forma.config?.asesores_whatsapp || [])]
+                                                                                        list[idx] = { ...list[idx], telefono: e.target.value }
+                                                                                        updateForma(forma.id, { asesores_whatsapp: list })
+                                                                                    }} placeholder="+51 999 888 777" className="bg-white/5 border-white/10 text-white text-[10px] h-7" />
+                                                                                </div>
+                                                                                <div className="flex items-center gap-1 flex-shrink-0">
+                                                                                    <label className="cursor-pointer px-2 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] text-gray-400 hover:text-white hover:bg-white/10 flex items-center gap-1">
+                                                                                        📷
+                                                                                        <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                                                                            const file = e.target.files?.[0]; if (!file) return;
+                                                                                            setGuardando(forma.id);
+                                                                                            try {
+                                                                                                const fd = new FormData(); fd.append("file", file);
+                                                                                                const res = await fetch("/api/admin/biblioteca/upload", { method: "POST", body: fd });
+                                                                                                const d = await res.json();
+                                                                                                if (d.success) {
+                                                                                                    const list = [...(forma.config?.asesores_whatsapp || [])]
+                                                                                                    list[idx] = { ...list[idx], foto_url: d.url }
+                                                                                                    updateForma(forma.id, { asesores_whatsapp: list })
+                                                                                                }
+                                                                                            } catch {}
+                                                                                            setGuardando(null);
+                                                                                        }} />
+                                                                                    </label>
+                                                                                    <button onClick={() => {
+                                                                                        const list = (forma.config?.asesores_whatsapp || []).filter((_: any, i: number) => i !== idx)
+                                                                                        updateForma(forma.id, { asesores_whatsapp: list })
+                                                                                    }} className="p-1.5 text-red-400 hover:text-red-300"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                    <Button size="sm" variant="outline" onClick={() => {
+                                                                        const list = [...(forma.config?.asesores_whatsapp || []), { id: Math.random().toString(36).substring(2, 10), nombre: '', telefono: '', foto_url: '' }]
+                                                                        updateForma(forma.id, { asesores_whatsapp: list })
+                                                                    }} className="text-[10px] border-white/10 text-gray-400 hover:text-white w-full h-8">
+                                                                        <Plus className="w-3 h-3 mr-1" /> Agregar Asesor
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     )}

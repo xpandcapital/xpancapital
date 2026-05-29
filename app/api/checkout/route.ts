@@ -319,11 +319,14 @@ export async function POST(request: NextRequest) {
     if (metodo_pago === 'whatsapp' && orden) {
       const asesorId = body.asesor_id
       if (asesorId) {
-        const { data: asesor } = await supabase
-          .from('asesores')
-          .select('id, nombre, foto_url, telefono')
-          .eq('id', asesorId)
+        const { data: fpData } = await supabase
+          .from('formas_pago')
+          .select('config')
+          .eq('slug', 'whatsapp')
           .single()
+
+        const asesoresWhatsApp: any[] = fpData?.config?.asesores_whatsapp || []
+        const asesor = asesoresWhatsApp.find((a: any) => a.id === asesorId)
 
         if (asesor?.telefono) {
           const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
