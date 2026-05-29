@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { getSupabase } from "@/lib/supabase";
 
 interface Notificacion {
   id: string;
@@ -113,33 +114,26 @@ export function NotificationBell() {
     fetchNotifications();
   }, [fetchNotifications]);
 
+  // Realtime: suscripción a nuevas notificaciones (sin polling)
   useEffect(() => {
     if (!user) return;
 
-    let interval: NodeJS.Timeout | null = null
-
-    const startPolling = () => {
-      fetchNotifications()
-      interval = setInterval(fetchNotifications, 60000)
-    }
-
-    const stopPolling = () => {
-      if (interval) { clearInterval(interval); interval = null }
-    }
-
-    const onVisibility = () => {
-      if (document.hidden) { stopPolling() }
-      else { startPolling() }
-    }
-
-    startPolling()
-    document.addEventListener('visibilitychange', onVisibility)
+    const supabase = getSupabase();
+    const channel = supabase
+      .channel('notifications-realtime')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notificaciones',
+      }, () => {
+        fetchNotifications();
+      })
+      .subscribe();
 
     return () => {
-      stopPolling()
-      document.removeEventListener('visibilitychange', onVisibility)
-    }
-  }, [fetchNotifications, user]);
+      supabase.removeChannel(channel);
+    };
+  }, [user, fetchNotifications]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
