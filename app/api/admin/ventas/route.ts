@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest) {
       .eq("id", id)
       .single();
 
-    const updates: any = { updated_at: new Date().toISOString() };
+    const updates: any = {};
     if (estado) updates.estado = estado;
     if (metodo_pago) updates.metodo_pago = metodo_pago;
 
