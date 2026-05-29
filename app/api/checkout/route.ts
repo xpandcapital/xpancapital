@@ -398,6 +398,38 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ── Enriquecer metadata con datos de pago para transfer/crypto ──────────
+    if (orden && (metodo_pago === 'transfer' || metodo_pago === 'crypto_manual')) {
+      try {
+        const { data: fpData } = await supabase
+          .from('formas_pago')
+          .select('config')
+          .eq('slug', metodo_pago)
+          .maybeSingle()
+
+        const config = fpData?.config || {}
+        const selectedCountry = body.selected_country || body.pais || ''
+        const paymentDetails: Record<string, any> = { type: metodo_pago }
+
+        if (metodo_pago === 'transfer') {
+          paymentDetails.country = selectedCountry
+          paymentDetails.countries = config.countries || {}
+          paymentDetails.whatsapp = config.whatsapp || ''
+          paymentDetails.instructions = config.instructions || ''
+        } else if (metodo_pago === 'crypto_manual') {
+          paymentDetails.wallets = config.wallets || []
+          paymentDetails.whatsapp = config.whatsapp || ''
+          paymentDetails.instructions = config.instructions || ''
+        }
+
+        await supabase.from('compras').update({
+          metadata: { ...orden.metadata, payment_details: paymentDetails }
+        }).eq('id', orden.id)
+      } catch (e) {
+        console.error('[Checkout] Error enriqueciendo metadata:', e)
+      }
+    }
+
     // ── Si pagó con coins, descontarlos ─────────────────────────────────────
     if (metodo_pago === 'coins' && finalUserId && monto_coins > 0) {
       await supabase.from('coins_transacciones').insert({

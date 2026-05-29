@@ -559,25 +559,18 @@ function CheckoutContent() {
                 if (!data.success) throw new Error(data.error || 'Error al procesar')
                 clearCart()
                 setIsProcessing(false)
-                window.location.href = `/tienda/checkout/whatsapp-gracias?order_id=${data.ordenId}`
+                window.location.href = `/tienda/checkout/pago-pendiente?order_id=${data.ordenId}`
                 return;
             }
 
             // Flujo transferencia y crypto manual
             if (paymentMethod === 'transfer' || paymentMethod === 'crypto_manual') {
-                const fp = formasPago.find((f: any) => f.slug === paymentMethod)
-                const banco = encodeURIComponent(JSON.stringify({
-                    config: fp?.config,
-                    country: selectedCountry || form.pais,
-                    total: grandTotal,
-                    metodo: paymentMethod,
-                }))
-
                 const res = await fetch('/api/checkout', {
                     method: 'POST', headers,
                     body: JSON.stringify({
                         ...commonPayload,
                         metodo_pago: paymentMethod,
+                        selected_country: selectedCountry || form.pais,
                         monto_coins: 0,
                         monto_usd: grandTotal,
                         estado: 'pendiente',
@@ -586,7 +579,8 @@ function CheckoutContent() {
                 const data = await res.json()
                 if (!data.success) throw new Error(data.error || 'Error al procesar')
                 clearCart()
-                window.location.href = `/tienda/checkout/transfer-gracias?info=${banco}`
+                setIsProcessing(false)
+                window.location.href = `/tienda/checkout/pago-pendiente?order_id=${data.ordenId}`
                 return;
             }
 
