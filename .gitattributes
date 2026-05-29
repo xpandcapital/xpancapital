@@ -1,3 +1,8 @@
+# Forzar LF en todos los archivos de codigo
 *.ts text eol=lf
 *.tsx text eol=lf
 *.js text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.sql text eol=lf
