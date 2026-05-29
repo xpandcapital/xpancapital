@@ -432,6 +432,7 @@ export async function POST(request: NextRequest) {
       precio: p.precio_unitario?.toFixed(2) || '0',
       cantidad: p.cantidad || 1,
       categoria: p.productType || '',
+      imagen: p.imagen || '',
     }));
 
     try {

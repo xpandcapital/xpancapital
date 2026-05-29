@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
             nombre: p.nombre || 'Producto',
             precio: p.precio_unitario?.toFixed(2) || '0',
             cantidad: p.cantidad || 1,
+            imagen: p.imagen || '',
           })),
         }).catch(() => {})
       }

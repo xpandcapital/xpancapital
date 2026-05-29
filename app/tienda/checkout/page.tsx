@@ -392,6 +392,7 @@ function CheckoutContent() {
                 precio_coins: item.precio_coins,
                 curso_id: item.curso_id,
                 slug: item.slug,
+                imagen: item.image || (item as any).imagen_principal || '',
             }));
 
             const commonPayload = {

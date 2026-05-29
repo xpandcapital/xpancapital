@@ -169,6 +169,7 @@ export async function POST(request: NextRequest) {
             precio: p.precio_unitario?.toFixed(2) || ordenActual.monto_usd?.toFixed(2) || '0',
             cantidad: p.cantidad || 1,
             categoria: p.productType || '',
+            imagen: p.imagen || '',
           }))
           const { userId, isNewUser } = await createUserAndNotify({
             email, nombre,

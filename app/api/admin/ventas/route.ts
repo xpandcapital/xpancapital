@@ -112,6 +112,7 @@ export async function PUT(request: NextRequest) {
             precio: p.precio_unitario?.toFixed(2) || data.monto_usd?.toFixed(2) || '0',
             cantidad: p.cantidad || 1,
             categoria: p.productType || '',
+            imagen: p.imagen || '',
           }))
           const { userId } = await createUserAndNotify({
             email, nombre,
