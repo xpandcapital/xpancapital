@@ -8,12 +8,11 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 // GET — listar todas las formas de pago (admin)
 export async function GET(request: NextRequest) {
   try {
-    const auth = await getAuthUser(request);
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     // Si es público (sin auth), solo devolver activas
     const { searchParams } = new URL(request.url);
     const isPublic = searchParams.get("public") === "1";
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     if (isPublic) {
       const { data } = await supabase
@@ -24,7 +23,7 @@ export async function GET(request: NextRequest) {
 
       const formas = data || []
 
-      const enriched = await Promise.all(formas.map(async (f: any) => {
+      const enriched = formas.map((f: any) => {
         if (f.slug !== 'whatsapp') return f
         const asesoresData = f.config?.asesores_whatsapp || []
         if (asesoresData.length === 0) return f
@@ -34,11 +33,12 @@ export async function GET(request: NextRequest) {
           foto_url: a.foto_url || '',
         }))
         return { ...f, asesores: asesoresPublic }
-      }))
+      })
 
       return NextResponse.json({ success: true, formas: enriched });
     }
 
+    const auth = await getAuthUser(request);
     if (!auth || !["superadmin", "admin"].includes(auth.rol)) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
