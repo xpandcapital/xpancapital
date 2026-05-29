@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useCursos } from "@/lib/hooks/useCursos";
+import { useUserCursos } from "@/lib/hooks/useCursos";
 
 interface Lesson {
     id: string;
@@ -43,7 +43,7 @@ const TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> =
 
 function AcademyContent() {
     const { user } = useAuth();
-    const { cursos, loading } = useCursos();
+    const { userCursos, loading, refetch: refetchUserCursos } = useUserCursos(user?.id || null);
     const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
     const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
     const [activeModule, setActiveModule] = useState<string | null>(null);
@@ -160,7 +160,7 @@ function AcademyContent() {
         return Math.round((completedLessons.length / total) * 100);
     };
 
-    if (loading) {
+    if (loading || loadingPurchased) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
@@ -181,15 +181,16 @@ function AcademyContent() {
         );
     }
 
-    const coursesWithProgress = cursos.map((curso: any) => ({
+    // Combinar cursos del usuario (equipo_cursos) con cursos comprados sin duplicar
+    const enrolledCourses = userCursos.map((curso: any) => ({
         ...curso,
         modulos: curso.modulos || [{ id: 'm1', title: 'Módulo 1', lessons: [] }],
         progreso: curso.progreso || { progreso: 0 }
     }));
 
-    const enrolledIds = new Set(coursesWithProgress.map(c => c.id));
+    const enrolledIds = new Set(enrolledCourses.map(c => c.id));
     const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.id));
-    const allAcademyCourses = [...coursesWithProgress, ...newPurchasedCourses];
+    const allAcademyCourses = [...enrolledCourses, ...newPurchasedCourses];
 
     return (
         <div className="space-y-8 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
