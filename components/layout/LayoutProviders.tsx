@@ -10,7 +10,7 @@ import { CursorWrapper } from "@/components/ui/CursorWrapper"
 import { PWARegistrar } from "@/components/utils/PWARegistrar"
 import { DynamicMetadata } from "@/components/utils/DynamicMetadata"
 import { FaviconBadge } from "@/components/layout/FaviconBadge"
-import { ChatWidget } from "@/components/chat/ChatWidget"
+// import { ChatWidget } from "@/components/chat/ChatWidget"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 interface LayoutProvidersProps {
@@ -50,7 +50,7 @@ export function LayoutProviders({
                   logoVertical={logoVertical}
                 />
                 {children}
-                <ChatWidget />
+                {/* <ChatWidget /> */}
               </SalesProvider>
             </ShopProvider>
           </ToastProvider>

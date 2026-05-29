@@ -113,11 +113,29 @@ export function NotificationBell() {
   useEffect(() => {
     if (!user) return;
 
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, 30000);
+    let interval: NodeJS.Timeout | null = null
 
-    return () => clearInterval(interval);
+    const startPolling = () => {
+      fetchNotifications()
+      interval = setInterval(fetchNotifications, 60000)
+    }
+
+    const stopPolling = () => {
+      if (interval) { clearInterval(interval); interval = null }
+    }
+
+    const onVisibility = () => {
+      if (document.hidden) { stopPolling() }
+      else { startPolling() }
+    }
+
+    startPolling()
+    document.addEventListener('visibilitychange', onVisibility)
+
+    return () => {
+      stopPolling()
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [fetchNotifications, user]);
 
   useEffect(() => {

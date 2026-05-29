@@ -47,13 +47,22 @@ export function FaviconBadge() {
     }
 
     checkUnread()
-    intervalRef.current = setInterval(checkUnread, 30000)
+    intervalRef.current = setInterval(checkUnread, 60000)
+
+    // Pausar cuando la pestaña no está activa
+    const onVisibility = () => {
+      if (document.hidden) {
+        if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null }
+      } else {
+        checkUnread()
+        intervalRef.current = setInterval(checkUnread, 60000)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-        intervalRef.current = null
-      }
+      if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null }
+      document.removeEventListener('visibilitychange', onVisibility)
     }
   }, [user, pathname])
 

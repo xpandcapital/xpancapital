@@ -206,7 +206,7 @@ export function SecurityDashboard() {
     finally { setLoading(false) }
   }, [dias])
 
-  useEffect(() => { fetchData(); const i = setInterval(fetchData, 30000); return () => clearInterval(i) }, [fetchData])
+  useEffect(() => { fetchData() }, [fetchData])
 
   if (!data && loading) return (
     <div className="flex items-center justify-center h-full">
