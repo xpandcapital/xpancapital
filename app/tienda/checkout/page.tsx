@@ -942,11 +942,11 @@ function CheckoutContent() {
                                         return (
                                             <div key={fp.id}>
                                                 <PayOption selected={paymentMethod === 'whatsapp'} onClick={() => setPaymentMethod('whatsapp')}
-                                                    icon={<MessageCircle className="w-5 h-5 text-green-400" />} bg="bg-green-500/10 border-green-500/40"
+                                                    icon={<img src="/icons/brands/whatsapp.svg" className="w-5 h-5" alt="WhatsApp" />} bg="bg-green-500/10 border-green-500/40"
                                                     label="WhatsApp" sublabel={fp.descripcion || "Coordina tu pago con un asesor"} amount={`$${getMethodTotal('whatsapp').toFixed(2)}`} />
                                                 {paymentMethod === 'whatsapp' && (
                                                     <div className="mt-3 p-4 bg-green-500/5 border border-green-500/20 rounded-2xl space-y-3">
-                                                        <p className="text-xs text-green-400 font-bold uppercase flex gap-2"><MessageCircle className="w-4 h-4"/>Elige tu asesor</p>
+                                                        <p className="text-xs text-green-400 font-bold uppercase flex gap-2"><img src="/icons/brands/whatsapp.svg" className="w-4 h-4" alt="" />Elige tu asesor</p>
                                                         {asesoresList.length === 0 ? (
                                                             <p className="text-xs text-gray-500 italic">No hay asesores disponibles en este momento.</p>
                                                         ) : (
@@ -960,8 +960,8 @@ function CheckoutContent() {
                                                                         {a.foto_url ? (
                                                                             <img src={a.foto_url} alt={a.nombre} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                                                                         ) : (
-                                                                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                                                                                <MessageCircle className="w-5 h-5 text-gray-500" />
+                                                                            <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                                                                                <img src="/icons/brands/whatsapp.svg" className="w-5 h-5" alt="" />
                                                                             </div>
                                                                         )}
                                                                         <div>

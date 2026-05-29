@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useState, useEffect, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { CheckCircle2, Loader2, Clock, MessageCircle, ArrowLeft, Package, ShoppingBag } from "lucide-react";
+import { CheckCircle2, Loader2, Clock, ArrowLeft, Package, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/sections/Header";
 import { FooterSections } from "@/components/sections/Footer";
@@ -116,7 +116,7 @@ function WhatsAppGraciasContent() {
       title: "Completa el pago por WhatsApp",
       desc: `Habla con tu asesor ${asesorNombre} para coordinar el pago.`,
       done: state !== "loading",
-      icon: MessageCircle,
+      icon: (props: { className?: string }) => <img src="/icons/brands/whatsapp.svg" className={props.className} alt="" />,
     },
     {
       num: 2,
@@ -278,7 +278,7 @@ function WhatsAppGraciasContent() {
                   onClick={handleWhatsApp}
                   className="flex items-center justify-center gap-3 w-full px-8 py-4 bg-green-600 hover:bg-green-500 text-white font-black uppercase rounded-2xl transition-all"
                 >
-                  <MessageCircle className="w-5 h-5" /> Abrir WhatsApp
+                  <img src="/icons/brands/whatsapp.svg" className="w-5 h-5" alt="" /> Abrir WhatsApp
                 </button>
               )}
 
