@@ -603,3 +603,57 @@ Directrices exactas de refactorización visual para cada sección de la landing 
 * **Botón Enviar:** Animación de carga interna (spinner + texto cambia a "Enviando..."). `whileTap={{ scale: 0.95 }}`.
 
 ---
+
+## 🎨 Iconos de Marca (Brand Icons)
+
+### Ubicación
+```
+public/icons/brands/
+├── whatsapp.svg
+├── google.svg
+├── stripe.svg
+├── ... (113 íconos)
+```
+
+### Cómo usarlos en componentes
+
+```tsx
+{/* Como imagen directa */}
+<img src="/icons/brands/whatsapp.svg" className="w-5 h-5" alt="WhatsApp" />
+
+{/* Como componente funcional inline */}
+const WaIcon = () => <img src="/icons/brands/whatsapp.svg" className="w-5 h-5" alt="" />
+
+{/* Con Next.js Image (para optimización) */}
+import Image from "next/image"
+<Image src="/icons/brands/stripe.svg" width={24} height={24} alt="Stripe" />
+```
+
+### Cómo descargar nuevos íconos
+
+Los íconos provienen del repositorio [thesvg.org](https://github.com/glincker/thesvg) (`public/icons/`).
+
+**Script:** `scripts/download-brand-icon.ts`
+
+```bash
+# Descargar uno
+npx tsx scripts/download-brand-icon.ts notion
+
+# Lote completo (todos los definidos en BATCH[])
+npx tsx scripts/download-brand-icon.ts --batch
+```
+
+**Si un ícono no se encuentra**, probar nombres alternativos consultando el repo:
+```bash
+curl -s https://api.github.com/repos/glincker/thesvg/contents/public/icons/{nombre}
+```
+
+El script intenta variantes: `default.svg` → `wordmark.svg` → `mono.svg` → `icon.svg` → `color.svg`.
+
+### ⚠️ Reglas
+
+- **NO descargar íconos de otras fuentes** — solo del repo `glincker/thesvg`
+- **Nombrar el archivo** exactamente como el nombre de marca (minúsculas, slugs): `google-play.svg`, `microsoft-teams.svg`
+- **Si ya existe**, el script lo omite automáticamente
+- Los SVGs son locales (sin dependencia externa en producción)
+- Cada SVG pesa ~1-5KB — sin problema de rendimiento
