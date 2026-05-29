@@ -414,7 +414,7 @@ export async function POST(request: NextRequest) {
           lines.push('')
           lines.push('_Por favor coordina el pago con el cliente._')
 
-          const mensaje = lines.join('\n')
+          const mensaje = lines.join('\r\n')
           const telefonoLimpio = asesor.telefono.replace(/\D/g, '')
           whatsappUrl = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`
 
@@ -457,7 +457,7 @@ export async function POST(request: NextRequest) {
         lines.push('')
         lines.push('_Adjunto mi comprobante de pago. Por favor verificar._')
         
-        const mensaje = lines.join('\n')
+        const mensaje = lines.join('\r\n')
         const telefonoLimpio = wpp.replace(/\D/g, '')
         const whatsappUrl = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`
 
