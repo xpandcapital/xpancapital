@@ -97,7 +97,7 @@ export default function UserDashboard() {
 
     const allCourses = [...enrolledCourses, ...newPurchasedCourses].slice(0, 6);
 
-    const recentDownloads = compras
+    const recentPurchases = compras
         .filter(c => c.estado === 'completado')
         .slice(0, 4)
         .flatMap(c => (c.items || []).map(item => {
@@ -114,7 +114,9 @@ export default function UserDashboard() {
                 isCourse: isService,
                 isDownloadable: hasDownload && !isService
             };
-        })).filter(item => item.isDownloadable);
+        }));
+
+    const recentDownloads = recentPurchases.filter(item => item.isDownloadable);
 
     useEffect(() => {
         if (user?.id) {
@@ -202,7 +204,7 @@ export default function UserDashboard() {
             </div>
 
             {/* Mis Compras Section */}
-            {recentDownloads.length > 0 && (
+            {recentPurchases.length > 0 && (
                 <div className="space-y-4">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-black text-white uppercase tracking-widest flex items-center gap-3">
@@ -212,7 +214,7 @@ export default function UserDashboard() {
                         <a href="/miembros/productos" className="text-xs text-blis-red font-black uppercase tracking-widest hover:text-white transition-colors">Ver Todo</a>
                     </div>
                     <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible md:grid md:grid-cols-2 lg:grid-cols-4">
-                        {recentDownloads.map((item, i) => (
+                        {recentPurchases.map((item, i) => (
                             item.isCourse ? (
                                 <Link key={item.id || i} href="/miembros/academia" className="group cursor-pointer shrink-0 w-48 md:w-auto bg-black/40 border border-blis-red/20 rounded-2xl overflow-hidden hover:border-blis-red/40 transition-all flex flex-col">
                                     <div className="flex items-center gap-3 p-3 bg-zinc-900/50">

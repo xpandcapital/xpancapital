@@ -184,7 +184,7 @@ export default function VentasAdminPage() {
                             placeholder="Buscar por cliente o producto..." className="bg-zinc-900/50 border-white/10 text-white placeholder:text-gray-600 rounded-xl pl-10" />
                     </div>
                     <select value={filtroEstado} onChange={e => { setFiltroEstado(e.target.value); setPage(1); }}
-                        className="px-4 py-2.5 bg-zinc-900/50 border border-white/10 rounded-xl text-sm text-white cursor-pointer">
+                        className="px-4 py-2.5 bg-zinc-900/50 border border-white/10 rounded-xl text-sm text-white cursor-pointer appearance-none focus:outline-none focus:border-blis-red/30 transition-all">
                         <option value="">Todos los estados</option>
                         <option value="completado">Completado</option>
                         <option value="pendiente">Pendiente</option>
@@ -320,7 +320,7 @@ export default function VentasAdminPage() {
                         <div>
                             <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Producto *</label>
                             <select value={formNueva.producto_id} onChange={e => setFormNueva({ ...formNueva, producto_id: e.target.value })}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white">
+                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-blis-red/30 transition-all">
                                 <option value="">Seleccionar producto...</option>
                                 {productos.map(p => (
                                     <option key={p.id} value={p.id}>{p.nombre} ({p.categoria?.nombre || p.tipo || 'N/A'})</option>
@@ -330,7 +330,7 @@ export default function VentasAdminPage() {
                         <div>
                             <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Método de Pago</label>
                             <select value={formNueva.metodo_pago} onChange={e => setFormNueva({ ...formNueva, metodo_pago: e.target.value })}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white">
+                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-blis-red/30 transition-all">
                                 <option value="transferencia">Transferencia</option>
                                 <option value="efectivo">Efectivo</option>
                                 <option value="tarjeta">Tarjeta</option>
@@ -376,7 +376,7 @@ export default function VentasAdminPage() {
                             <div>
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Sub-tipo de pago</label>
                                 <select value={subTipoPago} onChange={e => setSubTipoPago(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white">
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-blis-red/30 transition-all">
                                     <option value="">Seleccionar...</option>
                                     <option value="transferencia">Transferencia Bancaria</option>
                                     <option value="billetera_digital">Billetera Digital (Yape/Plin)</option>
