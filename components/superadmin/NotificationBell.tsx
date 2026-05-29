@@ -13,6 +13,7 @@ import {
   CheckCheck,
   ExternalLink,
   Banknote,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
@@ -200,6 +201,20 @@ export function NotificationBell() {
     }
   };
 
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    try {
+      await fetch(`/api/notificaciones?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      setUnreadCount((prev) => {
+        const removed = notifications.find((n) => n.id === id);
+        return removed && !removed.leida ? Math.max(0, prev - 1) : prev;
+      });
+    } catch {
+      // silencioso
+    }
+  };
+
   const IconoComponent = TIPO_ICONOS;
   const displayNotifications = notifications.slice(0, 10);
 
@@ -312,9 +327,15 @@ export function NotificationBell() {
                             <span className="text-[10px] text-gray-600 font-medium uppercase tracking-wider">
                               {tiempoRelativo(n.creado_en)}
                             </span>
-                            {(n.link || n.data?.url) && (
+                            {(n.link || n.data?.url) ? (
                               <ExternalLink className="w-3 h-3 text-gray-600 group-hover:text-blis-red transition-colors" />
-                            )}
+                            ) : <span className="w-3 h-3" />}
+                            <button
+                              onClick={(e) => handleDelete(e, n.id)}
+                              className="p-0.5 hover:bg-red-500/10 rounded text-gray-600 hover:text-red-400 transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
                           </div>
                         </div>
                       </button>
