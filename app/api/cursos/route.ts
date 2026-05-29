@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
         .filter(c => enrolledMap.has(c.id))
         .map(c => ({
           ...c,
-          progreso: enrolledMap.get(c.id) || 0,
+          progreso: { progreso: enrolledMap.get(c.id) || 0 },
           matriculado: true,
         }))
 
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
           const cursoIds = linkedCursos?.map(p => p.curso_id) || []
           const purchased = cursos.filter(c => cursoIds.includes(c.id)).map(c => ({
             ...c,
-            progreso: 0,
+            progreso: { progreso: 0 },
             matriculado: false,
           }))
 
