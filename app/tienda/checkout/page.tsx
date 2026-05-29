@@ -541,6 +541,9 @@ function CheckoutContent() {
 
             // Flujo WhatsApp
             if (paymentMethod === 'whatsapp') {
+                const controller = new AbortController()
+                const timeout = setTimeout(() => controller.abort(), 15000)
+                
                 const payload = {
                     ...commonPayload,
                     metodo_pago: 'whatsapp',
@@ -549,11 +552,12 @@ function CheckoutContent() {
                     monto_usd: grandTotal,
                     estado: 'pendiente',
                 }
-                console.log('[WhatsApp Checkout] Enviando:', { asesorId: selectedAsesor, total: grandTotal, productos: payload.productos?.length })
+                console.log('[WhatsApp Checkout] Enviando:', { asesorId: selectedAsesor, total: grandTotal })
                 const res = await fetch('/api/checkout', {
                     method: 'POST', headers,
                     body: JSON.stringify(payload),
-                })
+                    signal: controller.signal,
+                }).finally(() => clearTimeout(timeout))
                 const data = await res.json()
                 console.log('[WhatsApp Checkout] Respuesta:', { success: data.success, ordenId: data.ordenId, error: data.error, status: res.status })
                 if (!data.success) throw new Error(data.error || 'Error al procesar')
@@ -566,6 +570,9 @@ function CheckoutContent() {
 
             // Flujo transferencia y crypto manual
             if (paymentMethod === 'transfer' || paymentMethod === 'crypto_manual') {
+                const controller = new AbortController()
+                const timeout = setTimeout(() => controller.abort(), 15000)
+                
                 const res = await fetch('/api/checkout', {
                     method: 'POST', headers,
                     body: JSON.stringify({
@@ -575,8 +582,9 @@ function CheckoutContent() {
                         monto_coins: 0,
                         monto_usd: grandTotal,
                         estado: 'pendiente',
-                    })
-                })
+                    }),
+                    signal: controller.signal,
+                }).finally(() => clearTimeout(timeout))
                 const data = await res.json()
                 if (!data.success) throw new Error(data.error || 'Error al procesar')
                 isRedirectingRef.current = true
