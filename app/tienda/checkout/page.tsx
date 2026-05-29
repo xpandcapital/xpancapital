@@ -897,7 +897,7 @@ function CheckoutContent() {
                                                                 {b.cci && <p className="text-xs text-gray-400 flex items-center gap-2">CCI: <span className="text-white font-mono">{b.cci}</span> <button onClick={() => { navigator.clipboard.writeText((b.cci || '').replace(/[\s-]/g, '')) }} className="text-gray-500 hover:text-white"><Copy className="w-3 h-3" /></button></p>}
                                                             </div>
                                                         ))}</div> : <p className="text-xs text-gray-500 italic">No hay bancos configurados</p>}
-                                                        {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><img src="/icons/brands/whatsapp.svg" className="w-4 h-4" alt="" />Enviar Comprobante por WhatsApp</a>}
+                                                        <p className="text-[10px] text-gray-500 text-center">Podrás enviar tu comprobante en el siguiente paso.</p>
                                                         {ins && <p className="text-[10px] text-gray-500 text-center">{ins}</p>}
                                                     </div>);
                                                 })()}

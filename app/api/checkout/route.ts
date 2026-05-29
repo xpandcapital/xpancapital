@@ -431,6 +431,42 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ── Generar whatsapp_url para transfer/crypto ───────────────────────────
+    if (orden && (metodo_pago === 'transfer' || metodo_pago === 'crypto_manual')) {
+      const pd = (orden.metadata as any)?.payment_details || {}
+      const wpp = pd?.whatsapp || ''
+      if (wpp) {
+        const E = (code: number) => String.fromCodePoint(code)
+        const lines: string[] = []
+        lines.push(`${E(0x1F4B0)} *COMPROBANTE DE PAGO — BLIS Corp*`)
+        lines.push('')
+        lines.push(`${E(0x1F464)} *Cliente:* ${nombre || 'Invitado'}`)
+        lines.push(`${E(0x1F4E7)} ${email}`)
+        if (telefono) lines.push(`${E(0x1F4F1)} ${telefono}`)
+        lines.push('')
+        lines.push(`${E(0x1F4E6)} *Productos:*`)
+        for (const p of productos) {
+          const pName = p.nombre || 'Producto'
+          const price = p.precio_unitario ? `$${p.precio_unitario.toFixed(2)} USD` : ''
+          lines.push(`• ${pName} — ${price}`)
+        }
+        lines.push('')
+        lines.push(`${E(0x1F4B0)} *Total:* $${(monto_usd || 0).toFixed(2)} USD`)
+        lines.push(`${E(0x1F4CB)} *Orden:* #${orden.id.substring(0, 8)}`)
+        lines.push(`${E(0x1F4B3)} *Método:* ${metodo_pago === 'transfer' ? 'Transferencia' : 'Cripto'}`)
+        lines.push('')
+        lines.push('_Adjunto mi comprobante de pago. Por favor verificar._')
+        
+        const mensaje = lines.join('\n')
+        const telefonoLimpio = wpp.replace(/\D/g, '')
+        const whatsappUrl = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`
+
+        await supabase.from('compras').update({
+          metadata: { ...orden.metadata, whatsapp_url: whatsappUrl }
+        }).eq('id', orden.id)
+      }
+    }
+
     // ── Si pagó con coins, descontarlos ─────────────────────────────────────
     if (metodo_pago === 'coins' && finalUserId && monto_coins > 0) {
       await supabase.from('coins_transacciones').insert({

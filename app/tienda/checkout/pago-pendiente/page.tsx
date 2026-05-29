@@ -60,7 +60,9 @@ function PagoPendienteContent() {
 
       const meta = orden.metadata || {};
       setMetodoPago(orden.metodo_pago || "");
-      setPaymentDetails(meta.payment_details || meta);
+      const pd = meta.payment_details || meta;
+      if (pd && meta.whatsapp_url) pd.whatsapp_url = meta.whatsapp_url;
+      setPaymentDetails(pd);
 
       if (orden.estado === "completado") {
         setState("completado");
@@ -124,20 +126,8 @@ function PagoPendienteContent() {
       case "whatsapp":
         return { label: "Abrir WhatsApp", icon: "whatsapp", onClick: () => { const url = paymentDetails?.whatsapp_url; if (url) window.open(url, "_blank"); } };
       case "transfer":
-        return { label: "Copiar datos bancarios", icon: "copy", onClick: () => {
-          const c = paymentDetails?.countries || {}; const k = paymentDetails?.country || Object.keys(c)[0] || "";
-          const bks = c[k]?.banks || []; if (bks.length > 0) {
-            const txt = bks.map((b: any) => `${b.name}\nCuenta: ${b.account_number}\nTitular: ${b.account_holder}${b.cci ? '\nCCI: ' + b.cci : ''}`).join('\n\n');
-            navigator.clipboard.writeText(txt);
-          }
-        }};
       case "crypto_manual":
-        return { label: "Copiar wallet", icon: "copy", onClick: () => {
-          const wls = paymentDetails?.wallets || []; if (wls.length > 0) {
-            const txt = wls.map((w: any) => `${w.label || w.network}: ${w.address}`).join('\n');
-            navigator.clipboard.writeText(txt);
-          }
-        }};
+        return { label: "Abrir WhatsApp", icon: "whatsapp", onClick: () => { const url = paymentDetails?.whatsapp_url; if (url) window.open(url, "_blank"); } };
       default: return null;
     }
   };
