@@ -372,12 +372,6 @@ function CheckoutContent() {
             return;
         }
 
-        if (paymentMethod === 'whatsapp' && !selectedAsesor) {
-            showToast('Selecciona un asesor para continuar con el pago por WhatsApp', 'error');
-            setIsProcessing(false);
-            return;
-        }
-
         setIsProcessing(true);
 
         try {
@@ -948,7 +942,12 @@ function CheckoutContent() {
                                         const asesoresList: any[] = fp.asesores || []
                                         return (
                                             <div key={fp.id}>
-                                                <PayOption selected={paymentMethod === 'whatsapp'} onClick={() => setPaymentMethod('whatsapp')}
+                                                <PayOption selected={paymentMethod === 'whatsapp'} onClick={() => {
+                                                    setPaymentMethod('whatsapp')
+                                                    if (asesoresList.length > 0 && !selectedAsesor) {
+                                                        setSelectedAsesor(asesoresList[0].id)
+                                                    }
+                                                }}
                                                     icon={<img src="/icons/brands/whatsapp.svg" className="w-5 h-5" alt="WhatsApp" />} bg="bg-green-500/10 border-green-500/40"
                                                     label="WhatsApp" sublabel={fp.descripcion || "Coordina tu pago con un asesor"} amount={`$${getMethodTotal('whatsapp').toFixed(2)}`} />
                                                 {paymentMethod === 'whatsapp' && (
