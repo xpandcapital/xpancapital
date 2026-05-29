@@ -248,9 +248,49 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ── Construir metadata base ───────────────────────────────────────────────
+    const metadataBase: Record<string, any> = {
+      productos,
+      email_cliente: email.toLowerCase(),
+      nombre_cliente: nombre,
+      telefono_cliente: telefono,
+      tiene_fisicos: tiene_fisicos || false,
+      direccion_envio: direccion_envio || null,
+    }
+
+    // ── Enriquecer metadata con datos de pago (transfer/crypto) ─────────────
+    if (metodo_pago === 'transfer' || metodo_pago === 'crypto_manual') {
+      try {
+        const { data: fpData } = await supabase
+          .from('formas_pago')
+          .select('config')
+          .eq('slug', metodo_pago)
+          .maybeSingle()
+
+        const config = fpData?.config || {}
+        const selectedCountry = body.selected_country || body.pais || ''
+        const paymentDetails: Record<string, any> = { type: metodo_pago }
+
+        if (metodo_pago === 'transfer') {
+          paymentDetails.country = selectedCountry
+          paymentDetails.countries = config.countries || {}
+          paymentDetails.whatsapp = config.whatsapp || ''
+          paymentDetails.instructions = config.instructions || ''
+        } else if (metodo_pago === 'crypto_manual') {
+          paymentDetails.wallets = config.wallets || []
+          paymentDetails.whatsapp = config.whatsapp || ''
+          paymentDetails.instructions = config.instructions || ''
+        }
+
+        metadataBase.payment_details = paymentDetails
+      } catch (e) {
+        console.error('[Checkout] Error enriqueciendo metadata:', e)
+      }
+    }
+
     // ── Crear la orden en Supabase ───────────────────────────────────────────
     const primerProductoId = productos?.[0]?.producto_id || productos?.[0]?.id || null;
-    
+
     console.log('[CHECKOUT] Creando orden con:', {
       empresa_id,
       user_id: finalUserId,
@@ -260,7 +300,7 @@ export async function POST(request: NextRequest) {
       monto_usd,
       productosCount: productos?.length
     });
-    
+
     const { data: orden, error: ordenError } = await supabase
       .from('compras')
       .insert({
@@ -271,14 +311,7 @@ export async function POST(request: NextRequest) {
         monto_coins: monto_coins || 0,
         monto_usd: monto_usd || 0,
         estado: estado || 'completado',
-        metadata: {
-          productos,
-          email_cliente: email.toLowerCase(),
-          nombre_cliente: nombre,
-          telefono_cliente: telefono,
-          tiene_fisicos: tiene_fisicos || false,
-          direccion_envio: direccion_envio || null,
-        },
+        metadata: metadataBase,
         creado_en: new Date().toISOString(),
       })
       .select()
@@ -395,38 +428,6 @@ export async function POST(request: NextRequest) {
             }
           }).eq('id', orden.id)
         }
-      }
-    }
-
-    // ── Enriquecer metadata con datos de pago para transfer/crypto ──────────
-    if (orden && (metodo_pago === 'transfer' || metodo_pago === 'crypto_manual')) {
-      try {
-        const { data: fpData } = await supabase
-          .from('formas_pago')
-          .select('config')
-          .eq('slug', metodo_pago)
-          .maybeSingle()
-
-        const config = fpData?.config || {}
-        const selectedCountry = body.selected_country || body.pais || ''
-        const paymentDetails: Record<string, any> = { type: metodo_pago }
-
-        if (metodo_pago === 'transfer') {
-          paymentDetails.country = selectedCountry
-          paymentDetails.countries = config.countries || {}
-          paymentDetails.whatsapp = config.whatsapp || ''
-          paymentDetails.instructions = config.instructions || ''
-        } else if (metodo_pago === 'crypto_manual') {
-          paymentDetails.wallets = config.wallets || []
-          paymentDetails.whatsapp = config.whatsapp || ''
-          paymentDetails.instructions = config.instructions || ''
-        }
-
-        await supabase.from('compras').update({
-          metadata: { ...orden.metadata, payment_details: paymentDetails }
-        }).eq('id', orden.id)
-      } catch (e) {
-        console.error('[Checkout] Error enriqueciendo metadata:', e)
       }
     }
 

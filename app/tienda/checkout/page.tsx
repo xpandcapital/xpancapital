@@ -557,9 +557,10 @@ function CheckoutContent() {
                 const data = await res.json()
                 console.log('[WhatsApp Checkout] Respuesta:', { success: data.success, ordenId: data.ordenId, error: data.error, status: res.status })
                 if (!data.success) throw new Error(data.error || 'Error al procesar')
+                isRedirectingRef.current = true
                 clearCart()
                 setIsProcessing(false)
-                window.location.href = `/tienda/checkout/pago-pendiente?order_id=${data.ordenId}`
+                router.push(`/tienda/checkout/pago-pendiente?order_id=${data.ordenId}`)
                 return;
             }
 
@@ -578,9 +579,10 @@ function CheckoutContent() {
                 })
                 const data = await res.json()
                 if (!data.success) throw new Error(data.error || 'Error al procesar')
+                isRedirectingRef.current = true
                 clearCart()
                 setIsProcessing(false)
-                window.location.href = `/tienda/checkout/pago-pendiente?order_id=${data.ordenId}`
+                router.push(`/tienda/checkout/pago-pendiente?order_id=${data.ordenId}`)
                 return;
             }
 
@@ -895,7 +897,7 @@ function CheckoutContent() {
                                                                 {b.cci && <p className="text-xs text-gray-400 flex items-center gap-2">CCI: <span className="text-white font-mono">{b.cci}</span> <button onClick={() => { navigator.clipboard.writeText((b.cci || '').replace(/[\s-]/g, '')) }} className="text-gray-500 hover:text-white"><Copy className="w-3 h-3" /></button></p>}
                                                             </div>
                                                         ))}</div> : <p className="text-xs text-gray-500 italic">No hay bancos configurados</p>}
-                                                        {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><Phone className="w-4 h-4"/>Enviar Comprobante por WhatsApp</a>}
+                                                        {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><img src="/icons/brands/whatsapp.svg" className="w-4 h-4" alt="" />Enviar Comprobante por WhatsApp</a>}
                                                         {ins && <p className="text-[10px] text-gray-500 text-center">{ins}</p>}
                                                     </div>);
                                                 })()}
@@ -928,7 +930,7 @@ function CheckoutContent() {
                                                             {w.qr_url && <img src={w.qr_url} alt="QR" className="w-20 h-20 rounded-xl object-cover border border-white/10 flex-shrink-0" />}
                                                         </div>
                                                     ))}</div> : <p className="text-xs text-gray-500 italic">No hay wallets configuradas aún</p>}
-                                                    {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><Phone className="w-4 h-4"/>Enviar Comprobante por WhatsApp</a>}
+                                                    {wpp && <a href={`https://wa.me/${wpp.replace(/[^0-9]/g, '')}?text=${msg}`} target="_blank" className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold uppercase text-xs rounded-xl"><img src="/icons/brands/whatsapp.svg" className="w-4 h-4" alt="" />Enviar Comprobante por WhatsApp</a>}
                                                     {ins && <p className="text-[10px] text-gray-500 text-center">{ins}</p>}
                                                 </div>);
                                             })()}
