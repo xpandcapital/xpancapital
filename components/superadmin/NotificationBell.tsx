@@ -78,6 +78,7 @@ export function NotificationBell() {
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const fetchRef = useRef<() => void>(() => {});
   const router = useRouter();
   const { user } = useAuth();
 
@@ -111,10 +112,7 @@ export function NotificationBell() {
     }
   }, [user]);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
-
+  fetchRef.current = fetchNotifications;
   // Realtime: suscripción a nuevas notificaciones (sin polling)
   useEffect(() => {
     if (!user) return;
@@ -127,14 +125,14 @@ export function NotificationBell() {
         schema: 'public',
         table: 'notificaciones',
       }, () => {
-        fetchNotifications();
+        fetchRef.current();
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, fetchNotifications]);
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
