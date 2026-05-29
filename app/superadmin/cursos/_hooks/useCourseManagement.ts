@@ -127,7 +127,6 @@ export function useCourseManagement() {
         sequential_progress: currentCourse.sequentialProgress || false,
         require_completion: currentCourse.requireCompletion || false,
         vender_en_tienda: currentCourse.venderEnTienda || false,
-        producto_id: currentCourse.productoId || null,
       }
 
       if (currentCourse.image) courseData.imagen_principal = currentCourse.image

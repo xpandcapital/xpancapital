@@ -145,7 +145,7 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const body = await request.json()
-    const { id, vender_en_tienda, ...updates } = body
+    const { id, vender_en_tienda, producto_id: _pid, ...updates } = body
 
     if (!id) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
