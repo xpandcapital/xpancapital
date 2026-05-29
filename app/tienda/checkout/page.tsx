@@ -372,6 +372,12 @@ function CheckoutContent() {
             return;
         }
 
+        if (paymentMethod === 'whatsapp' && !selectedAsesor) {
+            showToast('Selecciona un asesor para continuar con el pago por WhatsApp', 'error');
+            setIsProcessing(false);
+            return;
+        }
+
         setIsProcessing(true);
 
         try {
@@ -555,6 +561,7 @@ function CheckoutContent() {
                 const data = await res.json()
                 if (!data.success) throw new Error(data.error || 'Error al procesar')
                 clearCart()
+                setIsProcessing(false)
                 window.location.href = `/tienda/checkout/whatsapp-gracias?order_id=${data.ordenId}`
                 return;
             }

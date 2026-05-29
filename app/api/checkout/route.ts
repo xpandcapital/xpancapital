@@ -351,19 +351,21 @@ export async function POST(request: NextRequest) {
                 : null
 
             if (prodUrl) {
-              let codigo = ''
-              const { data: existLink } = await supabase
-                .from('short_links')
-                .select('codigo')
-                .eq('url_destino', prodUrl)
-                .maybeSingle()
-              if (existLink) {
-                codigo = existLink.codigo
-              } else {
-                codigo = Math.random().toString(36).substring(2, 8)
-                await supabase.from('short_links').insert({ codigo, url_destino: prodUrl })
-              }
-              lines.push(`  🔗 ${baseUrl}/s/${codigo}`)
+              try {
+                let codigo = ''
+                const { data: existLink } = await supabase
+                  .from('short_links')
+                  .select('codigo')
+                  .eq('url_destino', prodUrl)
+                  .maybeSingle()
+                if (existLink) {
+                  codigo = existLink.codigo
+                } else {
+                  codigo = Math.random().toString(36).substring(2, 8)
+                  await supabase.from('short_links').insert({ codigo, url_destino: prodUrl })
+                }
+                lines.push(`  🔗 ${baseUrl}/s/${codigo}`)
+              } catch { /* non-blocking: skip short link if it fails */ }
             }
           }
 
