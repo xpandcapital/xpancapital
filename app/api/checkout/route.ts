@@ -314,6 +314,80 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ── WhatsApp: generar mensaje y links acortados ─────────────────────────
+    let whatsappUrl = null
+    if (metodo_pago === 'whatsapp' && orden) {
+      const asesorId = body.asesor_id
+      if (asesorId) {
+        const { data: asesor } = await supabase
+          .from('asesores')
+          .select('id, nombre, foto_url, telefono')
+          .eq('id', asesorId)
+          .single()
+
+        if (asesor?.telefono) {
+          const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+          const lines: string[] = []
+          lines.push('🛒 *NUEVO PEDIDO — BLIS Corp*')
+          lines.push('')
+          lines.push(`👤 *Cliente:* ${nombre || 'Invitado'}`)
+          lines.push(`📧 ${email}`)
+          if (telefono) lines.push(`📱 ${telefono}`)
+          lines.push('')
+          lines.push('📦 *Productos:*')
+
+          for (const p of productos) {
+            const pName = p.nombre || `Producto`
+            const price = p.precio_unitario ? `$${p.precio_unitario.toFixed(2)} USD` : ''
+            lines.push(`• ${pName} — ${price}`)
+
+            const prodUrl = p.slug
+              ? `${baseUrl}/tienda/producto/${p.slug}`
+              : p.producto_id
+                ? `${baseUrl}/tienda/producto/${p.producto_id}`
+                : null
+
+            if (prodUrl) {
+              let codigo = ''
+              const { data: existLink } = await supabase
+                .from('short_links')
+                .select('codigo')
+                .eq('url_destino', prodUrl)
+                .maybeSingle()
+              if (existLink) {
+                codigo = existLink.codigo
+              } else {
+                codigo = Math.random().toString(36).substring(2, 8)
+                await supabase.from('short_links').insert({ codigo, url_destino: prodUrl })
+              }
+              lines.push(`  🔗 ${baseUrl}/s/${codigo}`)
+            }
+          }
+
+          lines.push('')
+          lines.push(`💰 *Total:* $${(monto_usd || 0).toFixed(2)} USD`)
+          if (monto_coins > 0) lines.push(`🪙 BLISCOINS: ${monto_coins}`)
+          lines.push(`📋 *Orden:* #${orden.id.substring(0, 8)}`)
+          lines.push('')
+          lines.push('_Por favor coordina el pago con el cliente._')
+
+          const mensaje = lines.join('\n')
+          const telefonoLimpio = asesor.telefono.replace(/\D/g, '')
+          whatsappUrl = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`
+
+          await supabase.from('compras').update({
+            metadata: {
+              ...orden.metadata,
+              asesor_id: asesor.id,
+              asesor_nombre: asesor.nombre,
+              asesor_foto: asesor.foto_url,
+              whatsapp_url: whatsappUrl,
+            }
+          }).eq('id', orden.id)
+        }
+      }
+    }
+
     // ── Si pagó con coins, descontarlos ─────────────────────────────────────
     if (metodo_pago === 'coins' && finalUserId && monto_coins > 0) {
       await supabase.from('coins_transacciones').insert({
@@ -454,6 +528,7 @@ export async function POST(request: NextRequest) {
       coursesAssigned,
       courseAssignmentError,
       alreadyPurchased,
+      whatsappUrl: whatsappUrl || undefined,
     });
 
   } catch (err) {

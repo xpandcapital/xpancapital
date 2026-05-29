@@ -21,7 +21,24 @@ export async function GET(request: NextRequest) {
         .select("*")
         .eq("activo", true)
         .order("orden", { ascending: true });
-      return NextResponse.json({ success: true, formas: data || [] });
+
+      const formas = data || []
+
+      const enriched = await Promise.all(formas.map(async (f: any) => {
+        if (f.slug !== 'whatsapp') return f
+        const asesorIds = f.config?.asesor_ids || []
+        if (asesorIds.length === 0) return f
+
+        const { data: asesores } = await supabase
+          .from('asesores')
+          .select('id, nombre, foto_url')
+          .in('id', asesorIds)
+          .eq('activo', true)
+
+        return { ...f, asesores: asesores || [] }
+      }))
+
+      return NextResponse.json({ success: true, formas: enriched });
     }
 
     if (!auth || !["superadmin", "admin"].includes(auth.rol)) {

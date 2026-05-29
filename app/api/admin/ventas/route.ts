@@ -62,7 +62,7 @@ export async function PUT(request: NextRequest) {
     if (!auth) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const body = await request.json();
-    const { id, estado, metodo_pago, notas } = body;
+    const { id, estado, metodo_pago, notas, sub_tipo_pago } = body;
 
     if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
 
@@ -87,6 +87,14 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) throw error;
+
+    // Guardar sub_tipo_pago en metadata
+    if (sub_tipo_pago && data) {
+      const metaActual = data.metadata || {}
+      await supabase.from('compras').update({
+        metadata: { ...metaActual, sub_tipo_pago }
+      }).eq('id', id)
+    }
 
     // Insertar log de cambio si cambió el estado
     if (estado && compraActual && compraActual.estado !== estado) {

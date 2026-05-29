@@ -6,7 +6,7 @@ import {
     CreditCard, Coins, Building2, ShieldCheck, Loader2,
     ToggleLeft, ToggleRight, Settings, Save, Globe, Wallet,
     Plus, Trash2, Phone, ChevronDown, ChevronRight,
-    ArrowUp, ArrowDown
+    ArrowUp, ArrowDown, MessageCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,8 +21,8 @@ interface FormaPago {
     activo: boolean; config: Record<string, any>; orden: number;
 }
 
-const ICONOS: Record<string, any> = { izipay: CreditCard, coins: Coins, transfer: Building2, crypto_manual: Globe };
-const COLORES: Record<string, string> = { izipay: "bg-blis-red/10 border-blis-red/20 text-blis-red", coins: "bg-amber-500/10 border-amber-500/20 text-amber-400", transfer: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", crypto_manual: "bg-orange-500/10 border-orange-500/20 text-orange-400" };
+const ICONOS: Record<string, any> = { izipay: CreditCard, coins: Coins, transfer: Building2, crypto_manual: Globe, whatsapp: MessageCircle };
+const COLORES: Record<string, string> = { izipay: "bg-blis-red/10 border-blis-red/20 text-blis-red", coins: "bg-amber-500/10 border-amber-500/20 text-amber-400", transfer: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400", crypto_manual: "bg-orange-500/10 border-orange-500/20 text-orange-400", whatsapp: "bg-green-500/10 border-green-500/20 text-green-400" };
 
 export default function FormasPagoAdminPage() {
     const { showToast } = useToast();
@@ -31,6 +31,7 @@ export default function FormasPagoAdminPage() {
     const [guardando, setGuardando] = useState<string | null>(null);
     const [expanded, setExpanded] = useState<string | null>(null);
     const [expandedPais, setExpandedPais] = useState<Record<string, boolean>>({});
+    const [asesores, setAsesores] = useState<any[]>([]);
 
     const cargar = async () => {
         setLoading(true);
@@ -43,7 +44,12 @@ export default function FormasPagoAdminPage() {
         finally { setLoading(false); }
     };
 
-    useEffect(() => { cargar(); }, []);
+    useEffect(() => {
+        cargar();
+        fetch("/api/admin/asesores").then(r => r.json()).then(d => {
+            if (d.success || Array.isArray(d)) setAsesores(d.data || d || []);
+        }).catch(() => {});
+    }, []);
 
     const toggleActivo = async (forma: FormaPago) => {
         setGuardando(forma.id);
@@ -302,6 +308,60 @@ export default function FormasPagoAdminPage() {
                                                         <div className="grid grid-cols-2 gap-3">
                                                             <Input value={forma.config?.rate || "10"} onChange={e => updateSimple(forma.id, 'rate', e.target.value)} type="number" placeholder="Tasa (1 USD = X BLIS)" className="bg-white/5 border-white/10 text-white text-sm" />
                                                             <Input value={forma.config?.min_coins || "0"} onChange={e => updateSimple(forma.id, 'min_coins', e.target.value)} type="number" placeholder="Mínimo BLISCOINS" className="bg-white/5 border-white/10 text-white text-sm" />
+                                                        </div>
+                                                    )}
+
+                                                    {/* ── WHATSAPP ── */}
+                                                    {forma.slug === 'whatsapp' && (
+                                                        <div className="space-y-3">
+                                                            <div>
+                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Modo de asignación</label>
+                                                                <select
+                                                                    value={forma.config?.modo_asignacion || 'manual'}
+                                                                    onChange={e => updateSimple(forma.id, 'modo_asignacion', e.target.value)}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white"
+                                                                >
+                                                                    <option value="manual">Manual — El cliente elige</option>
+                                                                    <option value="auto">Auto — Si solo hay 1, se autoasigna</option>
+                                                                    <option value="round_robin">Round Robin — Distribución equitativa</option>
+                                                                </select>
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-[10px] text-gray-500 uppercase font-bold block mb-2">Asesores disponibles</label>
+                                                                {asesores.length === 0 ? (
+                                                                    <p className="text-xs text-gray-600">No hay asesores configurados. Créalos en Campañas → Asesores.</p>
+                                                                ) : (
+                                                                    <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                                        {asesores.map((a: any) => {
+                                                                            const selected = (forma.config?.asesor_ids || []).includes(a.id)
+                                                                            return (
+                                                                                <button
+                                                                                    key={a.id}
+                                                                                    onClick={() => {
+                                                                                        const ids: string[] = forma.config?.asesor_ids || []
+                                                                                        const next = selected ? ids.filter((id: string) => id !== a.id) : [...ids, a.id]
+                                                                                        updateForma(forma.id, { asesor_ids: next })
+                                                                                    }}
+                                                                                    className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-all text-xs ${selected ? 'bg-green-500/10 border border-green-500/20' : 'bg-white/5 border border-white/5 hover:bg-white/10'}`}
+                                                                                >
+                                                                                    {a.foto_url ? (
+                                                                                        <img src={a.foto_url} alt={a.nombre} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                                                                    ) : (
+                                                                                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                                                                                            <MessageCircle className="w-4 h-4 text-gray-500" />
+                                                                                        </div>
+                                                                                    )}
+                                                                                    <div className="min-w-0 flex-1">
+                                                                                        <p className="text-white font-bold truncate">{a.nombre}</p>
+                                                                                        <p className="text-gray-500 text-[10px] truncate">{a.email || a.telefono || ''}</p>
+                                                                                    </div>
+                                                                                    {selected && <div className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />}
+                                                                                </button>
+                                                                            )
+                                                                        })}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     )}
 

@@ -51,6 +51,7 @@ export default function VentasAdminPage() {
     const [modalHistorial, setModalHistorial] = useState<string | null>(null);
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [notasVerificacion, setNotasVerificacion] = useState("");
+    const [subTipoPago, setSubTipoPago] = useState("");
     const [guardando, setGuardando] = useState(false);
     
     const [formNueva, setFormNueva] = useState({ user_email: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0 });
@@ -85,16 +86,19 @@ export default function VentasAdminPage() {
         if (d.success) setLogs(d.logs || []);
     };
 
-    const actualizarEstado = async (id: string, estado: string, notas?: string) => {
+    const actualizarEstado = async (id: string, estado: string, notas?: string, subTipo?: string) => {
+        const body: any = { id, estado, ...(notas ? { notas } : {}) }
+        if (subTipo) body.sub_tipo_pago = subTipo
         const res = await fetch("/api/admin/ventas", {
             method: "PUT", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, estado, ...(notas ? { notas } : {}) }),
+            body: JSON.stringify(body),
         });
         const data = await res.json();
         if (res.ok && data.success) {
             setVentas(prev => prev.map(v => v.id === id ? { ...v, estado } : v));
             setModalVerificar(null);
             setNotasVerificacion("");
+            setSubTipoPago("");
         } else {
             alert(data.error || 'Error al actualizar estado');
         }
@@ -257,7 +261,7 @@ export default function VentasAdminPage() {
                                             <td className="p-4">
                                                 <div className="flex items-center gap-1">
                                                     {venta.estado === "pendiente" && (
-                                                        <button onClick={() => { setModalVerificar(venta); setNotasVerificacion(""); }}
+                                                        <button onClick={() => { setModalVerificar(venta); setNotasVerificacion(""); setSubTipoPago(""); }}
                                                             className="p-2 hover:bg-emerald-500/10 rounded-lg text-gray-400 hover:text-emerald-400 transition-colors"
                                                             title="Verificar pago y dar acceso">
                                                             <ShieldCheck className="w-4 h-4" />
@@ -368,13 +372,26 @@ export default function VentasAdminPage() {
                         </p>
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
+                        {modalVerificar?.metodo_pago === 'whatsapp' && (
+                            <div>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Sub-tipo de pago</label>
+                                <select value={subTipoPago} onChange={e => setSubTipoPago(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="transferencia">Transferencia Bancaria</option>
+                                    <option value="billetera_digital">Billetera Digital (Yape/Plin)</option>
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+                        )}
                         <div>
                             <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Nota de verificación</label>
                             <textarea value={notasVerificacion} onChange={e => setNotasVerificacion(e.target.value)}
                                 placeholder="Ej: Transferencia recibida, comprobante #1234" rows={3}
                                 className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white resize-none" />
                         </div>
-                        <Button onClick={() => actualizarEstado(modalVerificar!.id, "completado", notasVerificacion)}
+                        <Button onClick={() => actualizarEstado(modalVerificar!.id, "completado", notasVerificacion, subTipoPago)}
                             className="w-full bg-emerald-600 hover:bg-emerald-600/90 text-white font-bold">
                             <ShieldCheck className="w-4 h-4 mr-2" /> Confirmar Pago y Dar Acceso
                         </Button>

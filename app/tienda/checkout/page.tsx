@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ShoppingCart, Coins, CreditCard, MapPin, User, Mail, Phone,
     CheckCircle2, Loader2, ArrowLeft, Lock, Shield, Package,
-    Zap, Truck, Gift, Star, Wallet, Building2, Globe, Copy
+    Zap, Truck, Gift, Star, Wallet, Building2, Globe, Copy, MessageCircle
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/Toast";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 
-type PaymentMethod = 'coins' | 'izipay' | 'paypal' | 'transfer' | 'crypto_manual';
+type PaymentMethod = 'coins' | 'izipay' | 'paypal' | 'transfer' | 'crypto_manual' | 'whatsapp';
 
 interface CheckoutForm {
     nombre: string;
@@ -83,6 +83,7 @@ function CheckoutContent() {
     const [izipayTotal, setIzipayTotal] = useState(0);
     const [izipayScriptLoaded, setIzipayScriptLoaded] = useState(false);
     const [krKey, setKrKey] = useState(0);
+    const [selectedAsesor, setSelectedAsesor] = useState<string | null>(null);
 
     const [form, setForm] = useState<CheckoutForm>({
         nombre: user?.name?.split(" ")[0] || '',
@@ -538,6 +539,26 @@ function CheckoutContent() {
                 return;
             }
 
+            // Flujo WhatsApp
+            if (paymentMethod === 'whatsapp') {
+                const res = await fetch('/api/checkout', {
+                    method: 'POST', headers,
+                    body: JSON.stringify({
+                        ...commonPayload,
+                        metodo_pago: 'whatsapp',
+                        asesor_id: selectedAsesor,
+                        monto_coins: 0,
+                        monto_usd: grandTotal,
+                        estado: 'pendiente',
+                    })
+                })
+                const data = await res.json()
+                if (!data.success) throw new Error(data.error || 'Error al procesar')
+                clearCart()
+                window.location.href = `/tienda/checkout/whatsapp-gracias?order_id=${data.ordenId}`
+                return;
+            }
+
             // Flujo transferencia y crypto manual
             if (paymentMethod === 'transfer' || paymentMethod === 'crypto_manual') {
                 const fp = formasPago.find((f: any) => f.slug === paymentMethod)
@@ -913,6 +934,49 @@ function CheckoutContent() {
                                                 </div>);
                                             })()}
                                         </div>);
+                                    }
+                                    // WhatsApp
+                                    if (fp.slug === 'whatsapp') {
+                                        if (fp.activo === false) return null;
+                                        const asesoresList: any[] = fp.asesores || []
+                                        return (
+                                            <div key={fp.id}>
+                                                <PayOption selected={paymentMethod === 'whatsapp'} onClick={() => setPaymentMethod('whatsapp')}
+                                                    icon={<MessageCircle className="w-5 h-5 text-green-400" />} bg="bg-green-500/10 border-green-500/40"
+                                                    label="WhatsApp" sublabel={fp.descripcion || "Coordina tu pago con un asesor"} amount={`$${getMethodTotal('whatsapp').toFixed(2)}`} />
+                                                {paymentMethod === 'whatsapp' && (
+                                                    <div className="mt-3 p-4 bg-green-500/5 border border-green-500/20 rounded-2xl space-y-3">
+                                                        <p className="text-xs text-green-400 font-bold uppercase flex gap-2"><MessageCircle className="w-4 h-4"/>Elige tu asesor</p>
+                                                        {asesoresList.length === 0 ? (
+                                                            <p className="text-xs text-gray-500 italic">No hay asesores disponibles en este momento.</p>
+                                                        ) : (
+                                                            <div className="space-y-2">
+                                                                {asesoresList.map((a: any) => (
+                                                                    <button
+                                                                        key={a.id}
+                                                                        onClick={() => setSelectedAsesor(a.id)}
+                                                                        className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${selectedAsesor === a.id ? 'bg-green-500/10 border border-green-500/30' : 'bg-black/30 border border-white/5 hover:bg-white/5'}`}
+                                                                    >
+                                                                        {a.foto_url ? (
+                                                                            <img src={a.foto_url} alt={a.nombre} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                                                                        ) : (
+                                                                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                                                                                <MessageCircle className="w-5 h-5 text-gray-500" />
+                                                                            </div>
+                                                                        )}
+                                                                        <div>
+                                                                            <p className="text-sm font-bold text-white">{a.nombre}</p>
+                                                                            <p className="text-[10px] text-gray-400">Blis Expert Team</p>
+                                                                        </div>
+                                                                        {selectedAsesor === a.id && <div className="ml-auto w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
                                     }
                                     // izipay, paypal y otras pasarelas
                                     const imap: Record<string, any> = { izipay: CreditCard, paypal: Wallet };
