@@ -79,6 +79,7 @@ export function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const fetchRef = useRef<() => void>(() => {});
+  const channelName = useRef(`notifications-${Date.now()}`).current;
   const router = useRouter();
   const { user } = useAuth();
 
@@ -119,7 +120,7 @@ export function NotificationBell() {
 
     const supabase = getSupabase();
     const channel = supabase
-      .channel('notifications-realtime')
+      .channel(channelName)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
