@@ -68,6 +68,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Filtrar solo cursos matriculados del usuario
+    if (userId && cursos) {
+      const { data: enrolled } = await supabase
+        .from('equipo_cursos')
+        .select('curso_id')
+        .eq('user_id', userId)
+
+      const enrolledIds = (enrolled || []).map(e => e.curso_id)
+      const filtered = cursos.filter(c => enrolledIds.includes(c.id))
+      return NextResponse.json({ success: true, data: filtered })
+    }
+
     return NextResponse.json({ success: true, data: cursos })
   } catch {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
