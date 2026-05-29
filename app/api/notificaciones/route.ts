@@ -37,14 +37,30 @@ export async function GET(request: NextRequest) {
 
     if (unread === 'true') {
       if (!userId) return NextResponse.json({ success: true, count: 0 })
-      const { count, error } = await supabaseAdmin
+
+      // Notificaciones directas al user
+      const { count: directCount, error: directErr } = await supabaseAdmin
         .from('notificaciones')
         .select('id', { count: 'exact', head: true })
         .eq('user_id', userId)
         .eq('leida', false)
 
-      if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
-      return NextResponse.json({ success: true, count: count || 0 })
+      if (directErr) return NextResponse.json({ success: false, error: directErr.message }, { status: 500 })
+
+      // Notificaciones por rol (para admins)
+      let roleCount = 0
+      if (auth?.rol === 'superadmin' || auth?.rol === 'admin') {
+        const { count: rCount, error: roleErr } = await supabaseAdmin
+          .from('notificaciones')
+          .select('id', { count: 'exact', head: true })
+          .eq('destinatario_tipo', 'por_rol')
+          .contains('destinatario_ids', [auth.rol])
+          .eq('leida', false)
+
+        if (!roleErr) roleCount = rCount || 0
+      }
+
+      return NextResponse.json({ success: true, count: (directCount || 0) + roleCount })
     }
 
     if (admin === 'true') {
@@ -63,19 +79,40 @@ export async function GET(request: NextRequest) {
     }
 
     if (userId) {
-      const { data, error } = await supabaseAdmin
+      const { data: directNotifs, error: directErr } = await supabaseAdmin
         .from('notificaciones')
         .select('*')
         .eq('user_id', userId)
         .order('creado_en', { ascending: false })
         .limit(limit)
 
-      if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+      if (directErr) return NextResponse.json({ success: false, error: directErr.message }, { status: 500 })
 
-      const unreadCount = (data || []).filter((n: any) => !n.leida).length
+      let allNotifications = directNotifs || []
+
+      // Incluir notificaciones por rol si es admin/superadmin
+      if (auth?.rol === 'superadmin' || auth?.rol === 'admin') {
+        const { data: roleNotifs } = await supabaseAdmin
+          .from('notificaciones')
+          .select('*')
+          .eq('destinatario_tipo', 'por_rol')
+          .contains('destinatario_ids', [auth.rol])
+          .order('creado_en', { ascending: false })
+          .limit(limit)
+
+        if (roleNotifs) {
+          allNotifications = [...allNotifications, ...roleNotifs]
+          allNotifications.sort((a: any, b: any) =>
+            new Date(b.creado_en).getTime() - new Date(a.creado_en).getTime()
+          )
+          allNotifications = allNotifications.slice(0, limit)
+        }
+      }
+
+      const unreadCount = allNotifications.filter((n: any) => !n.leida).length
       return NextResponse.json({
         success: true,
-        notifications: data || [],
+        notifications: allNotifications,
         unreadCount
       })
     }
@@ -103,15 +140,32 @@ export async function PUT(request: NextRequest) {
         .update({ leida: true, leida_en: new Date().toISOString() })
         .eq('user_id', userId)
         .eq('leida', false)
+
+      // También marcar notificaciones por rol del admin
+      if (auth?.rol === 'superadmin' || auth?.rol === 'admin') {
+        await supabaseAdmin
+          .from('notificaciones')
+          .update({ leida: true, leida_en: new Date().toISOString() })
+          .eq('destinatario_tipo', 'por_rol')
+          .contains('destinatario_ids', [auth.rol])
+          .eq('leida', false)
+      }
+
       return NextResponse.json({ success: true })
     }
 
     if (body.id) {
-      await supabaseAdmin
+      const isAdmin = auth?.rol === 'superadmin' || auth?.rol === 'admin'
+      let query = supabaseAdmin
         .from('notificaciones')
         .update({ leida: true, leida_en: new Date().toISOString() })
         .eq('id', body.id)
-        .eq('user_id', userId)
+
+      if (!isAdmin) {
+        query = query.eq('user_id', userId)
+      }
+
+      await query
       return NextResponse.json({ success: true })
     }
 

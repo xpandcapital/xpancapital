@@ -12,6 +12,7 @@ import {
   UserPlus,
   CheckCheck,
   ExternalLink,
+  Banknote,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
@@ -34,6 +35,7 @@ const TIPO_ICONOS: Record<string, React.ComponentType<{ className?: string }>> =
   blog: FileText,
   leads: UserPlus,
   compras: ShoppingCart,
+  venta: Banknote,
   cursos: GraduationCap,
   sistema: Settings,
   mensaje: MessageSquare,
@@ -43,6 +45,7 @@ const TIPO_COLORES: Record<string, string> = {
   blog: "text-violet-400 bg-violet-400/10",
   leads: "text-emerald-400 bg-emerald-400/10",
   compras: "text-amber-400 bg-amber-400/10",
+  venta: "text-emerald-400 bg-emerald-400/10",
   cursos: "text-blue-400 bg-blue-400/10",
   sistema: "text-gray-400 bg-gray-400/10",
   mensaje: "text-rose-400 bg-rose-400/10",
