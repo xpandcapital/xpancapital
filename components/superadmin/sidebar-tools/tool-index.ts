@@ -340,7 +340,7 @@ const TOOL_INDEX: ToolDef[] = [
         }
     },
     {
-        id: 'pdf_converter', name: 'PDF & Document Converter', description: 'Comprime, une, divide PDFs y convierte Office a PDF. Soporta archivos de hasta 2GB vía iLovePDF.', cat: 'Multimedia', icon: FileText, isIA: false,
+        id: 'pdf_converter', name: 'PDF & Document Converter', description: 'Comprime, une, divide PDFs y convierte Office a PDF. Soporta archivos de hasta 2GB.', cat: 'Multimedia', icon: FileText, isIA: false,
         help: "Procesa documentos PDF y Office: comprime archivos pesados, une múltiples PDFs, divide por páginas, convierte Word/Excel/PowerPoint a PDF, extrae imágenes de PDFs y crea PDFs desde imágenes.",
         examples: {
             simple: "Sube un PDF y comprímelo al máximo para enviar por email.",

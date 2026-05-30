@@ -37,6 +37,8 @@ const PAGE_SIZES = [
     { id: 'letter', name: 'Carta' },
 ];
 
+const API_BASE = 'https://api.ilovepdf.com/v1';
+
 interface UploadedFile {
     file: File;
     serverFilename: string | null;
@@ -54,7 +56,6 @@ function StandardPdfConverter() {
     const [resultBlob, setResultBlob] = useState<Blob | null>(null);
     const [resultFilename, setResultFilename] = useState<string>('');
 
-    // Mode-specific options
     const [compressionLevel, setCompressionLevel] = useState('recommended');
     const [splitMode, setSplitMode] = useState<'ranges' | 'remove_pages' | 'fixed_range'>('ranges');
     const [splitRanges, setSplitRanges] = useState('');
@@ -149,35 +150,53 @@ function StandardPdfConverter() {
         e.preventDefault();
     };
 
-    const getPublicKey = async (): Promise<string> => {
+    // ─── Procesamiento ──────────────────────────────────────────
+
+    const fetchPublicKey = async (): Promise<string> => {
         const res = await fetch('/api/ilovepdf/config');
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Error del servidor (${res.status}): ${text.slice(0, 200)}`);
+        }
         const data = await res.json();
-        if (!data.publicKey) throw new Error('iLovePDF no está configurado. Agrega tus API keys en API Nube → Documentos & PDF → iLovePDF.');
+        if (!data.publicKey) {
+            throw new Error(
+                'Clave de procesamiento no configurada.\n\n' +
+                'Ve a: API Nube → Documentos & PDF → Procesador de Documentos\n' +
+                'y guarda tus credenciales de acceso.'
+            );
+        }
         return data.publicKey;
     };
 
-    const iloveAuth = async (publicKey: string): Promise<string> => {
-        const res = await fetch('https://api.ilovepdf.com/v1/auth', {
+    const authenticate = async (publicKey: string): Promise<string> => {
+        const res = await fetch(`${API_BASE}/auth`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ public_key: publicKey }),
         });
         const data = await res.json();
-        if (!data.token) throw new Error('Error al autenticar con iLovePDF');
+        if (!data.token) {
+            const msg = data.message || data.error || JSON.stringify(data);
+            throw new Error(`Error de autenticación (${res.status}): ${msg}`);
+        }
         return data.token;
     };
 
-    const iloveStart = async (token: string, tool: string): Promise<{ server: string; task: string }> => {
-        const res = await fetch(`https://api.ilovepdf.com/v1/start/${tool}`, {
+    const startTask = async (token: string, tool: string): Promise<{ server: string; task: string }> => {
+        const res = await fetch(`${API_BASE}/start/${tool}`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
-        if (!data.server || !data.task) throw new Error('Error al iniciar tarea en iLovePDF');
+        if (!data.server || !data.task) {
+            const msg = data.message || JSON.stringify(data);
+            throw new Error(`Error al iniciar tarea (${res.status}): ${msg}`);
+        }
         return { server: data.server, task: data.task };
     };
 
-    const iloveUpload = async (server: string, task: string, token: string, file: File): Promise<string> => {
+    const uploadFile = async (server: string, task: string, token: string, file: File): Promise<string> => {
         const formData = new FormData();
         formData.append('task', task);
         formData.append('file', file);
@@ -188,22 +207,20 @@ function StandardPdfConverter() {
             body: formData,
         });
         const data = await res.json();
-        if (!data.server_filename) throw new Error(`Error al subir ${file.name}`);
+        if (!data.server_filename) {
+            throw new Error(`Error al subir ${file.name} (${res.status})`);
+        }
         return data.server_filename;
     };
 
-    const iloveProcess = async (server: string, token: string, tool: string, task: string, serverFilenames: string[], originalNames: string[], extraParams: Record<string, unknown> = {}): Promise<void> => {
-        const filesToProcess = serverFilenames.map((sfn, i) => ({
+    const processFiles = async (
+        server: string, token: string, tool: string, task: string,
+        serverFilenames: string[], originalNames: string[], extraParams: Record<string, unknown> = {}
+    ): Promise<void> => {
+        const filesPayload = serverFilenames.map((sfn, i) => ({
             server_filename: sfn,
             filename: originalNames[i],
         }));
-
-        const body: Record<string, unknown> = {
-            task,
-            tool,
-            files: filesToProcess,
-            ...extraParams,
-        };
 
         const res = await fetch(`https://${server}/v1/process`, {
             method: 'POST',
@@ -211,13 +228,15 @@ function StandardPdfConverter() {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(body),
+            body: JSON.stringify({ task, tool, files: filesPayload, ...extraParams }),
         });
         const data = await res.json();
-        if (data.status === 'TaskError') throw new Error('Error al procesar: ' + (data.message || 'Error desconocido'));
+        if (data.status === 'TaskError' || !res.ok) {
+            throw new Error('Error al procesar: ' + (data.message || `HTTP ${res.status}`));
+        }
     };
 
-    const iloveDownload = async (server: string, task: string, token: string): Promise<{ blob: Blob; filename: string }> => {
+    const downloadResult = async (server: string, task: string, token: string): Promise<{ blob: Blob; filename: string }> => {
         const res = await fetch(`https://${server}/v1/download/${task}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
@@ -228,16 +247,7 @@ function StandardPdfConverter() {
         return { blob, filename };
     };
 
-    const getToolName = (m: Mode): string => {
-        switch (m) {
-            case 'compress': return 'compress';
-            case 'merge': return 'merge';
-            case 'split': return 'split';
-            case 'officepdf': return 'officepdf';
-            case 'pdfjpg': return 'pdfjpg';
-            case 'imagepdf': return 'imagepdf';
-        }
-    };
+    const getToolName = (m: Mode): string => m;
 
     const getExtraParams = (): Record<string, unknown> => {
         switch (mode) {
@@ -264,45 +274,50 @@ function StandardPdfConverter() {
 
         setProcessing(true);
         setProgress(0);
-        setStatusMsg('Conectando con iLovePDF...');
+        setStatusMsg('Obteniendo configuración...');
         setError(null);
 
         try {
-            const publicKey = await getPublicKey();
+            // 1. Obtener clave
+            const publicKey = await fetchPublicKey();
             setProgress(5);
-            setStatusMsg('Autenticando...');
 
-            const token = await iloveAuth(publicKey);
+            // 2. Autenticar
+            setStatusMsg('Autenticando...');
+            const token = await authenticate(publicKey);
             setProgress(10);
 
+            // 3. Iniciar tarea
             const tool = getToolName(mode);
-            setStatusMsg('Iniciando tarea...');
-            const { server, task } = await iloveStart(token, tool);
+            setStatusMsg('Iniciando procesamiento...');
+            const { server, task } = await startTask(token, tool);
             setProgress(15);
 
-            // Upload files
+            // 4. Subir archivos
             const serverFilenames: string[] = [];
             const originalNames: string[] = [];
 
             for (let i = 0; i < files.length; i++) {
-                const pct = 15 + Math.round((i / files.length) * 35);
+                const pct = 15 + Math.round((i / files.length) * 40);
                 setProgress(pct);
                 setStatusMsg(`Subiendo ${files[i].file.name} (${formatSize(files[i].file.size)})...`);
 
                 setFiles(prev => prev.map((f, idx) => idx === i ? { ...f, status: 'uploading' as const } : f));
-                const sfn = await iloveUpload(server, task, token, files[i].file);
+                const sfn = await uploadFile(server, task, token, files[i].file);
                 serverFilenames.push(sfn);
                 originalNames.push(files[i].file.name);
                 setFiles(prev => prev.map((f, idx) => idx === i ? { ...f, status: 'uploaded' as const, serverFilename: sfn } : f));
             }
 
+            // 5. Procesar
             setProgress(55);
             setStatusMsg('Procesando archivos...');
-            await iloveProcess(server, token, tool, task, serverFilenames, originalNames, getExtraParams());
+            await processFiles(server, token, tool, task, serverFilenames, originalNames, getExtraParams());
 
+            // 6. Descargar
             setProgress(80);
             setStatusMsg('Descargando resultado...');
-            const { blob, filename } = await iloveDownload(server, task, token);
+            const { blob, filename } = await downloadResult(server, task, token);
 
             setProgress(100);
             setStatusMsg('¡Completado!');
@@ -310,7 +325,9 @@ function StandardPdfConverter() {
             setResultFilename(filename);
             setProcessing(false);
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
+            const msg = err instanceof Error ? err.message : 'Error desconocido';
+            console.error('[PDF Converter]', msg);
+            setError(msg);
             setProcessing(false);
             setProgress(0);
         }
@@ -338,13 +355,12 @@ function StandardPdfConverter() {
 
     return (
         <div className="w-full space-y-6">
-            {/* Header */}
             <div className="text-center space-y-2">
                 <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">
                     PDF & Document <span className="text-blis-red">Converter</span>
                 </h2>
                 <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em]">
-                    Powered by iLovePDF · Archivos hasta 2GB
+                    Procesamiento de documentos · Archivos hasta 2GB
                 </p>
             </div>
 
@@ -366,7 +382,6 @@ function StandardPdfConverter() {
                 ))}
             </div>
 
-            {/* Mode Description */}
             {modeDef && (
                 <p className="text-center text-zinc-600 text-[9px] font-black uppercase tracking-[0.2em]">
                     {modeDef.desc}
@@ -610,9 +625,9 @@ function StandardPdfConverter() {
 
             {/* Error */}
             {error && (
-                <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-                    <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
-                    <p className="text-red-400 text-sm">{error}</p>
+                <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                    <p className="text-red-400 text-sm whitespace-pre-line">{error}</p>
                 </div>
             )}
 
@@ -647,11 +662,6 @@ function StandardPdfConverter() {
                     </div>
                 </motion.div>
             )}
-
-            {/* Credits Info */}
-            <p className="text-center text-zinc-800 text-[8px] font-black uppercase tracking-[0.3em]">
-                Créditos por operación · Comprimir: 10 · Unir: 5 · Dividir: 5 · Office→PDF: 10
-            </p>
         </div>
     );
 }

@@ -1076,15 +1076,15 @@ export const categories: ApiCategory[] = [
             { id: "pandadoc", name: "PandaDoc", icon: FileCheck, color: "text-green-400", bg: "bg-green-500/10", description: "Propuestas, contratos y documentos con firma electrónica integrada.", website: "pandadoc.com", fields: [{ id: "pandadoc_api_key", label: "API Key", type: "password", description: "Clave para PandaDoc API. Crea y envía documentos.", getFrom: "pandadoc.com → Settings → Integrations → API", accessType: "Privada", cost: "pagado" }] },
             {
                 id: "ilovepdf",
-                name: "iLovePDF",
+                name: "Procesador de Documentos",
                 icon: FileCheck,
                 color: "text-red-400",
                 bg: "bg-red-500/10",
-                description: "API de procesamiento de PDF: comprimir, unir, dividir, convertir Office a PDF, PDF a imágenes y más. Soporta archivos de hasta 2GB.",
-                website: "developer.ilovepdf.com",
+                description: "Servicio de procesamiento de PDF: comprimir, unir, dividir, convertir Office a PDF, PDF a imágenes y más. Soporta archivos de hasta 2GB.",
+                website: "Configuración interna",
                 fields: [
-                    { id: "ilovepdf_public_key", label: "Public Key", type: "password", description: "Clave pública del proyecto iLovePDF. Se usa en el frontend para autenticar requests.", getFrom: "developer.ilovepdf.com → Projects → Tu proyecto → Public Key", accessType: "Pública", cost: "freemium" },
-                    { id: "ilovepdf_secret_key", label: "Secret Key", type: "password", description: "Clave secreta del proyecto iLovePDF. Se usa en el backend para operaciones administrativas.", getFrom: "developer.ilovepdf.com → Projects → Tu proyecto → Secret Key", accessType: "Privada", cost: "freemium" },
+                    { id: "ilovepdf_public_key", label: "Public Key", type: "password", description: "Clave pública del servicio de procesamiento de documentos.", getFrom: "Panel de administración del proveedor → Proyecto → Public Key", accessType: "Pública", cost: "freemium" },
+                    { id: "ilovepdf_secret_key", label: "Secret Key", type: "password", description: "Clave secreta del servicio de procesamiento de documentos.", getFrom: "Panel de administración del proveedor → Proyecto → Secret Key", accessType: "Privada", cost: "freemium" },
                 ]
             },
         ]
