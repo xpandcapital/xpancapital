@@ -152,33 +152,11 @@ function StandardPdfConverter() {
 
     // ─── Procesamiento ──────────────────────────────────────────
 
-    const fetchPublicKey = async (): Promise<string> => {
-        const res = await fetch('/api/ilovepdf/config');
-        if (!res.ok) {
-            const text = await res.text();
-            throw new Error(`Error del servidor (${res.status}): ${text.slice(0, 200)}`);
-        }
+    const getAuthToken = async (): Promise<string> => {
+        const res = await fetch('/api/ilovepdf/auth', { method: 'POST' });
         const data = await res.json();
-        if (!data.publicKey) {
-            throw new Error(
-                'Clave de procesamiento no configurada.\n\n' +
-                'Ve a: API Nube → Documentos & PDF → Procesador de Documentos\n' +
-                'y guarda tus credenciales de acceso.'
-            );
-        }
-        return data.publicKey;
-    };
-
-    const authenticate = async (publicKey: string): Promise<string> => {
-        const res = await fetch(`${API_BASE}/auth`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ public_key: publicKey }),
-        });
-        const data = await res.json();
-        if (!data.token) {
-            const msg = data.message || data.error || JSON.stringify(data);
-            throw new Error(`Error de autenticación (${res.status}): ${msg}`);
+        if (!res.ok || !data.token) {
+            throw new Error(data.error || `Error de autenticación (${res.status})`);
         }
         return data.token;
     };
@@ -278,13 +256,9 @@ function StandardPdfConverter() {
         setError(null);
 
         try {
-            // 1. Obtener clave
-            const publicKey = await fetchPublicKey();
             setProgress(5);
-
-            // 2. Autenticar
             setStatusMsg('Autenticando...');
-            const token = await authenticate(publicKey);
+            const token = await getAuthToken();
             setProgress(10);
 
             // 3. Iniciar tarea
