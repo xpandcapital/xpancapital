@@ -213,6 +213,8 @@ const DEFAULT_VALUES: Record<string, string> = {
   amplitude_key: '',
   blis_blog_time: '60',
   blis_blog_coins: '5',
+  ilovepdf_public_key: '',
+  ilovepdf_secret_key: '',
 }
 
 export function useApiConfig() {

@@ -1074,6 +1074,19 @@ export const categories: ApiCategory[] = [
             { id: "pdfmonkey", name: "PDFMonkey", icon: FileCheck, color: "text-blue-400", bg: "bg-blue-500/10", description: "Genera PDFs dinámicos desde plantillas. Ideal para facturas, contratos, reportes.", website: "pdfmonkey.io", fields: [{ id: "pdfmonkey_api_key", label: "API Key", type: "password", description: "Clave para PDFMonkey API. Generación de PDFs desde plantillas.", getFrom: "pdfmonkey.io → Dashboard → API → API Key", accessType: "Privada", cost: "freemium" }] },
             { id: "docspring", name: "DocSpring", icon: FileCheck, color: "text-purple-400", bg: "bg-purple-500/10", description: "PDF templates con datos dinámicos. Completa plantillas y genera PDFs.", website: "docspring.com", fields: [{ id: "docspring_api_key", label: "API Key", type: "password", description: "Clave para DocSpring API.", getFrom: "docspring.com → Settings → API Keys", accessType: "Privada", cost: "pagado" }, { id: "docspring_secret", label: "Secret", type: "password", description: "Secreto para firmar requests.", getFrom: "docspring.com → Settings → API Keys", accessType: "Privada", cost: "pagado" }] },
             { id: "pandadoc", name: "PandaDoc", icon: FileCheck, color: "text-green-400", bg: "bg-green-500/10", description: "Propuestas, contratos y documentos con firma electrónica integrada.", website: "pandadoc.com", fields: [{ id: "pandadoc_api_key", label: "API Key", type: "password", description: "Clave para PandaDoc API. Crea y envía documentos.", getFrom: "pandadoc.com → Settings → Integrations → API", accessType: "Privada", cost: "pagado" }] },
+            {
+                id: "ilovepdf",
+                name: "iLovePDF",
+                icon: FileCheck,
+                color: "text-red-400",
+                bg: "bg-red-500/10",
+                description: "API de procesamiento de PDF: comprimir, unir, dividir, convertir Office a PDF, PDF a imágenes y más. Soporta archivos de hasta 2GB.",
+                website: "developer.ilovepdf.com",
+                fields: [
+                    { id: "ilovepdf_public_key", label: "Public Key", type: "password", description: "Clave pública del proyecto iLovePDF. Se usa en el frontend para autenticar requests.", getFrom: "developer.ilovepdf.com → Projects → Tu proyecto → Public Key", accessType: "Pública", cost: "freemium" },
+                    { id: "ilovepdf_secret_key", label: "Secret Key", type: "password", description: "Clave secreta del proyecto iLovePDF. Se usa en el backend para operaciones administrativas.", getFrom: "developer.ilovepdf.com → Projects → Tu proyecto → Secret Key", accessType: "Privada", cost: "freemium" },
+                ]
+            },
         ]
     },
     {

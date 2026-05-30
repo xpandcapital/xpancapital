@@ -11,6 +11,7 @@ import { StandardROI, StandardDiscount, StandardMarkup, StandardLoan, StandardCo
 import { StandardBreakEven, StandardTax, StandardWaste, StandardFuel } from './StandardLogistics';
 import { StandardPassGen, StandardDateDiff, StandardAgeCalc, StandardCheckDigit, StandardNumToLetters, StandardWinner, StandardShuffle, StandardHourCounter, StandardPitchTimer, StandardWALink, StandardQRGen, UniversalManualForm } from './StandardOffice';
 import { StandardVideoConverter } from './StandardVideoConverter';
+import { StandardPdfConverter } from './StandardPdfConverter';
 import { StandardTextAnalyze, StandardCodeTools } from './StandardTextAnalyze';
 import { YouTubeBatchDownloader } from './YouTubeBatchDownloader';
 import { CurrencyConverter } from './CurrencyConverter';
@@ -26,7 +27,7 @@ const SmartAITool = ({ tool }: { tool: ToolDef }) => {
     const [result, setResult] = useState<string | null>(null);
     const [lastModel, setLastModel] = useState<string>('');
     const [loading, setLoading] = useState(false);
-    const [mode, setMode] = useState<'ia' | 'manual'>('ia');
+    const [mode, setMode] = useState<'ia' | 'manual'>(tool.isIA !== false ? 'ia' : 'manual');
     const [history, setHistory] = useState<{ id: string, title: string, input: string, result: string, model: string, date: string }[]>([]);
 
     useEffect(() => {
@@ -186,6 +187,7 @@ const SmartAITool = ({ tool }: { tool: ToolDef }) => {
                                                                                                         tool.id === 'winner_gen' ? <StandardWinner /> :
                                                                                                             tool.id === 'shuffle' ? <StandardShuffle /> :
                                                                                                                 tool.id === 'video_converter' ? <StandardVideoConverter /> :
+                                                                                                                    tool.id === 'pdf_converter' ? <StandardPdfConverter /> :
                                                                                                                     tool.id === 'youtube_batch' ? <YouTubeBatchDownloader /> :
                                                                                                                     tool.id === 'margin' || tool.id === 'markup' || tool.id === 'sku_profit' ? <StandardMarkup /> :
                                                                                                                     tool.id === 'percentage' ? <PercentageTool /> :
