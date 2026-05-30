@@ -37,7 +37,6 @@ const PAGE_SIZES = [
     { id: 'letter', name: 'Carta' },
 ];
 
-const API_BASE = 'https://api.ilovepdf.com/v1';
 
 interface UploadedFile {
     file: File;
@@ -152,98 +151,6 @@ function StandardPdfConverter() {
 
     // ─── Procesamiento ──────────────────────────────────────────
 
-    const getAuthToken = async (): Promise<string> => {
-        const res = await fetch('/api/ilovepdf/auth', { method: 'POST' });
-        const data = await res.json();
-        if (!res.ok || !data.token) {
-            throw new Error(data.error || `Error de autenticación (${res.status})`);
-        }
-        return data.token;
-    };
-
-    const startTask = async (token: string, tool: string): Promise<{ server: string; task: string }> => {
-        const res = await fetch(`${API_BASE}/start/${tool}`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (!data.server || !data.task) {
-            const msg = data.message || JSON.stringify(data);
-            throw new Error(`Error al iniciar tarea (${res.status}): ${msg}`);
-        }
-        return { server: data.server, task: data.task };
-    };
-
-    const uploadFile = async (server: string, task: string, token: string, file: File): Promise<string> => {
-        const formData = new FormData();
-        formData.append('task', task);
-        formData.append('file', file);
-
-        const res = await fetch(`https://${server}/v1/upload`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-            body: formData,
-        });
-        const data = await res.json();
-        if (!data.server_filename) {
-            throw new Error(`Error al subir ${file.name} (${res.status})`);
-        }
-        return data.server_filename;
-    };
-
-    const processFiles = async (
-        server: string, token: string, tool: string, task: string,
-        serverFilenames: string[], originalNames: string[], extraParams: Record<string, unknown> = {}
-    ): Promise<void> => {
-        const filesPayload = serverFilenames.map((sfn, i) => ({
-            server_filename: sfn,
-            filename: originalNames[i],
-        }));
-
-        const res = await fetch(`https://${server}/v1/process`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ task, tool, files: filesPayload, ...extraParams }),
-        });
-        const data = await res.json();
-        if (data.status === 'TaskError' || !res.ok) {
-            throw new Error('Error al procesar: ' + (data.message || `HTTP ${res.status}`));
-        }
-    };
-
-    const downloadResult = async (server: string, task: string, token: string): Promise<{ blob: Blob; filename: string }> => {
-        const res = await fetch(`https://${server}/v1/download/${task}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        const blob = await res.blob();
-        const disposition = res.headers.get('content-disposition') || '';
-        const match = disposition.match(/filename="?([^"]+)"?/);
-        const filename = match ? match[1] : 'resultado.pdf';
-        return { blob, filename };
-    };
-
-    const getToolName = (m: Mode): string => m;
-
-    const getExtraParams = (): Record<string, unknown> => {
-        switch (mode) {
-            case 'compress':
-                return { compression_level: compressionLevel };
-            case 'split':
-                if (splitMode === 'ranges') return { split_mode: 'ranges', ranges: splitRanges || '1' };
-                if (splitMode === 'fixed_range') return { split_mode: 'fixed_range', fixed_range: fixedRange || 1 };
-                return { split_mode: 'remove_pages', remove_pages: removePages || '' };
-            case 'pdfjpg':
-                return { pdfjpg_mode: pdfjpgMode };
-            case 'imagepdf':
-                return { orientation, margin: String(margin), pagesize: pageSize, merge_after: true };
-            default:
-                return {};
-        }
-    };
-
     const handleProcess = async () => {
         if (files.length === 0) {
             setError('Selecciona al menos un archivo');
@@ -251,47 +158,52 @@ function StandardPdfConverter() {
         }
 
         setProcessing(true);
-        setProgress(0);
-        setStatusMsg('Obteniendo configuración...');
+        setProgress(10);
+        setStatusMsg('Enviando archivos...');
         setError(null);
 
         try {
-            setProgress(5);
-            setStatusMsg('Autenticando...');
-            const token = await getAuthToken();
-            setProgress(10);
-
-            // 3. Iniciar tarea
-            const tool = getToolName(mode);
-            setStatusMsg('Iniciando procesamiento...');
-            const { server, task } = await startTask(token, tool);
-            setProgress(15);
-
-            // 4. Subir archivos
-            const serverFilenames: string[] = [];
-            const originalNames: string[] = [];
-
-            for (let i = 0; i < files.length; i++) {
-                const pct = 15 + Math.round((i / files.length) * 40);
-                setProgress(pct);
-                setStatusMsg(`Subiendo ${files[i].file.name} (${formatSize(files[i].file.size)})...`);
-
-                setFiles(prev => prev.map((f, idx) => idx === i ? { ...f, status: 'uploading' as const } : f));
-                const sfn = await uploadFile(server, task, token, files[i].file);
-                serverFilenames.push(sfn);
-                originalNames.push(files[i].file.name);
-                setFiles(prev => prev.map((f, idx) => idx === i ? { ...f, status: 'uploaded' as const, serverFilename: sfn } : f));
+            const formData = new FormData();
+            formData.append('mode', mode);
+            for (const f of files) {
+                formData.append('files', f.file);
             }
 
-            // 5. Procesar
-            setProgress(55);
-            setStatusMsg('Procesando archivos...');
-            await processFiles(server, token, tool, task, serverFilenames, originalNames, getExtraParams());
+            if (mode === 'compress') {
+                formData.append('compression_level', compressionLevel);
+            } else if (mode === 'split') {
+                formData.append('split_mode', splitMode);
+                if (splitMode === 'ranges') formData.append('ranges', splitRanges || '1');
+                if (splitMode === 'fixed_range') formData.append('fixed_range', String(fixedRange || 1));
+                if (splitMode === 'remove_pages') formData.append('remove_pages', removePages);
+            } else if (mode === 'pdfjpg') {
+                formData.append('pdfjpg_mode', pdfjpgMode);
+            } else if (mode === 'imagepdf') {
+                formData.append('orientation', orientation);
+                formData.append('pagesize', pageSize);
+                formData.append('margin', String(margin));
+            }
 
-            // 6. Descargar
+            setProgress(30);
+            setStatusMsg('Procesando en el servidor...');
+
+            const res = await fetch('/api/ilovepdf/process', {
+                method: 'POST',
+                body: formData,
+            });
+
             setProgress(80);
-            setStatusMsg('Descargando resultado...');
-            const { blob, filename } = await downloadResult(server, task, token);
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({ error: `Error HTTP ${res.status}` }));
+                throw new Error(errData.error || `Error del servidor (${res.status})`);
+            }
+
+            setStatusMsg('Recibiendo resultado...');
+            const blob = await res.blob();
+            const disposition = res.headers.get('content-disposition') || '';
+            const match = disposition.match(/filename="?([^"]+)"?/);
+            const filename = match ? match[1] : 'resultado.pdf';
 
             setProgress(100);
             setStatusMsg('¡Completado!');
