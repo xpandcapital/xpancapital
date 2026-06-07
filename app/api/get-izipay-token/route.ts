@@ -43,7 +43,10 @@ async function getIzipayConfig(supabase: ReturnType<typeof createClient>) {
   const hmacKey = map['izipay_hmac_key']
   const displayMode = map['izipay_display_mode'] || 'popup'
 
-  if (!shopId || !secretKey || !publicKey || !hmacKey) return null
+  if (!shopId || !secretKey || !publicKey || !hmacKey) {
+    console.error('[Izipay] Faltan keys:' + JSON.stringify({ shopId: !!shopId, secretKey: !!secretKey, publicKey: !!publicKey, hmacKey: !!hmacKey }))
+    return null
+  }
 
   return {
     shopId,
@@ -99,11 +102,14 @@ export async function POST(request: NextRequest) {
     const config = await getIzipayConfig(supabase)
 
     if (!config) {
+      console.error('[Izipay] Config no disponible')
       return NextResponse.json({
         success: false,
         error: 'Izipay no está configurado. Agrega izipay_shop_id, izipay_secret_key, izipay_public_key, izipay_hmac_key en API Nube.',
       }, { status: 500 })
     }
+
+    console.log('[Izipay] Config ok — solicitando formToken con shopId:', config.shopId.substring(0, 8) + '...')
 
     const finalEmpresaId = empresa_id || DEFAULT_EMPRESA_ID
     const amountInCents = Math.round(total_usd * 100)

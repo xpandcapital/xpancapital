@@ -420,6 +420,7 @@ function CheckoutContent() {
 
                 let res: Response;
                 try {
+                    console.log('[Izipay] Solicitando token...')
                     res = await fetch('/api/get-izipay-token', {
                         method: 'POST',
                         headers,
@@ -432,6 +433,7 @@ function CheckoutContent() {
                     });
                 } catch (fetchErr: any) {
                     clearTimeout(timeout);
+                    console.error('[Izipay] Fetch error:', fetchErr.name, fetchErr.message)
                     if (fetchErr.name === 'AbortError') {
                         throw new Error('El servicio de pago está tardando demasiado. Intenta de nuevo en unos minutos.');
                     }
@@ -440,6 +442,7 @@ function CheckoutContent() {
                 clearTimeout(timeout);
 
                 const data = await res.json();
+                console.log('[Izipay] Respuesta:', { success: data.success, error: data.error, status: res.status, hasToken: !!data.formToken })
 
                 if (!data.success) {
                     const errMsg = data.error || '';
