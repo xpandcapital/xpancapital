@@ -1,18 +1,18 @@
 import crypto from 'crypto'
 
-const ENCRYPTION_KEY = process.env.API_ENCRYPTION_KEY || ''
+const API_ENCRYPTION_KEY = process.env.API_ENCRYPTION_KEY || process.env.EMAIL_ENCRYPTION_KEY || ''
 
-if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length < 32) {
+if (!API_ENCRYPTION_KEY || API_ENCRYPTION_KEY.length < 32) {
   console.warn('[API Crypto] API_ENCRYPTION_KEY no configurada o muy corta. Las claves se guardarán sin cifrar.')
 }
 
 function getKey(): Buffer {
   // Derivar una clave de 32 bytes desde la env var usando SHA-256
-  return crypto.createHash('sha256').update(ENCRYPTION_KEY).digest()
+  return crypto.createHash('sha256').update(API_ENCRYPTION_KEY).digest()
 }
 
 export function encryptApiKey(plaintext: string): string {
-  if (!plaintext || !ENCRYPTION_KEY || ENCRYPTION_KEY.length < 32) return plaintext
+  if (!plaintext || !API_ENCRYPTION_KEY || API_ENCRYPTION_KEY.length < 32) return plaintext
   try {
     const key = getKey()
     const iv = crypto.randomBytes(16)
@@ -28,7 +28,7 @@ export function encryptApiKey(plaintext: string): string {
 }
 
 export function decryptApiKey(ciphertext: string): string {
-  if (!ciphertext || !ciphertext.startsWith('enc:') || !ENCRYPTION_KEY || ENCRYPTION_KEY.length < 32) {
+  if (!ciphertext || !ciphertext.startsWith('enc:') || !API_ENCRYPTION_KEY || API_ENCRYPTION_KEY.length < 32) {
     return ciphertext
   }
   try {
