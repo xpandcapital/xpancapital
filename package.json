@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
+    "@ilovepdf/ilovepdf-nodejs": "^0.3.1",
     "@radix-ui/react-switch": "^1.2.6",
     "@react-pdf/renderer": "^4.3.2",
     "@sparticuz/chromium": "^143.0.4",

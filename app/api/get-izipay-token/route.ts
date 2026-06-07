@@ -29,9 +29,9 @@ async function getIzipayConfig(supabase: ReturnType<typeof createClient>) {
       map[row.key_name] = row.key_value || 'popup'
     } else {
       const decrypted = decryptApiKey(row.key_value || '')
-      if (decrypted && decrypted.startsWith('enc:')) {
-        console.error(`[Izipay] No se pudo desencriptar ${row.key_name}: API_ENCRYPTION_KEY no configurada`)
-        console.error('[Izipay] Ejecuta: DELETE FROM api_keys WHERE key_name LIKE \'%izipay%\' y vuelve a ingresar las claves')
+      if (!decrypted || decrypted.startsWith('enc:')) {
+        console.error(`[Izipay] No se pudo desencriptar ${row.key_name}: clave de cifrado incorrecta o faltante`)
+        continue
       }
       map[row.key_name] = decrypted
     }
