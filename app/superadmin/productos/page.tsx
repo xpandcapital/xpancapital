@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useActionGuard } from '@/hooks/useActionGuard'
-import { AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Trash2, CheckCircle2, Package } from "lucide-react"
 import { useProducts } from "./_hooks/useProducts"
 import { useProductFilters } from "./_hooks/useProductFilters"
