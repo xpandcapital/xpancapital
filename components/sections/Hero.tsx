@@ -435,7 +435,36 @@ export function Hero() {
                             style={{ x: smoothX, y: smoothY }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => window.location.href = cmsData.hero.primaryBtnLink}
+                            onClick={() => {
+                                const target = cmsData.hero.primaryBtnLink;
+                                if (target && target.startsWith("#")) {
+                                    const hashId = target.substring(1);
+                                    let el = document.getElementById(hashId);
+                                    if (!el) {
+                                        const fallback: Record<string, string> = {
+                                            proyectos: "projects",
+                                            equipo: "team",
+                                            operaciones: "operations",
+                                            calculadora: "calculator",
+                                            tienda: "catalog",
+                                        };
+                                        const enId = fallback[hashId];
+                                        if (enId) el = document.getElementById(enId);
+                                    }
+                                    if (el) {
+                                        const top = el.getBoundingClientRect().top + window.scrollY - 70;
+                                        window.scrollTo({ top, behavior: "smooth" });
+                                        return;
+                                    }
+                                    // fallback directo a projects
+                                    const projectsEl = document.getElementById('projects');
+                                    if (projectsEl) {
+                                        window.scrollTo({ top: projectsEl.getBoundingClientRect().top + window.scrollY - 70, behavior: "smooth" });
+                                        return;
+                                    }
+                                }
+                                window.location.href = target;
+                            }}
                             className="group relative flex-1 sm:flex-none flex items-center justify-center px-4 py-3 sm:px-8 sm:py-4 md:px-7 md:py-4 lg:px-9 lg:py-5 [@media(min-width:1024px)_and_(max-width:1366px)]:!px-[1.2rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!py-[0.65rem] [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[9px] bg-blis-red text-white font-black tracking-normal sm:tracking-[0.2em] uppercase rounded-xl overflow-hidden transition-all shadow-[0_0_30px_rgba(190,11,60,0.4)] hover:shadow-[0_0_50px_rgba(190,11,60,0.8)] text-[10px] sm:text-xs md:text-sm lg:text-base whitespace-nowrap"
                         >
                             <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
@@ -449,7 +478,7 @@ export function Hero() {
                             whileTap={{ scale: 0.95 }}
                             onClick={() => {
                                 const target = cmsData.hero.secondaryBtnLink;
-                                if (target.startsWith("#")) {
+                                if (target && target.startsWith("#")) {
                                     const hashId = target.substring(1);
                                     let el = document.getElementById(hashId);
                                     if (!el) {
@@ -467,8 +496,15 @@ export function Hero() {
                                         const scrollOffset = 70;
                                         const top = el.getBoundingClientRect().top + window.scrollY - scrollOffset;
                                         window.scrollTo({ top, behavior: "smooth" });
+                                        return;
                                     }
-                                } else {
+                                }
+                                // Fallback: buscar la seccion projects directamente
+                                const el = document.getElementById('projects');
+                                if (el) {
+                                    const top = el.getBoundingClientRect().top + window.scrollY - 70;
+                                    window.scrollTo({ top, behavior: "smooth" });
+                                } else if (target) {
                                     window.location.href = target;
                                 }
                             }}
