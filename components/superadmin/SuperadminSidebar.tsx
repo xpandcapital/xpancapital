@@ -259,7 +259,7 @@ export function SuperadminSidebar() {
                 }}
                 onMouseEnter={handleSidebarMouseEnter}
                 onMouseLeave={handleSidebarMouseLeave}
-                className="flex flex-col bg-zinc-950 border-r border-white/5 h-[calc(100vh-80px)] fixed left-0 top-20 z-[999] overflow-hidden shadow-[15px_0_40px_rgba(0,0,0,0.8)] flex-shrink-0"
+                className="flex flex-col bg-zinc-950 border-r border-white/5 h-[calc(100vh-80px)] fixed left-0 top-20 z-40 overflow-hidden shadow-[15px_0_40px_rgba(0,0,0,0.8)] flex-shrink-0"
                 style={{ pointerEvents: 'auto' }}
             >
                 <div className={`pt-6 pb-4 px-4 flex items-center ${!isExpanded ? 'justify-center px-0' : 'justify-between'}`}>
