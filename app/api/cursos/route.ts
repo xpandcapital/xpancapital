@@ -119,40 +119,40 @@ export async function GET(request: NextRequest) {
           matriculado: true,
         }))
 
-      // Si el usuario no tiene cursos en equipo_cursos, buscar en compras
-      if (filtered.length === 0) {
-        const { data: comprasUser } = await supabase
-          .from('compras')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('estado', 'completado')
+      // Buscar cursos comprados via tienda (productos.curso_id) y mergear con equipo_cursos
+      const { data: comprasUser } = await supabase
+        .from('compras')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('estado', 'completado')
 
-        if (comprasUser?.length) {
-          const { data: compraItems } = await supabase
-            .from('compra_items')
-            .select('producto_id')
-            .in('compra_id', comprasUser.map(c => c.id))
+      let purchased: any[] = []
+      if (comprasUser?.length) {
+        const { data: compraItems } = await supabase
+          .from('compra_items')
+          .select('producto_id')
+          .in('compra_id', comprasUser.map(c => c.id))
 
-          const productoIds = compraItems?.map(ci => ci.producto_id).filter(Boolean) || []
+        const productoIds = compraItems?.map(ci => ci.producto_id).filter(Boolean) || []
 
-          const { data: linkedCursos } = await supabase
-            .from('productos')
-            .select('curso_id')
-            .in('id', productoIds)
-            .not('curso_id', 'is', null)
+        const { data: linkedCursos } = await supabase
+          .from('productos')
+          .select('curso_id')
+          .in('id', productoIds)
+          .not('curso_id', 'is', null)
 
-          const cursoIds = linkedCursos?.map(p => p.curso_id) || []
-          const purchased = cursos.filter(c => cursoIds.includes(c.id)).map(c => ({
+        const cursoIds = linkedCursos?.map(p => p.curso_id) || []
+        const enrolledIds = new Set(filtered.map(c => c.id))
+        purchased = cursos
+          .filter(c => cursoIds.includes(c.id) && !enrolledIds.has(c.id))
+          .map(c => ({
             ...c,
             progreso: { progreso: 0 },
             matriculado: false,
           }))
-
-          return NextResponse.json({ success: true, data: [...filtered, ...purchased] })
-        }
       }
 
-      return NextResponse.json({ success: true, data: filtered })
+      return NextResponse.json({ success: true, data: [...filtered, ...purchased] })
     }
 
     return NextResponse.json({ success: true, data: cursos })
