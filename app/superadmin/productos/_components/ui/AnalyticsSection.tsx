@@ -89,7 +89,7 @@ export function AnalyticsSection({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="md:col-span-2 bg-zinc-950/50 border border-white/5 p-6 rounded-[2.5rem]">
+              <div className="md:col-span-2 bg-zinc-950/50 border border-white/5 p-4 md:p-6 rounded-[2.5rem]">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">Flujo de Operaciones</h3>
                   <span className="text-[8px] font-black text-indigo-500 uppercase tracking-widest">Actividad 24h</span>
@@ -105,7 +105,7 @@ export function AnalyticsSection({
                 <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest mt-8">Carga máxima en almacén: <span className="text-indigo-500">8:00 AM - 11:00 AM</span></p>
               </div>
 
-              <div className="bg-zinc-950/50 border border-white/5 p-6 rounded-[2.5rem]">
+              <div className="bg-zinc-950/50 border border-white/5 p-4 md:p-6 rounded-[2.5rem]">
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-6">Stock por Categoría</h3>
                 <div className="space-y-4">
                   {topCategoriesByStock.length > 0 ? topCategoriesByStock.map((cat, i) => (
@@ -130,7 +130,7 @@ export function AnalyticsSection({
             </div>
 
             <div className={`grid grid-cols-1 md:grid-cols-2 ${enablePerishables ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
-              <div className="bg-zinc-950/50 border border-white/5 p-6 rounded-[2.5rem]">
+              <div className="bg-zinc-950/50 border border-white/5 p-4 md:p-6 rounded-[2.5rem]">
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-6">Salud del Inventario</h3>
                 <div className="space-y-5">
                   {healthStats.map((s, i) => (
@@ -152,7 +152,7 @@ export function AnalyticsSection({
                 </div>
               </div>
 
-              <div className="bg-zinc-950/50 border border-white/5 p-6 rounded-[2.5rem]">
+              <div className="bg-zinc-950/50 border border-white/5 p-4 md:p-6 rounded-[2.5rem]">
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-6">Eficiencia de Reabasto</h3>
                 <div className="h-32 flex items-end gap-4 px-4 overflow-hidden">
                   {[85, 92, 78, 95, 88].map((v, i) => (

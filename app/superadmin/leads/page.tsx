@@ -151,7 +151,7 @@ export default function LeadsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-8">
+    <div className="min-h-screen bg-black text-white p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -170,7 +170,7 @@ export default function LeadsPage() {
 
         {/* Filters */}
         <div className="flex flex-wrap gap-4 mb-6">
-          <div className="flex-1 min-w-[250px]">
+          <div className="flex-1 min-w-[200px]">
             <div className="relative">
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
               <input
@@ -243,9 +243,9 @@ export default function LeadsPage() {
                   <tr className="border-b border-white/10">
                     <th className="text-left text-xs font-bold text-gray-400 uppercase p-4">Lead</th>
                     <th className="text-left text-xs font-bold text-gray-400 uppercase p-4">Contacto</th>
-                    <th className="text-left text-xs font-bold text-gray-400 uppercase p-4">Campaña</th>
+                    <th className="text-left text-xs font-bold text-gray-400 uppercase p-4 hidden md:table-cell">Campaña</th>
                     <th className="text-left text-xs font-bold text-gray-400 uppercase p-4">Estado</th>
-                    <th className="text-left text-xs font-bold text-gray-400 uppercase p-4">Fecha</th>
+                    <th className="text-left text-xs font-bold text-gray-400 uppercase p-4 hidden md:table-cell">Fecha</th>
                     <th className="text-left text-xs font-bold text-gray-400 uppercase p-4">Acciones</th>
                   </tr>
                 </thead>
@@ -281,7 +281,7 @@ export default function LeadsPage() {
                           )}
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 hidden md:table-cell">
                         <span className="text-sm text-gray-400">
                           {lead.campana?.nombre || 'Sin campaña'}
                         </span>
@@ -297,7 +297,7 @@ export default function LeadsPage() {
                           ))}
                         </select>
                       </td>
-                      <td className="p-4">
+                      <td className="p-4 hidden md:table-cell">
                         <div className="flex items-center gap-1 text-sm text-gray-400">
                           <Calendar className="w-4 h-4" />
                           {new Date(lead.creado_en).toLocaleDateString()}
@@ -354,7 +354,7 @@ export default function LeadsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {selectedLead.email && (
                   <div>
                     <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Email</label>
@@ -390,7 +390,7 @@ export default function LeadsPage() {
 
               <div className="border-t border-white/10 pt-4">
                 <h4 className="text-sm font-bold text-white mb-3">Información Adicional</h4>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                   {selectedLead.campana && (
                     <div>
                       <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Campaña</label>

@@ -399,18 +399,18 @@ export default function AdminClientes() {
                             <table className="w-full text-left">
                                 <thead className="bg-zinc-900 font-black text-[10px] text-gray-500 uppercase tracking-[0.4em]">
                                     <tr>
-                                        <th className="px-8 py-6">Socio & Perfil</th>
-                                        <th className="px-6 py-6 text-center">Nivel / Tier</th>
-                                        <th className="px-6 py-6 text-center">Estado Ops</th>
-                                        <th className="px-6 py-6 text-center">Boveda (BC)</th>
-                                        <th className="px-6 py-6 text-center">Total Compra</th>
-                                        <th className="px-6 py-6 text-right">Acciones Directas</th>
+                                        <th className="px-4 md:px-8 py-4 md:py-6">Socio & Perfil</th>
+                                        <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Nivel / Tier</th>
+                                        <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Estado Ops</th>
+                                        <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Boveda (BC)</th>
+                                        <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Total Compra</th>
+                                        <th className="px-4 md:px-8 py-4 md:py-6 text-right">Acciones Directas</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {filteredClients.map(c => (
                                         <tr key={c.id} className="group hover:bg-white/[0.01] transition-all cursor-pointer" onClick={() => router.push(`/superadmin/clientes/${c.id}`)}>
-                                            <td className="px-8 py-6">
+                                            <td className="px-4 md:px-8 py-4 md:py-6">
                                                 <div className="flex items-center gap-4">
                                                     <div className="relative group">
                                                         <div className="w-12 h-12 rounded-2xl bg-zinc-900 border-2 border-white/5 flex items-center justify-center text-blis-red text-lg font-black shadow-xl group-hover:scale-105 transition-transform">{c.avatar}</div>
@@ -422,7 +422,7 @@ export default function AdminClientes() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-6 text-center">
+                                            <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">
                                                 <span className={`text-[9px] font-black uppercase px-4 py-1.5 rounded-full border ${
                                                     c.tier.includes('Platinum') ? 'bg-neutral-900 border-neutral-700 text-neutral-300' :
                                                     c.tier.includes('Gold') ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
@@ -430,16 +430,16 @@ export default function AdminClientes() {
                                                     'bg-white/5 border-white/10 text-gray-500'
                                                 }`}>{c.tier}</span>
                                             </td>
-                                            <td className="px-6 py-6 text-center">
+                                            <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">
                                                 <span className={`text-[9px] font-black uppercase px-4 py-1.5 rounded-full border ${
                                                     c.status === 'Verificado' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500 shadow-lg shadow-emerald-500/10' :
                                                     c.status === 'Premium' ? 'bg-blis-red/10 border-blis-red/20 text-blis-red shadow-lg shadow-blis-red/10 animate-pulse' :
                                                     'bg-white/5 border-white/10 text-gray-500'
                                                 }`}>{c.status}</span>
                                             </td>
-                                            <td className="px-6 py-6 text-center font-black text-amber-500 text-xs tracking-widest">{formatCurrency(c.blisCoins)} BC</td>
-                                            <td className="px-6 py-6 text-center font-black text-white text-xs">${formatCurrency(c.income)}</td>
-                                            <td className="px-8 py-6 text-right" onClick={e => e.stopPropagation()}>
+                                            <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell font-black text-amber-500 text-xs tracking-widest">{formatCurrency(c.blisCoins)} BC</td>
+                                            <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell font-black text-white text-xs">${formatCurrency(c.income)}</td>
+                                            <td className="px-4 md:px-8 py-4 md:py-6 text-right" onClick={e => e.stopPropagation()}>
                                                 <div className="flex justify-end gap-2">
                                                     <a href={`https://wa.me/${c.phone.replace(/\+/g, '').replace(/\s/g, '')}?text=Hola%20${c.firstName},%20un%20gusto%20saludarte.`} target="_blank" rel="noopener noreferrer" className="p-2.5 bg-emerald-600/10 text-emerald-500 border border-emerald-500/10 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-xl shadow-emerald-900/10"><Smartphone className="w-4 h-4" /></a>
                                                     <button onClick={() => handleDelete(c.id, `${c.firstName} ${c.lastName}`)} className="p-2.5 bg-red-500/10 text-red-500 border border-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
@@ -454,7 +454,7 @@ export default function AdminClientes() {
                         )}
                     </div>
                 ) : (
-                    <div className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="p-4 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                         {isLoading ? (
                             <div className="col-span-full flex items-center justify-center py-20">
                                 <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
@@ -469,7 +469,7 @@ export default function AdminClientes() {
                             filteredClients.map(c => (
                                 <div key={c.id} onClick={() => router.push(`/superadmin/clientes/${c.id}`)} className="relative p-8 bg-zinc-900 border border-white/5 rounded-[3rem] hover:border-blis-red/50 transition-all cursor-pointer group flex flex-col items-center text-center space-y-4 shadow-3xl hover:shadow-blis-red/5">
                                     <div className="absolute top-4 right-4 flex gap-1">
-                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id, `${c.firstName} ${c.lastName}`); }} className="p-1.5 bg-red-500/10 text-red-500 border border-red-500/10 rounded-lg hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id, `${c.firstName} ${c.lastName}`); }} className="p-1.5 bg-red-500/10 text-red-500 border border-red-500/10 rounded-lg hover:bg-red-500 hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
                                         <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-lg border ${
                                             c.tier.includes('Gold') ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
                                             c.tier.includes('Platinum') ? 'bg-neutral-800 border-neutral-700 text-neutral-300' :

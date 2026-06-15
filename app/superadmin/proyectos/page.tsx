@@ -156,7 +156,7 @@ export default function AdminProjects() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="max-w-[1800px] mx-auto px-6 py-10">
+      <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-6 md:py-10">
         <Header loadProjects={loadProjects} viewMode={viewMode} setViewMode={setViewMode} exportCSV={exportCSV} onNewProject={openNewProject} />
         <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 

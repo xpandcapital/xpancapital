@@ -207,21 +207,21 @@ export default function Dashboard() {
   }, [compras]);
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-8 font-sans">
+    <div className="min-h-screen bg-[#050505] text-white p-4 md:p-8 font-sans">
       <div className="max-w-[1600px] mx-auto space-y-8">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-4xl font-black uppercase tracking-tighter">
+              <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tighter">
                 {empresa.nombre} <span className="text-blis-red">Panel</span>
               </h1>
               <button onClick={fetchData} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-all">
                 <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
               </button>
             </div>
-            <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.4em] mt-2 flex items-center gap-2">
+            <p className="text-zinc-500 text-xs font-black uppercase tracking-normal md:tracking-[0.4em] mt-2 flex items-center gap-2">
               <TrendingUp size={14} className="text-emerald-500" /> Panel de Control Corporativo
             </p>
           </div>

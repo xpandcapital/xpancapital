@@ -10,10 +10,10 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex bg-black min-h-[calc(100dvh-80px)]">
+        <div className="flex bg-black min-h-[calc(100dvh-80px)] overflow-x-hidden">
             <SuperadminSidebar />
-            <div className="flex-1 pt-24 pl-16">
-                <div className="max-w-[1600px] mx-auto w-full pb-20">
+            <div className="flex-1 pt-20 md:pt-24 pl-4 md:pl-6 lg:pl-16">
+                <div className="max-w-[1600px] mx-auto w-full pb-20 overflow-x-hidden">
                     <SuperadminGuard>
                         <GlobalSearch />
                         {children}

@@ -386,7 +386,7 @@ export default function FormasPagoAdminPage() {
                                                     {/* Costo de procesamiento */}
                                                     <div className="border-t border-white/5 pt-3 mt-2">
                                                         <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2">Costo de procesamiento</p>
-                                                        <div className="grid grid-cols-4 gap-2">
+                                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                                             <select value={forma.config?.processing_fee_type || ''}
                                                                 onChange={e => updateSimple(forma.id, 'processing_fee_type', e.target.value)}
                                                                 className="bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white col-span-1">

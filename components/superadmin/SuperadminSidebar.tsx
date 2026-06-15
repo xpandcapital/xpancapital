@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import {
     LayoutDashboard, Users, FileText, Image as ImageIcon,
     Settings, LogOut, Activity, UserCircle, ShoppingBag,
-    Coins, ChevronLeft, Menu, X, GraduationCap, Award, Cloud,
+    Coins, ChevronLeft, GraduationCap, Award, Cloud,
     ShoppingCart, Boxes, CandlestickChart, Scale, BarChart3,
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
@@ -203,7 +203,7 @@ export function SuperadminSidebar() {
 
     useEffect(() => {
         const handleResize = () => {
-            const isMobile = window.innerWidth < 768
+            const isMobile = window.innerWidth < 1024
             setSidebarWidth(isMobile ? 56 : 64)
         }
         handleResize()

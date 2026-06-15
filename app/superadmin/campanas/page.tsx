@@ -146,7 +146,7 @@ export default function CampanasPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-8">
+    <div className="min-h-screen bg-black text-white p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -156,7 +156,7 @@ export default function CampanasPage() {
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="px-5 py-3 bg-blis-red text-white rounded-xl font-bold flex items-center gap-2 hover:scale-105 transition-transform"
+            className="px-5 py-3 bg-blis-red text-white rounded-xl font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-transform"
           >
             <Plus className="w-5 h-5" />
             Nueva Campaña

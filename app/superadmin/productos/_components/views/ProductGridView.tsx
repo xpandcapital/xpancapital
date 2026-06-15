@@ -39,7 +39,7 @@ export const ProductGridView = React.memo(function ProductGridView({
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 p-6 bg-white/[0.01]">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-5 p-3 md:p-6 bg-white/[0.01]">
       {products.map((product) => {
         const isSelected = selectedIds.includes(product.id)
         const statusColor = getStatusColor(product)
@@ -72,7 +72,7 @@ export const ProductGridView = React.memo(function ProductGridView({
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent opacity-40" />
             </div>
 
-            <div className="p-5 space-y-4 flex-1 flex flex-col">
+            <div className="p-3 md:p-5 space-y-3 md:space-y-4 flex-1 flex flex-col">
               <div className="space-y-2">
                 <div className="flex justify-between items-start gap-4">
                   <div className="space-y-1 flex-1 min-w-0">
@@ -152,7 +152,7 @@ export const ProductGridView = React.memo(function ProductGridView({
                 </div>
               )}
 
-              <div className="mt-auto pt-4 border-t border-white/5 flex items-center justify-between">
+              <div className="mt-auto pt-3 md:pt-4 border-t border-white/5 flex items-center justify-between">
                 <div className="flex flex-col flex-1">
                   <span className="text-[10px] text-gray-500 uppercase font-black">Stock Actual</span>
                   {isBulkEditing ? (
@@ -181,15 +181,15 @@ export const ProductGridView = React.memo(function ProductGridView({
                     </select>
                   </div>
                 ) : (
-                  <div className="flex gap-4 items-center justify-end">
-                    <button onClick={() => onPrintLabels(product)} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg" title="Etiquetas">
-                      <BarcodeIcon className="w-4 h-4" />
+                  <div className="flex gap-1 md:gap-4 items-center justify-end">
+                    <button onClick={() => onPrintLabels(product)} className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg" title="Etiquetas">
+                      <BarcodeIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
-                    <button onClick={() => onEdit(product)} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg">
-                      <Edit2 className="w-4 h-4" />
+                    <button onClick={() => onEdit(product)} className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg">
+                      <Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
-                    <button onClick={() => onDelete(product.id)} className="p-2.5 rounded-xl bg-white/5 hover:bg-blis-red/20 text-gray-400 hover:text-blis-red transition-all shadow-lg">
-                      <Trash2 className="w-4 h-4" />
+                    <button onClick={() => onDelete(product.id)} className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-blis-red/20 text-gray-400 hover:text-blis-red transition-all shadow-lg">
+                      <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
                   </div>
                 )}

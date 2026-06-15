@@ -168,11 +168,11 @@ export default function BulkContractReconciliation() {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white p-6 font-sans select-none">
+        <div className="min-h-screen bg-[#050505] text-white p-4 md:p-6 font-sans select-none">
             <div className="max-w-7xl mx-auto space-y-6">
                 
                 {/* Header Masivo */}
-                <div className="flex items-center justify-between bg-[#0a0a0a] p-6 rounded-3xl border border-white/5 shadow-2xl">
+                <div className="flex items-center justify-between bg-[#0a0a0a] p-4 md:p-6 rounded-3xl border border-white/5 shadow-2xl">
                     <div className="flex items-center gap-5">
                         <div className="p-4 bg-emerald-500/20 rounded-2xl border border-emerald-500/20"><Layers className="w-8 h-8 text-emerald-500" /></div>
                         <div>
@@ -187,16 +187,16 @@ export default function BulkContractReconciliation() {
                 </div>
 
                 {activeView === 'new' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:p-6">
                         
                         {/* 1. Dropzone Masivo */}
                         <div className="lg:col-span-1 space-y-6">
-                            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-3xl relative group overflow-hidden">
-                                <div className="absolute -top-10 -left-10 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full" />
+                            <div className="bg-[#0a0a0a] border border-white/5 p-4 md:p-8 rounded-3xl relative group overflow-hidden">
+                                <div className="absolute -top-4 md:p-10 -left-10 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full" />
                                 <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2 relative z-10"><Files size={16}/> Carga de Archivos</h3>
                                 <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-white/10 rounded-[2.5rem] cursor-pointer hover:border-emerald-500/50 transition-all bg-black/40 hover:bg-black/60 relative z-10">
-                                    <div className="text-center p-6">
-                                        <Upload className="w-12 h-12 text-zinc-800 mb-4 mx-auto group-hover:text-emerald-500 transition-colors" />
+                                    <div className="text-center p-4 md:p-6">
+                                        <Upload className="w-12 h-12 text-zinc-800 mb-4 mx-auto group-hover:text-emerald-500 group-active:text-emerald-500 transition-colors" />
                                         <p className="text-sm font-black uppercase tracking-widest text-zinc-400">Suelte Contratos y Recibos</p>
                                         <p className="text-[9px] text-zinc-600 mt-2 font-bold uppercase">Procesamiento IA Masivo Activo</p>
                                     </div>
@@ -227,7 +227,7 @@ export default function BulkContractReconciliation() {
 
                         {/* 2. Resumen de Expediente */}
                         <div className="lg:col-span-2 space-y-6">
-                            <div className="bg-[#0a0a0a] border border-white/5 p-8 rounded-3xl space-y-8">
+                            <div className="bg-[#0a0a0a] border border-white/5 p-4 md:p-8 rounded-3xl space-y-8">
                                 <div className="flex items-center justify-between border-b border-white/5 pb-6">
                                     <div>
                                         <h2 className="text-2xl font-black tracking-tighter uppercase italic">{contract.clientName || 'Esperando Cliente...'}</h2>
@@ -268,7 +268,7 @@ export default function BulkContractReconciliation() {
 
                 {activeView === 'report' && report && (
                     <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} className="max-w-5xl mx-auto space-y-6">
-                        <div className="bg-[#0a0a0a] border border-white/5 p-10 rounded-[3rem] space-y-10 relative overflow-hidden shadow-2xl">
+                        <div className="bg-[#0a0a0a] border border-white/5 p-4 md:p-10 rounded-[3rem] space-y-10 relative overflow-hidden shadow-2xl">
                             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 via-blue-500 to-amber-500" />
                             
                             <div className="text-center">
@@ -279,29 +279,29 @@ export default function BulkContractReconciliation() {
                                 )}
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="p-6 bg-black/60 border border-white/5 rounded-3xl text-center">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:p-6">
+                                <div className="p-4 md:p-6 bg-black/60 border border-white/5 rounded-3xl text-center">
                                     <p className="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Abonado a la Fecha</p>
                                     <h4 className="text-3xl font-black text-white">${report.totalPaid.toLocaleString()}</h4>
                                 </div>
-                                <div className="p-6 bg-black/60 border border-white/5 rounded-3xl text-center border-t-emerald-500/40 border-t-2">
+                                <div className="p-4 md:p-6 bg-black/60 border border-white/5 rounded-3xl text-center border-t-emerald-500/40 border-t-2">
                                     <p className="text-[9px] font-black text-emerald-500 uppercase mb-2 tracking-widest">Meta Firma (50% + Cuotas)</p>
                                     <h4 className="text-3xl font-black text-white">${report.installmentsOwedToDate.toLocaleString()}</h4>
                                 </div>
-                                <div className="p-6 bg-black/60 border border-white/5 rounded-3xl text-center">
+                                <div className="p-4 md:p-6 bg-black/60 border border-white/5 rounded-3xl text-center">
                                     <p className="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Proyección Cuotas (Dic 2026)</p>
                                     <h4 className="text-3xl font-black text-zinc-400">${report.projectedUntilDec2026.toLocaleString()}</h4>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="p-10 bg-emerald-500/5 border border-emerald-500/20 rounded-[3rem] text-center shadow-[0_0_60px_rgba(16,185,129,0.05)]">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:p-6">
+                                <div className="p-4 md:p-10 bg-emerald-500/5 border border-emerald-500/20 rounded-[3rem] text-center shadow-[0_0_60px_rgba(16,185,129,0.05)]">
                                     <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-4">Saldo Firma Escritura Final</p>
                                     <h4 className="text-6xl font-black text-white tracking-tighter">${report.balanceAtDeed.toLocaleString()}</h4>
                                     <p className="text-[8px] text-zinc-600 mt-4 uppercase font-bold tracking-widest italic italic">Monto proyectado para liquidación del lote</p>
                                 </div>
-                                <div className="p-10 bg-amber-500/5 border border-amber-500/30 rounded-[3rem] text-center shadow-[0_0_60px_rgba(245,158,11,0.1)] relative">
-                                    <div className="absolute top-6 right-8 w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
+                                <div className="p-4 md:p-10 bg-amber-500/5 border border-amber-500/30 rounded-[3rem] text-center shadow-[0_0_60px_rgba(245,158,11,0.1)] relative">
+                                    <div className="absolute top-4 md:p-6 right-8 w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
                                     <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.5em] mb-4">Monto para Regularizar YA</p>
                                     <h4 className="text-7xl font-black text-white tracking-tighter drop-shadow-2xl">${report.pendingToRegularize.toLocaleString()}</h4>
                                     <div className="mt-8 flex items-center justify-center gap-3"><span className="text-[9px] font-black text-amber-500 uppercase tracking-widest italic italic">Requerido para Promesa de Compraventa</span></div>
@@ -319,7 +319,7 @@ export default function BulkContractReconciliation() {
                                         status: 'reconciled'
                                     }]);
                                     alert('Expediente Guardado'); setActiveView('history');
-                                }} className="p-6 bg-zinc-900 border border-white/10 rounded-3xl hover:border-emerald-500 transition-all"><Save size={24}/></button>
+                                }} className="p-4 md:p-6 bg-zinc-900 border border-white/10 rounded-3xl hover:border-emerald-500 transition-all"><Save size={24}/></button>
                             </div>
                         </div>
                     </motion.div>
@@ -328,10 +328,10 @@ export default function BulkContractReconciliation() {
                 {activeView === 'history' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {contractHistory.map(item => (
-                            <div key={item.id} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-[2rem] text-left hover:border-emerald-500/30 transition-all shadow-xl group relative overflow-hidden">
+                            <div key={item.id} className="bg-[#0a0a0a] border border-white/5 p-4 md:p-6 rounded-[2rem] text-left hover:border-emerald-500/30 transition-all shadow-xl group relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 blur-2xl rounded-full" />
                                 <div className="flex justify-between mb-5 relative z-10">
-                                    <div className="p-3 bg-zinc-900 rounded-xl group-hover:bg-emerald-500/20 transition-colors"><Home size={20} className="text-emerald-500" /></div>
+                                    <div className="p-3 bg-zinc-900 rounded-xl group-hover:bg-emerald-500/20 active:bg-emerald-500/20 transition-colors"><Home size={20} className="text-emerald-500" /></div>
                                     <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{new Date(item.created_at).toLocaleDateString()}</span>
                                 </div>
                                 <h4 className="text-xl font-black text-white italic tracking-tighter">({item.lot_id} - {item.client_name})</h4>

@@ -36,9 +36,9 @@ export default function SiteConfigPage() {
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/superadmin" className="text-gray-400 hover:text-white transition-colors">
+            <Link href="/superadmin" className="text-gray-400 hover:text-white active:text-white transition-colors">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <div>
@@ -49,7 +49,7 @@ export default function SiteConfigPage() {
           <button
             onClick={saveConfig}
             disabled={saving}
-            className="px-5 py-2.5 bg-blis-red text-white text-sm font-bold rounded-xl hover:bg-blis-red/80 transition-all flex items-center gap-2 disabled:opacity-50"
+            className="px-5 py-2.5 bg-blis-red text-white text-sm font-bold rounded-xl hover:bg-blis-red/80 active:bg-blis-red/70 transition-all flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saving ? "Guardando..." : "Guardar"}
@@ -58,7 +58,7 @@ export default function SiteConfigPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 md:py-8 space-y-8">
         <BrandingPanel config={config} updateField={updateField} />
         <SiteInfoPanel config={config} updateField={updateField} />
         <ColorsPanel config={config} updateField={updateField} />

@@ -51,7 +51,7 @@ export function ProductListView({
   const allSelected = selectedIds.length === filteredCount && filteredCount > 0
 
   return (
-    <table className="w-full text-left border-collapse min-w-[1100px]">
+    <table className="w-full text-left border-collapse min-w-[800px] lg:min-w-[1100px]">
       <ProductTableHeader
         allSelected={allSelected}
         onToggleAll={onToggleAll}

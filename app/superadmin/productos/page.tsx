@@ -301,7 +301,7 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
                 )}
 
                 {filteredProducts.length === 0 && (
-                  <div className="p-32 text-center space-y-4">
+                  <div className="p-16 md:p-32 text-center space-y-4">
                     <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
                       <Package className="w-10 h-10 text-gray-800" />
                     </div>

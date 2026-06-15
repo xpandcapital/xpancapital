@@ -50,7 +50,7 @@ export default function EmpresasPage() {
           <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none sm:leading-tight">Empresas</h1>
           <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">Gestiona las empresas del sistema. Cada empresa tiene sus propias API keys, usuarios y configuración.</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="w-full sm:w-auto bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+        <button onClick={() => setShowCreate(true)} className="w-full sm:w-auto bg-blis-red text-white px-4 md:px-6 py-2.5 md:py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
           <Plus className="w-4 h-4" />Nueva Empresa
         </button>
       </div>

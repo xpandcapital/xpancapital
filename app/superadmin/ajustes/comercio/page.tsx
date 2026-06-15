@@ -10,7 +10,7 @@ import { ArrowLeft } from "lucide-react";
 
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
     return (
-        <div className="bg-zinc-950 border border-white/5 rounded-[2rem] p-8 shadow-4xl">
+        <div className="bg-zinc-950 border border-white/5 rounded-[2rem] p-4 md:p-8 shadow-4xl">
             <div className="flex items-center gap-4 mb-8">
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10">
                     {icon}
@@ -64,7 +64,7 @@ export default function ComercioSettings() {
                 <div className="w-full sm:w-auto">
                     <Link 
                         href="/superadmin/ajustes" 
-                        className="text-gray-400 hover:text-white text-xs flex items-center gap-1 mb-2"
+                        className="text-gray-400 hover:text-white active:text-white text-xs flex items-center gap-1 mb-2"
                     >
                         <ArrowLeft className="w-3 h-3" /> Volver a Ajustes
                     </Link>
@@ -73,7 +73,7 @@ export default function ComercioSettings() {
                 </div>
                 <button 
                     onClick={handleSave}
-                    className="w-full sm:w-auto bg-blis-red text-white px-8 py-4 sm:py-5 rounded-3xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all flex items-center justify-center shrink-0 gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)] mt-4 sm:mt-0"
+                    className="w-full sm:w-auto bg-blis-red text-white px-8 py-4 sm:py-5 rounded-3xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all flex items-center justify-center shrink-0 gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)] mt-4 sm:mt-0"
                 >
                     <Save className="w-5 h-5" /> Guardar Cambios
                 </button>
