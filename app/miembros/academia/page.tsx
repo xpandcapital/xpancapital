@@ -76,7 +76,9 @@ function AcademyContent() {
         setActiveModule(null);
         setOpenModules(new Set());
         setCompletedLessons([]);
-        if (course.slug) {
+        if (course.isPurchased && course.cursoId) {
+            await fetchCursoCompleto(course.cursoId, true);
+        } else if (course.slug) {
             await fetchCursoCompleto(course.slug);
         } else if (course.cursoId || course.id) {
             await fetchCursoCompleto(course.cursoId || course.id, true);
