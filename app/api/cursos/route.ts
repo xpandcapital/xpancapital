@@ -70,13 +70,46 @@ export async function GET(request: NextRequest) {
 
     // Filtrar solo cursos matriculados del usuario + añadir progreso
     if (userId && cursos) {
+      // Consulta 1: equipo_cursos donde user_id coincide directamente
       const { data: enrolled } = await supabase
         .from('equipo_cursos')
         .select('curso_id, progreso')
         .eq('user_id', userId)
 
+      // Consulta 2: también buscar por email del advisor (para registros con user_id null)
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', userId)
+        .single()
+
+      let enrolledByAdvisor: any[] = []
+      if (userProfile?.email) {
+        const { data: advisorRecord } = await supabase
+          .from('advisors')
+          .select('id')
+          .eq('email', userProfile.email.toLowerCase())
+          .maybeSingle()
+
+        if (advisorRecord?.id) {
+          const { data: advisorCourses } = await supabase
+            .from('equipo_cursos')
+            .select('curso_id, progreso')
+            .eq('advisor_id', advisorRecord.id)
+            .is('user_id', null)
+
+          enrolledByAdvisor = advisorCourses || []
+        }
+      }
+
+      // Unificar ambos resultados (priorizando user_id directo)
+      const allEnrolled = [...(enrolled || []), ...enrolledByAdvisor]
       const enrolledMap = new Map()
-      enrolled?.forEach(e => enrolledMap.set(e.curso_id, e.progreso || 0))
+      allEnrolled.forEach(e => {
+        if (!enrolledMap.has(e.curso_id) || e.user_id !== null) {
+          enrolledMap.set(e.curso_id, e.progreso || 0)
+        }
+      })
 
       const filtered = cursos
         .filter(c => enrolledMap.has(c.id))

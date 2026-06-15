@@ -521,7 +521,8 @@ export async function POST(request: NextRequest) {
           }
 
           if (!cursoExists) {
-            console.log(`[Checkout] Curso NO encontrado para producto:`, product);
+            console.error(`[Checkout] Curso NO encontrado para producto: ${product.nombre || product.id}`);
+            courseAssignmentError = courseAssignmentError || `No se encontró el curso vinculado al producto "${product.nombre || product.id}"`;
           }
 
           if (cursoExists && cursoId) {
@@ -565,7 +566,17 @@ export async function POST(request: NextRequest) {
                 console.log(`[Checkout] Curso ${cursoId} auto-asignado a ${email}`);
                 coursesAssigned++;
               } else if (assignError?.code === '23505') {
-                console.log(`[Checkout] Curso ${cursoId} ya estaba asignado a ${email}`);
+                console.log(`[Checkout] Curso ${cursoId} ya estaba asignado a ${email}, actualizando user_id...`);
+                const { error: updateError } = await supabase
+                  .from('equipo_cursos')
+                  .update({ user_id: finalUserId, estado: 'asignado' })
+                  .eq('advisor_id', advisorId)
+                  .eq('curso_id', cursoId);
+                if (updateError) {
+                  console.error('[Checkout] Error actualizando user_id en duplicado:', updateError);
+                } else {
+                  console.log(`[Checkout] user_id actualizado para curso ${cursoId}`);
+                }
                 coursesAssigned++;
               }
             }
