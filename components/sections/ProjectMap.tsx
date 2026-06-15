@@ -144,7 +144,7 @@ export function ProjectMap() {
                                         }}
                                         onClick={() => {
                                             window.dispatchEvent(new CustomEvent('openProjectModal', { detail: loc.fullName }));
-                                            const el = document.getElementById('proyectos');
+                                            const el = document.getElementById('projects');
                                             if (el) el.scrollIntoView({ behavior: 'smooth' });
                                         }}
                                     >

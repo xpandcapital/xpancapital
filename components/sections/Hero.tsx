@@ -450,7 +450,19 @@ export function Hero() {
                             onClick={() => {
                                 const target = cmsData.hero.secondaryBtnLink;
                                 if (target.startsWith("#")) {
-                                    const el = document.getElementById(target.substring(1));
+                                    const hashId = target.substring(1);
+                                    let el = document.getElementById(hashId);
+                                    if (!el) {
+                                        const fallback: Record<string, string> = {
+                                            proyectos: "projects",
+                                            equipo: "team",
+                                            operaciones: "operations",
+                                            calculadora: "calculator",
+                                            tienda: "catalog",
+                                        };
+                                        const enId = fallback[hashId];
+                                        if (enId) el = document.getElementById(enId);
+                                    }
                                     if (el) {
                                         const scrollOffset = 70;
                                         const top = el.getBoundingClientRect().top + window.scrollY - scrollOffset;
