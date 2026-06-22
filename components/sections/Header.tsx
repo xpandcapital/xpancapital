@@ -150,15 +150,15 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                         </button>
 
 {/* Logo */}
-<div
-                              className={`absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 ${!user ? 'w-[120px] xl:w-[200px]' : 'w-auto'} flex-shrink-0 cursor-pointer z-20`}
+                          <div
+                              className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 w-auto flex-shrink-0 cursor-pointer z-20"
                               onClick={() => handleNavigation('/#hero')}
                           >
                           {(logoHorizontal || siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal) ? (
                               <img
                                   src={logoHorizontal || siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal}
                                   alt="Blis Corp Logo"
-                                  className="h-14 sm:h-14 lg:h-12 xl:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(190,11,60,0.5)] mx-auto lg:ml-0"
+                                  className="h-12 sm:h-14 lg:h-14 xl:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(190,11,60,0.5)] mx-auto lg:ml-0"
                               />
                           ) : (
                               <span className="text-xl font-black text-white tracking-wider">BLIS CORP</span>
@@ -168,7 +168,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
 
 
                         {/* Desktop Navigation */}
-                        <nav className="hidden lg:flex items-center justify-center gap-2 xl:gap-8 z-10 flex-1 relative transition-all duration-500">
+                        <nav className="hidden lg:flex items-center justify-center gap-4 lg:gap-6 xl:gap-8 z-10 flex-1 relative transition-all duration-500">
 
                             {navLinks.map((link) => {
                                 const active = isActiveLink(link.href);
@@ -177,7 +177,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         key={link.name}
                                         href={link.href}
                                         onClick={(e) => handleLinkClick(e, link.href)}
-                                        className={`text-[9px] lg:text-[10px] xl:text-xs 2xl:text-base [@media(min-width:1024px)_and_(max-width:1366px)]:!text-[11px] font-black tracking-tighter xl:tracking-widest uppercase transition-all duration-300 relative group
+                                        className={`text-[10px] lg:text-xs xl:text-sm 2xl:text-base font-black tracking-tighter lg:tracking-wide xl:tracking-widest uppercase transition-all duration-300 relative group
                                             ${active
                                                 ? 'text-blis-red drop-shadow-[0_0_8px_rgba(190,11,60,0.8)]'
                                                 : 'text-gray-300 hover:text-white'}`
@@ -193,7 +193,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                         </nav>
 
                          {/* Desktop: Search + Login */}
-                         <div className={`hidden lg:flex items-center justify-end gap-2 xl:gap-4 z-20 ${!user ? 'w-[120px] xl:w-[200px]' : 'w-auto ml-auto'} flex-shrink-0`}>
+                         <div className="hidden lg:flex items-center justify-end gap-2 lg:gap-3 xl:gap-4 z-20 w-auto ml-auto flex-shrink-0">
 
 
                             {(searchProps || pathname !== '/superadmin') && (
@@ -207,7 +207,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                             onChange={(e) => handleSearchChange(e.target.value)}
                                             onFocus={() => { if ((searchProps ? searchProps.value : searchQuery).length > 2) setShowDropdown(true) }}
                                             onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                                            className="w-28 xl:w-48 2xl:w-72 pl-9 pr-4 py-2.5 bg-black/40 backdrop-blur-md border border-white/20 text-white rounded-full text-[10px] xl:text-xs font-semibold tracking-wider placeholder:text-gray-500 focus:outline-none focus:border-blis-red focus:bg-black/80 shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)] transition-all duration-300"
+                                            className="w-36 lg:w-44 xl:w-56 2xl:w-72 pl-9 pr-4 py-2.5 bg-black/40 backdrop-blur-md border border-white/20 text-white rounded-full text-xs xl:text-sm font-semibold tracking-wider placeholder:text-gray-500 focus:outline-none focus:border-blis-red focus:bg-black/80 shadow-[inset_0_1px_4px_rgba(0,0,0,0.5)] transition-all duration-300"
                                         />
                                     </div>
                                     <button className="lg:hidden p-2 text-gray-400 hover:text-white" onClick={() => setMobileSearchOpen(true)}>
@@ -259,7 +259,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                             )}
 
 {/* Action Icons - Always visible */}
-                             <div className="hidden lg:flex items-center gap-4 border-r border-white/10 pr-6 mr-1">
+                             <div className="hidden lg:flex items-center gap-3 lg:gap-4 xl:gap-6 border-r border-white/10 pr-4 lg:pr-6 mr-1">
                                 {/* Cart Dropdown */}
                                 <div className="relative group/cart">
                                     <button className="relative text-gray-400 hover:text-white transition-colors">
