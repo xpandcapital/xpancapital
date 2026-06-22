@@ -391,7 +391,7 @@ export function Hero() {
                         {cmsData.hero.subtitle}
                     </motion.span>
 
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[8.5rem] 2xl:text-[10rem] font-black tracking-tighter text-white mb-4 md:mb-5 uppercase flex flex-row items-center gap-2 sm:gap-3 md:gap-4 xl:gap-6 leading-none cyber-flicker">
+                    <h1 className="text-5xl sm:text-6xl md:text-6xl lg:text-7xl xl:text-[8.5rem] 2xl:text-[10rem] font-black tracking-tighter text-white mb-3 sm:mb-4 md:mb-5 uppercase flex flex-row flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-4 xl:gap-6 leading-none cyber-flicker">
                         <span className="neon-trace-blis">
                             <GlitchText text={cmsData.hero.title1}>
                                 <CharReveal text={cmsData.hero.title1} />
