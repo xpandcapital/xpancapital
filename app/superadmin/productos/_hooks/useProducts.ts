@@ -30,6 +30,8 @@ export function useProducts(): UseProductsReturn {
     skuPrefix: (p.sku_prefix as string) || 'SKU',
     isAutoSku: (p.is_auto_sku as boolean) !== false,
     name: p.nombre as string,
+    slug: (p.slug as string) || '',
+    shortSlug: (p.shortSlug as string) || '',
     category: (p.categoria as Record<string, unknown>)?.nombre as string || 'Capacitaciones',
     price: (p.precio_usd as number) || 0,
     originalPrice: (p.precio_comparacion as number) || (p.precio_usd as number) || 0,
@@ -48,6 +50,8 @@ export function useProducts(): UseProductsReturn {
           : 'Disponible',
     image: (p.imagen_principal as string) || '/images/placeholder-product.jpg',
     description: (p.descripcion as string) || '',
+    metaDescripcion: (p.meta_descripcion as string) || '',
+    metaTitulo: (p.meta_titulo as string) || '',
     currencyCode: 'USD',
     isPerishable: (p.es_perecedero as boolean) || false,
     purchaseDate: (p.fecha_compra as string) || '',
@@ -64,7 +68,15 @@ export function useProducts(): UseProductsReturn {
       const res = await fetch('/api/productos?all=true')
       const data = await res.json()
       if (data.success && data.data) {
-        const mapped = data.data.map(mapProductFromApi)
+        const shortLinksMap: Record<string, string> = data.shortLinksMap || {}
+        const mapped = data.data.map((p: Record<string, unknown>) => {
+          const product = mapProductFromApi(p)
+          const slug = (p.slug as string) || ''
+          if (slug && shortLinksMap[slug]) {
+            product.shortSlug = shortLinksMap[slug]
+          }
+          return product
+        })
         setProducts(mapped)
         setInitialProducts(mapped)
       }

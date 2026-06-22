@@ -41,7 +41,16 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 })
       }
       
-      return NextResponse.json({ success: true, data })
+      // Buscar short link asociado
+      let shortSlug: string | null = null
+      const { data: shortLink } = await supabase
+        .from('short_links')
+        .select('codigo')
+        .eq('url_destino', `/tienda/producto/${slug}`)
+        .single()
+      if (shortLink) shortSlug = shortLink.codigo
+
+      return NextResponse.json({ success: true, data, shortSlug })
     }
 
     if (categoriaId) {
@@ -62,7 +71,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, data })
+    // ── Incluir short links asociados ──────────────────────────────────────────
+    let shortLinksMap: Record<string, string> = {}
+    if (data && data.length > 0) {
+      const productoUrls = data.map((p: any) => `/tienda/producto/${p.slug}`)
+      const { data: shortLinks } = await supabase
+        .from('short_links')
+        .select('codigo, url_destino')
+        .in('url_destino', productoUrls)
+      if (shortLinks) {
+        for (const sl of shortLinks) {
+          const slugMatch = sl.url_destino.match(/\/tienda\/producto\/(.+)$/)
+          if (slugMatch) shortLinksMap[slugMatch[1]] = sl.codigo
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true, data, shortLinksMap })
   } catch {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
@@ -103,6 +128,8 @@ export async function POST(request: NextRequest) {
       fecha_vencimiento,
       manejo_perecedero,
       lote_uid,
+      meta_descripcion,
+      meta_titulo,
       estado = 'borrador' // Estado inicial
     } = body
 
@@ -143,7 +170,9 @@ export async function POST(request: NextRequest) {
       fecha_compra: fecha_compra || null,
       fecha_vencimiento: fecha_vencimiento || null,
       manejo_perecedero: manejo_perecedero || null,
-      lote_uid: lote_uid || null
+      lote_uid: lote_uid || null,
+      meta_descripcion: meta_descripcion || null,
+      meta_titulo: meta_titulo || null
     }
 
     const { data, error } = await supabase
@@ -156,7 +185,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, data })
+    // ── Crear enlace corto automático ────────────────────────────────────────
+    let shortSlug: string | null = null
+    try {
+      const productoUrl = `/tienda/producto/${slug}`
+      const { data: existingLink } = await supabase
+        .from('short_links')
+        .select('codigo')
+        .eq('url_destino', productoUrl)
+        .single()
+
+      if (existingLink) {
+        shortSlug = existingLink.codigo
+      } else {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+        let codigo = ''
+        let intentos = 0
+        while (intentos < 10) {
+          codigo = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+          const { data: dupe } = await supabase
+            .from('short_links')
+            .select('id')
+            .eq('codigo', codigo)
+            .single()
+          if (!dupe) break
+          intentos++
+        }
+        const { error: shortError } = await supabase
+          .from('short_links')
+          .insert({ codigo, url_destino: productoUrl })
+        if (!shortError) shortSlug = codigo
+      }
+    } catch { /* non-blocking */ }
+
+    return NextResponse.json({ success: true, data, shortSlug })
   } catch {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
@@ -172,6 +234,32 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
     }
 
+    // ── Si cambia el slug, actualizar el short_link asociado ──────────────────
+    if (updates.slug) {
+      // Obtener el slug anterior
+      const { data: prevProduct } = await supabase
+        .from('productos')
+        .select('slug')
+        .eq('id', id)
+        .single()
+
+      if (prevProduct?.slug && prevProduct.slug !== updates.slug) {
+        const oldUrl = `/tienda/producto/${prevProduct.slug}`
+        const newUrl = `/tienda/producto/${updates.slug}`
+        const { data: existingLink } = await supabase
+          .from('short_links')
+          .select('codigo')
+          .eq('url_destino', oldUrl)
+          .single()
+        if (existingLink) {
+          await supabase
+            .from('short_links')
+            .update({ url_destino: newUrl })
+            .eq('codigo', existingLink.codigo)
+        }
+      }
+    }
+
     const { data, error } = await supabase
       .from('productos')
       .update(updates)
@@ -184,7 +272,18 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, data })
+    // Buscar short link actualizado
+    let shortSlug: string | null = null
+    if (data?.slug) {
+      const { data: shortLink } = await supabase
+        .from('short_links')
+        .select('codigo')
+        .eq('url_destino', `/tienda/producto/${data.slug}`)
+        .single()
+      if (shortLink) shortSlug = shortLink.codigo
+    }
+
+    return NextResponse.json({ success: true, data, shortSlug })
   } catch {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }

@@ -1,7 +1,10 @@
 "use client"
 
-import { CheckSquare, Square, ChevronUp, ChevronDown, Edit2, Trash2, Barcode as BarcodeIcon } from "lucide-react"
+import { useState } from "react"
+import { CheckSquare, Square, ChevronUp, ChevronDown, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check } from "lucide-react"
 import type { Product, ProductSort, Category, Status, Currency } from '../../_types'
+
+const SITE_DOMAIN = 'blis-corp.com'
 
 interface CompactTableViewProps {
   products: Product[]
@@ -40,6 +43,15 @@ export function CompactTableView({
   isBlisCoinsEnabled,
   filteredCount
 }: CompactTableViewProps) {
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const handleCopyLink = (product: Product) => {
+    if (!product.shortSlug) return
+    navigator.clipboard.writeText(`https://${SITE_DOMAIN}/s/${product.shortSlug}`)
+    setCopiedId(product.id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
   const allSelected = selectedIds.length === filteredCount && filteredCount > 0
 
   const getCurrency = (code: string) => code || selectedCurrency.code
@@ -213,6 +225,26 @@ export function CompactTableView({
                   <button onClick={() => onPrintLabels(product)} className="p-1.5 text-gray-500 hover:text-white transition-colors" title="Etiquetas">
                     <BarcodeIcon className="w-4 h-4" />
                   </button>
+                  {product.shortSlug && (
+                    <button
+                      onClick={() => handleCopyLink(product)}
+                      className="p-1.5 text-gray-500 hover:text-emerald-400 transition-colors"
+                      title="Copiar enlace corto"
+                    >
+                      {copiedId === product.id ? <Check className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+                    </button>
+                  )}
+                  {product.slug && (
+                    <a
+                      href={`/tienda/producto/${product.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-1.5 text-gray-500 hover:text-white transition-colors"
+                      title="Ver producto público"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )}
                   <button onClick={() => onEdit(product)} className="p-1.5 text-gray-500 hover:text-white transition-colors" title="Editar">
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>

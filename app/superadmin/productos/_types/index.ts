@@ -19,6 +19,8 @@ export interface Product {
   skuPrefix: string
   isAutoSku: boolean
   name: string
+  slug: string
+  shortSlug: string
   category: string
   tipo?: 'digital' | 'fisico' | 'servicio' | 'suscripcion'
   price: number
@@ -32,6 +34,8 @@ export interface Product {
   status: ProductStatus
   image: string
   description: string
+  metaDescripcion: string
+  metaTitulo: string
   currencyCode: string
   isPerishable: boolean
   purchaseDate: string
@@ -138,6 +142,8 @@ export interface ProductFormData {
   fecha_vencimiento?: string
   manejo_perecedero?: PerishableHandling
   lote_uid?: string
+  meta_descripcion?: string
+  meta_titulo?: string
 }
 
 export interface Category {

@@ -1,7 +1,10 @@
 "use client"
 
-import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon } from "lucide-react"
+import { useState } from "react"
+import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check } from "lucide-react"
 import type { Product, Category, Status, Currency } from '../../_types'
+
+const SITE_DOMAIN = 'blis-corp.com'
 
 interface ProductTableRowProps {
   product: Product
@@ -38,6 +41,15 @@ export function ProductTableRow({
   isBlisCoinsEnabled,
   skuPatterns
 }: ProductTableRowProps) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopyLink = () => {
+    if (!product.shortSlug) return
+    navigator.clipboard.writeText(`https://${SITE_DOMAIN}/s/${product.shortSlug}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const getCurrency = (code: string) => currencies.find(c => c.code === code) || selectedCurrency
 
   const getStatusColor = (product: Product) => {
@@ -251,6 +263,26 @@ return (
           <button onClick={() => onPrintLabels(product)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all transform hover:scale-110 shrink-0" title="Generar Etiquetas (Barras)">
             <BarcodeIcon className="w-4 h-4" />
           </button>
+          {product.shortSlug && (
+            <button
+              onClick={handleCopyLink}
+              className="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all transform hover:scale-110 shrink-0"
+              title="Copiar enlace corto"
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+            </button>
+          )}
+          {product.slug && (
+            <a
+              href={`/tienda/producto/${product.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all transform hover:scale-110 shrink-0"
+              title="Ver producto público"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          )}
           <button onClick={() => onEdit(product)} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all transform hover:scale-110 shrink-0">
             <Edit2 className="w-4 h-4" />
           </button>

@@ -1,10 +1,12 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import { motion } from "framer-motion"
-import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon } from "lucide-react"
+import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check } from "lucide-react"
 import Image from "next/image"
 import type { Product, Category, Status } from '../../_types'
+
+const SITE_DOMAIN = 'blis-corp.com'
 
 interface ProductGridViewProps {
   products: Product[]
@@ -33,6 +35,15 @@ export const ProductGridView = React.memo(function ProductGridView({
   statuses,
   isBlisCoinsEnabled
 }: ProductGridViewProps) {
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const handleCopyLink = (product: Product) => {
+    if (!product.shortSlug) return
+    navigator.clipboard.writeText(`https://${SITE_DOMAIN}/s/${product.shortSlug}`)
+    setCopiedId(product.id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
   const getStatusColor = (product: Product) => {
     const statusObj = statuses.find(s => s.name === product.status)
     return statusObj?.color || (product.status === 'Disponible' ? '#10b981' : '#ef4444')
@@ -185,6 +196,26 @@ export const ProductGridView = React.memo(function ProductGridView({
                     <button onClick={() => onPrintLabels(product)} className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg" title="Etiquetas">
                       <BarcodeIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
+                    {product.shortSlug && (
+                      <button
+                        onClick={() => handleCopyLink(product)}
+                        className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all shadow-lg"
+                        title="Copiar enlace corto"
+                      >
+                        {copiedId === product.id ? <Check className="w-3.5 h-3.5 md:w-4 md:h-4" /> : <Link2 className="w-3.5 h-3.5 md:w-4 md:h-4" />}
+                      </button>
+                    )}
+                    {product.slug && (
+                      <a
+                        href={`/tienda/producto/${product.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg"
+                        title="Ver producto público"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                      </a>
+                    )}
                     <button onClick={() => onEdit(product)} className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg">
                       <Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>

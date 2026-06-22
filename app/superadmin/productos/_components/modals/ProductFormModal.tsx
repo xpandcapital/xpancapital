@@ -1,13 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { Globe } from "lucide-react"
+import { Globe, Link2, Copy, Check, ExternalLink, Loader2, X, Edit2 } from "lucide-react"
 import { ProductImageUploader } from './ProductImageUploader'
 import { ProductPriceSection } from './ProductPriceSection'
 import { ProductStockSection } from './ProductStockSection'
 import { PerishableSection } from './PerishableSection'
 import RichTextEditor from "@/components/superadmin/RichTextEditor"
 import type { Product, Category, Status, Currency, PerishableHandling } from '../../_types'
+
+const SITE_DOMAIN = 'blis-corp.com'
+
+function generateSlug(text: string): string {
+  return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}
 
 interface ProductFormModalProps {
   isOpen: boolean
@@ -44,10 +50,18 @@ export function ProductFormModal({
   const [perishableHandling, setPerishableHandling] = useState<PerishableHandling>(editingProduct?.perishableHandling ?? 'discard')
   const [isUnlimitedStock, setIsUnlimitedStock] = useState(editingProduct?.stock === -1)
   const [isGeneratingAI, setIsGeneratingAI] = useState(false)
+  const [isAutoSlug, setIsAutoSlug] = useState(editingProduct ? !editingProduct.slug : true)
+  const [shortSlug, setShortSlug] = useState(editingProduct?.shortSlug || '')
+  const [shortSlugEditing, setShortSlugEditing] = useState(false)
+  const [shortSlugValue, setShortSlugValue] = useState('')
+  const [shortSlugSaving, setShortSlugSaving] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
   const [formData, setFormData] = useState(() => {
     if (editingProduct) {
       return {
         name: editingProduct.name,
+        slug: editingProduct.slug || generateSlug(editingProduct.name),
+        metaDescripcion: editingProduct.metaDescripcion || '',
         description: editingProduct.description || '',
         category: editingProduct.category,
         price: editingProduct.price,
@@ -65,6 +79,8 @@ export function ProductFormModal({
     }
     return {
       name: '',
+      slug: '',
+      metaDescripcion: '',
       description: '',
       category: categories[0]?.name ?? '',
       price: 0,
@@ -98,9 +114,11 @@ export function ProductFormModal({
     const categoryName = (form.querySelector('[name="category"]') as HTMLSelectElement)?.value
     const category = categories.find(c => c.name === categoryName)
     
+    const finalSlug = isAutoSlug ? generateSlug(formData.name) : formData.slug
+    
     const data = {
       nombre: formData.name,
-      slug: formData.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''),
+      slug: finalSlug,
       descripcion: formData.description,
       contenido: formData.description,
       metodo_pago: 'ambos' as const,
@@ -123,11 +141,45 @@ export function ProductFormModal({
       es_perecedero: isPerishable,
       fecha_compra: formData.purchaseDate || undefined,
       fecha_vencimiento: formData.expirationDate || undefined,
-      manejo_perecedero: perishableHandling
+      manejo_perecedero: perishableHandling,
+      meta_descripcion: formData.metaDescripcion || null,
+      meta_titulo: null
     }
 
     await onSave(data)
     onClose()
+  }
+
+  // ── Handlers para enlace corto ──────────────────────────────────────────────
+  const handleCopyLink = () => {
+    if (!shortSlug) return
+    navigator.clipboard.writeText(`https://${SITE_DOMAIN}/s/${shortSlug}`)
+    setLinkCopied(true)
+    setTimeout(() => setLinkCopied(false), 2000)
+  }
+
+  const handleSaveShortSlug = async () => {
+    if (!shortSlugValue.trim() || !editingProduct) return
+    const code = shortSlugValue.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (!/^[a-z0-9]{3,20}$/.test(code)) return
+    setShortSlugSaving(true)
+    try {
+      const productoUrl = `/tienda/producto/${formData.slug}`
+      const res = await fetch('/api/short-links', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: productoUrl, nuevo_codigo: code })
+      })
+      const result = await res.json()
+      if (result.success) {
+        setShortSlug(result.codigo)
+        setShortSlugEditing(false)
+      }
+    } catch (err) {
+      console.error('Error guardando short slug:', err)
+    } finally {
+      setShortSlugSaving(false)
+    }
   }
 
   return (
@@ -183,11 +235,146 @@ export function ProductFormModal({
                 name="name"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => {
+                  const name = e.target.value
+                  setFormData(prev => ({ ...prev, name, slug: isAutoSlug ? generateSlug(name) : prev.slug }))
+                }}
                 type="text"
                 placeholder="Ej. Whey Protein Isolate"
                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-blis-red transition-all"
               />
+            </div>
+
+            {/* Enlace público (slug) */}
+            <div className="md:col-span-2 space-y-2">
+              <div className="flex justify-between items-center pb-1">
+                <label className="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-none">Enlace Público (URL)</label>
+                <label className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5 cursor-pointer leading-none">
+                  <input
+                    type="checkbox"
+                    checked={isAutoSlug}
+                    onChange={(e) => {
+                      setIsAutoSlug(e.target.checked)
+                      if (e.target.checked) {
+                        setFormData(prev => ({ ...prev, slug: generateSlug(prev.name) }))
+                      }
+                    }}
+                    className="accent-emerald-500 w-3 h-3"
+                  />
+                  Automático
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 text-xs font-mono shrink-0 hidden sm:inline">{SITE_DOMAIN}/tienda/producto/</span>
+                <span className="text-gray-500 text-xs font-mono shrink-0 sm:hidden">/</span>
+                <input
+                  value={formData.slug}
+                  onChange={(e) => {
+                    const slug = e.target.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '')
+                    setFormData(prev => ({ ...prev, slug }))
+                  }}
+                  disabled={isAutoSlug}
+                  type="text"
+                  placeholder="whey-protein-isolate"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm font-mono placeholder:text-gray-800 focus:outline-none focus:border-emerald-500 transition-all disabled:opacity-50"
+                />
+              </div>
+              {formData.slug && (
+                <p className="text-[10px] text-gray-600 font-mono truncate">
+                  Vista previa: <span className="text-emerald-500/70">https://{SITE_DOMAIN}/tienda/producto/{formData.slug}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Descripción para compartir (meta) */}
+            <div className="md:col-span-2 space-y-2">
+              <div className="flex justify-between items-center pb-1">
+                <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none">Descripción para Compartir (SEO/Redes)</label>
+                <span className={`text-[9px] font-black ${(formData.metaDescripcion || '').length > 160 ? 'text-red-500' : 'text-gray-600'}`}>
+                  {(formData.metaDescripcion || '').length}/160
+                </span>
+              </div>
+              <textarea
+                value={formData.metaDescripcion}
+                onChange={(e) => setFormData(prev => ({ ...prev, metaDescripcion: e.target.value }))}
+                rows={2}
+                maxLength={200}
+                placeholder="Texto corto que aparece al compartir el enlace en WhatsApp, Facebook, etc. Si lo dejas vacío, se usa la imagen del producto."
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm placeholder:text-gray-800 focus:outline-none focus:border-blue-500 transition-all resize-none"
+              />
+            </div>
+
+            {/* Enlace corto */}
+            <div className="md:col-span-2 space-y-3">
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
+                <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
+                  <Link2 className="w-4 h-4 text-emerald-400" />
+                  Enlace Corto para Compartir
+                </h3>
+                {shortSlug && !shortSlugEditing ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleCopyLink}
+                      className="flex-1 flex items-center justify-between px-3 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-mono hover:bg-emerald-500/20 transition-all group"
+                    >
+                      <span className="flex items-center gap-1.5 truncate">
+                        <Link2 className="w-3.5 h-3.5 opacity-50 shrink-0" />
+                        {SITE_DOMAIN}/s/{shortSlug}
+                      </span>
+                      {linkCopied ? <Check className="w-3.5 h-3.5 shrink-0" /> : <Copy className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />}
+                    </button>
+                    <a
+                      href={`/s/${shortSlug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors shrink-0"
+                      title="Abrir enlace"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                    {editingProduct && (
+                      <button
+                        onClick={() => { setShortSlugValue(shortSlug); setShortSlugEditing(true) }}
+                        className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors shrink-0"
+                        title="Editar código"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ) : shortSlugEditing ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 text-xs font-mono shrink-0">{SITE_DOMAIN}/s/</span>
+                    <input
+                      type="text"
+                      value={shortSlugValue}
+                      onChange={e => setShortSlugValue(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
+                      placeholder="codigo-corto"
+                      maxLength={20}
+                      className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 text-sm font-mono transition-all"
+                      onKeyDown={e => e.key === 'Enter' && handleSaveShortSlug()}
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSaveShortSlug}
+                      disabled={shortSlugSaving || !shortSlugValue.trim()}
+                      className="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors disabled:opacity-50 shrink-0"
+                    >
+                      {shortSlugSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Guardar'}
+                    </button>
+                    <button
+                      onClick={() => setShortSlugEditing(false)}
+                      className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors shrink-0"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-gray-600">
+                    Se generará automáticamente un código corto al guardar el producto.
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="md:col-span-2 space-y-2">
