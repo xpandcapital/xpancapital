@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     ShoppingCart, Coins, CreditCard, MapPin, User, Mail, Phone,
     CheckCircle2, Loader2, ArrowLeft, Lock, Shield, Package,
-    Zap, Truck, Gift, Star, Wallet, Building2, Globe, Copy, MessageCircle
+    Zap, Truck, Gift, Star, Wallet, Building2, Globe, Copy, MessageCircle, Trash2, X
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -61,7 +61,7 @@ function CheckoutLoading() {
 }
 
 function CheckoutContent() {
-    const { cart, blisCoins, clearCart, getCartTotal } = useShop();
+    const { cart, blisCoins, clearCart, getCartTotal, removeFromCart } = useShop();
     const { user } = useAuth();
     const { showToast } = useToast();
     const router = useRouter();
@@ -1019,24 +1019,44 @@ function CheckoutContent() {
 
                             {/* Items */}
                             <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
-                                {cart.map(item => (
-                                    <div key={item.id} className="flex gap-3">
-                                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-white/5 flex-shrink-0 border border-white/5">
-                                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold line-clamp-2 leading-tight">{item.title}</p>
-                                            <p className="text-[10px] text-gray-500 uppercase mt-0.5">{item.category}</p>
-                                            <p className="text-emerald-400 font-bold text-sm mt-1">${(item.price || (item as any).precio_usd || 0).toFixed(2)}</p>
-                                        </div>
-                                        {/* Tipo badge */}
-                                        <div className={`self-start px-2 py-0.5 rounded-lg text-[8px] font-black uppercase border ${
-                                            (item as any).productType === 'pack' ? 'bg-sky-500/10 border-sky-500/20 text-sky-400' : 'bg-purple-500/10 border-purple-500/20 text-purple-400'
-                                        }`}>
-                                            {(item as any).productType === 'pack' ? 'Físico' : 'Digital'}
-                                        </div>
-                                    </div>
-                                ))}
+                                <AnimatePresence mode="popLayout">
+                                    {cart.map(item => (
+                                        <motion.div
+                                            key={item.id}
+                                            layout
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="flex gap-3 items-start group"
+                                        >
+                                            <div className="w-14 h-14 rounded-xl overflow-hidden bg-white/5 flex-shrink-0 border border-white/5">
+                                                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold line-clamp-2 leading-tight">{item.title}</p>
+                                                <p className="text-[10px] text-gray-500 uppercase mt-0.5">{item.category}</p>
+                                                <p className="text-emerald-400 font-bold text-sm mt-1">${(item.price || (item as any).precio_usd || 0).toFixed(2)}</p>
+                                            </div>
+                                            <div className="flex flex-col items-end gap-1.5">
+                                                {/* Tipo badge */}
+                                                <div className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase border ${
+                                                    (item as any).productType === 'pack' ? 'bg-sky-500/10 border-sky-500/20 text-sky-400' : 'bg-purple-500/10 border-purple-500/20 text-purple-400'
+                                                }`}>
+                                                    {(item as any).productType === 'pack' ? 'Físico' : 'Digital'}
+                                                </div>
+                                                {/* Boton eliminar */}
+                                                <button
+                                                    onClick={() => removeFromCart(item.id)}
+                                                    className="w-6 h-6 rounded-md bg-red-500/10 flex items-center justify-center hover:bg-red-500/30 transition-colors opacity-60 group-hover:opacity-100"
+                                                    title="Quitar del carrito"
+                                                >
+                                                    <X className="w-3 h-3 text-red-400" />
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
                             </div>
 
                             {/* Totales */}
