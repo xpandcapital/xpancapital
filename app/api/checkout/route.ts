@@ -291,9 +291,39 @@ export async function POST(request: NextRequest) {
     // ── Crear la orden en Supabase ───────────────────────────────────────────
     const primerProductoId = productos?.[0]?.producto_id || productos?.[0]?.id || null;
 
+    // ── Verificar que el profile exista antes de insertar la compra ──────────
+    // Si el usuario existe en auth.users pero no en profiles, la FK falla
+    let safeUserId = finalUserId || null;
+    if (safeUserId) {
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', safeUserId)
+        .maybeSingle();
+
+      if (!existingProfile) {
+        console.log('[CHECKOUT] Profile faltante para user_id:', safeUserId, '— creando...');
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: safeUserId,
+            email: email.toLowerCase(),
+            nombre,
+            telefono,
+            empresa_id,
+            creado_en: new Date().toISOString(),
+          }, { onConflict: 'id' });
+
+        if (profileError) {
+          console.error('[CHECKOUT] No se pudo crear perfil faltante:', profileError);
+          safeUserId = null;
+        }
+      }
+    }
+
     console.log('[CHECKOUT] Creando orden con:', {
       empresa_id,
-      user_id: finalUserId,
+      user_id: safeUserId,
       producto_id: primerProductoId,
       metodo_pago,
       monto_coins,
@@ -305,7 +335,7 @@ export async function POST(request: NextRequest) {
       .from('compras')
       .insert({
         empresa_id,
-        user_id: finalUserId || null,
+        user_id: safeUserId,
         producto_id: primerProductoId,
         metodo_pago,
         monto_coins: monto_coins || 0,

@@ -114,9 +114,38 @@ export async function POST(request: NextRequest) {
     const finalEmpresaId = empresa_id || DEFAULT_EMPRESA_ID
     const amountInCents = Math.round(total_usd * 100)
 
+    // ── Verificar que el profile exista antes de insertar la compra ──────────
+    // Si el usuario existe en auth.users pero no en profiles, la FK falla
+    let safeUserId = user_id || null;
+    if (safeUserId) {
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', safeUserId)
+        .maybeSingle();
+
+      if (!existingProfile) {
+        console.log('[Izipay] Profile faltante para user_id:', safeUserId, '— creando...');
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: safeUserId,
+            email: email.toLowerCase(),
+            nombre: `${nombre} ${apellido || ''}`.trim(),
+            empresa_id: finalEmpresaId,
+            creado_en: new Date().toISOString(),
+          }, { onConflict: 'id' });
+
+        if (profileError) {
+          console.error('[Izipay] No se pudo crear perfil faltante:', profileError);
+          safeUserId = null;
+        }
+      }
+    }
+
     const insertData = {
       empresa_id: finalEmpresaId,
-      user_id: user_id || null,
+      user_id: safeUserId,
       producto_id: productos?.[0]?.producto_id || null,
       metodo_pago: 'izipay',
       monto_coins: 0,
