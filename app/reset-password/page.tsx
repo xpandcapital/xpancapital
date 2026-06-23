@@ -23,45 +23,48 @@ function ResetPasswordForm() {
   useEffect(() => {
     if (!supabase) return
 
-    // Leer token tanto de query string (?access_token=) como de hash (#access_token=)
-    let code = searchParams.get('code')
-    let accessToken = searchParams.get('access_token')
-    let refreshToken = searchParams.get('refresh_token')
+    // Supabase procesa el hash automáticamente (onAuthStateChange).
+    // Si hay token en query string (code), intercambiar manualmente.
+    const code = searchParams.get('code')
 
-    if (!code && !accessToken && typeof window !== 'undefined') {
-      const hash = window.location.hash.substring(1)
-      const hashParams = new URLSearchParams(hash)
-      code = code || hashParams.get('code')
-      accessToken = accessToken || hashParams.get('access_token')
-      refreshToken = refreshToken || hashParams.get('refresh_token')
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          console.error('[ResetPassword] Error exchanging code:', error)
+          setError('El enlace de recuperación no es válido o ha expirado.')
+        }
+        setLoadingSession(false)
+      })
+      return
     }
 
-    async function exchange() {
-      try {
-        if (accessToken && refreshToken) {
-          const { error } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          })
-          if (error) {
-            console.error('[ResetPassword] Error setting session:', error)
-            setError('El enlace de recuperación no es válido o ha expirado.')
-          }
-        } else if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code)
-          if (error) {
-            console.error('[ResetPassword] Error exchanging code:', error)
-            setError('El enlace de recuperación no es válido o ha expirado.')
-          }
-        } else if (!accessToken) {
+    // Para tokens en hash: escuchar el evento de sesión que Supabase dispara automáticamente
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setLoadingSession(false)
+      } else if (event === 'INITIAL_SESSION') {
+        if (!session) {
           setError('No se encontró un token de recuperación en la URL.')
         }
-      } finally {
         setLoadingSession(false)
       }
-    }
+    })
 
-    exchange()
+    // Timeout de seguridad: si después de 3s no hay sesión, mostrar error
+    const timeout = setTimeout(() => {
+      setLoadingSession(prev => {
+        if (prev) {
+          setError('No se encontró un token de recuperación en la URL.')
+          return false
+        }
+        return prev
+      })
+    }, 3000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [searchParams, supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
