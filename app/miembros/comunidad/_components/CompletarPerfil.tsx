@@ -36,9 +36,9 @@ export function CompletarPerfil() {
               <motion.circle
                 cx="50" cy="50" r="42" fill="none" stroke="rgb(190 11 36)" strokeWidth="8"
                 strokeLinecap="round"
-                strokeDasharray={`${(pct / 100) * 264} 264`}
-                initial={{ strokeDashoffset: 264 }}
-                animate={{ strokeDashoffset: 264 - (pct / 100) * 264 }}
+                  strokeDasharray={`${((pct / 100) * 264).toFixed(0)} 264`}
+                  initial={{ strokeDashoffset: 264 }}
+                  animate={{ strokeDashoffset: (264 - (pct / 100) * 264).toFixed(0) }}
                 transition={{ duration: 1.5, ease: 'easeOut' }}
               />
             </svg>

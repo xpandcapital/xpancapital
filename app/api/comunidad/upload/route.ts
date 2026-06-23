@@ -125,15 +125,6 @@ async function compressVideo(buffer: Buffer): Promise<{ compressed: Buffer | nul
   }
 }
 
-async function ensureBucket(supabase: any, bucketName: string) {
-  const { error } = await supabase.storage.getBucket(bucketName)
-  if (error) {
-    await supabase.storage.createBucket(bucketName, {
-      public: true,
-      fileSizeLimit: MAX_SIZE
-    })
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -165,8 +156,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: `Tamaño máximo: ${isImage ? '20MB' : '100MB'}` }, { status: 400 })
     }
 
-    await ensureBucket(supabase, 'comunidad-media')
-
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
@@ -176,11 +165,24 @@ export async function POST(request: NextRequest) {
     const baseName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 60)
     const folder = `${user.empresaId}/comunidad`
 
-    // Subir original
+    // Subir original (con retry si el bucket no existe)
     const originalPath = `${folder}/${timestamp}-${random}-orig.${extension}`
-    const originalUpload = await supabase.storage
+    let originalUpload = await supabase.storage
       .from('comunidad-media')
       .upload(originalPath, buffer, { contentType: file.type, upsert: false })
+
+    if (originalUpload.error) {
+      // Crear bucket si no existe y reintentar
+      const { error: bucketError } = await supabase.storage.createBucket('comunidad-media', {
+        public: true,
+        fileSizeLimit: MAX_SIZE
+      })
+      if (!bucketError || bucketError.message?.includes('already exists')) {
+        originalUpload = await supabase.storage
+          .from('comunidad-media')
+          .upload(originalPath, buffer, { contentType: file.type, upsert: false })
+      }
+    }
 
     if (originalUpload.error) {
       return NextResponse.json({ success: false, error: originalUpload.error.message }, { status: 500 })
