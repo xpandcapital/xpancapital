@@ -296,7 +296,11 @@ export default function UserDashboard() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                             {allCourses.map((course, i) => (
                                 course.isEnrolled ? (
-                                    <div key={`enrolled-${course.id || i}`} className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                                    <Link
+                                        key={`enrolled-${course.id || i}`}
+                                        href={`/miembros/academia?iniciar=${course.cursoId || course.id}`}
+                                        className="group cursor-pointer bg-black/40 border border-white/5 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col"
+                                    >
                                         <div className="aspect-square relative overflow-hidden bg-zinc-900">
                                             {course.image ? (
                                                 <Image
@@ -337,11 +341,11 @@ export default function UserDashboard() {
                                                 <span>{course.lastAccessed}</span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                 ) : (
                                     <Link
                                         key={`purchased-${course.id || i}`}
-                                        href="/miembros/academia"
+                                        href={`/miembros/academia?iniciar=${course.cursoId || course.id}`}
                                         className="group cursor-pointer bg-black/40 border border-blis-red/20 rounded-[1.5rem] overflow-hidden hover:border-blis-red/30 transition-all flex flex-col"
                                     >
                                         <div className="aspect-square relative overflow-hidden bg-zinc-900">

@@ -23,15 +23,17 @@ export async function GET(request: NextRequest) {
         .from('cursos')
         .select('*')
         .eq('empresa_id', DEFAULT_EMPRESA_ID)
-        .eq('activo', true)
 
+      // Para lookup por slug (público), requerir activo=true
+      // Para lookup por id (usuario con acceso comprado), no requerir activo
       if (slug) {
+        query = query.eq('activo', true)
         query = query.eq('slug', slug)
       } else if (id) {
         query = query.eq('id', id)
       }
 
-      if (!teamMember) {
+      if (slug && !teamMember) {
         query = query.neq('para_equipo', true)
       }
 

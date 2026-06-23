@@ -5,6 +5,7 @@ import { Play, Clock, Star, Trophy, ChevronRight, Lock, CheckCircle2, Search, Ar
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCursos } from "@/lib/hooks/useCursos";
 
@@ -43,6 +44,8 @@ const TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> =
 
 function AcademyContent() {
     const { user } = useAuth();
+    const searchParams = useSearchParams();
+    const iniciarCursoId = searchParams.get('iniciar');
     const { userCursos, loading, refetch: refetchUserCursos } = useUserCursos(user?.id || null);
     const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
     const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
@@ -53,6 +56,7 @@ function AcademyContent() {
     const [loadingCurso, setLoadingCurso] = useState(false);
     const [purchasedCourses, setPurchasedCourses] = useState<any[]>([]);
     const [loadingPurchased, setLoadingPurchased] = useState(false);
+    const [autoStarted, setAutoStarted] = useState(false);
 
     const fetchCursoCompleto = useCallback(async (slugOrId: string, useId: boolean = false) => {
         setLoadingCurso(true);
@@ -63,8 +67,11 @@ function AcademyContent() {
             const data = await res.json();
             if (data.success && data.data) {
                 setFullCurso(data.data);
+            } else {
+                console.error('[Academia] Error al cargar curso:', data.error || 'No encontrado');
             }
-        } catch {
+        } catch (err) {
+            console.error('[Academia] Error de red al cargar curso:', err);
         } finally {
             setLoadingCurso(false);
         }
@@ -76,6 +83,11 @@ function AcademyContent() {
         setActiveModule(null);
         setOpenModules(new Set());
         setCompletedLessons([]);
+        // Actualizar URL sin recargar para reflejar el curso actual
+        const newUrl = course.slug
+            ? `/miembros/academia/${course.slug}`
+            : `/miembros/academia?iniciar=${course.cursoId || course.id}`;
+        window.history.pushState({}, '', newUrl);
         if (course.isPurchased && course.cursoId) {
             await fetchCursoCompleto(course.cursoId, true);
         } else if (course.slug) {
@@ -132,6 +144,18 @@ function AcademyContent() {
         };
         fetchPurchasedCourses();
     }, [user?.id]);
+
+    // Auto-iniciar curso si viene de un link directo (dashboard)
+    useEffect(() => {
+        if (iniciarCursoId && !autoStarted && (userCursos.length > 0 || purchasedCourses.length > 0)) {
+            const allCourses = [...userCursos, ...purchasedCourses];
+            const target = allCourses.find((c: any) => c.id === iniciarCursoId || c.cursoId === iniciarCursoId);
+            if (target) {
+                setAutoStarted(true);
+                handleSelectCourse(target);
+            }
+        }
+    }, [iniciarCursoId, autoStarted, userCursos, purchasedCourses]);
 
     const handleLessonComplete = useCallback((lessonId: string) => {
         if (!completedLessons.includes(lessonId)) {
@@ -347,7 +371,7 @@ function AcademyContent() {
                         className="space-y-6"
                     >
                         <button
-                            onClick={() => { setSelectedSlug(null); setFullCurso(null); setActiveLesson(null); }}
+                            onClick={() => { setSelectedSlug(null); setFullCurso(null); setActiveLesson(null); window.history.pushState({}, '', '/miembros/academia'); }}
                             className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest mb-4 group"
                         >
                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
