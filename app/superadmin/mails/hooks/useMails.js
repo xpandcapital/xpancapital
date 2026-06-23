@@ -100,6 +100,13 @@ export function useMails() {
   const handleLoadTemplate = async (templateId) => { try { const found = await getTemplate(templateId); if (found) { const blks = typeof found.blocks === 'string' ? JSON.parse(found.blocks) : found.blocks; const sets = typeof found.settings === 'string' ? JSON.parse(found.settings) : found.settings; setBlocks(blks || []); setSettings(sets || INITIAL_SETTINGS); setCurrentTemplateId(found.id); setTemplateName(found.nombre); setShowTemplatesModal(false); setSelectedBlockId(null); if ((blks || []).some(b => b.type === 'receipt')) setPreviewWithDemo(true); } else alert("No se pudo cargar la plantilla."); } catch (e) { console.error(e); alert("Error al cargar la plantilla."); } };
   const handleNewTemplate = () => { setBlocks([]); setSettings(INITIAL_SETTINGS); setCurrentTemplateId(null); setTemplateName(''); setSelectedBlockId(null); try { localStorage.removeItem('blismail_currentTemplateId'); } catch {} };
   const handleSaveAsNew = () => { setTemplateName(''); setSaveAsNew(true); setShowSaveModal(true); };
+  const handleDeleteTemplate = async (templateId) => {
+    const ok = await deleteTemplateFromDb(templateId);
+    if (ok) {
+      const t = await getTemplates();
+      if (t) setSavedTemplates(t);
+    }
+  };
   const handleOpenSendModal = () => { setCampaignConfig(prev => ({ ...prev, selectedSenderId: settings?.senderId || prev.selectedSenderId, subject: settings?.subject || prev.subject, preview: settings?.previewText || prev.preview })); setShowSendModal(true); };
   const handleSendCampaign = async () => { setSendingEmail(true); try { const sender = senders?.find(s => s.id === campaignConfig.selectedSenderId); if (!sender) { alert("Selecciona un remitente"); setSendingEmail(false); return; } const emails = campaignConfig.type === 'manual' ? (campaignConfig.emails || '').split(',').map(e => e.trim()).filter(Boolean) : []; if (emails.length === 0 && campaignConfig.type === 'manual') { alert("Ingresa al menos un correo"); setSendingEmail(false); return; } const htmlContent = generateHTML(displayBlocks, settings); const attachData = []; for (const file of attachments) { const dataUrl = await new Promise((resolve) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.readAsDataURL(file); }); attachData.push({ filename: file.name, content: String(dataUrl).split(',')[1], encoding: 'base64' }); } const res = await fetch('/api/send-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ senderId: sender.id, to: emails, subject: campaignConfig.subject || settings?.subject || 'Sin asunto', html: htmlContent, previewText: campaignConfig.preview || settings?.previewText || '', attachments: attachData }) }); const data = await res.json(); if (data.success) { alert(`Enviado a ${data.sent || emails.length} destinatarios`); setShowSendModal(false); setAttachments([]); } else { alert("Error: " + (data.error || "Desconocido")); } } catch (e) { alert("Error al enviar: " + e.message); } setSendingEmail(false); };
   const exportTemplate = () => { const d = JSON.stringify({ settings, blocks }, null, 2); const b = new Blob([d], { type: 'application/json' }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `plantilla-bliscorp-${Date.now()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(u); };
@@ -181,7 +188,7 @@ export function useMails() {
     saveTemplate, handleSaveTemplate, handleLoadTemplate, handleNewTemplate, handleOpenSendModal, handleSendCampaign, exportTemplate, handleNetworkUpdate, addNetwork,
     applyDemoData, importTemplate, processZipFile, searchEnvato, downloadEnvatoItem, pasteEnvatoSession, checkEnvatoStatus,
     checkEnvatoAndSearch, detectEnvatoPlatform, importFromHTML, PLATFORM_LABELS_MAP,
-    saveAsNew, setSaveAsNew, handleSaveAsNew,
+    saveAsNew, setSaveAsNew, handleSaveAsNew, handleDeleteTemplate,
     onLoadTemplateFromEvent,
     getTemplate, deleteTemplateFromDb, saveSender, deleteSender, uploadMedia, deleteMedia,
   };

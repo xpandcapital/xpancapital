@@ -97,7 +97,10 @@ export function useEmailTemplates() {
       if (!data.success) throw new Error(data.error)
       return true
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al eliminar plantilla')
+      const errMsg = err instanceof Error ? err.message : 'Error al eliminar plantilla'
+      console.error('deleteTemplate Error:', errMsg)
+      alert('Error al eliminar plantilla: ' + errMsg)
+      setError(errMsg)
       return false
     } finally {
       setLoading(false)
