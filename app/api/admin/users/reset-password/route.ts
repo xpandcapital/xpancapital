@@ -1,8 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+function generatePassword(length = 10): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,7 +24,7 @@ export async function POST(request: NextRequest) {
     if (sendEmail) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('email')
+        .select('email, nombre')
         .eq('id', userId)
         .single()
 
@@ -26,15 +32,30 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No se encontró el email del usuario' }, { status: 404 })
       }
 
+      const newPassword = password || generatePassword()
+
       const { error: resetError } = await supabase.auth.admin.updateUserById(userId, {
-        password: password || undefined,
+        password: newPassword,
       })
 
       if (resetError) {
         return NextResponse.json({ error: `Error al resetear contraseña: ${resetError.message}` }, { status: 500 })
       }
 
-      return NextResponse.json({ success: true, message: 'Contraseña actualizada. Se debería enviar un email al usuario.' })
+      // Enviar email con la contraseña temporal
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
+      await sendTemplateEmail({
+        evento: 'cuenta_invitacion_crear_cuenta',
+        to: profile.email,
+        variables: {
+          nombre: profile.nombre || 'Cliente',
+          email: profile.email,
+          enlace_crear_cuenta: `${siteUrl}/login`,
+          password_temporal: newPassword,
+        },
+      })
+
+      return NextResponse.json({ success: true, message: 'Contraseña actualizada y email enviado.' })
     }
 
     if (!password) {

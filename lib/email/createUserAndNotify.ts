@@ -88,17 +88,21 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
 
-  const evento = params.isGuest
+  // Solo usar plantilla de invitado si realmente es un invitado NUEVO.
+  // Si el invitado ya tenia cuenta, usamos la plantilla de logueado para no mostrarle
+  // campos vacios de password_temporal ni enlaces de crear cuenta.
+  const evento = (params.isGuest && isNewUser)
     ? 'transaccion_compra_completada_invitado'
     : 'transaccion_compra_completada_logueado'
 
   const extraVars: Record<string, string> = {}
   if (isNewUser && tempPassword) {
     extraVars.password_temporal = tempPassword
+    extraVars.enlace_crear_cuenta = `${siteUrl}/login`
     console.log('[createUserAndNotify] Usuario nuevo, incluyendo password_temporal')
   }
 
-  console.log('[createUserAndNotify] Enviando email:', evento)
+  console.log('[createUserAndNotify] Enviando email:', evento, '| isGuest:', params.isGuest, '| isNewUser:', isNewUser)
   await sendTemplateEmail({
     evento,
     to: email,

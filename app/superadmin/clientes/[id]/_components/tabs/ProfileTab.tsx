@@ -79,8 +79,28 @@ export function ProfileTab({ client, onUpdate }: ProfileTabProps) {
         showToast(`Nivel cambiado a ${tier}`, 'success');
     };
 
-    const handleResetPassword = () => {
-        showToast('Enlace de reseteo enviado por email', 'success');
+    const [resetting, setResetting] = useState(false);
+
+    const handleResetPassword = async () => {
+        if (!client.email) return showToast('El cliente no tiene email registrado', 'warning');
+        setResetting(true);
+        try {
+            const res = await fetch('/api/admin/users/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: client.id, sendEmail: true }),
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showToast('Contraseña temporal enviada por email', 'success');
+            } else {
+                showToast(data.error || 'No se pudo enviar el email', 'error');
+            }
+        } catch {
+            showToast('Error al enviar el email', 'error');
+        } finally {
+            setResetting(false);
+        }
     };
 
     return (
@@ -101,9 +121,10 @@ export function ProfileTab({ client, onUpdate }: ProfileTabProps) {
                     </a>
                     <button
                         onClick={handleResetPassword}
-                        className="p-3 bg-blue-600/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500 hover:text-white transition-all shadow-xl"
+                        disabled={resetting}
+                        className="p-3 bg-blue-600/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500 hover:text-white transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <Key className="w-5 h-5" />
+                        {resetting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Key className="w-5 h-5" />}
                     </button>
                     <button
                         onClick={validateIdentity}
