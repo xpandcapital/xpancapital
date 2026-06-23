@@ -25,7 +25,7 @@ export default function Mails() {
         onSaveAsNew={mail.handleSaveAsNew}
         setShowExportHtml={mail.setShowExportHtml}
         onOpenSend={() => mail.handleOpenSendModal()}
-        onSaveCurrent={() => mail.currentTemplateId ? mail.handleSaveTemplate(false) : mail.setShowSaveModal(true)}
+        onSaveCurrent={mail.handleQuickSave}
         currentTemplateId={mail.currentTemplateId}
       />
 
