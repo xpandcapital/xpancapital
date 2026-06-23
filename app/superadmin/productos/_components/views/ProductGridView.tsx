@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { motion } from "framer-motion"
-import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check } from "lucide-react"
+import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check, GraduationCap } from "lucide-react"
 import Image from "next/image"
 import type { Product, Category, Status } from '../../_types'
 
@@ -83,57 +83,53 @@ export const ProductGridView = React.memo(function ProductGridView({
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent opacity-40" />
             </div>
 
-            <div className="p-3 md:p-5 space-y-3 md:space-y-4 flex-1 flex flex-col">
-              <div className="space-y-2">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="space-y-1 flex-1 min-w-0">
-                    {isBulkEditing ? (
-                      <select
-                        value={product.category}
-                        onChange={(e) => onUpdateBulk(product.id, 'category', e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black text-blis-red uppercase tracking-widest w-full outline-none"
-                      >
-                        {categories.map(c => <option key={c.id} value={c.name} className="bg-zinc-900">{c.name}</option>)}
-                      </select>
-                    ) : (
-                      <p className="text-[10px] font-black text-blis-red uppercase tracking-widest">{product.category}</p>
-                    )}
+            <div className="p-3 md:p-4 space-y-2.5 md:space-y-3 flex-1 flex flex-col">
+              <div className="flex-1 min-w-0">
+                {isBulkEditing ? (
+                  <select
+                    value={product.category}
+                    onChange={(e) => onUpdateBulk(product.id, 'category', e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black text-blis-red uppercase tracking-widest w-full outline-none"
+                  >
+                    {categories.map(c => <option key={c.id} value={c.name} className="bg-zinc-900">{c.name}</option>)}
+                  </select>
+                ) : (
+                  <p className="text-[9px] font-black text-blis-red uppercase tracking-widest truncate">{product.category}</p>
+                )}
 
-                    {isBulkEditing ? (
-                      <input
-                        value={product.name}
-                        onChange={(e) => onUpdateBulk(product.id, 'name', e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm font-bold text-white w-full outline-none focus:border-blis-red"
-                      />
-                    ) : (
-                      <h3 className="text-white font-bold text-base leading-tight group-hover:text-blis-red transition-colors">{product.name}</h3>
-                    )}
+                {isBulkEditing ? (
+                  <input
+                    value={product.name}
+                    onChange={(e) => onUpdateBulk(product.id, 'name', e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm font-bold text-white w-full outline-none focus:border-blis-red mt-1"
+                  />
+                ) : (
+                  <h3 className="text-white font-bold text-sm md:text-base leading-tight group-hover:text-blis-red transition-colors mt-0.5">
+                    {product.name}
+                  </h3>
+                )}
+
+                {!isBulkEditing && product.curso && (
+                  <div className="mt-1.5 flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-[9px] font-bold text-purple-400 w-fit max-w-full">
+                    <GraduationCap className="w-2.5 h-2.5 flex-shrink-0" />
+                    <span className="truncate">{product.curso.nombre}</span>
                   </div>
-
-                  {!isBulkEditing && (
-                      <span
-                        className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border border-white/5 shrink-0"
-                        style={{ backgroundColor: `${statusColor}15`, color: statusColor }}
-                      >
-                        {product.status}
-                      </span>
-                    )}
-                </div>
+                )}
 
                 {!isBulkEditing && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mt-1.5">
                     {product.bliscoins > 0 && isBlisCoinsEnabled ? (
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-gray-500 font-bold text-xs uppercase tracking-tighter opacity-50 line-through">
-                          {product.price.toFixed(2)}
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-gray-500 font-bold text-xs line-through opacity-50">
+                          ${product.price.toFixed(2)}
                         </span>
-                        <span className="text-amber-500 font-black text-lg tracking-tighter leading-none uppercase">
-                          <span className="mr-0.5 text-[10px]">B</span>{product.bliscoins}
+                        <span className="text-amber-500 font-black text-base tracking-tighter leading-none">
+                          <span className="text-[9px]">B</span>{product.bliscoins}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-emerald-500 font-black text-lg tracking-tighter leading-none">
-                        {product.price.toFixed(2)}
+                      <span className="text-emerald-500 font-black text-base tracking-tighter leading-none">
+                        ${product.price.toFixed(2)}
                       </span>
                     )}
                   </div>
@@ -163,22 +159,30 @@ export const ProductGridView = React.memo(function ProductGridView({
                 </div>
               )}
 
-              <div className="mt-auto pt-3 md:pt-4 border-t border-white/5 flex items-center justify-between">
-                <div className="flex flex-col flex-1">
-                  <span className="text-[10px] text-gray-500 uppercase font-black">Stock Actual</span>
-                  {isBulkEditing ? (
+              <div className="pt-2.5 md:pt-3 border-t border-white/5 flex items-center justify-between gap-1">
+                {isBulkEditing ? (
+                  <div className="flex flex-col flex-1">
+                    <span className="text-[9px] text-gray-500 uppercase font-black">Stock</span>
                     <input
                       type="number"
                       value={product.stock}
                       onChange={(e) => onUpdateBulk(product.id, 'stock', parseInt(e.target.value))}
-                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs font-black text-white w-full max-w-[80px] outline-none"
+                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs font-black text-white w-full max-w-[70px] outline-none"
                     />
-                  ) : (
-                    <span className="text-white font-black tracking-tight text-xs">
-                      {product.stock === -1 ? <span className="text-xl leading-none">∞</span> : `${product.stock} Un.`}
-                    </span>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center flex-1 min-w-0">
+                    {product.stock === -1 ? (
+                      <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                        Ilimitado
+                      </span>
+                    ) : (
+                      <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black bg-white/5 text-gray-300 border border-white/10">
+                        {product.stock} un.
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {isBulkEditing ? (
                   <div className="flex flex-col flex-1 items-end">
@@ -186,23 +190,23 @@ export const ProductGridView = React.memo(function ProductGridView({
                     <select
                       value={product.status}
                       onChange={(e) => onUpdateBulk(product.id, 'status', e.target.value)}
-                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black text-white w-full max-w-[100px] outline-none"
+                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black text-white w-full max-w-[90px] outline-none"
                     >
                       {statuses.map(s => <option key={s.id} value={s.name} className="bg-zinc-900">{s.name}</option>)}
                     </select>
                   </div>
                 ) : (
-                  <div className="flex gap-1 md:gap-4 items-center justify-end">
-                    <button onClick={() => onPrintLabels(product)} className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg" title="Etiquetas">
-                      <BarcodeIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                  <div className="flex gap-0.5 md:gap-1 items-center flex-shrink-0">
+                    <button onClick={() => onPrintLabels(product)} className="p-1 md:p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all" title="Etiquetas">
+                      <BarcodeIcon className="w-3 h-3" />
                     </button>
                     {product.shortSlug && (
                       <button
                         onClick={() => handleCopyLink(product)}
-                        className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all shadow-lg"
+                        className="p-1 md:p-1.5 rounded-lg bg-white/5 hover:bg-emerald-500/20 text-gray-400 hover:text-emerald-400 transition-all"
                         title="Copiar enlace corto"
                       >
-                        {copiedId === product.id ? <Check className="w-3.5 h-3.5 md:w-4 md:h-4" /> : <Link2 className="w-3.5 h-3.5 md:w-4 md:h-4" />}
+                        {copiedId === product.id ? <Check className="w-3 h-3" /> : <Link2 className="w-3 h-3" />}
                       </button>
                     )}
                     {product.slug && (
@@ -210,17 +214,17 @@ export const ProductGridView = React.memo(function ProductGridView({
                         href={`/tienda/producto/${product.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg"
+                        className="p-1 md:p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all"
                         title="Ver producto público"
                       >
-                        <ExternalLink className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                        <ExternalLink className="w-3 h-3" />
                       </a>
                     )}
-                    <button onClick={() => onEdit(product)} className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all shadow-lg">
-                      <Edit2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                    <button onClick={() => onEdit(product)} className="p-1 md:p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all">
+                      <Edit2 className="w-3 h-3" />
                     </button>
-                    <button onClick={() => onDelete(product.id)} className="p-1.5 md:p-2.5 rounded-xl bg-white/5 hover:bg-blis-red/20 text-gray-400 hover:text-blis-red transition-all shadow-lg">
-                      <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                    <button onClick={() => onDelete(product.id)} className="p-1 md:p-1.5 rounded-lg bg-white/5 hover:bg-blis-red/20 text-gray-400 hover:text-blis-red transition-all">
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
                 )}
