@@ -117,6 +117,8 @@ export async function PUT(request: NextRequest) {
         const apellido = nombreParts.slice(1).join(' ') || ''
         const productos = (meta.productos as Array<any>) || []
 
+        console.log('[admin/ventas PUT] Marcando completado. user_id actual:', data.user_id, '| email:', email, '| nombre:', nombre, '| apellido:', apellido, '| productos:', productos.length)
+
         if (email && productos.length > 0) {
           const prodNames = productos.map((p: any) => p.nombre || 'Producto')
           const prodPrices = productos.map((p: any) => ({
@@ -127,15 +129,21 @@ export async function PUT(request: NextRequest) {
             imagen: p.imagen || '',
           }))
 
-          const { userId } = await createUserAndNotify({
+          const createResult = await createUserAndNotify({
             email, nombre, apellido,
             isGuest: !data.user_id,
             productos: prodNames,
             total: `${data.monto_usd?.toFixed(2) || '0'} USD`,
             metodo_pago: data.metodo_pago || 'Manual',
             productPrices: prodPrices,
-          }).catch(() => ({ userId: null, isNewUser: false, tempPassword: '' }))
+          }).catch((err) => {
+            console.error('[admin/ventas PUT] Error en createUserAndNotify:', err)
+            return { userId: null, isNewUser: false, tempPassword: '' }
+          })
 
+          console.log('[admin/ventas PUT] createUserAndNotify result:', { userId: createResult.userId, isNewUser: createResult.isNewUser, tempPasswordLength: createResult.tempPassword?.length || 0 })
+
+          const userId = createResult.userId
           const effectiveUserId = data.user_id || userId
 
           if (userId && !data.user_id) {

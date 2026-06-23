@@ -136,10 +136,14 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
   }
 
   const extraVars: Record<string, string> = {}
-  if (params.isGuest && isNewUser && tempPassword) {
-    extraVars.password_temporal = tempPassword
-    extraVars.enlace_crear_cuenta = `${siteUrl}/login`
-    console.log('[createUserAndNotify] Usuario nuevo invitado, incluyendo password_temporal')
+  if (params.isGuest && isNewUser) {
+    if (tempPassword) {
+      extraVars.password_temporal = tempPassword
+      extraVars.enlace_crear_cuenta = `${siteUrl}/login`
+      console.log('[createUserAndNotify] Usuario nuevo invitado, incluyendo password_temporal:', tempPassword.substring(0, 3) + '***')
+    } else {
+      console.error('[createUserAndNotify] ALERTA: invitado nuevo SIN contraseña temporal. userId:', userId)
+    }
   }
 
   // Normalizar total para la plantilla (el receipt ya agrega el signo $)

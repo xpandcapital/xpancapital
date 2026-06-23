@@ -109,11 +109,13 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
         )
 
         // 3. Reemplazar variables {{nombre}}, {{ productos }}, etc. (con o sin espacios)
+        console.log('[sendTemplateEmail] Variables disponibles:', Object.keys(variables), '| password_temporal presente:', !!variables.password_temporal, '| valor length:', variables.password_temporal?.length || 0)
         for (const [key, value] of Object.entries(variables)) {
           html = html.replace(new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g'), value)
         }
         // Limpiar variables no reemplazadas
         html = html.replace(/\{\{[^}]+\}\}/g, '')
+        console.log('[sendTemplateEmail] HTML contiene password_temporal placeholder:', html.includes('password_temporal'))
       } catch (e) {
         console.error('[sendTemplateEmail] Error generando HTML:', e)
         html = buildFallbackHTML(variables)
