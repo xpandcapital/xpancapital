@@ -165,30 +165,17 @@ export async function POST(request: NextRequest) {
     const baseName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 60)
     const folder = `${user.empresaId}/comunidad`
 
-    // Subir original (con retry si el bucket no existe)
+    // Subir original
     const originalPath = `${folder}/${timestamp}-${random}-orig.${extension}`
-    let originalUpload = await supabase.storage
-      .from('comunidad-media')
+    const originalUpload = await supabase.storage
+      .from('cms-images')
       .upload(originalPath, buffer, { contentType: file.type, upsert: false })
-
-    if (originalUpload.error) {
-      // Crear bucket si no existe y reintentar
-      const { error: bucketError } = await supabase.storage.createBucket('comunidad-media', {
-        public: true,
-        fileSizeLimit: MAX_SIZE
-      })
-      if (!bucketError || bucketError.message?.includes('already exists')) {
-        originalUpload = await supabase.storage
-          .from('comunidad-media')
-          .upload(originalPath, buffer, { contentType: file.type, upsert: false })
-      }
-    }
 
     if (originalUpload.error) {
       return NextResponse.json({ success: false, error: originalUpload.error.message }, { status: 500 })
     }
 
-    const { data: originalUrlData } = supabase.storage.from('comunidad-media').getPublicUrl(originalPath)
+    const { data: originalUrlData } = supabase.storage.from('cms-images').getPublicUrl(originalPath)
     const urlOriginal = originalUrlData.publicUrl
 
     let urlComprimida: string | undefined
@@ -199,23 +186,23 @@ export async function POST(request: NextRequest) {
     if (isImage) {
       const { compressed, thumbnail, compressedSize } = await compressImage(buffer, file.type)
       const compressedPath = `${folder}/${timestamp}-${random}-comp.webp`
-      await supabase.storage.from('comunidad-media').upload(compressedPath, compressed, { contentType: 'image/webp', upsert: false })
-      const { data: compUrlData } = supabase.storage.from('comunidad-media').getPublicUrl(compressedPath)
+      await supabase.storage.from('cms-images').upload(compressedPath, compressed, { contentType: 'image/webp', upsert: false })
+      const { data: compUrlData } = supabase.storage.from('cms-images').getPublicUrl(compressedPath)
       urlComprimida = compUrlData.publicUrl
       tamañoComprimido = compressedSize
 
       if (thumbnail) {
         const thumbPath = `${folder}/${timestamp}-${random}-thumb.webp`
-        await supabase.storage.from('comunidad-media').upload(thumbPath, thumbnail, { contentType: 'image/webp', upsert: false })
-        const { data: thumbUrlData } = supabase.storage.from('comunidad-media').getPublicUrl(thumbPath)
+        await supabase.storage.from('cms-images').upload(thumbPath, thumbnail, { contentType: 'image/webp', upsert: false })
+        const { data: thumbUrlData } = supabase.storage.from('cms-images').getPublicUrl(thumbPath)
         urlThumbnail = thumbUrlData.publicUrl
       }
     } else if (isVideo) {
       const { compressed, compressedSize } = await compressVideo(buffer)
       if (compressed) {
         const compressedPath = `${folder}/${timestamp}-${random}-comp.mp4`
-        await supabase.storage.from('comunidad-media').upload(compressedPath, compressed, { contentType: 'video/mp4', upsert: false })
-        const { data: compUrlData } = supabase.storage.from('comunidad-media').getPublicUrl(compressedPath)
+        await supabase.storage.from('cms-images').upload(compressedPath, compressed, { contentType: 'video/mp4', upsert: false })
+        const { data: compUrlData } = supabase.storage.from('cms-images').getPublicUrl(compressedPath)
         urlComprimida = compUrlData.publicUrl
         tamañoComprimido = compressedSize
       }
@@ -294,7 +281,7 @@ export async function DELETE(request: NextRequest) {
       const paths: string[] = []
       const extractPath = (url: string | undefined) => {
         if (!url) return
-        const parts = url.split('/comunidad-media/')
+        const parts = url.split('/cms-images/')
         if (parts[1]) paths.push(parts[1])
       }
       extractPath(media.url_original)
@@ -302,7 +289,7 @@ export async function DELETE(request: NextRequest) {
       extractPath(media.url_thumbnail)
 
       if (paths.length > 0) {
-        await supabase.storage.from('comunidad-media').remove(paths)
+        await supabase.storage.from('cms-images').remove(paths)
       }
       await supabase.from('comunidad_post_media').delete().eq('id', media.id)
     }
