@@ -34,7 +34,6 @@ interface UserProfile {
     activo: boolean;
     creado_en: string;
     empresa_id: string;
-    recibir_notificaciones_compras?: boolean;
 }
 
 export default function AdminUsers() {
@@ -85,25 +84,6 @@ export default function AdminUsers() {
         a.href = url;
         a.download = `usuarios_bliscorp_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
-    };
-
-    const handleToggleNotificaciones = async (userId: string, currentValue: boolean) => {
-        try {
-            const res = await fetch('/api/admin/users', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: userId, recibir_notificaciones_compras: !currentValue }),
-            });
-            const data = await res.json();
-            if (data.success) {
-                setUsers(prev => prev.map(u => u.id === userId ? { ...u, recibir_notificaciones_compras: !currentValue } : u));
-                showToast(!currentValue ? 'Notificaciones activadas' : 'Notificaciones desactivadas');
-            } else {
-                showToast(data.error || 'Error al actualizar', 'error');
-            }
-        } catch {
-            showToast('Error al actualizar', 'error');
-        }
     };
 
     const filteredUsers = users.filter(user => {
@@ -216,7 +196,6 @@ export default function AdminUsers() {
                                     <th className="px-6 py-4">Email</th>
                                     <th className="px-6 py-4">Rol</th>
                                     <th className="px-6 py-4">Estado</th>
-                                    <th className="px-6 py-4">Notif.</th>
                                     <th className="px-6 py-4">Fecha</th>
                                     <th className="px-6 py-4">Acciones</th>
                                 </tr>
@@ -247,16 +226,6 @@ export default function AdminUsers() {
                                                 <CheckCircle2 className="w-3 h-3" />
                                                 {isActivo(user) ? 'Activo' : 'Inactivo'}
                                             </span>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleToggleNotificaciones(user.id, !!user.recibir_notificaciones_compras)}
-                                                title={user.recibir_notificaciones_compras ? 'Desactivar notificaciones de compras' : 'Activar notificaciones de compras'}
-                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 ${user.recibir_notificaciones_compras ? 'bg-blis-red' : 'bg-gray-700'}`}
-                                            >
-                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform ${user.recibir_notificaciones_compras ? 'translate-x-6' : 'translate-x-1'}`} />
-                                            </button>
                                         </td>
                                         <td className="px-6 py-5 text-gray-500">
                                             {new Date(user.creado_en).toLocaleDateString()}
