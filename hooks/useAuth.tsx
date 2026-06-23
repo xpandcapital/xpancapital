@@ -33,7 +33,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, nombre?: string, apellido?: string) => Promise<{ success: boolean; error?: string }>
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
-  updateProfile: (data: { name?: string; profilePic?: string | null; email?: string; phone?: string }) => void
+  updateProfile: (data: { name?: string; profilePic?: string | null; email?: string; phone?: string; nombre?: string; apellido?: string }) => void
   refreshUser: () => Promise<void>
 }
 
@@ -54,7 +54,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, nombre, apellido, avatar_url, blis_coins, rol, empresa_id')
+      .select('id, email, nombre, apellido, avatar_url, blis_coins, rol, empresa_id, telefono')
       .eq('id', userId)
       .single()
 
@@ -110,7 +110,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
           profilePic: p.avatar_url,
           blis_coins: p.blis_coins || 0,
           role: normalizedRol,
-          phone: undefined,
+          phone: p.telefono || '',
           empresa_id: p.empresa_id || EMPRESA_ID,
           permisos_adicionales: p.permisos_adicionales || null,
           ruta_inicio: null,
@@ -130,6 +130,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
       blis_coins?: number
       rol?: string
       empresa_id?: string
+      telefono?: string
       permisos_adicionales?: PermisosAdicionales | null
     }
 
@@ -149,7 +150,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
       profilePic: profile.avatar_url,
       blis_coins: profile.blis_coins || 0,
       role: normalizedRol,
-      phone: undefined,
+      phone: profile.telefono || '',
       empresa_id: profile.empresa_id || EMPRESA_ID,
       permisos_adicionales: profile.permisos_adicionales || null,
       ruta_inicio: null,
@@ -292,6 +293,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profile = await fetchProfile(data.user.id)
         if (profile) {
           setUser(profile)
+          fetch('/api/auth/login-history', { method: 'POST' }).catch(() => {})
           return { success: true }
         }
         // Fallback: usar datos del JWT si no hay profile
@@ -305,6 +307,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           permisos_adicionales: null,
           ruta_inicio: null,
         })
+        fetch('/api/auth/login-history', { method: 'POST' }).catch(() => {})
         return { success: true }
       }
 

@@ -306,7 +306,7 @@ export default function ProfilePage() {
     const [name, setName] = useState(user?.nombre || user?.name?.split(' ')[0] || "");
     const [lastName, setLastName] = useState(user?.apellido || user?.name?.split(' ').slice(1).join(' ') || "");
     const [email, setEmail] = useState(user?.email || "");
-    const [phone, setPhone] = useState(user?.telefono || user?.phone || "");
+    const [phone, setPhone] = useState(user?.phone || user?.phone || "");
     const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
     const [isCountryOpen, setIsCountryOpen] = useState(false);
     const [countrySearch, setCountrySearch] = useState("");
@@ -342,11 +342,21 @@ export default function ProfilePage() {
             else if (user.name && !user.nombre) setLastName(user.name.split(' ').slice(1).join(' ') || '');
             if (user.email) setEmail(user.email);
             if (user.profilePic) setProfilePic(user.profilePic);
+            if (user.phone) {
+                const matchedCountry = COUNTRIES.find(c => user.phone!.startsWith(c.code));
+                if (matchedCountry) {
+                    setSelectedCountry(matchedCountry);
+                    setPhone(user.phone.slice(matchedCountry.code.length));
+                } else {
+                    setPhone(user.phone);
+                }
+            }
         }
     }, [user]);
 
     const handleUpdate = () => {
-        updateProfile({ nombre: name, apellido: lastName, profilePic });
+        const fullPhone = phone ? `${selectedCountry.code}${phone.replace(/\s+/g, '')}` : '';
+        updateProfile({ nombre: name, apellido: lastName, profilePic, phone: fullPhone });
         showToast("¡Éxito! Tus datos han sido actualizados en la base de datos de Blis Corp.", "success");
     };
 

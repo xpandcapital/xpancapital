@@ -3,7 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'La nueva contraseña debe tener al menos 6 caracteres' }, { status: 400 })
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey, {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: { autoRefreshToken: false, persistSession: false }
     })
 
@@ -37,8 +38,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
     }
 
-    // Verificar contraseña actual
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    // Verificar contraseña actual con cliente ANON (sin afectar sesión del usuario)
+    const supabaseAnon = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
+    })
+
+    const { error: signInError } = await supabaseAnon.auth.signInWithPassword({
       email: profile.email,
       password: currentPassword,
     })
@@ -47,7 +52,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Contraseña actual incorrecta' }, { status: 400 })
     }
 
-    // Cambiar contraseña
+    // Cambiar contraseña con service_role
     const { error: updateError } = await supabase.auth.admin.updateUserById(auth.userId, {
       password: newPassword,
     })
