@@ -132,71 +132,78 @@ export function useComunidad(options: UseComunidadOptions = {}) {
   }, [fetchPosts])
 
   const votar = useCallback(async (encuestaId: string, opcionId: string) => {
-    const res = await fetch(`${API}/votar`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ encuesta_id: encuestaId, opcion_id: opcionId })
-    })
-    const json = await res.json()
-    if (!json.success) throw new Error(json.error)
-
-    // Actualizar post optimistamente
+    // Optimista: actualizar UI inmediatamente
     setPosts(prev => prev.map(p => {
       if (p.encuesta?.id !== encuestaId) return p
-      return {
-        ...p,
-        encuesta: {
-          ...p.encuesta,
-          opciones: json.data.opciones,
-          total_votos: json.data.total_votos,
-          usuario_voto: json.data.usuario_voto
+      const ops = p.encuesta.opciones.map(o => {
+        if (o.id !== opcionId) {
+          // Si votación única y ya votó por otra, quitar ese voto
+          if (!p.encuesta!.multiple && o.votada) return { ...o, votos_count: (o.votos_count || 1) - 1, votada: false }
+          return o
         }
-      }
+        const yaVotada = o.votada
+        return {
+          ...o,
+          votos_count: (o.votos_count || 0) + (yaVotada ? -1 : 1),
+          votada: !yaVotada
+        }
+      })
+      const totalVotos = p.encuesta!.total_votos! + (ops.find(o => o.id === opcionId)!.votada ? 1 : -1)
+      return { ...p, encuesta: { ...p.encuesta!, opciones: ops, total_votos: Math.max(0, totalVotos), usuario_voto: ops.filter(o => o.votada).map(o => o.id) } }
     }))
-    return json.data
-  }, [])
+
+    try {
+      const res = await fetch(`${API}/votar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ encuesta_id: encuestaId, opcion_id: opcionId })
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error)
+      // Confirmar con datos del servidor
+      setPosts(prev => prev.map(p => {
+        if (p.encuesta?.id !== encuestaId) return p
+        return { ...p, encuesta: { ...p.encuesta!, opciones: json.data.opciones, total_votos: json.data.total_votos, usuario_voto: json.data.usuario_voto } }
+      }))
+    } catch {
+      // Revertir recargando
+      fetchPosts(true)
+    }
+  }, [fetchPosts])
 
   const inscribirEvento = useCallback(async (eventoId: string) => {
-    const res = await fetch(`${API}/inscribir`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ evento_id: eventoId })
-    })
-    const json = await res.json()
-    if (!json.success) throw new Error(json.error)
-
+    // Optimista
     setPosts(prev => prev.map(p => {
       if (p.evento?.id !== eventoId) return p
-      return {
-        ...p,
-        evento: {
-          ...p.evento,
-          usuario_inscrito: json.data.estado === 'inscrito',
-          usuario_estado: json.data.estado,
-          inscritos_count: (p.evento.inscritos_count || 0) + (json.data.estado === 'inscrito' ? 1 : -1)
-        }
-      }
+      return { ...p, evento: { ...p.evento!, usuario_inscrito: true, usuario_estado: 'inscrito', inscritos_count: (p.evento!.inscritos_count || 0) + 1 } }
     }))
-  }, [])
+    try {
+      const res = await fetch(`${API}/inscribir`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ evento_id: eventoId })
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error)
+    } catch {
+      fetchPosts(true)
+    }
+  }, [fetchPosts])
 
   const cancelarInscripcion = useCallback(async (eventoId: string) => {
-    const res = await fetch(`${API}/inscribir?evento_id=${eventoId}`, { method: 'DELETE' })
-    const json = await res.json()
-    if (!json.success) throw new Error(json.error)
-
+    // Optimista
     setPosts(prev => prev.map(p => {
       if (p.evento?.id !== eventoId) return p
-      return {
-        ...p,
-        evento: {
-          ...p.evento,
-          usuario_inscrito: false,
-          usuario_estado: 'cancelado',
-          inscritos_count: Math.max(0, (p.evento.inscritos_count || 1) - 1)
-        }
-      }
+      return { ...p, evento: { ...p.evento!, usuario_inscrito: false, usuario_estado: 'cancelado', inscritos_count: Math.max(0, (p.evento!.inscritos_count || 1) - 1) } }
     }))
-  }, [])
+    try {
+      const res = await fetch(`${API}/inscribir?evento_id=${eventoId}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error)
+    } catch {
+      fetchPosts(true)
+    }
+  }, [fetchPosts])
 
   return {
     posts, loading, loadingMore, error, hasMore,
@@ -246,6 +253,7 @@ export function useComentarios(postId: string) {
 }
 
 interface MediaUploadResult {
+  id: string
   url_original: string
   url_comprimida: string | null
   url_thumbnail: string | null

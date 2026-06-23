@@ -90,11 +90,11 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
     setEnviando(true)
     setError(null)
     try {
-      const uploadedUrls: string[] = []
+      const uploadedIds: string[] = []
       for (const m of mediaPreview) {
         try {
           const result = await uploadMedia(m.file)
-          uploadedUrls.push(result.url_original)
+          if (result.id) uploadedIds.push(result.id)
         } catch {}
       }
 
@@ -120,7 +120,7 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
         }
       }
 
-      if (uploadedUrls.length > 0) body.media_ids = uploadedUrls
+      if (uploadedIds.length > 0) body.media_ids = uploadedIds
 
       const res = await fetch('/api/comunidad', {
         method: 'POST',
@@ -239,30 +239,57 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
 
               {/* Evento */}
               {tab === 'evento' && (
-                <div className="space-y-2 bg-white/[0.02] rounded-xl p-3 border border-white/[0.04]">
-                  <input type="text" value={evTitulo} onChange={e => setEvTitulo(e.target.value)} placeholder="Título del evento *" className="w-full bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none" />
-                  <textarea value={evDesc} onChange={e => setEvDesc(e.target.value)} placeholder="Descripción..." className="w-full bg-transparent text-xs text-white placeholder-gray-600 focus:outline-none min-h-[40px]" />
+                <div className="space-y-3 bg-white/[0.02] rounded-xl p-4 border border-white/[0.04]">
+                  <input type="text" value={evTitulo} onChange={e => setEvTitulo(e.target.value)} placeholder="🎯 Título del evento *" className="w-full bg-transparent text-sm font-semibold text-white placeholder-gray-600 focus:outline-none" />
+                  <textarea value={evDesc} onChange={e => setEvDesc(e.target.value)} placeholder="Descripción del evento..." className="w-full bg-transparent text-xs text-white placeholder-gray-600 focus:outline-none min-h-[40px] resize-none" />
+
+                  {/* Tipo + Capacidad */}
                   <div className="grid grid-cols-2 gap-2">
-                    <select value={evTipo} onChange={e => setEvTipo(e.target.value as any)} className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-2 py-1.5 text-xs text-white">
-                      <option value="presencial">Presencial</option>
-                      <option value="digital">Digital</option>
-                      <option value="hibrido">Híbrido</option>
+                    <select value={evTipo} onChange={e => setEvTipo(e.target.value as any)} className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white/10 cursor-pointer">
+                      <option value="presencial">📍 Presencial</option>
+                      <option value="digital">💻 Digital</option>
+                      <option value="hibrido">🔀 Híbrido</option>
                     </select>
-                    <input type="number" value={evCapacidad || ''} onChange={e => setEvCapacidad(e.target.value ? parseInt(e.target.value) : null)} placeholder="Capacidad" className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-2 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none" />
+                    <input type="number" value={evCapacidad || ''} onChange={e => setEvCapacidad(e.target.value ? parseInt(e.target.value) : null)} placeholder="👥 Capacidad (opcional)" className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-white/10" />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input type="date" value={evFechaInicio} onChange={e => setEvFechaInicio(e.target.value)} className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none" />
-                    <input type="date" value={evFechaFin} onChange={e => setEvFechaFin(e.target.value)} className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none" />
+
+                  {/* Fechas */}
+                  <div>
+                    <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">Fecha y hora</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[9px] text-gray-600 block mb-1">Inicio *</label>
+                        <input type="date" value={evFechaInicio} onChange={e => setEvFechaInicio(e.target.value)} className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white/10 cursor-pointer [color-scheme:dark]" />
+                      </div>
+                      <div>
+                        <label className="text-[9px] text-gray-600 block mb-1">Fin</label>
+                        <input type="date" value={evFechaFin} onChange={e => setEvFechaFin(e.target.value)} className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white/10 cursor-pointer [color-scheme:dark]" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <div>
+                        <label className="text-[9px] text-gray-600 block mb-1">Hora inicio</label>
+                        <input type="time" value={evHoraInicio} onChange={e => setEvHoraInicio(e.target.value)} className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white/10 cursor-pointer [color-scheme:dark]" />
+                      </div>
+                      <div>
+                        <label className="text-[9px] text-gray-600 block mb-1">Hora fin</label>
+                        <input type="time" value={evHoraFin} onChange={e => setEvHoraFin(e.target.value)} className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-white/10 cursor-pointer [color-scheme:dark]" />
+                      </div>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input type="time" value={evHoraInicio} onChange={e => setEvHoraInicio(e.target.value)} className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none" />
-                    <input type="time" value={evHoraFin} onChange={e => setEvHoraFin(e.target.value)} className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none" />
-                  </div>
+
+                  {/* Ubicación / URL */}
                   {evTipo !== 'digital' && (
-                    <input type="text" value={evUbicacion} onChange={e => setEvUbicacion(e.target.value)} placeholder="📍 Ubicación" className="w-full bg-transparent text-xs text-white placeholder-gray-600 focus:outline-none border-b border-white/[0.06] pb-1" />
+                    <div>
+                      <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">Ubicación</p>
+                      <input type="text" value={evUbicacion} onChange={e => setEvUbicacion(e.target.value)} placeholder="📍 Dirección o lugar del evento" className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-white/10" />
+                    </div>
                   )}
                   {evTipo !== 'presencial' && (
-                    <input type="url" value={evUrlEvento} onChange={e => setEvUrlEvento(e.target.value)} placeholder="🔗 URL (Zoom, Meet...)" className="w-full bg-transparent text-xs text-white placeholder-gray-600 focus:outline-none border-b border-white/[0.06] pb-1" />
+                    <div>
+                      <p className="text-[10px] text-gray-600 uppercase tracking-wider mb-2">Enlace</p>
+                      <input type="url" value={evUrlEvento} onChange={e => setEvUrlEvento(e.target.value)} placeholder="🔗 URL de Zoom, Google Meet, etc." className="w-full bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-white/10" />
+                    </div>
                   )}
                 </div>
               )}

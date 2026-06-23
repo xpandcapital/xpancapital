@@ -219,29 +219,31 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (postId) {
-      const { error: mediaError } = await supabase
-        .from('comunidad_post_media')
-        .insert({
-          post_id: postId,
-          tipo: mediaType,
-          url_original: urlOriginal,
-          url_comprimida: urlComprimida || null,
-          url_thumbnail: urlThumbnail || null,
-          mime_type: file.type,
-          nombre_archivo: baseName,
-          tamaño_original: file.size,
-          tamaño_comprimido: tamañoComprimido || null
-        })
+    // Siempre crear registro en comunidad_post_media
+    const { data: mediaRecord, error: mediaError } = await supabase
+      .from('comunidad_post_media')
+      .insert({
+        post_id: postId || null,
+        tipo: mediaType,
+        url_original: urlOriginal,
+        url_comprimida: urlComprimida || null,
+        url_thumbnail: urlThumbnail || null,
+        mime_type: file.type,
+        nombre_archivo: baseName,
+        tamaño_original: file.size,
+        tamaño_comprimido: tamañoComprimido || null
+      })
+      .select('id')
+      .single()
 
-      if (mediaError) {
-        return NextResponse.json({ success: false, error: mediaError.message }, { status: 500 })
-      }
+    if (mediaError) {
+      return NextResponse.json({ success: false, error: mediaError.message }, { status: 500 })
     }
 
     return NextResponse.json({
       success: true,
       data: {
+        id: mediaRecord?.id,
         url_original: urlOriginal,
         url_comprimida: urlComprimida || null,
         url_thumbnail: urlThumbnail || null,
