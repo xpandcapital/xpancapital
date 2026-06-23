@@ -34,6 +34,7 @@ export function useCourseManagement() {
           require_completion?: boolean
           imagen_principal?: string
           linked_product_id?: string | null
+          linked_product_name?: string | null
         }) => ({
           id: c.id,
           title: c.nombre,
@@ -50,7 +51,9 @@ export function useCourseManagement() {
           sequentialProgress: c.sequential_progress || false,
           requireCompletion: c.require_completion || false,
           venderEnTienda: !!c.linked_product_id,
-          productoId: c.linked_product_id || null
+          productoId: c.linked_product_id || null,
+          productoNombre: c.linked_product_name || null,
+          linkProductoId: null
         }))
         setCourses(mappedCourses)
       }
@@ -127,6 +130,7 @@ export function useCourseManagement() {
         sequential_progress: currentCourse.sequentialProgress || false,
         require_completion: currentCourse.requireCompletion || false,
         vender_en_tienda: currentCourse.venderEnTienda || false,
+        link_producto_id: currentCourse.linkProductoId || null,
       }
 
       if (currentCourse.image) courseData.imagen_principal = currentCourse.image
@@ -216,7 +220,9 @@ export function useCourseManagement() {
       sequentialProgress: false,
       requireCompletion: false,
       venderEnTienda: false,
-      productoId: null
+      productoId: null,
+      productoNombre: null,
+      linkProductoId: null
     }
     setCourses(prev => [...prev, newCourse])
     setCurrentCourse(newCourse)

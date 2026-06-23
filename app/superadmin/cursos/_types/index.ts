@@ -43,6 +43,8 @@ export interface Course {
   requireCompletion: boolean
   venderEnTienda: boolean
   productoId: string | null
+  productoNombre?: string | null
+  linkProductoId?: string | null
 }
 
 export interface CertificateTemplate {
