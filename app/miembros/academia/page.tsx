@@ -108,7 +108,11 @@ function AcademyContent() {
                     const purchased = (data.data || [])
                         .filter((c: any) => c.estado === 'completado')
                         .flatMap((c: any) => (c.items || [])
-                            .filter((item: any) => item.product_type === 'servicio' || item.producto?.tipo === 'servicio')
+                            .filter((item: any) =>
+                                item.product_type === 'servicio' ||
+                                item.producto?.tipo === 'servicio' ||
+                                item.producto?.curso_id
+                            )
                             .filter((item: any) => item.producto?.curso_id)
                             .map((item: any) => ({
                                 id: item.producto?.curso_id || item.producto?.id,

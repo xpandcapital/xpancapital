@@ -358,9 +358,6 @@ export default function UserDashboard() {
                                                 </div>
                                             )}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                                            <div className="absolute top-4 left-4">
-                                                <span className="bg-blis-red/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full">Nuevo</span>
-                                            </div>
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
                                                     <Play className="w-5 h-5 text-white fill-white ml-0.5" />
@@ -368,9 +365,22 @@ export default function UserDashboard() {
                                             </div>
                                         </div>
                                         <div className="p-4 flex-1 flex flex-col justify-between">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="bg-blis-red/80 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">Nuevo</span>
+                                            </div>
                                             <h4 className="text-white font-black uppercase tracking-tight text-sm mb-2 leading-tight group-hover:text-blis-red transition-colors line-clamp-2 h-[2.5rem]">{course.title}</h4>
-                                            <div className="flex items-center gap-2 text-[8px] text-emerald-500 font-bold uppercase tracking-widest">
-                                                <span>✓ Comprado</span>
+                                            <div className="mt-auto space-y-2">
+                                                <div className="flex justify-between items-center text-[8px] font-black text-white uppercase tracking-widest">
+                                                    <span>Progreso</span>
+                                                    <span>{course.progress}%</span>
+                                                </div>
+                                                <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${course.progress}%` }}
+                                                        className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </Link>
