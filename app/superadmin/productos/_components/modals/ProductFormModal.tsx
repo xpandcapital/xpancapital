@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Globe, Link2, Copy, Check, ExternalLink, Loader2, X, Edit2 } from "lucide-react"
+import { Globe, Copy, Check, Loader2, X } from "lucide-react"
 import { ProductImageUploader } from './ProductImageUploader'
 import { ProductPriceSection } from './ProductPriceSection'
 import { ProductStockSection } from './ProductStockSection'
@@ -32,7 +32,7 @@ interface ProductFormModalProps {
   }
   cursos?: Array<{ id: string; nombre: string }>
   onClose: () => void
-  onSave: (data: any) => Promise<void>
+  onSave: (data: any) => Promise<{ shortSlug?: string } | void>
 }
 
 export function ProductFormModal({
@@ -151,20 +151,23 @@ export function ProductFormModal({
       curso_id: formData.cursoId || null
     }
 
-    await onSave(data)
-    onClose()
+    const result = await onSave(data)
+
+    // Si es producto nuevo, actualizar shortSlug con el generado por el backend
+    if (!editingProduct?.id && result?.shortSlug) {
+      setShortSlug(result.shortSlug)
+      setLinkCopied(false)
+    }
+
+    // Solo cerrar si es edición (ya existía)
+    if (editingProduct?.id) {
+      onClose()
+    }
   }
 
   // ── Handlers para enlace corto ──────────────────────────────────────────────
-  const handleCopyLink = () => {
-    if (!shortSlug) return
-    navigator.clipboard.writeText(`https://${SITE_DOMAIN}/s/${shortSlug}`)
-    setLinkCopied(true)
-    setTimeout(() => setLinkCopied(false), 2000)
-  }
-
   const handleSaveShortSlug = async () => {
-    if (!shortSlugValue.trim() || !editingProduct) return
+    if (!shortSlugValue.trim() || !formData.slug) return
     const code = shortSlugValue.toLowerCase().replace(/[^a-z0-9]/g, '')
     if (!/^[a-z0-9]{3,20}$/.test(code)) return
     setShortSlugSaving(true)
@@ -179,6 +182,8 @@ export function ProductFormModal({
       if (result.success) {
         setShortSlug(result.codigo)
         setShortSlugEditing(false)
+      } else if (result.error) {
+        alert(result.error)
       }
     } catch (err) {
       console.error('Error guardando short slug:', err)
@@ -285,9 +290,93 @@ export function ProductFormModal({
                 />
               </div>
               {formData.slug && (
-                <p className="text-[10px] text-gray-600 font-mono truncate">
-                  Vista previa: <span className="text-emerald-500/70">https://{SITE_DOMAIN}/tienda/producto/{formData.slug}</span>
+                <p className="text-[10px] text-gray-600 font-mono truncate flex items-center gap-2">
+                  <span>Vista previa:</span>
+                  <span className="text-emerald-500/70">https://{SITE_DOMAIN}/tienda/producto/{formData.slug}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`https://${SITE_DOMAIN}/tienda/producto/${formData.slug}`)
+                      setLinkCopied(true)
+                      setTimeout(() => setLinkCopied(false), 1500)
+                    }}
+                    className="p-1 rounded-md hover:bg-white/10 text-gray-500 hover:text-white transition-colors flex-shrink-0"
+                    title="Copiar enlace"
+                  >
+                    {linkCopied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  </button>
                 </p>
+              )}
+            </div>
+
+            {/* Enlace corto */}
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-none">Enlace Corto para Compartir</label>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 text-xs font-mono shrink-0 hidden sm:inline">{SITE_DOMAIN}/s/</span>
+                <span className="text-gray-500 text-xs font-mono shrink-0 sm:hidden">s/</span>
+                <input
+                  type="text"
+                  value={shortSlugEditing ? shortSlugValue : (shortSlug || '')}
+                  onChange={(e) => {
+                    const val = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '')
+                    setShortSlugValue(val)
+                    setShortSlugEditing(true)
+                  }}
+                  onFocus={() => {
+                    if (!shortSlugEditing) {
+                      setShortSlugValue(shortSlug || '')
+                      setShortSlugEditing(true)
+                    }
+                  }}
+                  placeholder={shortSlug ? shortSlug : 'código-corto'}
+                  maxLength={20}
+                  className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm font-mono placeholder:text-gray-600 focus:outline-none focus:border-emerald-500 transition-all"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSaveShortSlug()
+                    }
+                  }}
+                />
+                {shortSlugEditing && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleSaveShortSlug}
+                      disabled={shortSlugSaving || !shortSlugValue.trim()}
+                      className="px-3 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors disabled:opacity-50 shrink-0"
+                    >
+                      {shortSlugSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Guardar'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShortSlugEditing(false)}
+                      className="p-2.5 rounded-xl hover:bg-white/5 text-gray-400 hover:text-white transition-colors shrink-0"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                )}
+              </div>
+              {!shortSlug && !shortSlugEditing && (
+                <p className="text-[10px] text-amber-400/70 flex items-center gap-1">
+                  Se generará automáticamente al guardar el producto
+                </p>
+              )}
+              {shortSlug && !shortSlugEditing && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`https://${SITE_DOMAIN}/s/${shortSlug}`)
+                    setLinkCopied(true)
+                    setTimeout(() => setLinkCopied(false), 1500)
+                  }}
+                  className="text-[10px] text-emerald-400/70 hover:text-emerald-300 transition-colors flex items-center gap-1"
+                >
+                  <Copy className="w-2.5 h-2.5" />
+                  Copiar enlace corto
+                </button>
               )}
             </div>
 
@@ -307,79 +396,6 @@ export function ProductFormModal({
                 placeholder="Texto corto que aparece al compartir el enlace en WhatsApp, Facebook, etc. Si lo dejas vacío, se usa la imagen del producto."
                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm placeholder:text-gray-800 focus:outline-none focus:border-blue-500 transition-all resize-none"
               />
-            </div>
-
-            {/* Enlace corto */}
-            <div className="md:col-span-2 space-y-3">
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-                <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-                  <Link2 className="w-4 h-4 text-emerald-400" />
-                  Enlace Corto para Compartir
-                </h3>
-                {shortSlug && !shortSlugEditing ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleCopyLink}
-                      className="flex-1 flex items-center justify-between px-3 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-mono hover:bg-emerald-500/20 transition-all group"
-                    >
-                      <span className="flex items-center gap-1.5 truncate">
-                        <Link2 className="w-3.5 h-3.5 opacity-50 shrink-0" />
-                        {SITE_DOMAIN}/s/{shortSlug}
-                      </span>
-                      {linkCopied ? <Check className="w-3.5 h-3.5 shrink-0" /> : <Copy className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />}
-                    </button>
-                    <a
-                      href={`/s/${shortSlug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors shrink-0"
-                      title="Abrir enlace"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                    {editingProduct && (
-                      <button
-                        onClick={() => { setShortSlugValue(shortSlug); setShortSlugEditing(true) }}
-                        className="p-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors shrink-0"
-                        title="Editar código"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                ) : shortSlugEditing ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500 text-xs font-mono shrink-0">{SITE_DOMAIN}/s/</span>
-                    <input
-                      type="text"
-                      value={shortSlugValue}
-                      onChange={e => setShortSlugValue(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
-                      placeholder="codigo-corto"
-                      maxLength={20}
-                      className="flex-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 text-sm font-mono transition-all"
-                      onKeyDown={e => e.key === 'Enter' && handleSaveShortSlug()}
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleSaveShortSlug}
-                      disabled={shortSlugSaving || !shortSlugValue.trim()}
-                      className="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors disabled:opacity-50 shrink-0"
-                    >
-                      {shortSlugSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Guardar'}
-                    </button>
-                    <button
-                      onClick={() => setShortSlugEditing(false)}
-                      className="p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-white transition-colors shrink-0"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ) : (
-                  <p className="text-[10px] text-gray-600">
-                    Se generará automáticamente un código corto al guardar el producto.
-                  </p>
-                )}
-              </div>
             </div>
 
             <div className="md:col-span-2 space-y-2">

@@ -158,20 +158,28 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
     )
   }
 
-  const handleSaveProduct = async (data: any) => {
+  const handleSaveProduct = async (data: any): Promise<{ shortSlug?: string }> => {
     try {
       if (editingProduct?.id) {
         await updateProduct(editingProduct.id, data)
+        return {}
       } else {
-        await createProduct(data)
+        const res = await fetch('/api/productos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        })
+        const result = await res.json()
+        if (!result.success) throw new Error(result.error || 'Error al crear producto')
+        await fetchProducts()
+        setToastType("success")
+        setShowToast(true)
+        setTimeout(() => setShowToast(false), 3000)
+        return { shortSlug: result.shortSlug || undefined }
       }
-      await fetchProducts()
-      setToastType("success")
-      setShowToast(true)
-      setTimeout(() => setShowToast(false), 3000)
     } catch (err) {
       console.error("Error guardando producto:", err)
-      alert('Error: ' + (err instanceof Error ? err.message : String(err)))
+      throw err
     }
   }
 
