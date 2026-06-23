@@ -1,14 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
+import { generateSecurePassword } from '@/lib/crypto'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-function generatePassword(length = 10): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +28,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No se encontró el email del usuario' }, { status: 404 })
       }
 
-      const newPassword = password || generatePassword()
+      const newPassword = password || generateSecurePassword()
 
       const { error: resetError } = await supabase.auth.admin.updateUserById(userId, {
         password: newPassword,

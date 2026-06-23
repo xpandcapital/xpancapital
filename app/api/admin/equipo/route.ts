@@ -1,16 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { generateSecurePassword } from '@/lib/crypto'
 
 const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
-
-function generatePassword(length = 12): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%'
-  let password = ''
-  for (let i = 0; i < length; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return password
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,7 +27,7 @@ export async function POST(request: NextRequest) {
     const existingUser = existingUsers?.users?.find(u => u.email === normalizedEmail)
 
     let userId: string | null = null
-    let generatedPassword = password || generatePassword()
+    let generatedPassword = password || generateSecurePassword()
     let isNewUser = false
 
     if (existingUser) {

@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import { verifyTurnstileToken } from '@/lib/bot-protection';
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 import { createUserAndNotify } from '@/lib/email/createUserAndNotify';
+import { generateSecurePassword } from '@/lib/crypto';
 
 // Cliente admin (service role - bypass RLS) - se usa para todas las operaciones de BD
 const supabase = createClient(
@@ -26,12 +27,6 @@ function createServerSupabase(request: NextRequest) {
       auth: { autoRefreshToken: false, persistSession: false }
     }
   );
-}
-
-// Genera contraseña aleatoria legible
-function generatePassword(length = 10): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
 // Envía email de bienvenida con contraseña
@@ -215,7 +210,7 @@ export async function POST(request: NextRequest) {
         finalUserId = existingUser.id;
       } else {
         // 2. Crear usuario nuevo con contraseña generada
-        tempPassword = generatePassword();
+        tempPassword = generateSecurePassword();
         const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
           email: email.toLowerCase(),
           password: tempPassword,
@@ -649,6 +644,7 @@ export async function POST(request: NextRequest) {
         total: `${monto_usd?.toFixed(2) || '0'} USD`,
         metodo_pago: metodo_pago || 'Manual',
         productPrices: prodPrices,
+        newUserPassword: isNewUser ? tempPassword : undefined,
       }).catch((err) => { console.error('[Checkout] Error en createUserAndNotify:', err) })
     } else {
       console.log('[Checkout] Compra offline/pendiente - email pospuesto hasta aprobación admin')

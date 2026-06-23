@@ -1,11 +1,7 @@
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { createClient } from '@/lib/supabase/server'
 import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
-
-function generatePassword(length = 10): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
-}
+import { generateSecurePassword } from '@/lib/crypto'
 
 interface CreateUserParams {
   email: string
@@ -17,6 +13,7 @@ interface CreateUserParams {
   empresa_id?: string
   telefono?: string
   isGuest?: boolean
+  newUserPassword?: string
   productPrices?: Array<{ nombre: string; precio: string; cantidad?: number; categoria?: string; imagen?: string }>
 }
 
@@ -85,7 +82,7 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
   // 3. Crear nuevo usuario si no existe en ningún lado
   if (!userId) {
     try {
-      tempPassword = generatePassword()
+      tempPassword = generateSecurePassword()
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email,
         password: tempPassword,
@@ -109,6 +106,13 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
     } catch (e) {
       console.error('[createUserAndNotify] Error creando usuario:', e)
     }
+  }
+
+  // Si el caller (ej: checkout) ya creó al usuario en auth, usar su contraseña
+  if (params.isGuest && userId && !isNewUser && params.newUserPassword) {
+    isNewUser = true
+    tempPassword = params.newUserPassword
+    console.log('[createUserAndNotify] Usando password generada externamente (caller ya creó el usuario)')
   }
 
   // 4. Enviar email unificado (con o sin password según tipo de usuario)
