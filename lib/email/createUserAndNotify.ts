@@ -110,43 +110,24 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
     }
   }
 
-  // 4. Para compras de invitados, SIEMPRE generamos/actualizamos una contraseña temporal
-  //    y enviamos la plantilla de invitado, ya sea que el usuario sea nuevo o exista.
-  if (params.isGuest && userId) {
-    if (!tempPassword) {
-      tempPassword = generatePassword()
-    }
-    try {
-      const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
-        password: tempPassword,
-      })
-      if (updateError) {
-        console.error('[createUserAndNotify] Error actualizando contraseña temporal:', updateError.message)
-      } else {
-        console.log('[createUserAndNotify] Contraseña temporal actualizada para invitado:', userId)
-      }
-    } catch (e) {
-      console.error('[createUserAndNotify] Error actualizando contraseña temporal:', e)
-    }
-  }
-
-  // 5. Enviar email unificado (con o sin password según tipo de usuario)
+  // 4. Enviar email unificado (con o sin password según tipo de usuario)
   const nombresList = params.productos
     .map(p => `<li style="margin-bottom:6px;font-size:14px;color:#e5e7eb;">✅ ${p}</li>`)
     .join('')
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
 
-  // Invitado => plantilla con password_temporal. Logueado => plantilla normal.
-  const evento = params.isGuest
+  // Solo enviamos plantilla de invitado (con password_temporal) cuando el invitado es NUEVO.
+  // Si el invitado ya tenía cuenta, enviamos la plantilla de logueado.
+  const evento = (params.isGuest && isNewUser)
     ? 'transaccion_compra_completada_invitado'
     : 'transaccion_compra_completada_logueado'
 
   const extraVars: Record<string, string> = {}
-  if (params.isGuest && tempPassword) {
+  if (isNewUser && tempPassword) {
     extraVars.password_temporal = tempPassword
     extraVars.enlace_crear_cuenta = `${siteUrl}/login`
-    console.log('[createUserAndNotify] Invitado: incluyendo password_temporal')
+    console.log('[createUserAndNotify] Usuario nuevo invitado, incluyendo password_temporal')
   }
 
   console.log('[createUserAndNotify] Enviando email:', evento, '| isGuest:', params.isGuest, '| isNewUser:', isNewUser)

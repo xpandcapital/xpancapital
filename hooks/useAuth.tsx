@@ -335,19 +335,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const resetPassword = async (email: string): Promise<{ success: boolean; error?: string }> => {
-    const supabase = getSupabaseClient()
-    if (!supabase) {
-      return { success: false, error: 'Supabase no está configurado' }
-    }
-
     try {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${siteUrl}/reset-password`,
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       })
 
-      if (error) {
-        return { success: false, error: error.message }
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || 'No se pudo enviar el correo' }
       }
 
       return { success: true }

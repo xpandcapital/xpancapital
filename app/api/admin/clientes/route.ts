@@ -185,24 +185,90 @@ export async function DELETE(request: NextRequest) {
     const supabase = getSupabase()
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
-    
+
     if (!id) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
     }
-    
-    // 1. Eliminar de Auth (si existe)
-    await supabase.auth.admin.deleteUser(id).catch(() => {})
-    
-    // 2. Eliminar de profiles
-    const { error } = await supabase
+
+    // 1. Verificar que el cliente existe
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .delete()
+      .select('id, email')
       .eq('id', id)
-    
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      .maybeSingle()
+
+    if (profileError) {
+      console.error('[admin/clientes DELETE] Error buscando perfil:', profileError.message)
+      return NextResponse.json({ error: profileError.message }, { status: 500 })
     }
-    
+
+    if (!profile) {
+      // Si no hay perfil, intentar eliminar de auth de todos modos
+      await supabase.auth.admin.deleteUser(id).catch((e) => {
+        console.error('[admin/clientes DELETE] Error eliminando usuario de auth:', e.message)
+      })
+      return NextResponse.json({ success: true })
+    }
+
+    // 2. Limpiar tablas relacionadas comunes (ignorar errores de tablas inexistentes)
+    const relatedTables = [
+      'direcciones',
+      'carrito',
+      'favoritos',
+      'usuario_cursos',
+      'usuario_biblioteca',
+      'certificados',
+      'compra_items',
+      'compras',
+      'notificaciones',
+      'push_subscriptions',
+      'chat_mensajes',
+      'chat_participantes',
+      'chat_salas',
+      'security_logs',
+      'login_history',
+      'postulantes',
+      'formulario_respuestas',
+      'email_event_logs',
+    ]
+
+    const cleanupResults = await Promise.allSettled(
+      relatedTables.map(async (table) => {
+        try {
+          const { error } = await supabase.from(table).delete().eq('user_id', id)
+          if (error && !error.message?.includes('does not exist')) {
+            console.warn(`[admin/clientes DELETE] Error limpiando ${table}:`, error.message)
+          }
+        } catch (e) {
+          console.warn(`[admin/clientes DELETE] Excepción limpiando ${table}:`, e)
+        }
+      })
+    )
+
+    console.log(
+      '[admin/clientes DELETE] Tablas relacionadas limpiadas:',
+      cleanupResults.filter(r => r.status === 'fulfilled').length,
+      'de',
+      cleanupResults.length
+    )
+
+    // 3. Eliminar de profiles
+    const { error: deleteProfileError } = await supabase.from('profiles').delete().eq('id', id)
+    if (deleteProfileError) {
+      console.error('[admin/clientes DELETE] Error eliminando profiles:', deleteProfileError.message)
+      return NextResponse.json(
+        { error: `No se pudo eliminar el perfil: ${deleteProfileError.message}` },
+        { status: 500 }
+      )
+    }
+
+    // 4. Eliminar de Auth (service role)
+    const { error: authError } = await supabase.auth.admin.deleteUser(id)
+    if (authError) {
+      console.error('[admin/clientes DELETE] Error eliminando usuario de auth:', authError.message)
+      // No fallamos la operación si el perfil ya fue eliminado; puede reintentarse después
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Admin delete cliente error:', error)
