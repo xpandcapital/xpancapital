@@ -83,7 +83,7 @@ function ResetPasswordForm() {
     }
 
     return () => {}
-  }, [searchParams, supabase])
+  }, [supabase]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
