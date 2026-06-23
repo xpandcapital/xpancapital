@@ -38,15 +38,26 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: `Error al resetear contraseña: ${resetError.message}` }, { status: 500 })
       }
 
-      // Enviar email con la contraseña temporal
+      // Generar link de recuperación real de Supabase
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
+      const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+        type: 'recovery',
+        email: profile.email,
+        options: { redirectTo: `${siteUrl}/reset-password` },
+      })
+
+      const resetLink = linkData?.properties?.action_link || `${siteUrl}/reset-password`
+      if (linkError) {
+        console.error('[reset-password] Error generando link:', linkError.message)
+      }
+
       await sendTemplateEmail({
-        evento: 'cuenta_invitacion_crear_cuenta',
+        evento: 'cuenta_restablecer_password',
         to: profile.email,
         variables: {
           nombre: profile.nombre || 'Cliente',
           email: profile.email,
-          enlace_crear_cuenta: `${siteUrl}/login`,
+          enlace_restablecer: resetLink,
           password_temporal: newPassword,
         },
       })
