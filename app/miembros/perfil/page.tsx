@@ -14,14 +14,6 @@ import { ReferralPanel } from "@/components/profile/ReferralPanel";
 import { getSupabase } from "@/lib/supabase";
 import Link from "next/link";
 
-const NOTIFICACION_TIPOS = [
-  { key: "blog", label: "Blog", icon: FileText, color: "text-violet-400" },
-  { key: "leads", label: "Leads", icon: UserPlus, color: "text-emerald-400" },
-  { key: "compras", label: "Compras", icon: ShoppingCart, color: "text-amber-400" },
-  { key: "cursos", label: "Cursos", icon: GraduationCap, color: "text-blue-400" },
-  { key: "sistema", label: "Sistema", icon: Settings, color: "text-gray-400" },
-];
-
 const COUNTRIES = [
     { name: "Ecuador", code: "+593", flag: "🇪🇨" },
     { name: "Colombia", code: "+57", flag: "🇨🇴" },
@@ -311,7 +303,8 @@ export default function ProfilePage() {
         }
     }, [user?.id, fetchBalance, fetchTransactions]);
 
-    const [name, setName] = useState(user?.nombre || user?.name || "");
+    const [name, setName] = useState(user?.nombre || user?.name?.split(' ')[0] || "");
+    const [lastName, setLastName] = useState(user?.apellido || user?.name?.split(' ').slice(1).join(' ') || "");
     const [email, setEmail] = useState(user?.email || "");
     const [phone, setPhone] = useState(user?.telefono || user?.phone || "");
     const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
@@ -329,45 +322,6 @@ export default function ProfilePage() {
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [changingPassword, setChangingPassword] = useState(false);
 
-    const [notificacionesTipos, setNotificacionesTipos] = useState<Record<string, boolean>>({
-        blog: true,
-        leads: true,
-        compras: true,
-        cursos: true,
-        sistema: true,
-    });
-    const [tiposCargados, setTiposCargados] = useState(false);
-
-    useEffect(() => {
-        if (!user?.id || tiposCargados) return;
-        const loadTipos = async () => {
-            const supabase = getSupabase();
-            if (!supabase) return;
-            const { data } = await supabase
-                .from("profiles")
-                .select("notificaciones_tipos")
-                .eq("id", user.id)
-                .single();
-            if (data?.notificaciones_tipos) {
-                setNotificacionesTipos(data.notificaciones_tipos);
-            }
-            setTiposCargados(true);
-        };
-        loadTipos();
-    }, [user?.id, tiposCargados]);
-
-    const handleToggleTipo = async (key: string, enabled: boolean) => {
-        const nuevos = { ...notificacionesTipos, [key]: enabled };
-        setNotificacionesTipos(nuevos);
-        if (!user?.id) return;
-        const supabase = getSupabase();
-        if (!supabase) return;
-        await supabase
-            .from("profiles")
-            .update({ notificaciones_tipos: nuevos })
-            .eq("id", user.id);
-    };
-
     // Sync with global state
     useEffect(() => {
         if (user) {
@@ -378,7 +332,7 @@ export default function ProfilePage() {
     }, [user]);
 
     const handleUpdate = () => {
-        updateProfile({ name, profilePic });
+        updateProfile({ nombre: name, apellido: lastName, profilePic });
         showToast("¡Éxito! Tus datos han sido actualizados en la base de datos de Blis Corp.", "success");
     };
 
@@ -392,25 +346,16 @@ export default function ProfilePage() {
             setPasswordError("Las contraseñas no coinciden");
             return;
         }
-        if (!email) {
-            setPasswordError("No se pudo verificar tu identidad");
-            return;
-        }
         setChangingPassword(true);
         try {
-            const supabase = getSupabase();
-            const { error: signInError } = await supabase.auth.signInWithPassword({
-                email,
-                password: currentPassword,
+            const res = await fetch('/api/auth/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentPassword, newPassword }),
             });
-            if (signInError) {
-                setPasswordError("Contraseña actual incorrecta");
-                setChangingPassword(false);
-                return;
-            }
-            const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-            if (updateError) {
-                setPasswordError(updateError.message);
+            const data = await res.json();
+            if (!res.ok) {
+                setPasswordError(data.error || 'Error al cambiar la contraseña');
                 setChangingPassword(false);
                 return;
             }
@@ -510,13 +455,25 @@ export default function ProfilePage() {
                     </h2>
                     <div className="bg-zinc-950/30 border border-white/5 p-8 rounded-[2.5rem] space-y-6 shadow-xl">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2">Nombre Completo</label>
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2">Nombres</label>
                             <div className="relative group">
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blis-red transition-colors" />
                                 <input
                                     type="text"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-blis-red transition-all"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2">Apellidos</label>
+                            <div className="relative group">
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blis-red transition-colors" />
+                                <input
+                                    type="text"
+                                    value={lastName}
+                                    onChange={(e) => setLastName(e.target.value)}
                                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-blis-red transition-all"
                                 />
                             </div>
@@ -658,30 +615,6 @@ export default function ProfilePage() {
                                 />
                             </div>
                         </button>
-
-                        <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl space-y-3">
-                            <h3 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
-                                <Bell className="w-3.5 h-3.5 text-gray-500" />
-                                Tipos de Notificación
-                            </h3>
-                            <div className="space-y-2">
-                                {NOTIFICACION_TIPOS.map(({ key, label, icon: IconComp, color }) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => handleToggleTipo(key, !notificacionesTipos[key])}
-                                        className="w-full flex items-center justify-between p-2.5 bg-white/[0.02] hover:bg-white/[0.05] rounded-xl transition-all text-left"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <IconComp className={`w-4 h-4 ${color}`} />
-                                            <span className="text-xs font-bold text-white uppercase tracking-wider">{label}</span>
-                                        </div>
-                                        <div className={`w-10 h-5 rounded-full relative p-0.5 transition-colors duration-300 ${notificacionesTipos[key] ? 'bg-blis-red' : 'bg-zinc-800'}`}>
-                                            <motion.div animate={{ x: notificacionesTipos[key] ? 20 : 0 }} className="w-4 h-4 bg-white rounded-full" />
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
 
                         <div className="p-6 bg-blis-red/5 border border-blis-red/20 rounded-[2rem] space-y-4">
                             <h3 className="text-xs font-black text-white uppercase tracking-tight">Autenticación de 2 Factores</h3>

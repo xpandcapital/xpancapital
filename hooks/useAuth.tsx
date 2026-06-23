@@ -362,21 +362,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push('/')
   }
 
-  const updateProfile = async (data: { name?: string; profilePic?: string | null; email?: string; phone?: string }) => {
+  const updateProfile = async (data: { name?: string; profilePic?: string | null; email?: string; phone?: string; nombre?: string; apellido?: string }) => {
     if (!user) return
-    // Guardar el estado anterior por si necesitamos revertir
     const previousUser = user
 
-    // Actualizar estado local inmediatamente para UI responsive
-    const updatedUser = { ...user, ...data }
+    const displayName = data.nombre !== undefined && data.apellido !== undefined
+      ? `${data.nombre} ${data.apellido}`.trim()
+      : data.name
+    const updatedUser = { ...user, ...data, name: displayName }
     setUser(updatedUser)
 
-    // Guardar en Supabase
     try {
       const supabase = getSupabaseClient()
       if (supabase) {
         const updateData: Record<string, unknown> = {}
-        if (data.name !== undefined) {
+        if (data.nombre !== undefined || data.apellido !== undefined) {
+          updateData.nombre = data.nombre || ''
+          updateData.apellido = data.apellido || ''
+        } else if (data.name !== undefined) {
           const parts = data.name.trim().split(' ')
           updateData.nombre = parts[0] || ''
           updateData.apellido = parts.slice(1).join(' ') || ''
