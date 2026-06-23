@@ -39,7 +39,7 @@ function ResetPasswordForm() {
     }
 
     // Para tokens en hash: Supabase ssr usa cookies, no auto-detecta el hash.
-    // Leer tokens manualmente y establecer sesión.
+    // Leer tokens manualmente y establecer sesión con delay para evitar lock.
     let settled = false
     const hash = typeof window !== 'undefined' ? window.location.hash.substring(1) : ''
     const hasRecoveryTokens = hash.includes('access_token') && hash.includes('type=recovery')
@@ -49,29 +49,37 @@ function ResetPasswordForm() {
       const at = hashParams.get('access_token')
       const rt = hashParams.get('refresh_token')
       if (at && rt) {
-        supabase.auth.setSession({ access_token: at, refresh_token: rt }).then(({ error }) => {
-          if (error) {
-            console.error('[ResetPassword] Error setSession:', error)
-            setError('El enlace de recuperación no es válido o ha expirado.')
-          }
-          setLoadingSession(false)
-          settled = true
-        }).catch(err => {
-          console.error('[ResetPassword] Excepción setSession:', err)
-          setError('Error al procesar la sesión. Intenta de nuevo.')
-          setLoadingSession(false)
-          settled = true
-        })
-      } else {
-        setError('No se encontró un token de recuperación en la URL.')
-        setLoadingSession(false)
-        settled = true
+        // Delay de 1s para que @supabase/ssr termine su inicialización interna
+        const timer = setTimeout(() => {
+          supabase.auth.setSession({ access_token: at, refresh_token: rt }).then(({ error }) => {
+            if (error) {
+              console.error('[ResetPassword] Error setSession:', error)
+              setError('El enlace de recuperación no es válido o ha expirado.')
+            }
+            setLoadingSession(false)
+            settled = true
+          }).catch(err => {
+            console.error('[ResetPassword] Excepción setSession:', err)
+            // Si falla por lock, intentar una vez más
+            return supabase.auth.setSession({ access_token: at, refresh_token: rt })
+          }).then(() => {
+            if (!settled) {
+              setLoadingSession(false)
+              settled = true
+            }
+          }).catch(() => {
+            setError('Error al procesar la sesión. Intenta de nuevo.')
+            setLoadingSession(false)
+            settled = true
+          })
+        }, 1000)
+        return () => clearTimeout(timer)
       }
-    } else {
-      // Sin tokens en hash ni code: mostrar error
       setError('No se encontró un token de recuperación en la URL.')
       setLoadingSession(false)
-      settled = true
+    } else {
+      setError('No se encontró un token de recuperación en la URL.')
+      setLoadingSession(false)
     }
 
     return () => {}
