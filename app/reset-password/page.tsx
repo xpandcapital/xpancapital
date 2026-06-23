@@ -38,33 +38,27 @@ function ResetPasswordForm() {
       return
     }
 
-    // Para tokens en hash: escuchar el evento de sesión que Supabase dispara automáticamente
+    // Para tokens en hash: Supabase ssr usa cookies, no auto-detecta el hash.
+    // Leer tokens manualmente y establecer sesión.
     let settled = false
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (settled) return
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || (event === 'INITIAL_SESSION' && session)) {
-        setError(null)
-        setLoadingSession(false)
-        settled = true
-      } else if (event === 'INITIAL_SESSION' && !session) {
-        setLoadingSession(false)
-        settled = true
-      }
-    })
+    const hash = typeof window !== 'undefined' ? window.location.hash.substring(1) : ''
+    const hasRecoveryTokens = hash.includes('access_token') && hash.includes('type=recovery')
 
-    // Si después de 4s no se estableció sesión y hay tokens en el hash, intentar setSession manual
-    const timeout = setTimeout(() => {
-      if (settled || !window.location.hash.includes('access_token')) return
-      const hash = window.location.hash.substring(1)
+    if (hasRecoveryTokens) {
       const hashParams = new URLSearchParams(hash)
       const at = hashParams.get('access_token')
       const rt = hashParams.get('refresh_token')
       if (at && rt) {
         supabase.auth.setSession({ access_token: at, refresh_token: rt }).then(({ error }) => {
           if (error) {
-            console.error('[ResetPassword] Error manual setSession:', error)
+            console.error('[ResetPassword] Error setSession:', error)
             setError('El enlace de recuperación no es válido o ha expirado.')
           }
+          setLoadingSession(false)
+          settled = true
+        }).catch(err => {
+          console.error('[ResetPassword] Excepción setSession:', err)
+          setError('Error al procesar la sesión. Intenta de nuevo.')
           setLoadingSession(false)
           settled = true
         })
@@ -73,12 +67,14 @@ function ResetPasswordForm() {
         setLoadingSession(false)
         settled = true
       }
-    }, 2000)
-
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timeout)
+    } else {
+      // Sin tokens en hash ni code: mostrar error
+      setError('No se encontró un token de recuperación en la URL.')
+      setLoadingSession(false)
+      settled = true
     }
+
+    return () => {}
   }, [searchParams, supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
