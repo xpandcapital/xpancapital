@@ -55,6 +55,49 @@ export async function POST(request: NextRequest) {
     const { nombre, descripcion, settings, blocks } = body
     const empresaId = body.empresa_id || DEFAULT_EMPRESA_ID
 
+    // Extraer evento del settings (para vincular plantilla a evento del sistema)
+    const evento = settings?.evento || body.evento
+
+    // Si hay evento asignado, liberarlo de otras plantillas (una plantilla por evento)
+    if (evento && evento !== 'ninguno') {
+      await supabase
+        .from('email_templates')
+        .update({ evento: null })
+        .eq('empresa_id', empresaId)
+        .eq('evento', evento)
+    }
+
+    // Verificar si ya existe una plantilla con el mismo nombre (evitar duplicados)
+    const { data: existing } = await supabase
+      .from('email_templates')
+      .select('id')
+      .eq('empresa_id', empresaId)
+      .eq('nombre', nombre)
+      .maybeSingle()
+
+    if (existing) {
+      // Actualizar la plantilla existente en vez de crear duplicado
+      const { data, error } = await supabase
+        .from('email_templates')
+        .update({
+          nombre,
+          descripcion,
+          settings: settings || {},
+          blocks: blocks || [],
+          evento: evento && evento !== 'ninguno' ? evento : null,
+          actualizado_en: new Date().toISOString()
+        })
+        .eq('id', existing.id)
+        .select()
+        .single()
+
+      if (error) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 400 })
+      }
+
+      return NextResponse.json({ success: true, data })
+    }
+
     const { data, error } = await supabase
       .from('email_templates')
       .insert({
@@ -62,7 +105,8 @@ export async function POST(request: NextRequest) {
         nombre,
         descripcion,
         settings: settings || {},
-        blocks: blocks || []
+        blocks: blocks || [],
+        evento: evento && evento !== 'ninguno' ? evento : null
       })
       .select()
       .single()
