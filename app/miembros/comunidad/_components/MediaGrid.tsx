@@ -188,16 +188,24 @@ function PostModal({ media, startIndex, post, onReaccionar, onClose }: PostModal
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/98 flex flex-col lg:flex-row"
+      className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-2 md:p-4"
       onClick={onClose}
     >
-      {/* Close button */}
-      <button onClick={onClose} className="absolute top-4 right-4 z-30 p-2 bg-black/50 rounded-full text-white/60 hover:text-white transition-colors">
-        <X className="w-5 h-5" />
-      </button>
+      {/* Popup container */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        className="bg-zinc-950 border border-white/[0.08] rounded-2xl overflow-hidden flex flex-col lg:flex-row w-full max-w-4xl max-h-[95vh] shadow-2xl shadow-black/50 relative"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button onClick={onClose} className="absolute top-3 right-3 z-30 p-1.5 bg-black/60 hover:bg-black/80 rounded-full text-white/60 hover:text-white transition-colors">
+          <X className="w-4 h-4" />
+        </button>
 
-      {/* === LEFT: Image Carousel === */}
-      <div className="flex-1 flex items-center justify-center relative min-h-0" onClick={e => e.stopPropagation()}>
+        {/* === LEFT: Image Carousel === */}
+        <div className="flex-1 flex items-center justify-center relative bg-black/30 min-h-[250px]">
         {/* Prev */}
         {currentIdx > 0 && (
           <button onClick={handlePrev} className="absolute left-2 md:left-4 z-20 p-2 bg-black/50 rounded-full text-white/60 hover:text-white transition-colors">
@@ -253,11 +261,11 @@ function PostModal({ media, startIndex, post, onReaccionar, onClose }: PostModal
         )}
       </div>
 
-      {/* === RIGHT: Comments sidebar === */}
-      <div
-        className="lg:w-[400px] xl:w-[460px] bg-zinc-950 border-l border-white/[0.06] flex flex-col max-h-[40vh] lg:max-h-full"
-        onClick={e => e.stopPropagation()}
-      >
+        {/* === RIGHT: Comments sidebar === */}
+        <div
+          className="lg:w-[380px] xl:w-[420px] bg-zinc-950 border-t lg:border-t-0 lg:border-l border-white/[0.06] flex flex-col max-h-[40vh] lg:max-h-full"
+          onClick={e => e.stopPropagation()}
+        >
         {/* Post header */}
         <div className="p-4 border-b border-white/[0.06] flex items-center gap-3 flex-shrink-0">
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blis-red/30 to-purple-500/30 flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -407,6 +415,7 @@ function PostModal({ media, startIndex, post, onReaccionar, onClose }: PostModal
           </button>
         </div>
       </div>
+      </motion.div>
     </motion.div>
   )
 }
