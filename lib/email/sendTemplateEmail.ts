@@ -24,16 +24,44 @@ interface TemplateEmailParams {
 export async function sendTemplateEmail(params: TemplateEmailParams): Promise<boolean> {
   const { evento, empresa_id = DEFAULT_EMPRESA_ID, to, subject, variables, products } = params
 
+  // Fallback entre variantes invitado/logueado si una no existe
+  function getFallbackEvent(originalEvent: string): string | null {
+    const map: Record<string, string> = {
+      'transaccion_compra_completada_invitado': 'transaccion_compra_completada_logueado',
+      'transaccion_compra_completada_logueado': 'transaccion_compra_completada_invitado',
+      'transaccion_compra_pendiente_invitado': 'transaccion_compra_pendiente_logueado',
+      'transaccion_compra_pendiente_logueado': 'transaccion_compra_pendiente_invitado',
+    }
+    return map[originalEvent] || null
+  }
+
   try {
     const supabase = createClient()
 
     // 1. Buscar template por evento
-    const { data: template } = await supabase
+    let { data: template } = await supabase
       .from('email_templates')
       .select('settings, blocks, nombre')
       .eq('empresa_id', empresa_id)
       .eq('evento', evento)
       .maybeSingle()
+
+    // 1b. Fallback a variante alternativa si no existe la específica
+    if (!template?.settings || !template?.blocks) {
+      const fallbackEvent = getFallbackEvent(evento)
+      if (fallbackEvent) {
+        console.log(`[sendTemplateEmail] Plantilla "${evento}" no encontrada, intentando fallback: "${fallbackEvent}"`)
+        const { data: fallbackTemplate } = await supabase
+          .from('email_templates')
+          .select('settings, blocks, nombre')
+          .eq('empresa_id', empresa_id)
+          .eq('evento', fallbackEvent)
+          .maybeSingle()
+        if (fallbackTemplate?.settings && fallbackTemplate?.blocks) {
+          template = fallbackTemplate
+        }
+      }
+    }
 
     let html = ''
 

@@ -630,14 +630,14 @@ export async function POST(request: NextRequest) {
     }));
 
     createUserAndNotify({
-      isGuest: !finalUserId,
+      isGuest: !user_id,
       email: email.toLowerCase(),
       nombre: nombre || email.split('@')[0],
       productos: nombreProductos,
       total: `$${monto_usd?.toFixed(2) || '0'} USD`,
       metodo_pago: metodo_pago || 'Manual',
       productPrices: prodPrices,
-    }).catch(() => {})
+    }).catch((err) => { console.error('[Checkout] Error en createUserAndNotify:', err) })
 
     return NextResponse.json({
       success: true,
