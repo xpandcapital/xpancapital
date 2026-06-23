@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getAuthUser } from "@/lib/supabase/api-auth";
 import { createUserAndNotify } from "@/lib/email/createUserAndNotify";
+import { assignCoursesToUser } from "@/lib/courses/assignCourses";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -106,12 +107,12 @@ export async function PUT(request: NextRequest) {
         notas: notas || null,
       });
 
-      // Si se confirma como completado, crear usuario (si es invitado) y enviar email
+      // Si se confirma como completado, crear usuario (si es invitado), asignar cursos y enviar email
       if (estado === 'completado') {
         const meta = (data.metadata || {}) as Record<string, unknown>
         const email = (meta.email_cliente as string) || ''
         const nombre = (meta.nombre_cliente as string) || 'Cliente'
-        const productos = (meta.productos as Array<{ nombre: string }>) || []
+        const productos = (meta.productos as Array<any>) || []
 
         if (email && productos.length > 0) {
           const prodNames = productos.map((p: any) => p.nombre || 'Producto')
@@ -122,6 +123,7 @@ export async function PUT(request: NextRequest) {
             categoria: p.productType || '',
             imagen: p.imagen || '',
           }))
+
           const { userId } = await createUserAndNotify({
             email, nombre,
             isGuest: !data.user_id,
@@ -131,8 +133,15 @@ export async function PUT(request: NextRequest) {
             productPrices: prodPrices,
           }).catch(() => ({ userId: null, isNewUser: false, tempPassword: '' }))
 
+          const effectiveUserId = data.user_id || userId
+
           if (userId && !data.user_id) {
             await supabase.from('compras').update({ user_id: userId }).eq('id', id)
+          }
+
+          // Asignar cursos comprados al usuario efectivo
+          if (effectiveUserId) {
+            await assignCoursesToUser(supabase, productos, email, effectiveUserId, nombre)
           }
         }
       }

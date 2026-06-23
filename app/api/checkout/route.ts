@@ -288,6 +288,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ── Determinar si es una compra offline/pendiente ────────────────────────
+    const metodosOffline = ['transfer', 'whatsapp', 'crypto_manual', 'yape', 'plin', 'deposito', 'crypto']
+    const esOffline = metodosOffline.includes(metodo_pago)
+    const estadoFinal = estado || (esOffline ? 'pendiente' : 'completado')
+
     // ── Crear la orden en Supabase ───────────────────────────────────────────
     const primerProductoId = productos?.[0]?.producto_id || productos?.[0]?.id || null;
 
@@ -340,7 +345,7 @@ export async function POST(request: NextRequest) {
         metodo_pago,
         monto_coins: monto_coins || 0,
         monto_usd: monto_usd || 0,
-        estado: estado || 'completado',
+        estado: estadoFinal,
         metadata: metadataBase,
         creado_en: new Date().toISOString(),
       })
@@ -509,10 +514,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-      // ── Auto-asignar cursos comprados en la tienda ───────────────────────────
+      // ── Auto-asignar cursos comprados en la tienda (solo si está completado) ─
     let coursesAssigned = 0;
     let courseAssignmentError = null;
-    if (finalUserId && email) {
+    if (estadoFinal === 'completado' && finalUserId && email) {
       console.log('[Checkout] Buscando cursos para asignar, productos:', JSON.stringify(productos, null, 2));
       const cursoProducts = productos.filter((p: any) => p.productType === 'curso' || p.tipo === 'servicio');
       console.log('[Checkout] Cursos detectados:', cursoProducts.length);
@@ -619,25 +624,30 @@ export async function POST(request: NextRequest) {
       console.log(`[Checkout] Cursos asignados: ${coursesAssigned}, errores: ${courseAssignmentError}`);
     }
 
-    // ── Enviar email vía plantilla (fire-and-forget, no bloquea) ──────────
-    const nombreProductos = productos.map((p: any) => p.nombre || `Producto #${p.producto_id?.substring(0, 6)}`);
-    const prodPrices = productos.map((p: any) => ({
-      nombre: p.nombre || 'Producto',
-      precio: p.precio_unitario?.toFixed(2) || '0',
-      cantidad: p.cantidad || 1,
-      categoria: p.productType || '',
-      imagen: p.imagen || '',
-    }));
+    // ── Enviar email vía plantilla (fire-and-forget, no bloquea)
+    // Solo si la compra queda completada; las offline/pendientes esperarán aprobación del admin.
+    if (estadoFinal === 'completado') {
+      const nombreProductos = productos.map((p: any) => p.nombre || `Producto #${p.producto_id?.substring(0, 6)}`);
+      const prodPrices = productos.map((p: any) => ({
+        nombre: p.nombre || 'Producto',
+        precio: p.precio_unitario?.toFixed(2) || '0',
+        cantidad: p.cantidad || 1,
+        categoria: p.productType || '',
+        imagen: p.imagen || '',
+      }));
 
-    createUserAndNotify({
-      isGuest: !user_id,
-      email: email.toLowerCase(),
-      nombre: nombre || email.split('@')[0],
-      productos: nombreProductos,
-      total: `$${monto_usd?.toFixed(2) || '0'} USD`,
-      metodo_pago: metodo_pago || 'Manual',
-      productPrices: prodPrices,
-    }).catch((err) => { console.error('[Checkout] Error en createUserAndNotify:', err) })
+      createUserAndNotify({
+        isGuest: !user_id,
+        email: email.toLowerCase(),
+        nombre: nombre || email.split('@')[0],
+        productos: nombreProductos,
+        total: `$${monto_usd?.toFixed(2) || '0'} USD`,
+        metodo_pago: metodo_pago || 'Manual',
+        productPrices: prodPrices,
+      }).catch((err) => { console.error('[Checkout] Error en createUserAndNotify:', err) })
+    } else {
+      console.log('[Checkout] Compra offline/pendiente - email pospuesto hasta aprobación admin')
+    }
 
     return NextResponse.json({
       success: true,
