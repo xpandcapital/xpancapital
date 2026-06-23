@@ -12,7 +12,7 @@ export default function AdminLayout({
     return (
         <div className="flex bg-black min-h-[calc(100dvh-80px)] overflow-x-hidden">
             <SuperadminSidebar />
-            <div className="flex-1 min-w-0 pt-20 md:pt-24">
+            <div className="flex-1 min-w-0 pt-20 md:pt-24 ml-[var(--sidebar-width)] transition-all duration-300">
                 <div className="max-w-[1600px] mx-auto w-full pb-20">
                     <SuperadminGuard>
                         <GlobalSearch />

@@ -224,6 +224,7 @@
 }
 
 :root {
+  --sidebar-width: 64px;
   --background: #050505;
   --foreground: #ffffff;
   --card: #0a0a0a;
