@@ -75,6 +75,15 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
 
         // Inyectar productos en bloques receipt
         if (products && products.length > 0) {
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+          const normalizeImage = (url?: string) => {
+            if (!url) return ''
+            if (url.startsWith('http')) return url
+            if (url.startsWith('//')) return `https:${url}`
+            return `${siteUrl}${url.startsWith('/') ? '' : '/'}${url}`
+          }
+
+          console.log('[sendTemplateEmail] Inyectando productos:', products.map(p => ({ nombre: p.nombre, precio: p.precio, imagen: p.imagen?.substring(0, 60) })))
           blocks = blocks.map((block: any) => {
             if (block.type === 'receipt' && block.content) {
               return {
@@ -83,8 +92,8 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
                   ...block.content,
                   items: products.map(p => ({
                     nombre: p.nombre || 'Producto',
-                    precio: p.precio || '0',
-                    imagen: p.imagen || '',
+                    precio: (p.precio || '0').toString().replace(/^\$/, '').trim(),
+                    imagen: normalizeImage(p.imagen),
                     categoria: p.categoria || '',
                   })),
                 },

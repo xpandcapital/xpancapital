@@ -128,7 +128,7 @@ export async function PUT(request: NextRequest) {
             email, nombre,
             isGuest: !data.user_id,
             productos: prodNames,
-            total: `$${data.monto_usd?.toFixed(2) || '0'} USD`,
+            total: `${data.monto_usd?.toFixed(2) || '0'} USD`,
             metodo_pago: data.metodo_pago || 'Manual',
             productPrices: prodPrices,
           }).catch(() => ({ userId: null, isNewUser: false, tempPassword: '' }))

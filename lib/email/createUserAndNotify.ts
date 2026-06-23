@@ -123,21 +123,36 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
     ? 'transaccion_compra_completada_invitado'
     : 'transaccion_compra_completada_logueado'
 
+  // Si por algún edge case somos invitado+nuevo pero no tenemos tempPassword, generarla ahora
+  if (params.isGuest && isNewUser && !tempPassword && userId) {
+    tempPassword = generatePassword()
+    try {
+      await supabase.auth.admin.updateUserById(userId, { password: tempPassword })
+      console.log('[createUserAndNotify] Contraseña temporal regenerada para invitado:', userId)
+    } catch (e) {
+      console.error('[createUserAndNotify] Error regenerando contraseña temporal:', e)
+    }
+  }
+
   const extraVars: Record<string, string> = {}
-  if (isNewUser && tempPassword) {
+  if (params.isGuest && isNewUser && tempPassword) {
     extraVars.password_temporal = tempPassword
     extraVars.enlace_crear_cuenta = `${siteUrl}/login`
     console.log('[createUserAndNotify] Usuario nuevo invitado, incluyendo password_temporal')
   }
 
-  console.log('[createUserAndNotify] Enviando email:', evento, '| isGuest:', params.isGuest, '| isNewUser:', isNewUser)
+  // Normalizar total para la plantilla (el receipt ya agrega el signo $)
+  const totalLimpio = params.total.replace(/^\$/, '').replace(/\s*USD\s*$/i, '').trim()
+
+  console.log('[createUserAndNotify] Enviando email:', evento, '| isGuest:', params.isGuest, '| isNewUser:', isNewUser, '| tempPassword presente:', !!tempPassword)
   await sendTemplateEmail({
     evento,
     to: email,
     variables: {
       nombre: params.nombre, email,
       productos: `<ul style="margin:0;padding:0;list-style:none;">${nombresList}</ul>`,
-      total: params.total, subtotal: params.total,
+      total: totalLimpio,
+      subtotal: totalLimpio,
       metodo_pago: params.metodo_pago,
       fecha_compra: new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }),
       enlace_acceso: `${siteUrl}/miembros`,
