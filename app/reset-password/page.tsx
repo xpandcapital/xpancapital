@@ -26,17 +26,28 @@ function ResetPasswordForm() {
     // Leer token tanto de query string (?access_token=) como de hash (#access_token=)
     let code = searchParams.get('code')
     let accessToken = searchParams.get('access_token')
+    let refreshToken = searchParams.get('refresh_token')
 
     if (!code && !accessToken && typeof window !== 'undefined') {
       const hash = window.location.hash.substring(1)
       const hashParams = new URLSearchParams(hash)
       code = code || hashParams.get('code')
       accessToken = accessToken || hashParams.get('access_token')
+      refreshToken = refreshToken || hashParams.get('refresh_token')
     }
 
     async function exchange() {
       try {
-        if (code) {
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+          if (error) {
+            console.error('[ResetPassword] Error setting session:', error)
+            setError('El enlace de recuperación no es válido o ha expirado.')
+          }
+        } else if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code)
           if (error) {
             console.error('[ResetPassword] Error exchanging code:', error)
