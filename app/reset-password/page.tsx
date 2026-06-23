@@ -39,27 +39,41 @@ function ResetPasswordForm() {
     }
 
     // Para tokens en hash: escuchar el evento de sesión que Supabase dispara automáticamente
+    let settled = false
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      if (settled) return
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || (event === 'INITIAL_SESSION' && session)) {
+        setError(null)
         setLoadingSession(false)
-      } else if (event === 'INITIAL_SESSION') {
-        if (!session) {
-          setError('No se encontró un token de recuperación en la URL.')
-        }
+        settled = true
+      } else if (event === 'INITIAL_SESSION' && !session) {
         setLoadingSession(false)
+        settled = true
       }
     })
 
-    // Timeout de seguridad: si después de 3s no hay sesión, mostrar error
+    // Si después de 4s no se estableció sesión y hay tokens en el hash, intentar setSession manual
     const timeout = setTimeout(() => {
-      setLoadingSession(prev => {
-        if (prev) {
-          setError('No se encontró un token de recuperación en la URL.')
-          return false
-        }
-        return prev
-      })
-    }, 3000)
+      if (settled || !window.location.hash.includes('access_token')) return
+      const hash = window.location.hash.substring(1)
+      const hashParams = new URLSearchParams(hash)
+      const at = hashParams.get('access_token')
+      const rt = hashParams.get('refresh_token')
+      if (at && rt) {
+        supabase.auth.setSession({ access_token: at, refresh_token: rt }).then(({ error }) => {
+          if (error) {
+            console.error('[ResetPassword] Error manual setSession:', error)
+            setError('El enlace de recuperación no es válido o ha expirado.')
+          }
+          setLoadingSession(false)
+          settled = true
+        })
+      } else {
+        setError('No se encontró un token de recuperación en la URL.')
+        setLoadingSession(false)
+        settled = true
+      }
+    }, 2000)
 
     return () => {
       subscription.unsubscribe()
