@@ -312,7 +312,6 @@ export default function ProfilePage() {
     const [countrySearch, setCountrySearch] = useState("");
     const [profilePic, setProfilePic] = useState<string | null>(user?.profilePic || null);
     const [tempImage, setTempImage] = useState<string | null>(null);
-    const [notifications, setNotifications] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -338,7 +337,9 @@ export default function ProfilePage() {
     // Sync with global state
     useEffect(() => {
         if (user) {
-            if (user.name) setName(user.name);
+            if (user.nombre || user.name) setName(user.nombre || user.name?.split(' ')[0] || '');
+            if (user.apellido) setLastName(user.apellido);
+            else if (user.name && !user.nombre) setLastName(user.name.split(' ').slice(1).join(' ') || '');
             if (user.email) setEmail(user.email);
             if (user.profilePic) setProfilePic(user.profilePic);
         }
@@ -613,21 +614,6 @@ export default function ProfilePage() {
                             </div>
                             <span className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">Activo</span>
                         </button>
-                        <button
-                            onClick={() => setNotifications(!notifications)}
-                            className="w-full flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group text-left"
-                        >
-                            <div className="flex items-center gap-4">
-                                <Bell className="w-5 h-5 text-gray-500 group-hover:text-blis-red transition-colors" />
-                                <span className="text-sm font-bold text-white">Notificaciones Push</span>
-                            </div>
-                            <div className={`w-12 h-6 rounded-full relative p-1 transition-colors duration-300 ${notifications ? 'bg-blis-red' : 'bg-zinc-800'}`}>
-                                <motion.div
-                                    animate={{ x: notifications ? 24 : 0 }}
-                                    className="w-4 h-4 bg-white rounded-full"
-                                />
-                            </div>
-                        </button>
 
                         <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl space-y-3">
                             <h3 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
@@ -670,17 +656,6 @@ export default function ProfilePage() {
                                 <span className="text-sm font-bold text-white">{closingSessions ? 'Cerrando...' : 'Cerrar Otras Sesiones'}</span>
                             </div>
                         </button>
-
-                        <div className="p-6 bg-blis-red/5 border border-blis-red/20 rounded-[2rem] space-y-4">
-                            <h3 className="text-xs font-black text-white uppercase tracking-tight">Autenticación de 2 Factores</h3>
-                            <p className="text-[10px] text-gray-500 font-medium leading-relaxed uppercase tracking-widest">Añade una capa extra de seguridad a tu portal de inversión.</p>
-                            <button
-                                onClick={() => showToast("Iniciando configuración de 2FA...", "info")}
-                                className="text-[10px] text-blis-red font-black uppercase tracking-[0.2em] border-b-2 border-blis-red/30 pb-1 hover:border-blis-red transition-all"
-                            >
-                                Configurar Ahora
-                            </button>
-                        </div>
                     </div>
 
                     <button
@@ -830,21 +805,16 @@ export default function ProfilePage() {
                 <ReferralPanel />
 
                 {/* Modal Cambiar Contraseña */}
-                <AnimatePresence>
-                    {showPasswordModal && (
+                {showPasswordModal && (
+                    <div
+                        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                        onClick={(e) => { if (e.target === e.currentTarget && !changingPassword) { setShowPasswordModal(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); } }}
+                    >
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-                            onClick={(e) => { if (e.target === e.currentTarget && !changingPassword) { setShowPasswordModal(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); } }}
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-zinc-900 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl"
                         >
-                            <motion.div
-                                initial={{ scale: 0.95, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.95, opacity: 0 }}
-                                className="bg-zinc-900 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl"
-                            >
                                 <div className="flex items-center justify-between mb-6">
                                     <h3 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3">
                                         <Lock className="w-5 h-5 text-blis-red" /> Nueva Contraseña
@@ -913,10 +883,9 @@ export default function ProfilePage() {
                                         {changingPassword ? "Cambiando..." : "Cambiar Contraseña"}
                                     </button>
                                 </div>
-                            </motion.div>
                         </motion.div>
-                    )}
-                </AnimatePresence>
+                    </div>
+                )}
             </div>
         </div>
     );

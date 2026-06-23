@@ -17,6 +17,8 @@ interface User {
   email: string
   phone?: string
   name?: string
+  nombre?: string
+  apellido?: string
   profilePic?: string | null
   blis_coins?: number
   empresa_id?: string
@@ -84,6 +86,8 @@ async function fetchProfile(userId: string): Promise<User | null> {
               id: userId,
               email,
               name: nombre,
+              nombre: nombre,
+              apellido: '',
               role: rol as UserRole,
               blis_coins: 0,
               empresa_id: EMPRESA_ID,
@@ -101,6 +105,8 @@ async function fetchProfile(userId: string): Promise<User | null> {
           id: p.id,
           email: p.email || '',
           name: `${p.nombre || ''} ${p.apellido || ''}`.trim(),
+          nombre: p.nombre || '',
+          apellido: p.apellido || '',
           profilePic: p.avatar_url,
           blis_coins: p.blis_coins || 0,
           role: normalizedRol,
@@ -138,6 +144,8 @@ async function fetchProfile(userId: string): Promise<User | null> {
       id: profile.id,
       email: profile.email || '',
       name: `${profile.nombre || ''} ${profile.apellido || ''}`.trim(),
+      nombre: profile.nombre || '',
+      apellido: profile.apellido || '',
       profilePic: profile.avatar_url,
       blis_coins: profile.blis_coins || 0,
       role: normalizedRol,
@@ -369,7 +377,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const displayName = data.nombre !== undefined && data.apellido !== undefined
       ? `${data.nombre} ${data.apellido}`.trim()
       : data.name
-    const updatedUser = { ...user, ...data, name: displayName }
+    const updatedUser = { ...user, ...data, name: displayName, nombre: data.nombre ?? user?.nombre, apellido: data.apellido ?? user?.apellido }
     setUser(updatedUser)
 
     try {
