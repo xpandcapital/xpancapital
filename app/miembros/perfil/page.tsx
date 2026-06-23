@@ -321,6 +321,19 @@ export default function ProfilePage() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordError, setPasswordError] = useState<string | null>(null);
     const [changingPassword, setChangingPassword] = useState(false);
+    const [loginHistory, setLoginHistory] = useState<any[]>([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+    const [closingSessions, setClosingSessions] = useState(false);
+
+    useEffect(() => {
+        if (!user?.id) return;
+        setLoadingHistory(true);
+        fetch('/api/auth/login-history')
+            .then(r => r.json())
+            .then(d => { if (d.success) setLoginHistory(d.sessions || []); })
+            .catch(() => {})
+            .finally(() => setLoadingHistory(false));
+    }, [user?.id]);
 
     // Sync with global state
     useEffect(() => {
@@ -616,6 +629,48 @@ export default function ProfilePage() {
                             </div>
                         </button>
 
+                        <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl space-y-3">
+                            <h3 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                <Clock className="w-3.5 h-3.5 text-gray-500" />
+                                Historial de Sesiones
+                            </h3>
+                            {loadingHistory ? (
+                                <p className="text-[10px] text-gray-600 uppercase tracking-widest">Cargando...</p>
+                            ) : loginHistory.length === 0 ? (
+                                <p className="text-[10px] text-gray-600 uppercase tracking-widest">Sin registros</p>
+                            ) : (
+                                <div className="space-y-2 max-h-40 overflow-y-auto">
+                                    {loginHistory.slice(0, 5).map((session: any, i: number) => (
+                                        <div key={session.id || i} className="flex items-center justify-between text-[10px] text-gray-500 bg-white/[0.02] px-3 py-2 rounded-lg">
+                                            <span className="uppercase tracking-wider">{session.pais || 'Desconocido'} — {session.ip || 'N/A'}</span>
+                                            <span>{new Date(session.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <button
+                            onClick={async () => {
+                                if (!confirm("¿Cerrar sesión en todos los demás dispositivos?")) return;
+                                setClosingSessions(true);
+                                try {
+                                    const res = await fetch('/api/auth/login-history', { method: 'DELETE' });
+                                    const data = await res.json();
+                                    if (data.success) showToast("Sesiones cerradas en otros dispositivos", "success");
+                                    else showToast(data.error || "Error al cerrar sesiones", "error");
+                                } catch { showToast("Error al cerrar sesiones", "error"); }
+                                setClosingSessions(false);
+                            }}
+                            disabled={closingSessions}
+                            className="w-full flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group text-left disabled:opacity-50"
+                        >
+                            <div className="flex items-center gap-4">
+                                <Shield className="w-5 h-5 text-gray-500 group-hover:text-blis-red transition-colors" />
+                                <span className="text-sm font-bold text-white">{closingSessions ? 'Cerrando...' : 'Cerrar Otras Sesiones'}</span>
+                            </div>
+                        </button>
+
                         <div className="p-6 bg-blis-red/5 border border-blis-red/20 rounded-[2rem] space-y-4">
                             <h3 className="text-xs font-black text-white uppercase tracking-tight">Autenticación de 2 Factores</h3>
                             <p className="text-[10px] text-gray-500 font-medium leading-relaxed uppercase tracking-widest">Añade una capa extra de seguridad a tu portal de inversión.</p>
@@ -629,10 +684,9 @@ export default function ProfilePage() {
                     </div>
 
                     <button
-                        onClick={() => {
-                            if (confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible.")) {
-                                showToast("Solicitud enviada. Un administrador se pondrá en contacto contigo para verificar la identidad.", "success");
-                            }
+                        onClick={async () => {
+                            if (!confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible.")) return;
+                            showToast("Solicitud enviada. Un administrador se pondrá en contacto contigo para verificar la identidad.", "success");
                         }}
                         className="w-full py-5 bg-zinc-900 border border-white/5 text-gray-500 font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2"
                     >
