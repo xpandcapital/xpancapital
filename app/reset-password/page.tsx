@@ -23,8 +23,16 @@ function ResetPasswordForm() {
   useEffect(() => {
     if (!supabase) return
 
-    const code = searchParams.get('code')
-    const accessToken = searchParams.get('access_token')
+    // Leer token tanto de query string (?access_token=) como de hash (#access_token=)
+    let code = searchParams.get('code')
+    let accessToken = searchParams.get('access_token')
+
+    if (!code && !accessToken && typeof window !== 'undefined') {
+      const hash = window.location.hash.substring(1)
+      const hashParams = new URLSearchParams(hash)
+      code = code || hashParams.get('code')
+      accessToken = accessToken || hashParams.get('access_token')
+    }
 
     async function exchange() {
       try {
