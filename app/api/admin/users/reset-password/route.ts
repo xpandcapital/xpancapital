@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
-import { generateSecurePassword } from '@/lib/crypto'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -28,17 +27,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'No se encontró el email del usuario' }, { status: 404 })
       }
 
-      const newPassword = password || generateSecurePassword()
-
-      const { error: resetError } = await supabase.auth.admin.updateUserById(userId, {
-        password: newPassword,
-      })
-
-      if (resetError) {
-        return NextResponse.json({ error: `Error al resetear contraseña: ${resetError.message}` }, { status: 500 })
-      }
-
-      // Generar link de recuperación real de Supabase
+      // Generar link de recuperación de Supabase (el usuario elegirá su contraseña)
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
       const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
         type: 'recovery',
@@ -49,6 +38,7 @@ export async function POST(request: NextRequest) {
       const resetLink = linkData?.properties?.action_link || `${siteUrl}/reset-password`
       if (linkError) {
         console.error('[reset-password] Error generando link:', linkError.message)
+        return NextResponse.json({ error: `Error al generar enlace: ${linkError.message}` }, { status: 500 })
       }
 
       await sendTemplateEmail({
@@ -58,11 +48,10 @@ export async function POST(request: NextRequest) {
           nombre: profile.nombre || 'Cliente',
           email: profile.email,
           enlace_restablecer: resetLink,
-          password_temporal: newPassword,
         },
       })
 
-      return NextResponse.json({ success: true, message: 'Contraseña actualizada y email enviado.' })
+      return NextResponse.json({ success: true, message: 'Email de restablecimiento enviado.' })
     }
 
     if (!password) {
