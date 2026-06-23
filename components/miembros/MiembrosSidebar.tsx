@@ -16,7 +16,8 @@ import {
     ChevronLeft,
     Menu,
     X,
-    Award
+    Award,
+    Users
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -46,6 +47,12 @@ export function MiembrosSidebar() {
                 { icon: Video, label: "Mis Cursos", href: "/miembros/academia" },
                 { icon: FileText, label: "Mis Contratos", href: "/miembros/contratos" },
                 { icon: Award, label: "Mis Certificados", href: "/miembros/certificados" },
+            ]
+        },
+        {
+            separator: true,
+            items: [
+                { icon: Users, label: "Comunidad", href: "/miembros/comunidad" },
             ]
         },
         {

@@ -1,0 +1,6 @@
+export { PostCard } from './PostCard'
+export { EncuestaCard } from './EncuestaCard'
+export { EventoCard } from './EventoCard'
+export { MediaGrid } from './MediaGrid'
+export { Comentarios } from './Comentarios'
+export { PostCreator } from './PostCreator'
