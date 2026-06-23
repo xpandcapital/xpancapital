@@ -283,6 +283,7 @@ export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise
 
       const templateSent = await sendTemplateEmail({
         evento: 'admin_nueva_compra_revisar',
+        empresa_id: empresaId,
         to: dest.email,
         subject,
         variables: {
