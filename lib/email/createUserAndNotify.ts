@@ -118,31 +118,32 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
 
-  // Solo enviamos plantilla de invitado (con password_temporal) cuando el invitado es NUEVO.
-  // Si el invitado ya tenía cuenta, enviamos la plantilla de logueado.
-  const evento = (params.isGuest && isNewUser)
+  // Para invitados (compras sin sesión), SIEMPRE generamos/actualizamos una contraseña temporal
+  // y enviamos la plantilla de invitado. Para logueados, plantilla normal.
+  const evento = params.isGuest
     ? 'transaccion_compra_completada_invitado'
     : 'transaccion_compra_completada_logueado'
 
-  // Si por algún edge case somos invitado+nuevo pero no tenemos tempPassword, generarla ahora
-  if (params.isGuest && isNewUser && !tempPassword && userId) {
-    tempPassword = generatePassword()
+  if (params.isGuest && userId) {
+    if (!tempPassword) {
+      tempPassword = generatePassword()
+    }
     try {
       await supabase.auth.admin.updateUserById(userId, { password: tempPassword })
-      console.log('[createUserAndNotify] Contraseña temporal regenerada para invitado:', userId)
+      console.log('[createUserAndNotify] Contraseña temporal actualizada para invitado:', userId)
     } catch (e) {
-      console.error('[createUserAndNotify] Error regenerando contraseña temporal:', e)
+      console.error('[createUserAndNotify] Error actualizando contraseña temporal:', e)
     }
   }
 
   const extraVars: Record<string, string> = {}
-  if (params.isGuest && isNewUser) {
+  if (params.isGuest) {
     if (tempPassword) {
       extraVars.password_temporal = tempPassword
       extraVars.enlace_crear_cuenta = `${siteUrl}/login`
-      console.log('[createUserAndNotify] Usuario nuevo invitado, incluyendo password_temporal:', tempPassword.substring(0, 3) + '***')
+      console.log('[createUserAndNotify] Invitado: incluyendo password_temporal:', tempPassword.substring(0, 3) + '***')
     } else {
-      console.error('[createUserAndNotify] ALERTA: invitado nuevo SIN contraseña temporal. userId:', userId)
+      console.error('[createUserAndNotify] ALERTA: invitado SIN contraseña temporal. userId:', userId)
     }
   }
 

@@ -76,8 +76,9 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
         // Inyectar productos en bloques receipt
         if (products && products.length > 0) {
           const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+          const placeholderImage = `https://placehold.co/100x100/181818/ffffff?text=Producto`
           const normalizeImage = (url?: string) => {
-            if (!url) return ''
+            if (!url) return placeholderImage
             if (url.startsWith('http')) return url
             if (url.startsWith('//')) return `https:${url}`
             return `${siteUrl}${url.startsWith('/') ? '' : '/'}${url}`
