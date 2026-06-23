@@ -358,7 +358,10 @@ export const EVENT_GROUPS = [
         value: 'admin_nueva_compra_revisar',
         label: 'Nueva compra a revisar',
         desc: 'Compra pendiente necesita aprobacion del admin',
-        vars: ['nombre_comprador', 'apellido_comprador', 'email_comprador', 'total_compra', 'metodo_pago_compra', 'moneda', 'fecha_compra']
+        vars: ['nombre_comprador', 'apellido_comprador', 'email_comprador', 'total_compra', 'metodo_pago_compra', 'moneda', 'fecha_compra', 'comprobante_id', 'enlace_aprobar_compra', 'enlace_rechazar_compra', 'productos', 'whatsapp_soporte',
+          'producto_1_nombre', 'producto_1_categoria', 'producto_1_precio', 'producto_1_imagen',
+          'producto_2_nombre', 'producto_2_categoria', 'producto_2_precio', 'producto_2_imagen',
+          'producto_3_nombre', 'producto_3_categoria', 'producto_3_precio', 'producto_3_imagen']
       },
       {
         value: 'admin_usuario_solicito_baja',

@@ -32,6 +32,7 @@ const PUBLIC_PATHS = [
   '/', '/blog', '/tienda', '/cursos', '/proyectos',
   '/verificar', '/gracias', '/f', '/formulario', '/embudo',
   '/calendario', '/certificado', '/login', '/embed', '/legal', '/s',
+  '/compras',
 ]
 
 export async function middleware(request: NextRequest) {

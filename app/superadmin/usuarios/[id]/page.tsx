@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Shield, CheckCircle2, X, Loader2, Pencil, Mail, User,
     ToggleLeft, Save, KeyRound, Send, Eye, EyeOff, GraduationCap,
-    Plus, Trash2, Copy
+    Plus, Trash2, Copy, Bell
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard';
@@ -45,6 +45,7 @@ interface UserProfile {
     empresa_id: string;
     blis_coins?: number;
     telefono?: string;
+    recibir_notificaciones_compras?: boolean;
 }
 
 interface AssignedCourse {
@@ -82,6 +83,7 @@ export default function EditarUsuarioPage() {
     const [email, setEmail] = useState('');
     const [rol, setRol] = useState('empleado');
     const [activo, setActivo] = useState(true);
+    const [recibirNotificaciones, setRecibirNotificaciones] = useState(false);
 
     const [showPasswordSection, setShowPasswordSection] = useState(false);
     const [newPassword, setNewPassword] = useState('');
@@ -113,6 +115,7 @@ export default function EditarUsuarioPage() {
                 setEmail(u.email || '');
                 setRol(u.rol || 'empleado');
                 setActivo(u.activo !== false);
+                setRecibirNotificaciones(u.recibir_notificaciones_compras === true);
                 fetchCourses(userId);
             } else {
                 showToast('Usuario no encontrado', 'error');
@@ -144,7 +147,7 @@ export default function EditarUsuarioPage() {
             const res = await fetch('/api/admin/users', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: userId, nombre, apellido, email, rol }),
+                body: JSON.stringify({ id: userId, nombre, apellido, email, rol, recibir_notificaciones_compras: recibirNotificaciones }),
             });
             const data = await res.json();
             if (data.success) {
@@ -298,6 +301,15 @@ export default function EditarUsuarioPage() {
                                 </div>
                                 <button type="button" onClick={() => setActivo(!activo)} className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors shrink-0 ${activo ? 'bg-emerald-500' : 'bg-gray-600'}`}>
                                     <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${activo ? 'translate-x-8' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
+                            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-white font-bold flex items-center gap-2"><Bell className="w-4 h-4" /> Notificar nuevas compras</p>
+                                    <p className="text-[11px] text-gray-500 mt-1">Recibir correo cuando haya compras pendientes de aprobación</p>
+                                </div>
+                                <button type="button" onClick={() => setRecibirNotificaciones(!recibirNotificaciones)} className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors shrink-0 ${recibirNotificaciones ? 'bg-blis-red' : 'bg-gray-600'}`}>
+                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${recibirNotificaciones ? 'translate-x-8' : 'translate-x-1'}`} />
                                 </button>
                             </div>
                         </div>

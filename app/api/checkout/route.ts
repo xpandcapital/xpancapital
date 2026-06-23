@@ -4,6 +4,7 @@ import nodemailer from 'nodemailer';
 import { verifyTurnstileToken } from '@/lib/bot-protection';
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 import { createUserAndNotify } from '@/lib/email/createUserAndNotify';
+import { notifyAdminNuevaCompra } from '@/lib/email/notifyAdminNuevaCompra';
 import { generateSecurePassword } from '@/lib/crypto';
 
 // Cliente admin (service role - bypass RLS) - se usa para todas las operaciones de BD
@@ -648,8 +649,27 @@ export async function POST(request: NextRequest) {
         productPrices: prodPrices,
         newUserPassword: isNewUser ? tempPassword : undefined,
       }).catch((err) => { console.error('[Checkout] Error en createUserAndNotify:', err) })
-    } else {
-      console.log('[Checkout] Compra offline/pendiente - email pospuesto hasta aprobación admin')
+    } else if (orden) {
+      console.log('[Checkout] Compra offline/pendiente - notificando a admins')
+      const prodInfo = productos.map((p: any) => ({
+        nombre: p.nombre || `Producto #${(p.producto_id || p.id || '').substring(0, 6)}`,
+        precio_unitario: p.precio_unitario || p.price || 0,
+        productType: p.productType || '',
+        imagen: p.imagen || '',
+        cantidad: p.cantidad || 1,
+      }))
+
+      notifyAdminNuevaCompra({
+        compraId: orden.id,
+        empresaId: empresa_id,
+        compradorNombre: nombre || email.split('@')[0],
+        compradorEmail: email.toLowerCase(),
+        compradorTelefono: telefono || '',
+        productos: prodInfo,
+        montoUSD: monto_usd || 0,
+        metodoPago: metodo_pago || 'Manual',
+        moneda: 'USD',
+      }).catch((err) => { console.error('[Checkout] Error en notifyAdminNuevaCompra:', err) })
     }
 
     return NextResponse.json({
