@@ -251,6 +251,7 @@ export async function POST(request: NextRequest) {
       telefono_cliente: telefono,
       tiene_fisicos: tiene_fisicos || false,
       direccion_envio: direccion_envio || null,
+      es_invitado: !user_id,
     }
 
     // ── Enriquecer metadata con datos de pago (transfer/crypto) ─────────────

@@ -87,6 +87,7 @@ export default function VentasAdminPage() {
     };
 
     const actualizarEstado = async (id: string, estado: string, notas?: string, subTipo?: string) => {
+        setGuardando(true);
         const body: any = { id, estado, ...(notas ? { notas } : {}) }
         if (subTipo) body.sub_tipo_pago = subTipo
         const res = await fetch("/api/admin/ventas", {
@@ -102,6 +103,7 @@ export default function VentasAdminPage() {
         } else {
             alert(data.error || 'Error al actualizar estado');
         }
+        setGuardando(false);
     };
 
     const eliminar = async (id: string) => {
@@ -392,8 +394,10 @@ export default function VentasAdminPage() {
                                 className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white resize-none" />
                         </div>
                         <Button onClick={() => actualizarEstado(modalVerificar!.id, "completado", notasVerificacion, subTipoPago)}
-                            className="w-full bg-emerald-600 hover:bg-emerald-600/90 text-white font-bold">
-                            <ShieldCheck className="w-4 h-4 mr-2" /> Confirmar Pago y Dar Acceso
+                            disabled={guardando}
+                            className="w-full bg-emerald-600 hover:bg-emerald-600/90 text-white font-bold disabled:opacity-50">
+                            {guardando ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : <ShieldCheck className="w-4 h-4 mr-2 inline" />}
+                            {guardando ? 'Procesando...' : 'Confirmar Pago y Dar Acceso'}
                         </Button>
                     </div>
                 </DialogContent>

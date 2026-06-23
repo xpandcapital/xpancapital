@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { getAuthUser } from "@/lib/supabase/api-auth";
 import { createUserAndNotify } from "@/lib/email/createUserAndNotify";
 import { assignCoursesToUser } from "@/lib/courses/assignCourses";
+import { generateSecurePassword } from "@/lib/crypto";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -129,13 +130,32 @@ export async function PUT(request: NextRequest) {
             imagen: p.imagen || '',
           }))
 
+          // Detectar si fue una compra de invitado (sin sesión al momento del checkout)
+          const esInvitadoOriginal = !!(meta.es_invitado) || !data.user_id
+          console.log('[admin/ventas PUT] esInvitadoOriginal:', esInvitadoOriginal, '| meta.es_invitado:', meta.es_invitado, '| data.user_id:', data.user_id)
+
+          // Si el usuario fue creado por el checkout pero nunca recibió su contraseña,
+          // generar una nueva para incluirla en el email
+          let passwordParaEmail = ''
+          if (esInvitadoOriginal && data.user_id) {
+            passwordParaEmail = generateSecurePassword()
+            const { error: passError } = await supabase.auth.admin.updateUserById(data.user_id, { password: passwordParaEmail })
+            if (passError) {
+              console.error('[admin/ventas PUT] Error actualizando contraseña:', passError.message)
+              passwordParaEmail = ''
+            } else {
+              console.log('[admin/ventas PUT] Contraseña actualizada para usuario existente invitado:', passwordParaEmail.substring(0, 3) + '***')
+            }
+          }
+
           const createResult = await createUserAndNotify({
             email, nombre, apellido,
-            isGuest: !data.user_id,
+            isGuest: esInvitadoOriginal,
             productos: prodNames,
             total: `${data.monto_usd?.toFixed(2) || '0'} USD`,
             metodo_pago: data.metodo_pago || 'Manual',
             productPrices: prodPrices,
+            newUserPassword: passwordParaEmail || undefined,
           }).catch((err) => {
             console.error('[admin/ventas PUT] Error en createUserAndNotify:', err)
             return { userId: null, isNewUser: false, tempPassword: '' }
