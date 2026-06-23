@@ -29,6 +29,7 @@ interface AuthContextType {
   loading: boolean
   loginWithEmail: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
   signUp: (email: string, password: string, nombre?: string, apellido?: string) => Promise<{ success: boolean; error?: string }>
+  resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
   updateProfile: (data: { name?: string; profilePic?: string | null; email?: string; phone?: string }) => void
   refreshUser: () => Promise<void>
@@ -333,6 +334,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const resetPassword = async (email: string): Promise<{ success: boolean; error?: string }> => {
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      return { success: false, error: 'Supabase no está configurado' }
+    }
+
+    try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${siteUrl}/reset-password`,
+      })
+
+      if (error) {
+        return { success: false, error: error.message }
+      }
+
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : 'Error desconocido' }
+    }
+  }
+
   const logout = async () => {
     const supabase = getSupabaseClient()
     if (supabase) {
@@ -432,7 +455,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithEmail, signUp, logout, updateProfile, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, loginWithEmail, signUp, resetPassword, logout, updateProfile, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

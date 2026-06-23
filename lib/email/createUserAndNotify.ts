@@ -25,6 +25,21 @@ interface CreateUserResult {
   tempPassword: string
 }
 
+async function findAuthUserByEmail(supabase: ReturnType<typeof createClient>, email: string): Promise<{ id: string } | null> {
+  try {
+    const { data, error } = await supabase.auth.admin.listUsers()
+    if (error) {
+      console.error('[createUserAndNotify] Error listando usuarios de auth:', error.message)
+      return null
+    }
+    const found = data?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase())
+    return found ? { id: found.id } : null
+  } catch (e) {
+    console.error('[createUserAndNotify] Error buscando en auth.users:', e)
+    return null
+  }
+}
+
 export async function createUserAndNotify(params: CreateUserParams): Promise<CreateUserResult> {
   console.log('[createUserAndNotify] Iniciando para:', params.email)
   const supabase = createClient()
@@ -47,7 +62,26 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
     console.error('[createUserAndNotify] Error buscando en profiles:', e)
   }
 
-  // 2. Crear nuevo usuario si no existe
+  // 2. Si no está en profiles, buscar en auth.users (puede pasar tras borrados parciales)
+  if (!userId) {
+    const authUser = await findAuthUserByEmail(supabase, email)
+    if (authUser) {
+      userId = authUser.id
+      console.log('[createUserAndNotify] Usuario encontrado en auth.users:', userId)
+      // Reconstruir perfil faltante
+      try {
+        await supabase.from('profiles').upsert({
+          id: userId, email, nombre: params.nombre,
+          telefono: params.telefono || '', empresa_id,
+          creado_en: new Date().toISOString(),
+        }, { onConflict: 'id' })
+      } catch (e) {
+        console.error('[createUserAndNotify] Error reconstruyendo perfil:', e)
+      }
+    }
+  }
+
+  // 3. Crear nuevo usuario si no existe en ningún lado
   if (!userId) {
     try {
       tempPassword = generatePassword()
@@ -70,36 +104,49 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
         }, { onConflict: 'id' })
       } else if (createError) {
         console.error('[createUserAndNotify] Error creando usuario:', createError?.message)
-        // Intentar recuperar el ID desde profiles (por si el usuario ya existe)
-        try {
-          const { data: p } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle()
-          if (p) userId = p.id
-        } catch {}
       }
     } catch (e) {
       console.error('[createUserAndNotify] Error creando usuario:', e)
     }
   }
 
-  // 3. Enviar email unificado (con o sin password según tipo de usuario)
+  // 4. Para compras de invitados, SIEMPRE generamos/actualizamos una contraseña temporal
+  //    y enviamos la plantilla de invitado, ya sea que el usuario sea nuevo o exista.
+  if (params.isGuest && userId) {
+    if (!tempPassword) {
+      tempPassword = generatePassword()
+    }
+    try {
+      const { error: updateError } = await supabase.auth.admin.updateUserById(userId, {
+        password: tempPassword,
+      })
+      if (updateError) {
+        console.error('[createUserAndNotify] Error actualizando contraseña temporal:', updateError.message)
+      } else {
+        console.log('[createUserAndNotify] Contraseña temporal actualizada para invitado:', userId)
+      }
+    } catch (e) {
+      console.error('[createUserAndNotify] Error actualizando contraseña temporal:', e)
+    }
+  }
+
+  // 5. Enviar email unificado (con o sin password según tipo de usuario)
   const nombresList = params.productos
     .map(p => `<li style="margin-bottom:6px;font-size:14px;color:#e5e7eb;">✅ ${p}</li>`)
     .join('')
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
 
-  // Solo usar plantilla de invitado si realmente es un invitado NUEVO.
-  // Si el invitado ya tenia cuenta, usamos la plantilla de logueado para no mostrarle
-  // campos vacios de password_temporal ni enlaces de crear cuenta.
-  const evento = (params.isGuest && isNewUser)
+  // Invitado => plantilla con password_temporal. Logueado => plantilla normal.
+  const evento = params.isGuest
     ? 'transaccion_compra_completada_invitado'
     : 'transaccion_compra_completada_logueado'
 
   const extraVars: Record<string, string> = {}
-  if (isNewUser && tempPassword) {
+  if (params.isGuest && tempPassword) {
     extraVars.password_temporal = tempPassword
     extraVars.enlace_crear_cuenta = `${siteUrl}/login`
-    console.log('[createUserAndNotify] Usuario nuevo, incluyendo password_temporal')
+    console.log('[createUserAndNotify] Invitado: incluyendo password_temporal')
   }
 
   console.log('[createUserAndNotify] Enviando email:', evento, '| isGuest:', params.isGuest, '| isNewUser:', isNewUser)

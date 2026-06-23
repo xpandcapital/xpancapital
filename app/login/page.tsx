@@ -12,14 +12,18 @@ import { getDefaultRouteForRole, ROLE_CONFIG, type UserRole } from '@/lib/auth/p
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user, loading, loginWithEmail } = useAuth()
+  const { user, loading, loginWithEmail, resetPassword } = useAuth()
   const { defaultRoute, loading: permLoading } = usePermissions()
-  
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [showForgot, setShowForgot] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotSending, setForgotSending] = useState(false)
+  const [forgotMessage, setForgotMessage] = useState<string | null>(null)
   const [turnstileSiteKey, setTurnstileSiteKey] = useState('')
   const [turnstileToken, setTurnstileToken] = useState('')
   const [turnstileSolved, setTurnstileSolved] = useState(false)
@@ -99,6 +103,26 @@ function LoginForm() {
       setError(err instanceof Error ? err.message : 'Error desconocido')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setForgotMessage(null)
+    setForgotSending(true)
+
+    try {
+      const result = await resetPassword(forgotEmail)
+      if (!result.success) {
+        setForgotMessage(result.error || 'No se pudo enviar el correo')
+        return
+      }
+      setForgotMessage('Te hemos enviado un enlace para restablecer tu contraseña.')
+      setTimeout(() => setShowForgot(false), 4000)
+    } catch (err) {
+      setForgotMessage(err instanceof Error ? err.message : 'Error desconocido')
+    } finally {
+      setForgotSending(false)
     }
   }
 
@@ -195,6 +219,19 @@ function LoginForm() {
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            <div className="flex justify-end mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForgot(!showForgot)
+                  setForgotMessage(null)
+                  setForgotEmail(email)
+                }}
+                className="text-[11px] text-blis-red hover:text-red-400 transition-colors font-medium tracking-wide"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
+            </div>
           </div>
 
           {turnstileSiteKey && (
@@ -238,6 +275,51 @@ function LoginForm() {
             )}
           </button>
         </form>
+
+        {/* Recuperar contraseña */}
+        {showForgot && (
+          <form
+            onSubmit={handleForgotSubmit}
+            className="mt-6 space-y-4 bg-white/[0.03] backdrop-blur-xl p-6 rounded-2xl border border-white/[0.06] shadow-2xl"
+          >
+            <h3 className="text-sm font-black uppercase tracking-widest text-white text-center">
+              Restablecer contraseña
+            </h3>
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                required
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                placeholder="tu@email.com"
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blis-red/50 focus:bg-black/70 transition-all"
+              />
+            </div>
+            {forgotMessage && (
+              <div className={`p-3 rounded-xl text-xs font-medium text-center ${
+                forgotMessage.includes('enviado')
+                  ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400'
+                  : 'bg-red-500/10 border border-red-500/30 text-red-400'
+              }`}>
+                {forgotMessage}
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={forgotSending}
+              className="w-full bg-white/5 border border-blis-red/30 text-blis-red py-3 rounded-xl font-black uppercase tracking-widest hover:bg-blis-red hover:text-white transition-all flex items-center justify-center gap-2 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {forgotSending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                'Enviar enlace'
+              )}
+            </button>
+          </form>
+        )}
 
         {/* Footer */}
         <p className="text-center text-[10px] text-gray-600 mt-8 font-mono tracking-wider">
