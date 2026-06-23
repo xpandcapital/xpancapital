@@ -119,19 +119,43 @@ export async function GET(request: NextRequest) {
           matriculado: true,
         }))
 
-      // Buscar cursos comprados via tienda (productos.curso_id) y mergear con equipo_cursos
+      // Buscar cursos comprados via tienda (productos.curso_id)
+      // Q3a: compras con user_id directo
       const { data: comprasUser } = await supabase
         .from('compras')
         .select('id')
         .eq('user_id', userId)
         .eq('estado', 'completado')
 
+      // Q3b: compras sin user_id pero con email en metadata que coincide con el perfil
+      let comprasEmail: any[] = []
+      if (userProfile?.email) {
+        const { data: comprasByEmail } = await supabase
+          .from('compras')
+          .select('id')
+          .eq('estado', 'completado')
+          .is('user_id', null)
+          .eq('metadata->>email_cliente', userProfile.email.toLowerCase())
+
+        comprasEmail = comprasByEmail || []
+        // Actualizar user_id en compras huérfanas encontradas
+        for (const compra of comprasEmail) {
+          await supabase
+            .from('compras')
+            .update({ user_id: userId })
+            .eq('id', compra.id)
+        }
+      }
+
+      const todasLasCompras = [...(comprasUser || []), ...comprasEmail]
+      const todosLosIds = todasLasCompras.map(c => c.id)
+
       let purchased: any[] = []
-      if (comprasUser?.length) {
+      if (todosLosIds.length) {
         const { data: compraItems } = await supabase
           .from('compra_items')
           .select('producto_id')
-          .in('compra_id', comprasUser.map(c => c.id))
+          .in('compra_id', todosLosIds)
 
         const productoIds = compraItems?.map(ci => ci.producto_id).filter(Boolean) || []
 

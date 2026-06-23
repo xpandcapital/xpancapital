@@ -1,7 +1,8 @@
--- Migración: 101_after_compra_completada_asignar_cursos
+-- Migración: 101_after_compra_completada_asignar_cursos (actualizada)
 -- Trigger que asigna automáticamente cursos al completarse una compra
 -- Cubre: webhooks (Izipay/PayPal), pagos offline verificados, registro manual,
 --         checkout, y cualquier actualización directa a compras.estado = 'completado'
+-- v2: Resuelve user_id desde email en metadata si compras.user_id es NULL
 
 CREATE OR REPLACE FUNCTION after_compra_completada_asignar_cursos()
 RETURNS TRIGGER AS $$
@@ -12,7 +13,6 @@ DECLARE
     v_advisor_id UUID;
     v_user_id    UUID;
 BEGIN
-    -- Solo cuando el estado llegó a 'completado'
     IF TG_OP = 'UPDATE' AND OLD.estado = 'completado' THEN
         RETURN NEW;
     END IF;
@@ -21,13 +21,25 @@ BEGIN
         RETURN NEW;
     END IF;
 
-    -- Extraer datos del cliente desde metadata
     v_email  := lower(trim(NEW.metadata->>'email_cliente'));
     v_nombre := COALESCE(NEW.metadata->>'nombre_cliente', 'Cliente');
     v_user_id := NEW.user_id;
 
     IF v_email IS NULL OR v_email = '' THEN
         RETURN NEW;
+    END IF;
+
+    -- Si compras.user_id es NULL, intentar resolver desde profiles por email
+    IF v_user_id IS NULL THEN
+        SELECT id INTO v_user_id
+        FROM profiles
+        WHERE lower(email) = v_email
+        LIMIT 1;
+
+        -- Si se encontró, actualizar la compra con el user_id
+        IF v_user_id IS NOT NULL THEN
+            UPDATE compras SET user_id = v_user_id WHERE id = NEW.id;
+        END IF;
     END IF;
 
     -- Buscar o crear advisor por email
@@ -50,6 +62,8 @@ BEGIN
         WHERE ci.compra_id = NEW.id
           AND p.curso_id IS NOT NULL
     LOOP
+        -- Si ya existe el par (advisor_id, curso_id), actualizar user_id SOLO si el actual es NULL
+        -- o si el nuevo tiene valor (nunca sobrescribir un user_id válido con NULL)
         INSERT INTO equipo_cursos (
             advisor_id, curso_id, user_id, estado, lecciones_completadas
         ) VALUES (
@@ -57,7 +71,7 @@ BEGIN
         )
         ON CONFLICT (advisor_id, curso_id)
         DO UPDATE SET
-            user_id  = EXCLUDED.user_id,
+            user_id  = COALESCE(EXCLUDED.user_id, equipo_cursos.user_id),
             estado   = 'asignado';
     END LOOP;
 
@@ -65,14 +79,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Dispara en INSERT (venta creada directo como completada: coins, registro manual)
 DROP TRIGGER IF EXISTS trigger_compra_completada_insert ON compras;
 CREATE TRIGGER trigger_compra_completada_insert
 AFTER INSERT ON compras
 FOR EACH ROW
 EXECUTE FUNCTION after_compra_completada_asignar_cursos();
 
--- Dispara en UPDATE (webhooks, admin verifica pago offline → completado)
 DROP TRIGGER IF EXISTS trigger_compra_completada_update ON compras;
 CREATE TRIGGER trigger_compra_completada_update
 AFTER UPDATE ON compras

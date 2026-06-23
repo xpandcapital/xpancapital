@@ -82,7 +82,11 @@ export default function UserDashboard() {
 
     const purchasedCourses = compras
         .filter(c => c.estado === 'completado')
-        .flatMap(c => (c.items || []).filter(item => item.product_type === 'servicio' || item.producto?.tipo === 'servicio').map(item => ({
+        .flatMap(c => (c.items || []).filter(item =>
+          item.product_type === 'servicio' ||
+          item.producto?.tipo === 'servicio' ||
+          item.producto?.curso_id  // Producto vinculado a curso aunque su tipo no sea 'servicio'
+        ).map(item => ({
             id: item.producto?.id || c.id,
             cursoId: item.producto?.curso_id || item.producto?.id || '',
             title: item.producto?.nombre || 'Curso',
@@ -102,9 +106,10 @@ export default function UserDashboard() {
         .slice(0, 4)
         .flatMap(c => (c.items || []).map(item => {
             const tipo = item.producto?.tipo || item.product_type || 'digital';
-            const isService = tipo === 'servicio';
+            const hasCursoId = !!item.producto?.curso_id;
+            const isService = tipo === 'servicio' || hasCursoId;
             const isDigital = tipo === 'digital';
-            const hasDownload = item.producto?.archivo_url || isDigital;
+            const hasDownload = item.producto?.archivo_url || (isDigital && !hasCursoId);
             return {
                 id: item.producto?.id || c.id,
                 name: item.producto?.nombre || 'Producto',
