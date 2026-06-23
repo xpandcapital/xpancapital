@@ -15,7 +15,7 @@ export function PerfilHeader({ stats }: PerfilHeaderProps) {
   const apellido = user?.apellido || ''
   const nombreCompleto = `${nombre} ${apellido}`.trim()
   const username = `@${(nombre + (apellido || '')).toLowerCase().replace(/\s+/g, '')}`
-  const avatarUrl = user?.profilePic
+  const avatarUrl = user?.profilePic || (user as any)?.avatar_url
   const rol = user?.role || ''
 
   return (

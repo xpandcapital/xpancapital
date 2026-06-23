@@ -47,7 +47,7 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
   const [evCapacidad, setEvCapacidad] = useState<number | null>(null)
   const [evImagen, setEvImagen] = useState('')
 
-  const avatarUrl = user?.profilePic
+  const avatarUrl = user?.profilePic || (user as any)?.avatar_url
   const nombre = user?.nombre || 'U'
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +95,11 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
         try {
           const result = await uploadMedia(m.file)
           if (result.id) uploadedIds.push(result.id)
-        } catch {}
+        } catch (e) {
+          setError(`Error al subir ${m.file.name}: ${e instanceof Error ? e.message : 'desconocido'}`)
+          setEnviando(false)
+          return
+        }
       }
 
       const body: any = {}
