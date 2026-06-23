@@ -2,10 +2,11 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { ShieldCheck, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getSupabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 
 function ResetPasswordForm() {
   const router = useRouter()
@@ -19,6 +20,7 @@ function ResetPasswordForm() {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [loadingSession, setLoadingSession] = useState(true)
+  const recoveryRef = useRef<ReturnType<typeof createClient> | null>(null)
 
   useEffect(() => {
     if (!supabase) return
@@ -38,8 +40,8 @@ function ResetPasswordForm() {
       return
     }
 
-    // Para tokens en hash: Supabase ssr usa cookies, no auto-detecta el hash.
-    // Leer tokens manualmente y establecer sesión con delay para evitar lock.
+    // Para tokens en hash: crear un cliente aislado para evitar lock con @supabase/ssr
+    // El cliente singleton compite por el lock del token. Usamos uno fresco.
     let settled = false
     const hash = typeof window !== 'undefined' ? window.location.hash.substring(1) : ''
     const hasRecoveryTokens = hash.includes('access_token') && hash.includes('type=recovery')
@@ -49,34 +51,28 @@ function ResetPasswordForm() {
       const at = hashParams.get('access_token')
       const rt = hashParams.get('refresh_token')
       if (at && rt) {
-        // Delay de 1s para que @supabase/ssr termine su inicialización interna
-        const timer = setTimeout(() => {
-          supabase.auth.setSession({ access_token: at, refresh_token: rt }).then(({ error }) => {
-            if (error) {
-              console.error('[ResetPassword] Error setSession:', error)
-              setError('El enlace de recuperación no es válido o ha expirado.')
-            }
-            setLoadingSession(false)
-            settled = true
-          }).catch(err => {
-            console.error('[ResetPassword] Excepción setSession:', err)
-            // Si falla por lock, intentar una vez más
-            return supabase.auth.setSession({ access_token: at, refresh_token: rt })
-          }).then(() => {
-            if (!settled) {
-              setLoadingSession(false)
-              settled = true
-            }
-          }).catch(() => {
-            setError('Error al procesar la sesión. Intenta de nuevo.')
-            setLoadingSession(false)
-            settled = true
-          })
-        }, 1000)
-        return () => clearTimeout(timer)
+        const recoveryClient = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        )
+        recoveryRef.current = recoveryClient
+        recoveryClient.auth.setSession({ access_token: at, refresh_token: rt }).then(({ error }) => {
+          if (error) {
+            console.error('[ResetPassword] Error setSession:', error)
+            setError('El enlace de recuperación no es válido o ha expirado.')
+          }
+          setLoadingSession(false)
+          settled = true
+        }).catch(() => {
+          setError('Error al procesar la sesión. Intenta de nuevo.')
+          setLoadingSession(false)
+          settled = true
+        })
+      } else {
+        setError('No se encontró un token de recuperación en la URL.')
+        setLoadingSession(false)
+        settled = true
       }
-      setError('No se encontró un token de recuperación en la URL.')
-      setLoadingSession(false)
     } else {
       setError('No se encontró un token de recuperación en la URL.')
       setLoadingSession(false)
@@ -99,7 +95,7 @@ function ResetPasswordForm() {
       return
     }
 
-    if (!supabase) {
+    if (!supabase && !recoveryRef.current) {
       setError('Supabase no está configurado')
       return
     }
@@ -107,7 +103,8 @@ function ResetPasswordForm() {
     setSubmitting(true)
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({ password })
+      const authClient = recoveryRef.current?.auth || supabase.auth
+      const { error: updateError } = await authClient.updateUser({ password })
 
       if (updateError) {
         setError(updateError.message)
