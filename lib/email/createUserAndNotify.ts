@@ -118,33 +118,22 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
 
-  // Para invitados (compras sin sesión), SIEMPRE generamos/actualizamos una contraseña temporal
-  // y enviamos la plantilla de invitado. Para logueados, plantilla normal.
-  const evento = params.isGuest
+  // La contraseña temporal solo se incluye para usuarios NUEVOS.
+  // Si es invitado pero su email ya existe, no se modifica su contraseña y se usa
+  // la plantilla de usuario logueado (ya tiene cuenta y puede acceder con sus credenciales).
+  const esInvitadoNuevo = params.isGuest && isNewUser && !!tempPassword
+
+  const evento = esInvitadoNuevo
     ? 'transaccion_compra_completada_invitado'
     : 'transaccion_compra_completada_logueado'
 
-  if (params.isGuest && userId) {
-    if (!tempPassword) {
-      tempPassword = generatePassword()
-    }
-    try {
-      await supabase.auth.admin.updateUserById(userId, { password: tempPassword })
-      console.log('[createUserAndNotify] Contraseña temporal actualizada para invitado:', userId)
-    } catch (e) {
-      console.error('[createUserAndNotify] Error actualizando contraseña temporal:', e)
-    }
-  }
-
   const extraVars: Record<string, string> = {}
-  if (params.isGuest) {
-    if (tempPassword) {
-      extraVars.password_temporal = tempPassword
-      extraVars.enlace_crear_cuenta = `${siteUrl}/login`
-      console.log('[createUserAndNotify] Invitado: incluyendo password_temporal:', tempPassword.substring(0, 3) + '***')
-    } else {
-      console.error('[createUserAndNotify] ALERTA: invitado SIN contraseña temporal. userId:', userId)
-    }
+  if (esInvitadoNuevo) {
+    extraVars.password_temporal = tempPassword
+    extraVars.enlace_crear_cuenta = `${siteUrl}/login`
+    console.log('[createUserAndNotify] Invitado nuevo: incluyendo password_temporal:', tempPassword.substring(0, 3) + '***')
+  } else if (params.isGuest && userId) {
+    console.log('[createUserAndNotify] Invitado existente (no se modifica contraseña). userId:', userId)
   }
 
   // Normalizar total para la plantilla (el receipt ya agrega el signo $)
