@@ -4,7 +4,6 @@ import { getCachedProjects, getCachedProducts, getCachedCategories } from "@/lib
 import { DynamicSections } from "@/components/layout/DynamicSections";
 import { CapturePopup } from "@/components/ui/CapturePopup";
 import { SideAnchorNav } from "@/components/ui/SideAnchorNav";
-import { RecoveryRedirect } from "@/components/ui/RecoveryRedirect";
 
 export default async function Home() {
   const template = await getCachedLandingTemplate();
@@ -25,7 +24,6 @@ export default async function Home() {
 
   return (
     <main className="bg-black text-white min-h-screen relative">
-      <RecoveryRedirect />
       <SideAnchorNav />
       <CapturePopup />
       <DynamicSections
