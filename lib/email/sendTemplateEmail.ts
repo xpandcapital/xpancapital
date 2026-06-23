@@ -108,9 +108,9 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
           typeof template.settings === 'string' ? JSON.parse(template.settings) : template.settings
         )
 
-        // 3. Reemplazar variables {{nombre}}, {{productos}}, etc.
+        // 3. Reemplazar variables {{nombre}}, {{ productos }}, etc. (con o sin espacios)
         for (const [key, value] of Object.entries(variables)) {
-          html = html.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value)
+          html = html.replace(new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g'), value)
         }
         // Limpiar variables no reemplazadas
         html = html.replace(/\{\{[^}]+\}\}/g, '')
@@ -152,7 +152,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
 
       let finalSubject = subject || template?.settings?.subject || 'Confirmación de compra — BLIS Corp'
       for (const [key, value] of Object.entries(variables)) {
-        finalSubject = finalSubject.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value)
+        finalSubject = finalSubject.replace(new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g'), value)
       }
       finalSubject = finalSubject.replace(/\{\{[^}]+\}\}/g, '')
 

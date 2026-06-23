@@ -111,7 +111,10 @@ export async function PUT(request: NextRequest) {
       if (estado === 'completado') {
         const meta = (data.metadata || {}) as Record<string, unknown>
         const email = (meta.email_cliente as string) || ''
-        const nombre = (meta.nombre_cliente as string) || 'Cliente'
+        const nombreCompleto = (meta.nombre_cliente as string) || 'Cliente'
+        const nombreParts = nombreCompleto.trim().split(/\s+/)
+        const nombre = nombreParts[0] || 'Cliente'
+        const apellido = nombreParts.slice(1).join(' ') || ''
         const productos = (meta.productos as Array<any>) || []
 
         if (email && productos.length > 0) {
@@ -125,7 +128,7 @@ export async function PUT(request: NextRequest) {
           }))
 
           const { userId } = await createUserAndNotify({
-            email, nombre,
+            email, nombre, apellido,
             isGuest: !data.user_id,
             productos: prodNames,
             total: `${data.monto_usd?.toFixed(2) || '0'} USD`,

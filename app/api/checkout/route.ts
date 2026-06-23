@@ -636,10 +636,15 @@ export async function POST(request: NextRequest) {
         imagen: p.imagen || '',
       }));
 
+      const nombreParts = (nombre || '').trim().split(/\s+/)
+      const firstName = body.nombre || nombreParts[0] || email.split('@')[0]
+      const lastName = body.apellido || nombreParts.slice(1).join(' ') || ''
+
       createUserAndNotify({
         isGuest: !user_id,
         email: email.toLowerCase(),
-        nombre: nombre || email.split('@')[0],
+        nombre: firstName,
+        apellido: lastName,
         productos: nombreProductos,
         total: `${monto_usd?.toFixed(2) || '0'} USD`,
         metodo_pago: metodo_pago || 'Manual',

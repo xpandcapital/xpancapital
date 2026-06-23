@@ -10,13 +10,14 @@ function generatePassword(length = 10): string {
 interface CreateUserParams {
   email: string
   nombre: string
+  apellido?: string
   productos: string[]
   total: string
   metodo_pago: string
   empresa_id?: string
   telefono?: string
   isGuest?: boolean
-  productPrices?: Array<{ nombre: string; precio: string; cantidad?: number; categoria?: string }>
+  productPrices?: Array<{ nombre: string; precio: string; cantidad?: number; categoria?: string; imagen?: string }>
 }
 
 interface CreateUserResult {
@@ -71,7 +72,7 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
       // Reconstruir perfil faltante
       try {
         await supabase.from('profiles').upsert({
-          id: userId, email, nombre: params.nombre,
+          id: userId, email, nombre: params.nombre, apellido: params.apellido || '',
           telefono: params.telefono || '', empresa_id,
           creado_en: new Date().toISOString(),
         }, { onConflict: 'id' })
@@ -98,7 +99,7 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
         console.log('[createUserAndNotify] Usuario nuevo creado:', userId)
 
         await supabase.from('profiles').upsert({
-          id: userId, email, nombre: params.nombre,
+          id: userId, email, nombre: params.nombre, apellido: params.apellido || '',
           telefono: params.telefono || '', empresa_id,
           creado_en: new Date().toISOString(),
         }, { onConflict: 'id' })
@@ -144,22 +145,26 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
   // Normalizar total para la plantilla (el receipt ya agrega el signo $)
   const totalLimpio = params.total.replace(/^\$/, '').replace(/\s*USD\s*$/i, '').trim()
 
-  console.log('[createUserAndNotify] Enviando email:', evento, '| isGuest:', params.isGuest, '| isNewUser:', isNewUser, '| tempPassword presente:', !!tempPassword)
+  const emailVars = {
+    nombre: params.nombre,
+    apellido: params.apellido || '',
+    email,
+    productos: `<ul style="margin:0;padding:0;list-style:none;">${nombresList}</ul>`,
+    total: totalLimpio,
+    subtotal: totalLimpio,
+    metodo_pago: params.metodo_pago,
+    fecha_compra: new Date().toLocaleDateString('es-PE', { timeZone: 'America/Lima', day: 'numeric', month: 'long', year: 'numeric' }),
+    enlace_acceso: `${siteUrl}/miembros`,
+    descuento_monto: '0.00',
+    cupon: '',
+    ...extraVars,
+  }
+
+  console.log('[createUserAndNotify] Enviando email:', evento, '| isGuest:', params.isGuest, '| isNewUser:', isNewUser, '| tempPassword presente:', !!tempPassword, '| variables keys:', Object.keys(emailVars))
   await sendTemplateEmail({
     evento,
     to: email,
-    variables: {
-      nombre: params.nombre, email,
-      productos: `<ul style="margin:0;padding:0;list-style:none;">${nombresList}</ul>`,
-      total: totalLimpio,
-      subtotal: totalLimpio,
-      metodo_pago: params.metodo_pago,
-      fecha_compra: new Date().toLocaleDateString('es-PE', { day: 'numeric', month: 'long', year: 'numeric' }),
-      enlace_acceso: `${siteUrl}/miembros`,
-      descuento_monto: '0.00',
-      cupon: '',
-      ...extraVars,
-    },
+    variables: emailVars,
     products: params.productPrices || params.productos.map(p => ({ nombre: p, precio: '0', categoria: '' })),
   })
 

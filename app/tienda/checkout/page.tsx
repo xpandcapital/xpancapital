@@ -399,7 +399,8 @@ function CheckoutContent() {
             const commonPayload = {
                 empresa_id: DEFAULT_EMPRESA_ID,
                 user_id: userId,
-                nombre: `${form.nombre} ${form.apellido}`.trim(),
+                nombre: form.nombre.trim(),
+                apellido: form.apellido.trim(),
                 email: form.email,
                 telefono: form.telefono,
                 productos: productosPayload,
