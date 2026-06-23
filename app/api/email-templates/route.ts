@@ -76,26 +76,10 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (existing) {
-      // Actualizar la plantilla existente en vez de crear duplicado
-      const { data, error } = await supabase
-        .from('email_templates')
-        .update({
-          nombre,
-          descripcion,
-          settings: settings || {},
-          blocks: blocks || [],
-          evento: evento && evento !== 'ninguno' ? evento : null,
-          actualizado_en: new Date().toISOString()
-        })
-        .eq('id', existing.id)
-        .select()
-        .single()
-
-      if (error) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 400 })
-      }
-
-      return NextResponse.json({ success: true, data })
+      return NextResponse.json(
+        { success: false, error: `Ya existe una plantilla con el nombre "${nombre}". Usa "Guardar Como" en el modal de edición o elige otro nombre.` },
+        { status: 409 }
+      )
     }
 
     const { data, error } = await supabase

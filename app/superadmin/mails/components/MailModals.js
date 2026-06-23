@@ -23,18 +23,24 @@ export function ExportHtmlModal({ show, onClose, generateHTML, copied, setCopied
   );
 }
 
-export function SaveTemplateModal({ show, onClose, templateName, setTemplateName, currentTemplateId, onSave, templatesLoading }) {
+export function SaveTemplateModal({ show, onClose, templateName, setTemplateName, currentTemplateId, saveAsNew, onSave, templatesLoading }) {
   if (!show) return null;
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-[#111111] border border-gray-200 dark:border-[#333] rounded-2xl shadow-2xl w-full max-w-md">
         <div className="flex justify-between p-5 border-b border-gray-100 dark:border-[#222]">
-          <h3 className="font-bold flex gap-2 text-gray-900 dark:text-white"><Save className="text-emerald-500"/> Guardar Plantilla</h3>
+          <h3 className="font-bold flex gap-2 text-gray-900 dark:text-white"><Save className="text-emerald-500"/> {saveAsNew ? 'Guardar como Nueva Plantilla' : 'Guardar Plantilla'}</h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X/></button>
         </div>
         <div className="p-5 space-y-4">
-          <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre de la plantilla</label><input type="text" value={templateName} onChange={(e) => setTemplateName(e.target.value)} placeholder="Ej: Newsletter Enero 2026" className="w-full px-4 py-2 border border-gray-300 dark:border-[#333] rounded-lg bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e11d48]" /></div>
-          {currentTemplateId ? (<div className="grid grid-cols-2 gap-3"><button onClick={() => onSave(false)} disabled={templatesLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 disabled:opacity-50"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 13 17 13"/></svg> Actualizar</button><button onClick={() => onSave(true)} disabled={templatesLoading} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 disabled:opacity-50 text-sm"><Save size={18} /> Guardar Como</button></div>) : (<button onClick={() => onSave(true)} disabled={templatesLoading} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 disabled:opacity-50"><Save size={18} /> {templatesLoading ? 'Guardando...' : 'Guardar Plantilla'}</button>)}
+          <div><label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre de la plantilla</label><input type="text" value={templateName} onChange={(e) => setTemplateName(e.target.value)} placeholder={saveAsNew ? 'Ej: Mi Newsletter Personalizado' : 'Ej: Newsletter Enero 2026'} className="w-full px-4 py-2 border border-gray-300 dark:border-[#333] rounded-lg bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#e11d48]" /></div>
+          {saveAsNew ? (
+            <button onClick={() => onSave(true)} disabled={templatesLoading} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 disabled:opacity-50"><Plus size={18} /> {templatesLoading ? 'Creando...' : 'Crear Nueva Plantilla'}</button>
+          ) : currentTemplateId ? (
+            <div className="grid grid-cols-2 gap-3"><button onClick={() => onSave(false)} disabled={templatesLoading} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 disabled:opacity-50"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 13 17 13"/></svg> Actualizar</button><button onClick={() => onSave(true)} disabled={templatesLoading} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 disabled:opacity-50 text-sm"><Save size={18} /> Guardar Como</button></div>
+          ) : (
+            <button onClick={() => onSave(true)} disabled={templatesLoading} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 disabled:opacity-50"><Save size={18} /> {templatesLoading ? 'Guardando...' : 'Guardar Plantilla'}</button>
+          )}
         </div>
       </div>
     </div>

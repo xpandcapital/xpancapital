@@ -22,6 +22,7 @@ export default function Mails() {
         importTemplate={mail.importTemplate}
         fileInputRef={mail.fileInputRef}
         setShowSaveModal={mail.setShowSaveModal}
+        onSaveAsNew={mail.handleSaveAsNew}
         setShowExportHtml={mail.setShowExportHtml}
         onOpenSend={() => mail.handleOpenSendModal()}
         onSaveCurrent={() => mail.currentTemplateId ? mail.handleSaveTemplate(false) : mail.setShowSaveModal(true)}
@@ -119,7 +120,7 @@ export default function Mails() {
       </div>
 
       <ExportHtmlModal show={mail.showExportHtml} onClose={() => mail.setShowExportHtml(false)} generateHTML={htmlOutput} copied={mail.copied} setCopied={mail.setCopied} />
-      <SaveTemplateModal show={mail.showSaveModal} onClose={() => mail.setShowSaveModal(false)} templateName={mail.templateName} setTemplateName={mail.setTemplateName} currentTemplateId={mail.currentTemplateId} onSave={mail.handleSaveTemplate} templatesLoading={mail.templatesLoading} />
+      <SaveTemplateModal show={mail.showSaveModal} onClose={() => mail.setShowSaveModal(false)} templateName={mail.templateName} setTemplateName={mail.setTemplateName} currentTemplateId={mail.currentTemplateId} saveAsNew={mail.saveAsNew} onSave={mail.handleSaveTemplate} templatesLoading={mail.templatesLoading} />
       <TemplatesModal show={mail.showTemplatesModal} onClose={() => mail.setShowTemplatesModal(false)} savedTemplates={mail.savedTemplates} onLoadTemplate={mail.handleLoadTemplate} onDeleteTemplate={mail.deleteTemplateFromDb} />
       <SendModal show={mail.showSendModal} onClose={() => mail.setShowSendModal(false)} campaignConfig={mail.campaignConfig} setCampaignConfig={mail.setCampaignConfig} senders={mail.senders} sendTab={mail.sendTab} setSendTab={mail.setSendTab} sendingEmail={mail.sendingEmail} onSend={() => mail.handleSendCampaign()} attachments={mail.attachments} setAttachments={mail.setAttachments} />
       <MediaModal show={mail.showMediaModal} onClose={() => mail.setShowMediaModal(false)} media={mail.media} mediaLoading={mail.mediaLoading} mediaTab={mail.mediaTab} setMediaTab={mail.setMediaTab} uploadMedia={mail.uploadMedia} deleteMedia={mail.deleteMedia} mediaCallbackRef={mail.mediaCallbackRef} />

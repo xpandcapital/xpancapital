@@ -2,7 +2,7 @@
 import React from 'react';
 import { Monitor, Smartphone, Sun, Moon, Settings, Plus, FolderOpen, Upload, Database, Code, Send, Mail, Save } from 'lucide-react';
 
-export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMode, setShowSettingsModal, onNewTemplate, setShowTemplatesModal, importTemplate, fileInputRef, setShowSaveModal, onSaveCurrent, currentTemplateId, setShowExportHtml, onOpenSend }) {
+export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMode, setShowSettingsModal, onNewTemplate, setShowTemplatesModal, importTemplate, fileInputRef, setShowSaveModal, onSaveAsNew, onSaveCurrent, currentTemplateId, setShowExportHtml, onOpenSend }) {
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-white dark:bg-[#111111] border-b border-gray-200 dark:border-[#222222] shadow-sm z-20 flex-shrink-0">
       <div className="flex items-center space-x-3">
@@ -39,7 +39,7 @@ export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMo
         <button onClick={onSaveCurrent} title="Guardar (sobrescribir)" className="p-2 flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-md">
           <Save size={18} />
         </button>
-        <button onClick={() => setShowSaveModal(true)} title="Guardar como Nuevo" className="p-2 flex items-center justify-center bg-emerald-500/80 hover:bg-emerald-500 text-white rounded-md text-[10px] font-bold gap-1">
+        <button onClick={onSaveAsNew} title="Guardar como Nueva Plantilla" className="p-2 flex items-center justify-center bg-emerald-500/80 hover:bg-emerald-500 text-white rounded-md text-[10px] font-bold gap-1">
           <Plus size={14} /> Nuevo
         </button>
         <button onClick={() => setShowExportHtml(true)} title="Exportar HTML" className="p-2 flex items-center justify-center bg-[#e11d48] hover:bg-[#be123c] text-white rounded-md transition-colors">
