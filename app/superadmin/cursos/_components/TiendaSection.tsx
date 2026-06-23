@@ -13,6 +13,7 @@ interface Props {
 export function TiendaSection({ course, onUpdate }: Props) {
   const [expanded, setExpanded] = useState(course.venderEnTienda)
   const [mostrarSelector, setMostrarSelector] = useState(false)
+  const [busquedaProducto, setBusquedaProducto] = useState("")
   const [productosDisponibles, setProductosDisponibles] = useState<Array<{ id: string; nombre: string }>>([])
 
   useEffect(() => {
@@ -151,26 +152,45 @@ export function TiendaSection({ course, onUpdate }: Props) {
                       Seleccionar producto existente
                     </span>
                     <button
-                      onClick={() => setMostrarSelector(false)}
+                      onClick={() => { setMostrarSelector(false); setBusquedaProducto("") }}
                       className="text-[10px] text-gray-500 hover:text-white"
                     >
                       Cancelar
                     </button>
                   </div>
-                  <select
-                    value={course.linkProductoId || ''}
-                    onChange={(e) => {
-                      if (e.target.value) vincularProductoExistente(e.target.value)
-                    }}
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500/50 transition-colors appearance-none"
-                  >
-                    <option value="" className="bg-zinc-900">Seleccionar producto...</option>
+                  <input
+                    type="text"
+                    value={busquedaProducto}
+                    onChange={(e) => setBusquedaProducto(e.target.value)}
+                    placeholder="Buscar producto..."
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 transition-colors"
+                    autoFocus
+                  />
+                  <div className="max-h-40 overflow-y-auto space-y-0.5">
                     {productosDisponibles
-                      .filter(p => p.id !== course.productoId)
+                      .filter(p =>
+                        p.id !== course.productoId &&
+                        (!busquedaProducto || p.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()))
+                      )
+                      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
                       .map(p => (
-                        <option key={p.id} value={p.id} className="bg-zinc-900">{p.nombre}</option>
+                        <button
+                          key={p.id}
+                          onClick={() => vincularProductoExistente(p.id)}
+                          className="w-full text-left px-3 py-2 rounded-lg text-sm text-white hover:bg-purple-500/20 hover:text-purple-300 transition-colors truncate"
+                        >
+                          {p.nombre}
+                        </button>
                       ))}
-                  </select>
+                    {productosDisponibles.filter(p =>
+                      p.id !== course.productoId &&
+                      (!busquedaProducto || p.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()))
+                    ).length === 0 && (
+                      <p className="text-[10px] text-gray-500 px-3 py-2 text-center">
+                        {busquedaProducto ? 'No se encontraron productos' : 'No hay productos disponibles'}
+                      </p>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
