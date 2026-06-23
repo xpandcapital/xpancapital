@@ -6,9 +6,9 @@ import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-function getSupabase() {
-  return createClient(supabaseUrl, supabaseServiceKey)
-}
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: { autoRefreshToken: false, persistSession: false }
+})
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +19,6 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase().trim()
-    const supabase = getSupabase()
 
     // Buscar usuario en auth
     const { data: usersData, error: listError } = await supabase.auth.admin.listUsers()
@@ -30,20 +29,16 @@ export async function POST(request: NextRequest) {
 
     const user = usersData?.users?.find(u => u.email?.toLowerCase() === normalizedEmail)
 
-    // Si no existe, devolvemos éxito igual para no revelar existencia
     if (!user) {
       return NextResponse.json({ success: true })
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
 
-    // Generar link de recuperación de Supabase sin enviar su email por defecto
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'recovery',
       email: normalizedEmail,
-      options: {
-        redirectTo: `${siteUrl}/reset-password`,
-      },
+      options: { redirectTo: `${siteUrl}/reset-password` },
     })
 
     if (linkError || !linkData?.properties?.action_link) {
@@ -53,7 +48,6 @@ export async function POST(request: NextRequest) {
 
     const resetLink = linkData.properties.action_link
 
-    // Detectar el evento de la plantilla (puede estar como slug o nombre)
     const { data: templateRow } = await supabase
       .from('email_templates')
       .select('evento, nombre')
@@ -63,7 +57,6 @@ export async function POST(request: NextRequest) {
 
     const evento = templateRow?.evento || 'cuenta_restablecer_password'
 
-    // Enviar con nuestra plantilla personalizada
     await sendTemplateEmail({
       evento,
       subject: 'Restablecer contraseña — BLIS Corp',
