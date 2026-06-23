@@ -322,6 +322,13 @@ export default function ProfilePage() {
     const [notifications, setNotifications] = useState(true);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [changingPassword, setChangingPassword] = useState(false);
+
     const [notificacionesTipos, setNotificacionesTipos] = useState<Record<string, boolean>>({
         blog: true,
         leads: true,
@@ -373,6 +380,49 @@ export default function ProfilePage() {
     const handleUpdate = () => {
         updateProfile({ name, profilePic });
         showToast("¡Éxito! Tus datos han sido actualizados en la base de datos de Blis Corp.", "success");
+    };
+
+    const handleChangePassword = async () => {
+        setPasswordError(null);
+        if (newPassword.length < 6) {
+            setPasswordError("La nueva contraseña debe tener al menos 6 caracteres");
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setPasswordError("Las contraseñas no coinciden");
+            return;
+        }
+        if (!email) {
+            setPasswordError("No se pudo verificar tu identidad");
+            return;
+        }
+        setChangingPassword(true);
+        try {
+            const supabase = getSupabase();
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email,
+                password: currentPassword,
+            });
+            if (signInError) {
+                setPasswordError("Contraseña actual incorrecta");
+                setChangingPassword(false);
+                return;
+            }
+            const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+            if (updateError) {
+                setPasswordError(updateError.message);
+                setChangingPassword(false);
+                return;
+            }
+            setShowPasswordModal(false);
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
+            showToast("Contraseña actualizada correctamente", "success");
+        } catch {
+            setPasswordError("Error al cambiar la contraseña");
+        }
+        setChangingPassword(false);
     };
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -584,7 +634,7 @@ export default function ProfilePage() {
                     </h2>
                     <div className="bg-zinc-950/30 border border-white/5 p-8 rounded-[2.5rem] space-y-6 shadow-xl">
                         <button
-                            onClick={() => showToast("Función para cambiar contraseña habilitada. Revisa tu email para el enlace de seguridad.", "info")}
+                            onClick={() => { setPasswordError(null); setShowPasswordModal(true); }}
                             className="w-full flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group text-left"
                         >
                             <div className="flex items-center gap-4">
@@ -791,6 +841,95 @@ export default function ProfilePage() {
 
                 {/* Referral Program */}
                 <ReferralPanel />
+
+                {/* Modal Cambiar Contraseña */}
+                <AnimatePresence>
+                    {showPasswordModal && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+                            onClick={(e) => { if (e.target === e.currentTarget && !changingPassword) { setShowPasswordModal(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); } }}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.95, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.95, opacity: 0 }}
+                                className="bg-zinc-900 border border-white/10 rounded-3xl p-8 w-full max-w-md shadow-2xl"
+                            >
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-lg font-black text-white uppercase tracking-widest flex items-center gap-3">
+                                        <Lock className="w-5 h-5 text-blis-red" /> Nueva Contraseña
+                                    </h3>
+                                    <button
+                                        onClick={() => { if (!changingPassword) { setShowPasswordModal(false); setCurrentPassword(""); setNewPassword(""); setConfirmPassword(""); } }}
+                                        className="text-gray-500 hover:text-white transition-colors"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                {passwordError && (
+                                    <div className="mb-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30">
+                                        <p className="text-red-400 text-sm font-medium text-center">{passwordError}</p>
+                                    </div>
+                                )}
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                                            Contraseña Actual
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                                            Nueva Contraseña
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            placeholder="Mínimo 6 caracteres"
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                                            Confirmar Nueva Contraseña
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            placeholder="Repite la contraseña"
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={handleChangePassword}
+                                        disabled={changingPassword || !currentPassword || !newPassword || !confirmPassword}
+                                        className="w-full py-4 bg-blis-red text-white font-black uppercase tracking-widest rounded-xl hover:bg-[#87082a] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {changingPassword ? (
+                                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <Lock className="w-4 h-4" />
+                                        )}
+                                        {changingPassword ? "Cambiando..." : "Cambiar Contraseña"}
+                                    </button>
+                                </div>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
