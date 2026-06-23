@@ -71,6 +71,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                         title: item.producto?.nombre || 'Producto',
                         image: item.producto?.imagen_principal || '',
                         price: item.precio_unitario || 0,
+                        curso_id: item.producto?.curso_id || null,
+                        slug: item.producto?.slug || '',
                     })));
                 setPurchasedProducts(purchased);
             }

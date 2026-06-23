@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Star, ShoppingCart, ShieldCheck, ChevronLeft, ChevronRight, Heart, Clock } from "lucide-react";
+import { Star, ShoppingCart, ShieldCheck, ChevronLeft, ChevronRight, Heart, Clock, Eye } from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -143,7 +143,9 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
     const { showToast } = useToast();
     const router = useRouter();
     const isLiked = favorites.some(fav => fav.id === product.id);
-    const isPurchased = purchasedProducts.some(p => p.id === product.id);
+    const purchasedInfo = purchasedProducts.find(p => p.id === product.id);
+    const isPurchased = !!purchasedInfo;
+    const purchasedCursoId = purchasedInfo?.curso_id || null;
     const categoryKey = product.category?.toLowerCase() || 'general';
     const typeStyle = TYPE_STYLES[categoryKey] || { label: product.category || 'Producto', color: 'bg-gray-500/20 text-gray-400 border-gray-500/30' };
 
@@ -205,21 +207,29 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                 <div className="mt-auto space-y-4">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex flex-col">
-                            {product.originalPrice ? (
-                                <span className="text-gray-600 text-[12px] line-through font-mono leading-none mb-1">
-                                    ${product.originalPrice.toFixed(2)}
+                            {isPurchased ? (
+                                <span className="text-emerald-400 font-black text-lg uppercase tracking-tight leading-none">
+                                    ✓ Comprado
                                 </span>
                             ) : (
-                                <div className="h-[12px] mb-1" />
+                                <>
+                                    {product.originalPrice ? (
+                                        <span className="text-gray-600 text-[12px] line-through font-mono leading-none mb-1">
+                                            ${product.originalPrice.toFixed(2)}
+                                        </span>
+                                    ) : (
+                                        <div className="h-[12px] mb-1" />
+                                    )}
+                                    <div className="flex flex-col">
+                                        <span className="text-white font-black text-3xl tracking-tighter leading-none">
+                                            ${product.price.toFixed(2)}
+                                        </span>
+                                        <span className={`text-emerald-500 font-black text-[10px] mt-2 flex items-center gap-1 uppercase tracking-widest transition-opacity ${user ? 'opacity-100' : 'opacity-40'}`} suppressHydrationWarning>
+                                            {Math.round(product.price * 10).toLocaleString()} BLISC
+                                        </span>
+                                    </div>
+                                </>
                             )}
-                            <div className="flex flex-col">
-                                <span className="text-white font-black text-3xl tracking-tighter leading-none">
-                                    ${product.price.toFixed(2)}
-                                </span>
-                                <span className={`text-emerald-500 font-black text-[10px] mt-2 flex items-center gap-1 uppercase tracking-widest transition-opacity ${user ? 'opacity-100' : 'opacity-40'}`} suppressHydrationWarning>
-                                    {Math.round(product.price * 10).toLocaleString()} BLISC
-                                </span>
-                            </div>
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -245,27 +255,37 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                                 <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
                             </button>
 
-                            <button
-                                onClick={() => {
-                                    if (isPurchased) {
-                                        showToast("Ya has comprado este producto.", "info");
-                                        return;
-                                    }
-                                    addToCart({
-                                        id: product.id,
-                                        title: product.title,
-                                        image: product.image,
-                                        price: product.price
-                                    })
-                                    showToast(`"${product.title}" agregado al carrito`, "success");
-                                    openCart();
-                                }}
-                                disabled={isPurchased}
-                                className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-90 group/cart ${isPurchased ? 'bg-gray-500/20 text-gray-500 cursor-not-allowed' : 'bg-white text-black hover:bg-blis-red hover:text-white'}`}
-                                title={isPurchased ? "Ya comprado" : "Añadir al Carrito"}
-                            >
-                                <ShoppingCart className="w-6 h-6 group-hover/cart:scale-110 transition-transform" />
-                            </button>
+                            {isPurchased && purchasedCursoId ? (
+                                <Link
+                                    href={`/miembros/academia?iniciar=${purchasedCursoId}`}
+                                    className="w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-90 bg-emerald-500 text-white hover:bg-emerald-400"
+                                    title="Ir al curso"
+                                >
+                                    <Eye className="w-6 h-6" />
+                                </Link>
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        if (isPurchased) {
+                                            showToast("Ya has comprado este producto.", "info");
+                                            return;
+                                        }
+                                        addToCart({
+                                            id: product.id,
+                                            title: product.title,
+                                            image: product.image,
+                                            price: product.price
+                                        })
+                                        showToast(`"${product.title}" agregado al carrito`, "success");
+                                        openCart();
+                                    }}
+                                    disabled={isPurchased}
+                                    className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all shadow-[0_10px_30px_rgba(255,255,255,0.1)] active:scale-90 group/cart ${isPurchased ? 'bg-gray-500/20 text-gray-500 cursor-not-allowed' : 'bg-white text-black hover:bg-blis-red hover:text-white'}`}
+                                    title={isPurchased ? "Ya comprado" : "Añadir al Carrito"}
+                                >
+                                    <ShoppingCart className="w-6 h-6 group-hover/cart:scale-110 transition-transform" />
+                                </button>
+                            )}
                         </div>
                     </div>
 

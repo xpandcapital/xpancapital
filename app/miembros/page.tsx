@@ -28,7 +28,7 @@ import { useEffect } from "react";
 export default function UserDashboard() {
     const { user } = useAuth();
     const { stats, loading: statsLoading, fetchUserStats } = useUserStats();
-    const { cursos, loading: cursosLoading } = useCursos();
+    const { cursos: _allCursos, loading: _allCursosLoading } = useCursos();
     const { userCursos, loading: userCursosLoading, refetch: refetchUserCursos } = useUserCursos(user?.id || null);
     const { compras, loading: comprasLoading, fetchUserPurchases } = useCompras();
     const { coinsEnabled } = useShop();
@@ -112,6 +112,7 @@ export default function UserDashboard() {
             const hasDownload = item.producto?.archivo_url || (isDigital && !hasCursoId);
             return {
                 id: item.producto?.id || c.id,
+                cursoId: item.producto?.curso_id || null,
                 name: item.producto?.nombre || 'Producto',
                 category: item.producto?.categoria?.nombre || (isService ? 'Curso' : isDigital ? 'Ebook' : tipo === 'fisico' ? 'Kit' : tipo === 'suscripcion' ? 'Mentoría' : 'Producto'),
                 image: item.producto?.imagen_principal || '',
@@ -129,7 +130,7 @@ export default function UserDashboard() {
         }
     }, [user?.id, fetchUserPurchases]);
 
-    if (statsLoading || cursosLoading) {
+    if (statsLoading || (userCursosLoading && comprasLoading)) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
@@ -221,7 +222,7 @@ export default function UserDashboard() {
                     <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible md:grid md:grid-cols-2 lg:grid-cols-4">
                         {recentPurchases.map((item, i) => (
                             item.isCourse ? (
-                                <Link key={item.id || i} href="/miembros/academia" className="group cursor-pointer shrink-0 w-48 md:w-auto bg-black/40 border border-blis-red/20 rounded-2xl overflow-hidden hover:border-blis-red/40 transition-all flex flex-col">
+                                <Link key={item.id || i} href={`/miembros/academia?iniciar=${item.cursoId || ''}`} className="group cursor-pointer shrink-0 w-48 md:w-auto bg-black/40 border border-blis-red/20 rounded-2xl overflow-hidden hover:border-blis-red/40 transition-all flex flex-col">
                                     <div className="flex items-center gap-3 p-3 bg-zinc-900/50">
                                         {item.image ? (
                                             <div className="w-12 h-12 rounded-xl overflow-hidden relative flex-shrink-0">

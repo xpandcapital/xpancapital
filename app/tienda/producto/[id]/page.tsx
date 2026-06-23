@@ -204,7 +204,7 @@ export default function ProductDetailPage() {
     const params = useParams();
     const id = params.id as string;
     const router = useRouter();
-    const { addToCart, toggleFavorite, favorites, coinsEnabled } = useShop();
+    const { addToCart, toggleFavorite, favorites, coinsEnabled, purchasedProducts } = useShop();
     const { showToast } = useToast();
     const { fetchProductBySlug, loading } = useProducts();
 
@@ -217,6 +217,9 @@ export default function ProductDetailPage() {
     const [activeTab, setActiveTab] = useState<"descripcion" | "detalles" | "reviews">("descripcion");
 
     const isLiked = product ? favorites.some(fav => fav.id === product.id) : false;
+    const purchasedInfo = product ? purchasedProducts.find(p => p.id === product.id) : null;
+    const isPurchased = !!purchasedInfo;
+    const purchasedCursoId = purchasedInfo?.curso_id || null;
 
     // Load product from Supabase or fallback to mock
     useEffect(() => {
@@ -498,43 +501,71 @@ export default function ProductDetailPage() {
 
                                 {/* Section 3: Call to Action Buttons */}
                                 <div className="space-y-3">
-                                    {/* Add to Cart Button */}
-                                    <motion.button
-                                        onClick={() => {
-                                            addToCart({ ...product, price: product.price * quantity });
-                                            showToast("¡Añadido al carrito!", "success");
-                                        }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="w-full bg-white/5 border border-white/10 text-white py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/10 transition-all"
-                                    >
-                                        <ShoppingCart className="w-5 h-5" />
-                                        <span className="text-base font-bold uppercase tracking-tight">Añadir al Carrito</span>
-                                    </motion.button>
-                                    
-                                    {/* Buy Now Button */}
-                                    <motion.button
-                                        onClick={() => {
-                                            addToCart({ ...product, price: product.price * quantity });
-                                            router.push('/tienda/checkout');
-                                        }}
-                                        animate={{
-                                            scale: [1, 1.02, 1],
-                                            boxShadow: [
-                                                "0 15px 40px rgba(16,185,129,0.3)",
-                                                "0 20px 60px rgba(16,185,129,0.5)",
-                                                "0 15px 40px rgba(16,185,129,0.3)"
-                                            ]
-                                        }}
-                                        transition={{
-                                            duration: 1.5,
-                                            repeat: Infinity,
-                                            ease: "easeInOut"
-                                        }}
-                                        className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:brightness-110 transition-all active:scale-[0.98] group relative overflow-hidden border border-emerald-400/30"
-                                    >
-                                        <Lock className="w-5 h-5" />
-                                        <span className="text-xl font-black uppercase tracking-tight">Comprar Ahora</span>
-                                    </motion.button>
+                                    {isPurchased ? (
+                                        <>
+                                            <div className="w-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 py-4 rounded-2xl flex items-center justify-center gap-3">
+                                                <CheckCircle2 className="w-5 h-5" />
+                                                <span className="text-base font-black uppercase tracking-tight">Ya has comprado este producto</span>
+                                            </div>
+                                            {purchasedCursoId ? (
+                                                <Link
+                                                    href={`/miembros/academia?iniciar=${purchasedCursoId}`}
+                                                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:brightness-110 transition-all active:scale-[0.98] group"
+                                                >
+                                                    <Eye className="w-5 h-5" />
+                                                    <span className="text-xl font-black uppercase tracking-tight">Ir al Curso</span>
+                                                </Link>
+                                            ) : (
+                                                <Link
+                                                    href="/miembros/productos"
+                                                    className="w-full bg-white/5 border border-white/10 text-white py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/10 transition-all"
+                                                >
+                                                    <Eye className="w-5 h-5" />
+                                                    <span className="text-base font-bold uppercase tracking-tight">Ver Mis Productos</span>
+                                                </Link>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* Add to Cart Button */}
+                                            <motion.button
+                                                onClick={() => {
+                                                    addToCart({ ...product, price: product.price * quantity });
+                                                    showToast("¡Añadido al carrito!", "success");
+                                                }}
+                                                whileTap={{ scale: 0.98 }}
+                                                className="w-full bg-white/5 border border-white/10 text-white py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/10 transition-all"
+                                            >
+                                                <ShoppingCart className="w-5 h-5" />
+                                                <span className="text-base font-bold uppercase tracking-tight">Añadir al Carrito</span>
+                                            </motion.button>
+
+                                            {/* Buy Now Button */}
+                                            <motion.button
+                                                onClick={() => {
+                                                    addToCart({ ...product, price: product.price * quantity });
+                                                    router.push('/tienda/checkout');
+                                                }}
+                                                animate={{
+                                                    scale: [1, 1.02, 1],
+                                                    boxShadow: [
+                                                        "0 15px 40px rgba(16,185,129,0.3)",
+                                                        "0 20px 60px rgba(16,185,129,0.5)",
+                                                        "0 15px 40px rgba(16,185,129,0.3)"
+                                                    ]
+                                                }}
+                                                transition={{
+                                                    duration: 1.5,
+                                                    repeat: Infinity,
+                                                    ease: "easeInOut"
+                                                }}
+                                                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-black py-4 rounded-2xl flex items-center justify-center gap-3 hover:brightness-110 transition-all active:scale-[0.98] group relative overflow-hidden border border-emerald-400/30"
+                                            >
+                                                <Lock className="w-5 h-5" />
+                                                <span className="text-xl font-black uppercase tracking-tight">Comprar Ahora</span>
+                                            </motion.button>
+                                        </>
+                                    )}
 
                                     <div className="flex justify-center gap-6 py-1 opacity-50">
                                         <div className="flex items-center gap-2">
