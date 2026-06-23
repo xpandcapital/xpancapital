@@ -33,95 +33,101 @@ export async function assignCoursesToUser(
     return { assigned, error: 'Faltan datos para asignar cursos' }
   }
 
-  const cursoProducts = productos.filter(
-    (p) => p.productType === 'curso' || p.tipo === 'servicio'
-  )
+  const { data: advisor } = await supabase
+    .from('advisors')
+    .select('id')
+    .eq('email', email.toLowerCase())
+    .maybeSingle()
 
-  for (const product of cursoProducts) {
+  let advisorId = advisor?.id
+  if (!advisorId) {
+    const { data: newAdvisor, error: createAdvError } = await supabase
+      .from('advisors')
+      .insert({
+        email: email.toLowerCase(),
+        name: nombre || email.split('@')[0],
+      })
+      .select('id')
+      .single()
+    if (createAdvError) {
+      return { assigned: 0, error: 'No se pudo crear el registro de asesor' }
+    }
+    advisorId = newAdvisor?.id
+  }
+
+  if (!advisorId) {
+    return { assigned: 0, error: 'No se pudo obtener el ID del asesor' }
+  }
+
+  for (const product of productos) {
     try {
-      let cursoId = product.curso_id || null
-      let cursoExists = !!cursoId
+      const productoId = product.producto_id || product.id
+      if (!productoId) continue
 
-      if (!cursoExists && (product.slug || product.producto_id || product.id)) {
-        const lookup = product.slug || product.producto_id || product.id
+      // Buscar curso_id real desde BD (fuente de verdad)
+      const { data: producto } = await supabase
+        .from('productos')
+        .select('curso_id, nombre')
+        .eq('id', productoId)
+        .maybeSingle()
+
+      let cursoId = producto?.curso_id || product.curso_id || null
+
+      // Fallback: buscar por slug del producto si no hay curso_id explícito
+      if (!cursoId && product.slug) {
         const { data: cursoBySlug } = await supabase
           .from('cursos')
           .select('id')
-          .eq('slug', lookup)
+          .eq('slug', product.slug)
           .maybeSingle()
         if (cursoBySlug) {
           cursoId = cursoBySlug.id
-          cursoExists = true
         }
       }
 
-      if (!cursoExists && product.id) {
+      // Fallback: buscar por ID del producto en cursos
+      if (!cursoId && productoId) {
         const { data: cursoData } = await supabase
           .from('cursos')
           .select('id')
-          .eq('id', product.id)
+          .eq('id', productoId)
           .maybeSingle()
         if (cursoData) {
           cursoId = cursoData.id
-          cursoExists = true
         }
       }
 
-      if (!cursoExists) {
-        error = error || `No se encontró el curso vinculado al producto "${product.nombre || product.id}"`
-        continue
-      }
+      if (!cursoId) continue
 
-      if (cursoExists && cursoId) {
-        const { data: advisor } = await supabase
-          .from('advisors')
-          .select('id')
-          .eq('email', email.toLowerCase())
-          .maybeSingle()
+      const { error: assignError } = await supabase.from('equipo_cursos').insert({
+        advisor_id: advisorId,
+        curso_id: cursoId,
+        user_id: userId,
+        estado: 'asignado',
+        lecciones_completadas: [],
+      })
 
-        let advisorId = advisor?.id
-        if (!advisorId) {
-          const { data: newAdvisor, error: createAdvError } = await supabase
-            .from('advisors')
-            .insert({
-              email: email.toLowerCase(),
-              name: nombre || email.split('@')[0],
-            })
-            .select('id')
-            .single()
-          if (createAdvError) {
-            error = 'No se pudo crear el registro de asesor'
-            continue
-          }
-          advisorId = newAdvisor?.id
-        }
-
-        if (advisorId) {
-          const { error: assignError } = await supabase.from('equipo_cursos').insert({
-            advisor_id: advisorId,
-            curso_id: cursoId,
-            user_id: userId,
-            estado: 'asignado',
-            lecciones_completadas: [],
-          })
-
-          if (assignError && assignError.code !== '23505') {
-            error = 'Error al asignar el curso'
-          } else if (!assignError) {
-            assigned++
-          } else if (assignError?.code === '23505') {
-            await supabase
-              .from('equipo_cursos')
-              .update({ user_id: userId, estado: 'asignado' })
-              .eq('advisor_id', advisorId)
-              .eq('curso_id', cursoId)
-            assigned++
-          }
+      if (assignError && assignError.code !== '23505') {
+        console.error('[assignCoursesToUser] Error asignando curso:', assignError)
+        error = error || 'Error al asignar el curso'
+      } else if (!assignError) {
+        assigned++
+      } else if (assignError?.code === '23505') {
+        const { error: updateError } = await supabase
+          .from('equipo_cursos')
+          .update({ user_id: userId, estado: 'asignado' })
+          .eq('advisor_id', advisorId)
+          .eq('curso_id', cursoId)
+        if (updateError) {
+          console.error('[assignCoursesToUser] Error actualizando duplicado:', updateError)
+          error = error || 'Error al actualizar curso existente'
+        } else {
+          assigned++
         }
       }
     } catch (e) {
       console.error('[assignCoursesToUser] Error en auto-asignación de curso:', e)
-      error = 'Error interno al asignar curso'
+      error = error || 'Error interno al asignar curso'
     }
   }
 

@@ -30,6 +30,7 @@ interface ProductFormModalProps {
     enablePerishables: boolean
     enableSerialization: boolean
   }
+  cursos?: Array<{ id: string; nombre: string }>
   onClose: () => void
   onSave: (data: any) => Promise<void>
 }
@@ -43,6 +44,7 @@ export function ProductFormModal({
   taxCurrency,
   isBlisCoinsEnabled,
   settings,
+  cursos = [],
   onClose,
   onSave
 }: ProductFormModalProps) {
@@ -74,7 +76,8 @@ export function ProductFormModal({
         isAutoSku: editingProduct.isAutoSku ?? true,
         purchaseDate: editingProduct.purchaseDate || '',
         expirationDate: editingProduct.expirationDate || '',
-        image: editingProduct.image || null
+        image: editingProduct.image || null,
+        cursoId: editingProduct.curso_id || null
       }
     }
     return {
@@ -93,7 +96,8 @@ export function ProductFormModal({
       isAutoSku: true,
       purchaseDate: '',
       expirationDate: '',
-      image: null
+      image: null,
+      cursoId: null
     }
   })
 
@@ -143,7 +147,8 @@ export function ProductFormModal({
       fecha_vencimiento: formData.expirationDate || undefined,
       manejo_perecedero: perishableHandling,
       meta_descripcion: formData.metaDescripcion || null,
-      meta_titulo: null
+      meta_titulo: null,
+      curso_id: formData.cursoId || null
     }
 
     await onSave(data)
@@ -408,6 +413,30 @@ export function ProductFormModal({
                 {categories.map(c => <option key={c.id} value={c.name} className="bg-zinc-900">{c.name} ({c.skuPrefix})</option>)}
               </select>
             </div>
+
+            {cursos.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-purple-400 uppercase tracking-widest">
+                  Vincular a Curso
+                </label>
+                <select
+                  name="curso_id"
+                  value={formData.cursoId || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, cursoId: e.target.value || null }))}
+                  className="w-full bg-white/5 border border-purple-500/20 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-purple-500 transition-all appearance-none"
+                >
+                  <option value="" className="bg-zinc-900">Sin curso vinculado</option>
+                  {cursos.map(c => (
+                    <option key={c.id} value={c.id} className="bg-zinc-900">{c.nombre}</option>
+                  ))}
+                </select>
+                {formData.cursoId && (
+                  <p className="text-[10px] text-purple-400/70 flex items-center gap-1">
+                    Al comprar este producto se asignará automáticamente el curso vinculado
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2">
               <div className="flex justify-between items-center pb-1">

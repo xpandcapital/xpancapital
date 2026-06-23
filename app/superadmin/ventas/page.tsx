@@ -6,7 +6,7 @@ import {
     DollarSign, Clock, CheckCircle2, AlertCircle, Loader2,
     Search, Edit3, Trash2, Plus, Filter, ShoppingBag, User,
     Banknote, CreditCard, ExternalLink, History, ShieldCheck,
-    Coins, Clock3, Eye
+    Coins, Clock3, Eye, GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,7 @@ interface Venta {
     estado: string;
     creado_en: string;
     cliente?: { id: string; nombre: string; email: string; avatar_url: string | null };
-    producto?: { id: string; nombre: string; imagen_principal: string | null; tipo: string; categoria?: { nombre: string } | null };
+    producto?: { id: string; nombre: string; imagen_principal: string | null; tipo: string; curso_id?: string | null; curso?: { id: string; nombre: string } | null; categoria?: { nombre: string } | null };
 }
 
 interface LogEntry {
@@ -236,7 +236,15 @@ export default function VentasAdminPage() {
                                                    className="text-sm text-blis-red hover:underline truncate max-w-[200px] block">
                                                     {venta.producto?.nombre || "Producto"}
                                                 </a>
-                                                <span className="text-[10px] text-gray-600">{venta.producto?.categoria?.nombre || venta.producto?.tipo || ""}</span>
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                  <span className="text-[10px] text-gray-600">{venta.producto?.categoria?.nombre || venta.producto?.tipo || ""}</span>
+                                                  {venta.producto?.curso_id && (
+                                                    <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[9px] flex items-center gap-0.5">
+                                                      <GraduationCap className="w-2.5 h-2.5" />
+                                                      {venta.producto?.curso?.nombre || 'Curso'}
+                                                    </Badge>
+                                                  )}
+                                                </div>
                                             </td>
                                             <td className="p-4 hidden md:table-cell">
                                                 <span className="flex items-center gap-1 text-xs text-gray-400">

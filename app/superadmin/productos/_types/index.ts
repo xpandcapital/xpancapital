@@ -45,6 +45,8 @@ export interface Product {
   unitsPerBox?: number
   isSerialized?: boolean
   categoria_id?: string
+  curso_id?: string | null
+  curso?: { id: string; nombre: string } | null
 }
 
 export interface ProductFilters {
@@ -144,6 +146,7 @@ export interface ProductFormData {
   lote_uid?: string
   meta_descripcion?: string
   meta_titulo?: string
+  curso_id?: string | null
 }
 
 export interface Category {

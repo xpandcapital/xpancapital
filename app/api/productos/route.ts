@@ -24,7 +24,8 @@ export async function GET(request: NextRequest) {
       .from('productos')
       .select(`
         *,
-        categoria:producto_categorias(id, nombre, slug, icono)
+        categoria:producto_categorias(id, nombre, slug, icono),
+        curso:cursos(id, nombre)
       `)
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .order('creado_en', { ascending: false })
@@ -130,6 +131,7 @@ export async function POST(request: NextRequest) {
       lote_uid,
       meta_descripcion,
       meta_titulo,
+      curso_id,
       estado = 'borrador' // Estado inicial
     } = body
 
@@ -172,7 +174,8 @@ export async function POST(request: NextRequest) {
       manejo_perecedero: manejo_perecedero || null,
       lote_uid: lote_uid || null,
       meta_descripcion: meta_descripcion || null,
-      meta_titulo: meta_titulo || null
+      meta_titulo: meta_titulo || null,
+      curso_id: curso_id || null
     }
 
     const { data, error } = await supabase

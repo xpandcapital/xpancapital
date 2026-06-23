@@ -58,7 +58,9 @@ export function useProducts(): UseProductsReturn {
     expirationDate: (p.fecha_vencimiento as string) || '',
     perishableHandling: (p.manejo_perecedero as 'discard' | 'reimburse') || 'discard',
     batchUid: (p.lote_uid as string) || '',
-    categoria_id: (p.categoria_id as string) || undefined
+    categoria_id: (p.categoria_id as string) || undefined,
+    curso_id: (p.curso_id as string) || null,
+    curso: (p.curso as { id: string; nombre: string }) || null
   })
 
   const fetchProducts = useCallback(async () => {

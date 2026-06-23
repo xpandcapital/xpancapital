@@ -50,6 +50,16 @@ function AdminProductsContent() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [qrModal, setQrModal] = useState<{ isOpen: boolean; items: Array<{ product: Product; quantity: number }>; type: QRModalType }>({ isOpen: false, items: [], type: 'default' })
+  const [cursos, setCursos] = useState<Array<{ id: string; nombre: string }>>([])
+
+  useEffect(() => {
+    fetch('/api/admin/cursos?limit=500')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data) setCursos(d.data.map((c: any) => ({ id: c.id, nombre: c.nombre })))
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const saved = localStorage.getItem("blis_default_view")
@@ -184,6 +194,7 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
         }}
         onClose={handleCloseModal}
         onSave={handleSaveProduct}
+        cursos={cursos}
       />
     )
   }

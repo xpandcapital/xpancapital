@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       .select(`
         *,
         cliente:profiles!user_id(id, nombre, email, avatar_url),
-        producto:productos!producto_id(id, nombre, imagen_principal, tipo, categoria:producto_categorias(nombre))
+        producto:productos!producto_id(id, nombre, imagen_principal, tipo, curso_id, categoria:producto_categorias(nombre), curso:cursos(id, nombre))
       `, { count: "exact" })
       .order("creado_en", { ascending: false })
       .range((page - 1) * limit, page * limit - 1);
