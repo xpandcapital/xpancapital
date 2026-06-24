@@ -15,7 +15,7 @@ export interface ComunidadAutor {
 export interface ComunidadPostMedia {
   id: string
   post_id: string
-  tipo: 'imagen' | 'video' | 'archivo'
+  tipo: 'imagen' | 'video' | 'audio' | 'archivo'
   url_original: string
   url_comprimida?: string
   url_thumbnail?: string

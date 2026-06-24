@@ -18,14 +18,21 @@ const ALLOWED_FILE_TYPES = [
   'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'text/plain', 'text/csv',
   'application/json', 'application/xml', 'text/xml',
-  'application/vnd.rar', 'application/octet-stream',
+  'application/vnd.rar', 'application/x-compressed', 'application/octet-stream',
+  'application/vnd.android.package-archive',
+]
+const ALLOWED_AUDIO_TYPES = [
+  'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave',
+  'audio/ogg', 'audio/mp4', 'audio/aac', 'audio/webm',
+  'audio/x-m4a',
 ]
 const IMAGE_MAX_WIDTH = 1920
 const WEBP_QUALITY = 80
 
-function getMediaType(mime: string): 'imagen' | 'video' | 'archivo' {
+function getMediaType(mime: string): 'imagen' | 'video' | 'audio' | 'archivo' {
   if (mime.startsWith('image/')) return 'imagen'
   if (mime.startsWith('video/')) return 'video'
+  if (mime.startsWith('audio/')) return 'audio'
   return 'archivo'
 }
 
@@ -45,15 +52,16 @@ export async function uploadMediaAction(formData: FormData) {
   const mediaType = getMediaType(file.type)
   const isImage = mediaType === 'imagen'
   const isVideo = mediaType === 'video'
+  const isAudio = mediaType === 'audio'
 
-  const allowedTypes = isImage ? ALLOWED_IMAGE_TYPES : isVideo ? ALLOWED_VIDEO_TYPES : ALLOWED_FILE_TYPES
+  const allowedTypes = isImage ? ALLOWED_IMAGE_TYPES : isVideo ? ALLOWED_VIDEO_TYPES : isAudio ? ALLOWED_AUDIO_TYPES : ALLOWED_FILE_TYPES
   if (!allowedTypes.includes(file.type)) {
     return { success: false, error: `Tipo de archivo no permitido: ${file.type}` }
   }
 
   const maxFileSize = isImage ? 20 * 1024 * 1024 : isVideo ? 50 * 1024 * 1024 : 50 * 1024 * 1024
   if (file.size > maxFileSize) {
-    const maxMB = isImage ? '20MB' : isVideo ? '50MB' : '50MB'
+    const maxMB = isImage ? '20MB' : '50MB'
     return { success: false, error: `Archivo demasiado grande. Máximo: ${maxMB}. Tu archivo: ${(file.size / (1024*1024)).toFixed(1)}MB` }
   }
 

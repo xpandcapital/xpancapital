@@ -258,7 +258,7 @@ interface MediaUploadResult {
   url_original: string
   url_comprimida: string | null
   url_thumbnail: string | null
-  tipo: string
+  tipo: 'imagen' | 'video' | 'audio' | 'archivo'
   mime_type: string
   nombre_archivo: string
   tamaño_original: number

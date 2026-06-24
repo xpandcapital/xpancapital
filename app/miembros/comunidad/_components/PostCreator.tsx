@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import {
   X, ImageIcon, FileUp, Loader2, Plus, Send, Calendar, BarChart3,
-  Camera, Film, Smile, MapPin, ChevronDown
+  Camera, Film, Smile, MapPin, ChevronDown, Mic
 } from 'lucide-react'
 import { useMediaUpload } from '../_hooks/useComunidad'
 import { useAuth } from '@/hooks/useAuth'
+import { AudioRecorder } from './AudioRecorder'
 import { PostCard } from './PostCard'
 
 interface PostCreatorProps {
@@ -31,6 +32,7 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
   const videoInputRef = useRef<HTMLInputElement>(null)
   const archivoInputRef = useRef<HTMLInputElement>(null)
   const [tooltip, setTooltip] = useState<string | null>(null)
+  const [showAudioRecorder, setShowAudioRecorder] = useState(false)
 
   // Encuesta
   const [pregunta, setPregunta] = useState('')
@@ -320,6 +322,19 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
 
               {error && <p className="text-red-400 text-[11px]">{error}</p>}
 
+              {/* Audio Recorder */}
+              {showAudioRecorder && (
+                <AudioRecorder
+                  onRecorded={(file) => {
+                    const previewUrl = URL.createObjectURL(file)
+                    const id = `temp-${Date.now()}-audio`
+                    setMediaPreview(prev => [...prev, { id, url: previewUrl, tipo: 'audio', file }])
+                    setShowAudioRecorder(false)
+                  }}
+                  onCancel={() => setShowAudioRecorder(false)}
+                />
+              )}
+
               {/* Footer */}
               <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
                 <div className="flex items-center gap-1">
@@ -381,7 +396,26 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
                         <p className="text-[10px] text-gray-500">Máx. 50MB</p>
                       </div>
                     )}
-                    <input ref={archivoInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip,.rar,.7z,.tar,.gz,.json,.xml" onChange={e => handleFileSelect(e, 'archivo')} className="hidden" />
+                    <input ref={archivoInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip,.rar,.7z,.tar,.gz,.json,.xml,.apk" onChange={e => handleFileSelect(e, 'archivo')} className="hidden" />
+                  </div>
+
+                  {/* Audio */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowAudioRecorder(!showAudioRecorder)}
+                      onMouseEnter={() => setTooltip('audio')}
+                      onMouseLeave={() => setTooltip(null)}
+                      className={`p-2 rounded-lg transition-colors ${showAudioRecorder ? 'text-blis-red bg-blis-red/5' : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                    >
+                      <Mic className="w-4 h-4" />
+                    </button>
+                    {tooltip === 'audio' && (
+                      <div className="absolute bottom-full left-0 mb-2 w-48 bg-zinc-900 border border-white/10 rounded-xl p-2.5 shadow-xl z-30 pointer-events-none">
+                        <p className="text-[11px] font-semibold text-white mb-1">🎙️ Audio</p>
+                        <p className="text-[10px] text-gray-400">Graba o sube un mensaje de voz</p>
+                        <p className="text-[10px] text-gray-500">Máx. 50MB</p>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

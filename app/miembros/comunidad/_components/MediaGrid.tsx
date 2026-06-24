@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight, Play, FileText, Download, FileSpreadsheet, FileArchive, File, FileCode, FileImage } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Play, Pause, FileText, Download, FileSpreadsheet, FileArchive, File, FileCode, FileImage } from 'lucide-react'
 import type { ComunidadPostMedia, ComunidadPost, ReaccionTipo } from '../_types'
 
 interface MediaGridProps {
@@ -86,6 +86,8 @@ function MediaGridInner({ media }: MediaGridProps) {
                     ) : null}
                     <Play className="w-14 h-14 text-white/30 absolute" />
                   </div>
+                ) : item.tipo === 'audio' ? (
+                  <AudioPlayer src={item.url_original} name={item.nombre_archivo} duration={item.duracion_segundos} />
                 ) : (
                   <div className="flex items-center gap-3 p-5 bg-white/[0.02] border border-white/[0.04] min-h-[80px]">
                     <FileIconByType mime={item.mime_type} name={item.nombre_archivo} />
@@ -129,6 +131,61 @@ function MediaGridInner({ media }: MediaGridProps) {
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+function AudioPlayer({ src, name, duration }: { src: string; name?: string; duration?: number }) {
+  const [playing, setPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [dur, setDuration] = useState(duration || 0)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    const audio = new Audio(src)
+    audioRef.current = audio
+    audio.addEventListener('timeupdate', () => setCurrentTime(audio.currentTime))
+    audio.addEventListener('ended', () => setPlaying(false))
+    audio.addEventListener('loadedmetadata', () => {
+      if (!duration) setDuration(audio.duration)
+    })
+    return () => { audio.pause(); audio.src = '' }
+  }, [src])
+
+  const togglePlay = () => {
+    if (!audioRef.current) return
+    if (playing) { audioRef.current.pause() }
+    else { audioRef.current.play() }
+    setPlaying(!playing)
+  }
+
+  const formatTime = (s: number) => {
+    if (!s || !isFinite(s)) return '0:00'
+    const min = Math.floor(s / 60)
+    const sec = Math.floor(s % 60)
+    return `${min}:${sec.toString().padStart(2, '0')}`
+  }
+
+  const progress = dur ? (currentTime / dur) * 100 : 0
+
+  return (
+    <div className="flex items-center gap-4 p-5 bg-white/[0.02] border border-white/[0.04]">
+      <button
+        onClick={togglePlay}
+        className="w-10 h-10 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center hover:bg-blis-red/20 transition-colors flex-shrink-0"
+      >
+        {playing ? <Pause className="w-4 h-4 text-blis-red" /> : <Play className="w-4 h-4 text-blis-red ml-0.5" />}
+      </button>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-gray-300 truncate mb-1">{name || 'Audio'}</p>
+        <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+          <div className="h-full bg-blis-red/30 rounded-full transition-all duration-200" style={{ width: `${Math.min(progress, 100)}%` }} />
+        </div>
+        <div className="flex justify-between mt-1">
+          <span className="text-[10px] text-gray-600 tabular-nums">{formatTime(currentTime)}</span>
+          <span className="text-[10px] text-gray-600 tabular-nums">{formatTime(dur)}</span>
+        </div>
+      </div>
     </div>
   )
 }

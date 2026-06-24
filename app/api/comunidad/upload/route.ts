@@ -30,8 +30,12 @@ const ALLOWED_FILE_TYPES = [
   'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'text/plain', 'text/csv',
   'application/json', 'application/xml', 'text/xml',
-  'application/vnd.rar',
-  'application/octet-stream',
+  'application/vnd.rar', 'application/x-compressed',
+  'application/octet-stream', 'application/vnd.android.package-archive',
+]
+const ALLOWED_AUDIO_TYPES = [
+  'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave',
+  'audio/ogg', 'audio/mp4', 'audio/aac', 'audio/webm', 'audio/x-m4a',
 ]
 const MAX_SIZE = 50 * 1024 * 1024 // 50MB total (límite Vercel Pro)
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024  // 20MB para imágenes (se comprimen)
