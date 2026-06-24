@@ -501,35 +501,28 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
 
 function FileIconPreview({ name, type }: { name: string; type: string }) {
   const ext = name.split('.').pop()?.toLowerCase() || ''
-  const cls = 'w-8 h-8 flex-shrink-0 object-contain'
+  const label = ext.toUpperCase().substring(0, 4)
+  const color = getFileColor(ext)
 
-  if (ext === 'doc' || ext === 'docx' || type.includes('word'))
-    return <img src="/icons/brands/microsoft-word.svg" className={cls} alt="Word" />
-  if (ext === 'xls' || ext === 'xlsx' || type.includes('excel') || type.includes('spreadsheet'))
-    return <img src="/icons/brands/microsoft-excel.svg" className={cls} alt="Excel" />
-  if (ext === 'ppt' || ext === 'pptx' || type.includes('presentation') || type.includes('powerpoint'))
-    return <img src="/icons/brands/microsoft-powerpoint.svg" className={cls} alt="PowerPoint" />
-  if (ext === 'pdf' || type.includes('pdf') || type.includes('acrobat'))
-    return <img src="/icons/brands/icons8-acrobat-67.png" className={cls} alt="PDF" />
-  if (ext === 'csv')
-    return <img src="/icons/brands/icons8-csv-48.png" className={cls} alt="CSV" />
-  if (ext === 'txt' || type === 'text/plain')
-    return <img src="/icons/brands/icons8-txt-48.png" className={cls} alt="TXT" />
-  if (ext === 'json')
-    return <img src="/icons/brands/icons8-json-48.png" className={cls} alt="JSON" />
-  if (ext === 'xml' || type.includes('xml'))
-    return <img src="/icons/brands/icons8-xml-file-48.png" className={cls} alt="XML" />
-  if (ext === 'rar' || type.includes('rar'))
-    return <img src="/icons/brands/icons8-winrar-94.png" className={cls} alt="RAR" />
-  if (ext === 'zip' || ext === '7z' || ext === 'tar' || ext === 'gz' || type.includes('zip') || type.includes('compressed'))
-    return <img src="/icons/brands/icons8-archive-folder-48.png" className={cls} alt="ZIP" />
-  if (ext === 'apk' || type.includes('android'))
-    return <img src="/icons/brands/icons8-apk-64.png" className={cls} alt="APK" />
-  if (ext === 'exe' || ext === 'msi' || ext === 'dmg' || type.includes('msdownload') || type.includes('msdos') || type.includes('dmg'))
-    return <img src="/icons/brands/icons8-software-48.png" className={cls} alt="EXE" />
-  if (ext === 'psd' || type.includes('photoshop'))
-    return <img src="/icons/brands/adobe-photoshop.svg" className={cls} alt="Photoshop" />
-  if (ext === 'ai' || ext === 'eps' || type.includes('illustrator') || type.includes('postscript'))
-    return <img src="/icons/brands/adobe-illustrator.svg" className={cls} alt="Illustrator" />
-  return <File className={`${cls} text-gray-500`} />
+  return (
+    <div className={`w-12 h-12 rounded-2xl ${color.bg} flex items-center justify-center`}>
+      <span className={`text-[11px] font-black ${color.text} tracking-tight`}>{label}</span>
+    </div>
+  )
+}
+
+function getFileColor(ext: string): { bg: string; text: string } {
+  if (ext === 'pdf') return { bg: 'bg-red-500/10', text: 'text-red-400' }
+  if (ext === 'doc' || ext === 'docx') return { bg: 'bg-blue-500/10', text: 'text-blue-400' }
+  if (ext === 'xls' || ext === 'xlsx' || ext === 'csv') return { bg: 'bg-emerald-500/10', text: 'text-emerald-400' }
+  if (ext === 'ppt' || ext === 'pptx') return { bg: 'bg-orange-500/10', text: 'text-orange-400' }
+  if (ext === 'zip' || ext === 'rar' || ext === '7z' || ext === 'tar' || ext === 'gz') return { bg: 'bg-purple-500/10', text: 'text-purple-400' }
+  if (ext === 'json') return { bg: 'bg-cyan-500/10', text: 'text-cyan-400' }
+  if (ext === 'xml') return { bg: 'bg-amber-500/10', text: 'text-amber-400' }
+  if (ext === 'txt') return { bg: 'bg-gray-500/10', text: 'text-gray-400' }
+  if (ext === 'apk') return { bg: 'bg-emerald-500/10', text: 'text-emerald-400' }
+  if (ext === 'exe' || ext === 'msi' || ext === 'dmg') return { bg: 'bg-zinc-500/10', text: 'text-zinc-400' }
+  if (ext === 'psd') return { bg: 'bg-blue-600/10', text: 'text-blue-300' }
+  if (ext === 'ai' || ext === 'eps') return { bg: 'bg-amber-600/10', text: 'text-amber-300' }
+  return { bg: 'bg-white/5', text: 'text-gray-500' }
 }

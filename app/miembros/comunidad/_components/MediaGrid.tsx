@@ -33,11 +33,12 @@ function MediaGridInner({ media }: MediaGridProps) {
   }
 
   const isSingleImage = media.length === 1 && media[0].tipo === 'imagen'
+  const allFiles = media.every(m => m.tipo !== 'imagen' && m.tipo !== 'video')
 
   return (
     <div>
       {isSingleImage ? (
-        /* Imagen única: centrada, altura fija, sin recorte */
+        /* Imagen única */
         <div className="max-h-[500px] flex items-center justify-center bg-black/30 rounded-xl overflow-hidden border border-white/[0.04]">
           <Image
             src={media[0].url_comprimida || media[0].url_original}
@@ -47,6 +48,28 @@ function MediaGridInner({ media }: MediaGridProps) {
             className="max-h-[500px] w-auto h-auto object-contain"
             unoptimized
           />
+        </div>
+      ) : allFiles && media.length > 1 ? (
+        /* Lista vertical de archivos */
+        <div className="space-y-1.5">
+          {media.map(item => (
+            <div key={item.id} className="flex items-center gap-3 p-3.5 bg-white/[0.02] rounded-xl border border-white/[0.04] hover:bg-white/[0.03] transition-colors">
+              {item.tipo === 'audio' ? (
+                <AudioPlayer src={item.url_original} name={item.nombre_archivo} duration={item.duracion_segundos} />
+              ) : (
+                <>
+                  <FileIconByType mime={item.mime_type} name={item.nombre_archivo} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-gray-300 truncate">{item.nombre_archivo || 'Archivo'}</p>
+                    <p className="text-xs text-gray-600">{formatBytes(item.tamaño_original)}</p>
+                  </div>
+                  <a href={item.url_original} target="_blank" rel="noopener noreferrer" download className="p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0">
+                    <Download className="w-4 h-4 text-gray-500 hover:text-white" />
+                  </a>
+                </>
+              )}
+            </div>
+          ))}
         </div>
       ) : (
         /* Carrusel horizontal con flechas */
@@ -199,37 +222,28 @@ function formatBytes(bytes: number) {
 
 function FileIconByType({ mime, name }: { mime: string; name?: string }) {
   const ext = (name || '').split('.').pop()?.toLowerCase() || ''
-  const cls = 'w-8 h-8 flex-shrink-0 object-contain'
+  const label = ext.toUpperCase().substring(0, 4)
+  const color = getFileColor(ext)
 
-  if (ext === 'doc' || ext === 'docx' || mime.includes('word'))
-    return <img src="/icons/brands/microsoft-word.svg" className={cls} alt="Word" />
-  if (ext === 'xls' || ext === 'xlsx' || mime.includes('excel') || mime.includes('spreadsheet'))
-    return <img src="/icons/brands/microsoft-excel.svg" className={cls} alt="Excel" />
-  if (ext === 'ppt' || ext === 'pptx' || mime.includes('presentation') || mime.includes('powerpoint'))
-    return <img src="/icons/brands/microsoft-powerpoint.svg" className={cls} alt="PowerPoint" />
-  if (ext === 'pdf' || mime.includes('pdf') || mime.includes('acrobat'))
-    return <img src="/icons/brands/icons8-acrobat-67.png" className={cls} alt="PDF" />
-  if (ext === 'csv')
-    return <img src="/icons/brands/icons8-csv-48.png" className={cls} alt="CSV" />
-  if (ext === 'txt' || mime === 'text/plain')
-    return <img src="/icons/brands/icons8-txt-48.png" className={cls} alt="TXT" />
-  if (ext === 'json')
-    return <img src="/icons/brands/icons8-json-48.png" className={cls} alt="JSON" />
-  if (ext === 'xml' || mime.includes('xml'))
-    return <img src="/icons/brands/icons8-xml-file-48.png" className={cls} alt="XML" />
-  if (ext === 'rar' || mime.includes('rar'))
-    return <img src="/icons/brands/icons8-winrar-94.png" className={cls} alt="RAR" />
-  if (ext === 'zip' || ext === '7z' || ext === 'tar' || ext === 'gz' || mime.includes('zip') || mime.includes('compressed'))
-    return <img src="/icons/brands/icons8-archive-folder-48.png" className={cls} alt="ZIP" />
-  if (ext === 'apk' || mime.includes('android'))
-    return <img src="/icons/brands/icons8-apk-64.png" className={cls} alt="APK" />
-  if (ext === 'exe' || ext === 'msi' || ext === 'dmg' || mime.includes('msdownload') || mime.includes('msdos') || mime.includes('dmg'))
-    return <img src="/icons/brands/icons8-software-48.png" className={cls} alt="EXE" />
-  if (ext === 'psd' || mime.includes('photoshop'))
-    return <img src="/icons/brands/adobe-photoshop.svg" className={cls} alt="Photoshop" />
-  if (ext === 'ai' || ext === 'eps' || mime.includes('illustrator') || mime.includes('postscript'))
-    return <img src="/icons/brands/adobe-illustrator.svg" className={cls} alt="Illustrator" />
-  if (mime.startsWith('image/'))
-    return <FileImage className={`${cls} text-pink-400`} />
-  return <File className={`${cls} text-gray-500`} />
+  return (
+    <div className={`w-10 h-10 rounded-xl ${color.bg} flex items-center justify-center flex-shrink-0`}>
+      <span className={`text-[9px] font-black ${color.text} tracking-tight`}>{label}</span>
+    </div>
+  )
+}
+
+function getFileColor(ext: string): { bg: string; text: string } {
+  if (ext === 'pdf') return { bg: 'bg-red-500/10', text: 'text-red-400' }
+  if (ext === 'doc' || ext === 'docx') return { bg: 'bg-blue-500/10', text: 'text-blue-400' }
+  if (ext === 'xls' || ext === 'xlsx' || ext === 'csv') return { bg: 'bg-emerald-500/10', text: 'text-emerald-400' }
+  if (ext === 'ppt' || ext === 'pptx') return { bg: 'bg-orange-500/10', text: 'text-orange-400' }
+  if (ext === 'zip' || ext === 'rar' || ext === '7z' || ext === 'tar' || ext === 'gz') return { bg: 'bg-purple-500/10', text: 'text-purple-400' }
+  if (ext === 'json') return { bg: 'bg-cyan-500/10', text: 'text-cyan-400' }
+  if (ext === 'xml') return { bg: 'bg-amber-500/10', text: 'text-amber-400' }
+  if (ext === 'txt') return { bg: 'bg-gray-500/10', text: 'text-gray-400' }
+  if (ext === 'apk') return { bg: 'bg-emerald-500/10', text: 'text-emerald-400' }
+  if (ext === 'exe' || ext === 'msi' || ext === 'dmg') return { bg: 'bg-zinc-500/10', text: 'text-zinc-400' }
+  if (ext === 'psd') return { bg: 'bg-blue-600/10', text: 'text-blue-300' }
+  if (ext === 'ai' || ext === 'eps') return { bg: 'bg-amber-600/10', text: 'text-amber-300' }
+  return { bg: 'bg-white/5', text: 'text-gray-500' }
 }

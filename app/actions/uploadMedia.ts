@@ -8,42 +8,11 @@ import sharp from 'sharp'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/tiff']
-const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo']
-const ALLOWED_FILE_TYPES = [
-  'application/pdf',
-  'application/zip', 'application/x-zip-compressed', 'application/x-rar-compressed', 'application/x-7z-compressed',
-  'application/x-tar', 'application/gzip', 'application/x-gzip',
-  'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'text/plain', 'text/csv',
-  'application/json', 'application/xml', 'text/xml',
-  'application/vnd.rar', 'application/x-compressed', 'application/octet-stream',
-  'application/vnd.android.package-archive',
-  'application/x-msdownload', 'application/x-msdos-program', 'application/exe', 'application/x-exe',
-  'application/x-dmg', 'application/x-apple-diskimage',
-  'image/vnd.adobe.photoshop', 'application/x-photoshop', 'application/photoshop',
-  'application/postscript', 'application/illustrator', 'application/x-illustrator',
-]
-const ALLOWED_AUDIO_TYPES = [
-  'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave',
-  'audio/ogg', 'audio/mp4', 'audio/aac', 'audio/webm',
-  'audio/x-m4a',
-]
 const IMAGE_MAX_WIDTH = 1920
 const WEBP_QUALITY = 80
 
-function getMediaType(mime: string): 'imagen' | 'video' | 'audio' | 'archivo' {
-  if (mime.startsWith('image/')) return 'imagen'
-  if (mime.startsWith('video/')) return 'video'
-  if (mime.startsWith('audio/')) return 'audio'
-  return 'archivo'
-}
-
 export async function uploadMediaAction(formData: FormData) {
   try {
-  // Autenticar vía cookies de Supabase (Server Actions no reciben headers del middleware)
   const cookieStore = await cookies()
   const supabaseAuth = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,7 +22,6 @@ export async function uploadMediaAction(formData: FormData) {
   const { data: { user: authUser } } = await supabaseAuth.auth.getUser()
   if (!authUser?.id) return { success: false, error: 'No autorizado' }
 
-  // Obtener empresa_id del perfil
   const { data: profile } = await supabaseAuth.from('profiles').select('empresa_id').eq('id', authUser.id).single()
   const userId = authUser.id
   const empresaId = profile?.empresa_id
@@ -61,22 +29,16 @@ export async function uploadMediaAction(formData: FormData) {
 
   const file = formData.get('file') as File | null
   const postId = formData.get('post_id') as string | null
-
   if (!file) return { success: false, error: 'No se proporcionó archivo' }
 
-  const mediaType = getMediaType(file.type)
-  const isImage = mediaType === 'imagen'
-  const isVideo = mediaType === 'video'
-  const isAudio = mediaType === 'audio'
+  // Sin restricción de MIME — acepta cualquier tipo
+  const mediaType = file.type.startsWith('image/') ? 'imagen' :
+    file.type.startsWith('video/') ? 'video' :
+    file.type.startsWith('audio/') ? 'audio' : 'archivo'
 
-  const allowedTypes = isImage ? ALLOWED_IMAGE_TYPES : isVideo ? ALLOWED_VIDEO_TYPES : isAudio ? ALLOWED_AUDIO_TYPES : ALLOWED_FILE_TYPES
-  if (!allowedTypes.includes(file.type)) {
-    return { success: false, error: `Tipo de archivo no permitido: ${file.type}` }
-  }
-
-  const maxFileSize = isImage ? 20 * 1024 * 1024 : isVideo ? 50 * 1024 * 1024 : 50 * 1024 * 1024
+  const maxFileSize = mediaType === 'imagen' ? 20 * 1024 * 1024 : 50 * 1024 * 1024
   if (file.size > maxFileSize) {
-    const maxMB = isImage ? '20MB' : '50MB'
+    const maxMB = mediaType === 'imagen' ? '20MB' : '50MB'
     return { success: false, error: `Archivo demasiado grande. Máximo: ${maxMB}. Tu archivo: ${(file.size / (1024*1024)).toFixed(1)}MB` }
   }
 
@@ -116,6 +78,7 @@ export async function uploadMediaAction(formData: FormData) {
   let tamañoComprimido: number | null = null
 
   // Comprimir imagen
+  const isImage = mediaType === 'imagen'
   if (isImage) {
     try {
       let pipeline = sharp(buffer)
