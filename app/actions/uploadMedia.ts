@@ -1,7 +1,8 @@
 "use server"
 
 import { createClient } from '@supabase/supabase-js'
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 import sharp from 'sharp'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -37,12 +38,21 @@ function getMediaType(mime: string): 'imagen' | 'video' | 'audio' | 'archivo' {
 }
 
 export async function uploadMediaAction(formData: FormData) {
-  const hdr = await headers()
-  const userId = hdr.get('x-blis-user-id')
-  const empresaId = hdr.get('x-blis-empresa-id')
-  if (!userId || !empresaId) {
-    return { success: false, error: 'No autorizado' }
-  }
+  // Autenticar vía cookies de Supabase (Server Actions no reciben headers del middleware)
+  const cookieStore = await cookies()
+  const supabaseAuth = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() }, setAll() {} } }
+  )
+  const { data: { user: authUser } } = await supabaseAuth.auth.getUser()
+  if (!authUser?.id) return { success: false, error: 'No autorizado' }
+
+  // Obtener empresa_id del perfil
+  const { data: profile } = await supabaseAuth.from('profiles').select('empresa_id').eq('id', authUser.id).single()
+  const userId = authUser.id
+  const empresaId = profile?.empresa_id
+  if (!empresaId) return { success: false, error: 'Perfil no encontrado' }
 
   const file = formData.get('file') as File | null
   const postId = formData.get('post_id') as string | null

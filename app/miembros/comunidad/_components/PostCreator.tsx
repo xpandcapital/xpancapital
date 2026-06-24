@@ -6,6 +6,7 @@ import Image from 'next/image'
 import {
   X, ImageIcon, FileUp, Loader2, Plus, Send, Calendar, BarChart3,
   Film, Mic, FileSpreadsheet, FileArchive, FileCode, File,
+  ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { useMediaUpload } from '../_hooks/useComunidad'
 import { useAuth } from '@/hooks/useAuth'
@@ -33,6 +34,8 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
   const archivoInputRef = useRef<HTMLInputElement>(null)
   const [tooltip, setTooltip] = useState<string | null>(null)
   const [showAudioRecorder, setShowAudioRecorder] = useState(false)
+  const [previewPage, setPreviewPage] = useState(0)
+  const PREVIEW_PER_PAGE = 4
 
   // Encuesta
   const [pregunta, setPregunta] = useState('')
@@ -302,36 +305,78 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
                 </div>
               )}
 
-              {/* Media preview */}
-              {mediaPreview.length > 0 && (
-                <div className="flex gap-3 overflow-x-auto pb-2">
-                  {mediaPreview.map(m => (
-                    <div key={m.id} className="relative flex-shrink-0 w-36 space-y-1.5">
-                      <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.04]">
-                        {m.tipo === 'imagen' ? (
-                          <img src={m.url} alt="" className="w-full h-full object-cover" />
-                        ) : m.tipo === 'video' ? (
-                          <div className="w-full h-full flex items-center justify-center bg-black/20">
-                            <Film className="w-8 h-8 text-gray-500" />
+              {/* Media preview carousel */}
+              {mediaPreview.length > 0 && (() => {
+                const totalPages = Math.ceil(mediaPreview.length / PREVIEW_PER_PAGE)
+                const page = Math.min(previewPage, totalPages - 1)
+                const items = mediaPreview.slice(page * PREVIEW_PER_PAGE, (page + 1) * PREVIEW_PER_PAGE)
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-1">
+                      {/* Prev */}
+                      <button
+                        onClick={() => setPreviewPage(Math.max(0, page - 1))}
+                        disabled={page === 0}
+                        className="p-1 text-gray-600 hover:text-white disabled:opacity-20 transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+
+                      {/* Grid de previews */}
+                      <div className="flex-1 flex gap-2 overflow-hidden">
+                        {items.map(m => (
+                          <div key={m.id} className="relative flex-1 min-w-0 max-w-[25%] space-y-1.5">
+                            <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.04]">
+                              {m.tipo === 'imagen' ? (
+                                <img src={m.url} alt="" className="w-full h-full object-cover" />
+                              ) : m.tipo === 'video' ? (
+                                <div className="w-full h-full flex items-center justify-center bg-black/20">
+                                  <Film className="w-6 h-6 text-gray-500" />
+                                </div>
+                              ) : m.tipo === 'audio' ? (
+                                <div className="w-full h-full flex items-center justify-center bg-purple-500/5">
+                                  <Mic className="w-6 h-6 text-purple-400" />
+                                </div>
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-white/[0.02]">
+                                  <FileIconPreview name={m.file.name} type={m.file.type} />
+                                </div>
+                              )}
+                              <button onClick={() => removePreview(m.id)} className="absolute top-1 right-1 p-0.5 bg-black/70 rounded-full">
+                                <X className="w-2 h-2 text-white/80" />
+                              </button>
+                            </div>
+                            <p className="text-[9px] text-gray-500 text-center leading-tight line-clamp-1">{m.file.name}</p>
                           </div>
-                        ) : m.tipo === 'audio' ? (
-                          <div className="w-full h-full flex items-center justify-center bg-purple-500/5">
-                            <Mic className="w-8 h-8 text-purple-400" />
-                          </div>
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-white/[0.02]">
-                            <FileIconPreview name={m.file.name} type={m.file.type} />
-                          </div>
-                        )}
-                        <button onClick={() => removePreview(m.id)} className="absolute top-1 right-1 p-0.5 bg-black/70 rounded-full">
-                          <X className="w-2.5 h-2.5 text-white/80" />
-                        </button>
+                        ))}
                       </div>
-                      <p className="text-[10px] text-gray-500 text-center leading-tight line-clamp-2 px-1">{m.file.name}</p>
+
+                      {/* Next */}
+                      <button
+                        onClick={() => setPreviewPage(Math.min(totalPages - 1, page + 1))}
+                        disabled={page >= totalPages - 1}
+                        className="p-1 text-gray-600 hover:text-white disabled:opacity-20 transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
                     </div>
-                  ))}
-                </div>
-              )}
+
+                    {/* Dots */}
+                    {totalPages > 1 && (
+                      <div className="flex justify-center gap-1">
+                        {Array.from({ length: totalPages }).map((_, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setPreviewPage(i)}
+                            className={`w-1.5 h-1.5 rounded-full transition-colors ${i === page ? 'bg-blis-red' : 'bg-white/15'}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-[10px] text-gray-600 text-center">{mediaPreview.length} archivo{mediaPreview.length > 1 ? 's' : ''}</p>
+                  </div>
+                )
+              })()}
 
               {error && <p className="text-red-400 text-[11px]">{error}</p>}
 
