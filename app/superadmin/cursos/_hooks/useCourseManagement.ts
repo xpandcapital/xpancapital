@@ -35,6 +35,8 @@ export function useCourseManagement() {
           imagen_principal?: string
           linked_product_id?: string | null
           linked_product_name?: string | null
+          linked_product_precio_comparacion?: number | null
+          linked_product_descuento?: number | null
         }) => ({
           id: c.id,
           title: c.nombre,
@@ -53,7 +55,9 @@ export function useCourseManagement() {
           venderEnTienda: !!c.linked_product_id,
           productoId: c.linked_product_id || null,
           productoNombre: c.linked_product_name || null,
-          linkProductoId: null
+          linkProductoId: null,
+          precioComparacion: c.linked_product_precio_comparacion || 0,
+          descuentoPorcentaje: c.linked_product_descuento || 0,
         }))
         setCourses(mappedCourses)
       }
@@ -131,6 +135,8 @@ export function useCourseManagement() {
         require_completion: currentCourse.requireCompletion || false,
         vender_en_tienda: currentCourse.venderEnTienda || false,
         link_producto_id: currentCourse.linkProductoId || null,
+        precio_comparacion: currentCourse.precioComparacion || 0,
+        descuento_porcentaje: currentCourse.descuentoPorcentaje || 0,
       }
 
       if (currentCourse.image) courseData.imagen_principal = currentCourse.image
@@ -222,7 +228,9 @@ export function useCourseManagement() {
       venderEnTienda: false,
       productoId: null,
       productoNombre: null,
-      linkProductoId: null
+      linkProductoId: null,
+      precioComparacion: 0,
+      descuentoPorcentaje: 0
     }
     setCourses(prev => [...prev, newCourse])
     setCurrentCourse(newCourse)

@@ -1,6 +1,6 @@
 'use client'
 
-import { DollarSign, Coins, Users, Camera, ImageIcon } from 'lucide-react'
+import { Users, Camera, ImageIcon } from 'lucide-react'
 import type { Course, CertificateTemplate } from '../_types'
 
 interface CourseDetailsFormProps {
@@ -29,29 +29,6 @@ export function CourseDetailsForm({
               <div className="lg:col-span-2 space-y-2">
                 <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Título Principal</label>
                 <input type="text" value={course.title} onChange={(e) => onUpdate({ ...course, title: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red transition-all text-sm font-bold" placeholder="Ej. Fotografía Inmobiliaria Masterclass" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Precio & BlisCoins</label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1 group/input">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500 transition-colors group-focus-within/input:text-blis-red" />
-                    <input
-                      type="number"
-                      value={course.price}
-                      onChange={(e) => onUpdate({ ...course, price: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-2 py-3 text-white focus:outline-none focus:border-blis-red transition-all text-xs font-bold"
-                    />
-                  </div>
-                  <div className="relative flex-1 group/input">
-                    <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-amber-500 transition-colors group-focus-within/input:text-amber-400" />
-                    <input
-                      type="number"
-                      value={course.bliscoins}
-                      onChange={(e) => onUpdate({ ...course, bliscoins: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-2 py-3 text-white focus:outline-none focus:border-amber-500 transition-all text-xs font-bold"
-                    />
-                  </div>
-                </div>
               </div>
             </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Store, DollarSign, Coins, Tag, ImageIcon, ChevronDown, ChevronUp, Link2, Unlink2, RefreshCw } from "lucide-react"
+import { Store, DollarSign, Coins, Tag, ImageIcon, ChevronDown, ChevronUp, Link2, Unlink2, RefreshCw, Percent } from "lucide-react"
 import type { Course } from "../_types"
 
 interface Props {
@@ -225,6 +225,39 @@ export function TiendaSection({ course, onUpdate }: Props) {
                 onChange={(e) => onUpdate({ ...course, bliscoins: parseInt(e.target.value) || 0 })}
                 placeholder="0"
                 className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
+                <Tag className="w-3 h-3 inline mr-1" />
+                Precio Real (tachado)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={course.precioComparacion || ''}
+                onChange={(e) => onUpdate({ ...course, precioComparacion: parseFloat(e.target.value) || 0 })}
+                placeholder="Precio original sin descuento"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
+                <Percent className="w-3 h-3 inline mr-1" />
+                Descuento %
+              </label>
+              <input
+                type="number"
+                step="1"
+                min="0"
+                max="100"
+                value={course.descuentoPorcentaje || ''}
+                onChange={(e) => onUpdate({ ...course, descuentoPorcentaje: Math.min(100, parseInt(e.target.value) || 0) })}
+                placeholder="0"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50 transition-colors"
               />
             </div>
           </div>

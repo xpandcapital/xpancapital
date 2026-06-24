@@ -55,19 +55,26 @@ export async function GET(request: NextRequest) {
     // Buscar productos vinculados (curso_id → producto.id + nombre)
     const linkedProductos = await supabase
       .from('productos')
-      .select('id, curso_id, nombre')
+      .select('id, curso_id, nombre, precio_comparacion, descuento_porcentaje')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .not('curso_id', 'is', null)
 
     const productMap = new Map()
-    linkedProductos?.data?.forEach((p: any) => productMap.set(p.curso_id, { id: p.id, nombre: p.nombre }))
+    linkedProductos?.data?.forEach((p: any) => productMap.set(p.curso_id, {
+      id: p.id,
+      nombre: p.nombre,
+      precio_comparacion: p.precio_comparacion,
+      descuento_porcentaje: p.descuento_porcentaje,
+    }))
 
     const dataWithLinks = data.map(c => {
       const linked = productMap.get(c.id)
       return {
         ...c,
         linked_product_id: linked?.id || null,
-        linked_product_name: linked?.nombre || null
+        linked_product_name: linked?.nombre || null,
+        linked_product_precio_comparacion: linked?.precio_comparacion || null,
+        linked_product_descuento: linked?.descuento_porcentaje || null,
       }
     })
 
@@ -229,6 +236,8 @@ export async function PUT(request: NextRequest) {
           nombre: data.nombre || 'Curso',
           precio_usd: data.precio_usd || 0,
           precio_coins: data.precio_coins || 0,
+          precio_comparacion: data.precio_comparacion || null,
+          descuento_porcentaje: data.descuento_porcentaje || null,
           imagen_principal: data.imagen_principal || null,
           tipo: 'servicio',
           activo: data.activo || false,

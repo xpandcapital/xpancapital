@@ -45,6 +45,8 @@ export interface Course {
   productoId: string | null
   productoNombre?: string | null
   linkProductoId?: string | null
+  precioComparacion: number
+  descuentoPorcentaje: number
 }
 
 export interface CertificateTemplate {
