@@ -102,7 +102,7 @@ export function PostCard({ post, onReaccionar, onEliminar, onVotar, onInscribirE
       {/* Media */}
       {post.media && post.media.length > 0 && (
         <div className="px-4 md:px-5 pb-3">
-          <MediaGrid media={post.media} post={post} onReaccionar={onReaccionar} />
+          <MediaGrid media={post.media} />
         </div>
       )}
 

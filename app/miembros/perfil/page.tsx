@@ -314,6 +314,25 @@ export default function ProfilePage() {
     const [tempImage, setTempImage] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Redes sociales y biografía
+    const [biografia, setBiografia] = useState('');
+    const [socials, setSocials] = useState<Record<string, string>>({});
+    useEffect(() => {
+        if (!user?.id) return
+        fetch('/api/profile', { headers: { 'x-blis-user-id': user.id, 'x-blis-empresa-id': user.empresa_id || '', 'x-blis-user-rol': user.role } })
+            .then(r => r.json())
+            .then(d => {
+                if (d.success && d.data) {
+                    setBiografia(d.data.biografia || '')
+                    const s: Record<string, string> = {}
+                    const fields = ['website_url','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','whatsapp_url','telegram_url','discord_url','github_url']
+                    fields.forEach(f => { if (d.data[f]) s[f] = d.data[f] })
+                    setSocials(s)
+                }
+            })
+            .catch(() => {})
+    }, [user?.id])
+
     const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -357,6 +376,15 @@ export default function ProfilePage() {
     const handleUpdate = () => {
         const fullPhone = phone ? `${selectedCountry.code}${phone.replace(/\s+/g, '')}` : '';
         updateProfile({ nombre: name, apellido: lastName, profilePic, phone: fullPhone });
+        // Guardar biografía y redes sociales vía API
+        const socialData: Record<string, string | null> = { biografia }
+        const fields = ['website_url','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','whatsapp_url','telegram_url','discord_url','github_url']
+        fields.forEach(f => { socialData[f] = socials[f] || null })
+        fetch('/api/profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(socialData)
+        }).catch(() => {})
         showToast("¡Éxito! Tus datos han sido actualizados en la base de datos de Blis Corp.", "success");
     };
 
@@ -599,6 +627,48 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Biografía */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2">Biografía</label>
+                            <textarea
+                                value={biografia}
+                                onChange={(e) => setBiografia(e.target.value)}
+                                rows={3}
+                                placeholder="Cuéntanos sobre ti..."
+                                className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-medium text-white focus:outline-none focus:border-blis-red transition-all resize-none placeholder-gray-600"
+                            />
+                        </div>
+
+                        {/* Redes Sociales */}
+                        <div className="space-y-3">
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2">Redes Sociales</label>
+                            {[
+                                { key: 'website_url', icon: '🌐', label: 'Sitio Web', placeholder: 'https://...' },
+                                { key: 'facebook_url', icon: '📘', label: 'Facebook', placeholder: 'https://facebook.com/...' },
+                                { key: 'instagram_url', icon: '📸', label: 'Instagram', placeholder: 'https://instagram.com/...' },
+                                { key: 'twitter_url', icon: '🐦', label: 'Twitter / X', placeholder: 'https://x.com/...' },
+                                { key: 'youtube_url', icon: '▶️', label: 'YouTube', placeholder: 'https://youtube.com/@...' },
+                                { key: 'linkedin_url', icon: '💼', label: 'LinkedIn', placeholder: 'https://linkedin.com/in/...' },
+                                { key: 'tiktok_url', icon: '🎵', label: 'TikTok', placeholder: 'https://tiktok.com/@...' },
+                                { key: 'whatsapp_url', icon: '💬', label: 'WhatsApp', placeholder: 'https://wa.me/...' },
+                                { key: 'telegram_url', icon: '✈️', label: 'Telegram', placeholder: 'https://t.me/...' },
+                                { key: 'discord_url', icon: '🎮', label: 'Discord', placeholder: 'https://discord.gg/...' },
+                                { key: 'github_url', icon: '💻', label: 'GitHub', placeholder: 'https://github.com/...' },
+                            ].map(({ key, icon, label, placeholder }) => (
+                                <div key={key} className="relative group">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm">{icon}</span>
+                                    <input
+                                        type="url"
+                                        value={socials[key] || ''}
+                                        onChange={(e) => setSocials(prev => ({ ...prev, [key]: e.target.value }))}
+                                        placeholder={placeholder}
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-11 pr-4 py-3.5 text-xs font-medium text-white focus:outline-none focus:border-blis-red transition-all placeholder-gray-600"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
                         <button
                             onClick={handleUpdate}
                             className="w-full py-5 bg-white text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-blis-red hover:text-white transition-all shadow-xl"
