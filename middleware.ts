@@ -32,7 +32,7 @@ const PUBLIC_PATHS = [
   '/', '/blog', '/tienda', '/cursos', '/proyectos',
   '/verificar', '/gracias', '/f', '/formulario', '/embudo',
   '/calendario', '/certificado', '/login', '/embed', '/legal', '/s',
-  '/compras',
+  '/compras', '/api/compras/aprobar', '/api/compras/rechazar',
 ]
 
 export async function middleware(request: NextRequest) {
@@ -40,6 +40,11 @@ export async function middleware(request: NextRequest) {
   const method = request.method
   const ip = getClientIP(request)
   const ua = request.headers.get('user-agent') || ''
+
+  // Links mágicos de aprobación/rechazo: siempre públicos, sin auth
+  if (pathname.startsWith('/api/compras/aprobar/') || pathname.startsWith('/api/compras/rechazar/') || pathname === '/compras/aprobada') {
+    return NextResponse.next()
+  }
 
   const isPublic = PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
   const isProtected = pathname.startsWith('/superadmin') || pathname.startsWith('/miembros') || pathname.startsWith('/admin')
