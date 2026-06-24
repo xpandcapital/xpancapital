@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import {
   X, ImageIcon, FileUp, Loader2, Plus, Send, Calendar, BarChart3,
-  Film, Mic, FileSpreadsheet, FileArchive, FileCode, File, FileText,
+  Film, Mic, File,
   ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { useMediaUpload } from '../_hooks/useComunidad'
@@ -450,11 +450,12 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
                       <div className="absolute bottom-full left-0 mb-2 w-60 bg-zinc-900 border border-white/10 rounded-xl p-2.5 shadow-xl z-30 pointer-events-none">
                         <p className="text-[11px] font-semibold text-white mb-1">📁 Archivos</p>
                         <p className="text-[10px] text-gray-400">PDF, DOC, XLS, PPT, CSV, TXT</p>
-                        <p className="text-[10px] text-gray-400">RAR, ZIP, 7Z, TAR, GZ, JSON, XML</p>
+                        <p className="text-[10px] text-gray-400">RAR, ZIP, 7Z, TAR, GZ, JSON, XML, APK, EXE</p>
+                        <p className="text-[10px] text-gray-400">PDF, PSD, AI, EPS</p>
                         <p className="text-[10px] text-gray-500">Máx. 50MB</p>
                       </div>
                     )}
-                    <input ref={archivoInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip,.rar,.7z,.tar,.gz,.json,.xml,.apk,.exe,.msi,.dmg" onChange={e => handleFileSelect(e, 'archivo')} className="hidden" />
+                    <input ref={archivoInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip,.rar,.7z,.tar,.gz,.json,.xml,.apk,.exe,.msi,.dmg,.psd,.ai,.eps" onChange={e => handleFileSelect(e, 'archivo')} className="hidden" />
                   </div>
 
                   {/* Audio */}
@@ -508,8 +509,8 @@ function FileIconPreview({ name, type }: { name: string; type: string }) {
     return <img src="/icons/brands/microsoft-excel.svg" className={cls} alt="Excel" />
   if (ext === 'ppt' || ext === 'pptx' || type.includes('presentation') || type.includes('powerpoint'))
     return <img src="/icons/brands/microsoft-powerpoint.svg" className={cls} alt="PowerPoint" />
-  if (ext === 'pdf' || type.includes('pdf'))
-    return <FileText className={`${cls} text-red-400`} />
+  if (ext === 'pdf' || type.includes('pdf') || type.includes('acrobat'))
+    return <img src="/icons/brands/icons8-acrobat-67.png" className={cls} alt="PDF" />
   if (ext === 'csv')
     return <img src="/icons/brands/icons8-csv-48.png" className={cls} alt="CSV" />
   if (ext === 'txt' || type === 'text/plain')
@@ -521,10 +522,14 @@ function FileIconPreview({ name, type }: { name: string; type: string }) {
   if (ext === 'rar' || type.includes('rar'))
     return <img src="/icons/brands/icons8-winrar-94.png" className={cls} alt="RAR" />
   if (ext === 'zip' || ext === '7z' || ext === 'tar' || ext === 'gz' || type.includes('zip') || type.includes('compressed'))
-    return <img src="/icons/brands/icons8-archive-folder-48.png" className={cls} alt="Comprimido" />
+    return <img src="/icons/brands/icons8-archive-folder-48.png" className={cls} alt="ZIP" />
   if (ext === 'apk' || type.includes('android'))
     return <img src="/icons/brands/icons8-apk-64.png" className={cls} alt="APK" />
   if (ext === 'exe' || ext === 'msi' || ext === 'dmg' || type.includes('msdownload') || type.includes('msdos') || type.includes('dmg'))
-    return <img src="/icons/brands/icons8-software-48.png" className={cls} alt="Software" />
+    return <img src="/icons/brands/icons8-software-48.png" className={cls} alt="EXE" />
+  if (ext === 'psd' || type.includes('photoshop'))
+    return <img src="/icons/brands/adobe-photoshop.svg" className={cls} alt="Photoshop" />
+  if (ext === 'ai' || ext === 'eps' || type.includes('illustrator') || type.includes('postscript'))
+    return <img src="/icons/brands/adobe-illustrator.svg" className={cls} alt="Illustrator" />
   return <File className={`${cls} text-gray-500`} />
 }

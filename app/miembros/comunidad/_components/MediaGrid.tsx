@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight, Play, Pause, FileText, Download, FileSpreadsheet, FileArchive, File, FileCode, FileImage } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Play, Pause, Download, File, FileImage } from 'lucide-react'
 import type { ComunidadPostMedia, ComunidadPost, ReaccionTipo } from '../_types'
 
 interface MediaGridProps {
@@ -207,8 +207,8 @@ function FileIconByType({ mime, name }: { mime: string; name?: string }) {
     return <img src="/icons/brands/microsoft-excel.svg" className={cls} alt="Excel" />
   if (ext === 'ppt' || ext === 'pptx' || mime.includes('presentation') || mime.includes('powerpoint'))
     return <img src="/icons/brands/microsoft-powerpoint.svg" className={cls} alt="PowerPoint" />
-  if (ext === 'pdf' || mime.includes('pdf'))
-    return <FileText className={`${cls} text-red-400`} />
+  if (ext === 'pdf' || mime.includes('pdf') || mime.includes('acrobat'))
+    return <img src="/icons/brands/icons8-acrobat-67.png" className={cls} alt="PDF" />
   if (ext === 'csv')
     return <img src="/icons/brands/icons8-csv-48.png" className={cls} alt="CSV" />
   if (ext === 'txt' || mime === 'text/plain')
@@ -220,11 +220,15 @@ function FileIconByType({ mime, name }: { mime: string; name?: string }) {
   if (ext === 'rar' || mime.includes('rar'))
     return <img src="/icons/brands/icons8-winrar-94.png" className={cls} alt="RAR" />
   if (ext === 'zip' || ext === '7z' || ext === 'tar' || ext === 'gz' || mime.includes('zip') || mime.includes('compressed'))
-    return <img src="/icons/brands/icons8-archive-folder-48.png" className={cls} alt="Comprimido" />
+    return <img src="/icons/brands/icons8-archive-folder-48.png" className={cls} alt="ZIP" />
   if (ext === 'apk' || mime.includes('android'))
     return <img src="/icons/brands/icons8-apk-64.png" className={cls} alt="APK" />
   if (ext === 'exe' || ext === 'msi' || ext === 'dmg' || mime.includes('msdownload') || mime.includes('msdos') || mime.includes('dmg'))
-    return <img src="/icons/brands/icons8-software-48.png" className={cls} alt="Software" />
+    return <img src="/icons/brands/icons8-software-48.png" className={cls} alt="EXE" />
+  if (ext === 'psd' || mime.includes('photoshop'))
+    return <img src="/icons/brands/adobe-photoshop.svg" className={cls} alt="Photoshop" />
+  if (ext === 'ai' || ext === 'eps' || mime.includes('illustrator') || mime.includes('postscript'))
+    return <img src="/icons/brands/adobe-illustrator.svg" className={cls} alt="Illustrator" />
   if (mime.startsWith('image/'))
     return <FileImage className={`${cls} text-pink-400`} />
   return <File className={`${cls} text-gray-500`} />

@@ -23,6 +23,8 @@ const ALLOWED_FILE_TYPES = [
   'application/vnd.android.package-archive',
   'application/x-msdownload', 'application/x-msdos-program', 'application/exe', 'application/x-exe',
   'application/x-dmg', 'application/x-apple-diskimage',
+  'image/vnd.adobe.photoshop', 'application/x-photoshop', 'application/photoshop',
+  'application/postscript', 'application/illustrator', 'application/x-illustrator',
 ]
 const ALLOWED_AUDIO_TYPES = [
   'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave',
@@ -149,7 +151,7 @@ export async function uploadMediaAction(formData: FormData) {
       url_comprimida: urlComprimida,
       url_thumbnail: urlThumbnail,
       mime_type: file.type,
-      nombre_archivo: baseName,
+      nombre_archivo: nombreCompleto,
       tamaño_original: file.size,
       tamaño_comprimido: tamañoComprimido,
     })
