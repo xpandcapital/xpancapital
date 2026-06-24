@@ -263,6 +263,28 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    // ── Si vincula a un curso, sincronizar bidireccionalmente ──────────────────
+    if (updates.curso_id) {
+      // Quitar curso_id de otros productos que apuntaran al mismo curso (1:1)
+      await supabase
+        .from('productos')
+        .update({ curso_id: null })
+        .eq('curso_id', updates.curso_id)
+        .eq('empresa_id', DEFAULT_EMPRESA_ID)
+        .neq('id', id)
+
+      // Asegurar tipo y categoría compatibles con curso
+      const { data: catCursos } = await supabase
+        .from('producto_categorias')
+        .select('id')
+        .eq('slug', 'cursos')
+        .eq('empresa_id', DEFAULT_EMPRESA_ID)
+        .maybeSingle()
+
+      if (!updates.tipo) updates.tipo = 'servicio'
+      if (!updates.categoria_id && catCursos?.id) updates.categoria_id = catCursos.id
+    }
+
     const { data, error } = await supabase
       .from('productos')
       .update(updates)

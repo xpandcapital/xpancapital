@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Globe, Copy, Check, Loader2, X } from "lucide-react"
+import { Globe, Copy, Check, Loader2, X, Search, GraduationCap, Link2, Unlink2 } from "lucide-react"
 import { ProductImageUploader } from './ProductImageUploader'
 import { ProductPriceSection } from './ProductPriceSection'
 import { ProductStockSection } from './ProductStockSection'
@@ -435,19 +435,31 @@ export function ProductFormModal({
                 <label className="text-[10px] font-black text-purple-400 uppercase tracking-widest">
                   Vincular a Curso
                 </label>
-                <select
-                  name="curso_id"
-                  value={formData.cursoId || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cursoId: e.target.value || null }))}
-                  className="w-full bg-white/5 border border-purple-500/20 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-purple-500 transition-all appearance-none"
-                >
-                  <option value="" className="bg-zinc-900">Sin curso vinculado</option>
-                  {cursos.map(c => (
-                    <option key={c.id} value={c.id} className="bg-zinc-900">{c.nombre}</option>
-                  ))}
-                </select>
+
+                {formData.cursoId ? (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Link2 className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                      <span className="text-sm text-purple-300 truncate">
+                        {cursos.find(c => c.id === formData.cursoId)?.nombre || 'Curso vinculado'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, cursoId: null }))}
+                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
+                      title="Desvincular curso"
+                    >
+                      <Unlink2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <CursoSelector cursos={cursos} onSelect={(id) => setFormData(prev => ({ ...prev, cursoId: id }))} />
+                )}
+
                 {formData.cursoId && (
                   <p className="text-[10px] text-purple-400/70 flex items-center gap-1">
+                    <GraduationCap className="w-3 h-3" />
                     Al comprar este producto se asignará automáticamente el curso vinculado
                   </p>
                 )}
@@ -531,6 +543,71 @@ export function ProductFormModal({
           </div>
         </div>
       </form>
+    </div>
+  )
+}
+
+function CursoSelector({ cursos, onSelect }: { cursos: Array<{ id: string; nombre: string }>; onSelect: (id: string) => void }) {
+  const [abierto, setAbierto] = useState(false)
+  const [busqueda, setBusqueda] = useState("")
+
+  const filtrados = cursos
+    .filter(c => !busqueda || c.nombre.toLowerCase().includes(busqueda.toLowerCase()))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+
+  if (!abierto) {
+    return (
+      <button
+        type="button"
+        onClick={() => setAbierto(true)}
+        className="w-full flex items-center gap-2 p-3 rounded-xl bg-white/[0.03] border border-dashed border-white/10 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all text-xs text-gray-400 hover:text-purple-400"
+      >
+        <Search className="w-3.5 h-3.5" />
+        Buscar y vincular un curso existente...
+      </button>
+    )
+  }
+
+  return (
+    <div className="space-y-2 p-3 rounded-xl bg-purple-500/5 border border-purple-500/10">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-bold uppercase text-purple-400 tracking-wider">
+          Seleccionar curso
+        </span>
+        <button
+          type="button"
+          onClick={() => { setAbierto(false); setBusqueda("") }}
+          className="text-[10px] text-gray-500 hover:text-white"
+        >
+          Cancelar
+        </button>
+      </div>
+      <input
+        type="text"
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+        placeholder="Buscar curso..."
+        className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 transition-colors"
+        autoFocus
+      />
+      <div className="max-h-40 overflow-y-auto space-y-0.5">
+        {filtrados.map(c => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => { onSelect(c.id); setAbierto(false); setBusqueda("") }}
+            className="w-full text-left px-3 py-2 rounded-lg text-sm text-white hover:bg-purple-500/20 hover:text-purple-300 transition-colors truncate flex items-center gap-2"
+          >
+            <GraduationCap className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+            {c.nombre}
+          </button>
+        ))}
+        {filtrados.length === 0 && (
+          <p className="text-[10px] text-gray-500 px-3 py-2 text-center">
+            {busqueda ? 'No se encontraron cursos' : 'No hay cursos disponibles'}
+          </p>
+        )}
+      </div>
     </div>
   )
 }
