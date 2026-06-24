@@ -8,10 +8,10 @@ const nextConfig = {
   },
   api: {
     bodyParser: {
-      sizeLimit: '20mb',
+      sizeLimit: '100mb',
     },
   },
-  serverExternalPackages: ['potrace', 'jimp'],
+  serverExternalPackages: ['potrace', 'jimp', 'sharp'],
   images: {
     remotePatterns: [
       {

@@ -272,21 +272,39 @@ export function useMediaUpload() {
     setUploading(true)
     setProgress(0)
 
-    const formData = new FormData()
-    formData.append('file', file)
-    if (postId) formData.append('post_id', postId)
-
     try {
+      const formData = new FormData()
+      formData.append('file', file)
+      if (postId) formData.append('post_id', postId)
+
       const res = await fetch(`${API}/upload`, {
         method: 'POST',
         body: formData
       })
-      const json = await res.json()
+
+      // Manejar respuestas no-JSON (ej: 413 Payload Too Large de Vercel)
+      const text = await res.text()
+      let json: any
+      try {
+        json = JSON.parse(text)
+      } catch {
+        setUploading(false)
+        if (res.status === 413) {
+          throw new Error('Archivo demasiado grande para el servidor. Máximo 50MB.')
+        }
+        throw new Error(`Error del servidor (${res.status}). Intenta con un archivo más pequeño.`)
+      }
+
       setProgress(100)
-      if (!json.success) throw new Error(json.error)
-      return json.data
-    } finally {
+      if (!json.success) {
+        setUploading(false)
+        throw new Error(json.error || 'Error al subir')
+      }
       setUploading(false)
+      return json.data
+    } catch (e) {
+      setUploading(false)
+      throw e
     }
   }, [])
 

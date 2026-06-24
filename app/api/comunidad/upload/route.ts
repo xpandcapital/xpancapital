@@ -13,14 +13,19 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/tiff']
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo']
 const ALLOWED_FILE_TYPES = [
-  'application/pdf', 'application/zip', 'application/x-rar-compressed',
+  'application/pdf',
+  'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed',
+  'application/x-tar', 'application/gzip',
   'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'text/plain', 'text/csv'
+  'text/plain', 'text/csv',
+  'application/json', 'application/xml', 'text/xml',
+  'application/vnd.rar',
 ]
-const MAX_SIZE = 100 * 1024 * 1024 // 100MB
+const MAX_SIZE = 50 * 1024 * 1024 // 50MB total (límite Vercel Pro)
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024  // 20MB para imágenes (se comprimen)
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024  // 50MB video
 const IMAGE_MAX_WIDTH = 1920
 const WEBP_QUALITY = 80
 
@@ -151,9 +156,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: `Tipo de archivo no permitido: ${file.type}` }, { status: 400 })
     }
 
-    const maxFileSize = isImage ? MAX_IMAGE_SIZE : MAX_SIZE
+    const maxFileSize = isImage ? MAX_IMAGE_SIZE : isVideo ? MAX_VIDEO_SIZE : MAX_SIZE
     if (file.size > maxFileSize) {
-      return NextResponse.json({ success: false, error: `Tamaño máximo: ${isImage ? '20MB' : '100MB'}` }, { status: 400 })
+      const maxMB = isImage ? '20MB' : isVideo ? '50MB' : '50MB'
+      return NextResponse.json({ success: false, error: `Archivo demasiado grande. Máximo: ${maxMB}. Tu archivo: ${(file.size / (1024*1024)).toFixed(1)}MB` }, { status: 400 })
     }
 
     const bytes = await file.arrayBuffer()
