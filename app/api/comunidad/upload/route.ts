@@ -7,6 +7,15 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
+// Body size limit para App Router (Vercel Pro: hasta 50MB)
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
@@ -14,14 +23,15 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo']
 const ALLOWED_FILE_TYPES = [
   'application/pdf',
-  'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed',
-  'application/x-tar', 'application/gzip',
+  'application/zip', 'application/x-zip-compressed', 'application/x-rar-compressed', 'application/x-7z-compressed',
+  'application/x-tar', 'application/gzip', 'application/x-gzip',
   'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'text/plain', 'text/csv',
   'application/json', 'application/xml', 'text/xml',
   'application/vnd.rar',
+  'application/octet-stream',
 ]
 const MAX_SIZE = 50 * 1024 * 1024 // 50MB total (límite Vercel Pro)
 const MAX_IMAGE_SIZE = 20 * 1024 * 1024  // 20MB para imágenes (se comprimen)

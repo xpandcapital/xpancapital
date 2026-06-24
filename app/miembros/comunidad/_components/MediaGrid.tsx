@@ -233,53 +233,59 @@ function PostModal({ media, startIndex, post, onReaccionar, onClose }: PostModal
         </button>
 
         {/* === LEFT: Image Carousel === */}
-        <div className="flex-1 flex items-center justify-center relative bg-black/30 min-h-[250px]">
-        {/* Prev */}
-        {currentIdx > 0 && (
-          <button onClick={handlePrev} className="absolute left-2 md:left-4 z-20 p-2 bg-black/50 rounded-full text-white/60 hover:text-white transition-colors">
-            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-          </button>
-        )}
-        {/* Next */}
-        {currentIdx < media.length - 1 && (
-          <button onClick={handleNext} className="absolute right-2 md:right-4 z-20 p-2 bg-black/50 rounded-full text-white/60 hover:text-white transition-colors">
-            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-          </button>
-        )}
+        <div className="flex-1 flex items-center bg-black/30 min-h-[250px]">
+          {/* Prev button area */}
+          <div className="w-10 md:w-12 flex items-center justify-center flex-shrink-0">
+            {currentIdx > 0 ? (
+              <button onClick={handlePrev} className="p-1.5 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            ) : <div className="w-5 h-5" />}
+          </div>
 
-        {/* Image */}
-        <motion.div
-          key={currentIdx}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="w-full h-full flex items-center justify-center p-4 md:p-8"
-        >
-          {actual.tipo === 'imagen' ? (
-            <Image
-              src={actual.url_original}
-              alt=""
-              width={1600}
-              height={1200}
-              className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
-              unoptimized
-            />
-          ) : actual.tipo === 'video' ? (
-            <div className="w-full max-w-3xl aspect-video bg-black/40 rounded-xl overflow-hidden flex items-center justify-center">
-              <Play className="w-16 h-16 text-white/40" />
-            </div>
+          {/* Image */}
+          <motion.div
+            key={currentIdx}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex-1 flex items-center justify-center py-2 min-w-0"
+          >
+            {actual.tipo === 'imagen' ? (
+              <Image
+                src={actual.url_original}
+                alt=""
+                width={1600}
+                height={1200}
+                className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
+                unoptimized
+              />
+            ) : actual.tipo === 'video' ? (
+              <div className="w-full max-w-3xl aspect-video bg-black/40 rounded-xl overflow-hidden flex items-center justify-center">
+                <Play className="w-16 h-16 text-white/40" />
+              </div>
           ) : null}
-        </motion.div>
+          </motion.div>
+
+          {/* Next button area */}
+          <div className="w-10 md:w-12 flex items-center justify-center flex-shrink-0">
+            {currentIdx < media.length - 1 ? (
+              <button onClick={handleNext} className="p-1.5 rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors">
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            ) : <div className="w-5 h-5" />}
+          </div>
+        </div>
 
         {/* Dots indicator */}
         {imagenes.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+          <div className="flex justify-center gap-1.5 py-2">
             {media.map((m, i) => {
               if (m.tipo !== 'imagen') return null
               return (
                 <button
                   key={i}
                   onClick={e => { e.stopPropagation(); setCurrentIdx(i) }}
-                  className={`w-2 h-2 rounded-full transition-colors ${
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${
                     i === currentIdx ? 'bg-blis-red' : 'bg-white/20 hover:bg-white/40'
                   }`}
                 />
@@ -287,7 +293,6 @@ function PostModal({ media, startIndex, post, onReaccionar, onClose }: PostModal
             })}
           </div>
         )}
-      </div>
 
         {/* === RIGHT: Comments sidebar === */}
         <div

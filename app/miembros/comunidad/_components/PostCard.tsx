@@ -1,15 +1,15 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, PartyPopper, ThumbsUp, Lightbulb, Frown, MessageCircle, Trash2, ChevronDown } from 'lucide-react'
-import type { ComunidadPost, ReaccionTipo } from '../_types'
+import type { ComunidadPost, ReaccionTipo, ComunidadComentario } from '../_types'
 import { EncuestaCard } from './EncuestaCard'
 import { EventoCard } from './EventoCard'
 import { MediaGrid } from './MediaGrid'
-import { Comentarios } from './Comentarios'
 import { useAuth } from '@/hooks/useAuth'
+import { useComentarios } from '../_hooks/useComunidad'
 
 const REACCIONES = [
   { tipo: 'like', Icon: ThumbsUp, label: 'Me gusta', color: 'text-blue-400' },
@@ -31,7 +31,6 @@ interface PostCardProps {
 export function PostCard({ post, onReaccionar, onEliminar, onVotar, onInscribirEvento, onCancelarInscripcion }: PostCardProps) {
   const { user } = useAuth()
   const [showReacciones, setShowReacciones] = useState(false)
-  const [showComments, setShowComments] = useState(false)
   const isAdmin = ['superadmin', 'admin'].includes(user?.role || '')
   const isOwner = user?.id === post.autor_id
 
@@ -211,31 +210,113 @@ export function PostCard({ post, onReaccionar, onEliminar, onVotar, onInscribirE
             )}
           </AnimatePresence>
         </div>
-        <button
-          onClick={() => setShowComments(!showComments)}
-          className="px-3 py-2 rounded-lg transition-all text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 flex items-center gap-1.5"
+        <span
+          className="px-3 py-2 rounded-lg text-xs font-medium text-gray-400 flex items-center gap-1.5"
         >
           <MessageCircle className="w-4 h-4" />
-          <span className="hidden sm:inline">Comentar</span>
+          <span className="hidden sm:inline">Comentarios</span>
           {post.comentarios_count ? (
             <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded-full">{post.comentarios_count}</span>
           ) : null}
-        </button>
+        </span>
       </div>
 
-      {/* Comentarios */}
-      <AnimatePresence>
-        {showComments && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-white/[0.04]"
-          >
-            <Comentarios postId={post.id} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Comentarios preview */}
+      <ComentariosPreview postId={post.id} total={post.comentarios_count || 0} />
     </motion.div>
+  )
+}
+
+function ComentariosPreview({ postId, total }: { postId: string; total: number }) {
+  const { user } = useAuth()
+  const { comentarios, loading, fetchComentarios, crearComentario, eliminarComentario } = useComentarios(postId)
+  const [expanded, setExpanded] = useState(false)
+  const [texto, setTexto] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const isAdmin = ['superadmin', 'admin'].includes(user?.role || '')
+
+  useEffect(() => { fetchComentarios() }, [fetchComentarios])
+
+  const handleEnviar = async () => {
+    if (!texto.trim() || enviando) return
+    setEnviando(true)
+    try { await crearComentario(texto); setTexto('') }
+    finally { setEnviando(false) }
+  }
+
+  const preview = expanded ? comentarios : comentarios.slice(0, 3)
+  const remaining = Math.max(0, total - 3)
+
+  if (total === 0 && !loading) return null
+
+  return (
+    <div className="border-t border-white/[0.04]">
+      {loading ? (
+        <div className="p-4 text-center text-gray-600 text-xs">Cargando...</div>
+      ) : (
+        <>
+          {preview.map(c => (
+            <div key={c.id} className="px-4 py-2.5 flex items-start gap-2.5">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {c.autor?.avatar_url ? (
+                  <Image src={c.autor.avatar_url} alt="" width={28} height={28} className="object-cover" />
+                ) : (
+                  <span className="text-[10px] font-bold text-white/40">{c.autor?.nombre?.charAt(0) || 'U'}</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="bg-white/[0.03] rounded-xl px-3 py-2">
+                  <p className="text-[11px] font-semibold text-white">{c.autor?.nombre}</p>
+                  <p className="text-xs text-gray-300 mt-0.5">{c.contenido}</p>
+                </div>
+                <div className="flex items-center gap-2 mt-1 ml-1">
+                  <span className="text-[10px] text-gray-700">{new Date(c.created_at).toLocaleDateString('es-PE')}</span>
+                  {(isAdmin || user?.id === c.usuario_id) && (
+                    <button onClick={() => eliminarComentario(c.id)} className="text-[10px] text-gray-700 hover:text-red-400">Eliminar</button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {!expanded && remaining > 0 && (
+            <button
+              onClick={() => setExpanded(true)}
+              className="w-full py-2 text-[11px] text-gray-500 hover:text-gray-300 hover:bg-white/[0.02] transition-colors"
+            >
+              Ver {remaining} comentario{remaining > 1 ? 's' : ''} más
+            </button>
+          )}
+
+          {expanded && remaining > 0 && (
+            <button
+              onClick={() => setExpanded(false)}
+              className="w-full py-2 text-[11px] text-gray-600 hover:text-gray-400 transition-colors"
+            >
+              Mostrar menos
+            </button>
+          )}
+        </>
+      )}
+
+      {/* Input rápido */}
+      <div className="px-4 py-2.5 flex gap-2 border-t border-white/[0.04]">
+        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blis-red/30 to-purple-500/30 flex items-center justify-center overflow-hidden flex-shrink-0">
+          {user?.profilePic ? (
+            <Image src={user.profilePic} alt="" width={28} height={28} className="object-cover" />
+          ) : (
+            <span className="text-[10px] font-bold text-white/40">{user?.nombre?.charAt(0) || 'U'}</span>
+          )}
+        </div>
+        <input
+          type="text"
+          value={texto}
+          onChange={e => setTexto(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleEnviar()}
+          placeholder="Escribe un comentario..."
+          className="flex-1 bg-transparent text-xs text-white placeholder-gray-600 focus:outline-none"
+        />
+      </div>
+    </div>
   )
 }
