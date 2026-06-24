@@ -60,7 +60,7 @@ export default function TemplateEditorPage() {
   return (
     <div className="flex min-h-screen bg-black">
       {/* Desktop sidebar: always visible */}
-      <div className="hidden lg:block">
+      <div className="hidden lg:block fixed left-0 top-20 bottom-0 z-30">
         <TemplateSidebar
           template={template}
           sectionsConfig={sectionsConfig}
