@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
 import {
     DollarSign, Clock, CheckCircle2, AlertCircle, Loader2,
-    Search, Edit3, Trash2, Plus, Filter, ShoppingBag, User,
-    Banknote, CreditCard, ExternalLink, History, ShieldCheck,
-    Coins, Clock3, Eye, GraduationCap
+    Search, Trash2, Plus, ShoppingBag,
+    Banknote, CreditCard, History, ShieldCheck,
+    Coins, Clock3, GraduationCap, Calendar
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +57,7 @@ export default function VentasAdminPage() {
     const [clientes, setClientes] = useState<any[]>([]);
     const [productos, setProductos] = useState<any[]>([]);
 
-    const cargar = async () => {
+    const cargar = useCallback(async () => {
         setLoading(true);
         const params = new URLSearchParams({ page: page.toString(), limit: "50" });
         if (filtroEstado) params.set("estado", filtroEstado);
@@ -67,9 +66,16 @@ export default function VentasAdminPage() {
         const d = await res.json();
         if (d.success) { setVentas(d.ventas || []); setTotal(d.total || 0); }
         setLoading(false);
-    };
+    }, [page, filtroEstado, search]);
 
-    useEffect(() => { cargar(); }, [page, filtroEstado]);
+    useEffect(() => { cargar(); }, [cargar]);
+
+    // Debounced search: resetea a página 1 al escribir
+    useEffect(() => {
+        if (page !== 1) { setPage(1); return; }
+        const timer = setTimeout(() => { cargar(); }, 400);
+        return () => clearTimeout(timer);
+    }, [search]);
 
     useEffect(() => {
         fetch("/api/admin/clientes?limit=200").then(r => r.json()).then(d => {
@@ -149,6 +155,29 @@ export default function VentasAdminPage() {
         return <Badge className={`${b.color} border text-[10px] font-bold flex items-center gap-1`}><b.icon className="w-3 h-3" /> {b.label}</Badge>;
     };
 
+    const metodoPagoLabel = (metodo: string) => {
+        if (metodo === 'transfer' || metodo === 'transferencia') return 'Transferencia';
+        if (metodo === 'efectivo') return 'Efectivo';
+        if (metodo === 'crypto_manual') return 'Cripto';
+        return metodo || 'N/A';
+    };
+
+    const metodoIcon = (metodo: string) => {
+        if (metodo === 'bliscoins' && coinsEnabled) return <Coins className="w-3 h-3 text-amber-400" />;
+        if (metodo === 'transfer' || metodo === 'transferencia') return <Banknote className="w-3 h-3" />;
+        if (metodo === 'crypto_manual') return <Banknote className="w-3 h-3" />;
+        return <CreditCard className="w-3 h-3" />;
+    };
+
+    const formatFecha = (dateStr: string) => {
+        if (!dateStr) return { fecha: '-', hora: '' };
+        const d = new Date(dateStr);
+        return {
+            fecha: d.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' }),
+            hora: d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+        };
+    };
+
     return (
         <div className="min-h-screen bg-black text-white p-4 md:p-6">
             <div className="max-w-7xl mx-auto">
@@ -182,8 +211,8 @@ export default function VentasAdminPage() {
                 <div className="flex flex-col sm:flex-row gap-3 mb-6">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                        <Input value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSearch()}
-                            placeholder="Buscar por cliente o producto..." className="bg-zinc-900/50 border-white/10 text-white placeholder:text-gray-600 rounded-xl pl-10" />
+                        <Input value={search} onChange={e => setSearch(e.target.value)}
+                            placeholder="Buscar por cliente, email o producto..." className="bg-zinc-900/50 border-white/10 text-white placeholder:text-gray-600 rounded-xl pl-10" />
                     </div>
                     <select value={filtroEstado} onChange={e => { setFiltroEstado(e.target.value); setPage(1); }}
                         className="px-4 py-2.5 bg-zinc-900/50 border border-white/10 rounded-xl text-sm text-white cursor-pointer appearance-none focus:outline-none focus:border-blis-red/30 transition-all">
@@ -193,116 +222,192 @@ export default function VentasAdminPage() {
                         <option value="cancelado">Cancelado</option>
                         <option value="reembolsado">Reembolsado</option>
                     </select>
-                    <Button onClick={handleSearch} className="bg-blis-red hover:bg-blis-red/90 text-white text-xs"><Search className="w-4 h-4 mr-2" /> Buscar</Button>
                 </div>
 
                 {loading ? (
                     <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-blis-red" /></div>
+                ) : ventas.length === 0 ? (
+                    <p className="text-center py-12 text-gray-500">No se encontraron ventas</p>
                 ) : (
-                    <div className="bg-zinc-900/50 border border-white/10 rounded-2xl overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-widest text-[10px]">
-                                    <tr>
-                                        <th className="p-4">Cliente</th>
-                                        <th className="p-4">Producto</th>
-                                        <th className="p-4 hidden md:table-cell">Método</th>
-                                        <th className="p-4">Monto</th>
-                                        <th className="p-4 hidden lg:table-cell">Fecha</th>
-                                        <th className="p-4">Estado</th>
-                                        <th className="p-4 w-32">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/[0.02]">
-                                    {ventas.map(venta => (
-                                        <tr key={venta.id} className="hover:bg-white/[0.02] transition-colors">
-                                            <td className="p-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold">
-                                                        {venta.cliente?.nombre?.[0] || "U"}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-bold text-white">
-                                                            {venta.cliente?.nombre || venta.metadata?.nombre_cliente || "N/A"}
-                                                        </p>
-                                                        <p className="text-[10px] text-gray-500">
-                                                            {venta.cliente?.email || venta.metadata?.email_cliente || ""}
-                                                        </p>
-                                                    </div>
+                    <>
+                        {/* Mobile: tarjetas */}
+                        <div className="lg:hidden space-y-3">
+                            {ventas.map(venta => {
+                                const { fecha, hora } = formatFecha(venta.creado_en);
+                                return (
+                                    <div key={venta.id} className="bg-zinc-900/50 border border-white/10 rounded-2xl p-4 space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                                    {venta.cliente?.nombre?.[0] || (venta as any).metadata?.nombre_cliente?.[0] || "U"}
                                                 </div>
-                                            </td>
-                                            <td className="p-4">
-                                                <a href={`/tienda/producto/${venta.producto_id}`} target="_blank" 
-                                                   className="text-sm text-blis-red hover:underline truncate max-w-[200px] block">
-                                                    {venta.producto?.nombre || "Producto"}
-                                                </a>
-                                                <div className="flex items-center gap-1.5 flex-wrap">
-                                                  <span className="text-[10px] text-gray-600">{venta.producto?.categoria?.nombre || venta.producto?.tipo || ""}</span>
-                                                  {venta.producto?.curso_id && (
-                                                    <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20 text-[9px] flex items-center gap-0.5">
-                                                      <GraduationCap className="w-2.5 h-2.5" />
-                                                      {venta.producto?.curso?.nombre || 'Curso'}
-                                                    </Badge>
-                                                  )}
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-bold text-white truncate">
+                                                        {venta.cliente?.nombre || (venta as any).metadata?.nombre_cliente || "Invitado"}
+                                                    </p>
+                                                    <p className="text-[10px] text-gray-500 truncate">
+                                                        {venta.cliente?.email || (venta as any).metadata?.email_cliente || ""}
+                                                    </p>
                                                 </div>
-                                            </td>
-                                            <td className="p-4 hidden md:table-cell">
-                                                <span className="flex items-center gap-1 text-xs text-gray-400">
-                                                    {venta.metodo_pago === 'bliscoins' && coinsEnabled ? <Coins className="w-3 h-3 text-amber-400" /> :
-                                                     venta.metodo_pago === 'transfer' ? <Banknote className="w-3 h-3" /> :
-                                                     venta.metodo_pago === 'transferencia' ? <Banknote className="w-3 h-3" /> :
-                                                     <CreditCard className="w-3 h-3" />}
-                                                    {venta.metodo_pago === 'transfer' ? 'Transferencia' : venta.metodo_pago === 'transferencia' ? 'Transferencia' : venta.metodo_pago || 'N/A'}
-                                                </span>
-                                            </td>
-                                            <td className="p-4 font-mono font-bold text-white">
-                                                {venta.monto_coins > 0 && coinsEnabled ? (
-                                                    <span className="flex items-center gap-1 text-amber-400">
-                                                        <Coins className="w-3 h-3" /> {venta.monto_coins.toLocaleString()} BLIS
-                                                    </span>
-                                                ) : (
-                                                    `$${venta.monto_usd?.toLocaleString() || '0'}`
-                                                )}
-                                            </td>
-                                            <td className="p-4 hidden lg:table-cell text-xs text-gray-500">
-                                                {venta.creado_en ? new Date(venta.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : "-"}
-                                            </td>
-                                            <td className="p-4">{estadoBadge(venta.estado)}</td>
-                                            <td className="p-4">
-                                                <div className="flex items-center gap-1">
-                                                    {venta.estado === "pendiente" && (
-                                                        <button onClick={() => { setModalVerificar(venta); setNotasVerificacion(""); setSubTipoPago(""); }}
-                                                            className="p-2 hover:bg-emerald-500/10 rounded-lg text-gray-400 hover:text-emerald-400 transition-colors"
-                                                            title="Verificar pago y dar acceso">
-                                                            <ShieldCheck className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                    {venta.estado === "completado" && (
-                                                        <button onClick={() => actualizarEstado(venta.id, "reembolsado")}
-                                                            className="p-2 hover:bg-blue-500/10 rounded-lg text-gray-400 hover:text-blue-400 transition-colors"
-                                                            title="Reembolsar">
-                                                            <Clock3 className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                    <button onClick={async () => { setModalHistorial(venta.id); await cargarLogs(venta.id); }}
-                                                        className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
-                                                        title="Historial de cambios">
-                                                        <History className="w-4 h-4" />
-                                                    </button>
-                                                    <button onClick={() => eliminar(venta.id)}
-                                                        className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-400 transition-colors"
-                                                        title="Eliminar">
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </div>
+                                            {estadoBadge(venta.estado)}
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <GraduationCap className="w-3.5 h-3.5 text-blis-red flex-shrink-0" />
+                                            <span className="text-sm text-white truncate">{venta.producto?.nombre || "Producto"}</span>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                                            <span className="text-gray-500">Método</span>
+                                            <span className="text-gray-500">Monto</span>
+                                            <span className="text-white flex items-center gap-1">
+                                                {metodoIcon(venta.metodo_pago)}
+                                                {metodoPagoLabel(venta.metodo_pago)}
+                                            </span>
+                                            <span className="text-white font-mono font-bold">
+                                                {venta.monto_coins > 0 && coinsEnabled
+                                                    ? <span className="text-amber-400">{venta.monto_coins.toLocaleString()} BLIS</span>
+                                                    : `$${venta.monto_usd?.toLocaleString() || '0'}`}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <Calendar className="w-3 h-3" />
+                                            <span>{fecha}</span>
+                                            <Clock className="w-3 h-3 ml-1" />
+                                            <span>{hora}</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+                                            {venta.estado === "pendiente" && (
+                                                <button onClick={() => { setModalVerificar(venta); setNotasVerificacion(""); setSubTipoPago(""); }}
+                                                    className="p-2 hover:bg-emerald-500/10 rounded-lg text-gray-400 hover:text-emerald-400 transition-colors"
+                                                    title="Verificar pago">
+                                                    <ShieldCheck className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            {venta.estado === "completado" && (
+                                                <button onClick={() => actualizarEstado(venta.id, "reembolsado")}
+                                                    className="p-2 hover:bg-blue-500/10 rounded-lg text-gray-400 hover:text-blue-400 transition-colors"
+                                                    title="Reembolsar">
+                                                    <Clock3 className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            <button onClick={async () => { setModalHistorial(venta.id); await cargarLogs(venta.id); }}
+                                                className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                                title="Historial">
+                                                <History className="w-4 h-4" />
+                                            </button>
+                                            <button onClick={() => eliminar(venta.id)}
+                                                className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-400 transition-colors ml-auto"
+                                                title="Eliminar">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                        {ventas.length === 0 && <p className="text-center py-12 text-gray-500">No se encontraron ventas</p>}
-                    </div>
+
+                        {/* Desktop: tabla */}
+                        <div className="hidden lg:block bg-zinc-900/50 border border-white/10 rounded-2xl overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-widest text-[10px]">
+                                        <tr>
+                                            <th className="p-4">Cliente</th>
+                                            <th className="p-4">Producto</th>
+                                            <th className="p-4">Método</th>
+                                            <th className="p-4">Monto</th>
+                                            <th className="p-4">Fecha / Hora</th>
+                                            <th className="p-4">Estado</th>
+                                            <th className="p-4 w-32">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/[0.02]">
+                                        {ventas.map(venta => {
+                                            const { fecha, hora } = formatFecha(venta.creado_en);
+                                            return (
+                                                <tr key={venta.id} className="hover:bg-white/[0.02] transition-colors">
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold">
+                                                                {venta.cliente?.nombre?.[0] || (venta as any).metadata?.nombre_cliente?.[0] || "U"}
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-bold text-white">
+                                                                    {venta.cliente?.nombre || (venta as any).metadata?.nombre_cliente || "N/A"}
+                                                                </p>
+                                                                <p className="text-[10px] text-gray-500">
+                                                                    {venta.cliente?.email || (venta as any).metadata?.email_cliente || ""}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="text-sm text-white">{venta.producto?.nombre || "Producto"}</span>
+                                                        {venta.producto?.curso_id && (
+                                                            <Badge className="ml-2 bg-purple-500/10 text-purple-400 border-purple-500/20 text-[9px]">
+                                                                <GraduationCap className="w-2.5 h-2.5 mr-0.5" />
+                                                                {venta.producto?.curso?.nombre || 'Curso'}
+                                                            </Badge>
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="flex items-center gap-1 text-xs text-gray-400">
+                                                            {metodoIcon(venta.metodo_pago)}
+                                                            {metodoPagoLabel(venta.metodo_pago)}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 font-mono font-bold text-white">
+                                                        {venta.monto_coins > 0 && coinsEnabled ? (
+                                                            <span className="text-amber-400">{venta.monto_coins.toLocaleString()} BLIS</span>
+                                                        ) : `$${venta.monto_usd?.toLocaleString() || '0'}`}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="text-xs">
+                                                            <p className="text-white">{fecha}</p>
+                                                            <p className="text-gray-500 text-[10px]">{hora}</p>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">{estadoBadge(venta.estado)}</td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center gap-1">
+                                                            {venta.estado === "pendiente" && (
+                                                                <button onClick={() => { setModalVerificar(venta); setNotasVerificacion(""); setSubTipoPago(""); }}
+                                                                    className="p-2 hover:bg-emerald-500/10 rounded-lg text-gray-400 hover:text-emerald-400 transition-colors"
+                                                                    title="Verificar pago y dar acceso">
+                                                                    <ShieldCheck className="w-4 h-4" />
+                                                                </button>
+                                                            )}
+                                                            {venta.estado === "completado" && (
+                                                                <button onClick={() => actualizarEstado(venta.id, "reembolsado")}
+                                                                    className="p-2 hover:bg-blue-500/10 rounded-lg text-gray-400 hover:text-blue-400 transition-colors"
+                                                                    title="Reembolsar">
+                                                                    <Clock3 className="w-4 h-4" />
+                                                                </button>
+                                                            )}
+                                                            <button onClick={async () => { setModalHistorial(venta.id); await cargarLogs(venta.id); }}
+                                                                className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                                                title="Historial de cambios">
+                                                                <History className="w-4 h-4" />
+                                                            </button>
+                                                            <button onClick={() => eliminar(venta.id)}
+                                                                className="p-2 hover:bg-red-500/10 rounded-lg text-gray-400 hover:text-red-400 transition-colors"
+                                                                title="Eliminar">
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </>
                 )}
 
                 {total > 50 && (

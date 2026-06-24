@@ -45,7 +45,9 @@ export async function GET(request: NextRequest) {
       .range((page - 1) * limit, page * limit - 1);
 
     if (estado) query = query.eq("estado", estado);
-    if (search) query = query.or(`cliente.nombre.ilike.%${search}%,producto.nombre.ilike.%${search}%`);
+    if (search) {
+      query = query.or(`cliente.nombre.ilike.%${search}%,cliente.email.ilike.%${search}%,producto.nombre.ilike.%${search}%,metadata->>'nombre_cliente'.ilike.%${search}%,metadata->>'email_cliente'.ilike.%${search}%`);
+    }
 
     const { data, error, count } = await query;
 
