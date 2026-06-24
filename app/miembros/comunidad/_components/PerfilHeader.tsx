@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { CalendarDays, Users, UserPlus, Settings, Twitter, Youtube, Instagram, Facebook } from 'lucide-react'
+import {
+  CalendarDays, Users, UserPlus, Settings, MapPin,
+  Globe, Facebook, Twitter, Youtube, Instagram,
+  Linkedin, Music, MessageCircle, Send, Github,
+  ExternalLink
+} from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { createClient } from '@/lib/supabase/client'
 import type { ReactNode } from 'react'
@@ -18,6 +23,18 @@ interface PerfilData {
   avatar_url: string | null
   rol: string
   empresa_id: string
+  biografia?: string | null
+  website_url?: string | null
+  facebook_url?: string | null
+  instagram_url?: string | null
+  twitter_url?: string | null
+  youtube_url?: string | null
+  linkedin_url?: string | null
+  tiktok_url?: string | null
+  whatsapp_url?: string | null
+  telegram_url?: string | null
+  discord_url?: string | null
+  github_url?: string | null
 }
 
 export function PerfilHeader({ stats }: PerfilHeaderProps) {
@@ -30,7 +47,7 @@ export function PerfilHeader({ stats }: PerfilHeaderProps) {
     const supabase = createClient()
     supabase
       .from('profiles')
-      .select('nombre, apellido, avatar_url, rol, empresa_id')
+      .select('nombre, apellido, avatar_url, rol, empresa_id, biografia, website_url, facebook_url, instagram_url, twitter_url, youtube_url, linkedin_url, tiktok_url, whatsapp_url, telegram_url, discord_url, github_url')
       .eq('id', userId)
       .single()
       .then(({ data }) => { if (data) setPerfil(data as PerfilData) })
@@ -95,25 +112,57 @@ export function PerfilHeader({ stats }: PerfilHeaderProps) {
             </div>
           </div>
 
-          {/* Social Links */}
-          <div className="flex items-center justify-center gap-2 pb-2 flex-shrink-0">
-            {[
-              { Icon: Facebook, href: '#' },
-              { Icon: Twitter, href: '#' },
-              { Icon: Youtube, href: '#' },
-              { Icon: Instagram, href: '#' },
-            ].map(({ Icon, href }, i) => (
-              <a
-                key={i}
-                href={href}
-                className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.04] flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
-              >
-                <Icon className="w-3.5 h-3.5" />
-              </a>
-            ))}
-          </div>
+          {/* Social Links — solo las que tienen valor */}
+          <SocialIcons perfil={perfil} />
         </div>
+
+        {/* Biografía */}
+        {perfil?.biografia && (
+          <div className="px-4 md:px-6 pb-4">
+            <p className="text-sm text-gray-400 leading-relaxed max-w-2xl">{perfil.biografia}</p>
+          </div>
+        )}
       </div>
+    </div>
+  )
+}
+
+function SocialIcons({ perfil }: { perfil: PerfilData | null }) {
+  const redes = [
+    { key: 'website_url', Icon: Globe, label: 'Web' },
+    { key: 'facebook_url', Icon: Facebook, label: 'Facebook' },
+    { key: 'instagram_url', Icon: Instagram, label: 'Instagram' },
+    { key: 'twitter_url', Icon: Twitter, label: 'Twitter / X' },
+    { key: 'youtube_url', Icon: Youtube, label: 'YouTube' },
+    { key: 'linkedin_url', Icon: Linkedin, label: 'LinkedIn' },
+    { key: 'tiktok_url', Icon: Music, label: 'TikTok' },
+    { key: 'whatsapp_url', Icon: MessageCircle, label: 'WhatsApp' },
+    { key: 'telegram_url', Icon: Send, label: 'Telegram' },
+    { key: 'discord_url', Icon: MessageCircle, label: 'Discord' },
+    { key: 'github_url', Icon: Github, label: 'GitHub' },
+  ] as const
+
+  const filled = redes.filter(r => {
+    const val = (perfil as any)?.[r.key]
+    return val && typeof val === 'string' && val.trim()
+  })
+
+  if (filled.length === 0) return null
+
+  return (
+    <div className="flex items-center justify-center gap-1.5 pb-2 flex-shrink-0 flex-wrap">
+      {filled.map(({ key, Icon, label }) => (
+        <a
+          key={key}
+          href={(perfil as any)[key]}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={label}
+          className="w-8 h-8 rounded-lg bg-white/[0.03] border border-white/[0.04] flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/10 hover:border-white/10 transition-all"
+        >
+          <Icon className="w-3.5 h-3.5" />
+        </a>
+      ))}
     </div>
   )
 }
