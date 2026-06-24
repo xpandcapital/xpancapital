@@ -35,25 +35,23 @@ function getMediaType(mime: string): 'imagen' | 'video' | 'archivo' {
   return 'archivo'
 }
 
-async function compressImage(buffer: Buffer, mimeType: string): Promise<{ compressed: Buffer; thumbnail: Buffer | null; compressedSize: number }> {
-  let pipeline = sharp(buffer)
-
-  const metadata = await pipeline.metadata()
-  if (metadata.width && metadata.width > IMAGE_MAX_WIDTH) {
-    pipeline = pipeline.resize(IMAGE_MAX_WIDTH)
+async function compressImage(buffer: Buffer, mimeType: string): Promise<{ compressed: Buffer | null; thumbnail: Buffer | null; compressedSize: number }> {
+  try {
+    let pipeline = sharp(buffer)
+    const metadata = await pipeline.metadata()
+    if (metadata.width && metadata.width > IMAGE_MAX_WIDTH) {
+      pipeline = pipeline.resize(IMAGE_MAX_WIDTH)
+    }
+    const compressed = await pipeline.webp({ quality: WEBP_QUALITY }).toBuffer()
+    let thumbnail: Buffer | null = null
+    if (metadata.width && metadata.width > 400) {
+      thumbnail = await sharp(buffer).resize(400).webp({ quality: 70 }).toBuffer()
+    }
+    return { compressed, thumbnail, compressedSize: compressed.length }
+  } catch {
+    // Si falla sharp, devolver null para usar el original
+    return { compressed: null, thumbnail: null, compressedSize: 0 }
   }
-
-  const compressed = await pipeline.webp({ quality: WEBP_QUALITY }).toBuffer()
-
-  let thumbnail: Buffer | null = null
-  if (metadata.width && metadata.width > 400) {
-    thumbnail = await sharp(buffer)
-      .resize(400)
-      .webp({ quality: 70 })
-      .toBuffer()
-  }
-
-  return { compressed, thumbnail, compressedSize: compressed.length }
 }
 
 function getVideoThumbnail(buffer: Buffer): Promise<Buffer | null> {
@@ -191,12 +189,13 @@ export async function POST(request: NextRequest) {
     // Comprimir si es imagen o video
     if (isImage) {
       const { compressed, thumbnail, compressedSize } = await compressImage(buffer, file.type)
-      const compressedPath = `${folder}/${timestamp}-${random}-comp.webp`
-      await supabase.storage.from('cms-images').upload(compressedPath, compressed, { contentType: 'image/webp', upsert: false })
-      const { data: compUrlData } = supabase.storage.from('cms-images').getPublicUrl(compressedPath)
-      urlComprimida = compUrlData.publicUrl
-      tamañoComprimido = compressedSize
-
+      if (compressed) {
+        const compressedPath = `${folder}/${timestamp}-${random}-comp.webp`
+        await supabase.storage.from('cms-images').upload(compressedPath, compressed, { contentType: 'image/webp', upsert: false })
+        const { data: compUrlData } = supabase.storage.from('cms-images').getPublicUrl(compressedPath)
+        urlComprimida = compUrlData.publicUrl
+        tamañoComprimido = compressedSize
+      }
       if (thumbnail) {
         const thumbPath = `${folder}/${timestamp}-${random}-thumb.webp`
         await supabase.storage.from('cms-images').upload(thumbPath, thumbnail, { contentType: 'image/webp', upsert: false })

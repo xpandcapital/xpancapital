@@ -28,6 +28,9 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const videoInputRef = useRef<HTMLInputElement>(null)
+  const archivoInputRef = useRef<HTMLInputElement>(null)
+  const [tooltip, setTooltip] = useState<string | null>(null)
 
   // Encuesta
   const [pregunta, setPregunta] = useState('')
@@ -50,15 +53,14 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
   const avatarUrl = user?.profilePic || (user as any)?.avatar_url
   const nombre = user?.nombre || 'U'
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, tipo: 'imagen' | 'video' | 'archivo') => {
     const files = Array.from(e.target.files || [])
     for (const file of files) {
       const previewUrl = URL.createObjectURL(file)
       const id = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
-      const tipo = file.type.startsWith('image/') ? 'imagen' : file.type.startsWith('video/') ? 'video' : 'archivo'
       setMediaPreview(prev => [...prev, { id, url: previewUrl, tipo, file }])
     }
-    if (fileInputRef.current) fileInputRef.current.value = ''
+    e.target.value = ''
   }
 
   const removePreview = (id: string) => {
@@ -321,16 +323,66 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
               {/* Footer */}
               <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
                 <div className="flex items-center gap-1">
-                  <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors" title="Imagen/Video">
-                    <ImageIcon className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => fileInputRef.current?.click()} className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors" title="Archivo">
-                    <FileUp className="w-4 h-4" />
-                  </button>
-                  <button className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors hidden sm:block" title="Emoji">
-                    <Smile className="w-4 h-4" />
-                  </button>
-                  <input ref={fileInputRef} type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip" onChange={handleFileSelect} className="hidden" />
+                  {/* Imagen */}
+                  <div className="relative">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      onMouseEnter={() => setTooltip('img')}
+                      onMouseLeave={() => setTooltip(null)}
+                      className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                    </button>
+                    {tooltip === 'img' && (
+                      <div className="absolute bottom-full left-0 mb-2 w-52 bg-zinc-900 border border-white/10 rounded-xl p-2.5 shadow-xl z-30 pointer-events-none">
+                        <p className="text-[11px] font-semibold text-white mb-1">📸 Imágenes</p>
+                        <p className="text-[10px] text-gray-400">JPEG, PNG, WebP, GIF, AVIF</p>
+                        <p className="text-[10px] text-gray-500">Máx. 20MB · Se comprimen automáticamente</p>
+                      </div>
+                    )}
+                    <input ref={fileInputRef} type="file" multiple accept="image/*" onChange={e => handleFileSelect(e, 'imagen')} className="hidden" />
+                  </div>
+
+                  {/* Video */}
+                  <div className="relative">
+                    <button
+                      onClick={() => videoInputRef.current?.click()}
+                      onMouseEnter={() => setTooltip('video')}
+                      onMouseLeave={() => setTooltip(null)}
+                      className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <Film className="w-4 h-4" />
+                    </button>
+                    {tooltip === 'video' && (
+                      <div className="absolute bottom-full left-0 mb-2 w-52 bg-zinc-900 border border-white/10 rounded-xl p-2.5 shadow-xl z-30 pointer-events-none">
+                        <p className="text-[11px] font-semibold text-white mb-1">🎬 Video</p>
+                        <p className="text-[10px] text-gray-400">MP4, WebM, MOV, AVI</p>
+                        <p className="text-[10px] text-gray-500">Máx. 50MB · Se comprime a 720p</p>
+                      </div>
+                    )}
+                    <input ref={videoInputRef} type="file" multiple accept="video/*" onChange={e => handleFileSelect(e, 'video')} className="hidden" />
+                  </div>
+
+                  {/* Archivo */}
+                  <div className="relative">
+                    <button
+                      onClick={() => archivoInputRef.current?.click()}
+                      onMouseEnter={() => setTooltip('file')}
+                      onMouseLeave={() => setTooltip(null)}
+                      className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      <FileUp className="w-4 h-4" />
+                    </button>
+                    {tooltip === 'file' && (
+                      <div className="absolute bottom-full left-0 mb-2 w-60 bg-zinc-900 border border-white/10 rounded-xl p-2.5 shadow-xl z-30 pointer-events-none">
+                        <p className="text-[11px] font-semibold text-white mb-1">📁 Archivos</p>
+                        <p className="text-[10px] text-gray-400">PDF, DOC, XLS, PPT, CSV, TXT</p>
+                        <p className="text-[10px] text-gray-400">RAR, ZIP, 7Z, TAR, GZ, JSON, XML</p>
+                        <p className="text-[10px] text-gray-500">Máx. 50MB</p>
+                      </div>
+                    )}
+                    <input ref={archivoInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip,.rar,.7z,.tar,.gz,.json,.xml" onChange={e => handleFileSelect(e, 'archivo')} className="hidden" />
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={resetForm} className="px-3 py-1.5 text-[11px] text-gray-500 hover:text-white transition-colors">

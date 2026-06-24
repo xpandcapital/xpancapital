@@ -32,85 +32,113 @@ export function MediaGrid({ media, post, onReaccionar }: MediaGridProps) {
 
 function MediaGridInner({ media, post, onReaccionar }: MediaGridProps) {
   const [modalIndex, setModalIndex] = useState<number | null>(null)
+  const [carouselIdx, setCarouselIdx] = useState(0)
   const soloImagenes = media.filter(m => m.tipo === 'imagen')
-  const count = soloImagenes.length
 
-  const openModal = (index: number) => {
-    const realIndex = media.findIndex(m => m.tipo === 'imagen' && soloImagenes.indexOf(m) === index)
-    // Buscar el índice real dentro del array visual
-    const visualIdx = media.findIndex(m => m.id === soloImagenes[index]?.id)
-    setModalIndex(visualIdx)
+  const openModal = (idx: number) => {
+    setModalIndex(idx)
   }
 
-  const getContainerClass = () => {
-    if (media.length === 1) return 'grid-cols-1'
-    if (media.length === 2) return 'grid-cols-2'
-    if (media.length === 3) return 'grid-cols-2'
-    return 'grid-cols-2'
+  // Scroll snap en carrusel
+  const handleCarouselScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget
+    const idx = Math.round(el.scrollLeft / el.clientWidth)
+    setCarouselIdx(idx)
   }
+
+  const isSingleImage = soloImagenes.length === 1 && media.length === 1 && media[0].tipo === 'imagen'
 
   return (
     <>
-      <div className={`grid ${getContainerClass()} gap-1.5`}>
-        {media.map((item, i) => {
-          if (item.tipo === 'imagen') {
-            const isSingle = media.length === 1
-            const isLarge = media.length === 3 && i === 0
-            return (
+      {isSingleImage ? (
+        /* Imagen única: centrada, altura fija, sin recorte */
+        <div className="max-h-[500px] flex items-center justify-center bg-black/30 rounded-xl overflow-hidden border border-white/[0.04] cursor-pointer group"
+          onClick={() => openModal(0)}
+        >
+          <Image
+            src={media[0].url_comprimida || media[0].url_original}
+            alt=""
+            width={1200}
+            height={900}
+            className="max-h-[500px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-xl pointer-events-none" />
+        </div>
+      ) : (
+        /* Carrusel horizontal con snap */
+        <div className="relative">
+          <div
+            className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-xl"
+            onScroll={handleCarouselScroll}
+          >
+            {media.map((item, i) => (
               <div
                 key={item.id}
-                className={`relative rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.04] cursor-pointer group ${
-                  isLarge ? 'row-span-2' : ''
-                } ${isSingle ? 'max-h-[500px] flex items-center justify-center bg-black/30' : 'aspect-square'}`}
-                onClick={() => openModal(soloImagenes.findIndex(m => m.id === item.id))}
+                className="snap-center flex-shrink-0 w-full cursor-pointer"
+                onClick={() => openModal(i)}
               >
-                <Image
-                  src={item.url_comprimida || item.url_original}
-                  alt=""
-                  width={isSingle ? 1200 : 600}
-                  height={isSingle ? 900 : 600}
-                  className={`transition-transform duration-300 group-hover:scale-105 ${
-                    isSingle ? 'max-h-[500px] w-auto h-auto object-contain' : 'w-full h-full object-cover'
-                  }`}
-                  unoptimized={isSingle}
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-              </div>
-            )
-          }
-          if (item.tipo === 'video') {
-            return (
-              <div key={item.id} className="relative aspect-video bg-black/40 rounded-xl overflow-hidden border border-white/[0.04] flex items-center justify-center cursor-pointer group">
-                {item.url_thumbnail ? (
-                  <Image src={item.url_thumbnail} alt="" fill className="object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
-                ) : null}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-12 h-12 rounded-full bg-blis-red/80 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Play className="w-5 h-5 text-white ml-0.5" />
+                {item.tipo === 'imagen' ? (
+                  <div className="relative max-h-[440px] flex items-center justify-center bg-black/30 border border-white/[0.04] overflow-hidden group">
+                    <Image
+                      src={item.url_comprimida || item.url_original}
+                      alt=""
+                      width={1200}
+                      height={900}
+                      className="max-h-[440px] w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />
                   </div>
-                </div>
+                ) : item.tipo === 'video' ? (
+                  <div className="relative aspect-video bg-black/40 flex items-center justify-center group cursor-pointer">
+                    {item.url_thumbnail ? (
+                      <Image src={item.url_thumbnail} alt="" fill className="object-cover opacity-60 group-hover:opacity-40 transition-opacity" />
+                    ) : null}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Play className="w-14 h-14 text-white/30" />
+                    </div>
+                  </div>
+                ) : (
+                  /* Archivo en carrusel */
+                  <div className="flex items-center gap-3 p-5 bg-white/[0.02] min-h-[80px]">
+                    <FileText className="w-8 h-8 text-gray-500 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm text-gray-300 truncate">{item.nombre_archivo || 'Archivo'}</p>
+                      <p className="text-xs text-gray-500">{formatBytes(item.tamaño_original)}</p>
+                    </div>
+                    <a href={item.url_original} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 rounded-lg hover:bg-white/10 ml-auto">
+                      <Download className="w-4 h-4 text-gray-400" />
+                    </a>
+                  </div>
+                )}
               </div>
-            )
-          }
-          // Archivo
-          return (
-            <div key={item.id} className="flex items-center gap-3 p-4 bg-white/[0.02] rounded-xl border border-white/[0.04] min-h-[80px]">
-              <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                <FileText className="w-5 h-5 text-gray-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-gray-300 truncate">{item.nombre_archivo || 'Archivo'}</p>
-                <p className="text-xs text-gray-500">{formatBytes(item.tamaño_original)}</p>
-              </div>
-              <a href={item.url_original} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
-                <Download className="w-4 h-4 text-gray-400" />
-              </a>
-            </div>
-          )
-        })}
-      </div>
+            ))}
+          </div>
 
-      {/* Modal Facebook-style */}
+          {/* Dots + counter */}
+          {media.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5">
+              <span className="text-[10px] text-white/80 tabular-nums">{carouselIdx + 1}/{media.length}</span>
+              <div className="flex gap-1">
+                {media.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={e => {
+                      e.stopPropagation()
+                      const el = e.currentTarget.closest('.relative')?.querySelector('.overflow-x-auto') as HTMLElement
+                      if (el) el.scrollTo({ left: el.clientWidth * i, behavior: 'smooth' })
+                    }}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === carouselIdx ? 'bg-blis-red' : 'bg-white/30'}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modal popup */}
       <AnimatePresence>
         {modalIndex !== null && post && (
           <PostModal
