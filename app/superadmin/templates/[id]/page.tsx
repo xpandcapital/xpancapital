@@ -78,7 +78,7 @@ export default function TemplateEditorPage() {
 
       {/* Mobile sidebar: overlay */}
       {mobileSidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-50">
+        <div className="lg:hidden fixed inset-0 top-20 z-50">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileSidebarOpen(false)} />
           <div className="absolute left-0 top-0 bottom-0">
             <TemplateSidebar
