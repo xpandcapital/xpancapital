@@ -153,7 +153,7 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
     subtotal: totalLimpio,
     metodo_pago: params.metodo_pago,
     fecha_compra: new Date().toLocaleDateString('es-PE', { timeZone: 'America/Lima', day: 'numeric', month: 'long', year: 'numeric' }),
-    enlace_acceso: `${siteUrl}/miembros`,
+    enlace_acceso: `${siteUrl}/login`,
     descuento_monto: '0.00',
     cupon: '',
     ...extraVars,

@@ -570,7 +570,7 @@ export function getTemplates({ hdr, spac, txt, btn, div, soc, ftr, buildTemplate
         spac(8),
         txt('Fecha: {{fecha_actividad}}\nDispositivo: {{dispositivo}}', { fontSize: 14, textColor: '#6b7280', align: 'center' }),
         spac(12),
-        btn('Iniciar Sesion', '{{enlace_crear_cuenta}}', { paddingX: 40, paddingY: 16, fontSize: 16 }),
+        btn('Iniciar Sesion', '{{enlace_acceso}}', { paddingX: 40, paddingY: 16, fontSize: 16 }),
         spac(16),
         txt('Si no realizaste esta accion, cambia tu contrasena de inmediato.', { fontSize: 13, textColor: '#9ca3af', align: 'center' }),
         spac(8), div('#e5e7eb'), spac(8),
