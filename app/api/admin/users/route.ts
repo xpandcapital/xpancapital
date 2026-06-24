@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     if (id) {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en, recibir_notificaciones_compras')
+        .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en, avatar_url, recibir_notificaciones_compras')
         .eq('id', id)
         .single()
 
@@ -31,14 +31,15 @@ export async function GET(request: NextRequest) {
     }
 
     const page = parseInt(searchParams.get('page') || '1')
-    const perPage = parseInt(searchParams.get('per_page') || '20')
+    const perPage = parseInt(searchParams.get('per_page') || searchParams.get('limit') || '20')
     const search = searchParams.get('search') || ''
     const rol = searchParams.get('rol')
+    const empresaId = searchParams.get('empresa_id') || DEFAULT_EMPRESA_ID
 
     let query = supabase
       .from('profiles')
-      .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en, recibir_notificaciones_compras', { count: 'exact' })
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
+      .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en, avatar_url, recibir_notificaciones_compras', { count: 'exact' })
+      .eq('empresa_id', empresaId)
       .order('creado_en', { ascending: false })
       .range((page - 1) * perPage, page * perPage - 1)
 
