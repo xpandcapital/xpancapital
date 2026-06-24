@@ -43,6 +43,9 @@ export function PermissionsGrid({
   onUpdateRole,
 }: PermissionsGridProps) {
   const isWildcard = role.permisos?.includes('*')
+  const isAdminOrSuperadmin = role.nombre === 'admin' || role.nombre === 'superadmin'
+  // Admin y superadmin siempre muestran el árbol (con todo chequeado), no el banner "Acceso Total"
+  const showWildcardBanner = isWildcard && !isAdminOrSuperadmin
 
   const getAvailableRoutesForRole = (r: CustomRole) => {
     const isWc = r.permisos?.includes('*')
@@ -88,7 +91,7 @@ export function PermissionsGrid({
               <ClipboardPaste className="w-3 h-3" />Pegar ({clipboard.length})
             </button>
           )}
-          {!isWildcard && (
+          {!showWildcardBanner && (
             <button onClick={() => onSavePermisos(role)} disabled={!!saving} className="px-3 py-1.5 bg-blis-red rounded-lg text-white text-[10px] font-bold uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-1 disabled:opacity-50">
               <Save className="w-3 h-3" />{saving ? '...' : 'Guardar'}
             </button>
@@ -99,7 +102,7 @@ export function PermissionsGrid({
         </div>
       </div>
 
-      {isWildcard ? (
+      {showWildcardBanner ? (
         <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
           <p className="text-emerald-400 font-bold text-sm">Acceso Total</p>
           <p className="text-emerald-400/60 text-[11px]">Este rol tiene acceso a todas las secciones del sistema</p>

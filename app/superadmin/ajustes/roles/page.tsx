@@ -39,8 +39,8 @@ export default function RolesPage() {
     if (expandedId === roleId) { setExpandedId(null); return }
     setExpandedId(roleId)
     const allPerms = Object.keys(PERMISSIONS)
-    // Para admin: precargar todos los permisos chequeados (pero sin wildcard, permite desmarcar individuales)
-    if (roleName === 'admin' && !permisos.includes('*')) {
+    // Para admin y superadmin: precargar todos los permisos chequeados (pero sin wildcard, permite desmarcar individuales)
+    if ((roleName === 'admin' || roleName === 'superadmin') && !permisos.includes('*')) {
       setEditPermisos(allPerms)
     } else {
       setEditPermisos(permisos.includes('*') ? allPerms : [...permisos])
