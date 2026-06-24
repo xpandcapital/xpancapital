@@ -1,22 +1,47 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { CalendarDays, Users, UserPlus, MapPin, Globe, Twitter, Youtube, Instagram, Facebook } from 'lucide-react'
+import Link from 'next/link'
+import { CalendarDays, Users, UserPlus, Settings, Twitter, Youtube, Instagram, Facebook } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { createClient } from '@/lib/supabase/client'
 import type { ReactNode } from 'react'
 
 interface PerfilHeaderProps {
   stats?: { seguidores: number; siguiendo: number }
 }
 
+interface PerfilData {
+  nombre: string
+  apellido: string
+  avatar_url: string | null
+  rol: string
+  empresa_id: string
+}
+
 export function PerfilHeader({ stats }: PerfilHeaderProps) {
-  const { user } = useAuth()
-  const nombre = user?.nombre || 'Usuario'
-  const apellido = user?.apellido || ''
+  const { user: authUser } = useAuth()
+  const [perfil, setPerfil] = useState<PerfilData | null>(null)
+
+  useEffect(() => {
+    const userId = authUser?.id
+    if (!userId) return
+    const supabase = createClient()
+    supabase
+      .from('profiles')
+      .select('nombre, apellido, avatar_url, rol, empresa_id')
+      .eq('id', userId)
+      .single()
+      .then(({ data }) => { if (data) setPerfil(data as PerfilData) })
+  }, [authUser?.id])
+
+  const nombre = perfil?.nombre || authUser?.nombre || authUser?.name || 'Usuario'
+  const apellido = perfil?.apellido || authUser?.apellido || ''
   const nombreCompleto = `${nombre} ${apellido}`.trim()
-  const username = `@${(nombre + (apellido || '')).toLowerCase().replace(/\s+/g, '')}`
-  const avatarUrl = user?.profilePic || (user as any)?.avatar_url
-  const rol = user?.role || ''
+  const username = `@${nombre.toLowerCase().replace(/\s+/g, '')}`
+  const avatarUrl = perfil?.avatar_url || authUser?.profilePic || (authUser as any)?.avatar_url
+  const rol = authUser?.role || ''
 
   return (
     <div className="relative">
@@ -26,11 +51,14 @@ export function PerfilHeader({ stats }: PerfilHeaderProps) {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blis-red/20 via-transparent to-transparent" />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:48px_48px]" />
         </div>
-        {/* Cover actions */}
         <div className="absolute top-3 right-3 md:top-4 md:right-4">
-          <button className="px-3 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/[0.06] text-xs text-white/70 hover:text-white hover:bg-black/60 transition-colors">
-            Editar portada
-          </button>
+          <Link
+            href="/miembros/perfil"
+            className="px-3 py-1.5 rounded-lg bg-black/40 backdrop-blur-sm border border-white/[0.06] text-xs text-white/70 hover:text-white hover:bg-black/60 transition-colors inline-flex items-center gap-1.5"
+          >
+            <Settings className="w-3 h-3" />
+            Editar perfil
+          </Link>
         </div>
       </div>
 
