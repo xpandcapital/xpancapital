@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {
-  ArrowLeft, Settings, ChevronUp, ChevronDown, Eye, EyeOff
+  ArrowLeft, Settings, ChevronUp, ChevronDown, Eye, EyeOff, X
 } from "lucide-react";
 import { SectionConfig, TemplateData } from "../_types";
 
@@ -16,6 +16,8 @@ interface TemplateSidebarProps {
   moveSectionDown: (key: string) => void;
   toggleSectionVisibility: (key: string) => void;
   isSectionVisible: (key: string) => boolean;
+  mobileOpen: boolean;
+  onClose: () => void;
 }
 
 export function TemplateSidebar({
@@ -28,9 +30,17 @@ export function TemplateSidebar({
   moveSectionDown,
   toggleSectionVisibility,
   isSectionVisible,
+  mobileOpen,
+  onClose,
 }: TemplateSidebarProps) {
   return (
-    <div className="w-56 bg-zinc-950 border-r border-white/5 fixed h-screen overflow-y-auto z-50">
+    <div className="w-56 bg-zinc-950 border-r border-white/5 h-screen overflow-y-auto">
+      {/* Close button (mobile only) */}
+      {mobileOpen && (
+        <button onClick={onClose} className="absolute top-3 right-3 p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white lg:hidden">
+          <X className="w-5 h-5" />
+        </button>
+      )}
       <div className="p-4 border-b border-white/5">
         <Link href="/superadmin/templates" className="flex items-center gap-2 text-gray-400 hover:text-white text-sm">
           <ArrowLeft className="w-4 h-4" />
