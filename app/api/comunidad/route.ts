@@ -22,21 +22,60 @@ async function enrichPosts(supabase: any, posts: any[], userId: string) {
 
   const postIds: string[] = posts.map((p: any) => p.id)
 
-  // Encuestas
-  const { data: encuestas } = await supabase
-    .from('comunidad_encuestas')
-    .select('id, post_id, pregunta, multiple, fecha_cierre')
-    .in('post_id', postIds)
+  // Wave 1: queries independientes en paralelo
+  const [
+    { data: encuestas },
+    { data: eventos },
+    { data: reacciones },
+    { data: comentariosCount },
+  ] = await Promise.all([
+    supabase.from('comunidad_encuestas').select('id, post_id, pregunta, multiple, fecha_cierre').in('post_id', postIds),
+    supabase.from('comunidad_eventos').select('id, post_id, titulo, descripcion, imagen_url, fecha_inicio, fecha_fin, hora_inicio, hora_fin, ubicacion, ubicacion_url, es_digital, url_evento, tipo, capacidad').in('post_id', postIds),
+    supabase.from('comunidad_post_reacciones').select('post_id, usuario_id, tipo').in('post_id', postIds),
+    supabase.from('comunidad_post_comentarios').select('post_id', { count: 'exact', head: false }).in('post_id', postIds).eq('oculto', false),
+  ])
+
   const encuestasList = (encuestas || []) as any[]
+  const eventosList = (eventos || []) as any[]
+  const reaccionesList = (reacciones || []) as any[]
+  const comentariosCountList = (comentariosCount || []) as any[]
 
+  // Wave 2: queries que dependen de wave 1
   const encuestaIds = encuestasList.map((e: any) => e.id)
-  const { data: opciones } = await supabase
-    .from('comunidad_encuesta_opciones')
-    .select('id, encuesta_id, texto, orden')
-    .in('encuesta_id', encuestaIds.length ? encuestaIds : ['00000000-0000-0000-0000-000000000000'])
-    .order('orden')
-  const opcionesList = (opciones || []) as any[]
+  const eventoIds = eventosList.map((e: any) => e.id)
 
+  const opcionesPromise = encuestaIds.length
+    ? supabase.from('comunidad_encuesta_opciones').select('id, encuesta_id, texto, orden').in('encuesta_id', encuestaIds).order('orden')
+    : Promise.resolve({ data: [] as any[] })
+
+  const inscritosPromise = eventoIds.length
+    ? supabase.from('comunidad_evento_inscritos').select('evento_id, usuario_id, estado').in('evento_id', eventoIds)
+    : Promise.resolve({ data: [] as any[] })
+
+  // Referencias en paralelo
+  const productoIds = posts.filter((p: any) => p.origen === 'producto' && p.origen_id).map((p: any) => p.origen_id)
+  const blogIds = posts.filter((p: any) => p.origen === 'blog' && p.origen_id).map((p: any) => p.origen_id)
+
+  const productosPromise = productoIds.length
+    ? supabase.from('productos').select('id, nombre, slug, imagen_principal, precio_usd').in('id', productoIds)
+    : Promise.resolve({ data: [] as any[] })
+  const blogPromise = blogIds.length
+    ? supabase.from('blog_posts').select('id, titulo, slug, imagen_portada').in('id', blogIds)
+    : Promise.resolve({ data: [] as any[] })
+
+  const [
+    { data: opciones },
+    { data: inscritos },
+    { data: productosRef },
+    { data: blogRef },
+  ] = await Promise.all([opcionesPromise, inscritosPromise, productosPromise, blogPromise])
+
+  const opcionesList = (opciones || []) as any[]
+  const inscritosList = (inscritos || []) as any[]
+  const productosRefList = (productosRef || []) as any[]
+  const blogRefList = (blogRef || []) as any[]
+
+  // Wave 3: votos (depende de opciones)
   let votosData: any[] = []
   if (opcionesList.length) {
     const opcionIds = opcionesList.map((o: any) => o.id)
@@ -46,52 +85,6 @@ async function enrichPosts(supabase: any, posts: any[], userId: string) {
       .in('opcion_id', opcionIds)
     votosData = (v || []) as any[]
   }
-
-  // Eventos
-  const { data: eventos } = await supabase
-    .from('comunidad_eventos')
-    .select('id, post_id, titulo, descripcion, imagen_url, fecha_inicio, fecha_fin, hora_inicio, hora_fin, ubicacion, ubicacion_url, es_digital, url_evento, tipo, capacidad')
-    .in('post_id', postIds)
-  const eventosList = (eventos || []) as any[]
-
-  // Inscripciones
-  const eventoIds = eventosList.map((e: any) => e.id)
-  const { data: inscritos } = await supabase
-    .from('comunidad_evento_inscritos')
-    .select('evento_id, usuario_id, estado')
-    .in('evento_id', eventoIds.length ? eventoIds : ['00000000-0000-0000-0000-000000000000'])
-  const inscritosList = (inscritos || []) as any[]
-
-  // Reacciones
-  const { data: reacciones } = await supabase
-    .from('comunidad_post_reacciones')
-    .select('post_id, usuario_id, tipo')
-    .in('post_id', postIds)
-  const reaccionesList = (reacciones || []) as any[]
-
-  // Conteo de comentarios
-  const { data: comentariosCount } = await supabase
-    .from('comunidad_post_comentarios')
-    .select('post_id', { count: 'exact', head: false })
-    .in('post_id', postIds)
-    .eq('oculto', false)
-  const comentariosCountList = (comentariosCount || []) as any[]
-
-  // Referencias de productos
-  const productoIds = posts.filter((p: any) => p.origen === 'producto' && p.origen_id).map((p: any) => p.origen_id)
-  const { data: productosRef } = productoIds.length ? await supabase
-    .from('productos')
-    .select('id, nombre, slug, imagen_principal, precio_usd')
-    .in('id', productoIds) : { data: null }
-  const productosRefList = (productosRef || []) as any[]
-
-  // Referencias de blog
-  const blogIds = posts.filter((p: any) => p.origen === 'blog' && p.origen_id).map((p: any) => p.origen_id)
-  const { data: blogRef } = blogIds.length ? await supabase
-    .from('blog_posts')
-    .select('id, titulo, slug, imagen_portada')
-    .in('id', blogIds) : { data: null }
-  const blogRefList = (blogRef || []) as any[]
 
   // Mapear encuestas
   const encuestaMap = new Map(encuestasList.map((e: any) => [e.post_id, e]))

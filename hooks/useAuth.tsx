@@ -407,13 +407,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 byteArray[i] = byteCharacters.charCodeAt(i)
               }
               const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('avatars')
-                .upload(fileName, byteArray, {
+                .from('cms-images')
+                .upload(`avatars/${fileName}`, byteArray, {
                   contentType: data.profilePic.includes('image/png') ? 'image/png' : 'image/jpeg',
                   upsert: true,
                 })
               if (!uploadError && uploadData) {
-                const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(uploadData.path)
+                const { data: urlData } = supabase.storage.from('cms-images').getPublicUrl(uploadData.path)
                 if (urlData?.publicUrl) {
                   updateData.avatar_url = urlData.publicUrl
                   // Actualizar el estado con la URL real de Storage

@@ -90,8 +90,27 @@ export default function ComunidadPage() {
 
               {/* Feed */}
               {loading ? (
-                <div className="flex justify-center py-16">
-                  <Loader2 className="w-6 h-6 text-blis-red animate-spin" />
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-5 animate-pulse space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/[0.04]" />
+                        <div className="space-y-1.5 flex-1">
+                          <div className="h-3 bg-white/[0.04] rounded w-28" />
+                          <div className="h-2 bg-white/[0.03] rounded w-16" />
+                        </div>
+                      </div>
+                      <div className="space-y-2 pt-2">
+                        <div className="h-3 bg-white/[0.04] rounded w-full" />
+                        <div className="h-3 bg-white/[0.04] rounded w-3/4" />
+                      </div>
+                      <div className="h-48 bg-white/[0.03] rounded-xl" />
+                      <div className="flex gap-4 pt-1">
+                        <div className="h-8 bg-white/[0.03] rounded-lg w-20" />
+                        <div className="h-8 bg-white/[0.03] rounded-lg w-24" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : error ? (
                 <div className="text-center py-16 bg-white/[0.02] rounded-2xl border border-white/[0.06]">
