@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import {
   X, ImageIcon, FileUp, Loader2, Plus, Send, Calendar, BarChart3,
-  Film, Mic, FileSpreadsheet, FileArchive, FileCode, File,
+  Film, Mic, FileSpreadsheet, FileArchive, FileCode, File, FileText,
   ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { useMediaUpload } from '../_hooks/useComunidad'
@@ -454,7 +454,7 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
                         <p className="text-[10px] text-gray-500">Máx. 50MB</p>
                       </div>
                     )}
-                    <input ref={archivoInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip,.rar,.7z,.tar,.gz,.json,.xml,.apk" onChange={e => handleFileSelect(e, 'archivo')} className="hidden" />
+                    <input ref={archivoInputRef} type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt,.zip,.rar,.7z,.tar,.gz,.json,.xml,.apk,.exe,.msi,.dmg" onChange={e => handleFileSelect(e, 'archivo')} className="hidden" />
                   </div>
 
                   {/* Audio */}
@@ -500,14 +500,31 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
 
 function FileIconPreview({ name, type }: { name: string; type: string }) {
   const ext = name.split('.').pop()?.toLowerCase() || ''
-  const props = { className: 'w-8 h-8 flex-shrink-0' }
+  const cls = 'w-8 h-8 flex-shrink-0 object-contain'
 
-  if (type.includes('pdf') || ext === 'pdf') return <File {...props} className="w-8 h-8 text-red-400 flex-shrink-0" />
-  if (ext === 'doc' || ext === 'docx' || type.includes('word')) return <File {...props} className="w-8 h-8 text-blue-400 flex-shrink-0" />
-  if (ext === 'xls' || ext === 'xlsx' || ext === 'csv' || type.includes('excel') || type.includes('spreadsheet')) return <FileSpreadsheet {...props} className="w-8 h-8 text-emerald-400 flex-shrink-0" />
-  if (ext === 'ppt' || ext === 'pptx' || type.includes('presentation')) return <File {...props} className="w-8 h-8 text-orange-400 flex-shrink-0" />
-  if (ext === 'zip' || ext === 'rar' || ext === '7z' || ext === 'tar' || ext === 'gz' || type.includes('zip') || type.includes('rar') || type.includes('compressed') || type.includes('gzip')) return <FileArchive {...props} className="w-8 h-8 text-purple-400 flex-shrink-0" />
-  if (ext === 'apk' || type.includes('android')) return <File {...props} className="w-8 h-8 text-emerald-500 flex-shrink-0" />
-  if (ext === 'json' || ext === 'xml' || type.includes('json') || type.includes('xml')) return <FileCode {...props} className="w-8 h-8 text-cyan-400 flex-shrink-0" />
-  return <File {...props} className="w-8 h-8 text-gray-500 flex-shrink-0" />
+  if (ext === 'doc' || ext === 'docx' || type.includes('word'))
+    return <img src="/icons/brands/microsoft-word.svg" className={cls} alt="Word" />
+  if (ext === 'xls' || ext === 'xlsx' || type.includes('excel') || type.includes('spreadsheet'))
+    return <img src="/icons/brands/microsoft-excel.svg" className={cls} alt="Excel" />
+  if (ext === 'ppt' || ext === 'pptx' || type.includes('presentation') || type.includes('powerpoint'))
+    return <img src="/icons/brands/microsoft-powerpoint.svg" className={cls} alt="PowerPoint" />
+  if (ext === 'pdf' || type.includes('pdf'))
+    return <FileText className={`${cls} text-red-400`} />
+  if (ext === 'csv')
+    return <img src="/icons/brands/icons8-csv-48.png" className={cls} alt="CSV" />
+  if (ext === 'txt' || type === 'text/plain')
+    return <img src="/icons/brands/icons8-txt-48.png" className={cls} alt="TXT" />
+  if (ext === 'json')
+    return <img src="/icons/brands/icons8-json-48.png" className={cls} alt="JSON" />
+  if (ext === 'xml' || type.includes('xml'))
+    return <img src="/icons/brands/icons8-xml-file-48.png" className={cls} alt="XML" />
+  if (ext === 'rar' || type.includes('rar'))
+    return <img src="/icons/brands/icons8-winrar-94.png" className={cls} alt="RAR" />
+  if (ext === 'zip' || ext === '7z' || ext === 'tar' || ext === 'gz' || type.includes('zip') || type.includes('compressed'))
+    return <img src="/icons/brands/icons8-archive-folder-48.png" className={cls} alt="Comprimido" />
+  if (ext === 'apk' || type.includes('android'))
+    return <img src="/icons/brands/icons8-apk-64.png" className={cls} alt="APK" />
+  if (ext === 'exe' || ext === 'msi' || ext === 'dmg' || type.includes('msdownload') || type.includes('msdos') || type.includes('dmg'))
+    return <img src="/icons/brands/icons8-software-48.png" className={cls} alt="Software" />
+  return <File className={`${cls} text-gray-500`} />
 }

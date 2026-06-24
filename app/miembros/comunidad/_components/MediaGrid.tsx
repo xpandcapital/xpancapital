@@ -199,14 +199,33 @@ function formatBytes(bytes: number) {
 
 function FileIconByType({ mime, name }: { mime: string; name?: string }) {
   const ext = (name || '').split('.').pop()?.toLowerCase() || ''
-  const props = { className: 'w-8 h-8 flex-shrink-0' }
+  const cls = 'w-8 h-8 flex-shrink-0 object-contain'
 
-  if (mime.includes('pdf') || ext === 'pdf') return <FileText {...props} className="w-8 h-8 text-red-400 flex-shrink-0" />
-  if (ext === 'doc' || ext === 'docx' || mime.includes('word')) return <FileText {...props} className="w-8 h-8 text-blue-400 flex-shrink-0" />
-  if (ext === 'xls' || ext === 'xlsx' || ext === 'csv' || mime.includes('excel') || mime.includes('spreadsheet')) return <FileSpreadsheet {...props} className="w-8 h-8 text-emerald-400 flex-shrink-0" />
-  if (ext === 'ppt' || ext === 'pptx' || mime.includes('presentation')) return <FileText {...props} className="w-8 h-8 text-orange-400 flex-shrink-0" />
-  if (ext === 'zip' || ext === 'rar' || ext === '7z' || ext === 'tar' || ext === 'gz' || mime.includes('zip') || mime.includes('rar') || mime.includes('compressed') || mime.includes('gzip')) return <FileArchive {...props} className="w-8 h-8 text-purple-400 flex-shrink-0" />
-  if (ext === 'json' || ext === 'xml' || mime.includes('json') || mime.includes('xml')) return <FileCode {...props} className="w-8 h-8 text-cyan-400 flex-shrink-0" />
-  if (mime.startsWith('image/')) return <FileImage {...props} className="w-8 h-8 text-pink-400 flex-shrink-0" />
-  return <File {...props} className="w-8 h-8 text-gray-500 flex-shrink-0" />
+  if (ext === 'doc' || ext === 'docx' || mime.includes('word'))
+    return <img src="/icons/brands/microsoft-word.svg" className={cls} alt="Word" />
+  if (ext === 'xls' || ext === 'xlsx' || mime.includes('excel') || mime.includes('spreadsheet'))
+    return <img src="/icons/brands/microsoft-excel.svg" className={cls} alt="Excel" />
+  if (ext === 'ppt' || ext === 'pptx' || mime.includes('presentation') || mime.includes('powerpoint'))
+    return <img src="/icons/brands/microsoft-powerpoint.svg" className={cls} alt="PowerPoint" />
+  if (ext === 'pdf' || mime.includes('pdf'))
+    return <FileText className={`${cls} text-red-400`} />
+  if (ext === 'csv')
+    return <img src="/icons/brands/icons8-csv-48.png" className={cls} alt="CSV" />
+  if (ext === 'txt' || mime === 'text/plain')
+    return <img src="/icons/brands/icons8-txt-48.png" className={cls} alt="TXT" />
+  if (ext === 'json')
+    return <img src="/icons/brands/icons8-json-48.png" className={cls} alt="JSON" />
+  if (ext === 'xml' || mime.includes('xml'))
+    return <img src="/icons/brands/icons8-xml-file-48.png" className={cls} alt="XML" />
+  if (ext === 'rar' || mime.includes('rar'))
+    return <img src="/icons/brands/icons8-winrar-94.png" className={cls} alt="RAR" />
+  if (ext === 'zip' || ext === '7z' || ext === 'tar' || ext === 'gz' || mime.includes('zip') || mime.includes('compressed'))
+    return <img src="/icons/brands/icons8-archive-folder-48.png" className={cls} alt="Comprimido" />
+  if (ext === 'apk' || mime.includes('android'))
+    return <img src="/icons/brands/icons8-apk-64.png" className={cls} alt="APK" />
+  if (ext === 'exe' || ext === 'msi' || ext === 'dmg' || mime.includes('msdownload') || mime.includes('msdos') || mime.includes('dmg'))
+    return <img src="/icons/brands/icons8-software-48.png" className={cls} alt="Software" />
+  if (mime.startsWith('image/'))
+    return <FileImage className={`${cls} text-pink-400`} />
+  return <File className={`${cls} text-gray-500`} />
 }

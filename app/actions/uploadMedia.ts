@@ -21,6 +21,8 @@ const ALLOWED_FILE_TYPES = [
   'application/json', 'application/xml', 'text/xml',
   'application/vnd.rar', 'application/x-compressed', 'application/octet-stream',
   'application/vnd.android.package-archive',
+  'application/x-msdownload', 'application/x-msdos-program', 'application/exe', 'application/x-exe',
+  'application/x-dmg', 'application/x-apple-diskimage',
 ]
 const ALLOWED_AUDIO_TYPES = [
   'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/wave',
