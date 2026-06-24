@@ -131,10 +131,11 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
     ? 'transaccion_compra_completada_invitado'
     : 'transaccion_compra_completada_logueado'
 
-  const extraVars: Record<string, string> = {}
+  const extraVars: Record<string, string> = {
+    enlace_crear_cuenta: `${siteUrl}/login`,
+  }
   if (esInvitadoNuevo) {
     extraVars.password_temporal = tempPassword
-    extraVars.enlace_crear_cuenta = `${siteUrl}/login`
     console.log('[createUserAndNotify] Invitado nuevo: incluyendo password_temporal:', tempPassword.substring(0, 3) + '***')
   } else if (params.isGuest && userId) {
     console.log('[createUserAndNotify] Invitado existente (no se modifica contraseña). userId:', userId)
