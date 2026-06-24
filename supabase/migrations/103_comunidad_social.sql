@@ -231,20 +231,22 @@ BEGIN
             WHERE origen = 'producto' AND origen_id = NEW.id
         ) THEN
             SELECT id INTO v_admin_id FROM profiles
-            WHERE empresa_id = NEW.empresa_id AND rol = 'admin'
+            WHERE empresa_id = NEW.empresa_id AND rol IN ('admin', 'superadmin')
             LIMIT 1;
 
-            INSERT INTO comunidad_posts (
-                empresa_id, autor_id, tipo, contenido, origen, origen_id
-            ) VALUES (
-                NEW.empresa_id,
-                COALESCE(v_admin_id, NEW.autor_id),
-                'producto',
-                '🆕 **' || NEW.nombre || '**' ||
-                CASE WHEN NEW.descripcion IS NOT NULL THEN E'\n\n' || NEW.descripcion ELSE '' END,
-                'producto',
-                NEW.id
-            );
+            IF v_admin_id IS NOT NULL THEN
+                INSERT INTO comunidad_posts (
+                    empresa_id, autor_id, tipo, contenido, origen, origen_id
+                ) VALUES (
+                    NEW.empresa_id,
+                    v_admin_id,
+                    'producto',
+                    '🆕 **' || NEW.nombre || '**' ||
+                    CASE WHEN NEW.descripcion IS NOT NULL THEN E'\n\n' || NEW.descripcion ELSE '' END,
+                    'producto',
+                    NEW.id
+                );
+            END IF;
         END IF;
     END IF;
     RETURN NEW;
