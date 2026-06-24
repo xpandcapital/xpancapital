@@ -235,15 +235,23 @@ return (
           </div>
         ) : (
           <div className="flex flex-col gap-1.5 min-w-[100px]">
-            <div className="flex justify-between text-[11px] font-black uppercase text-gray-500">
-              <span className="whitespace-nowrap">{product.stock === -1 ? <span className="text-xl leading-none">∞</span> : `${product.stock} un.`}</span>
-            </div>
-            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full ${product.stock === -1 ? 'bg-cyan-500' : product.stock === 0 ? 'bg-red-500' : product.stock <= (product.lowStockThreshold || 15) ? 'bg-amber-500' : 'bg-emerald-500'}`}
-                style={{ width: product.stock === -1 ? '100%' : `${Math.min((product.stock / 100) * 100, 100)}%` }}
-              />
-            </div>
+            {product.stock === -1 ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-[11px] font-black text-cyan-400 uppercase whitespace-nowrap w-fit">
+                ∞ Ilimitado
+              </span>
+            ) : (
+              <>
+                <div className="flex justify-between text-[11px] font-black uppercase text-gray-500">
+                  <span className="whitespace-nowrap">{product.stock} un.</span>
+                </div>
+                <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${product.stock === 0 ? 'bg-red-500' : product.stock <= (product.lowStockThreshold || 15) ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                    style={{ width: `${Math.min((product.stock / 100) * 100, 100)}%` }}
+                  />
+                </div>
+              </>
+            )}
           </div>
         )}
       </td>

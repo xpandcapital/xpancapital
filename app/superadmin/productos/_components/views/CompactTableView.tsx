@@ -173,7 +173,7 @@ export function CompactTableView({
                   </span>
                 )}
               </td>
-              <td className="px-4 py-2 align-middle">
+              {isBlisCoinsEnabled && <td className="px-4 py-2 align-middle">
                 {isBulkEditing ? (
                   <input
                     type="number"
@@ -184,7 +184,7 @@ export function CompactTableView({
                 ) : (
                   <span className="text-xs font-black text-amber-500 uppercase tracking-tighter">{product.bliscoins || '-'}</span>
                 )}
-              </td>
+              </td>}
               <td className="px-4 py-2 align-middle">
                 {isBulkEditing ? (
                   <input
