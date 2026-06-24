@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import type { ComunidadPost, ComunidadComentario, ReaccionTipo } from '../_types'
+import { uploadMediaAction } from '@/app/actions/uploadMedia'
 
 const API = '/api/comunidad'
 
@@ -277,34 +278,16 @@ export function useMediaUpload() {
       formData.append('file', file)
       if (postId) formData.append('post_id', postId)
 
-      const res = await fetch(`${API}/upload`, {
-        method: 'POST',
-        body: formData
-      })
-
-      // Manejar respuestas no-JSON (ej: 413 Payload Too Large de Vercel)
-      const text = await res.text()
-      let json: any
-      try {
-        json = JSON.parse(text)
-      } catch {
-        setUploading(false)
-        if (res.status === 413) {
-          throw new Error('Archivo demasiado grande para el servidor. Máximo 50MB.')
-        }
-        throw new Error(`Error del servidor (${res.status}). Intenta con un archivo más pequeño.`)
-      }
+      const result = await uploadMediaAction(formData)
 
       setProgress(100)
-      if (!json.success) {
-        setUploading(false)
-        throw new Error(json.error || 'Error al subir')
-      }
       setUploading(false)
-      return json.data
+
+      if (!result.success) throw new Error(result.error || 'Error al subir')
+      return result.data!
     } catch (e) {
       setUploading(false)
-      throw e
+      throw e instanceof Error ? e : new Error('Error al subir archivo')
     }
   }, [])
 

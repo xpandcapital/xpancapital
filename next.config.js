@@ -11,6 +11,11 @@ const nextConfig = {
       sizeLimit: '100mb',
     },
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
+  },
   serverExternalPackages: ['potrace', 'jimp', 'sharp'],
   images: {
     remotePatterns: [

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight, Play, FileText, Download } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Play, FileText, Download, FileSpreadsheet, FileArchive, File, FileCode, FileImage } from 'lucide-react'
 import type { ComunidadPostMedia, ComunidadPost, ReaccionTipo } from '../_types'
 
 interface MediaGridProps {
@@ -88,7 +88,7 @@ function MediaGridInner({ media }: MediaGridProps) {
                   </div>
                 ) : (
                   <div className="flex items-center gap-3 p-5 bg-white/[0.02] border border-white/[0.04] min-h-[80px]">
-                    <FileText className="w-8 h-8 text-gray-500 flex-shrink-0" />
+                    <FileIconByType mime={item.mime_type} name={item.nombre_archivo} />
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-gray-300 truncate">{item.nombre_archivo || 'Archivo'}</p>
                       <p className="text-xs text-gray-500">{formatBytes(item.tamaño_original)}</p>
@@ -114,14 +114,14 @@ function MediaGridInner({ media }: MediaGridProps) {
 
           {/* Dots + counter */}
           {media.length > 1 && (
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5 opacity-0 group-hover/carousel:opacity-100 transition-opacity">
-              <span className="text-[10px] text-white/80 tabular-nums">{carouselIdx + 1}/{media.length}</span>
+            <div className="flex items-center justify-center gap-2 py-2">
+              <span className="text-[10px] text-gray-600 tabular-nums">{carouselIdx + 1}/{media.length}</span>
               <div className="flex gap-1">
                 {media.map((_, i) => (
                   <button
                     key={i}
                     onClick={(e) => { e.stopPropagation(); scrollTo(i) }}
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === carouselIdx ? 'bg-blis-red' : 'bg-white/30'}`}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${i === carouselIdx ? 'bg-blis-red' : 'bg-white/15 hover:bg-white/30'}`}
                   />
                 ))}
               </div>
@@ -138,4 +138,18 @@ function formatBytes(bytes: number) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
+}
+
+function FileIconByType({ mime, name }: { mime: string; name?: string }) {
+  const ext = (name || '').split('.').pop()?.toLowerCase() || ''
+  const props = { className: 'w-8 h-8 flex-shrink-0' }
+
+  if (mime.includes('pdf') || ext === 'pdf') return <FileText {...props} className="w-8 h-8 text-red-400 flex-shrink-0" />
+  if (ext === 'doc' || ext === 'docx' || mime.includes('word')) return <FileText {...props} className="w-8 h-8 text-blue-400 flex-shrink-0" />
+  if (ext === 'xls' || ext === 'xlsx' || ext === 'csv' || mime.includes('excel') || mime.includes('spreadsheet')) return <FileSpreadsheet {...props} className="w-8 h-8 text-emerald-400 flex-shrink-0" />
+  if (ext === 'ppt' || ext === 'pptx' || mime.includes('presentation')) return <FileText {...props} className="w-8 h-8 text-orange-400 flex-shrink-0" />
+  if (ext === 'zip' || ext === 'rar' || ext === '7z' || ext === 'tar' || ext === 'gz' || mime.includes('zip') || mime.includes('rar') || mime.includes('compressed') || mime.includes('gzip')) return <FileArchive {...props} className="w-8 h-8 text-purple-400 flex-shrink-0" />
+  if (ext === 'json' || ext === 'xml' || mime.includes('json') || mime.includes('xml')) return <FileCode {...props} className="w-8 h-8 text-cyan-400 flex-shrink-0" />
+  if (mime.startsWith('image/')) return <FileImage {...props} className="w-8 h-8 text-pink-400 flex-shrink-0" />
+  return <File {...props} className="w-8 h-8 text-gray-500 flex-shrink-0" />
 }
