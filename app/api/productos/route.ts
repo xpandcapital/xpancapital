@@ -156,9 +156,9 @@ export async function POST(request: NextRequest) {
       stock: stock || 0,
       stock_ilimitado: stock_ilimitado ?? true,
       archivo_url,
-      activo: false, // SIEMPRE inicia como borrador
-      destacado: false, // Nunca destacado al inicio
-      estado: 'borrador', // Estado explícito
+      activo: activo ?? false,
+      destacado: destacado ?? false,
+      estado: activo ? 'activo' : 'borrador',
       // Campos opcionales con valores por defecto
       sku: sku || null,
       sku_prefix: sku_prefix || 'SKU',
