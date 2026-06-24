@@ -129,7 +129,7 @@ export function CompactTableView({
                     className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-[10px] text-gray-400 w-full outline-none focus:border-blis-red"
                   />
                 ) : (
-                  <span className="text-xs font-mono font-bold text-gray-500 group-hover:text-amber-500 transition-colors uppercase truncate block">{product.sku}</span>
+                  <span className="text-xs font-mono font-bold text-gray-500 group-hover:text-amber-500 transition-colors uppercase truncate block" title={product.sku}>{product.sku?.length > 16 ? product.sku.replace(/^(.{6}).+(.{4})$/, '$1…$2') : product.sku}</span>
                 )}
               </td>
               <td className="px-4 py-2 align-middle truncate">

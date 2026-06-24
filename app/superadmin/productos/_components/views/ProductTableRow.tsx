@@ -117,7 +117,7 @@ return (
             ) : (
               <>
                 <span className="text-xs text-white font-bold group-hover:text-blis-red transition-colors whitespace-nowrap overflow-hidden text-ellipsis block">{product.name}</span>
-                <span className="text-[11px] text-blue-400 font-bold uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis block">{product.sku}</span>
+                <span className="text-[11px] text-blue-400 font-bold uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis block" title={product.sku}>{product.sku?.length > 16 ? product.sku.replace(/^(.{6}).+(.{4})$/, '$1…$2') : product.sku}</span>
               </>
             )}
           </div>
