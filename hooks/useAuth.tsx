@@ -396,33 +396,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updateData.apellido = parts.slice(1).join(' ') || ''
         }
         if (data.profilePic !== undefined) {
-          if (data.profilePic && data.profilePic.startsWith('data:image')) {
+          if (data.profilePic && typeof data.profilePic === 'string' && data.profilePic.startsWith('data:image')) {
             try {
-              const fileExt = data.profilePic.includes('image/png') ? 'png' : 'jpg'
-              const fileName = `${user.id}-avatar.${fileExt}`
-              const base64Data = data.profilePic.split(',')[1]
-              const byteCharacters = atob(base64Data)
-              const byteArray = new Uint8Array(byteCharacters.length)
-              for (let i = 0; i < byteCharacters.length; i++) {
-                byteArray[i] = byteCharacters.charCodeAt(i)
-              }
-              const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('cms-images')
-                .upload(`avatars/${fileName}`, byteArray, {
-                  contentType: data.profilePic.includes('image/png') ? 'image/png' : 'image/jpeg',
-                  upsert: true,
-                })
-              if (!uploadError && uploadData) {
-                const { data: urlData } = supabase.storage.from('cms-images').getPublicUrl(uploadData.path)
-                if (urlData?.publicUrl) {
-                  updateData.avatar_url = urlData.publicUrl
-                  // Actualizar el estado con la URL real de Storage
-                  setUser(prev => prev ? { ...prev, profilePic: urlData.publicUrl } : prev)
-                }
+              // Subir vía API server-side (tiene service role, evita RLS de Storage)
+              const res = await fetch('/api/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ profilePic: data.profilePic })
+              })
+              const json = await res.json()
+              if (json.success && json.data?.avatar_url) {
+                setUser(prev => prev ? { ...prev, profilePic: json.data.avatar_url } : prev)
               } else {
-                console.warn('[Auth] Storage upload failed:', uploadError)
-                // No guardar base64 en la BD — es muy grande
+                console.warn('[Auth] Avatar upload via API failed:', json.error)
               }
+              // No guardar avatar_url en updateData — la API ya lo guardó en BD
             } catch (uploadErr) {
               console.warn('[Auth] Error uploading avatar:', uploadErr)
             }
