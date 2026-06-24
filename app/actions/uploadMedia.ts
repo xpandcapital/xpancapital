@@ -40,6 +40,7 @@ function getMediaType(mime: string): 'imagen' | 'video' | 'audio' | 'archivo' {
 }
 
 export async function uploadMediaAction(formData: FormData) {
+  try {
   // Autenticar vía cookies de Supabase (Server Actions no reciben headers del middleware)
   const cookieStore = await cookies()
   const supabaseAuth = createServerClient(
@@ -170,5 +171,9 @@ export async function uploadMediaAction(formData: FormData) {
       tamaño_original: file.size,
       tamaño_comprimido: tamañoComprimido,
     }
+  }
+  } catch (err: any) {
+    console.error('[uploadMediaAction] Error:', err?.message || err)
+    return { success: false, error: `Error del servidor: ${err?.message || 'desconocido'}` }
   }
 }
