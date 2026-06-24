@@ -669,6 +669,7 @@ export async function POST(request: NextRequest) {
         montoUSD: monto_usd || 0,
         metodoPago: metodo_pago || 'Manual',
         moneda: 'USD',
+        siteUrl: request.nextUrl.origin,
       }).catch((err) => { console.error('[Checkout] Error en notifyAdminNuevaCompra:', err) })
     }
 

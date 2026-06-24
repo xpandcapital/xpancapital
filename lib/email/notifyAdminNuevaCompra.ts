@@ -20,6 +20,7 @@ interface NotifyAdminParams {
   montoUSD: number
   metodoPago: string
   moneda?: string
+  siteUrl?: string
 }
 
 function escapeHtml(text: string): string {
@@ -168,7 +169,7 @@ async function sendFallbackEmail(
 
 export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise<void> {
   const supabase = createClient()
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+  const siteUrl = params.siteUrl || 'https://www.blis-corp.com'
   const empresaId = params.empresaId || DEFAULT_EMPRESA_ID
 
   try {

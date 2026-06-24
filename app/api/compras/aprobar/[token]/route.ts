@@ -8,11 +8,11 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+  const siteUrl = request.nextUrl.origin
   const redirectBase = `${siteUrl}/compras/aprobada`
 
   try {
