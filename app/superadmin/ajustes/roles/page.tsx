@@ -35,10 +35,16 @@ export default function RolesPage() {
     if (await updateRole(role.id, { [field]: editValue || undefined })) setEditingField(null)
     setEditValue('')
   }
-  const handleExpand = (roleId: string, permisos: string[]) => {
+  const handleExpand = (roleId: string, permisos: string[], roleName: string) => {
     if (expandedId === roleId) { setExpandedId(null); return }
     setExpandedId(roleId)
-    setEditPermisos(permisos.includes('*') ? Object.keys(PERMISSIONS) : [...permisos])
+    const allPerms = Object.keys(PERMISSIONS)
+    // Para admin: precargar todos los permisos chequeados (pero sin wildcard, permite desmarcar individuales)
+    if (roleName === 'admin' && !permisos.includes('*')) {
+      setEditPermisos(allPerms)
+    } else {
+      setEditPermisos(permisos.includes('*') ? allPerms : [...permisos])
+    }
     setExpandedGroups({ Principal: true, Ventas: true, Contenido: true, Sistema: true, 'Panel Cliente': true })
   }
   const togglePerm = (key: string, action: string) => {
@@ -104,7 +110,7 @@ export default function RolesPage() {
                 isExpanded={expandedId === role.id} editingField={editingField} editValue={editValue}
                 saving={saving} isSystem={isSystem} isWildcard={isWildcard} permCount={permCount}
                 onSetEditValue={setEditValue} onMove={moveRole}
-                onExpand={() => handleExpand(role.id || '', role.permisos || [])}
+                onExpand={() => handleExpand(role.id || '', role.permisos || [], role.nombre)}
                 onStartEdit={startEdit} onSaveField={saveField} onCancelEdit={cancelEdit}
                 onSetConfirmDeleteId={setConfirmDeleteId} onUpdateRole={updateRole}
               >
