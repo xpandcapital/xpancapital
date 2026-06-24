@@ -73,6 +73,7 @@ export async function uploadMediaAction(formData: FormData) {
   const random = Math.random().toString(36).substring(2, 8)
   const extension = file.name.split('.').pop()?.toLowerCase() || 'bin'
   const baseName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 60)
+  const nombreCompleto = `${baseName}.${extension}`
   const folder = `${empresaId}/comunidad`
 
   // Subir original
@@ -153,7 +154,7 @@ export async function uploadMediaAction(formData: FormData) {
       url_thumbnail: urlThumbnail,
       tipo: mediaType,
       mime_type: file.type,
-      nombre_archivo: baseName,
+      nombre_archivo: nombreCompleto,
       tamaño_original: file.size,
       tamaño_comprimido: tamañoComprimido,
     }

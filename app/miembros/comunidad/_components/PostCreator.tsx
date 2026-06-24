@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import {
   X, ImageIcon, FileUp, Loader2, Plus, Send, Calendar, BarChart3,
-  Camera, Film, Smile, MapPin, ChevronDown, Mic
+  Film, Mic, FileSpreadsheet, FileArchive, FileCode, File,
 } from 'lucide-react'
 import { useMediaUpload } from '../_hooks/useComunidad'
 import { useAuth } from '@/hooks/useAuth'
@@ -304,17 +304,30 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
 
               {/* Media preview */}
               {mediaPreview.length > 0 && (
-                <div className="flex gap-2 overflow-x-auto pb-1">
+                <div className="flex gap-3 overflow-x-auto pb-2">
                   {mediaPreview.map(m => (
-                    <div key={m.id} className="relative w-20 h-20 rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.04] flex-shrink-0">
-                      {m.tipo === 'imagen' ? (
-                        <img src={m.url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">{m.tipo === 'video' ? <Film className="w-6 h-6 text-gray-600" /> : <FileUp className="w-6 h-6 text-gray-600" />}</div>
-                      )}
-                      <button onClick={() => removePreview(m.id)} className="absolute top-1 right-1 p-0.5 bg-black/70 rounded-full">
-                        <X className="w-2.5 h-2.5 text-white/80" />
-                      </button>
+                    <div key={m.id} className="relative flex-shrink-0 w-36 space-y-1.5">
+                      <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-white/[0.03] border border-white/[0.04]">
+                        {m.tipo === 'imagen' ? (
+                          <img src={m.url} alt="" className="w-full h-full object-cover" />
+                        ) : m.tipo === 'video' ? (
+                          <div className="w-full h-full flex items-center justify-center bg-black/20">
+                            <Film className="w-8 h-8 text-gray-500" />
+                          </div>
+                        ) : m.tipo === 'audio' ? (
+                          <div className="w-full h-full flex items-center justify-center bg-purple-500/5">
+                            <Mic className="w-8 h-8 text-purple-400" />
+                          </div>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-white/[0.02]">
+                            <FileIconPreview name={m.file.name} type={m.file.type} />
+                          </div>
+                        )}
+                        <button onClick={() => removePreview(m.id)} className="absolute top-1 right-1 p-0.5 bg-black/70 rounded-full">
+                          <X className="w-2.5 h-2.5 text-white/80" />
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-gray-500 text-center leading-tight line-clamp-2 px-1">{m.file.name}</p>
                     </div>
                   ))}
                 </div>
@@ -438,4 +451,18 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
       </AnimatePresence>
     </div>
   )
+}
+
+function FileIconPreview({ name, type }: { name: string; type: string }) {
+  const ext = name.split('.').pop()?.toLowerCase() || ''
+  const props = { className: 'w-8 h-8 flex-shrink-0' }
+
+  if (type.includes('pdf') || ext === 'pdf') return <File {...props} className="w-8 h-8 text-red-400 flex-shrink-0" />
+  if (ext === 'doc' || ext === 'docx' || type.includes('word')) return <File {...props} className="w-8 h-8 text-blue-400 flex-shrink-0" />
+  if (ext === 'xls' || ext === 'xlsx' || ext === 'csv' || type.includes('excel') || type.includes('spreadsheet')) return <FileSpreadsheet {...props} className="w-8 h-8 text-emerald-400 flex-shrink-0" />
+  if (ext === 'ppt' || ext === 'pptx' || type.includes('presentation')) return <File {...props} className="w-8 h-8 text-orange-400 flex-shrink-0" />
+  if (ext === 'zip' || ext === 'rar' || ext === '7z' || ext === 'tar' || ext === 'gz' || type.includes('zip') || type.includes('rar') || type.includes('compressed') || type.includes('gzip')) return <FileArchive {...props} className="w-8 h-8 text-purple-400 flex-shrink-0" />
+  if (ext === 'apk' || type.includes('android')) return <File {...props} className="w-8 h-8 text-emerald-500 flex-shrink-0" />
+  if (ext === 'json' || ext === 'xml' || type.includes('json') || type.includes('xml')) return <FileCode {...props} className="w-8 h-8 text-cyan-400 flex-shrink-0" />
+  return <File {...props} className="w-8 h-8 text-gray-500 flex-shrink-0" />
 }
