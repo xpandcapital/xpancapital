@@ -11,7 +11,7 @@ import {
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
     CalendarDays, Megaphone, ClipboardList, BookOpenCheck, Package, Bell,
-    MessageCircle, Library, DollarSign, Inbox, Server
+    MessageCircle, Library, DollarSign, Inbox, Server, Radio
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { LucideProps } from "lucide-react"
@@ -114,6 +114,7 @@ const ALL_SECTIONS: Section[] = [
                     { icon: UsersRound, label: "Leads", href: "/superadmin/leads", permission: "leads:ver" },
                     { icon: Megaphone, label: "Campañas", href: "/superadmin/campanas", permission: "campanas:ver" },
                     { icon: Bell, label: "Notificaciones", href: "/superadmin/notificaciones", permission: "notificaciones:ver" },
+                    { icon: Radio, label: "Transmisiones", href: "/superadmin/transmisiones", permission: "transmisiones:ver" },
                 ]
             },
             {

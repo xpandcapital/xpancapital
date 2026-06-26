@@ -1,4 +1,4 @@
-import { Eye, PlusCircle, Pencil, Trash } from 'lucide-react'
+import { Eye, PlusCircle, Pencil, Trash, Settings, Send } from 'lucide-react'
 import { buildPermission } from '@/lib/auth/permissions'
 
 export type ActionDef = { action: string; label: string }
@@ -31,6 +31,8 @@ export const ACTION_COLORS: Record<string, { active: string; border: string; ina
   crear: { active: 'bg-emerald-500/20', border: 'border-emerald-500/40', inactive: 'text-emerald-400' },
   editar: { active: 'bg-amber-500/20', border: 'border-amber-500/40', inactive: 'text-amber-400' },
   eliminar: { active: 'bg-red-500/20', border: 'border-red-500/40', inactive: 'text-red-400' },
+  configurar: { active: 'bg-violet-500/20', border: 'border-violet-500/40', inactive: 'text-violet-400' },
+  enviar: { active: 'bg-cyan-500/20', border: 'border-cyan-500/40', inactive: 'text-cyan-400' },
 }
 
 export const ACTION_ICONS: Record<string, React.FC<{ className?: string }>> = {
@@ -38,6 +40,8 @@ export const ACTION_ICONS: Record<string, React.FC<{ className?: string }>> = {
   crear: PlusCircle,
   editar: Pencil,
   eliminar: Trash,
+  configurar: Settings,
+  enviar: Send,
 }
 
 export function getAllItemPerms(item: PermItem): string[] {
@@ -69,7 +73,10 @@ export const PERMISSION_TREE: PermGroup[] = [
         key: 'pos', label: 'Punto de Venta', actions: VCED,
         subItems: [
           { key: 'pos', label: 'Terminal POS', actions: VCED },
+          { key: 'ventas', label: 'Historial de Ventas', actions: VCED },
+          { key: 'formasdepago', label: 'Formas de Pago', actions: VE },
           { key: 'productos', label: 'Productos', actions: VCED },
+          { key: 'productos', label: 'Entregas Digitales', actions: [V] },
           { key: 'clientes', label: 'Clientes', actions: VCE },
           { key: 'ajustes', label: 'Ajustes del Comercio', actions: VCED },
         ]
@@ -78,6 +85,7 @@ export const PERMISSION_TREE: PermGroup[] = [
         key: 'cursos', label: 'Academia', actions: VCED,
         subItems: [
           { key: 'cursos', label: 'Cursos', actions: VCED },
+          { key: 'biblioteca', label: 'Biblioteca', actions: VCED },
           { key: 'capacitaciones', label: 'Capacitaciones', actions: VCED },
           { key: 'certificados', label: 'Certificados', actions: VCED },
         ]
@@ -97,11 +105,15 @@ export const PERMISSION_TREE: PermGroup[] = [
       {
         key: 'mails', label: 'Comunicación', actions: VCED,
         subItems: [
+          { key: 'chat', label: 'Chat', actions: [V, { action: 'configurar', label: 'Configurar' }] },
           { key: 'mails', label: 'Correos', actions: VCED },
+          { key: 'correo', label: 'Correo IMAP', actions: VCED },
           { key: 'calendarios', label: 'Calendarios', actions: VCED },
           { key: 'formularios', label: 'Formularios', actions: VCED },
           { key: 'leads', label: 'Leads', actions: VCED },
           { key: 'campanas', label: 'Campañas', actions: VCED },
+          { key: 'notificaciones', label: 'Notificaciones', actions: [V, { action: 'enviar', label: 'Enviar' }] },
+          { key: 'transmisiones', label: 'Transmisiones', actions: VCED },
         ]
       },
       {
@@ -135,6 +147,8 @@ export const PERMISSION_TREE: PermGroup[] = [
           { key: 'ajustes', label: 'Comercio', actions: VCED },
           { key: 'roles', label: 'Roles y Niveles', actions: VCED },
           { key: 'empresas', label: 'Empresas', actions: VCED },
+          { key: 'configuracion', label: 'Seguridad', actions: [V] },
+          { key: 'configuracion', label: 'Config Correo', actions: [V] },
         ]
       },
       { key: 'perfil', label: 'Mi Perfil', actions: VE },

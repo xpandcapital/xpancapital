@@ -10,6 +10,7 @@ import { CursorWrapper } from "@/components/ui/CursorWrapper"
 import { PWARegistrar } from "@/components/utils/PWARegistrar"
 import { DynamicMetadata } from "@/components/utils/DynamicMetadata"
 import { FaviconBadge } from "@/components/layout/FaviconBadge"
+import { LiveTransmissionBanner } from "@/components/ui/LiveTransmissionBanner"
 // import { ChatWidget } from "@/components/chat/ChatWidget"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
@@ -45,6 +46,7 @@ export function LayoutProviders({
                 <CursorWrapper />
                 <PWARegistrar />
                 <FaviconBadge />
+                <LiveTransmissionBanner />
                 <Header
                   logoHorizontal={logoHorizontal}
                   logoVertical={logoVertical}

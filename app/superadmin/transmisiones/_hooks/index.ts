@@ -1,0 +1,1 @@
+export { useTransmisiones } from './useTransmisiones'
