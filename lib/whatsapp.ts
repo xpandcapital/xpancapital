@@ -92,19 +92,22 @@ export async function sendWhatsApp({
   }
 
   try {
-    const params = new URLSearchParams({
+    const body = JSON.stringify({
       number: number.replace(/\D/g, ''),
       type,
       message,
       instance_id: creds.instanceId,
       access_token: creds.accessToken,
+      ...(media_url ? { media_url } : {}),
+      ...(filename ? { filename } : {}),
     })
-    if (media_url) params.set('media_url', media_url)
-    if (filename) params.set('filename', filename)
-    const url = `${API_BASE}/send?${params.toString()}`
 
     console.log('[WhatsApp] Enviando a:', number.replace(/\D/g, ''), 'instancia:', creds.instanceId)
-    const res = await fetch(url, { method: 'POST' })
+    const res = await fetch(`${API_BASE}/send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    })
     const text = await res.text()
     console.log('[WhatsApp] Respuesta Planifyx:', res.status, text.substring(0, 300))
 
