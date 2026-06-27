@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import { Info } from 'lucide-react'
 import type { useCalendarEditor } from '../_hooks/useCalendarEditor'
 import { calendarTypeLabels } from '../_types'
@@ -7,13 +8,15 @@ import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 type Editor = ReturnType<typeof useCalendarEditor>
 
-const mockTeamMembers = [
-  { id: 'usr_1', name: 'Kevin Valdez', email: 'kevin@blis-corp.com' },
-  { id: 'usr_2', name: 'Ana Gómez', email: 'ana@blis-corp.com' },
-]
-
 export function EditorTeam({ editor }: { editor: Editor }) {
   const { formData, updateField, toggleUser } = editor
+  const [teamMembers, setTeamMembers] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch('/api/asesores').then(r => r.json()).then(d => {
+      if (d.success) setTeamMembers(d.data.map((a: any) => ({ id: a.id, nombre: a.nombre, email: a.email, whatsapp: a.whatsapp })))
+    })
+  }, [])
 
   return (
     <div className="p-8">
@@ -73,7 +76,7 @@ export function EditorTeam({ editor }: { editor: Editor }) {
         Miembros disponibles
       </h3>
       <div className="space-y-3">
-        {mockTeamMembers.map(user => (
+        {teamMembers.map(user => (
           <label
             key={user.id}
             className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${
@@ -96,10 +99,10 @@ export function EditorTeam({ editor }: { editor: Editor }) {
               className="w-4 h-4 accent-blis-red"
             />
             <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white font-bold text-sm">
-              {user.name.substring(0, 2).toUpperCase()}
+              {user.nombre.substring(0, 2).toUpperCase()}
             </div>
             <div>
-              <div className="font-bold text-white">{user.name}</div>
+              <div className="font-bold text-white">{user.nombre}</div>
               <div className="text-xs text-white/40">{user.email}</div>
             </div>
           </label>

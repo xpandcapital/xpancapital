@@ -405,6 +405,12 @@ export default function LeadsPage() {
                 </div>
               )}
 
+              <a href={`/superadmin/calendarios?lead_id=${selectedLead.id}&email=${encodeURIComponent(selectedLead.email || '')}`}
+                 className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold hover:bg-blue-500/20 transition-colors">
+                <Calendar className="w-3.5 h-3.5" />
+                Agendar Cita
+              </a>
+
               <div className="border-t border-white/10 pt-4">
                 <h4 className="text-sm font-bold text-white mb-3">Información Adicional</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
