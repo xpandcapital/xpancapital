@@ -7,73 +7,126 @@ const DEFAULT_EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
 function getAdmin() { return createClient(supabaseUrl, supabaseServiceKey) }
 
-/**
- * Webhook receptor de Planifyx WhatsApp.
- * Configurar en Planifyx: POST /api/set_webhook?webhook_url=https://www.blis-corp.com/api/whatsapp/webhook&enable=true&instance_id=TU_ID&access_token=TU_TOKEN
- */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const supabase = getAdmin()
-
-    // Planifyx envía diferentes estructuras según el evento
-    const eventType = detectEventType(body)
     const empresaId = DEFAULT_EMPRESA_ID
 
-    const message: Record<string, any> = {
-      empresa_id: empresaId,
-      instance_id: body.instance_id || null,
-      event_type: eventType,
-      raw_payload: body,
+    // Planifyx envuelve todo en data.data[0]
+    const wrapper = body.data || body
+    const entries = Array.isArray(wrapper.data) ? wrapper.data : (body.messages || body.data || [body])
+    const instanceId = body.instance_id || wrapper.instance_id || null
+
+    const messages: Record<string, any>[] = []
+
+    for (const entry of entries) {
+      const key = entry.key || entry
+      const update = entry.update || {}
+      const msg = entry.message || entry
+
+      // Extraer número limpio (quitar @s.whatsapp.net, @lid, @g.us, @c.us)
+      const rawJid = key.remoteJid || entry.remoteJid || body.remoteJid || ''
+      const cleanNumber = rawJid.replace(/@(s\.whatsapp\.net|lid|g\.us|c\.us|broadcast)$/, '')
+      const isGroup = rawJid.includes('@g.us')
+
+      // Determinar tipo de evento
+      const event = wrapper.event || body.event || ''
+      let eventType = 'unknown'
+      let messageType = 'text'
+      let body_text = null
+      let caption = null
+
+      if (event === 'messages.upsert') {
+        if (key.fromMe) {
+          eventType = 'sent'
+        } else if (msg.conversation || msg.extendedTextMessage?.text || msg.imageMessage || msg.videoMessage || msg.documentMessage || msg.audioMessage) {
+          eventType = 'message'
+          if (msg.conversation) {
+            messageType = 'text'
+            body_text = msg.conversation
+          } else if (msg.extendedTextMessage) {
+            messageType = 'text'
+            body_text = msg.extendedTextMessage.text
+          } else if (msg.imageMessage) {
+            messageType = 'image'
+            caption = msg.imageMessage.caption || null
+            body_text = caption || '[Imagen]'
+          } else if (msg.videoMessage) {
+            messageType = 'video'
+            caption = msg.videoMessage.caption || null
+            body_text = caption || '[Video]'
+          } else if (msg.documentMessage) {
+            messageType = 'document'
+            caption = msg.documentMessage.fileName || msg.documentMessage.caption || null
+            body_text = caption || '[Documento]'
+          } else if (msg.audioMessage) {
+            messageType = 'audio'
+            body_text = '[Audio]'
+          } else if (msg.locationMessage) {
+            messageType = 'location'
+            body_text = '[Ubicación]'
+          } else if (msg.contactMessage) {
+            messageType = 'contact'
+            body_text = '[Contacto]'
+          } else if (msg.stickerMessage) {
+            messageType = 'sticker'
+            body_text = '[Sticker]'
+          } else if (msg.reactionMessage) {
+            messageType = 'reaction'
+            body_text = msg.reactionMessage.text || '[Reacción]'
+          } else {
+            body_text = '[Mensaje no soportado]'
+          }
+        } else {
+          eventType = 'message'
+          body_text = JSON.stringify(msg).substring(0, 500)
+        }
+      } else if (event === 'messages.update') {
+        const status = update.status
+        if (status === 1) eventType = 'server_ack'
+        else if (status === 2) eventType = 'delivered'
+        else if (status === 3) eventType = 'read'
+        else if (status === 4) eventType = 'played'
+        else eventType = `status_${status}`
+      } else if (event === 'connection.update' || body.connected !== undefined) {
+        eventType = body.connected !== false ? 'connected' : 'disconnected'
+        body_text = body.connected !== false ? 'WhatsApp conectado' : 'WhatsApp desconectado'
+      } else if (event === 'battery') {
+        eventType = 'battery'
+        body_text = `Batería: ${body.battery || body.percent || '?'}%`
+      } else {
+        eventType = event || 'unknown'
+      }
+
+      messages.push({
+        empresa_id: empresaId,
+        instance_id: instanceId,
+        event_type: eventType,
+        from_number: key.fromMe ? cleanNumber : (isGroup ? cleanNumber : cleanNumber),
+        to_number: key.fromMe ? (isGroup ? cleanNumber : '') : (cleanNumber || null),
+        message_type: messageType,
+        body: body_text,
+        caption: caption,
+        media_url: msg?.imageMessage?.url || msg?.videoMessage?.url || msg?.documentMessage?.url || msg?.audioMessage?.url || null,
+        media_mime: msg?.imageMessage?.mimetype || msg?.videoMessage?.mimetype || msg?.documentMessage?.mimetype || msg?.audioMessage?.mimetype || null,
+        raw_payload: entry,
+        processed: false,
+      })
     }
 
-    // Extraer datos del mensaje según el tipo de evento
-    if (eventType === 'message') {
-      const msg = body.message || body.messages?.[0] || body
-      message.from_number = body.from || body.sender || msg?.from || msg?.author?.split('@')[0] || null
-      message.to_number = body.to || body.receiver || msg?.to || null
-      message.message_type = msg?.type || body.type || 'text'
-      message.body = msg?.text?.body || msg?.body || body.text || body.caption || null
-      message.caption = msg?.image?.caption || msg?.video?.caption || msg?.document?.caption || null
-      message.media_url = msg?.image?.url || msg?.video?.url || msg?.document?.url || msg?.audio?.url || null
-      message.media_mime = msg?.image?.mime_type || msg?.video?.mime_type || msg?.document?.mime_type || null
-    } else if (eventType === 'sent' || eventType === 'delivered' || eventType === 'read') {
-      message.from_number = body.to || body.recipient || null
-    } else if (eventType === 'connected' || eventType === 'disconnected') {
-      message.body = body.message || `WhatsApp ${eventType}`
-    } else if (eventType === 'battery') {
-      message.body = `Batería: ${body.battery || body.percent || '?'}%`
+    if (messages.length > 0) {
+      const { error } = await supabase.from('whatsapp_messages').insert(messages)
+      if (error) console.error('[WhatsApp Webhook] Error guardando:', error)
     }
 
-    const { error } = await supabase.from('whatsapp_messages').insert(message)
-    if (error) {
-      console.error('[WhatsApp Webhook] Error guardando:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    // Responder a Planifyx (siempre 200 para evitar reintentos)
-    return NextResponse.json({ success: true, event: eventType })
+    return NextResponse.json({ success: true, processed: messages.length })
   } catch (error) {
     console.error('[WhatsApp Webhook] Error:', error)
     return NextResponse.json({ success: true }, { status: 200 })
   }
 }
 
-function detectEventType(body: Record<string, any>): string {
-  // Planifyx envía el tipo en diferentes campos según la versión de API
-  if (body.event) return body.event
-  if (body.status) return body.status
-  if (body.ack) return body.ack === 1 ? 'sent' : body.ack === 2 ? 'delivered' : body.ack === 3 ? 'read' : 'unknown'
-  if (body.type === 'message' || body.messages || body.message || body.body || body.text) return 'message'
-  if (body.type === 'battery' || body.battery !== undefined) return 'battery'
-  if (body.type === 'qr' || body.qrcode) return 'qr'
-  if (body.connected !== undefined) return body.connected ? 'connected' : 'disconnected'
-  return 'unknown'
-}
-
-/**
- * GET: verificar que el webhook está activo (para testing)
- */
 export async function GET() {
   return NextResponse.json({ status: 'active', webhook: 'WhatsApp Planifyx Webhook' })
 }
