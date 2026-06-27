@@ -41,6 +41,14 @@ export function GlobalSearch() {
   const abortRef = useRef<AbortController | null>(null)
   const cacheRef = useRef<Map<string, Record<string, SearchResult[]>>>(new Map())
 
+  // Limpiar cache al cerrar y limitar tamaño
+  useEffect(() => {
+    if (open) {
+      const cache = cacheRef.current
+      if (cache.size > 50) cache.clear()
+    }
+  }, [open])
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {

@@ -107,7 +107,7 @@ export function NotificationBell() {
 
   fetchRef.current = fetchNotifications;
 
-  useEffect(() => { fetchRef.current(); }, []);
+  useEffect(() => { fetchRef.current(); }, [user]);
 
   // Realtime: INSERT + UPDATE + DELETE
   useEffect(() => {

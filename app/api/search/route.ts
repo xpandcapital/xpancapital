@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
         id: p.id,
         title: p.nombre,
         subtitle: p.precio_usd ? `$${p.precio_usd}` : undefined,
-        url: `/superadmin/productos`,
+        url: `/superadmin/productos?id=${p.id}`,
         image: p.imagen_principal || undefined,
       }))
     }
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         id: l.id,
         title: l.nombre,
         subtitle: l.email || l.estado || undefined,
-        url: `/superadmin/leads`,
+        url: `/superadmin/leads?id=${l.id}`,
       }))
     }
 

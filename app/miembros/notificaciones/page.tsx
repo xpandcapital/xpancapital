@@ -18,7 +18,8 @@ interface Notificacion {
 
 const TIPO_ICONOS: Record<string, React.ComponentType<{ className?: string }>> = {
   sistema: Settings, chat: MessageSquare, lead: UserPlus, venta: Banknote,
-  alerta: AlertTriangle, recordatorio: Clock, blog: FileText, compras: ShoppingCart,
+  alerta: AlertTriangle, recordatorio: Clock, info: FileText, warning: AlertTriangle,
+  success: CheckCheck, error: AlertTriangle, blog: FileText, compras: ShoppingCart,
   cursos: GraduationCap, mensaje: MessageSquare,
 }
 
@@ -42,7 +43,7 @@ export default function NotificacionesPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!user) return
+    if (!user) { setLoading(false); return }
     fetch("/api/notificaciones").then(r => r.json()).then(data => {
       setNotificaciones(data.notifications || [])
     }).finally(() => setLoading(false))
@@ -69,7 +70,10 @@ export default function NotificacionesPage() {
     <div className="min-h-screen bg-black pt-24 pb-20 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
-          <button onClick={() => router.back()} className="p-2 hover:bg-white/5 rounded-xl text-gray-400">
+          <button onClick={() => {
+            if (window.history.length > 1) router.back()
+            else router.push('/miembros')
+          }} className="p-2 hover:bg-white/5 rounded-xl text-gray-400">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
