@@ -2,6 +2,7 @@
 
 import type { Calendario } from '../_types'
 import type { useCalendarEditor } from '../_hooks/useCalendarEditor'
+import { NativeSelect } from '@/components/ui/SearchableSelect'
 
 type Editor = ReturnType<typeof useCalendarEditor>
 
@@ -78,17 +79,18 @@ export function EditorRules({ editor }: { editor: Editor }) {
               <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">
                 Audiencia
               </label>
-              <select
+              <NativeSelect
                 value={formData.audiencia_tipo}
-                onChange={e => updateField('audiencia_tipo', e.target.value as Calendario['audiencia_tipo'])}
+                onChange={v => updateField('audiencia_tipo', v as Calendario['audiencia_tipo'])}
+                options={[
+                  { value: 'publico', label: 'Público general' },
+                  { value: 'leads_campana', label: 'Leads de campaña' },
+                  { value: 'postulantes', label: 'Postulantes' },
+                  { value: 'equipo', label: 'Equipo interno' },
+                  { value: 'especifico', label: 'Específico' },
+                ]}
                 className={inputClass}
-              >
-                <option value="publico">Público general</option>
-                <option value="leads_campana">Leads de campaña</option>
-                <option value="postulantes">Postulantes</option>
-                <option value="equipo">Equipo interno</option>
-                <option value="especifico">Específico</option>
-              </select>
+              />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">

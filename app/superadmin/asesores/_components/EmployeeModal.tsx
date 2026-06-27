@@ -6,6 +6,7 @@ import type { Advisor, Role } from '../_types'
 import { PermissionSelector } from '@/components/ui/PermissionSelector'
 import type { PermisosAdicionales, UserRole } from '@/lib/auth/permissions'
 import { ROLE_CONFIG } from '@/lib/auth/permissions'
+import { NativeSelect } from '@/components/ui/SearchableSelect'
 
 interface EmployeeModalProps {
   advisor: Advisor | null
@@ -199,12 +200,11 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
                       )
                     }
                     if (field.type === 'select') {
+                      const opts = (field.options || []).map((v, i) => ({ value: v, label: (field.optionLabels || [])[i] || v }))
                       return (
                         <div key={field.key} className="space-y-1">
                           <label className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{field.label}</label>
-                          <select value={form[field.key as keyof typeof form] as string} onChange={(e) => updateField(field.key, e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-xs">
-                            {(field.options || []).map((opt, i) => <option key={opt} value={opt} className="bg-zinc-900">{field.optionLabels?.[i] || opt}</option>)}
-                          </select>
+                          <NativeSelect options={opts} value={form[field.key as keyof typeof form] as string} onChange={(val) => updateField(field.key, val)} />
                         </div>
                       )
                     }

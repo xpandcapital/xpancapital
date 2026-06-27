@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import RichTextEditor from '@/components/superadmin/RichTextEditor';
 import { CoverImagePanel, SeoPanel, AccessPanel, ShortLinkPanel, ConfigPanel, TagsPanel } from './_components';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 
 interface Category {
   id: string;
@@ -549,16 +550,13 @@ export default function CreateBlogPostContent() {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Categoría</label>
-                    <select
+                    <SearchableSelect
                       value={post.categoria_id || ''}
-                      onChange={e => updateField('categoria_id', e.target.value || null)}
-                      className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-white/30"
-                    >
-                      <option value="" className="bg-[#1a1a1a]">Sin categoría</option>
-                      {categories.map(cat => (
-                        <option key={cat.id} value={cat.id} className="bg-[#1a1a1a]">{cat.nombre}</option>
-                      ))}
-                    </select>
+                      onChange={(v) => updateField('categoria_id', v || null)}
+                      options={categories.map(cat => ({ value: cat.id, label: cat.nombre }))}
+                      placeholder="Sin categoría"
+                      searchPlaceholder="Buscar categoría..."
+                    />
                   </div>
                 </div>
 

@@ -7,6 +7,7 @@ import { useEmpresaEdit } from './useEmpresaEdit'
 import { useToast } from '@/components/ui/Toast'
 import { ImageUpload } from '@/components/editor/ImageUpload'
 import { PLANES, PAISES, MONEDAS, ZONAS_HORARIAS } from '../_types'
+import { NativeSelect, SearchableSelect } from '@/components/ui/SearchableSelect'
 
 type Tab = 'identidad' | 'apariencia' | 'regional' | 'fiscal' | 'plan' | 'features'
 
@@ -142,31 +143,21 @@ export default function EmpresaEditPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className={label}>País Fiscal</label>
-                <select value={(empresaForm.pais_fiscal as string) || 'PE'} onChange={e => upd('pais_fiscal', e.target.value)} className={input}>
-                  {PAISES.map(p => <option key={p.code} value={p.code}>{p.nombre}</option>)}
-                </select>
+                <SearchableSelect value={(empresaForm.pais_fiscal as string) || 'PE'} onChange={v => upd('pais_fiscal', v)} options={PAISES.map(p => ({ value: p.code, label: p.nombre }))} className={input} />
               </div>
               <div>
                 <label className={label}>Moneda Base</label>
-                <select value={(empresaForm.moneda_base as string) || 'USD'} onChange={e => upd('moneda_base', e.target.value)} className={input}>
-                  {MONEDAS.map(m => <option key={m.code} value={m.code}>{m.nombre}</option>)}
-                </select>
+                <SearchableSelect value={(empresaForm.moneda_base as string) || 'USD'} onChange={v => upd('moneda_base', v)} options={MONEDAS.map(m => ({ value: m.code, label: m.nombre }))} className={input} />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className={label}>Idioma</label>
-                <select value={(empresaForm.idioma as string) || 'es'} onChange={e => upd('idioma', e.target.value)} className={input}>
-                  <option value="es">Español</option>
-                  <option value="en">English</option>
-                  <option value="pt">Português</option>
-                </select>
+                <NativeSelect value={(empresaForm.idioma as string) || 'es'} onChange={v => upd('idioma', v)} options={[{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }, { value: 'pt', label: 'Português' }]} className={input} />
               </div>
               <div>
                 <label className={label}>Zona Horaria</label>
-                <select value={(empresaForm.zona_horaria as string) || 'America/Lima'} onChange={e => upd('zona_horaria', e.target.value)} className={input}>
-                  {ZONAS_HORARIAS.map(tz => <option key={tz} value={tz}>{tz.replace('_', ' ')}</option>)}
-                </select>
+                <SearchableSelect value={(empresaForm.zona_horaria as string) || 'America/Lima'} onChange={v => upd('zona_horaria', v)} options={ZONAS_HORARIAS.map(tz => ({ value: tz, label: tz.replace('_', ' ') }))} className={input} />
               </div>
             </div>
           </div>
@@ -189,9 +180,7 @@ export default function EmpresaEditPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label className={label}>Plan</label>
-                <select value={(empresaForm.plan as string) || 'free'} onChange={e => upd('plan', e.target.value)} className={input}>
-                  {PLANES.map(p => <option key={p.id} value={p.id}>{p.nombre} (hasta {p.usuarios} usuarios)</option>)}
-                </select>
+                <NativeSelect value={(empresaForm.plan as string) || 'free'} onChange={v => upd('plan', v)} options={PLANES.map(p => ({ value: p.id, label: `${p.nombre} (hasta ${p.usuarios} usuarios)` }))} className={input} />
               </div>
               <div><label className={label}>Límite de Usuarios</label><input type="number" value={(empresaForm.plan_limite_usuarios as number) || 5} onChange={e => upd('plan_limite_usuarios', parseInt(e.target.value))} className={input} /></div>
               <div><label className={label}>Límite de Productos</label><input type="number" value={(empresaForm.plan_limite_productos as number) || 50} onChange={e => upd('plan_limite_productos', parseInt(e.target.value))} className={input} /></div>

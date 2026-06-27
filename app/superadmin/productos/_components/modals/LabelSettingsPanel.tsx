@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { X, Check } from "lucide-react"
+import { NativeSelect } from "@/components/ui/SearchableSelect"
 
 interface LabelSettingsPanelProps {
   labelSettings: {
@@ -149,16 +150,17 @@ export function LabelSettingsPanel({
       <div className="flex gap-2">
         <div className="flex-1 space-y-2">
           <h4 className="text-[8px] font-black text-white/40 uppercase tracking-widest px-1">Hoja Impresión</h4>
-          <select
+          <NativeSelect
             value={labelSettings.paperSize}
-            onChange={(e) => onUpdate({ paperSize: e.target.value as typeof labelSettings.paperSize })}
+            onChange={(v) => onUpdate({ paperSize: v as typeof labelSettings.paperSize })}
+            options={[
+              { value: 'A2', label: 'A2' },
+              { value: 'A3', label: 'A3' },
+              { value: 'A4', label: 'A4' },
+              { value: 'A5', label: 'A5' },
+            ]}
             className="w-full bg-white/5 border border-white/5 rounded-xl px-0 cursor-pointer py-3 text-[10px] font-black uppercase text-white outline-none focus:border-white/20 transition-all appearance-none text-center backdrop-blur-md"
-          >
-            <option value="A2" className="bg-zinc-900">A2</option>
-            <option value="A3" className="bg-zinc-900">A3</option>
-            <option value="A4" className="bg-zinc-900">A4</option>
-            <option value="A5" className="bg-zinc-900">A5</option>
-          </select>
+          />
         </div>
         <div className="flex-1 space-y-2">
           <h4 className="text-[8px] font-black text-white/40 uppercase tracking-widest px-1">Altura</h4>

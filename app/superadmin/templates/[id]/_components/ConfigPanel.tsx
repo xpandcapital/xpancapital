@@ -5,6 +5,7 @@ import { Eye, EyeOff, Star, Trash2 } from "lucide-react";
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { TemplateData } from "../_types";
 import { InputField, TextAreaField, ColorPicker, SectionCard } from "./ui";
+import { NativeSelect } from "@/components/ui/SearchableSelect";
 
 interface ConfigPanelProps {
   template: TemplateData | null;
@@ -357,17 +358,17 @@ export function ConfigPanel({
                 />
                 <div>
                   <label className="text-[10px] text-gray-400 uppercase mb-1 block">Estilo</label>
-                  <select 
-                    value={templateConfig?.customHeader?.cta?.style || 'primary'} 
-                    onChange={(e) => setTemplateConfig(prev => ({
+                  <NativeSelect
+                    value={templateConfig?.customHeader?.cta?.style || 'primary'}
+                    onChange={(v) => setTemplateConfig(prev => ({
                       ...prev,
-                      customHeader: { ...prev?.customHeader, cta: { ...prev?.customHeader?.cta, style: e.target.value as 'primary' | 'secondary' } as any }
-                    }))} 
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white"
-                  >
-                    <option value="primary">Primario</option>
-                    <option value="secondary">Secundario</option>
-                  </select>
+                      customHeader: { ...prev?.customHeader, cta: { ...prev?.customHeader?.cta, style: v as 'primary' | 'secondary' } as any }
+                    }))}
+                    options={[
+                      { value: 'primary', label: 'Primario' },
+                      { value: 'secondary', label: 'Secundario' },
+                    ]}
+                  />
                 </div>
               </div>
             </div>

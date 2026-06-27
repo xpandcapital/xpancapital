@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { X, Save, Loader2, Camera, Palette, Upload } from 'lucide-react'
 import type { EmailCuenta } from '../_types'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 interface Props {
   open: boolean
@@ -204,16 +205,15 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
           {/* Plantilla predeterminada */}
           <div>
             <label className="block text-[10px] font-medium text-gray-500 uppercase mb-1">Plantilla por defecto al responder</label>
-            <select
+            <SearchableSelect
               value={plantillaDefault}
-              onChange={e => setPlantillaDefault(e.target.value)}
+              onChange={setPlantillaDefault}
+              options={[
+                { value: '', label: 'Ninguna (texto plano)' },
+                ...templates.map((t: any) => ({ value: t.id, label: t.nombre })),
+              ]}
               className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blis-red/30 transition-all appearance-none cursor-pointer"
-            >
-              <option value="">Ninguna (texto plano)</option>
-              {templates.map((t: any) => (
-                <option key={t.id} value={t.id}>{t.nombre}</option>
-              ))}
-            </select>
+            />
           </div>
 
           {error && (

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { MapPin, Plus, X } from 'lucide-react';
 import type { Client, Address } from '../../../_types';
 import { useToast } from '@/components/ui/Toast';
+import { NativeSelect } from '@/components/ui/SearchableSelect';
 
 interface AddressesTabProps {
     client: Client;
@@ -54,15 +55,16 @@ export function AddressesTab({ client, onUpdate }: AddressesTabProps) {
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] text-gray-600 font-black uppercase ml-1">Tipo</label>
-                            <select
-                                value={newAddress.type}
-                                onChange={e => setNewAddress({ ...newAddress, type: e.target.value as Address['type'] })}
+                            <NativeSelect
+                                value={newAddress.type || 'Envio'}
+                                onChange={v => setNewAddress({ ...newAddress, type: v as Address['type'] })}
+                                options={[
+                                    { value: 'Envio', label: 'Envío' },
+                                    { value: 'Facturacion', label: 'Facturación' },
+                                    { value: 'Oficina', label: 'Oficina' },
+                                ]}
                                 className="w-full bg-black/40 border p-4 rounded-xl text-xs"
-                            >
-                                <option value="Envio">Envío</option>
-                                <option value="Facturacion">Facturación</option>
-                                <option value="Oficina">Oficina</option>
-                            </select>
+                            />
                         </div>
                     </div>
                     <div className="space-y-2">

@@ -6,6 +6,7 @@ import { PERMISSIONS, AVAILABLE_ROUTES, ROLE_CONFIG, buildPermission } from '@/l
 import { getAllItemPerms, PERMISSION_TREE, ACTION_COLORS, ACTION_ICONS } from '../_types'
 import type { CustomRole } from '../_hooks'
 import type { PermGroup, PermItem } from '../_types'
+import { NativeSelect } from '@/components/ui/SearchableSelect'
 
 export interface PermissionsGridProps {
   role: CustomRole
@@ -64,19 +65,18 @@ export function PermissionsGrid({
           <Home className="w-3.5 h-3.5 text-blis-red" />
           <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Página de inicio al iniciar sesión</p>
         </div>
-        <select
+        <NativeSelect
           value={role.ruta_inicio || ''}
-          onChange={async (e) => {
-            const val = e.target.value || null
-            await onUpdateRole(role.id!, { ruta_inicio: val })
+          onChange={async (val) => {
+            await onUpdateRole(role.id!, { ruta_inicio: val || null })
           }}
+          options={[
+            { value: '', label: `Default del rol (${ROLE_CONFIG[role.nombre as keyof typeof ROLE_CONFIG]?.defaultRoute || '/superadmin'})` },
+            ...getAvailableRoutesForRole(role).map(route => ({ value: route.path, label: `${route.label} (${route.path})` })),
+          ]}
+          placeholder="Default del rol"
           className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blis-red/50 appearance-none cursor-pointer"
-        >
-          <option value="">Default del rol ({ROLE_CONFIG[role.nombre as keyof typeof ROLE_CONFIG]?.defaultRoute || '/superadmin'})</option>
-          {getAvailableRoutesForRole(role).map(route => (
-            <option key={route.path} value={route.path}>{route.label} ({route.path})</option>
-          ))}
-        </select>
+        />
         <p className="text-[9px] text-gray-600 mt-1.5">Al iniciar sesión, este rol será redirigido a esta página.</p>
       </div>
 

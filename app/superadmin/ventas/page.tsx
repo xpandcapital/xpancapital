@@ -215,14 +215,15 @@ export default function VentasAdminPage() {
                         <Input value={search} onChange={e => setSearch(e.target.value)}
                             placeholder="Buscar por cliente, email o producto..." className="bg-zinc-900/50 border-white/10 text-white placeholder:text-gray-600 rounded-xl pl-10" />
                     </div>
-                    <select value={filtroEstado} onChange={e => { setFiltroEstado(e.target.value); setPage(1); }}
-                        className="px-4 py-2.5 bg-zinc-900/50 border border-white/10 rounded-xl text-sm text-white cursor-pointer appearance-none focus:outline-none focus:border-blis-red/30 transition-all">
-                        <option value="">Todos los estados</option>
-                        <option value="completado">Completado</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="cancelado">Cancelado</option>
-                        <option value="reembolsado">Reembolsado</option>
-                    </select>
+                    <NativeSelect value={filtroEstado} onChange={v => { setFiltroEstado(v); setPage(1); }}
+                        options={[
+                            { value: 'completado', label: 'Completado' },
+                            { value: 'pendiente', label: 'Pendiente' },
+                            { value: 'cancelado', label: 'Cancelado' },
+                            { value: 'reembolsado', label: 'Reembolsado' },
+                        ]}
+                        placeholder="Todos los estados"
+                        className="px-4 py-2.5 bg-zinc-900/50 border border-white/10 rounded-xl text-sm text-white cursor-pointer appearance-none focus:outline-none focus:border-blis-red/30 transition-all" />
                 </div>
 
                 {loading ? (

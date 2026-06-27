@@ -3,6 +3,7 @@
 import { Plus, Trash2, Megaphone, Users } from "lucide-react";
 import { InputField, TextAreaField, LinkField, ColorPicker, SectionCard, VisibilityToggle } from "../ui";
 import { ImageUpload } from "@/components/editor/ImageUpload";
+import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface CaptureHeroEditorProps {
   sections: Record<string, any>;
@@ -42,17 +43,13 @@ export function CaptureHeroEditor({
               <Megaphone className="w-3 h-3 inline mr-1" />
               Campaña
             </label>
-            <select 
-              value={sections.captureHero?.form?.campana_id || ''} 
-              onChange={(e) => updateSection('captureHero', { form: { ...(sections.captureHero?.form || {}), campana_id: e.target.value } })}
-              className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white"
-              disabled={loadingCampanas}
-            >
-              <option value="">{loadingCampanas ? 'Cargando...' : 'Seleccionar campaña...'}</option>
-              {campanas?.map((c: any) => (
-                <option key={c.id} value={c.id}>{c.nombre}</option>
-              ))}
-            </select>
+            <SearchableSelect
+              value={sections.captureHero?.form?.campana_id || ''}
+              onChange={(v) => updateSection('captureHero', { form: { ...(sections.captureHero?.form || {}), campana_id: v } })}
+              options={campanas?.map((c: any) => ({ value: c.id, label: c.nombre })) || []}
+              placeholder={loadingCampanas ? 'Cargando...' : 'Seleccionar campaña...'}
+              searchPlaceholder="Buscar campaña..."
+            />
             <p className="text-[10px] text-gray-500 mt-1">La campaña define a quién se notifica</p>
           </div>
           
@@ -61,17 +58,13 @@ export function CaptureHeroEditor({
               <Users className="w-3 h-3 inline mr-1" />
               Asesor Asignado
             </label>
-            <select 
-              value={sections.captureHero?.form?.asesor_id || ''} 
-              onChange={(e) => updateSection('captureHero', { form: { ...(sections.captureHero?.form || {}), asesor_id: e.target.value } })}
-              className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white"
-              disabled={loadingAsesores}
-            >
-              <option value="">{loadingAsesores ? 'Cargando...' : 'Sin asesor específico'}</option>
-              {asesores?.filter((a: any) => a.activo !== false).map((a: any) => (
-                <option key={a.id} value={a.id}>{a.nombre}</option>
-              ))}
-            </select>
+            <SearchableSelect
+              value={sections.captureHero?.form?.asesor_id || ''}
+              onChange={(v) => updateSection('captureHero', { form: { ...(sections.captureHero?.form || {}), asesor_id: v } })}
+              options={asesores?.filter((a: any) => a.activo !== false).map((a: any) => ({ value: a.id, label: a.nombre })) || []}
+              placeholder={loadingAsesores ? 'Cargando...' : 'Sin asesor específico'}
+              searchPlaceholder="Buscar asesor..."
+            />
             <p className="text-[10px] text-gray-500 mt-1">Opcional: asigna un asesor específico</p>
           </div>
         </div>
@@ -221,19 +214,23 @@ export function CaptureHeroEditor({
                   <div className="grid grid-cols-3 gap-3 mt-3">
                     <div>
                       <label className="text-[10px] text-gray-400 uppercase mb-1 block">Tipo</label>
-                      <select value={field.type || 'text'} onChange={(e) => {
-                        const newFields = [...(sections.captureHero?.form?.fields || [])];
-                        newFields[idx] = { ...newFields[idx], type: e.target.value };
-                        updateSection('captureHero', { form: { ...(sections.captureHero?.form || {}), fields: newFields } });
-                      }} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-2 text-xs text-white">
-                        <option value="text">Texto</option>
-                        <option value="email">Email</option>
-                        <option value="tel">Teléfono</option>
-                        <option value="select">Selección</option>
-                        <option value="textarea">Área de Texto</option>
-                        <option value="checkbox">Checkbox</option>
-                        <option value="radio">Radio</option>
-                      </select>
+                      <NativeSelect
+                        value={field.type || 'text'}
+                        onChange={(v) => {
+                          const newFields = [...(sections.captureHero?.form?.fields || [])];
+                          newFields[idx] = { ...newFields[idx], type: v };
+                          updateSection('captureHero', { form: { ...(sections.captureHero?.form || {}), fields: newFields } });
+                        }}
+                        options={[
+                          { value: 'text', label: 'Texto' },
+                          { value: 'email', label: 'Email' },
+                          { value: 'tel', label: 'Teléfono' },
+                          { value: 'select', label: 'Selección' },
+                          { value: 'textarea', label: 'Área de Texto' },
+                          { value: 'checkbox', label: 'Checkbox' },
+                          { value: 'radio', label: 'Radio' },
+                        ]}
+                      />
                     </div>
                     <InputField label="Placeholder" value={field.placeholder || ''} onChange={(v) => {
                       const newFields = [...(sections.captureHero?.form?.fields || [])];

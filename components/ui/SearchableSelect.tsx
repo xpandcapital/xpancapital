@@ -39,7 +39,7 @@ export function SearchableSelect({
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const selected = options.find((o) => o.value === value)
+  const selectedOpt = options.find((o) => o.value === value)
 
   const filtrados = options
     .filter((o) => !busqueda || o.label.toLowerCase().includes(busqueda.toLowerCase()))
@@ -81,8 +81,8 @@ export function SearchableSelect({
     setBusqueda('')
   }
 
-  const selectedIcon = selected?.icon
-  const selectedImage = selected?.image
+  const SelectedIconComp = selectedOpt?.icon
+  const SelectedImage = selectedOpt?.image
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
@@ -95,12 +95,12 @@ export function SearchableSelect({
         }`}
       >
         <span className="flex items-center gap-2 min-w-0">
-          {selectedImage && (
-            <img src={selectedImage} alt="" className="w-5 h-5 rounded object-cover shrink-0" />
+          {SelectedImage && (
+            <img src={SelectedImage} alt="" className="w-5 h-5 rounded object-cover shrink-0" />
           )}
-          {!selectedImage && selectedIcon && <selectedIcon className="w-4 h-4 text-gray-400 shrink-0" />}
-          <span className={selected ? 'text-white truncate' : 'text-gray-500 truncate'}>
-            {selected ? selected.label : placeholder}
+          {!SelectedImage && SelectedIconComp && <SelectedIconComp className="w-4 h-4 text-gray-400 shrink-0" />}
+          <span className={selectedOpt ? 'text-white truncate' : 'text-gray-500 truncate'}>
+            {selectedOpt ? selectedOpt.label : placeholder}
           </span>
         </span>
         <motion.span animate={{ rotate: abierto ? 180 : 0 }} transition={{ duration: 0.2 }}>

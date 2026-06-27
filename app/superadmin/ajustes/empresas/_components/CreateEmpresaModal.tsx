@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { PLANES } from '../_types'
+import { NativeSelect } from '@/components/ui/SearchableSelect'
 
 interface Props {
   newEmpresa: { nombre: string; slug: string; nombre_legal: string; color_primario: string; pais_fiscal: string; moneda_base: string; idioma: string; zona_horaria: string; plan: string }
@@ -39,9 +40,7 @@ export function CreateEmpresaModal({ newEmpresa, setNewEmpresa, onSave, saving, 
           </div>
           <div>
             <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Plan</label>
-            <select value={newEmpresa.plan} onChange={e => setNewEmpresa(prev => ({ ...prev, plan: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 appearance-none">
-              {PLANES.map(p => <option key={p.id} value={p.id}>{p.nombre} ({p.usuarios} users)</option>)}
-            </select>
+            <NativeSelect value={newEmpresa.plan} onChange={v => setNewEmpresa(prev => ({ ...prev, plan: v }))} options={PLANES.map(p => ({ value: p.id, label: `${p.nombre} (${p.usuarios} users)` }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 appearance-none" />
           </div>
           <button onClick={onSave} disabled={saving || !newEmpresa.nombre || !newEmpresa.slug} className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
             {saving ? 'Creando...' : 'Crear Empresa'}

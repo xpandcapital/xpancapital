@@ -27,6 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import type { ChatSala, ChatMensaje, ChatVisitante } from "@/lib/chat/types";
 import { CallModal } from "@/components/chat/CallModal";
 import { usePushNotifications } from "@/lib/hooks/usePushNotifications";
+import { NativeSelect } from "@/components/ui/SearchableSelect";
 
 export default function ChatAdminPage() {
   const { user } = useAuth();
@@ -862,16 +863,17 @@ export default function ChatAdminPage() {
 
                           <div>
                             <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Modelo de IA</label>
-                            <select
+                            <NativeSelect
                               value={configEditada.ia_modelo || "gemini-2.5-flash-preview-05-20"}
-                              onChange={(e) => setConfigEditada({ ...configEditada, ia_modelo: e.target.value })}
+                              onChange={(v) => setConfigEditada({ ...configEditada, ia_modelo: v })}
+                              options={[
+                                { value: 'gemini-2.5-flash-preview-05-20', label: 'Gemini 2.5 Flash' },
+                                { value: 'gemini-2.5-pro-preview-05-20', label: 'Gemini 2.5 Pro' },
+                                { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+                                { value: 'gpt-4o', label: 'GPT-4o' },
+                              ]}
                               className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white"
-                            >
-                              <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash</option>
-                              <option value="gemini-2.5-pro-preview-05-20">Gemini 2.5 Pro</option>
-                              <option value="gpt-4o-mini">GPT-4o Mini</option>
-                              <option value="gpt-4o">GPT-4o</option>
-                            </select>
+                            />
                           </div>
 
                           <div>
@@ -945,20 +947,21 @@ export default function ChatAdminPage() {
                                 placeholder="Atajo (ej: /saludo)"
                                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 text-sm flex-1"
                               />
-                              <select
+                              <NativeSelect
                                 value={editandoPlantilla ? editandoPlantilla.departamento || "general" : nuevaPlantilla.departamento}
-                                onChange={(e) =>
+                                onChange={(v) =>
                                   editandoPlantilla
-                                    ? setEditandoPlantilla({ ...editandoPlantilla, departamento: e.target.value })
-                                    : setNuevaPlantilla({ ...nuevaPlantilla, departamento: e.target.value })
+                                    ? setEditandoPlantilla({ ...editandoPlantilla, departamento: v })
+                                    : setNuevaPlantilla({ ...nuevaPlantilla, departamento: v })
                                 }
+                                options={[
+                                  { value: 'general', label: 'General' },
+                                  { value: 'ventas', label: 'Ventas' },
+                                  { value: 'soporte', label: 'Soporte' },
+                                  { value: 'onboarding', label: 'Onboarding' },
+                                ]}
                                 className="bg-white/5 border border-white/10 rounded-xl px-3 text-sm text-white"
-                              >
-                                <option value="general">General</option>
-                                <option value="ventas">Ventas</option>
-                                <option value="soporte">Soporte</option>
-                                <option value="onboarding">Onboarding</option>
-                              </select>
+                              />
                             </div>
                             <div className="flex gap-2">
                               {editandoPlantilla ? (

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import Flag from 'react-world-flags';
 import type { AccessLogsStats, AccessLogEntry } from '../_types';
+import { NativeSelect } from '@/components/ui/SearchableSelect';
 
 const PAISES: Record<string, string> = {
   CN: "China", RU: "Rusia", US: "EE.UU.", GB: "Reino Unido", DE: "Alemania", FR: "Francia",
@@ -187,12 +188,13 @@ export function AccessLogsTool() {
         {/* Filtros compactos */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <Filter className="w-3 h-3 text-gray-500 shrink-0" />
-          <select value={filtroMotivo} onChange={e => setFiltroMotivo(e.target.value)}
-            className="bg-zinc-900 rounded-md px-2 py-1 text-[10px] text-white outline-none border border-white/5 w-auto">
-            <option value="">Todos</option>
-            <option value="geobloqueo">Geobloqueo</option>
-            <option value="rate_limit">Rate Limit</option>
-          </select>
+          <NativeSelect value={filtroMotivo} onChange={setFiltroMotivo}
+            options={[
+              { value: 'geobloqueo', label: 'Geobloqueo' },
+              { value: 'rate_limit', label: 'Rate Limit' },
+            ]}
+            placeholder="Todos"
+            className="bg-zinc-900 rounded-md px-2 py-1 text-[10px] text-white outline-none border border-white/5 w-auto" />
           <input type="text" value={filtroPais} onChange={e => setFiltroPais(e.target.value.toUpperCase())}
             placeholder="País" maxLength={2}
             className="bg-zinc-900 rounded-md px-2 py-1 text-[10px] text-white placeholder-gray-500 outline-none border border-white/5 w-20" />

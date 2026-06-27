@@ -6,6 +6,7 @@ import { InputField, TextAreaField, LinkField, ColorPicker, SectionCard, Visibil
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { MapEditor } from "@/components/editor/MapEditor";
 import { CaptureHeroEditor } from "./editors/CaptureHeroEditor";
+import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface EditorRouterProps {
   activeSection: string;
@@ -81,9 +82,14 @@ export function EditorRouter({
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-[10px] text-gray-400 uppercase mb-1 block">Ícono</label>
-                    <select value={step.icon || 'Mail'} onChange={(e) => updateArrayItem('thankYouNextSteps', 'steps', idx, { icon: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-2 text-xs text-white">
-                      {ICON_OPTIONS.map(icon => <option key={icon} value={icon}>{ICON_OPTIONS_SPANISH[icon]}</option>)}
-                    </select>
+                    <SearchableSelect
+                      value={step.icon || 'Mail'}
+                      onChange={(v) => updateArrayItem('thankYouNextSteps', 'steps', idx, { icon: v })}
+                      options={ICON_OPTIONS.map(icon => ({ value: icon, label: ICON_OPTIONS_SPANISH[icon] }))}
+                      placeholder="Seleccionar ícono..."
+                      searchPlaceholder="Buscar ícono..."
+                      className="w-full"
+                    />
                   </div>
                   <InputField label="Título" value={step.title || ''} onChange={(v) => updateArrayItem('thankYouNextSteps', 'steps', idx, { title: v })} />
                 </div>
@@ -169,11 +175,15 @@ export function EditorRouter({
           </div>
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <select value={sections.funnelCountdown?.layout || 'card'} onChange={(e) => updateSection('funnelCountdown', { layout: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-              <option value="card">Tarjeta</option>
-              <option value="inline">En línea</option>
-              <option value="banner">Banner</option>
-            </select>
+            <NativeSelect
+              value={sections.funnelCountdown?.layout || 'card'}
+              onChange={(v) => updateSection('funnelCountdown', { layout: v })}
+              options={[
+                { value: 'card', label: 'Tarjeta' },
+                { value: 'inline', label: 'En línea' },
+                { value: 'banner', label: 'Banner' },
+              ]}
+            />
           </div>
         </SectionCard>
       )}
@@ -192,11 +202,15 @@ export function EditorRouter({
             <InputField label="Texto Overlay" value={sections.funnelVideo?.overlayText || ''} onChange={(v) => updateSection('funnelVideo', { overlayText: v })} placeholder="Duración: 5 min" />
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-              <select value={sections.funnelVideo?.layout || 'boxed'} onChange={(e) => updateSection('funnelVideo', { layout: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-                <option value="boxed">Caja</option>
-                <option value="split">Dividido</option>
-                <option value="full">Pantalla Completa</option>
-              </select>
+              <NativeSelect
+                value={sections.funnelVideo?.layout || 'boxed'}
+                onChange={(v) => updateSection('funnelVideo', { layout: v })}
+                options={[
+                  { value: 'boxed', label: 'Caja' },
+                  { value: 'split', label: 'Dividido' },
+                  { value: 'full', label: 'Pantalla Completa' },
+                ]}
+              />
             </div>
           </div>
         </SectionCard>
@@ -225,9 +239,14 @@ export function EditorRouter({
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-[10px] text-gray-400 uppercase mb-1 block">Ícono</label>
-                    <select value={benefit.icon || 'TrendingUp'} onChange={(e) => updateArrayItem('funnelBenefits', 'benefits', idx, { icon: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-2 text-xs text-white">
-                      {ICON_OPTIONS.map(icon => <option key={icon} value={icon}>{ICON_OPTIONS_SPANISH[icon]}</option>)}
-                    </select>
+                    <SearchableSelect
+                      value={benefit.icon || 'TrendingUp'}
+                      onChange={(v) => updateArrayItem('funnelBenefits', 'benefits', idx, { icon: v })}
+                      options={ICON_OPTIONS.map(icon => ({ value: icon, label: ICON_OPTIONS_SPANISH[icon] }))}
+                      placeholder="Seleccionar ícono..."
+                      searchPlaceholder="Buscar ícono..."
+                      className="w-full"
+                    />
                   </div>
                   <InputField label="Título" value={benefit.title || ''} onChange={(v) => updateArrayItem('funnelBenefits', 'benefits', idx, { title: v })} />
                 </div>
@@ -240,10 +259,14 @@ export function EditorRouter({
           </div>
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <select value={sections.funnelBenefits?.layout || 'grid'} onChange={(e) => updateSection('funnelBenefits', { layout: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-              <option value="grid">Grilla</option>
-              <option value="list">Lista</option>
-            </select>
+            <NativeSelect
+              value={sections.funnelBenefits?.layout || 'grid'}
+              onChange={(v) => updateSection('funnelBenefits', { layout: v })}
+              options={[
+                { value: 'grid', label: 'Grilla' },
+                { value: 'list', label: 'Lista' },
+              ]}
+            />
           </div>
         </SectionCard>
       )}
@@ -276,9 +299,14 @@ export function EditorRouter({
                   <InputField label="Label" value={stat.label || ''} onChange={(v) => updateArrayItem('stats', 'stats', idx, { label: v })} />
                   <div>
                     <label className="text-[10px] text-gray-400 uppercase mb-1 block">Ícono</label>
-                    <select value={stat.icon || 'Building2'} onChange={(e) => updateArrayItem('stats', 'stats', idx, { icon: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-2 text-xs text-white">
-                      {ICON_OPTIONS.map(icon => <option key={icon} value={icon}>{ICON_OPTIONS_SPANISH[icon]}</option>)}
-                    </select>
+                    <SearchableSelect
+                      value={stat.icon || 'Building2'}
+                      onChange={(v) => updateArrayItem('stats', 'stats', idx, { icon: v })}
+                      options={ICON_OPTIONS.map(icon => ({ value: icon, label: ICON_OPTIONS_SPANISH[icon] }))}
+                      placeholder="Seleccionar ícono..."
+                      searchPlaceholder="Buscar ícono..."
+                      className="w-full"
+                    />
                   </div>
                 </div>
                 <TextAreaField label="Descripción" value={stat.description || ''} onChange={(v) => updateArrayItem('stats', 'stats', idx, { description: v })} rows={1} />
@@ -300,11 +328,15 @@ export function EditorRouter({
           </div>
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <select value={sections.stats?.layout || 'grid'} onChange={(e) => updateSection('stats', { layout: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-              <option value="grid">Grilla</option>
-              <option value="horizontal">Horizontal</option>
-              <option value="featured">Destacado</option>
-            </select>
+            <NativeSelect
+              value={sections.stats?.layout || 'grid'}
+              onChange={(v) => updateSection('stats', { layout: v })}
+              options={[
+                { value: 'grid', label: 'Grilla' },
+                { value: 'horizontal', label: 'Horizontal' },
+                { value: 'featured', label: 'Destacado' },
+              ]}
+            />
           </div>
         </SectionCard>
       )}
@@ -321,11 +353,15 @@ export function EditorRouter({
           
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <select value={sections.funnelTestimonials?.layout || 'carousel'} onChange={(e) => updateSection('funnelTestimonials', { layout: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-              <option value="carousel">Carrusel</option>
-              <option value="grid">Grilla</option>
-              <option value="featured">Destacado</option>
-            </select>
+            <NativeSelect
+              value={sections.funnelTestimonials?.layout || 'carousel'}
+              onChange={(v) => updateSection('funnelTestimonials', { layout: v })}
+              options={[
+                { value: 'carousel', label: 'Carrusel' },
+                { value: 'grid', label: 'Grilla' },
+                { value: 'featured', label: 'Destacado' },
+              ]}
+            />
           </div>
           
           <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Testimonios ({(sections.funnelTestimonials?.testimonials || []).length})</h4>
@@ -369,10 +405,14 @@ export function EditorRouter({
           <ColorPicker label="Color de Acento" value={sections.funnelPricing?.accentColor || '#B10D24'} onChange={(v) => updateSection('funnelPricing', { accentColor: v })} />
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <select value={sections.funnelPricing?.layout || 'cards'} onChange={(e) => updateSection('funnelPricing', { layout: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-              <option value="cards">Tarjetas</option>
-              <option value="table">Tabla</option>
-            </select>
+            <NativeSelect
+              value={sections.funnelPricing?.layout || 'cards'}
+              onChange={(v) => updateSection('funnelPricing', { layout: v })}
+              options={[
+                { value: 'cards', label: 'Tarjetas' },
+                { value: 'table', label: 'Tabla' },
+              ]}
+            />
           </div>
           
           <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Planes ({(sections.funnelPricing?.tiers || []).length})</h4>
@@ -490,12 +530,16 @@ export function EditorRouter({
           <ImageUpload value={sections.content?.image || ''} onChange={(v) => updateSection('content', { image: v })} folder="cms/content" />
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Posición de Imagen</label>
-            <select value={sections.content?.imagePosition || 'right'} onChange={(e) => updateSection('content', { imagePosition: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-              <option value="left">Izquierda</option>
-              <option value="right">Derecha</option>
-              <option value="top">Arriba</option>
-              <option value="bottom">Abajo</option>
-            </select>
+            <NativeSelect
+              value={sections.content?.imagePosition || 'right'}
+              onChange={(v) => updateSection('content', { imagePosition: v })}
+              options={[
+                { value: 'left', label: 'Izquierda' },
+                { value: 'right', label: 'Derecha' },
+                { value: 'top', label: 'Arriba' },
+                { value: 'bottom', label: 'Abajo' },
+              ]}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
             <InputField label="Texto Botón Principal" value={sections.content?.ctaText || ''} onChange={(v) => updateSection('content', { ctaText: v })} />
@@ -537,17 +581,25 @@ export function EditorRouter({
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Variante</label>
-              <select value={sections.blogPosts?.variant || 'light'} onChange={(e) => updateSection('blogPosts', { variant: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-                <option value="light">Claro (Estándar)</option>
-                <option value="dark">Oscuro (Noche)</option>
-              </select>
+              <NativeSelect
+                value={sections.blogPosts?.variant || 'light'}
+                onChange={(v) => updateSection('blogPosts', { variant: v })}
+                options={[
+                  { value: 'light', label: 'Claro (Estándar)' },
+                  { value: 'dark', label: 'Oscuro (Noche)' },
+                ]}
+              />
             </div>
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Diseño</label>
-              <select value={sections.blogPosts?.layout || 'grid'} onChange={(e) => updateSection('blogPosts', { layout: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-                <option value="grid">Grilla Tradicional</option>
-                <option value="slider">Autoplay Slider</option>
-              </select>
+              <NativeSelect
+                value={sections.blogPosts?.layout || 'grid'}
+                onChange={(v) => updateSection('blogPosts', { layout: v })}
+                options={[
+                  { value: 'grid', label: 'Grilla Tradicional' },
+                  { value: 'slider', label: 'Autoplay Slider' },
+                ]}
+              />
             </div>
           </div>
 
@@ -608,10 +660,14 @@ export function EditorRouter({
             <InputField label="Máx. Categorías" value={sections.shopCategories?.maxCategories?.toString() || '10'} onChange={(v) => updateSection('shopCategories', { maxCategories: parseInt(v) || 10 })} type="number" />
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-              <select value={sections.shopCategories?.layout || 'slider'} onChange={(e) => updateSection('shopCategories', { layout: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-                <option value="grid">Grilla</option>
-                <option value="slider">Slider</option>
-              </select>
+              <NativeSelect
+                value={sections.shopCategories?.layout || 'slider'}
+                onChange={(v) => updateSection('shopCategories', { layout: v })}
+                options={[
+                  { value: 'grid', label: 'Grilla' },
+                  { value: 'slider', label: 'Slider' },
+                ]}
+              />
             </div>
             <label className="flex items-center gap-2 pt-6">
               <input type="checkbox" checked={sections.shopCategories?.showFilter !== false} onChange={(e) => updateSection('shopCategories', { showFilter: e.target.checked })} className="w-4 h-4" />
@@ -643,13 +699,17 @@ export function EditorRouter({
             </label>
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Orden por Defecto</label>
-              <select value={sections.shopSidebar?.defaultSort || 'recent'} onChange={(e) => updateSection('shopSidebar', { defaultSort: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-                <option value="recent">Más Recientes</option>
-                <option value="price_asc">Precio: Menor a Mayor</option>
-                <option value="price_desc">Precio: Mayor a Menor</option>
-                <option value="name_asc">Nombre: A-Z</option>
-                <option value="popular">Más Populares</option>
-              </select>
+              <NativeSelect
+                value={sections.shopSidebar?.defaultSort || 'recent'}
+                onChange={(v) => updateSection('shopSidebar', { defaultSort: v })}
+                options={[
+                  { value: 'recent', label: 'Más Recientes' },
+                  { value: 'price_asc', label: 'Precio: Menor a Mayor' },
+                  { value: 'price_desc', label: 'Precio: Mayor a Menor' },
+                  { value: 'name_asc', label: 'Nombre: A-Z' },
+                  { value: 'popular', label: 'Más Populares' },
+                ]}
+              />
             </div>
           </div>
         </SectionCard>
@@ -663,10 +723,14 @@ export function EditorRouter({
             <InputField label="Máx. Productos" value={sections.shopProducts?.maxProducts?.toString() || '12'} onChange={(v) => updateSection('shopProducts', { maxProducts: parseInt(v) || 12 })} type="number" />
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-              <select value={sections.shopProducts?.layout || 'grid'} onChange={(e) => updateSection('shopProducts', { layout: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white">
-                <option value="grid">Grilla</option>
-                <option value="list">Lista</option>
-              </select>
+              <NativeSelect
+                value={sections.shopProducts?.layout || 'grid'}
+                onChange={(v) => updateSection('shopProducts', { layout: v })}
+                options={[
+                  { value: 'grid', label: 'Grilla' },
+                  { value: 'list', label: 'Lista' },
+                ]}
+              />
             </div>
             <label className="flex items-center gap-2 pt-6">
               <input type="checkbox" checked={sections.shopProducts?.showFilters !== false} onChange={(e) => updateSection('shopProducts', { showFilters: e.target.checked })} className="w-4 h-4" />
@@ -813,9 +877,14 @@ export function EditorRouter({
                 <div className="grid grid-cols-2 gap-3 mt-2">
                   <div>
                     <label className="text-[10px] text-gray-400 uppercase mb-1 block">Ícono</label>
-                    <select value={step.icon || 'Check'} onChange={(e) => updateArrayItem('process', 'steps', idx, { icon: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-2 text-xs text-white">
-                      {ICON_OPTIONS.map(icon => <option key={icon} value={icon}>{ICON_OPTIONS_SPANISH[icon]}</option>)}
-                    </select>
+                    <SearchableSelect
+                      value={step.icon || 'Check'}
+                      onChange={(v) => updateArrayItem('process', 'steps', idx, { icon: v })}
+                      options={ICON_OPTIONS.map(icon => ({ value: icon, label: ICON_OPTIONS_SPANISH[icon] }))}
+                      placeholder="Seleccionar ícono..."
+                      searchPlaceholder="Buscar ícono..."
+                      className="w-full"
+                    />
                   </div>
                   <ImageUpload value={step.image || ''} onChange={(v) => updateArrayItem('process', 'steps', idx, { image: v })} folder="cms/process" />
                 </div>
@@ -939,14 +1008,18 @@ export function EditorRouter({
                 <div className="grid grid-cols-2 gap-3 mt-2">
                   <div>
                     <label className="text-[10px] text-gray-400 uppercase mb-1 block">Ícono</label>
-                    <select value={stat.icon || 'TrendingUp'} onChange={(e) => updateArrayItem('market', 'stats', idx, { icon: e.target.value })} className="w-full bg-black/50 border border-white/10 rounded-lg px-2 py-2 text-xs text-white">
-                      <option value="TrendingUp">TrendingUp</option>
-                      <option value="BarChart3">BarChart3</option>
-                      <option value="Zap">Zap</option>
-                      <option value="DollarSign">DollarSign</option>
-                      <option value="Users">Users</option>
-                      <option value="Building">Building</option>
-                    </select>
+                    <NativeSelect
+                      value={stat.icon || 'TrendingUp'}
+                      onChange={(v) => updateArrayItem('market', 'stats', idx, { icon: v })}
+                      options={[
+                        { value: 'TrendingUp', label: 'TrendingUp' },
+                        { value: 'BarChart3', label: 'BarChart3' },
+                        { value: 'Zap', label: 'Zap' },
+                        { value: 'DollarSign', label: 'DollarSign' },
+                        { value: 'Users', label: 'Users' },
+                        { value: 'Building', label: 'Building' },
+                      ]}
+                    />
                   </div>
                   <ColorPicker label="Color" value={stat.color || '#be0b3c'} onChange={(v) => updateArrayItem('market', 'stats', idx, { color: v })} />
                 </div>

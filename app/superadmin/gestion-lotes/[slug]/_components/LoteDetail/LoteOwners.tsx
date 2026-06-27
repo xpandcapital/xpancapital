@@ -4,6 +4,7 @@ import { Lote, Owner } from '../../_types';
 import { COUNTRY_CODES } from '../../_utils/constants';
 import { SubCard } from '../shared/GlassCard';
 import { User, PlusCircle, Trash2 } from 'lucide-react';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 
 interface Props {
   lot: Lote;
@@ -69,15 +70,12 @@ function OwnerCard({ owner, canRemove, onUpdate, onRemove }: {
         />
         <div className="grid grid-cols-2 gap-2">
           <div className="flex gap-1">
-            <select
+            <SearchableSelect
               value={owner.phoneCode}
-              onChange={(e) => onUpdate('phoneCode', e.target.value)}
+              onChange={v => onUpdate('phoneCode', v)}
+              options={COUNTRY_CODES.map(c => ({ value: c.code, label: `${c.flag} ${c.code}` }))}
               className="w-20 p-1.5 text-xs text-white bg-black border border-white/[0.06] rounded-md outline-none"
-            >
-              {COUNTRY_CODES.map(c => (
-                <option key={c.code} value={c.code} className="bg-black">{c.flag} {c.code}</option>
-              ))}
-            </select>
+            />
             <input
               type="text"
               value={owner.phone}

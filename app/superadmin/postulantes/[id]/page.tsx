@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/Toast'
 import { useActionGuard } from '@/hooks/useActionGuard'
 import { Postulante, ESTADO_LABELS, ESTADO_COLORS, gruposPreguntas, diccionarioPreguntas } from '../_types'
 import { PuestoCombobox } from './_components/PuestoCombobox'
+import { NativeSelect } from '@/components/ui/SearchableSelect'
 
 type Tab = 'datos' | 'logistica' | 'profesional' | 'experiencia' | 'psicologia' | 'alineacion' | 'admin'
 
@@ -181,15 +182,7 @@ export default function PostulanteEditPage() {
               <div><label className={label}>Proyecto interesado</label><input type="text" value={form.proyecto_interesado || ''} onChange={e => upd('proyecto_interesado', e.target.value)} className={input} /></div>
               <div>
                 <label className={label}>Tipo de entrevista</label>
-                <div className="relative">
-                  <select value={form.entrevista_tipo || ''} onChange={e => upd('entrevista_tipo', e.target.value)} className={selectCls}>
-                    <option value="">Sin definir</option>
-                    <option value="presencial">Presencial</option>
-                    <option value="videoconferencia">Videoconferencia</option>
-                    <option value="telefonica">Telefónica</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
+                <NativeSelect value={form.entrevista_tipo || ''} onChange={v => upd('entrevista_tipo', v)} options={[{ value: 'presencial', label: 'Presencial' }, { value: 'videoconferencia', label: 'Videoconferencia' }, { value: 'telefonica', label: 'Telefónica' }]} placeholder="Sin definir" className={selectCls} />
               </div>
             </div>
 
@@ -328,13 +321,7 @@ export default function PostulanteEditPage() {
                   return (
                     <div key={key}>
                       <label className={label}>{lbl}</label>
-                      <div className="relative">
-                        <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
-                          <option value="">Seleccionar</option>
-                          <option value="soltero/a">Soltero/a</option><option value="casado/a">Casado/a</option><option value="divorciado/a">Divorciado/a</option><option value="viudo/a">Viudo/a</option><option value="union_libre">Unión libre</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                      </div>
+                      <NativeSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'soltero/a', label: 'Soltero/a' }, { value: 'casado/a', label: 'Casado/a' }, { value: 'divorciado/a', label: 'Divorciado/a' }, { value: 'viudo/a', label: 'Viudo/a' }, { value: 'union_libre', label: 'Unión libre' }]} placeholder="Seleccionar" className={selectCls} />
                     </div>
                   )
                 }
@@ -343,13 +330,7 @@ export default function PostulanteEditPage() {
                   return (
                     <div key={key}>
                       <label className={label}>{lbl}</label>
-                      <div className="relative">
-                        <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
-                          <option value="">Seleccionar</option>
-                          <option value="si">Sí</option><option value="no">No</option><option value="condicionado">Condicionado</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                      </div>
+                      <NativeSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'si', label: 'Sí' }, { value: 'no', label: 'No' }, { value: 'condicionado', label: 'Condicionado' }]} placeholder="Seleccionar" className={selectCls} />
                     </div>
                   )
                 }
@@ -358,13 +339,7 @@ export default function PostulanteEditPage() {
                   return (
                     <div key={key}>
                       <label className={label}>{lbl}</label>
-                      <div className="relative">
-                        <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
-                          <option value="">Seleccionar</option>
-                          <option value="solo">Solo</option><option value="en_equipo">En equipo</option><option value="indiferente">Indiferente</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                      </div>
+                      <NativeSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'solo', label: 'Solo' }, { value: 'en_equipo', label: 'En equipo' }, { value: 'indiferente', label: 'Indiferente' }]} placeholder="Seleccionar" className={selectCls} />
                     </div>
                   )
                 }
@@ -373,13 +348,7 @@ export default function PostulanteEditPage() {
                   return (
                     <div key={key}>
                       <label className={label}>{lbl}</label>
-                      <div className="relative">
-                        <select value={value || ''} onChange={e => upd(key, e.target.value)} className={selectCls}>
-                          <option value="">Seleccionar</option>
-                          <option value="primaria">Primaria</option><option value="secundaria">Secundaria</option><option value="tecnico">Técnico</option><option value="universitario">Universitario</option><option value="postgrado">Postgrado</option><option value="maestria">Maestría</option><option value="doctorado">Doctorado</option>
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                      </div>
+                      <NativeSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'primaria', label: 'Primaria' }, { value: 'secundaria', label: 'Secundaria' }, { value: 'tecnico', label: 'Técnico' }, { value: 'universitario', label: 'Universitario' }, { value: 'postgrado', label: 'Postgrado' }, { value: 'maestria', label: 'Maestría' }, { value: 'doctorado', label: 'Doctorado' }]} placeholder="Seleccionar" className={selectCls} />
                     </div>
                   )
                 }

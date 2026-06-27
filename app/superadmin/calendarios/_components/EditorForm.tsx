@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { PlusCircle, Trash2, GripVertical, Layout } from 'lucide-react'
 import type { useCalendarEditor } from '../_hooks/useCalendarEditor'
+import { NativeSelect } from '@/components/ui/SearchableSelect'
 
 type Editor = ReturnType<typeof useCalendarEditor>
 
@@ -86,13 +87,10 @@ export function EditorForm({ editor }: { editor: Editor }) {
                   onChange={e => setNewField(prev => ({ ...prev, label: e.target.value }))}
                   placeholder="Ej. Tu usuario de Instagram..."
                   className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blis-red" />
-                <select value={newField.type}
-                  onChange={e => setNewField(prev => ({ ...prev, type: e.target.value }))}
-                  className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blis-red">
-                  {fieldTypes.map(ft => (
-                    <option key={ft.value} value={ft.value}>{ft.label}</option>
-                  ))}
-                </select>
+                <NativeSelect value={newField.type}
+                  onChange={v => setNewField(prev => ({ ...prev, type: v }))}
+                  options={fieldTypes.map(ft => ({ value: ft.value, label: ft.label }))}
+                  className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blis-red" />
                 <label className="flex items-center justify-center gap-2 text-sm text-white bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 cursor-pointer hover:bg-white/10">
                   <input type="checkbox" checked={newField.required}
                     onChange={e => setNewField(prev => ({ ...prev, required: e.target.checked }))}

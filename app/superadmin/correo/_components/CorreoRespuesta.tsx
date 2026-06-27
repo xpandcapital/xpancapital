@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { CorreoRedactorIA } from './CorreoRedactorIA'
 import type { EmailMessageFull } from '../_types'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 interface Props {
   open: boolean
@@ -262,17 +263,15 @@ export function CorreoRespuesta({
                     )}
                   </div>
                 </div>
-                <select
+                <SearchableSelect
                   value={templateId}
-                  onChange={(e) => setTemplateId(e.target.value)}
-                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2 text-sm text-gray-300
-                    focus:outline-none focus:border-blis-red/30 transition-all appearance-none cursor-pointer"
-                >
-                  <option value="none">Sin plantilla (texto plano)</option>
-                  {templates.map((t) => (
-                    <option key={t.id} value={t.id}>{t.nombre}</option>
-                  ))}
-                </select>
+                  onChange={setTemplateId}
+                  options={[
+                    { value: 'none', label: 'Sin plantilla (texto plano)' },
+                    ...templates.map((t: any) => ({ value: t.id, label: t.nombre })),
+                  ]}
+                  className="w-full bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blis-red/30 transition-all appearance-none cursor-pointer"
+                />
                 {templateId !== 'none' && (
                   <p className="text-[10px] text-gray-600 mt-1">
                     Escribe tu respuesta. Se insertará donde esté {'{{respuesta-de-correo}}'} en la plantilla.

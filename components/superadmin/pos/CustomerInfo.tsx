@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { stripHtml } from '@/lib/strip-html';
 import { formatDateInput, calculateAge } from './_types';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 
 // ── CustomDatePicker ──────────────────────────────────────
 const CustomDatePicker = ({ value, onChange, label }: { value: string, onChange: (val: string) => void, label: string }) => {
@@ -41,8 +42,8 @@ const CustomDatePicker = ({ value, onChange, label }: { value: string, onChange:
     const handlePrevMonth = () => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
     const handleNextMonth = () => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
 
-    const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setViewDate(new Date(parseInt(e.target.value), viewDate.getMonth(), 1));
+    const handleYearChange = (val: string) => {
+        setViewDate(new Date(parseInt(val), viewDate.getMonth(), 1));
     };
 
     const selectDate = (day: number) => {
@@ -89,13 +90,13 @@ const CustomDatePicker = ({ value, onChange, label }: { value: string, onChange:
                             <button onClick={handlePrevMonth} className="p-1.5 hover:bg-white/5 rounded-lg transition-colors"><ChevronLeft className="w-4 h-4" /></button>
                             <div className="flex gap-2 items-center">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-white">{months[viewDate.getMonth()]}</span>
-                                <select
-                                    className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-widest outline-none text-blis-red cursor-pointer appearance-none"
-                                    value={viewDate.getFullYear()}
+                                <SearchableSelect
+                                    options={years.map(y => ({ value: String(y), label: String(y) }))}
+                                    value={String(viewDate.getFullYear())}
                                     onChange={handleYearChange}
-                                >
-                                    {years.map(y => <option key={y} value={y} className="bg-zinc-950 text-white">{y}</option>)}
-                                </select>
+                                    placeholder="Año"
+                                    className="w-[90px]"
+                                />
                             </div>
                             <button onClick={handleNextMonth} className="p-1.5 hover:bg-white/5 rounded-lg transition-colors"><ChevronRight className="w-4 h-4" /></button>
                         </div>

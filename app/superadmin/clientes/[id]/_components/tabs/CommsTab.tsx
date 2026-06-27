@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import type { Client } from '../../../_types';
 import { useToast } from '@/components/ui/Toast';
+import { NativeSelect } from '@/components/ui/SearchableSelect';
 
 interface CommsTabProps {
     client: Client;
@@ -30,21 +31,21 @@ export function CommsTab({ client, onUpdate }: CommsTabProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <label className="text-[10px] text-gray-600 font-black uppercase ml-1">Template</label>
-                        <select
+                        <NativeSelect
                             value={noticeContent.template}
-                            onChange={e => {
-                                const val = e.target.value;
-                                if (val === 'welcome') setNoticeContent({ template: val, title: '¡Bienvenido a Blis Corp!', message: `Hola ${client.firstName}, es un gusto tenerte.` });
-                                else if (val === 'offer') setNoticeContent({ template: val, title: 'Oferta Exclusiva Gold', message: 'Tienes un 20% de descuento.' });
+                            onChange={v => {
+                                if (v === 'welcome') setNoticeContent({ template: v, title: '¡Bienvenido a Blis Corp!', message: `Hola ${client.firstName}, es un gusto tenerte.` });
+                                else if (v === 'offer') setNoticeContent({ template: v, title: 'Oferta Exclusiva Gold', message: 'Tienes un 20% de descuento.' });
                                 else setNoticeContent({ template: 'custom', title: '', message: '' });
                             }}
+                            options={[
+                                { value: 'custom', label: 'Mensaje Personalizado' },
+                                { value: 'welcome', label: 'Bienvenida Standard' },
+                                { value: 'offer', label: 'Promoción de Temporada' },
+                                { value: 'alert', label: 'Alerta de Seguridad' },
+                            ]}
                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-xs outline-none focus:border-blis-red transition-all"
-                        >
-                            <option value="custom">Mensaje Personalizado</option>
-                            <option value="welcome">Bienvenida Standard</option>
-                            <option value="offer">Promoción de Temporada</option>
-                            <option value="alert">Alerta de Seguridad</option>
-                        </select>
+                        />
                     </div>
                     <div className="space-y-2">
                         <label className="text-[10px] text-gray-600 font-black uppercase ml-1">Asunto</label>
