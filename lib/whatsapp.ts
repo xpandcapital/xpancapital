@@ -94,13 +94,12 @@ export async function sendWhatsApp({
     console.log('[WhatsApp] sendWhatsApp llamando con:', { number: numberClean, instanceId: creds.instanceId, tokenPrefix: creds.accessToken?.substring(0, 8) })
 
     // Planifyx requiere POST con query params en la URL (NO JSON body)
-    const params = new URLSearchParams({
-      number: numberClean,
-      type,
-      message,
-      instance_id: creds.instanceId,
-      access_token: creds.accessToken,
-    })
+    const params = new URLSearchParams()
+    params.set('number', numberClean)
+    params.set('type', type)
+    params.set('message', message) // URLSearchParams codifica saltos de línea automáticamente
+    params.set('instance_id', creds.instanceId)
+    params.set('access_token', creds.accessToken)
     if (media_url) params.set('media_url', media_url)
     if (filename) params.set('filename', filename)
 

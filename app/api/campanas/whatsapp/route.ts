@@ -107,7 +107,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (toInsert.length === 0) {
-      return NextResponse.json({ success: false, error: 'Ningún destinatario tiene teléfono válido. Agrega números de teléfono a los contactos.' })
+      const hint = source === 'empleados' ? 'Los empleados seleccionados no tienen número de teléfono en su perfil. Agrega el teléfono en la configuración del empleado.' 
+        : source === 'clientes' ? 'Los clientes seleccionados no tienen teléfono registrado.'
+        : 'Ningún número tiene formato válido (+51999999999).'
+      return NextResponse.json({ success: false, error: hint })
     }
 
     await supabase.from('whatsapp_campaign_recipients').insert(toInsert)
@@ -280,12 +283,12 @@ async function processOneBatch(campaignId: string) {
       error: result.success ? null : String(result.error || 'Error'),
     }).eq('id', r.id)
 
-    // Delay aleatorio entre mensajes individuales (parece humano)
+    // Delay aleatorio entre mensajes individuales
     if (recipients.length > 1) {
-      const minDelay = (campaign?.min_delay_seconds || 30) * 1000
-      const maxDelay = (campaign?.max_delay_seconds || 120) * 1000
-      const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay
-      await new Promise(resolve => setTimeout(resolve, Math.min(delay, 30000)))
+      const minDelay = Math.max(3, campaign?.min_delay_seconds || 30)
+      const maxDelay = Math.max(minDelay + 5, campaign?.max_delay_seconds || 120)
+      const delay = (Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay) * 1000
+      await new Promise(resolve => setTimeout(resolve, Math.min(delay, 120000)))
     }
   }
 

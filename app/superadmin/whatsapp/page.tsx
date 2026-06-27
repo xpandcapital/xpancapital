@@ -186,8 +186,7 @@ export default function WhatsAppPage() {
             return;
           }
           retries = 0;
-          const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay) * 1000;
-          setTimeout(loop, Math.min(delay, 15000));
+          setTimeout(loop, 2000); // Solo 2s entre batches, el delay real está en el backend
         } else {
           retries++;
           if (retries > 3) { setSendingIds(prev => { const n = new Set(prev); n.delete(campaignId); return n; }); return; }
