@@ -115,6 +115,7 @@ const ALL_SECTIONS: Section[] = [
                     { icon: Megaphone, label: "Campañas", href: "/superadmin/campanas", permission: "campanas:ver" },
                     { icon: Bell, label: "Notificaciones", href: "/superadmin/notificaciones", permission: "notificaciones:ver" },
                     { icon: Radio, label: "Transmisiones", href: "/superadmin/transmisiones", permission: "transmisiones:ver" },
+                    { icon: MessageCircle, label: "WhatsApp", href: "/superadmin/whatsapp", permission: "campanas:ver" },
                 ]
             },
             {
