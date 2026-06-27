@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, Trash2, Send, Mail, Globe } from 'lucide-react'
 import type { useFormEditor } from '../_hooks/useFormEditor'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 type Editor = ReturnType<typeof useFormEditor>
 
@@ -25,12 +26,31 @@ const stepBgColors: Record<string, string> = {
 }
 
 export function FormFlowPanel({ editor }: { editor: Editor }) {
-  const { formData, addFlowStep, updateFlowStep, deleteFlowStep } = editor
+  const { formData, addFlowStep, updateFlowStep, deleteFlowStep, updateField } = editor
   const [showNodeMenu, setShowNodeMenu] = useState<number | 'empty' | null>(null)
+  const [campanas, setCampanas] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch('/api/campanas').then(r => r.json()).then(d => setCampanas(d.data || [])).catch(() => {})
+  }, [])
 
   return (
     <div className="flex-1 bg-[#050505] p-10 overflow-y-auto">
       <div className="max-w-4xl mx-auto flex flex-col items-center gap-0 py-10">
+
+        <div className="w-80 bg-[#0a0a0a] border-2 border-white/10 rounded-2xl shadow-xl p-4 mb-2">
+          <label className="text-[10px] text-white/30 font-bold uppercase block mb-2">Campaña asociada</label>
+          <SearchableSelect
+            value={formData.campana_id || ''}
+            onChange={v => updateField('campana_id', v)}
+            options={campanas.map((c: any) => ({ value: c.id, label: c.nombre }))}
+            placeholder="Sin campaña"
+            searchPlaceholder="Buscar campaña..."
+            emptyText="Sin campañas"
+            className="w-full bg-white/5 border border-white/10 text-white rounded px-3 py-2 outline-none focus:border-blis-red text-sm"
+          />
+        </div>
+        <div className="h-8 w-px bg-blue-500/30 border-l-2 border-dashed border-blue-500/50" />
         {editor.formPages.map((pageFields, pageIdx) => (
           <div key={`page_${pageIdx}`} className="contents">
             <div className="w-80 bg-[#0a0a0a] border-2 border-blue-500 rounded-2xl shadow-xl flex flex-col overflow-hidden">

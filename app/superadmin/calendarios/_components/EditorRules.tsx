@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import type { Calendario } from '../_types'
 import type { useCalendarEditor } from '../_hooks/useCalendarEditor'
 import { SearchableSelect } from '@/components/ui/SearchableSelect'
@@ -10,6 +11,11 @@ const inputClass = "w-full bg-white/5 border border-white/10 text-white rounded-
 
 export function EditorRules({ editor }: { editor: Editor }) {
   const { formData, updateField } = editor
+  const [campanas, setCampanas] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch('/api/campanas').then(r => r.json()).then(d => setCampanas(d.data || [])).catch(() => {})
+  }, [])
 
   return (
     <div className="p-8">
@@ -89,6 +95,20 @@ export function EditorRules({ editor }: { editor: Editor }) {
                   { value: 'equipo', label: 'Equipo interno' },
                   { value: 'especifico', label: 'Específico' },
                 ]}
+                className={inputClass}
+              />
+            </div>
+            <div className="w-full">
+              <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">
+                Campaña asociada
+              </label>
+              <SearchableSelect
+                value={formData.campana_id || ''}
+                onChange={v => updateField('campana_id', v)}
+                options={campanas.map((c: any) => ({ value: c.id, label: c.nombre }))}
+                placeholder="Sin campaña"
+                searchPlaceholder="Buscar campaña..."
+                emptyText="Sin campañas"
                 className={inputClass}
               />
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCampanas } from "@/lib/hooks/useCampanas";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard'
@@ -15,18 +15,27 @@ export default function CampanasPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingCampana, setEditingCampana] = useState<any>(null);
   const [formData, setFormData] = useState({
-    nombre: "",
-    descripcion: "",
-    estado: "activa",
-    notificar_email: true,
-    notificar_whatsapp: false,
+    nombre: "", descripcion: "", estado: "activa",
+    asesor_id: "", tipo_captura: "solo_formulario",
+    formulario_id: "", calendario_id: "", producto_id: "",
+    notificar_email: true, notificar_whatsapp: false,
     emails_notificacion: [] as string[],
     whatsapp_notificacion: [] as string[],
-    notion_database_id: "",
-    notion_sync: false
+    notion_database_id: "", notion_sync: false
   });
+  const [asesores, setAsesores] = useState<any[]>([])
+  const [formularios, setFormularios] = useState<any[]>([])
+  const [calendarios, setCalendarios] = useState<any[]>([])
+  const [productos, setProductos] = useState<any[]>([])
   const [newEmail, setNewEmail] = useState("");
   const [newWhatsapp, setNewWhatsapp] = useState("");
+
+  useEffect(() => {
+    fetch('/api/asesores').then(r=>r.json()).then(d=>{ if(d.success) setAsesores(d.data||[]) })
+    fetch('/api/formularios?all=true').then(r=>r.json()).then(d=>{ if(d.success) setFormularios(d.data||[]) })
+    fetch('/api/calendarios').then(r=>r.json()).then(d=>{ if(d.success) setCalendarios(d.data||d.calendarios||[]) })
+    fetch('/api/productos?all=true&limit=500').then(r=>r.json()).then(d=>{ if(d.success) setProductos(d.data||d.productos||[]) })
+  }, [])
 
   const handleOpenModal = (campana?: any) => {
     if (campana) {
@@ -36,6 +45,11 @@ export default function CampanasPage() {
         nombre: campana.nombre || "",
         descripcion: campana.descripcion || "",
         estado: campana.estado || "activa",
+        asesor_id: campana.asesor_id || "",
+        tipo_captura: campana.tipo_captura || "solo_formulario",
+        formulario_id: campana.formulario_id || "",
+        calendario_id: campana.calendario_id || "",
+        producto_id: campana.producto_id || "",
         notificar_email: campana.notificar_email ?? true,
         notificar_whatsapp: campana.notificar_whatsapp ?? false,
         emails_notificacion: campana.emails_notificacion || [],
@@ -50,6 +64,11 @@ export default function CampanasPage() {
         nombre: "",
         descripcion: "",
         estado: "activa",
+        asesor_id: "",
+        tipo_captura: "solo_formulario",
+        formulario_id: "",
+        calendario_id: "",
+        producto_id: "",
         notificar_email: true,
         notificar_whatsapp: false,
         emails_notificacion: [],
@@ -93,11 +112,16 @@ export default function CampanasPage() {
     if (!guard('campanas', 'eliminar')) return
     if (!confirm("¿Estás seguro de eliminar esta campaña?")) return;
     
-    const success = await deleteCampana(id);
-    if (success) {
-      showToast("Campaña eliminada correctamente", "success");
-      refetch();
-    } else {
+    try {
+      const res = await fetch(`/api/campanas?id=${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (data.success) {
+        showToast("Campaña eliminada correctamente", "success");
+        refetch();
+      } else {
+        showToast("Error al eliminar campaña", "error");
+      }
+    } catch {
       showToast("Error al eliminar campaña", "error");
     }
   };
@@ -193,6 +217,7 @@ export default function CampanasPage() {
                     </div>
                     <div>
                       <h3 className="font-bold text-white">{campana.nombre}</h3>
+                      <span className="text-[10px] text-gray-500">{campana.leads_count || 0} leads</span>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${getEstadoColor(campana.estado)}`}>
                         {campana.estado}
                       </span>
@@ -325,6 +350,91 @@ export default function CampanasPage() {
                   className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
                 />
               </div>
+
+              {/* Asesor */}
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
+                  Asesor
+                </label>
+                <SearchableSelect
+                  value={formData.asesor_id}
+                  onChange={(value) => setFormData({ ...formData, asesor_id: value })}
+                  options={asesores.map(a => ({ value: a.id, label: a.nombre }))}
+                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                />
+              </div>
+
+              {/* Tipo de Captura */}
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
+                  Tipo de Captura
+                </label>
+                <div className="flex gap-1 bg-black/50 border border-white/10 rounded-xl p-1">
+                  {[
+                    { value: "solo_formulario", label: "Solo Formulario" },
+                    { value: "solo_calendario", label: "Solo Calendario" },
+                    { value: "formulario_calendario", label: "Formulario → Calendario" },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tipo_captura: opt.value })}
+                      className={`flex-1 px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
+                        formData.tipo_captura === opt.value
+                          ? "bg-blis-red text-white"
+                          : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Formulario (visible si tipo incluye formulario) */}
+              {(formData.tipo_captura === "solo_formulario" || formData.tipo_captura === "formulario_calendario") && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
+                    Formulario
+                  </label>
+                  <SearchableSelect
+                    value={formData.formulario_id}
+                    onChange={(value) => setFormData({ ...formData, formulario_id: value })}
+                    options={formularios.map(f => ({ value: f.id, label: f.nombre }))}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                  />
+                </div>
+              )}
+
+              {/* Calendario (visible si tipo incluye calendario) */}
+              {(formData.tipo_captura === "solo_calendario" || formData.tipo_captura === "formulario_calendario") && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
+                    Calendario
+                  </label>
+                  <SearchableSelect
+                    value={formData.calendario_id}
+                    onChange={(value) => setFormData({ ...formData, calendario_id: value })}
+                    options={calendarios.map(c => ({ value: c.id, label: c.nombre }))}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                  />
+                </div>
+              )}
+
+              {/* Producto (visible si tipo incluye calendario) */}
+              {(formData.tipo_captura === "solo_calendario" || formData.tipo_captura === "formulario_calendario") && (
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
+                    Producto
+                  </label>
+                  <SearchableSelect
+                    value={formData.producto_id}
+                    onChange={(value) => setFormData({ ...formData, producto_id: value })}
+                    options={productos.map(p => ({ value: p.id, label: p.nombre, image: p.imagen_principal }))}
+                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                  />
+                </div>
+              )}
 
               {/* Notificaciones */}
               <div className="border-t border-white/10 pt-4">
