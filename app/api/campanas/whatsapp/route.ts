@@ -208,28 +208,38 @@ async function getRecipientCount(supabase: any, source: string, filter: any, emp
 }
 
 async function getProductBuyers(supabase: any, productoId: string, empresaId: string) {
+  const { data: compras } = await supabase
+    .from('compras')
+    .select('user_id, id')
+    .eq('empresa_id', empresaId)
+    .eq('estado', 'completado')
+    .not('user_id', 'is', null)
+    .limit(1000)
+
+  if (!compras || compras.length === 0) return []
+
+  const compraIds = compras.map((c: any) => c.id)
+
+  // Find which compras contain this product
   const { data: items } = await supabase
     .from('compra_items')
     .select('compra_id')
     .eq('producto_id', productoId)
+    .in('compra_id', compraIds)
     .limit(500)
+
   if (!items || items.length === 0) return []
-  const compraIds = [...new Set(items.map((i: any) => i.compra_id))]
-  const { data: compras } = await supabase
-    .from('compras')
-    .select('user_id')
-    .in('id', compraIds)
-    .eq('empresa_id', empresaId)
-    .eq('estado', 'completado')
-    .not('user_id', 'is', null)
-  if (!compras || compras.length === 0) return []
-  const userIds = [...new Set(compras.map((c: any) => c.user_id))]
+
+  const matchingCompraIds = [...new Set(items.map((i: any) => i.compra_id))]
+  const matchingUserIds = [...new Set(compras.filter((c: any) => matchingCompraIds.includes(c.id)).map((c: any) => c.user_id))]
+
   const { data: profiles } = await supabase
     .from('profiles')
     .select('id, nombre, email, telefono')
-    .in('id', userIds)
+    .in('id', matchingUserIds)
     .not('telefono', 'is', null)
     .limit(500)
+
   return profiles || []
 }
 
@@ -259,6 +269,7 @@ async function processOneBatch(campaignId: string) {
       type: campaign?.media_url ? 'media' : 'text',
       media_url: campaign?.media_url || undefined,
       filename: campaign?.filename || undefined,
+      empresaId: DEFAULT_EMPRESA_ID,
     })
     await supabase.from('whatsapp_campaign_recipients').update({
       status: result.success ? 'sent' : 'failed',
