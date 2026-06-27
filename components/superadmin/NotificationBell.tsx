@@ -85,6 +85,69 @@ export function NotificationBell() {
   const router = useRouter();
   const { user } = useAuth();
 
+  // Push notification browser state
+  const [pushSupported, setPushSupported] = useState(false);
+  const [pushGranted, setPushGranted] = useState(false);
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+  const currentEndpoint = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const supported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
+    setPushSupported(supported);
+    if (supported) {
+      setPushGranted(Notification.permission === 'granted');
+      navigator.serviceWorker.ready.then(sw => {
+        sw.pushManager.getSubscription().then(sub => {
+          setPushSubscribed(!!sub);
+          if (sub) currentEndpoint.current = sub.endpoint;
+        });
+      });
+    }
+  }, []);
+
+  const handleTogglePush = async () => {
+    if (pushSubscribed) {
+      try {
+        await fetch(`/api/notificaciones/suscribir?endpoint=${encodeURIComponent(currentEndpoint.current || '')}`, { method: 'DELETE' });
+        const sw = await navigator.serviceWorker.ready;
+        const sub = await sw.pushManager.getSubscription();
+        if (sub) await sub.unsubscribe();
+        setPushSubscribed(false);
+        currentEndpoint.current = null;
+      } catch { /* silencioso */ }
+      return;
+    }
+
+    setPushLoading(true);
+    try {
+      const perm = await Notification.requestPermission();
+      setPushGranted(perm === 'granted');
+      if (perm !== 'granted') { setPushLoading(false); return; }
+
+      const sw = await navigator.serviceWorker.ready;
+      const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+      const sub = await sw.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: vapidPublic,
+      });
+      const rawKey = sub.getKey ? sub.getKey('p256dh') : null;
+      const rawAuth = sub.getKey ? sub.getKey('auth') : null;
+      const p256dh = rawKey ? btoa(String.fromCharCode(...new Uint8Array(rawKey))) : '';
+      const auth = rawAuth ? btoa(String.fromCharCode(...new Uint8Array(rawAuth))) : '';
+
+      await fetch('/api/notificaciones/suscribir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh, auth }, browser: navigator.userAgent }),
+      });
+      setPushSubscribed(true);
+      currentEndpoint.current = sub.endpoint;
+    } catch { /* silencioso */ }
+    setPushLoading(false);
+  };
+
   const fetchNotifications = useCallback(async () => {
     if (!user) {
       setLoading(false);
@@ -245,6 +308,33 @@ export function NotificationBell() {
                 </button>
               )}
             </div>
+
+            {/* Push browser notifications toggle */}
+            {pushSupported && (
+              <div className="px-4 py-2.5 border-b border-white/5 bg-white/[0.01]">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${pushGranted ? 'bg-emerald-500/10' : 'bg-white/5'}`}>
+                      <div className={`w-2 h-2 rounded-full ${pushGranted ? 'bg-emerald-500 animate-pulse' : 'bg-gray-600'}`} />
+                    </div>
+                    <span className="text-[10px] text-gray-400 truncate">
+                      {pushGranted ? 'Notificaciones activadas' : 'Notificaciones del navegador'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleTogglePush}
+                    disabled={pushLoading}
+                    className={`shrink-0 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50 ${
+                      pushSubscribed
+                        ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+                        : 'bg-blis-red/10 border border-blis-red/20 text-blis-red hover:bg-blis-red/20'
+                    }`}
+                  >
+                    {pushLoading ? '...' : pushSubscribed ? 'Activado' : 'Activar'}
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="max-h-[400px] overflow-y-auto">
               {loading ? (

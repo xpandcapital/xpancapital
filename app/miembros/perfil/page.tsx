@@ -283,6 +283,80 @@ function ImageCropper({ src, onCrop, onCancel }: { src: string; onCrop: (base64:
     );
 }
 
+function PushNotificationToggle() {
+  const [supported, setSupported] = useState(false)
+  const [granted, setGranted] = useState(false)
+  const [subscribed, setSubscribed] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const endpointRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const s = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window
+    setSupported(s)
+    if (s) {
+      setGranted(Notification.permission === 'granted')
+      navigator.serviceWorker.ready.then(sw => {
+        sw.pushManager.getSubscription().then(sub => {
+          setSubscribed(!!sub)
+          if (sub) endpointRef.current = sub.endpoint
+        })
+      })
+    }
+  }, [])
+
+  const toggle = async () => {
+    if (subscribed) {
+      await fetch(`/api/notificaciones/suscribir?endpoint=${encodeURIComponent(endpointRef.current || '')}`, { method: 'DELETE' })
+      const sw = await navigator.serviceWorker.ready
+      const sub = await sw.pushManager.getSubscription()
+      if (sub) await sub.unsubscribe()
+      setSubscribed(false)
+      endpointRef.current = null
+      return
+    }
+    setLoading(true)
+    try {
+      const perm = await Notification.requestPermission()
+      setGranted(perm === 'granted')
+      if (perm !== 'granted') return
+      const sw = await navigator.serviceWorker.ready
+      const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
+      const sub = await sw.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidPublic })
+      const rawKey = sub.getKey ? sub.getKey('p256dh') : null
+      const rawAuth = sub.getKey ? sub.getKey('auth') : null
+      const p256dh = rawKey ? btoa(String.fromCharCode(...new Uint8Array(rawKey))) : ''
+      const auth = rawAuth ? btoa(String.fromCharCode(...new Uint8Array(rawAuth))) : ''
+      await fetch('/api/notificaciones/suscribir', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh, auth }, browser: navigator.userAgent }),
+      })
+      setSubscribed(true)
+      endpointRef.current = sub.endpoint
+    } catch {}
+    setLoading(false)
+  }
+
+  if (!supported) return null
+
+  return (
+    <button onClick={toggle} disabled={loading} className="w-full flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group text-left disabled:opacity-50">
+      <div className="flex items-center gap-4">
+        <Bell className={`w-5 h-5 ${subscribed ? 'text-emerald-400' : 'text-gray-500'} group-hover:text-blis-red transition-colors`} />
+        <div>
+          <span className="text-sm font-bold text-white block">Notificaciones del Navegador</span>
+          <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+            {subscribed ? 'Activadas' : granted ? 'Desactivadas' : 'No configuradas'}
+          </span>
+        </div>
+      </div>
+      <span className={`text-[10px] font-bold uppercase tracking-widest ${subscribed ? 'text-emerald-400' : 'text-gray-600'}`}>
+        {loading ? '...' : subscribed ? 'Activado' : 'Activar'}
+      </span>
+    </button>
+  )
+}
+
 export default function ProfilePage() {
     const { user, updateProfile } = useAuth();
     const router = useRouter();
@@ -684,6 +758,7 @@ export default function ProfilePage() {
                         <Shield className="w-5 h-5 text-blis-red" /> Seguridad & Accesos
                     </h2>
                     <div className="bg-zinc-950/30 border border-white/5 p-8 rounded-[2.5rem] space-y-6 shadow-xl">
+                        <PushNotificationToggle />
                         <button
                             onClick={() => { setPasswordError(null); setShowPasswordModal(true); }}
                             className="w-full flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group text-left"

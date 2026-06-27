@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     try {
       const { data: subs } = await supabaseAdmin
         .from("push_subscriptions")
-        .select("endpoint, p256dh_key, auth_key")
+        .select("endpoint, p256dh, auth")
         .in("user_id", userIds);
 
       if (subs && subs.length > 0 && process.env.VAPID_PRIVATE_KEY && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
@@ -95,13 +95,15 @@ export async function POST(request: NextRequest) {
         await Promise.allSettled(
           subs.map((s) =>
             webPush.default.sendNotification(
-              { endpoint: s.endpoint, keys: { p256dh: s.p256dh_key, auth: s.auth_key } },
+              { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
               payload
-            ).catch(() => {})
+            ).catch((err) => console.error("[notificaciones/enviar] Push individual error:", err?.statusCode, err?.message))
           )
         );
       }
-    } catch {}
+    } catch (pushError) {
+      console.error("[notificaciones/enviar] Error enviando push:", pushError);
+    }
 
     return NextResponse.json({ success: true, enviadas: records.length });
   } catch (error) {
