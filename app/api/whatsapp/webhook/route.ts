@@ -7,111 +7,160 @@ const DEFAULT_EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
 function getAdmin() { return createClient(supabaseUrl, supabaseServiceKey) }
 
+function cleanJid(raw: string): string {
+  return raw
+    .replace(/:(\d+)$/, '')
+    .replace(/@(s\.whatsapp\.net|hosted\.lid|lid|g\.us|c\.us|broadcast)$/, '')
+}
+
+function detectMessageType(msg: Record<string, any>): string {
+  if (msg.conversation || msg.extendedTextMessage) return 'text'
+  if (msg.imageMessage) return 'image'
+  if (msg.videoMessage) return 'video'
+  if (msg.documentMessage) return 'document'
+  if (msg.audioMessage) return 'audio'
+  if (msg.locationMessage) return 'location'
+  if (msg.contactMessage) return 'contact'
+  if (msg.stickerMessage) return 'sticker'
+  if (msg.reactionMessage) return 'reaction'
+  return 'unknown'
+}
+
+function extractBody(msg: Record<string, any>): { body: string | null; caption: string | null; mediaUrl: string | null; mediaMime: string | null } {
+  if (msg.conversation) return { body: msg.conversation, caption: null, mediaUrl: null, mediaMime: null }
+  if (msg.extendedTextMessage?.text) return { body: msg.extendedTextMessage.text, caption: null, mediaUrl: null, mediaMime: null }
+  if (msg.imageMessage) return { body: msg.imageMessage.caption || '[Imagen]', caption: msg.imageMessage.caption || null, mediaUrl: msg.imageMessage.url || null, mediaMime: msg.imageMessage.mimetype || null }
+  if (msg.videoMessage) return { body: msg.videoMessage.caption || '[Video]', caption: msg.videoMessage.caption || null, mediaUrl: msg.videoMessage.url || null, mediaMime: msg.videoMessage.mimetype || null }
+  if (msg.documentMessage) return { body: msg.documentMessage.fileName || msg.documentMessage.caption || '[Documento]', caption: msg.documentMessage.caption || null, mediaUrl: msg.documentMessage.url || null, mediaMime: msg.documentMessage.mimetype || null }
+  if (msg.audioMessage) return { body: '[Audio]', caption: null, mediaUrl: msg.audioMessage.url || null, mediaMime: msg.audioMessage.mimetype || null }
+  if (msg.locationMessage) return { body: '[Ubicación]', caption: null, mediaUrl: null, mediaMime: null }
+  if (msg.contactMessage) return { body: '[Contacto]', caption: null, mediaUrl: null, mediaMime: null }
+  if (msg.stickerMessage) return { body: '[Sticker]', caption: null, mediaUrl: msg.stickerMessage.url || null, mediaMime: null }
+  if (msg.reactionMessage) return { body: msg.reactionMessage.text || '[Reacción]', caption: null, mediaUrl: null, mediaMime: null }
+  return { body: null, caption: null, mediaUrl: null, mediaMime: null }
+}
+
+function parseEntry(entry: Record<string, any>, eventName: string): Record<string, any> | null {
+  const key = entry.key || {}
+  const msg = entry.message || {}
+  const update = entry.update || {}
+  const rawJid = key.remoteJid || entry.remoteJid || entry.id || ''
+
+  // 1. Contacts update — ignorar (es metadata, no mensaje)
+  if (eventName === 'contacts.update' || entry.notify || entry.verifiedName) return null
+
+  // 2. Messages update (estados de entrega)
+  if (eventName === 'messages.update') {
+    const statusMap: Record<number, string> = { 1: 'server_ack', 2: 'delivered', 3: 'read', 4: 'played' }
+    return {
+      event_type: statusMap[update.status] || `status_${update.status}`,
+      from_number: key.fromMe ? cleanJid(rawJid) : null,
+      to_number: key.fromMe ? null : cleanJid(rawJid),
+      message_type: 'status',
+      body: null, caption: null, media_url: null, media_mime: null,
+    }
+  }
+
+  // 3. Messages upsert (mensajes reales)
+  if (eventName === 'messages.upsert' && Object.keys(msg).length > 0) {
+    const { body, caption, mediaUrl, mediaMime } = extractBody(msg)
+    if (!body && Object.keys(msg).length > 1) {
+      // Mensaje con contenido no reconocido — loguear para debug
+      console.log('[WhatsApp] messages.upsert no reconocido:', JSON.stringify(msg).substring(0, 300))
+    }
+    return {
+      event_type: key.fromMe ? 'sent' : 'message',
+      from_number: key.fromMe ? cleanJid(rawJid) : cleanJid(rawJid),
+      to_number: null,
+      message_type: detectMessageType(msg),
+      body,
+      caption,
+      media_url: mediaUrl,
+      media_mime: mediaMime,
+    }
+  }
+
+  // 4. Envío con ack
+  if (eventName === 'send' || entry.ack !== undefined) {
+    const ackMap: Record<number, string> = { 1: 'server_ack', 2: 'delivered', 3: 'read', 4: 'played' }
+    return {
+      event_type: ackMap[entry.ack] || `ack_${entry.ack}`,
+      from_number: null, to_number: cleanJid(entry.to || rawJid),
+      message_type: 'status', body: null, caption: null, media_url: null, media_mime: null,
+    }
+  }
+
+  // 5. Connection
+  if (entry.connected !== undefined || eventName === 'connection.update') {
+    return {
+      event_type: entry.connected !== false ? 'connected' : 'disconnected',
+      from_number: null, to_number: null,
+      message_type: 'status', body: entry.connected !== false ? 'WhatsApp conectado' : 'WhatsApp desconectado',
+      caption: null, media_url: null, media_mime: null,
+    }
+  }
+
+  // 6. Battery
+  if (entry.battery !== undefined || eventName === 'battery') {
+    return {
+      event_type: 'battery',
+      from_number: null, to_number: null,
+      message_type: 'status', body: `Batería: ${entry.battery || entry.percent || '?'}%`,
+      caption: null, media_url: null, media_mime: null,
+    }
+  }
+
+  // 7. Plain message (flat structure, no wrapper)
+  if (entry.body || entry.text || entry.conversation) {
+    return {
+      event_type: 'message',
+      from_number: cleanJid(rawJid || entry.author || entry.sender || ''),
+      to_number: null,
+      message_type: 'text',
+      body: entry.body || entry.text || entry.conversation || JSON.stringify(entry).substring(0, 500),
+      caption: null, media_url: null, media_mime: null,
+    }
+  }
+
+  return null
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const supabase = getAdmin()
     const empresaId = DEFAULT_EMPRESA_ID
+    const instanceId = body.instance_id || body.data?.instance_id || null
 
-    // Planifyx envuelve todo en data.data[0]
-    const wrapper = body.data || body
-    const entries = Array.isArray(wrapper.data) ? wrapper.data : (body.messages || body.data || [body])
-    const instanceId = body.instance_id || wrapper.instance_id || null
+    // Planifyx puede enviar el evento en diferentes ubicaciones
+    const eventName = body.event || body.data?.event || body.type || ''
+
+    // Aplanar entradas: prueba varios formatos
+    let entries: Record<string, any>[]
+    if (Array.isArray(body.data?.data)) entries = body.data.data
+    else if (Array.isArray(body.messages)) entries = body.messages
+    else if (Array.isArray(body.data)) entries = body.data
+    else if (Array.isArray(body.notifications)) entries = body.notifications
+    else if (typeof body.data === 'object' && body.data !== null && !Array.isArray(body.data)) entries = [body.data]
+    else entries = [body]
 
     const messages: Record<string, any>[] = []
 
     for (const entry of entries) {
-      const key = entry.key || entry
-      const update = entry.update || {}
-      const msg = entry.message || entry
-
-      // Extraer número limpio (quitar @s.whatsapp.net, @lid, @hosted.lid, @g.us, @c.us, y sufijos :99, :11)
-      const rawJid = key.remoteJid || entry.remoteJid || body.remoteJid || ''
-      const cleanNumber = rawJid
-        .replace(/:(\d+)$/, '')
-        .replace(/@(s\.whatsapp\.net|hosted\.lid|lid|g\.us|c\.us|broadcast)$/, '')
-      const isGroup = rawJid.includes('@g.us')
-
-      // Determinar tipo de evento
-      const event = wrapper.event || body.event || ''
-      let eventType = 'unknown'
-      let messageType = 'text'
-      let body_text = null
-      let caption = null
-
-      if (event === 'messages.upsert') {
-        if (key.fromMe) {
-          eventType = 'sent'
-        } else if (msg.conversation || msg.extendedTextMessage?.text || msg.imageMessage || msg.videoMessage || msg.documentMessage || msg.audioMessage) {
-          eventType = 'message'
-          if (msg.conversation) {
-            messageType = 'text'
-            body_text = msg.conversation
-          } else if (msg.extendedTextMessage) {
-            messageType = 'text'
-            body_text = msg.extendedTextMessage.text
-          } else if (msg.imageMessage) {
-            messageType = 'image'
-            caption = msg.imageMessage.caption || null
-            body_text = caption || '[Imagen]'
-          } else if (msg.videoMessage) {
-            messageType = 'video'
-            caption = msg.videoMessage.caption || null
-            body_text = caption || '[Video]'
-          } else if (msg.documentMessage) {
-            messageType = 'document'
-            caption = msg.documentMessage.fileName || msg.documentMessage.caption || null
-            body_text = caption || '[Documento]'
-          } else if (msg.audioMessage) {
-            messageType = 'audio'
-            body_text = '[Audio]'
-          } else if (msg.locationMessage) {
-            messageType = 'location'
-            body_text = '[Ubicación]'
-          } else if (msg.contactMessage) {
-            messageType = 'contact'
-            body_text = '[Contacto]'
-          } else if (msg.stickerMessage) {
-            messageType = 'sticker'
-            body_text = '[Sticker]'
-          } else if (msg.reactionMessage) {
-            messageType = 'reaction'
-            body_text = msg.reactionMessage.text || '[Reacción]'
-          } else {
-            body_text = '[Mensaje no soportado]'
-          }
-        } else {
-          eventType = 'message'
-          body_text = JSON.stringify(msg).substring(0, 500)
-        }
-      } else if (event === 'messages.update') {
-        const status = update.status
-        if (status === 1) eventType = 'server_ack'
-        else if (status === 2) eventType = 'delivered'
-        else if (status === 3) eventType = 'read'
-        else if (status === 4) eventType = 'played'
-        else eventType = `status_${status}`
-      } else if (event === 'connection.update' || body.connected !== undefined) {
-        eventType = body.connected !== false ? 'connected' : 'disconnected'
-        body_text = body.connected !== false ? 'WhatsApp conectado' : 'WhatsApp desconectado'
-      } else if (event === 'battery') {
-        eventType = 'battery'
-        body_text = `Batería: ${body.battery || body.percent || '?'}%`
-      } else {
-        eventType = event || 'unknown'
-      }
+      const parsed = parseEntry(entry, eventName)
+      if (!parsed) continue
 
       messages.push({
         empresa_id: empresaId,
         instance_id: instanceId,
-        event_type: eventType,
-        from_number: key.fromMe ? cleanNumber : (isGroup ? cleanNumber : cleanNumber),
-        to_number: key.fromMe ? (isGroup ? cleanNumber : '') : (cleanNumber || null),
-        message_type: messageType,
-        body: body_text,
-        caption: caption,
-        media_url: msg?.imageMessage?.url || msg?.videoMessage?.url || msg?.documentMessage?.url || msg?.audioMessage?.url || null,
-        media_mime: msg?.imageMessage?.mimetype || msg?.videoMessage?.mimetype || msg?.documentMessage?.mimetype || msg?.audioMessage?.mimetype || null,
+        event_type: parsed.event_type,
+        from_number: parsed.from_number || null,
+        to_number: parsed.to_number || null,
+        message_type: parsed.message_type || 'text',
+        body: parsed.body,
+        caption: parsed.caption,
+        media_url: parsed.media_url,
+        media_mime: parsed.media_mime,
         raw_payload: entry,
         processed: false,
       })
@@ -120,9 +169,13 @@ export async function POST(request: NextRequest) {
     if (messages.length > 0) {
       const { error } = await supabase.from('whatsapp_messages').insert(messages)
       if (error) console.error('[WhatsApp Webhook] Error guardando:', error)
+    } else {
+      // Loggear payloads no reconocidos para debug
+      const sample = JSON.stringify(body).substring(0, 400)
+      console.log('[WhatsApp Webhook] No procesado:', eventName, sample)
     }
 
-    return NextResponse.json({ success: true, processed: messages.length })
+    return NextResponse.json({ success: true, processed: messages.length, event: eventName })
   } catch (error) {
     console.error('[WhatsApp Webhook] Error:', error)
     return NextResponse.json({ success: true }, { status: 200 })
