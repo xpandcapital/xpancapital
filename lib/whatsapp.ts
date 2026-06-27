@@ -94,25 +94,20 @@ export async function sendWhatsApp({
   try {
     const numberClean = number.replace(/\D/g, '')
 
-    // Intentar POST con body SIN el access_token en el body (va como header)
-    console.log('[WhatsApp] Enviando a:', numberClean)
-    const res = await fetch(`${API_BASE}/send`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${creds.accessToken}`,
-      },
-      body: JSON.stringify({
-        number: numberClean,
-        type,
-        message,
-        instance_id: creds.instanceId,
-        ...(media_url ? { media_url } : {}),
-        ...(filename ? { filename } : {}),
-      }),
+    // Planifyx requiere POST con query params en la URL (NO JSON body)
+    const params = new URLSearchParams({
+      number: numberClean,
+      type,
+      message,
+      instance_id: creds.instanceId,
+      access_token: creds.accessToken,
     })
+    if (media_url) params.set('media_url', media_url)
+    if (filename) params.set('filename', filename)
+
+    const res = await fetch(`${API_BASE}/send?${params.toString()}`, { method: 'POST' })
     const text = await res.text()
-    console.log('[WhatsApp] Bearer Respuesta:', res.status, text.substring(0, 300))
+    console.log('[WhatsApp] Enviado:', numberClean, text.substring(0, 100))
 
     let data: any = {}
     try { data = JSON.parse(text) } catch {}
