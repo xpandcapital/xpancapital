@@ -101,10 +101,17 @@ export async function sendWhatsApp({
     })
     if (media_url) params.set('media_url', media_url)
     if (filename) params.set('filename', filename)
+    const url = `${API_BASE}/send?${params.toString()}`
 
-    const res = await fetch(`${API_BASE}/send?${params.toString()}`, { method: 'POST' })
-    const data = await res.json()
-    return { success: data?.status === 'success', data }
+    console.log('[WhatsApp] Enviando a:', number.replace(/\D/g, ''), 'instancia:', creds.instanceId)
+    const res = await fetch(url, { method: 'POST' })
+    const text = await res.text()
+    console.log('[WhatsApp] Respuesta Planifyx:', res.status, text.substring(0, 300))
+
+    let data: any = {}
+    try { data = JSON.parse(text) } catch {}
+    const success = data?.status === 'success' || data?.message === 'success' || text.includes('success')
+    return { success, data: data || text }
   } catch (error) {
     console.error('[WhatsApp] Error sending:', error)
     return { success: false, error }
