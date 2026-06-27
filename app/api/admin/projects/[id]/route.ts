@@ -30,7 +30,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       if (existing) {
         const { data: newData, error: insertError } = await supabase
           .from('projects')
-          .insert([{ ...body, id: body.id.toUpperCase(), order_index: existing.order_index ?? 0 }])
+            .insert([{ ...body, id: body.id.toUpperCase(), order_index: (existing as any).order_index ?? 0 }])
           .select()
           .single()
         if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 })

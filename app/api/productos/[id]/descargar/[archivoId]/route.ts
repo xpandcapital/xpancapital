@@ -16,7 +16,7 @@ async function recordDownload(
   tipoDescarga: string,
   request: NextRequest
 ) {
-  await supabase.from('producto_descargas').insert({
+  await (supabase as any).from('producto_descargas').insert({
     producto_id: productoId,
     archivo_id: archivoId || null,
     user_id: userId,
@@ -69,7 +69,7 @@ export async function GET(
       return NextResponse.json({ error: 'Archivo no encontrado' }, { status: 404 })
     }
 
-    await recordDownload(supabase, productoId, archivoId, userId, 'individual', request)
+    await recordDownload(supabase as any, productoId, archivoId, userId, 'individual', request)
 
     if (isSupabaseStorageUrl(archivo.archivo_url)) {
       const { data: signedUrl, error: signError } = await supabase.storage
@@ -82,7 +82,7 @@ export async function GET(
 
       return NextResponse.json({
         success: true,
-        url: signedUrl.signedURL,
+        url: (signedUrl as any).signedUrl,
         nombre: archivo.nombre
       })
     }

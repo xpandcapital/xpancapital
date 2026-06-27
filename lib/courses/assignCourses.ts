@@ -39,20 +39,21 @@ export async function assignCoursesToUser(
     .eq('email', email.toLowerCase())
     .maybeSingle()
 
-  let advisorId = advisor?.id
+  const typedAdvisor = advisor as { id: string } | null
+  let advisorId = typedAdvisor?.id
   if (!advisorId) {
     const { data: newAdvisor, error: createAdvError } = await supabase
       .from('advisors')
       .insert({
         email: email.toLowerCase(),
         name: nombre || email.split('@')[0],
-      })
+      } as never)
       .select('id')
       .single()
     if (createAdvError) {
       return { assigned: 0, error: 'No se pudo crear el registro de asesor' }
     }
-    advisorId = newAdvisor?.id
+    advisorId = (newAdvisor as { id: string } | null)?.id
   }
 
   if (!advisorId) {
@@ -71,7 +72,8 @@ export async function assignCoursesToUser(
         .eq('id', productoId)
         .maybeSingle()
 
-      let cursoId = producto?.curso_id || product.curso_id || null
+      let cursoId = ((producto as { curso_id?: string; nombre?: string } | null)?.curso_id)
+        || product.curso_id || null
 
       // Fallback: buscar por slug del producto si no hay curso_id explícito
       if (!cursoId && product.slug) {
@@ -81,7 +83,7 @@ export async function assignCoursesToUser(
           .eq('slug', product.slug)
           .maybeSingle()
         if (cursoBySlug) {
-          cursoId = cursoBySlug.id
+          cursoId = (cursoBySlug as { id: string }).id
         }
       }
 
@@ -93,7 +95,7 @@ export async function assignCoursesToUser(
           .eq('id', productoId)
           .maybeSingle()
         if (cursoData) {
-          cursoId = cursoData.id
+          cursoId = (cursoData as { id: string }).id
         }
       }
 
@@ -105,7 +107,7 @@ export async function assignCoursesToUser(
         user_id: userId,
         estado: 'asignado',
         lecciones_completadas: [],
-      })
+      } as never)
 
       if (assignError && assignError.code !== '23505') {
         console.error('[assignCoursesToUser] Error asignando curso:', assignError)
@@ -115,9 +117,9 @@ export async function assignCoursesToUser(
       } else if (assignError?.code === '23505') {
         const { error: updateError } = await supabase
           .from('equipo_cursos')
-          .update({ user_id: userId, estado: 'asignado' })
+          .update({ user_id: userId, estado: 'asignado' } as never)
           .eq('advisor_id', advisorId)
-          .eq('curso_id', cursoId)
+          .eq('curso_id', cursoId) as unknown as { error: { code?: string } | null }
         if (updateError) {
           console.error('[assignCoursesToUser] Error actualizando duplicado:', updateError)
           error = error || 'Error al actualizar curso existente'

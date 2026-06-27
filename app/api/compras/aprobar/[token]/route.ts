@@ -124,7 +124,7 @@ export async function GET(
       }
 
       if (effectiveUserId) {
-        await assignCoursesToUser(supabase, productos, email, effectiveUserId, nombre)
+        await assignCoursesToUser(supabase as any, productos, email, effectiveUserId, nombre)
       }
     }
 

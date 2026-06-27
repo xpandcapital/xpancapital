@@ -272,11 +272,11 @@ export function usePOS(): POSReturnValue | POSErrorReturn {
                     department: result.department || cached.department,
                     province: result.province || cached.province,
                     district: result.district || cached.district,
-                    country: result.country || cached.country || (isPeru ? 'PERÚ' : 'ECUADOR'),
+                    country: (result as any).country || cached.country || (isPeru ? 'PERÚ' : 'ECUADOR'),
                     status: result.status || cached.status,
                     condition: result.condition || cached.condition,
                     birthDate: mappedBirthDate,
-                    lastUpdate: result.lastUpdate || cached.lastUpdate,
+                    lastUpdate: (result as any).lastUpdate || cached.lastUpdate,
                     gender: 'gender' in result ? result.gender || cached.gender : cached.gender,
                     nationality: 'nationality' in result ? result.nationality || cached.nationality : cached.nationality,
                     bloodType: 'bloodType' in result ? result.bloodType || cached.bloodType : cached.bloodType,
@@ -306,7 +306,7 @@ export function usePOS(): POSReturnValue | POSErrorReturn {
                     console.error('Error saving cache', e);
                 }
 
-                const phone = (result as PeruCustomerData).cellphone || (result as PeruCustomerData).phone;
+                const phone = (result as any).cellphone || (result as any).phone;
                 if (phone) {
                     const checker = isPeru ? fetchWhatsAppPeru : fetchWhatsAppStatus;
                     checker(phone).then((r: WhatsAppStatusResult) => {

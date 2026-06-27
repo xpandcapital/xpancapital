@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: NextRequest) {
     try {
-        const { service, key, token_vimeo, url_cloudinary, merchant_id } = await req.json();
+        const { service, key, token_vimeo, url_cloudinary, merchant_id, extra } = await req.json();
 
         // 1. Priorizamos Headers por si acaso
         const hKey = req.headers.get('x-api-key');

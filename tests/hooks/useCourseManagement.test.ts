@@ -57,7 +57,7 @@ describe('useCourseManagement', () => {
     const { result } = renderHook(() => useCourseManagement())
 
     act(() => {
-      const newCourse = result.current.createNewCourse()
+      const newCourse = result.current.handleCreateNew()
       expect(newCourse.title).toBe('')
       expect(newCourse.status).toBe('Borrador')
       expect(newCourse.modules.length).toBe(1)
@@ -77,7 +77,16 @@ describe('useModuleActions', () => {
     allowComments: true,
     bliscoins: 0,
     image: null,
-    certificateTemplateId: null
+    certificateTemplateId: null,
+    paraEquipo: false,
+    sequentialProgress: false,
+    requireCompletion: false,
+    venderEnTienda: false,
+    productoId: null,
+    productoNombre: null,
+    linkProductoId: null,
+    precioComparacion: 0,
+    descuentoPorcentaje: 0
   }
 
   it('should add a module', () => {
@@ -144,7 +153,16 @@ describe('useLessonActions', () => {
     allowComments: true,
     bliscoins: 0,
     image: null,
-    certificateTemplateId: null
+    certificateTemplateId: null,
+    paraEquipo: false,
+    sequentialProgress: false,
+    requireCompletion: false,
+    venderEnTienda: false,
+    productoId: null,
+    productoNombre: null,
+    linkProductoId: null,
+    precioComparacion: 0,
+    descuentoPorcentaje: 0
   }
 
   it('should add a lesson', () => {

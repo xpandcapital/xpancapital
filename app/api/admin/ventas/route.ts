@@ -174,7 +174,7 @@ export async function PUT(request: NextRequest) {
 
           // Asignar cursos comprados al usuario efectivo
           if (effectiveUserId) {
-            await assignCoursesToUser(supabase, productos, email, effectiveUserId, nombre)
+            await assignCoursesToUser(supabase as any, productos, email, effectiveUserId, nombre)
           }
         }
       }

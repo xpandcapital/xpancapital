@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+// @ts-ignore
 import archiver from 'archiver'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -31,7 +32,7 @@ async function recordDownload(
   userId: string,
   request: NextRequest
 ) {
-  await supabase.from('producto_descargas').insert({
+  await (supabase as any).from('producto_descargas').insert({
     producto_id: productoId,
     user_id: userId,
     tipo_descarga: 'zip',
@@ -111,7 +112,7 @@ export async function GET(
     const archive = archiver('zip', { zlib: { level: 5 } })
 
     const chunks: Buffer[] = []
-    archive.on('data', (chunk) => chunks.push(chunk))
+    archive.on('data', (chunk: Buffer) => chunks.push(chunk))
 
     for (const file of filesToZip) {
       archive.append(file.buffer, { name: file.name })
@@ -138,7 +139,7 @@ export async function GET(
       return NextResponse.json({ error: 'Error al crear el ZIP' }, { status: 500 })
     }
 
-    await recordDownload(supabase, productoId, userId, request)
+    await recordDownload(supabase as any, productoId, userId, request)
 
     const { data: signedUrl } = await supabase.storage
       .from('productos')
@@ -146,7 +147,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      url: signedUrl?.signedURL,
+      url: (signedUrl as any)?.signedUrl,
       nombre: `producto_completo_${Date.now()}.zip`,
       tamanho: zipBuffer.length
     })

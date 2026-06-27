@@ -66,7 +66,7 @@ export const TerminalModals: React.FC<TerminalModalsProps> = ({
         {selectedPositionId && (() => {
           const p = openPositions.find(x => x.id === selectedPositionId) || tradeHistory.find(x => x.id === selectedPositionId);
           if (!p) return null;
-          const pnl = getPnlData(p);
+          const pnl = getPnlData(p as any);
           const popupRoi = p.finalPnlPercent != null ? p.finalPnlPercent : (p.amount > 0 ? ((p.finalPnl || 0) / p.amount) * 100 : 0);
           const popupOpenTag = p.openedBy === 'IA' ? 'IA' : 'H';
           const popupCloseTag = p.closedBy === 'IA' ? 'IA' : 'H';
@@ -88,7 +88,7 @@ export const TerminalModals: React.FC<TerminalModalsProps> = ({
                 </div>
                 <div className="p-5 sm:p-8 space-y-5">
                   <div className="grid grid-cols-2 gap-3 sm:gap-4 text-center">
-                    <div className="bg-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5"><span className="text-[9px] text-gray-500 block uppercase mb-1">{p.status === 'CLOSED' ? 'P/L Final' : 'P/L Vivo'}</span><span className={`text-lg sm:text-xl font-black ${p.status === 'CLOSED' ? (p.finalPnl >= 0 ? 'text-emerald-400' : 'text-blis-red-neon') : (pnl.isProfit ? 'text-emerald-400' : 'text-blis-red-neon')}`}>${p.status === 'CLOSED' ? (p.finalPnl || 0).toFixed(2) : pnl.value.toFixed(2)}</span></div>
+                    <div className="bg-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5"><span className="text-[9px] text-gray-500 block uppercase mb-1">{p.status === 'CLOSED' ? 'P/L Final' : 'P/L Vivo'}</span><span className={`text-lg sm:text-xl font-black ${p.status === 'CLOSED' ? ((p.finalPnl || 0) >= 0 ? 'text-emerald-400' : 'text-blis-red-neon') : (pnl.isProfit ? 'text-emerald-400' : 'text-blis-red-neon')}`}>${p.status === 'CLOSED' ? (p.finalPnl || 0).toFixed(2) : pnl.value.toFixed(2)}</span></div>
                     <div className="bg-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5"><span className="text-[9px] text-gray-500 block uppercase mb-1">Apalancamiento</span><span className="text-lg sm:text-xl font-black text-white">x{p.leverage}</span></div>
                   </div>
                   <div className="space-y-2.5">
@@ -96,9 +96,9 @@ export const TerminalModals: React.FC<TerminalModalsProps> = ({
                     <div className="flex justify-between text-[11px]"><span className="text-gray-500">Precio Entrada</span><span className="text-white font-mono">${p.entryPrice < 100 ? p.entryPrice.toFixed(6) : p.entryPrice.toFixed(2)}</span></div>
                     {p.status === 'CLOSED' ? (
                       <>
-                        <div className="flex justify-between text-[11px]"><span className="text-gray-500">Precio Cierre</span><span className="text-white font-mono font-bold">${p.closePrice < 100 ? p.closePrice?.toFixed(6) : p.closePrice?.toFixed(2)}</span></div>
-                        <div className="flex justify-between text-[11px]"><span className="text-gray-500 font-black text-emerald-500/60 uppercase">ROI Final</span><span className={`font-mono font-bold ${p.finalPnl >= 0 ? 'text-emerald-400' : 'text-blis-red-neon'}`}>{popupRoi >= 0 ? '+' : ''}{popupRoi.toFixed(2)}%</span></div>
-                        <div className="flex justify-between text-[11px]"><span className="text-gray-500">Tiempo Ejecución</span><span className="text-gray-300 font-mono italic">{(() => { const dur = (p.closeTime || Date.now()) - p.openTime; return `${Math.floor(dur / 60000)}m ${Math.floor((dur % 60000) / 1000)}s`; })()}</span></div>
+                        <div className="flex justify-between text-[11px]"><span className="text-gray-500">Precio Cierre</span><span className="text-white font-mono font-bold">${(p.closePrice || 0) < 100 ? (p.closePrice || 0).toFixed(6) : (p.closePrice || 0).toFixed(2)}</span></div>
+                        <div className="flex justify-between text-[11px]"><span className="text-gray-500 font-black text-emerald-500/60 uppercase">ROI Final</span><span className={`font-mono font-bold ${(p.finalPnl || 0) >= 0 ? 'text-emerald-400' : 'text-blis-red-neon'}`}>{popupRoi >= 0 ? '+' : ''}{popupRoi.toFixed(2)}%</span></div>
+                        <div className="flex justify-between text-[11px]"><span className="text-gray-500">Tiempo Ejecución</span><span className="text-gray-300 font-mono italic">{(() => { const dur = (p.closeTime || Date.now()) - (p.openTime || Date.now()); return `${Math.floor(dur / 60000)}m ${Math.floor((dur % 60000) / 1000)}s`; })()}</span></div>
                         <div className="flex justify-between text-[11px]"><span className="text-gray-500">Operado por</span><span className="text-white font-mono">{p.openedBy === 'IA' ? '🤖 IA' : '👤 Humano'} → {p.closedBy === 'IA' ? '🤖 IA' : '👤 Humano'}</span></div>
                       </>
                     ) : (
@@ -191,7 +191,7 @@ export const TerminalModals: React.FC<TerminalModalsProps> = ({
                       { id: 'CHAOS', symbol: 'CHA/USDT', name: 'Caos Estructural', desc: 'Ruido aleatorio de alta frecuencia sin tendencia clara. Diseñado para estresar los filtros de señal de la IA y evitar el overtrading en rangos laterales sucios.' }
                     ].map(m => (
                       <div key={m.id} className="flex justify-between items-center px-4 py-4 hover:bg-emerald-500/5 rounded-[1.8rem] group transition-all border border-transparent hover:border-emerald-500/20">
-                        <div className="flex items-center gap-5 cursor-pointer flex-1" onClick={() => { onSetSimMode(m.id); onSetDataSource('simulation'); onSetActiveSymbol(m.symbol.replace('/', '')); onSetShowSymbolSelector(false); }}>
+                        <div className="flex items-center gap-5 cursor-pointer flex-1" onClick={() => { onSetSimMode(m.id as SimMode); onSetDataSource('simulation'); onSetActiveSymbol(m.symbol.replace('/', '')); onSetShowSymbolSelector(false); }}>
                           <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-[12px] font-black text-emerald-400 border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black transition-all shrink-0 shadow-lg">{m.symbol.split('/')[0]}</div>
                           <div className="flex flex-col leading-tight text-left"><span className="text-white font-black text-lg tracking-tight group-hover:text-emerald-400 transition-colors uppercase">{m.id === 'NORMAL' ? 'BTC/USDT' : m.symbol} <span className="text-[10px] text-emerald-500/40 ml-1 font-mono tracking-widest">PRO</span></span><span className="text-[11px] text-gray-500 font-bold uppercase tracking-widest">{m.name}</span></div>
                         </div>
@@ -247,7 +247,7 @@ export const TerminalModals: React.FC<TerminalModalsProps> = ({
               <div className="mt-2 w-full flex flex-col gap-2">
                 <button onClick={() => onSetGlobalAlert(null)} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[10px] tracking-[0.2em] transition-all">CANCELAR</button>
                 {typeof globalAlert === 'object' && globalAlert.pendingSymbol && (
-                  <button onClick={() => onHandleSymbolChange(globalAlert.pendingSymbol, true)} className="w-full py-3 rounded-xl bg-blis-red/10 hover:bg-blis-red border border-blis-red/50 text-blis-red-neon hover:text-white font-black uppercase text-[10px] tracking-[0.2em] transition-all">FORZAR CAMBIO (MULTI-TAB)</button>
+                  <button onClick={() => onHandleSymbolChange(globalAlert.pendingSymbol!, true)} className="w-full py-3 rounded-xl bg-blis-red/10 hover:bg-blis-red border border-blis-red/50 text-blis-red-neon hover:text-white font-black uppercase text-[10px] tracking-[0.2em] transition-all">FORZAR CAMBIO (MULTI-TAB)</button>
                 )}
               </div>
             </motion.div>

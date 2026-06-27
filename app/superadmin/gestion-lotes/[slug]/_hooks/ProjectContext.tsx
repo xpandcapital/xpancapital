@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext } from 'react';
-import { Project } from './_types';
+import { Project } from '../_types';
 
 interface ProjectContextType {
   projects: Project[];

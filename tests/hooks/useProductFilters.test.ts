@@ -28,6 +28,11 @@ const mockProducts: Product[] = [
     expirationDate: '',
     perishableHandling: 'discard',
     batchUid: '',
+    precios_multimoneda: {},
+    slug: 'producto-a',
+    shortSlug: '',
+    metaDescripcion: '',
+    metaTitulo: '',
   },
   {
     id: '2',
@@ -53,6 +58,11 @@ const mockProducts: Product[] = [
     expirationDate: '',
     perishableHandling: 'discard',
     batchUid: '',
+    precios_multimoneda: {},
+    slug: 'producto-b',
+    shortSlug: '',
+    metaDescripcion: '',
+    metaTitulo: '',
   },
   {
     id: '3',
@@ -78,6 +88,11 @@ const mockProducts: Product[] = [
     expirationDate: '',
     perishableHandling: 'discard',
     batchUid: '',
+    precios_multimoneda: {},
+    slug: 'producto-c',
+    shortSlug: '',
+    metaDescripcion: '',
+    metaTitulo: '',
   },
 ]
 

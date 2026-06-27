@@ -284,7 +284,7 @@ export function useMediaUpload() {
       setUploading(false)
 
       if (!result.success) throw new Error(result.error || 'Error al subir')
-      return result.data!
+      return result.data! as MediaUploadResult
     } catch (e) {
       setUploading(false)
       throw e instanceof Error ? e : new Error('Error al subir archivo')

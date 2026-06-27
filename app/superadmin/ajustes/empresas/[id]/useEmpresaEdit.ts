@@ -28,7 +28,7 @@ export function useEmpresaEdit(id: string) {
             coins_registro: 100, coins_referido: 50,
           }
           setConfig(defaults)
-          setConfigForm(defaults)
+          setConfigForm(defaults as any)
         }
       }
     } catch {} finally { setLoading(false) }
@@ -50,7 +50,7 @@ export function useEmpresaEdit(id: string) {
         'plan_limite_usuarios', 'plan_limite_productos', 'plan_limite_almacenamiento'
       ]
       empresaFields.forEach(field => {
-        if (empresaForm[field] !== undefined && empresaForm[field] !== (empresa as Record<string, unknown>)[field]) {
+        if (empresaForm[field as keyof typeof empresaForm] !== undefined && (empresaForm as Record<string, unknown>)[field] !== (empresa as unknown as Record<string, unknown>)[field]) {
           empresaChanges[field] = empresaForm[field]
         }
       })
@@ -62,7 +62,7 @@ export function useEmpresaEdit(id: string) {
         'coins_por_lectura', 'segundos_lectura', 'coins_registro', 'coins_referido'
       ]
       configFields.forEach(field => {
-        if (configForm[field] !== undefined && configForm[field] !== (config as Record<string, unknown>)?.[field]) {
+        if (configForm[field as keyof typeof configForm] !== undefined && (configForm as Record<string, unknown>)[field] !== (config as unknown as Record<string, unknown>)?.[field]) {
           configChanges[field] = configForm[field]
         }
       })

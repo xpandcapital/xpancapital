@@ -44,7 +44,7 @@ export function usePermissions() {
         const json = await res.json()
         const rolesArray = Array.isArray(json) ? json : (json.data || [])
         const roleData = rolesArray.find?.(
-          (r: { nombre: string }) => r.nombre === user.role
+          (r: { nombre: string }) => r.nombre === user?.role
         )
         setDbPermissions(roleData?.permisos ?? null)
         setDbRutaInicio(roleData?.ruta_inicio ?? null)

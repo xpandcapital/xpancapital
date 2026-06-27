@@ -387,7 +387,7 @@ export function mapNotionPageToLot(page: NotionPage, projectId: string): Partial
     initialPayments.push({
       id: crypto.randomUUID(),
       description: 'Entrada Inicial',
-      expected: inicial,
+      expected: inicial ?? 0,
       actual: 0,
       payment_date: null,
       receipt_attached: null
@@ -431,7 +431,7 @@ export function mapNotionPageToLot(page: NotionPage, projectId: string): Partial
 
   return {
     project_id: projectId,
-    lot_number: lotNumber,
+    lot_number: String(lotNumber),
     client_name: clienteStr || null,
     status: estado,
     total_price: precioVentaFinal || precioTotalReferencial,
@@ -451,7 +451,7 @@ export function mapNotionPageToLot(page: NotionPage, projectId: string): Partial
       email: email ? String(email) : null,
       identificacion: identificacion ? String(identificacion).toUpperCase() : null,
       contacto_emergencia: contactoEmergencia ? String(contactoEmergencia) : null,
-      contrato_pdf: contratoPdf || null,
+      contrato_pdf: contratoPdf ? String(contratoPdf) : null,
       asesor: asesor ? String(asesor) : null,
       precio_total_referencial: precioTotalReferencial,
       precio_venta_final: precioVentaFinal,

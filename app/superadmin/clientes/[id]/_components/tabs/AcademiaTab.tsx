@@ -10,6 +10,11 @@ interface AcademiaTabProps {
 
 export function AcademiaTab({ academicData }: AcademiaTabProps) {
 
+    const handleDeleteCertificate = (id: string) => {
+        // TODO: implementar eliminación de certificado
+        console.warn('[AcademiaTab] handleDeleteCertificate no implementado', id)
+    }
+
     return (
         <div className="space-y-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

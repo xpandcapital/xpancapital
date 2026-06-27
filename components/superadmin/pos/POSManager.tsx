@@ -19,7 +19,7 @@ import { CartItem, Transaction } from '@/context/SalesContext';
 export const POSManager = () => {
     const pos = usePOS();
 
-    if (pos.error) {
+    if ('error' in pos) {
         return <div className="p-10 text-center font-black uppercase text-blis-red">Error: {pos.error}</div>;
     }
 
@@ -45,7 +45,7 @@ export const POSManager = () => {
         globalDiscountAmount, setGlobalDiscountAmount,
         globalDiscountType, setGlobalDiscountType,
         couponCode, setCouponCode, shippingCost, setShippingCost,
-    } = pos;
+    } = pos as any;
 
     const handleFinalize = async () => {
         if (total <= 0) { alert('El total debe ser mayor a 0'); return; }

@@ -45,7 +45,7 @@ function canAccess(rol: string, pathname: string): boolean {
   const normalizedRol = (rol || 'usuario') as UserRole
   const defaults = ROLE_DEFAULTS[normalizedRol]
   if (!defaults) return false
-  if (defaults.includes('*')) return true
+  if ((defaults as string[]).includes('*')) return true
 
   for (const [permission, routes] of Object.entries(SECTION_ROUTES)) {
     if (routes.some(route => pathname.startsWith(route))) {

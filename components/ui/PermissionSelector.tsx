@@ -28,7 +28,7 @@ const PERMISSION_CATEGORIES: Record<string, Permission[]> = {
   'Certificados': ['certificados:ver', 'certificados:crear'],
   'Trading': ['trading:ver'],
   'Páginas': ['templates:ver', 'templates:editar'],
-  'Correos': ['mails:ver', 'mails:enviar'],
+  'Correos': ['mails:ver', 'mails:editar'],
   'Calendarios': ['calendarios:ver', 'calendarios:editar'],
   'Formularios': ['formularios:ver', 'formularios:crear'],
   'Leads': ['leads:ver', 'leads:editar'],
@@ -63,7 +63,7 @@ export function PermissionSelector({ role, permisosAdicionales, onChange, readOn
   const [activeTab, setActiveTab] = useState<'defaults' | 'overrides'>('overrides')
 
   const defaults = ROLE_DEFAULTS[role] || ROLE_DEFAULTS.usuario
-  const isWildcard = defaults.includes('*')
+  const isWildcard = (defaults as any[]).includes('*')
   const extras = permisosAdicionales?.extra || []
   const denieds = permisosAdicionales?.denied || []
 

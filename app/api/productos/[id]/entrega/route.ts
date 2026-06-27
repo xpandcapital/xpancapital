@@ -73,7 +73,7 @@ export async function GET(
         producto: item.producto,
         videos: videos || [],
         archivos: archivos || [],
-        compra_id: item.compra?.id
+        compra_id: (item.compra as any)?.[0]?.id
       }
     })
   } catch (error) {

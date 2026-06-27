@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, Layout, FileText, ShoppingBag, Package, GraduationCap, BookOpen, Building2, Funnel, Target, CreditCard, CheckCircle, ChevronDown } from "lucide-react";
+import { Plus, Layout, FileText, ShoppingBag, Package, GraduationCap, BookOpen, Building2, Funnel, Target, CreditCard, CheckCircle, Shield, ChevronDown } from "lucide-react";
 import { Template, TipoContenido } from "@/lib/hooks/useTemplates";
 import { TemplateCard } from "./TemplateCard";
 
@@ -29,7 +29,8 @@ const TIPO_INFO: Record<TipoContenido, { label: string; icon: React.ComponentTyp
   funnel: { label: "Funnels", icon: Funnel },
   captura: { label: "Capturas", icon: Target },
   checkout: { label: "Checkout", icon: CreditCard },
-  thankyou: { label: "Thank You", icon: CheckCircle }
+  thankyou: { label: "Thank You", icon: CheckCircle },
+  legal: { label: "Legal", icon: Shield }
 };
 
 const TIPO_ORDER: TipoContenido[] = ['landing', 'blog', 'tienda', 'curso', 'proyecto', 'funnel', 'captura'];

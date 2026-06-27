@@ -15,7 +15,7 @@ export default async function Home() {
         templateType="landing"
         sectionOrder={template?.sectionOrder as string[] | undefined}
         sectionVisibility={template?.sectionVisibility as Record<string, boolean> | undefined}
-        sections={template?.secciones as Record<string, unknown> | undefined}
+        sections={template?.secciones as any}
       />
     </main>
   );

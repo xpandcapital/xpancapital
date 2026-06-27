@@ -57,7 +57,7 @@ export async function createOrder(
   if (params.items?.length) {
     purchaseUnit.items = params.items
     purchaseUnit.amount = {
-      ...purchaseUnit.amount,
+      ...(purchaseUnit.amount as Record<string, unknown>),
       breakdown: {
         item_total: {
           currency_code: params.currency,

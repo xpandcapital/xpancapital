@@ -54,7 +54,7 @@ export function ClientDetail({
             case 'addresses': return <AddressesTab {...baseProps} />;
             case 'academia': return <AcademiaTab {...baseProps} academicData={academicData} />;
             case 'referrals': return <ReferralsTab {...baseProps} referrals={referrals} />;
-            case 'comms': return <CommsTab {...baseProps} events={events} />;
+            case 'comms': return <CommsTab client={client} onUpdate={onUpdate} />;
             case 'ai': return <AiInsightsTab {...baseProps} insights={insights} />;
             case 'automations': return <AutomationsTab {...baseProps} automations={automations} />;
             case 'history': return <HistoryTab {...baseProps} history={history} />;

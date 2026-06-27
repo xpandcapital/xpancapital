@@ -103,7 +103,7 @@ export function usePushNotifications() {
               vibrate: [200, 100, 200],
               renotify: true,
               ...options,
-            });
+            } as NotificationOptions);
           });
         } else {
           new Notification(title, {

@@ -5,9 +5,11 @@ import { X } from 'lucide-react'
 import { PLANES } from '../_types'
 import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
+type EmpresaFormData = { nombre: string; slug: string; nombre_legal: string; color_primario: string; pais_fiscal: string; moneda_base: string; idioma: string; zona_horaria: string; plan: string }
+
 interface Props {
-  newEmpresa: { nombre: string; slug: string; nombre_legal: string; color_primario: string; pais_fiscal: string; moneda_base: string; idioma: string; zona_horaria: string; plan: string }
-  setNewEmpresa: React.Dispatch<React.SetStateAction<typeof newEmpresa>>
+  newEmpresa: EmpresaFormData
+  setNewEmpresa: React.Dispatch<React.SetStateAction<EmpresaFormData>>
   onSave: () => Promise<boolean | string>
   saving: boolean
   onClose: () => void

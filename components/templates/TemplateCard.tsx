@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Layout, FileText, ShoppingBag, Package, GraduationCap, BookOpen,
-  Building2, Funnel, Target, CreditCard, CheckCircle,
+  Building2, Funnel, Target, CreditCard, CheckCircle, Scale,
   MoreVertical, Edit2, Copy, Trash2, Star, Globe, EyeOff,
   Check, ExternalLink
 } from "lucide-react";
@@ -32,11 +32,13 @@ const TIPO_ICONS: Record<TipoContenido, React.ComponentType<{ className?: string
   funnel: Funnel,
   captura: Target,
   checkout: CreditCard,
-  thankyou: CheckCircle
+  thankyou: CheckCircle,
+  legal: Scale
 };
 
 const TIPO_LABELS: Record<TipoContenido, string> = {
   landing: "Landing",
+  legal: "Legal",
   blog: "Blog",
   blog_post: "Post",
   tienda: "Tienda",
@@ -62,6 +64,7 @@ const MOCKUP_IMAGES: Record<TipoContenido, string> = {
   funnel: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
   captura: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&q=80",
   checkout: "https://images.unsplash.com/photo-1556742044-3c52d6e88c62?w=800&q=80",
+  legal: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80",
   thankyou: "https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=800&q=80"
 };
 

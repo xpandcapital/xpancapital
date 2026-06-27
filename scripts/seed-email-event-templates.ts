@@ -508,7 +508,7 @@ const empleados = [
 // --- 4-9. CURSOS, LEADS, ADMIN, COMUNICACION, SEGURIDAD, DOCUMENTOS ---
 import { getTemplates } from './seed-template-data-v2';
 
-const helpers = { hdr: (w, b) => hdr(w, b), spac, txt, txtDark, btn, div, soc, ftr, ftrDark, buildTemplate, defaultNets, receipt, receiptPendiente };
+const helpers = { hdr: (w: any, b: any) => hdr(w, b), spac, txt, txtDark, btn, div, soc, ftr, ftrDark, buildTemplate, defaultNets, receipt, receiptPendiente };
 const { cursos, leads, admin, comunicacion, seguridad, documentos } = getTemplates(helpers);
 
 // --- EJECUCION ---

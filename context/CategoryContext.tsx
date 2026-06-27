@@ -57,7 +57,8 @@ export const CategoryProvider: React.FC<{ children: ReactNode }> = ({ children }
           id: result.data.id,
           name: result.data.nombre,
           skuPrefix: result.data.sku_prefix || '',
-          order: result.data.orden
+          order: result.data.orden,
+          activo: result.data.activo ?? true
         }
       }
     }

@@ -3,7 +3,7 @@
  * Uso: npx tsx -e "process.env.NEXT_PUBLIC_SUPABASE_URL='...'; process.env.SUPABASE_SERVICE_ROLE_KEY='...'; require('./scripts/seed-books.ts')"
  */
 
-async function main() {
+async function main2() {
   const WP_API = "https://campus.blis-corp.com/wp-json/wp/v2";
   const { createClient } = await import("@supabase/supabase-js");
   const supabase = createClient(
@@ -76,4 +76,4 @@ async function main() {
   console.log(`\n   ✅ ${inserted} libros insertados\n🎉 Listo!`);
 }
 
-main().catch((err) => { console.error("❌", err); process.exit(1); });
+main2().catch((err) => { console.error("❌", err); process.exit(1); });

@@ -123,21 +123,21 @@ export const TerminalStats = React.memo(function TerminalStats({
                     remaining = speed > 0 ? Math.min(distToTarget / speed, maxEstimate) : Math.min((distToTarget / currentPrice) * 100 * 5, maxEstimate);
                   } else { remaining = Math.max(0, maxEstimate - elapsed); }
                   return (
-                    <tr key={p.id} onMouseEnter={() => onSetHoverPositionId(p.id)} onMouseLeave={() => onSetHoverPositionId(null)} onClick={() => onSetSelectedPositionId(p.id)}
-                      className={`border-b border-white/[0.03] group transition-all whitespace-nowrap cursor-pointer ${pnl.isProfit ? 'bg-emerald-900/10 hover:bg-emerald-900/15' : 'bg-red-900/10 hover:bg-red-900/15'} ${p.id === (null) ? 'bg-white/[0.06]' : ''}`}>
-                      <td className="p-3 md:p-4 pl-4 md:pl-6 font-mono"><div className="text-white/70 text-[11px]">{formatTableTime(p.openTime)}</div></td>
+                    <tr key={p.id} onMouseEnter={() => onSetHoverPositionId(String(p.id))} onMouseLeave={() => onSetHoverPositionId(null)} onClick={() => onSetSelectedPositionId(String(p.id))}
+                      className={`border-b border-white/[0.03] group transition-all whitespace-nowrap cursor-pointer ${pnl.isProfit ? 'bg-emerald-900/10 hover:bg-emerald-900/15' : 'bg-red-900/10 hover:bg-red-900/15'} ${String(p.id) === (null) ? 'bg-white/[0.06]' : ''}`}>
+                      <td className="p-3 md:p-4 pl-4 md:pl-6 font-mono"><div className="text-white/70 text-[11px]">{formatTableTime(p.openTime || 0)}</div></td>
                       <td className="p-3 md:p-4">
                         <div className="flex items-center gap-1.5">
                           <span className={`text-[14px] font-black ${p.type === 'BUY' ? 'text-emerald-400' : 'text-blis-red-neon'}`}>{p.type === 'BUY' ? '▲' : '▼'}</span>
                           <span className={`px-2 py-1 rounded text-[10px] font-black border uppercase ${p.type === 'BUY' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-blis-red-neon'}`}>{(p.symbol || 'USD').replace(/USDT$/, ' / USDT')}</span>
                         </div>
                       </td>
-                      <td className="p-3 md:p-4 text-center"><button onClick={(e) => { e.stopPropagation(); onCloseTradeManual(p.id); }} className="bg-white/5 hover:bg-blis-red text-gray-400 hover:text-white px-3 py-1.5 rounded-lg text-[9px] font-bold transition-all uppercase tracking-tighter border border-white/10 hover:border-blis-red">Cerrar</button></td>
+                      <td className="p-3 md:p-4 text-center"><button onClick={(e) => { e.stopPropagation(); onCloseTradeManual(String(p.id)); }} className="bg-white/5 hover:bg-blis-red text-gray-400 hover:text-white px-3 py-1.5 rounded-lg text-[9px] font-bold transition-all uppercase tracking-tighter border border-white/10 hover:border-blis-red">Cerrar</button></td>
                       <td className={`p-3 md:p-4 font-black text-[13px] ${pnl.isProfit ? 'text-emerald-400' : 'text-blis-red-neon'}`}>{pnl.isProfit ? '+' : ''}${pnl.value.toFixed(2)}</td>
                       <td className={`p-3 md:p-4 text-center font-black text-[12px] ${pnl.isProfit ? 'text-emerald-400' : 'text-blis-red-neon'}`}>{roiPct >= 0 ? '+' : ''}{roiPct.toFixed(2)}%</td>
                       <td className="p-3 md:p-4 font-mono text-white/70 text-[11px]">${p.amount.toFixed(2)}<span className="opacity-50 text-[9px] block mt-0.5">x{p.leverage || 1}</span></td>
                       <td className={`p-3 md:p-4 font-mono font-bold text-[11px] ${saldoEst >= (p.amount || 0) ? 'text-emerald-400' : 'text-blis-red-neon'}`}>${Math.max(0, saldoEst).toFixed(2)}</td>
-                      <td className="p-3 md:p-4 text-cyan-400 font-mono font-bold text-[11px]">{formatTimePassed(p.openTime)}</td>
+                      <td className="p-3 md:p-4 text-cyan-400 font-mono font-bold text-[11px]">{formatTimePassed(p.openTime || 0)}</td>
                       <td className="p-3 md:p-4 text-white font-mono font-bold text-[11px] hidden lg:table-cell">{fmtUsd(p.entryPrice)}</td>
                       <td className="p-3 md:p-4 text-white/70 font-mono text-[11px] hidden lg:table-cell">{fmtUsd(currentPrice)}</td>
                       <td className="p-3 md:p-4 font-mono text-[11px] hidden lg:table-cell">
@@ -197,7 +197,7 @@ export const TerminalStats = React.memo(function TerminalStats({
                     const roiPercent = t.finalPnlPercent != null ? t.finalPnlPercent : (t.amount > 0 ? (t.finalPnl / t.amount) * 100 : 0);
                     const saldoFinal = (t.amount || 0) + (t.finalPnl || 0);
                     return (
-                      <tr key={`${t.id}_${i}_${t.closeTime}`} onClick={() => onSetSelectedPositionId(t.id)}
+                      <tr key={`${t.id}_${i}_${t.closeTime}`} onClick={() => onSetSelectedPositionId(String(t.id))}
                         className={`border-b border-white/[0.03] group cursor-pointer whitespace-nowrap transition-all ${isWin ? 'bg-emerald-900/10 hover:bg-emerald-900/15 text-gray-300' : 'bg-red-900/10 hover:bg-red-900/15 text-gray-300'}`}>
                         <td className="p-3 md:p-4 pl-4 md:pl-6 font-mono"><div className="text-white/70 text-[13px]">{formatTableTime(t.closeTime)}</div></td>
                         <td className="p-3 md:p-4"><div className="flex items-center gap-1.5"><span className={`text-[14px] font-black ${t.type === 'BUY' ? 'text-emerald-400' : 'text-blis-red-neon'}`}>{t.type === 'BUY' ? '▲' : '▼'}</span><span className={`px-2 py-1 rounded text-[13px] font-black border uppercase ${t.type === 'BUY' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-blis-red-neon'}`}>{(t.symbol || 'USD').replace(/USDT$/, ' / USDT')}</span></div></td>
@@ -210,7 +210,7 @@ export const TerminalStats = React.memo(function TerminalStats({
                         <td className="p-3 md:p-4 font-mono text-white/70 text-[13px] hidden lg:table-cell">{fmtUsd(t.closePrice)}</td>
                         <td className="p-3 md:p-4">
                           {(t.candlesAtClose || t.candlesAtOpen) ? (
-                            <button onClick={(e) => { e.stopPropagation(); const rc = t.candlesAtClose || t.candlesAtOpen || []; if (tradeReplayData && tradeReplayData.openTime === t.openTime) { onSetTradeReplayData(null); } else { onSetTradeReplayData({ candles: rc, entryPrice: t.entryPrice, closePrice: t.closePrice, type: t.type, symbol: t.symbol, openTime: t.openTime, closeTime: t.closeTime, openedBy: t.openedBy, closedBy: t.closedBy }); } }}
+                            <button onClick={(e) => { e.stopPropagation(); const rc = t.candlesAtClose || t.candlesAtOpen || []; if (tradeReplayData && tradeReplayData.openTime === t.openTime) { onSetTradeReplayData(null); } else { onSetTradeReplayData({ candles: rc, entryPrice: t.entryPrice, closePrice: t.closePrice, type: t.type as string, symbol: t.symbol, openTime: t.openTime || Date.now(), closeTime: t.closeTime, openedBy: t.openedBy, closedBy: t.closedBy }); } }}
                               className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg transition-all ${tradeReplayData && tradeReplayData.openTime === t.openTime ? 'bg-blis-red text-white shadow-[0_0_12px_rgba(190,11,60,0.4)]' : 'bg-white/5 text-gray-400 hover:bg-blis-red/20 hover:text-blis-red-neon border border-white/10'}`}>
                               {tradeReplayData && tradeReplayData.openTime === t.openTime ? '✕' : '▶'}
                             </button>

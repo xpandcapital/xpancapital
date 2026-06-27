@@ -58,6 +58,19 @@ export function EntregasPanel({ productoId, productoNombre, onClose }: EntregasP
     }
   }
 
+  const handleUpdateVideo = async () => {
+    if (!editingVideo) return
+    try {
+      await updateVideo(editingVideo.id, {
+        titulo: editingVideo.titulo,
+        video_url: editingVideo.video_url
+      })
+      setEditingVideo(null)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const handleAddArchivo = async (archivoData: Omit<ProductoArchivo, 'id' | 'producto_id' | 'orden'>) => {
     try {
       await addArchivo({ ...archivoData, orden: (data?.archivos.length || 0) + 1 })
@@ -186,6 +199,7 @@ export function EntregasPanel({ productoId, productoNombre, onClose }: EntregasP
                 setShowAdd={setShowAddVideo}
                 saving={saving}
                 onAdd={handleAddVideo}
+                onUpdate={handleUpdateVideo}
                 onDelete={handleDeleteVideo}
               />
             )}
@@ -200,6 +214,7 @@ export function EntregasPanel({ productoId, productoNombre, onClose }: EntregasP
                 saving={saving}
                 uploading={uploading}
                 onAdd={handleAddArchivo}
+                onUpdate={handleUpdateArchivo}
                 onDelete={handleDeleteArchivo}
                 onUpload={handleUploadFile}
               />
@@ -228,6 +243,7 @@ function VideosTab({
   setShowAdd,
   saving,
   onAdd,
+  onUpdate,
   onDelete
 }: {
   videos: ProductoVideo[]
@@ -237,6 +253,7 @@ function VideosTab({
   setShowAdd: (v: boolean) => void
   saving: boolean
   onAdd: (v: Omit<ProductoVideo, 'id' | 'producto_id' | 'orden'>) => void
+  onUpdate: () => void
   onDelete: (id: string) => void
 }) {
   const [newVideo, setNewVideo] = useState({ titulo: '', video_url: '', descripcion: '', duracion_min: '' as number | '' })
@@ -343,7 +360,7 @@ function VideosTab({
                 />
                 <div className="flex gap-2">
                   <button
-                    onClick={handleUpdateVideo}
+                    onClick={onUpdate}
                     disabled={saving}
                     className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blis-red text-white font-bold text-xs uppercase rounded-lg disabled:opacity-50"
                   >
@@ -410,6 +427,7 @@ function ArchivosTab({
   saving,
   uploading,
   onAdd,
+  onUpdate,
   onDelete,
   onUpload
 }: {
@@ -421,6 +439,7 @@ function ArchivosTab({
   saving: boolean
   uploading: boolean
   onAdd: (a: Omit<ProductoArchivo, 'id' | 'producto_id' | 'orden'>) => void
+  onUpdate: () => void
   onDelete: (id: string) => void
   onUpload: (file: File, tipo: 'archivo' | 'enlace') => Promise<{ url: string; name: string; size: number }>
 }) {
@@ -617,7 +636,7 @@ function ArchivosTab({
                 />
                 <div className="flex gap-2">
                   <button
-                    onClick={handleUpdateArchivo}
+                    onClick={onUpdate}
                     disabled={saving}
                     className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blis-red text-white font-bold text-xs uppercase rounded-lg disabled:opacity-50"
                   >

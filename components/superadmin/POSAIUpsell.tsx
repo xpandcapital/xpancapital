@@ -82,8 +82,8 @@ Responde SOLO con este JSON:
         // Si no hay match exacto, intentar por nombre (case-insensitive)
         if (!fullProduct && suggestion.id) {
             fullProduct = catalog.find((p: any) => 
-                p.name?.toLowerCase() === suggestion.id.toLowerCase() ||
-                p.name?.toLowerCase().includes(suggestion.id.toLowerCase())
+                p.name?.toLowerCase() === suggestion.id!.toLowerCase() ||
+                p.name?.toLowerCase().includes(suggestion.id!.toLowerCase())
             );
         }
         

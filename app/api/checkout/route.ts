@@ -21,10 +21,6 @@ function createServerSupabase(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       global: { headers: { cookie: request.headers.get('cookie') || '' } },
-      cookies: {
-        getAll() { return []; },
-        setAll() {}
-      },
       auth: { autoRefreshToken: false, persistSession: false }
     }
   );

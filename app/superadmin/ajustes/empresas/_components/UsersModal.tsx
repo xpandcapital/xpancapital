@@ -7,14 +7,16 @@ import { Empresa, EmpresaUser, ROLE_LABELS, ROLE_COLORS } from '../_types'
 import { useToast } from '@/components/ui/Toast'
 import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
+type UserFormData = { email: string; nombre: string; apellido: string; rol: string; password: string }
+
 interface Props {
   empresa: Empresa | undefined
   users: EmpresaUser[]
   loadingUsers: boolean
   searchResults: EmpresaUser[]
-  newUser: { email: string; nombre: string; apellido: string; rol: string; password: string }
+  newUser: UserFormData
   saving: boolean
-  setNewUser: React.Dispatch<React.SetStateAction<typeof newUser>>
+  setNewUser: React.Dispatch<React.SetStateAction<UserFormData>>
   onCreateUser: () => Promise<boolean | string>
   onAssignUser: (userId: string, rol?: string) => Promise<boolean | string>
   onUnassignUser: (userId: string) => void

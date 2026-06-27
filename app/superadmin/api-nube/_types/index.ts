@@ -3,7 +3,7 @@
 // Esquemas tipados para el módulo de APIs
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export type ApiFieldType = 'password' | 'text' | 'file' | 'database_selector'
+export type ApiFieldType = 'password' | 'text' | 'file' | 'database_selector' | 'select'
 
 export type ApiAccessType = 'Pública' | 'Privada'
 
@@ -24,6 +24,7 @@ export interface ApiField {
   docsUrl?: string
   testEndpoint?: string
   testMethod?: 'GET' | 'POST'
+  options?: Array<{ value: string; label: string }>
 }
 
 export interface ApiApp {

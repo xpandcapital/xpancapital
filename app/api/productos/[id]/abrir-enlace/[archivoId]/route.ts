@@ -15,7 +15,7 @@ async function recordEnlaceClick(
   userId: string,
   request: NextRequest
 ) {
-  await supabase.from('producto_descargas').insert({
+  await (supabase as any).from('producto_descargas').insert({
     producto_id: productoId,
     archivo_id: archivoId,
     user_id: userId,
@@ -68,7 +68,7 @@ export async function GET(
       return NextResponse.json({ error: 'Este archivo no es un enlace' }, { status: 400 })
     }
 
-    await recordEnlaceClick(supabase, productoId, archivoId, userId, request)
+    await recordEnlaceClick(supabase as any, productoId, archivoId, userId, request)
 
     return NextResponse.redirect(archivo.archivo_url)
   } catch (error) {
