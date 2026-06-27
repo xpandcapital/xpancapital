@@ -25,9 +25,11 @@ export async function POST(request: NextRequest) {
       const update = entry.update || {}
       const msg = entry.message || entry
 
-      // Extraer número limpio (quitar @s.whatsapp.net, @lid, @g.us, @c.us)
+      // Extraer número limpio (quitar @s.whatsapp.net, @lid, @hosted.lid, @g.us, @c.us, y sufijos :99, :11)
       const rawJid = key.remoteJid || entry.remoteJid || body.remoteJid || ''
-      const cleanNumber = rawJid.replace(/@(s\.whatsapp\.net|lid|g\.us|c\.us|broadcast)$/, '')
+      const cleanNumber = rawJid
+        .replace(/:(\d+)$/, '')
+        .replace(/@(s\.whatsapp\.net|hosted\.lid|lid|g\.us|c\.us|broadcast)$/, '')
       const isGroup = rawJid.includes('@g.us')
 
       // Determinar tipo de evento
