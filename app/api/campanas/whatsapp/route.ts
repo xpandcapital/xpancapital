@@ -256,7 +256,10 @@ async function processOneBatch(campaignId: string) {
     .limit(BATCH_SIZE)
 
   if (!recipients || recipients.length === 0) {
-    await supabase.from('whatsapp_campaigns').update({ status: 'completed', actualizado_en: new Date().toISOString() }).eq('id', campaignId)
+    // Verificar si TODOS los recipients fallaron
+    const { count: totalSent } = await supabase.from('whatsapp_campaign_recipients').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId).eq('status', 'sent')
+    const newStatus = (totalSent || 0) > 0 ? 'completed' : 'failed'
+    await supabase.from('whatsapp_campaigns').update({ status: newStatus, actualizado_en: new Date().toISOString() }).eq('id', campaignId)
     return { remaining: 0, sentBatch: 0, done: true }
   }
 
