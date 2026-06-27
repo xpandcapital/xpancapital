@@ -53,6 +53,7 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
   const [turnstileSiteKey, setTurnstileSiteKey] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
   const [turnstileSolved, setTurnstileSolved] = useState(false);
+  const [codigoPais, setCodigoPais] = useState('+51');
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -182,7 +183,7 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
           ...leadData,
           nombre: leadData.nombre || leadData.name || '',
           email: leadData.email || '',
-          telefono: leadData.telefono || leadData.phone || '',
+          telefono: leadData.telefono || leadData.phone ? codigoPais + (leadData.telefono || leadData.phone || '') : '',
           whatsapp: leadData.whatsapp || leadData.telefono || '',
           ciudad: leadData.ciudad || leadData.city || '',
           presupuesto: leadData.presupuesto || leadData.budget || '',
@@ -302,6 +303,44 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
     }
     
     // Default: text, email, tel
+    if (field.type === 'tel') {
+      return (
+        <div className="flex gap-2">
+          <select
+            value={codigoPais}
+            onChange={(e) => setCodigoPais(e.target.value)}
+            className="bg-white/5 border border-white/10 rounded-2xl px-2 py-4 text-white text-sm w-[100px] shrink-0 outline-none focus:border-[var(--accent)] transition-all appearance-none"
+            style={{ '--accent': accentColor } as React.CSSProperties}
+          >
+            <option value="+51">🇵🇪 +51</option>
+            <option value="+593">🇪🇨 +593</option>
+            <option value="+57">🇨🇴 +57</option>
+            <option value="+52">🇲🇽 +52</option>
+            <option value="+56">🇨🇱 +56</option>
+            <option value="+54">🇦🇷 +54</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+34">🇪🇸 +34</option>
+          </select>
+          <div className="relative flex-1">
+            {icon && (
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                {icon}
+              </div>
+            )}
+            <input
+              type={field.type}
+              name={field.name}
+              value={String(formData[field.name] || '')}
+              onChange={(e) => handleChange(field.name, e.target.value)}
+              placeholder={field.placeholder}
+              className={`w-full bg-white/5 border rounded-2xl px-5 py-4 text-white text-sm outline-none focus:border-[var(--accent)] transition-all ${errors[field.name] ? 'border-red-500' : 'border-white/10'} ${icon ? 'pl-12' : ''}`}
+              style={{ '--accent': accentColor } as React.CSSProperties}
+            />
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="relative">
         {icon && (

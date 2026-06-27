@@ -84,6 +84,7 @@ function CheckoutContent() {
     const [izipayScriptLoaded, setIzipayScriptLoaded] = useState(false);
     const [krKey, setKrKey] = useState(0);
     const [selectedAsesor, setSelectedAsesor] = useState<string | null>(null);
+  const [codigoPais, setCodigoPais] = useState('+51');
 
     const [form, setForm] = useState<CheckoutForm>({
         nombre: user?.name?.split(" ")[0] || '',
@@ -402,7 +403,7 @@ function CheckoutContent() {
                 nombre: form.nombre.trim(),
                 apellido: form.apellido.trim(),
                 email: form.email,
-                telefono: form.telefono,
+                telefono: codigoPais + form.telefono.replace(/\D/g, ''),
                 productos: productosPayload,
                 tiene_fisicos: hasPhysicalProducts,
                 processing_fee: processingFee,
@@ -786,9 +787,21 @@ function CheckoutContent() {
 
                             <div>
                                 <label className={labelCls}>Teléfono / WhatsApp</label>
-                                <div className="relative">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                    <input name="telefono" type="tel" value={form.telefono} onChange={handleInput} className={`${inputCls} pl-11`} placeholder="+51 999 999 999" />
+                                <div className="flex gap-2">
+                                    <select value={codigoPais} onChange={e => setCodigoPais(e.target.value)} className="bg-white/[0.03] border border-white/10 rounded-2xl px-2 py-3.5 text-sm text-white w-[110px] shrink-0 outline-none focus:border-emerald-500/50 transition-all appearance-none">
+                                        <option value="+51">🇵🇪 +51</option>
+                                        <option value="+593">🇪🇨 +593</option>
+                                        <option value="+57">🇨🇴 +57</option>
+                                        <option value="+52">🇲🇽 +52</option>
+                                        <option value="+56">🇨🇱 +56</option>
+                                        <option value="+54">🇦🇷 +54</option>
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+34">🇪🇸 +34</option>
+                                    </select>
+                                    <div className="relative flex-1">
+                                        <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                        <input name="telefono" type="tel" value={form.telefono} onChange={handleInput} className={`${inputCls} pl-11`} placeholder="999 999 999" />
+                                    </div>
                                 </div>
                             </div>
 

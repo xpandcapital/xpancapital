@@ -4,6 +4,8 @@ import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { createNotionPage } from '@/lib/integrations/notion'
 import { logger } from '@/lib/utils/logger'
 import { verifyTurnstileToken } from '@/lib/bot-protection'
+import { cleanPhone } from '@/lib/phone'
+import { notifyAsesor, NTemplates } from '@/lib/notifications'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -137,6 +139,8 @@ export async function POST(request: NextRequest) {
       utm_campaign
     } = body
 
+    const tel = cleanPhone(telefono || whatsapp, 'PE');
+
     if (!nombre || (!email && !telefono)) {
       return NextResponse.json({ 
         success: false, 
@@ -164,7 +168,7 @@ export async function POST(request: NextRequest) {
         .from('leads')
         .update({
           nombre: nombre || undefined,
-          telefono: telefono || undefined,
+          telefono: tel || telefono || undefined,
           whatsapp: whatsapp || undefined,
           ciudad: ciudad || undefined,
           presupuesto: presupuesto || undefined,
@@ -195,7 +199,7 @@ export async function POST(request: NextRequest) {
         empresa_id: DEFAULT_EMPRESA_ID,
         nombre,
         email,
-        telefono,
+        telefono: tel || telefono || null,
         whatsapp,
         ciudad,
         presupuesto,
@@ -226,6 +230,10 @@ export async function POST(request: NextRequest) {
     // Obtener campaña y asesor para notificaciones
     let campana = null
     let asesor = null
+
+    if (newLead && asesor_id) {
+      notifyAsesor(asesor_id, NTemplates.nuevo_lead(newLead).titulo, NTemplates.nuevo_lead(newLead).mensaje, NTemplates.nuevo_lead(newLead).link).catch(() => {})
+    }
 
     if (campana_id) {
       const { data: campanaData } = await supabase
@@ -384,6 +392,10 @@ export async function PUT(request: NextRequest) {
         success: false, 
         error: error.message 
       }, { status: 500 })
+    }
+
+    if (data && data.asesor_id && estado) {
+      notifyAsesor(data.asesor_id as string, NTemplates.nuevo_lead(data).titulo, NTemplates.nuevo_lead(data).mensaje, NTemplates.nuevo_lead(data).link).catch(() => {})
     }
 
     return NextResponse.json({ 

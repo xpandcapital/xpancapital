@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 import { verifyTurnstileToken } from '@/lib/bot-protection';
+import { cleanPhone } from '@/lib/phone';
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 import { createUserAndNotify } from '@/lib/email/createUserAndNotify';
 import { notifyAdminNuevaCompra } from '@/lib/email/notifyAdminNuevaCompra';
@@ -142,6 +143,8 @@ export async function POST(request: NextRequest) {
       estado,
     } = body;
 
+    const tel = cleanPhone(telefono, 'PE');
+
     if (!email || !productos?.length) {
       return NextResponse.json({ success: false, error: 'Faltan datos requeridos' }, { status: 400 });
     }
@@ -231,7 +234,7 @@ export async function POST(request: NextRequest) {
               id: finalUserId,
               email: email.toLowerCase(),
               nombre,
-              telefono,
+              telefono: tel || telefono || null,
               empresa_id,
               creado_en: new Date().toISOString(),
             }, { onConflict: 'id' });
@@ -245,7 +248,7 @@ export async function POST(request: NextRequest) {
       productos,
       email_cliente: email.toLowerCase(),
       nombre_cliente: nombre,
-      telefono_cliente: telefono,
+      telefono_cliente: tel || telefono || null,
       tiene_fisicos: tiene_fisicos || false,
       direccion_envio: direccion_envio || null,
       es_invitado: !user_id,
@@ -307,7 +310,7 @@ export async function POST(request: NextRequest) {
             id: safeUserId,
             email: email.toLowerCase(),
             nombre,
-            telefono,
+            telefono: tel || telefono || null,
             empresa_id,
             creado_en: new Date().toISOString(),
           }, { onConflict: 'id' });
@@ -638,7 +641,7 @@ export async function POST(request: NextRequest) {
         email: email.toLowerCase(),
         nombre: firstName,
         apellido: lastName,
-        telefono: telefono || '',
+        telefono: tel || telefono || '',
         productos: nombreProductos,
         total: `${monto_usd?.toFixed(2) || '0'} USD`,
         metodo_pago: metodo_pago || 'Manual',
@@ -660,7 +663,7 @@ export async function POST(request: NextRequest) {
         empresaId: empresa_id,
         compradorNombre: nombre || email.split('@')[0],
         compradorEmail: email.toLowerCase(),
-        compradorTelefono: telefono || '',
+        compradorTelefono: tel || telefono || '',
         productos: prodInfo,
         montoUSD: monto_usd || 0,
         metodoPago: metodo_pago || 'Manual',

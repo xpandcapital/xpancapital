@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from '@supabase/supabase-js'
 import { getAuthUser, isAdmin } from "@/lib/supabase/api-auth";
+import { notifyUser } from '@/lib/notifications';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { titulo, mensaje, link, destinatario_tipo, destinatario_roles, destinatario_ids } = body;
+    const { titulo, mensaje, link, destinatario_tipo, destinatario_roles, destinatario_ids, enviar_whatsapp } = body;
 
     if (!titulo || !mensaje) {
       return NextResponse.json({ error: "titulo y mensaje son requeridos" }, { status: 400 });
@@ -74,6 +75,13 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
+
+    // WhatsApp (si se solicitó)
+    if (enviar_whatsapp) {
+      for (const user of targetUsers) {
+        notifyUser({ userId: user.id, titulo, mensaje, link, canales: ['whatsapp'] }).catch(() => {})
+      }
     }
 
     // Intentar push notifications para los que tengan suscripción

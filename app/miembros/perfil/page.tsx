@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles, ShoppingCart, GraduationCap, FileText, UserPlus, Settings } from "lucide-react";
+import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles, ShoppingCart, GraduationCap, FileText, UserPlus, Settings, MessageSquare } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isAdminRole } from "@/lib/auth/permissions";
@@ -400,6 +400,7 @@ export default function ProfilePage() {
             .then(d => {
                 if (d.success && d.data) {
                     setBiografia(d.data.biografia || '')
+                    setWhatsappPhone(d.data.whatsapp || '')
                     const s: Record<string, string> = {}
                     const fields = ['website_url','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','whatsapp_url','telegram_url','discord_url','github_url']
                     fields.forEach(f => { if (d.data[f]) s[f] = d.data[f] })
@@ -418,6 +419,8 @@ export default function ProfilePage() {
     const [loginHistory, setLoginHistory] = useState<any[]>([]);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [closingSessions, setClosingSessions] = useState(false);
+  const [whatsappPhone, setWhatsappPhone] = useState('');
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
 
     useEffect(() => {
         if (!user?.id) return;
@@ -495,10 +498,25 @@ export default function ProfilePage() {
         } catch {
             setPasswordError("Error al cambiar la contraseña");
         }
-        setChangingPassword(false);
-    };
+    setChangingPassword(false);
+  };
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const saveWhatsappPhone = async () => {
+    setSavingWhatsapp(true);
+    try {
+      await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ whatsapp: whatsappPhone }),
+      });
+      showToast("Número de WhatsApp guardado", "success");
+    } catch {
+      showToast("Error al guardar", "error");
+    }
+    setSavingWhatsapp(false);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
@@ -761,6 +779,21 @@ export default function ProfilePage() {
                     </h2>
                     <div className="bg-zinc-950/30 border border-white/5 p-8 rounded-[2.5rem] space-y-6 shadow-xl">
                         <PushNotificationToggle />
+                        <div className="w-full flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                            <div className="flex items-center gap-4">
+                                <MessageSquare className="w-5 h-5 text-gray-500" />
+                                <div>
+                                    <span className="text-sm font-bold text-white block">WhatsApp</span>
+                                    <span className="text-[10px] text-gray-500">Recibe notificaciones por WhatsApp</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input type="text" value={whatsappPhone} onChange={e => setWhatsappPhone(e.target.value)} placeholder="+51 999 999 999" className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white w-40 text-center" />
+                                <button onClick={saveWhatsappPhone} disabled={savingWhatsapp} className="px-3 py-1.5 bg-blis-red text-white font-bold uppercase tracking-widest text-[10px] rounded-xl hover:bg-blis-red/90 transition-all disabled:opacity-50">
+                                    {savingWhatsapp ? "..." : "Guardar"}
+                                </button>
+                            </div>
+                        </div>
                         <button
                             onClick={() => { setPasswordError(null); setShowPasswordModal(true); }}
                             className="w-full flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all group text-left"

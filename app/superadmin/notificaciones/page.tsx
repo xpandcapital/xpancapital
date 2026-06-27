@@ -65,6 +65,7 @@ export default function NotificacionesPage() {
   const [destinatarioRoles, setDestinatarioRoles] = useState<string[]>([]);
   const [destinatarioMiembro, setDestinatarioMiembro] = useState<Profile | null>(null);
   const [destinatarioGrupo, setDestinatarioGrupo] = useState<string[]>([]);
+  const [enviarWhatsapp, setEnviarWhatsapp] = useState(false);
 
   useEffect(() => {
     fetchHistorial();
@@ -130,6 +131,7 @@ export default function NotificacionesPage() {
     setDestinatarioRoles([]);
     setDestinatarioMiembro(null);
     setDestinatarioGrupo([]);
+    setEnviarWhatsapp(false);
   };
 
   const handleDeleteNotificacion = async (id: string) => {
@@ -185,6 +187,8 @@ export default function NotificacionesPage() {
       if (link.trim()) {
         payload.link = link.trim();
       }
+
+      payload.enviar_whatsapp = enviarWhatsapp;
 
       if (destinatarioTipo === "por_rol") {
         payload.destinatario_roles = destinatarioRoles;
@@ -499,6 +503,11 @@ export default function NotificacionesPage() {
                     Ruta a la que se redirigirá al hacer clic en la notificación
                   </p>
                 </div>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={enviarWhatsapp} onChange={e => setEnviarWhatsapp(e.target.checked)} className="accent-emerald-500" />
+                  <span className="text-xs text-gray-400">Enviar también por WhatsApp 📱</span>
+                </label>
 
                 {/* Botón enviar */}
                 <button
