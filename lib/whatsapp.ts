@@ -92,43 +92,27 @@ export async function sendWhatsApp({
   }
 
   try {
-    // Probar GET con query params (Planifyx a veces requiere GET)
-    const params = new URLSearchParams({
-      number: number.replace(/\D/g, ''),
-      type,
-      message,
-      instance_id: creds.instanceId,
-      access_token: creds.accessToken,
+    const numberClean = number.replace(/\D/g, '')
+
+    // Intentar POST con body SIN el access_token en el body (va como header)
+    console.log('[WhatsApp] Enviando a:', numberClean)
+    const res = await fetch(`${API_BASE}/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${creds.accessToken}`,
+      },
+      body: JSON.stringify({
+        number: numberClean,
+        type,
+        message,
+        instance_id: creds.instanceId,
+        ...(media_url ? { media_url } : {}),
+        ...(filename ? { filename } : {}),
+      }),
     })
-    if (media_url) params.set('media_url', media_url)
-    if (filename) params.set('filename', filename)
-
-    console.log('[WhatsApp] Enviando GET a:', number.replace(/\D/g, ''))
-    const res = await fetch(`${API_BASE}/send?${params.toString()}`, { method: 'GET' })
     const text = await res.text()
-    console.log('[WhatsApp] GET Respuesta:', res.status, text.substring(0, 300))
-
-    // Si GET falla, intentar POST con body
-    if ((text.includes('error') || text.includes('does not exist')) && res.status === 200) {
-      console.log('[WhatsApp] GET falló, intentando POST JSON body...')
-      const res2 = await fetch(`${API_BASE}/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          number: number.replace(/\D/g, ''),
-          type, message,
-          instance_id: creds.instanceId,
-          access_token: creds.accessToken,
-          ...(media_url ? { media_url } : {}),
-          ...(filename ? { filename } : {}),
-        }),
-      })
-      const text2 = await res2.text()
-      console.log('[WhatsApp] POST Respuesta:', res2.status, text2.substring(0, 300))
-      let data2: any = {}
-      try { data2 = JSON.parse(text2) } catch {}
-      return { success: data2?.status === 'success' || text2.includes('success'), data: data2 || text2 }
-    }
+    console.log('[WhatsApp] Bearer Respuesta:', res.status, text.substring(0, 300))
 
     let data: any = {}
     try { data = JSON.parse(text) } catch {}
