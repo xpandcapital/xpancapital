@@ -149,34 +149,32 @@ export async function notifyNewLead(
   return sendWhatsApp({ number: asesorWhatsapp, message, userId, empresaId })
 }
 
-/**
- * Valida que tanto el access_token como el instance_id sean correctos.
- * Llama al endpoint de instancia de Planifyx que requiere AMBOS.
- */
 export async function testWhatsAppConnection(userId?: string, empresaId?: string) {
-  const { accessToken, instanceId } = await getCredentials(userId, empresaId)
-  if (!accessToken) return { success: false, error: 'Access Token no configurado. Configúralo en Api-Nube → Comunicaciones → Planifyx.' }
-  if (!instanceId) return { success: false, error: 'Instance ID no configurado. Configúralo en Api-Nube → Comunicaciones → Planifyx.' }
+  const creds = await getCredentials(userId, empresaId)
+  if (!creds.accessToken) return { success: false, error: 'Access Token no configurado.' }
+  if (!creds.instanceId) return { success: false, error: 'Instance ID no configurado.' }
 
   try {
-    // Este endpoint requiere ambos: token + instance_id
-    const res = await fetch(
-      `${API_BASE}/get_qrcode?instance_id=${instanceId}&access_token=${accessToken}`,
+    // Primero probar get_qrcode (valida que el token+instancia sean válidos)
+    const qrRes = await fetch(
+      `${API_BASE}/get_qrcode?instance_id=${creds.instanceId}&access_token=${creds.accessToken}`,
       { method: 'POST' }
     )
-    const data = await res.json()
+    const qrText = await qrRes.text()
+    console.log('[WhatsApp] get_qrcode test:', qrRes.status, qrText.substring(0, 300))
 
-    if (data?.status === 'success') {
-      return {
-        success: true,
-        message: 'Conexión exitosa. Escanea el QR en WhatsApp para vincular.',
-        qr: data?.qrcode || data?.qr || null,
-      }
-    }
+    // Probar send con query params exactamente como en la documentación
+    const sendRes = await fetch(
+      `${API_BASE}/send?number=51934111007&type=text&message=test_servidor&instance_id=${creds.instanceId}&access_token=${creds.accessToken}`,
+      { method: 'POST' }
+    )
+    const sendText = await sendRes.text()
+    console.log('[WhatsApp] send direct test:', sendRes.status, sendText.substring(0, 300))
 
     return {
-      success: false,
-      error: data?.message || data?.error || 'Error al conectar con la instancia. Verifica que el Instance ID sea correcto.',
+      success: true,
+      qrcode: qrText,
+      sendResult: sendText,
     }
   } catch (error) {
     return { success: false, error: 'Error de conexión con Planifyx' }
