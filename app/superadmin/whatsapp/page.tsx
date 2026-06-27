@@ -137,7 +137,7 @@ export default function WhatsAppPage() {
     setSaving(true);
     try {
       let vars: Record<string, string[]> = {}; try { vars = JSON.parse(variablesTexto); } catch {}
-      const msgList = mensajes.split("\n").filter(l => l.trim());
+      const msgList = mensajes.split("\n\n").map(m => m.trim()).filter(l => l);
       const filter: any = { source: contactMode };
 
       if (contactMode === "leads") { if (leadEstado) filter.estado = leadEstado; if (leadCampanaId) filter.campana_id = leadCampanaId; }
