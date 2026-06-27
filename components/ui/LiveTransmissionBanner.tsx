@@ -161,7 +161,7 @@ export function LiveTransmissionBanner() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -80, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-          className="fixed top-20 left-0 right-0 z-40"
+          className="sticky top-20 z-40"
         >
           <div className="relative overflow-hidden bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-950 border-b border-emerald-500/30">
             {/* Fondo animado */}
