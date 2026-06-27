@@ -9,25 +9,40 @@ interface WhatsAppCredentials {
 }
 
 async function getCredentials(userId?: string, empresaId?: string): Promise<WhatsAppCredentials> {
+  const supabase = createClient()
+
   // 1. Leer de api_keys (personal → global)
   if (userId && empresaId) {
     try {
-      const supabase = createClient()
-      const keys = await getApiKeys(
-        supabase,
-        ['planifyx_access_token', 'planifyx_instance_id'],
-        userId,
-        empresaId
-      )
+      const keys = await getApiKeys(supabase, ['planifyx_access_token', 'planifyx_instance_id'], userId, empresaId)
       if (keys.planifyx_access_token) {
-        return {
-          accessToken: keys.planifyx_access_token,
-          instanceId: keys.planifyx_instance_id || '',
+        return { accessToken: keys.planifyx_access_token, instanceId: keys.planifyx_instance_id || '' }
+      }
+    } catch { /* fall through */ }
+  }
+
+  // 1b. Solo empresaId (sin userId) — leer keys globales directamente
+  if (!userId && empresaId) {
+    try {
+      const { data } = await supabase
+        .from('api_keys')
+        .select('key_name, key_value')
+        .eq('empresa_id', empresaId)
+        .eq('is_global', true)
+        .in('key_name', ['planifyx_access_token', 'planifyx_instance_id'])
+
+      if (data) {
+        const token = data.find((r: any) => r.key_name === 'planifyx_access_token')
+        const instance = data.find((r: any) => r.key_name === 'planifyx_instance_id')
+        if (token?.key_value) {
+          const { decryptApiKey } = await import('@/lib/api-crypto')
+          return {
+            accessToken: decryptApiKey(token.key_value),
+            instanceId: instance?.key_value ? decryptApiKey(instance.key_value) : '',
+          }
         }
       }
-    } catch {
-      // Fall through to next fallback
-    }
+    } catch { /* fall through */ }
   }
 
   // 2. Fallback: localStorage (client-side cache)
