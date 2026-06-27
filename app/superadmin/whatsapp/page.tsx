@@ -22,8 +22,9 @@ export default function WhatsAppPage() {
   const [uploading, setUploading] = useState(false);
 
   const [nombre, setNombre] = useState("");
-  const [mensajes, setMensajes] = useState("");
-  const [variablesTexto, setVariablesTexto] = useState("{}");
+  const [mensajeBase, setMensajeBase] = useState("");
+  const [mensajeVariantes, setMensajeVariantes] = useState<string[]>([]);
+  const [vars, setVars] = useState<{ name: string; options: string }[]>([]);
   const [mediaUrl, setMediaUrl] = useState("");
   const [mediaFileName, setMediaFileName] = useState("");
   const [minDelay, setMinDelay] = useState(60);
@@ -126,18 +127,25 @@ export default function WhatsAppPage() {
   useEffect(() => { countLeads(); }, [countLeads]);
 
   const resetForm = () => {
-    setNombre(""); setMensajes(""); setVariablesTexto("{}"); setMediaUrl(""); setMediaFileName("");
+    setNombre(""); setMensajeBase(""); setMensajeVariantes([]); setVars([]); setMediaUrl(""); setMediaFileName("");
     setMinDelay(60); setMaxDelay(180); setManualPhones(""); setLeadEstado(""); setLeadCampanaId("");
     setCsvPhones([]); setCsvFileName(""); setEditingId(null); setLeadCount(0);
     setSelectedProductId(""); setBuyers([]); setSelectedBuyerIds([]); setSelectedRol(""); setEmployees([]); setSelectedEmployeeIds([]);
   };
 
   const handleCreate = async (startNow = false) => {
-    if (!nombre || !mensajes.trim()) { showToast("Nombre y mensajes requeridos", "error"); return; }
+    if (!nombre || !mensajeBase.trim()) { showToast("Nombre y mensaje requeridos", "error"); return; }
     setSaving(true);
     try {
-      let vars: Record<string, string[]> = {}; try { vars = JSON.parse(variablesTexto); } catch {}
-      const msgList = mensajes.split("\n\n").map(m => m.trim()).filter(l => l);
+      // Construir variantes: base + variantes adicionales
+      const allMessages = [mensajeBase, ...mensajeVariantes].map(m => m.trim()).filter(m => m);
+      // Construir variables desde la UI simple
+      const variablesObj: Record<string, string[]> = {};
+      for (const v of vars) {
+        if (v.name && v.options.trim()) {
+          variablesObj[v.name] = v.options.split("\n").map(o => o.trim()).filter(o => o);
+        }
+      }
       const filter: any = { source: contactMode };
 
       if (contactMode === "leads") { if (leadEstado) filter.estado = leadEstado; if (leadCampanaId) filter.campana_id = leadCampanaId; }
@@ -147,7 +155,7 @@ export default function WhatsAppPage() {
       else { filter.manual_phones = manualPhones.split(/[\n,]+/).map(p => p.trim()).filter(Boolean); }
 
       const action = editingId ? "update" : "create";
-      const body: any = { action, nombre, mensajes: msgList, variables: vars, media_url: mediaUrl || null, filename: mediaFileName || undefined, min_delay_seconds: minDelay, max_delay_seconds: maxDelay, lead_filter: filter };
+      const body: any = { action, nombre, mensajes: allMessages, variables: variablesObj, media_url: mediaUrl || null, filename: mediaFileName || undefined, min_delay_seconds: minDelay, max_delay_seconds: maxDelay, lead_filter: filter };
       if (editingId) body.id = editingId;
 
       const r = await fetch("/api/campanas/whatsapp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -215,8 +223,13 @@ export default function WhatsAppPage() {
   };
 
   const handleEdit = (wc: any) => {
-    setEditingId(wc.id); setNombre(wc.nombre || ""); setMensajes((wc.mensajes || [wc.mensaje]).join("\n"));
-    setVariablesTexto(JSON.stringify(wc.variables || {}, null, 0)); setMediaUrl(wc.media_url || ""); setMediaFileName(wc.filename || "");
+    setEditingId(wc.id); setNombre(wc.nombre || "");
+    const msgs = wc.mensajes || [wc.mensaje].filter(Boolean);
+    setMensajeBase(msgs[0] || "");
+    setMensajeVariantes(msgs.slice(1));
+    const v = wc.variables || {};
+    setVars(Object.entries(v).map(([name, opts]: [string, any]) => ({ name, options: Array.isArray(opts) ? opts.join("\n") : "" })));
+    setMediaUrl(wc.media_url || ""); setMediaFileName(wc.filename || "");
     setMinDelay(wc.min_delay_seconds || 60); setMaxDelay(wc.max_delay_seconds || 180);
     const f = wc.lead_filter || {}; setContactMode(f.source || "leads"); setLeadEstado(f.estado || ""); setLeadCampanaId(f.campana_id || "");
     setSelectedProductId(f.producto_id || ""); setSelectedRol(f.rol || ""); setLeadCount(wc.total_recipients || 0);
@@ -376,10 +389,40 @@ export default function WhatsAppPage() {
             </div>
 
             <div>
-              <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Variantes de mensaje * <span className="text-gray-600 normal-case">(1 por línea, aleatorio)</span></label>
-              <textarea value={mensajes} onChange={e => setMensajes(e.target.value)} rows={3} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1 resize-none" placeholder={`{saludo} oferta inmobiliaria 🏠\n{cierre} ¿te interesa?`} />
+              <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Mensaje *</label>
+              <textarea value={mensajeBase} onChange={e => setMensajeBase(e.target.value)} rows={4} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1 resize-none" placeholder={`Escribe tu mensaje aquí. Usa {variable} para insertar texto aleatorio.\n\nEj: {saludo} tenemos una oferta 🏠\n¿Te interesa? {cierre}`} />
+
+              {/* Variantes adicionales */}
+              {mensajeVariantes.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  {mensajeVariantes.map((v, i) => (
+                    <div key={i} className="flex gap-2">
+                      <textarea value={v} onChange={e => setMensajeVariantes(prev => prev.map((mv, j) => j === i ? e.target.value : mv))} rows={2} className="flex-1 bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white resize-none" placeholder={`Variante ${i + 2}`} />
+                      <button onClick={() => setMensajeVariantes(prev => prev.filter((_, j) => j !== i))} className="p-2 bg-red-500/10 rounded-lg text-red-400 hover:bg-red-500/20 self-start"><X className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button type="button" onClick={() => setMensajeVariantes(prev => [...prev, ""])} className="mt-2 text-[10px] text-emerald-400 font-bold flex items-center gap-1 hover:text-emerald-300"><Plus className="w-3 h-3" /> Agregar variante (se elige aleatoriamente)</button>
             </div>
-            <div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Variables <span className="text-gray-600 normal-case">(JSON)</span></label><textarea value={variablesTexto} onChange={e => setVariablesTexto(e.target.value)} rows={2} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white mt-1 resize-none font-mono" placeholder='{"saludo": ["Hola 👋","Hey 😊"]}' /></div>
+
+            {/* Variables intuitivas */}
+            <div>
+              <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Variables</label>
+              {vars.length === 0 && <p className="text-[10px] text-gray-600 mt-1">Usa {'{nombre}'} en tu mensaje. Agrega variables abajo para que se reemplacen aleatoriamente.</p>}
+              {vars.map((vr, i) => (
+                <div key={i} className="mt-2 p-3 bg-black/30 border border-white/5 rounded-lg space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-gray-500 font-bold">{"{ "}</span>
+                    <input value={vr.name} onChange={e => setVars(prev => prev.map((pv, j) => j === i ? { ...pv, name: e.target.value } : pv))} className="flex-1 bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-white" placeholder="nombre_variable" />
+                    <span className="text-[10px] text-gray-500 font-bold">{" }"}</span>
+                    <button onClick={() => setVars(prev => prev.filter((_, j) => j !== i))} className="p-1 text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
+                  </div>
+                  <textarea value={vr.options} onChange={e => setVars(prev => prev.map((pv, j) => j === i ? { ...pv, options: e.target.value } : pv))} rows={2} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-white resize-none" placeholder="Una opción por línea&#10;Hola, ¿qué tal? 👋&#10;¡Hey! ¿Cómo te va? 😊" />
+                </div>
+              ))}
+              <button type="button" onClick={() => setVars(prev => [...prev, { name: "", options: "" }])} className="mt-2 text-[10px] text-blue-400 font-bold flex items-center gap-1 hover:text-blue-300"><Plus className="w-3 h-3" /> Agregar variable</button>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Delay min (seg)</label><input type="number" value={minDelay} onChange={e => setMinDelay(parseInt(e.target.value) || 30)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" /></div>
               <div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Delay max (seg)</label><input type="number" value={maxDelay} onChange={e => setMaxDelay(parseInt(e.target.value) || 120)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" /></div>
