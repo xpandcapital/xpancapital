@@ -18,7 +18,7 @@ async function getCredentials(userId?: string, empresaId?: string): Promise<What
     try {
       const keys = await getApiKeys(supabase, ['planifyx_access_token', 'planifyx_instance_id'], userId, empresaId)
       if (keys.planifyx_access_token) {
-        return { accessToken: keys.planifyx_access_token, instanceId: keys.planifyx_instance_id || '' }
+        return { accessToken: keys.planifyx_access_token.trim(), instanceId: (keys.planifyx_instance_id || '').trim() }
       }
     } catch { /* fall through */ }
   }
@@ -44,8 +44,8 @@ async function getCredentials(userId?: string, empresaId?: string): Promise<What
         const token = data.find((r: any) => r.key_name === 'planifyx_access_token')
         const instance = data.find((r: any) => r.key_name === 'planifyx_instance_id')
         if (token?.key_value) {
-          const decToken = decryptApiKey(token.key_value)
-          const decInstance = instance?.key_value ? decryptApiKey(instance.key_value) : ''
+          const decToken = decryptApiKey(token.key_value)?.trim() || ''
+          const decInstance = decryptApiKey(instance?.key_value)?.trim() || ''
           console.log('[WhatsApp] Credenciales leídas:', { tokenOK: !!decToken, instanceValue: decInstance || 'VACÍO' })
           return { accessToken: decToken || '', instanceId: decInstance }
         }
