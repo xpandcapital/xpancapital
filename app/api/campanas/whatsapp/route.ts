@@ -50,9 +50,10 @@ export async function GET(request: NextRequest) {
   // List employees by role
   if (action === 'employees') {
     const rol = searchParams.get('rol')
-    const { data } = await supabase.from('profiles').select('id,nombre,email,telefono').eq('empresa_id', empresaId).limit(200)
-    const filtered = rol ? (data || []).filter((p: any) => p.rol === rol) : (data || [])
-    return NextResponse.json({ success: true, employees: filtered })
+    let query = supabase.from('profiles').select('id,nombre,email,telefono,rol').eq('empresa_id', empresaId).limit(200)
+    if (rol) query = query.eq('rol', rol)
+    const { data } = await query
+    return NextResponse.json({ success: true, employees: data || [] })
   }
 
   const { data } = await supabase.from('whatsapp_campaigns').select('*').order('creado_en', { ascending: false })
