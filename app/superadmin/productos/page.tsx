@@ -195,6 +195,7 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
         selectedCurrency={selectedCurrency}
         taxCurrency={taxCurrency}
         isMultiCurrencyEnabled={isMultiCurrencyEnabled}
+        activeMultiCurrencies={currencies.filter(c => activeCurrencyCodes.includes(c.code))}
         isBlisCoinsEnabled={isBlisCoinsEnabled}
         settings={{
           enablePerishables: settings?.enablePerishables ?? false,

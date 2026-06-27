@@ -9,6 +9,7 @@ import { ProductStockSection } from './ProductStockSection'
 import { PerishableSection } from './PerishableSection'
 import RichTextEditor from "@/components/superadmin/RichTextEditor"
 import type { Product, Category, Status, Currency, PerishableHandling } from '../../_types'
+import type { Currency as CurrencyObj } from '@/context/CurrencyContext'
 
 const SITE_DOMAIN = 'blis-corp.com'
 
@@ -27,6 +28,7 @@ interface ProductFormModalProps {
   taxCurrency: Currency
   isMultiCurrencyEnabled: boolean
   isBlisCoinsEnabled: boolean
+  activeMultiCurrencies?: CurrencyObj[]
   settings: {
     enablePerishables: boolean
     enableSerialization: boolean
@@ -43,7 +45,9 @@ export function ProductFormModal({
   currencies,
   selectedCurrency,
   taxCurrency,
+  isMultiCurrencyEnabled,
   isBlisCoinsEnabled,
+  activeMultiCurrencies = [],
   settings,
   cursos = [],
   onClose,
@@ -78,7 +82,9 @@ export function ProductFormModal({
         purchaseDate: editingProduct.purchaseDate || '',
         expirationDate: editingProduct.expirationDate || '',
         image: editingProduct.image || null,
-        cursoId: editingProduct.curso_id || null
+        cursoId: editingProduct.curso_id || null,
+        multiPrices: editingProduct.precios_multimoneda || {},
+        multiOriginalPrices: {},
       }
     }
     return {
@@ -98,7 +104,9 @@ export function ProductFormModal({
       purchaseDate: '',
       expirationDate: '',
       image: null,
-      cursoId: null
+      cursoId: null,
+      multiPrices: {} as Record<string, number>,
+      multiOriginalPrices: {} as Record<string, number>,
     }
   })
 
@@ -148,7 +156,8 @@ export function ProductFormModal({
       manejo_perecedero: perishableHandling,
       meta_descripcion: formData.metaDescripcion || null,
       meta_titulo: null,
-      curso_id: formData.cursoId || null
+      curso_id: formData.cursoId || null,
+      precios_multimoneda: isMultiCurrencyEnabled ? formData.multiPrices : {},
     }
 
     const result = await onSave(data)
@@ -503,9 +512,15 @@ export function ProductFormModal({
               bliscoins={formData.bliscoins}
               currencySymbol={selectedCurrency.symbol}
               isBlisCoinsEnabled={isBlisCoinsEnabled}
+              isMultiCurrencyEnabled={isMultiCurrencyEnabled}
+              activeCurrencies={activeMultiCurrencies}
+              multiPrices={formData.multiPrices}
+              multiOriginalPrices={formData.multiOriginalPrices}
               onPriceChange={(price) => setFormData(prev => ({ ...prev, price }))}
               onOriginalPriceChange={(originalPrice) => setFormData(prev => ({ ...prev, originalPrice }))}
               onBlisCoinsChange={(bliscoins) => setFormData(prev => ({ ...prev, bliscoins }))}
+              onMultiPriceChange={(code, price) => setFormData(prev => ({ ...prev, multiPrices: { ...prev.multiPrices, [code]: price } }))}
+              onMultiOriginalPriceChange={(code, price) => setFormData(prev => ({ ...prev, multiOriginalPrices: { ...prev.multiOriginalPrices, [code]: price } }))}
             />
 
             <ProductStockSection

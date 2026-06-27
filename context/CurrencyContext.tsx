@@ -71,9 +71,8 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [selectedCurrency, setCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "USD") || INITIAL_CURRENCIES[0]);
     const [taxCurrency, setTaxCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "PEN") || INITIAL_CURRENCIES[0]);
     const [fiscalCurrency, setFiscalCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "PEN") || INITIAL_CURRENCIES[0]);
-    const [isMultiCurrencyEnabled, setIsMultiCurrencyEnabled] = useState<boolean>(false);
-    const isBlisCoinsEnabled = coinsEnabled; // Master toggle from formas_pago
-    const setIsBlisCoinsEnabled = (_v: boolean) => {}; // No-op, controlled by formas_pago
+    const [isMultiCurrencyEnabled, setIsMultiCurrencyEnabledState] = useState<boolean>(false);
+    const isBlisCoinsEnabled = coinsEnabled;
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
     const activeCurrencyCodes = config?.monedas_activas || ["USD", "PEN", "MXN", "EUR"];
@@ -86,13 +85,19 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setLastUpdated(new Date(config.ultima_actualizacion));
         }
         
-        // Usar configuración guardada en lugar de valores por defecto
         if (config?.moneda_base) {
             const found = INITIAL_CURRENCIES.find(c => c.code === config.moneda_base);
             if (found) {
                 setCurrencyState(found);
                 setFiscalCurrencyState(found);
             }
+        }
+        if (config?.multi_moneda_habilitado !== undefined) {
+            setIsMultiCurrencyEnabledState(config.multi_moneda_habilitado);
+        }
+        if (config?.moneda_impuestos) {
+            const found = INITIAL_CURRENCIES.find(c => c.code === config.moneda_impuestos);
+            if (found) setTaxCurrencyState(found);
         }
     }, [config]);
 
@@ -124,10 +129,20 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (found) setCurrencyState(found);
     }, []);
 
+    const setIsMultiCurrencyEnabled = useCallback((enabled: boolean) => {
+        setIsMultiCurrencyEnabledState(enabled);
+        updateConfig({ multi_moneda_habilitado: enabled } as any);
+    }, [updateConfig]);
+
     const setTaxCurrency = useCallback((code: string) => {
         const found = INITIAL_CURRENCIES.find(c => c.code === code);
-        if (found) setTaxCurrencyState(found);
-    }, []);
+        if (found) {
+            setTaxCurrencyState(found);
+            updateConfig({ moneda_impuestos: code } as any);
+        }
+    }, [updateConfig]);
+
+    const setIsBlisCoinsEnabled = useCallback((_v: boolean) => {}, []);
 
     const setFiscalCurrency = useCallback((code: string) => {
         const found = INITIAL_CURRENCIES.find(c => c.code === code);

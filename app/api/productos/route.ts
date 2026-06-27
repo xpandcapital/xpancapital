@@ -132,6 +132,7 @@ export async function POST(request: NextRequest) {
       meta_descripcion,
       meta_titulo,
       curso_id,
+      precios_multimoneda,
       estado = 'borrador' // Estado inicial
     } = body
 
@@ -175,7 +176,8 @@ export async function POST(request: NextRequest) {
       lote_uid: lote_uid || null,
       meta_descripcion: meta_descripcion || null,
       meta_titulo: meta_titulo || null,
-      curso_id: curso_id || null
+      curso_id: curso_id || null,
+      precios_multimoneda: precios_multimoneda || {}
     }
 
     const { data, error } = await supabase

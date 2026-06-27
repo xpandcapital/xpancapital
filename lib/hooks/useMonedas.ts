@@ -43,7 +43,7 @@ export function useMonedas() {
       const exchangeRates: ExchangeRates = { ...INITIAL_RATES }
       if (tasasData) {
         tasasData.forEach((t: TasaCambio) => {
-          exchangeRates[`${t.moneda_origen}_${t.moneda_destino}`] = t.tasa
+          exchangeRates[t.moneda_destino] = t.tasa
         })
       }
 

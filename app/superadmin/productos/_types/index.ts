@@ -37,6 +37,7 @@ export interface Product {
   metaDescripcion: string
   metaTitulo: string
   currencyCode: string
+  precios_multimoneda: Record<string, number>
   isPerishable: boolean
   purchaseDate: string
   expirationDate: string

@@ -157,6 +157,8 @@ export interface MonedasConfig {
   moneda_base: string
   monedas_activas: string[]
   margen_seguridad: number
+  multi_moneda_habilitado: boolean
+  moneda_impuestos: string
   actualizar_automaticamente: boolean
   ultima_actualizacion: string | null
   creado_en: string

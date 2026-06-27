@@ -53,6 +53,7 @@ export function useProducts(): UseProductsReturn {
     metaDescripcion: (p.meta_descripcion as string) || '',
     metaTitulo: (p.meta_titulo as string) || '',
     currencyCode: 'USD',
+    precios_multimoneda: (p.precios_multimoneda as Record<string, number>) || {},
     isPerishable: (p.es_perecedero as boolean) || false,
     purchaseDate: (p.fecha_compra as string) || '',
     expirationDate: (p.fecha_vencimiento as string) || '',
