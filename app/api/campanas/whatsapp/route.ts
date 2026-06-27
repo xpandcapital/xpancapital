@@ -22,10 +22,39 @@ export async function GET(request: NextRequest) {
   const supabase = getAdmin()
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
+  const action = searchParams.get('action')
+  const empresaId = searchParams.get('empresa_id') || DEFAULT_EMPRESA_ID
+
   if (id) {
-    const { data } = await supabase.from('whatsapp_campaigns').select('*, recipients:whatsapp_campaign_recipients(count)').eq('id', id).single()
+    const { data } = await supabase.from('whatsapp_campaigns').select('*').eq('id', id).single()
     return NextResponse.json({ success: true, data })
   }
+
+  // Count endpoint
+  if (action === 'count') {
+    const source = searchParams.get('source') || 'leads'
+    const filterJson = searchParams.get('filter')
+    const filter = filterJson ? JSON.parse(filterJson) : {}
+    const count = await getRecipientCount(supabase, source, filter, empresaId)
+    return NextResponse.json({ success: true, count })
+  }
+
+  // List buyers of a product
+  if (action === 'buyers') {
+    const productoId = searchParams.get('producto_id')
+    if (!productoId) return NextResponse.json({ success: true, buyers: [] })
+    const buyers = await getProductBuyers(supabase, productoId, empresaId)
+    return NextResponse.json({ success: true, buyers })
+  }
+
+  // List employees by role
+  if (action === 'employees') {
+    const rol = searchParams.get('rol')
+    const { data } = await supabase.from('profiles').select('id,nombre,email,telefono').eq('empresa_id', empresaId).not('telefono', 'is', null).limit(200)
+    const filtered = rol ? (data || []).filter((p: any) => p.rol === rol) : (data || [])
+    return NextResponse.json({ success: true, employees: filtered })
+  }
+
   const { data } = await supabase.from('whatsapp_campaigns').select('*').order('creado_en', { ascending: false })
   return NextResponse.json({ success: true, data })
 }
@@ -36,12 +65,11 @@ export async function POST(request: NextRequest) {
   const supabase = getAdmin()
   const body = await request.json()
   const { action, ...rest } = body
+  const empresaId = auth.empresaId || DEFAULT_EMPRESA_ID
 
   if (action === 'create') {
     const { data, error } = await supabase.from('whatsapp_campaigns').insert({
-      empresa_id: auth.empresaId || DEFAULT_EMPRESA_ID,
-      ...rest,
-      created_by: auth.userId,
+      empresa_id: empresaId, ...rest, created_by: auth.userId,
     }).select().single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true, data })
@@ -51,63 +79,65 @@ export async function POST(request: NextRequest) {
     const campaignId = rest.id
     if (!campaignId) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
-    // Obtener campaña
     const { data: campaign } = await supabase.from('whatsapp_campaigns').select('*').eq('id', campaignId).single()
     if (!campaign) return NextResponse.json({ error: 'Campaña no encontrada' }, { status: 404 })
 
-    // Obtener leads según filtro
     const filter = campaign.lead_filter || {}
-    let query = supabase.from('leads').select('id,nombre,telefono').eq('empresa_id', auth.empresaId || DEFAULT_EMPRESA_ID)
-    if (filter.estado) query = query.eq('estado', filter.estado)
-    if (filter.etiquetas && Array.isArray(filter.etiquetas)) {
-      query = query.overlaps('etiquetas', filter.etiquetas)
-    }
-    if (filter.campana_id) query = query.eq('campana_id', filter.campana_id)
+    const source = filter.source || 'leads'
+    const selectedIds = filter.selected_ids || null
 
-    const { data: leads } = await query.limit(500)
-    if (!leads || leads.length === 0) {
-      return NextResponse.json({ success: true, message: 'Sin leads para enviar', total: 0 })
+    // Obtener destinatarios según la fuente
+    const recipients = await getRecipientsForSource(supabase, source, filter, empresaId, selectedIds)
+    if (recipients.length === 0) {
+      return NextResponse.json({ success: true, message: 'Sin destinatarios con teléfono válido', total: 0 })
     }
 
-    // Preparar recipients con teléfonos limpios
+    // Preparar e insertar recipients
     const variables = campaign.variables || {}
     const mensajes = campaign.mensajes || [campaign.mensaje || 'Hola']
-    const recipients: any[] = []
-    for (const lead of leads) {
-      const phone = cleanPhone(lead.telefono)
+    const toInsert: any[] = []
+
+    for (const r of recipients) {
+      const phone = cleanPhone(r.telefono)
       if (!phone || !isValidPhone(phone)) continue
       const msgTemplate = mensajes[Math.floor(Math.random() * mensajes.length)]
       const message = resolveVariables(msgTemplate, variables)
-      recipients.push({ phone, lead_id: lead.id, message, status: 'pending' })
+      toInsert.push({ campaign_id: campaignId, lead_id: r.lead_id || null, phone, message, status: 'pending' })
     }
 
-    // Insertar recipients
-    const { error: insError } = await supabase.from('whatsapp_campaign_recipients').insert(
-      recipients.map(r => ({ campaign_id: campaignId, lead_id: r.lead_id, phone: r.phone, message: r.message }))
-    )
-    if (insError) return NextResponse.json({ error: insError.message }, { status: 500 })
+    if (toInsert.length === 0) {
+      return NextResponse.json({ success: true, message: 'Sin teléfonos válidos', total: 0 })
+    }
 
-    // Actualizar contador
-    await supabase.from('whatsapp_campaigns').update({
-      total_recipients: recipients.length,
-      status: 'sending',
-    }).eq('id', campaignId)
+    await supabase.from('whatsapp_campaign_recipients').insert(toInsert)
+    await supabase.from('whatsapp_campaigns').update({ total_recipients: toInsert.length, status: 'sending' }).eq('id', campaignId)
 
-    // Iniciar envío en background (no bloqueamos la respuesta)
-    processNextBatch(campaignId, 0)
+    // Procesar primer batch inmediatamente
+    const result = await processOneBatch(campaignId)
 
-    return NextResponse.json({ success: true, total: recipients.length, message: 'Envío iniciado' })
+    return NextResponse.json({ success: true, total: toInsert.length, batch: result, message: 'Envío iniciado' })
+  }
+
+  if (action === 'process_batch') {
+    const campaignId = rest.id
+    if (!campaignId) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
+    const result = await processOneBatch(campaignId)
+    return NextResponse.json({ success: true, ...result })
   }
 
   if (action === 'update') {
     const { id, ...updates } = rest
-    const { error } = await supabase.from('whatsapp_campaigns').update({ ...updates, actualizado_en: new Date().toISOString() }).eq('id', id)
+    const clean: any = {}
+    const allowed = ['nombre', 'mensajes', 'variables', 'media_url', 'filename', 'min_delay_seconds', 'max_delay_seconds', 'lead_filter']
+    for (const k of allowed) { if (k in updates) clean[k] = updates[k] }
+    clean.actualizado_en = new Date().toISOString()
+    const { error } = await supabase.from('whatsapp_campaigns').update(clean).eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })
   }
 
   if (action === 'pause') {
-    await supabase.from('whatsapp_campaigns').update({ status: 'paused', actualizado_en: new Date().toISOString() }).eq('id', rest.id)
+    await supabase.from('whatsapp_campaigns').update({ status: 'paused' }).eq('id', rest.id)
     return NextResponse.json({ success: true })
   }
 
@@ -119,57 +149,131 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ error: 'Acción no reconocida' }, { status: 400 })
 }
 
-async function processNextBatch(campaignId: string, offset: number) {
+// ── Helpers ──
+
+async function getRecipientsForSource(supabase: any, source: string, filter: any, empresaId: string, selectedIds: string[] | null): Promise<{ telefono: string; lead_id?: string }[]> {
+  // Manual phones
+  if (source === 'manual' || source === 'csv') {
+    const phones: string[] = filter.manual_phones || filter.csv_phones || []
+    return phones.map((p: string) => ({ telefono: p }))
+  }
+
+  // Clients → query profiles with purchases of a product
+  if (source === 'clientes') {
+    let query = supabase.from('profiles').select('id, telefono, email, nombre').eq('empresa_id', empresaId).not('telefono', 'is', null)
+    if (filter.producto_id) {
+      const { data: buyers } = await getProductBuyers(supabase, filter.producto_id, empresaId)
+      if ((buyers as any[]).length === 0) return []
+      const ids = (buyers as any[]).map((b: any) => b.id)
+      if (selectedIds && selectedIds.length > 0) {
+        // Filtrar solo los seleccionados
+        const filteredIds = ids.filter((id: string) => selectedIds.includes(id))
+        if (filteredIds.length === 0) query = supabase.from('profiles').select('id, telefono').eq('id', '')
+        else query = query.in('id', filteredIds)
+      } else {
+        query = query.in('id', ids)
+      }
+    }
+    if (filter.producto_categoria) {
+      // Append: buscar por nombre de categoría en compras (simplificado)
+    }
+    const { data } = await query.limit(500)
+    return (data || []).map((p: any) => ({ telefono: p.telefono, lead_id: undefined }))
+  }
+
+  // Employees → query profiles by role
+  if (source === 'empleados') {
+    let query = supabase.from('profiles').select('id, telefono').eq('empresa_id', empresaId).not('telefono', 'is', null)
+    if (filter.rol) query = query.eq('rol', filter.rol)
+    if (selectedIds && selectedIds.length > 0) query = query.in('id', selectedIds)
+    const { data } = await query.limit(500)
+    return (data || []).map((p: any) => ({ telefono: p.telefono, lead_id: undefined }))
+  }
+
+  // Default: leads
+  let query = supabase.from('leads').select('id,nombre,telefono').eq('empresa_id', empresaId)
+  if (filter.estado) query = query.eq('estado', filter.estado)
+  if (filter.campana_id) query = query.eq('campana_id', filter.campana_id)
+  if (selectedIds && selectedIds.length > 0) query = query.in('id', selectedIds)
+  const { data } = await query.limit(500)
+  return (data || []).map((l: any) => ({ telefono: l.telefono, lead_id: l.id }))
+}
+
+async function getRecipientCount(supabase: any, source: string, filter: any, empresaId: string): Promise<number> {
+  const recipients = await getRecipientsForSource(supabase, source, filter, empresaId, null)
+  return recipients.filter(r => {
+    const p = cleanPhone(r.telefono)
+    return p && isValidPhone(p)
+  }).length
+}
+
+async function getProductBuyers(supabase: any, productoId: string, empresaId: string) {
+  const { data: items } = await supabase
+    .from('compra_items')
+    .select('compra_id')
+    .eq('producto_id', productoId)
+    .limit(500)
+  if (!items || items.length === 0) return []
+  const compraIds = [...new Set(items.map((i: any) => i.compra_id))]
+  const { data: compras } = await supabase
+    .from('compras')
+    .select('user_id')
+    .in('id', compraIds)
+    .eq('empresa_id', empresaId)
+    .eq('estado', 'completado')
+    .not('user_id', 'is', null)
+  if (!compras || compras.length === 0) return []
+  const userIds = [...new Set(compras.map((c: any) => c.user_id))]
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('id, nombre, email, telefono')
+    .in('id', userIds)
+    .not('telefono', 'is', null)
+    .limit(500)
+  return profiles || []
+}
+
+async function processOneBatch(campaignId: string) {
   const supabase = getAdmin()
   const BATCH_SIZE = 5
 
-  try {
-    const { data: recipients } = await supabase
-      .from('whatsapp_campaign_recipients')
-      .select('*')
-      .eq('campaign_id', campaignId)
-      .eq('status', 'pending')
-      .order('id')
-      .range(offset, offset + BATCH_SIZE - 1)
+  const { data: recipients } = await supabase
+    .from('whatsapp_campaign_recipients')
+    .select('*')
+    .eq('campaign_id', campaignId)
+    .eq('status', 'pending')
+    .order('id')
+    .limit(BATCH_SIZE)
 
-    if (!recipients || recipients.length === 0) {
-      await supabase.from('whatsapp_campaigns').update({ status: 'completed', actualizado_en: new Date().toISOString() }).eq('id', campaignId)
-      return
-    }
-
-    for (const r of recipients) {
-      const { data: campaign } = await supabase.from('whatsapp_campaigns').select('*').eq('id', campaignId).single()
-      if (campaign?.status === 'paused') return
-
-      const result = await sendWhatsApp({
-        number: r.phone,
-        message: r.message,
-        type: campaign?.media_url ? 'media' : 'text',
-        media_url: campaign?.media_url || undefined,
-        filename: campaign?.filename || undefined,
-      })
-
-      await supabase.from('whatsapp_campaign_recipients').update({
-        status: result.success ? 'sent' : 'failed',
-        sent_at: result.success ? new Date().toISOString() : null,
-        error: result.success ? null : String(result.error || 'Error'),
-      }).eq('id', r.id)
-
-      // Delay aleatorio entre mensajes
-      const minDelay = (campaign?.min_delay_seconds || 30) * 1000
-      const maxDelay = (campaign?.max_delay_seconds || 120) * 1000
-      const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay
-      await new Promise(resolve => setTimeout(resolve, delay))
-    }
-
-    // Incrementar sent_count y continuar
-    const { data: current } = await supabase.from('whatsapp_campaigns').select('sent_count').eq('id', campaignId).single()
-    const newCount = (current?.sent_count || 0) + recipients.length
-    await supabase.from('whatsapp_campaigns').update({ sent_count: newCount }).eq('id', campaignId)
-
-    // Procesar siguiente batch
-    await processNextBatch(campaignId, offset + BATCH_SIZE)
-  } catch (error) {
-    console.error('[Bulk WhatsApp] Error:', error)
+  if (!recipients || recipients.length === 0) {
+    await supabase.from('whatsapp_campaigns').update({ status: 'completed', actualizado_en: new Date().toISOString() }).eq('id', campaignId)
+    return { remaining: 0, sentBatch: 0, done: true }
   }
+
+  const { data: campaign } = await supabase.from('whatsapp_campaigns').select('*').eq('id', campaignId).single()
+
+  for (const r of recipients) {
+    const result = await sendWhatsApp({
+      number: r.phone,
+      message: r.message,
+      type: campaign?.media_url ? 'media' : 'text',
+      media_url: campaign?.media_url || undefined,
+      filename: campaign?.filename || undefined,
+    })
+    await supabase.from('whatsapp_campaign_recipients').update({
+      status: result.success ? 'sent' : 'failed',
+      sent_at: result.success ? new Date().toISOString() : null,
+      error: result.success ? null : String(result.error || 'Error'),
+    }).eq('id', r.id)
+  }
+
+  // Update sent_count
+  const { data: current } = await supabase.from('whatsapp_campaigns').select('sent_count').eq('id', campaignId).single()
+  const newCount = (current?.sent_count || 0) + recipients.length
+  await supabase.from('whatsapp_campaigns').update({ sent_count: newCount }).eq('id', campaignId)
+
+  // Count remaining pending
+  const { count } = await supabase.from('whatsapp_campaign_recipients').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId).eq('status', 'pending')
+
+  return { remaining: count || 0, sentBatch: recipients.length, done: (count || 0) === 0 }
 }
