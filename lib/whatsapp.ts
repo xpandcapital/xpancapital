@@ -97,13 +97,15 @@ export async function sendWhatsApp({
     const params = new URLSearchParams()
     params.set('number', numberClean)
     params.set('type', type)
+    params.set('message', message) // URLSearchParams codifica automáticamente
     params.set('instance_id', creds.instanceId)
     params.set('access_token', creds.accessToken)
     if (media_url) params.set('media_url', media_url)
     if (filename) params.set('filename', filename)
 
-    // Construir URL manualmente para evitar doble encoding del mensaje
-    const url = `${API_BASE}/send?${params.toString()}&message=${encodeURIComponent(message)}`
+    console.log('[WhatsApp] URL params:', { number: numberClean, type, msgLen: message?.length, hasMedia: !!media_url })
+    const url = `${API_BASE}/send?${params.toString()}`
+    console.log('[WhatsApp] URL completo:', url.substring(0, 200))
 
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 15000)
