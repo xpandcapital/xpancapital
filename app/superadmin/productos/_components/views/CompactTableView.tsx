@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { CheckSquare, Square, ChevronUp, ChevronDown, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check } from "lucide-react"
+import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
 import type { Product, ProductSort, Category, Status, Currency } from '../../_types'
 
 const SITE_DOMAIN = 'blis-corp.com'
@@ -145,13 +146,13 @@ export function CompactTableView({
               </td>
               <td className="px-4 py-2 align-middle">
                 {isBulkEditing ? (
-                  <select
+                  <SearchableSelect
                     value={product.category}
-                    onChange={(e) => onUpdateBulk(product.id, 'category', e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-[9px] text-gray-300 w-full outline-none focus:border-blis-red"
-                  >
-                    {categories.map(c => <option key={c.id} value={c.name} className="bg-zinc-900">{c.name}</option>)}
-                  </select>
+                    onChange={(value) => onUpdateBulk(product.id, 'category', value)}
+                    options={categories.map(c => ({ value: c.name, label: c.name }))}
+                    placeholder="Cat."
+                    className="w-full"
+                  />
                 ) : (
                   <span className="text-xs font-black text-gray-400 uppercase tracking-tighter truncate block">{product.category}</span>
                 )}
@@ -201,13 +202,12 @@ export function CompactTableView({
               </td>
               <td className="px-4 py-2 align-middle text-left">
                 {isBulkEditing ? (
-                  <select
+                  <NativeSelect
                     value={product.status}
-                    onChange={(e) => onUpdateBulk(product.id, 'status', e.target.value)}
+                    onChange={(value) => onUpdateBulk(product.id, 'status', value)}
+                    options={statuses.map(s => ({ value: s.name, label: s.name }))}
                     className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-sm text-gray-300 w-full outline-none focus:border-blis-red"
-                  >
-                    {statuses.map(s => <option key={s.id} value={s.name} className="bg-zinc-900">{s.name}</option>)}
-                  </select>
+                  />
                 ) : (
                   <div className="flex items-center justify-start gap-1.5 whitespace-nowrap">
                     <div

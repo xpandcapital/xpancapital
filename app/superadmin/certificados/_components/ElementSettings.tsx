@@ -11,6 +11,7 @@ import {
   Palette,
 } from "lucide-react";
 import type { CertificateElement } from "../_types";
+import { NativeSelect } from "@/components/ui/SearchableSelect";
 
 interface Props {
   selectedId: string | null;
@@ -190,16 +191,17 @@ export function ElementSettings({
                       onChange={e => onUpdate(activeElement.id, { color: e.target.value })}
                       className="w-full h-12 bg-black/40 border border-white/5 rounded-xl cursor-pointer p-1"
                     />
-                    <select
+                    <NativeSelect
                       value={activeElement.fontWeight}
-                      onChange={e => onUpdate(activeElement.id, { fontWeight: e.target.value })}
+                      onChange={(value) => onUpdate(activeElement.id, { fontWeight: value })}
+                      options={[
+                        { value: "normal", label: "Normal" },
+                        { value: "600", label: "Semi Bold" },
+                        { value: "700", label: "Bold" },
+                        { value: "900", label: "Black Version" },
+                      ]}
                       className="w-full bg-black/40 border border-white/5 rounded-xl px-2 text-[10px] font-black uppercase text-white outline-none focus:border-blis-red"
-                    >
-                      <option value="normal">Normal</option>
-                      <option value="600">Semi Bold</option>
-                      <option value="700">Bold</option>
-                      <option value="900">Black Version</option>
-                    </select>
+                    />
                   </div>
                 </div>
               )}

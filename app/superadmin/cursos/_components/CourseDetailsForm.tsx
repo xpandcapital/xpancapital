@@ -1,6 +1,7 @@
 'use client'
 
 import { Users, Camera, ImageIcon } from 'lucide-react'
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import type { Course, CertificateTemplate } from '../_types'
 
 interface CourseDetailsFormProps {
@@ -46,23 +47,25 @@ export function CourseDetailsForm({
 
               <div className="space-y-2">
                 <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Certificado</label>
-                <select
+                <SearchableSelect
                   value={course.certificateTemplateId || ''}
-                  onChange={(e) => {
-                    const val = e.target.value
+                  onChange={(value) => {
                     onUpdate({
                       ...course,
-                      certificateTemplateId: val || null,
-                      hasCertificate: !!val
+                      certificateTemplateId: value || null,
+                      hasCertificate: !!value
                     })
                   }}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-[11px] text-white focus:outline-none focus:border-blis-red transition-all"
-                >
-                  <option value="" className="bg-zinc-900 text-gray-500">Ninguno</option>
-                  {certificateTemplates.map(template => (
-                    <option key={template.id} value={template.id} className="bg-zinc-900">{template.nombre}</option>
-                  ))}
-                </select>
+                  options={[
+                    { value: "", label: "Ninguno" },
+                    ...certificateTemplates.map(template => ({
+                      value: template.id,
+                      label: template.nombre,
+                    })),
+                  ]}
+                  placeholder="Seleccionar certificado..."
+                  className="w-full"
+                />
               </div>
 
               <div className="space-y-2">

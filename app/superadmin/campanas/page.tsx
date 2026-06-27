@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCampanas } from "@/lib/hooks/useCampanas";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard'
+import { NativeSelect } from "@/components/ui/SearchableSelect"
 import { Plus, Edit2, Trash2, Megaphone, Users, Mail, Phone, X, Check, Settings } from "lucide-react";
 
 export default function CampanasPage() {
@@ -312,16 +313,17 @@ export default function CampanasPage() {
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
                   Estado
                 </label>
-                <select
+                <NativeSelect
                   value={formData.estado}
-                  onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                  onChange={(value) => setFormData({ ...formData, estado: value })}
+                  options={[
+                    { value: "borrador", label: "Borrador" },
+                    { value: "activa", label: "Activa" },
+                    { value: "pausada", label: "Pausada" },
+                    { value: "finalizada", label: "Finalizada" },
+                  ]}
                   className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
-                >
-                  <option value="borrador">Borrador</option>
-                  <option value="activa">Activa</option>
-                  <option value="pausada">Pausada</option>
-                  <option value="finalizada">Finalizada</option>
-                </select>
+                />
               </div>
 
               {/* Notificaciones */}

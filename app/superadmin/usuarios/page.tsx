@@ -6,6 +6,7 @@ import { UserPlus, Shield, Download, Search, Filter, User, CheckCircle2, X, Load
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard';
+import { NativeSelect } from "@/components/ui/SearchableSelect";
 
 const ROLE_OPTIONS = [
     { value: 'superadmin', label: 'Super Admin' },
@@ -151,28 +152,28 @@ export default function AdminUsers() {
                 <div className="flex flex-col md:flex-row gap-4 min-w-max">
                     <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
                         <Filter className="w-4 h-4 text-gray-500" />
-                        <select
+                        <NativeSelect
                             value={roleFilter}
-                            onChange={(e) => setRoleFilter(e.target.value)}
+                            onChange={(value) => setRoleFilter(value)}
+                            options={[
+                                { value: "Todos", label: "Todos los roles" },
+                                ...ROLE_OPTIONS,
+                            ]}
                             className="bg-white/5 text-sm text-white focus:outline-none appearance-none pr-6 rounded-lg cursor-pointer"
-                        >
-                            <option value="Todos">Todos los roles</option>
-                            {ROLE_OPTIONS.map(r => (
-                                <option key={r.value} value={r.value}>{r.label}</option>
-                            ))}
-                        </select>
+                        />
                     </div>
                     <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
                         <CheckCircle2 className="w-4 h-4 text-gray-500" />
-                        <select
+                        <NativeSelect
                             value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
+                            onChange={(value) => setStatusFilter(value)}
+                            options={[
+                                { value: "Todos", label: "Todos los estados" },
+                                { value: "Activo", label: "Activos" },
+                                { value: "Inactivo", label: "Inactivos" },
+                            ]}
                             className="bg-white/5 text-sm text-white focus:outline-none appearance-none pr-6 rounded-lg cursor-pointer"
-                        >
-                            <option value="Todos">Todos los estados</option>
-                            <option value="Activo">Activos</option>
-                            <option value="Inactivo">Inactivos</option>
-                        </select>
+                        />
                     </div>
                 </div>
             </div>
@@ -347,15 +348,12 @@ export default function AdminUsers() {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Rol</label>
-                                        <select
+                                        <NativeSelect
                                             value={newUserRole}
-                                            onChange={(e) => setNewUserRole(e.target.value)}
+                                            onChange={(value) => setNewUserRole(value)}
+                                            options={ROLE_OPTIONS}
                                             className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
-                                        >
-                                            {ROLE_OPTIONS.map(r => (
-                                                <option key={r.value} value={r.value}>{r.label}</option>
-                                            ))}
-                                        </select>
+                                        />
                                     </div>
                                     <div className="flex gap-3 pt-2">
                                         <button

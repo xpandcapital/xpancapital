@@ -3,6 +3,7 @@
 import React, { useState } from "react"
 import { motion } from "framer-motion"
 import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check, GraduationCap } from "lucide-react"
+import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
 import Image from "next/image"
 import type { Product, Category, Status } from '../../_types'
 
@@ -86,13 +87,13 @@ export const ProductGridView = React.memo(function ProductGridView({
             <div className="p-3 md:p-4 space-y-2.5 md:space-y-3 flex-1 flex flex-col">
               <div className="flex-1 min-w-0">
                 {isBulkEditing ? (
-                  <select
+                  <SearchableSelect
                     value={product.category}
-                    onChange={(e) => onUpdateBulk(product.id, 'category', e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black text-blis-red uppercase tracking-widest w-full outline-none"
-                  >
-                    {categories.map(c => <option key={c.id} value={c.name} className="bg-zinc-900">{c.name}</option>)}
-                  </select>
+                    onChange={(value) => onUpdateBulk(product.id, 'category', value)}
+                    options={categories.map(c => ({ value: c.name, label: c.name }))}
+                    placeholder="Cat."
+                    className="w-full"
+                  />
                 ) : (
                   <p className="text-[9px] font-black text-blis-red uppercase tracking-widest truncate">{product.category}</p>
                 )}
@@ -187,13 +188,12 @@ export const ProductGridView = React.memo(function ProductGridView({
                 {isBulkEditing ? (
                   <div className="flex flex-col flex-1 items-end">
                     <span className="text-[9px] text-gray-500 uppercase font-black">Estado</span>
-                    <select
+                    <NativeSelect
                       value={product.status}
-                      onChange={(e) => onUpdateBulk(product.id, 'status', e.target.value)}
+                      onChange={(value) => onUpdateBulk(product.id, 'status', value)}
+                      options={statuses.map(s => ({ value: s.name, label: s.name }))}
                       className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black text-white w-full max-w-[90px] outline-none"
-                    >
-                      {statuses.map(s => <option key={s.id} value={s.name} className="bg-zinc-900">{s.name}</option>)}
-                    </select>
+                    />
                   </div>
                 ) : (
                   <div className="flex gap-0.5 md:gap-1 items-center flex-shrink-0">

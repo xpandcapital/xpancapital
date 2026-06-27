@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/Toast";
 import { Search, Filter, Download, User, Mail, Phone, Calendar, ChevronDown, X, Check, Eye } from "lucide-react";
+import { SearchableSelect, NativeSelect } from "@/components/ui/SearchableSelect";
 
 interface Lead {
   id: string;
@@ -184,27 +185,21 @@ export default function LeadsPage() {
             </div>
           </div>
 
-          <select
+          <NativeSelect
             value={estadoFilter}
-            onChange={(e) => setEstadoFilter(e.target.value)}
-            className="bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
-          >
-            <option value="">Todos los estados</option>
-            {ESTADOS.map(e => (
-              <option key={e.value} value={e.value}>{e.label}</option>
-            ))}
-          </select>
+            onChange={setEstadoFilter}
+            placeholder="Todos los estados"
+            options={ESTADOS}
+          />
 
-          <select
+          <SearchableSelect
+            options={campanas.map((c: any) => ({ value: c.id, label: c.nombre }))}
             value={campanaFilter}
-            onChange={(e) => setCampanaFilter(e.target.value)}
-            className="bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
-          >
-            <option value="">Todas las campañas</option>
-            {campanas.map(c => (
-              <option key={c.id} value={c.id}>{c.nombre}</option>
-            ))}
-          </select>
+            onChange={setCampanaFilter}
+            placeholder="Todas las campañas"
+            searchPlaceholder="Buscar campaña..."
+            emptyText="Sin campañas"
+          />
 
           <button
             onClick={fetchLeads}
@@ -287,15 +282,12 @@ export default function LeadsPage() {
                         </span>
                       </td>
                       <td className="p-4">
-                        <select
+                        <NativeSelect
                           value={lead.estado}
-                          onChange={(e) => updateLeadEstado(lead.id, e.target.value)}
+                          onChange={(v) => updateLeadEstado(lead.id, v)}
+                          options={ESTADOS}
                           className={`text-xs px-2 py-1 rounded-full border border-white/10 cursor-pointer ${getEstadoColor(lead.estado)}`}
-                        >
-                          {ESTADOS.map(e => (
-                            <option key={e.value} value={e.value}>{e.label}</option>
-                          ))}
-                        </select>
+                        />
                       </td>
                       <td className="p-4 hidden md:table-cell">
                         <div className="flex items-center gap-1 text-sm text-gray-400">

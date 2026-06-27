@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Globe, Copy, Check, Loader2, X, Search, GraduationCap, Link2, Unlink2 } from "lucide-react"
+import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
 import { ProductImageUploader } from './ProductImageUploader'
 import { ProductPriceSection } from './ProductPriceSection'
 import { ProductStockSection } from './ProductStockSection'
@@ -115,8 +116,7 @@ export function ProductFormModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const form = e.target as HTMLFormElement
-    const categoryName = (form.querySelector('[name="category"]') as HTMLSelectElement)?.value
-    const category = categories.find(c => c.name === categoryName)
+    const category = categories.find(c => c.name === formData.category)
     
     const finalSlug = isAutoSlug ? generateSlug(formData.name) : formData.slug
     
@@ -417,17 +417,13 @@ export function ProductFormModal({
                   <p className="text-[10px] font-bold text-amber-500">⚠️ No hay categorías disponibles. Crea una categoría primero.</p>
                 </div>
               )}
-              <select
-                name="category"
-                required={categories.length > 0}
+              <SearchableSelect
                 value={formData.category}
-                onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-blis-red transition-all appearance-none disabled:opacity-50"
-                disabled={categories.length === 0}
-              >
-                {categories.length === 0 && <option value="" className="bg-zinc-900">-- Sin categoría --</option>}
-                {categories.map(c => <option key={c.id} value={c.name} className="bg-zinc-900">{c.name} ({c.skuPrefix})</option>)}
-              </select>
+                onChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                options={categories.length === 0 ? [{ value: "", label: "-- Sin categoría --" }] : categories.map(c => ({ value: c.name, label: `${c.name} (${c.skuPrefix})` }))}
+                placeholder="Seleccionar categoría..."
+                className={`w-full ${categories.length === 0 ? "opacity-50 pointer-events-none" : ""}`}
+              />
             </div>
 
             {cursos.length > 0 && (
@@ -480,15 +476,13 @@ export function ProductFormModal({
                 </label>
               </div>
               <div className="flex gap-2">
-                <select
+                <SearchableSelect
                   value={formData.skuPrefix}
-                  onChange={(e) => setFormData(prev => ({ ...prev, skuPrefix: e.target.value }))}
-                  className="w-[120px] bg-white/5 border border-white/10 rounded-2xl px-4 py-4 text-xs font-black text-blue-400 focus:outline-none focus:border-blue-500 transition-all appearance-none uppercase tracking-widest"
-                >
-                  <optgroup label="Categorías" className="bg-zinc-900 text-gray-500">
-                    {categories.map(c => <option key={c.id} value={c.skuPrefix}>{c.skuPrefix}</option>)}
-                  </optgroup>
-                </select>
+                  onChange={(value) => setFormData(prev => ({ ...prev, skuPrefix: value }))}
+                  options={categories.map(c => ({ value: c.skuPrefix, label: c.skuPrefix }))}
+                  placeholder="SKU"
+                  className="w-[120px]"
+                />
                 <input
                   value={formData.sku}
                   onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}

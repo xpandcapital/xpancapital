@@ -7,6 +7,7 @@ import {
     Banknote, CreditCard, History, ShieldCheck,
     Coins, Clock3, GraduationCap, Calendar
 } from "lucide-react";
+import { SearchableSelect, NativeSelect, type SearchableOption } from "@/components/ui/SearchableSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -434,24 +435,34 @@ export default function VentasAdminPage() {
                         </div>
                         <div>
                             <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Producto *</label>
-                            <select value={formNueva.producto_id} onChange={e => setFormNueva({ ...formNueva, producto_id: e.target.value })}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-blis-red/30 transition-all">
-                                <option value="">Seleccionar producto...</option>
-                                {productos.map(p => (
-                                    <option key={p.id} value={p.id}>{p.nombre} ({p.categoria?.nombre || p.tipo || 'N/A'})</option>
-                                ))}
-                            </select>
+                            <SearchableSelect
+                                options={productos.map((p: any): SearchableOption => ({
+                                    value: p.id,
+                                    label: p.nombre,
+                                    sublabel: p.categoria?.nombre || p.tipo || undefined,
+                                    image: p.imagen_principal || undefined,
+                                }))}
+                                value={formNueva.producto_id}
+                                onChange={(v) => setFormNueva({ ...formNueva, producto_id: v })}
+                                placeholder="Seleccionar producto..."
+                                searchPlaceholder="Buscar producto..."
+                                emptyText="No se encontraron productos"
+                            />
                         </div>
                         <div>
                             <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Método de Pago</label>
-                            <select value={formNueva.metodo_pago} onChange={e => setFormNueva({ ...formNueva, metodo_pago: e.target.value })}
-                                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-blis-red/30 transition-all">
-                                <option value="transferencia">Transferencia</option>
-                                <option value="efectivo">Efectivo</option>
-                                <option value="tarjeta">Tarjeta</option>
-                                {coinsEnabled && <option value="bliscoins">BLISCOINS</option>}
-                                <option value="otro">Otro</option>
-                            </select>
+                            <NativeSelect
+                                value={formNueva.metodo_pago}
+                                onChange={(v) => setFormNueva({ ...formNueva, metodo_pago: v })}
+                                options={[
+                                    { value: 'transferencia', label: 'Transferencia' },
+                                    { value: 'efectivo', label: 'Efectivo' },
+                                    { value: 'tarjeta', label: 'Tarjeta' },
+                                    ...(coinsEnabled ? [{ value: 'bliscoins', label: 'BLISCOINS' }] : []),
+                                    { value: 'otro', label: 'Otro' },
+                                ]}
+                                className="w-full"
+                            />
                         </div>
                         {formNueva.metodo_pago === "bliscoins" && coinsEnabled ? (
                             <div>
@@ -490,14 +501,18 @@ export default function VentasAdminPage() {
                         {modalVerificar?.metodo_pago === 'whatsapp' && (
                             <div>
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Sub-tipo de pago</label>
-                                <select value={subTipoPago} onChange={e => setSubTipoPago(e.target.value)}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white appearance-none cursor-pointer focus:outline-none focus:border-blis-red/30 transition-all">
-                                    <option value="">Seleccionar...</option>
-                                    <option value="transferencia">Transferencia Bancaria</option>
-                                    <option value="billetera_digital">Billetera Digital (Yape/Plin)</option>
-                                    <option value="efectivo">Efectivo</option>
-                                    <option value="otro">Otro</option>
-                                </select>
+                                <NativeSelect
+                                    value={subTipoPago}
+                                    onChange={setSubTipoPago}
+                                    options={[
+                                        { value: 'transferencia', label: 'Transferencia Bancaria' },
+                                        { value: 'billetera_digital', label: 'Billetera Digital (Yape/Plin)' },
+                                        { value: 'efectivo', label: 'Efectivo' },
+                                        { value: 'otro', label: 'Otro' },
+                                    ]}
+                                    placeholder="Seleccionar..."
+                                    className="w-full"
+                                />
                             </div>
                         )}
                         <div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check } from "lucide-react"
+import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
 import type { Product, Category, Status, Currency } from '../../_types'
 
 const SITE_DOMAIN = 'blis-corp.com'
@@ -98,14 +99,15 @@ return (
                     className="accent-blue-500 w-3 h-3 flex-shrink-0"
                     title="Auto SKU"
                   />
-                  <select
+                  <NativeSelect
                     value={product.skuPrefix || product.sku?.split('-')[0] || 'SKU'}
-                    onChange={(e) => onUpdateBulk(product.id, 'skuPrefix', e.target.value)}
-                    className="bg-zinc-900 border border-white/10 rounded px-1.5 py-1 text-sm font-black text-blue-400 outline-none w-[80px] appearance-none text-center"
-                  >
-                    {categories.map(c => <option key={c.id} value={c.skuPrefix}>{c.skuPrefix}</option>)}
-                    {skuPatterns.map(p => <option key={p.id} value={p.prefix}>{p.prefix}</option>)}
-                  </select>
+                    onChange={(value) => onUpdateBulk(product.id, 'skuPrefix', value)}
+                    options={[
+                      ...categories.map(c => ({ value: c.skuPrefix, label: c.skuPrefix })),
+                      ...skuPatterns.map(p => ({ value: p.prefix, label: p.prefix }))
+                    ]}
+                    className="bg-zinc-900 border border-white/10 rounded px-1.5 py-1 text-sm font-black text-blue-400 outline-none w-[80px] text-center"
+                  />
                   <input
                     value={product.sku}
                     disabled={product.isAutoSku}
@@ -126,13 +128,13 @@ return (
 
       <td className="px-4 py-3 align-middle w-32">
         {isBulkEditing ? (
-          <select
+          <SearchableSelect
             value={product.category}
-            onChange={(e) => onUpdateBulk(product.id, 'category', e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-sm text-white outline-none w-full"
-          >
-            {categories.map(c => <option key={c.id} value={c.name} className="bg-zinc-900">{c.name}</option>)}
-          </select>
+            onChange={(value) => onUpdateBulk(product.id, 'category', value)}
+            options={categories.map(c => ({ value: c.name, label: c.name }))}
+            placeholder="Cat."
+            className="w-full"
+          />
         ) : (
           <span className="bg-white/5 border border-white/5 px-3 py-1.5 rounded-xl text-[11px] text-gray-300 whitespace-nowrap inline-block">
             {product.category}
@@ -164,13 +166,12 @@ return (
                   placeholder="0.00"
                 />
                 {isMultiCurrencyEnabled && (
-                  <select
-                    value={product.currencyCode || selectedCurrency.code}
-                    onChange={(e) => onUpdateBulk(product.id, 'currencyCode', e.target.value)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-zinc-900 border border-white/10 rounded px-1 py-0.5 text-[7px] font-black text-emerald-400 outline-none appearance-none cursor-pointer"
-                  >
-                    {currencies.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}
-                  </select>
+                    <NativeSelect
+                      value={product.currencyCode || selectedCurrency.code}
+                      onChange={(value) => onUpdateBulk(product.id, 'currencyCode', value)}
+                      options={currencies.map(c => ({ value: c.code, label: c.code }))}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-zinc-900 border border-white/10 rounded px-1 py-0.5 text-[7px] font-black text-emerald-400 outline-none cursor-pointer"
+                    />
                 )}
               </div>
             </div>

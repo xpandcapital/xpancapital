@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/components/ui/Toast"
 import { useActionGuard } from '@/hooks/useActionGuard'
+import { NativeSelect } from "@/components/ui/SearchableSelect"
 import { Postulante, EMPRESA_ID, ESTADOS, ESTADO_LABELS, ESTADO_COLORS, diccionarioPreguntas } from "./_types"
 import { PostulanteDetailModal } from "./_components/PostulanteDetailModal"
 import { PostulanteFormModal } from "./_components/PostulanteFormModal"
@@ -180,11 +181,15 @@ export default function AdminPostulantes() {
         </div>
         <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
           <Filter className="w-4 h-4 text-gray-500" />
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white/5 text-sm text-white focus:outline-none appearance-none pr-6 rounded-lg cursor-pointer">
-            <option value="Todos">Todos los estados</option>
-            {ESTADOS_CONST.map((e) => <option key={e} value={e}>{ESTADO_LABELS[e]}</option>)}
-          </select>
+          <NativeSelect
+            value={statusFilter}
+            onChange={(value) => setStatusFilter(value)}
+            options={[
+              { value: "Todos", label: "Todos los estados" },
+              ...ESTADOS_CONST.map((e) => ({ value: e, label: ESTADO_LABELS[e] })),
+            ]}
+            className="bg-white/5 text-sm text-white focus:outline-none appearance-none pr-6 rounded-lg cursor-pointer"
+          />
         </div>
       </div>
 

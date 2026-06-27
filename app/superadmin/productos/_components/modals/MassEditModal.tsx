@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { Layers, X } from "lucide-react"
+import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
 import { createPortal } from "react-dom"
 
 interface MassEditModalProps {
@@ -55,26 +56,30 @@ export function MassEditModal({
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Cambiar Categoría</label>
-              <select
+              <SearchableSelect
                 value={massEditData.category}
-                onChange={(e) => onCategoryChange(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blis-red appearance-none"
-              >
-                <option value="" className="bg-zinc-900">Mantener actual</option>
-                {categories.map(c => <option key={c} value={c} className="bg-zinc-900">{c}</option>)}
-              </select>
+                onChange={(value) => onCategoryChange(value)}
+                options={[
+                  { value: "", label: "Mantener actual" },
+                  ...categories.map(c => ({ value: c, label: c }))
+                ]}
+                placeholder="Mantener actual"
+                className="w-full"
+              />
             </div>
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Cambiar Estado</label>
-              <select
+              <NativeSelect
                 value={massEditData.status}
-                onChange={(e) => onStatusChange(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blis-red appearance-none"
-              >
-                <option value="" className="bg-zinc-900">Mantener actual</option>
-                {statuses.map(s => <option key={s} value={s} className="bg-zinc-900">{s}</option>)}
-              </select>
+                onChange={(value) => onStatusChange(value)}
+                options={[
+                  { value: "", label: "Mantener actual" },
+                  ...statuses.map(s => ({ value: s, label: s }))
+                ]}
+                placeholder="Mantener actual"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blis-red"
+              />
             </div>
           </div>
 
