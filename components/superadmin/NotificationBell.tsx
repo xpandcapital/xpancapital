@@ -81,7 +81,7 @@ export function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const fetchRef = useRef<() => void>(() => {});
-  const channelRef = useRef<string>(`notifications-bell`);
+  const channelRef = useRef<string>(`notif-${Math.random().toString(36).slice(2, 9)}`);
   const router = useRouter();
   const { user } = useAuth();
 
