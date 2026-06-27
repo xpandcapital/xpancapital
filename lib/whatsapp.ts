@@ -23,7 +23,7 @@ async function getCredentials(userId?: string, empresaId?: string): Promise<What
     } catch { /* fall through */ }
   }
 
-  // 1b. Solo empresaId (sin userId) — usar service key para leer keys globales
+  // 1b. Solo empresaId (sin userId) — usar service key para leer keys
   if (!userId && empresaId) {
     try {
       const supabaseAdmin = createAdminClient(
@@ -34,7 +34,6 @@ async function getCredentials(userId?: string, empresaId?: string): Promise<What
         .from('api_keys')
         .select('key_name, key_value')
         .eq('empresa_id', empresaId)
-        .eq('is_global', true)
         .in('key_name', ['planifyx_access_token', 'planifyx_instance_id'])
 
       if (data) {
@@ -78,10 +77,10 @@ export async function sendWhatsApp({
   number, message, type = 'text', media_url, filename,
   userId, empresaId,
 }: WhatsAppSendParams) {
-  const { accessToken, instanceId } = await getCredentials(userId, empresaId)
-  if (!accessToken || !instanceId) {
-    console.error('[WhatsApp] Credenciales no configuradas')
-    return { success: false, error: 'Credenciales no configuradas' }
+  const creds = await getCredentials(userId, empresaId)
+  if (!creds.accessToken || !creds.instanceId) {
+    console.error('[WhatsApp] Credenciales no configuradas. Verifica api_keys: planifyx_access_token y planifyx_instance_id')
+    return { success: false, error: 'Credenciales no configuradas en Api-Nube → Comunicaciones → Planifyx' }
   }
 
   try {
@@ -89,8 +88,8 @@ export async function sendWhatsApp({
       number: number.replace(/\D/g, ''),
       type,
       message,
-      instance_id: instanceId,
-      access_token: accessToken,
+      instance_id: creds.instanceId,
+      access_token: creds.accessToken,
     })
     if (media_url) params.set('media_url', media_url)
     if (filename) params.set('filename', filename)
