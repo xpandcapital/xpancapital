@@ -329,7 +329,7 @@ export default function WhatsAppPage() {
     <div className="min-h-screen bg-black text-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
-          <div><h1 className="text-2xl font-black flex items-center gap-2"><MessageSquare className="w-6 h-6 text-emerald-400" /> WhatsApp Marketing</h1><p className="text-gray-500 text-xs mt-1">Grupos de mensajes · Variables · Delays · Tracking en vivo</p></div>
+          <div><h1 className="text-3xl font-black flex items-center gap-2"><MessageSquare className="w-6 h-6 text-emerald-400" /> WhatsApp Marketing</h1><p className="text-gray-500 text-xs mt-1">Grupos de mensajes · Variables · Delays · Tracking en vivo</p></div>
           <button onClick={() => { resetForm(); setShowForm(!showForm); }} className={`px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-colors ${showForm ? "bg-white/10" : "bg-emerald-600 hover:bg-emerald-500"}`}>{showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}{showForm ? "Cerrar" : "Nueva Campaña"}</button>
         </div>
 
@@ -337,107 +337,107 @@ export default function WhatsAppPage() {
           <div className="bg-zinc-900/50 border border-emerald-500/20 rounded-2xl p-6 space-y-5">
             <h3 className="text-white font-bold text-sm flex items-center gap-2">{editingId ? <Edit2 className="w-4 h-4 text-amber-400" /> : <Plus className="w-4 h-4 text-emerald-400" />}{editingId ? "Editar Campaña" : "Nueva Campaña WhatsApp"}</h3>
 
-            <div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Nombre *</label><input value={nombre} onChange={e => setNombre(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" placeholder="Oferta Julio 2026" /></div>
+            <div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Nombre *</label><input value={nombre} onChange={e => setNombre(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1" placeholder="Oferta Julio 2026" /></div>
 
             {/* Message Groups */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Mensajes</label>
+                <label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Mensajes</label>
                 <div className="flex gap-2">
                   <div className="relative">
-                    <select onChange={e => { if (e.target.value) loadMsg(msgTemplates.find(t => t.id === e.target.value)); e.target.value = ""; }} className="bg-black/50 border border-white/10 rounded px-2 py-1 text-[10px] text-gray-400">
+                    <select onChange={e => { if (e.target.value) loadMsg(msgTemplates.find(t => t.id === e.target.value)); e.target.value = ""; }} className="bg-black/50 border border-white/10 rounded px-3 py-1.5 text-xs text-gray-400">
                       <option value="">Cargar plantilla...</option>
                       {msgTemplates.map((t: any) => <option key={t.id} value={t.id}>{t.nombre}</option>)}
                     </select>
                   </div>
-                  <button onClick={saveMsg} className="text-[10px] text-blue-400 font-bold hover:text-blue-300">💾 Guardar</button>
+                  <button onClick={saveMsg} className="text-xs text-blue-400 font-bold hover:text-blue-300">💾 Guardar</button>
                 </div>
               </div>
               {messageGroups.map((g, gIdx) => (
                 <div key={gIdx} className="bg-black/30 border border-white/5 rounded-xl p-3 mb-2 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-gray-500 font-bold">📝 Mensaje {gIdx + 1}</span>
-                    {messageGroups.length > 1 && <button onClick={() => setMessageGroups(prev => prev.filter((_, i) => i !== gIdx))} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>}
+                    <span className="text-xs text-gray-500 font-bold">📝 Mensaje {gIdx + 1}</span>
+                    {messageGroups.length > 1 && <button onClick={() => setMessageGroups(prev => prev.filter((_, i) => i !== gIdx))} className="text-red-400 hover:text-red-300"><X className="w-3.5 h-3.5" /></button>}
                   </div>
                   <textarea
                     value={g.texts} onChange={e => setMessageGroups(prev => prev.map((mg, i) => i === gIdx ? { ...mg, texts: e.target.value } : mg))}
                     onFocus={e => { e.currentTarget.dataset.groupIdx = String(gIdx); activeTextareaRef.current = e.currentTarget; }}
                     data-group-idx={gIdx}
-                    rows={3} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white resize-none"
+                    rows={3} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white resize-none"
                     placeholder={`Variantes (1 por línea):\n{saludo} oferta 🏠\nHey, mira esto 👀`}
                   />
                   <div className="flex items-center gap-2">
                     <input ref={el => { groupFileRefs.current[gIdx] = el; }} type="file" accept="image/*,video/*,.pdf" onChange={e => handleGroupFile(gIdx, e)} className="hidden" />
                     {g.media_url ? (
-                      <div className="flex items-center gap-1 bg-emerald-500/10 rounded-lg px-2 py-1">
-                        <Image className="w-3 h-3 text-emerald-400" />
-                        <span className="text-[9px] text-emerald-400 truncate max-w-[150px]">{g.filename || "Archivo"}</span>
-                        <button onClick={() => removeGroupFile(gIdx)} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
+                      <div className="flex items-center gap-1 bg-emerald-500/10 rounded-lg px-3 py-1.5">
+                        <Image className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-sm text-emerald-400 truncate max-w-[150px]">{g.filename || "Archivo"}</span>
+                        <button onClick={() => removeGroupFile(gIdx)} className="text-red-400 hover:text-red-300"><X className="w-3.5 h-3.5" /></button>
                       </div>
                     ) : (
-                      <button type="button" onClick={() => groupFileRefs.current[gIdx]?.click()} disabled={uploading} className="text-[10px] text-gray-500 hover:text-white flex items-center gap-1"><Upload className="w-3 h-3" />Subir archivo</button>
+                      <button type="button" onClick={() => groupFileRefs.current[gIdx]?.click()} disabled={uploading} className="text-xs text-gray-500 hover:text-white flex items-center gap-1"><Upload className="w-3.5 h-3.5" />Subir archivo</button>
                     )}
                   </div>
                 </div>
               ))}
-              <button type="button" onClick={() => setMessageGroups(prev => [...prev, { texts: "", media_url: "", filename: "" }])} className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 hover:text-emerald-300"><Plus className="w-3 h-3" /> Agregar mensaje</button>
+              <button type="button" onClick={() => setMessageGroups(prev => [...prev, { texts: "", media_url: "", filename: "" }])} className="text-xs text-emerald-400 font-bold flex items-center gap-1 hover:text-emerald-300"><Plus className="w-3.5 h-3.5" /> Agregar mensaje</button>
             </div>
 
             {/* Variables */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Variables</label>
+                <label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Variables</label>
                 <div className="flex gap-2">
                   <div className="relative">
-                    <select onChange={e => { if (e.target.value) loadVars(varTemplates.find(t => t.id === e.target.value)); e.target.value = ""; }} className="bg-black/50 border border-white/10 rounded px-2 py-1 text-[10px] text-gray-400">
+                    <select onChange={e => { if (e.target.value) loadVars(varTemplates.find(t => t.id === e.target.value)); e.target.value = ""; }} className="bg-black/50 border border-white/10 rounded px-3 py-1.5 text-xs text-gray-400">
                       <option value="">Cargar plantilla...</option>
                       {varTemplates.map((t: any) => <option key={t.id} value={t.id}>{t.nombre}</option>)}
                     </select>
                   </div>
-                  <button onClick={saveVars} className="text-[10px] text-blue-400 font-bold hover:text-blue-300">💾 Guardar</button>
+                  <button onClick={saveVars} className="text-xs text-blue-400 font-bold hover:text-blue-300">💾 Guardar</button>
                 </div>
               </div>
               {vars.map((vr, i) => (
                 <div key={i} className="mt-2 p-3 bg-black/30 border border-white/5 rounded-lg space-y-2">
                   <div className="flex items-center gap-2">
-                    <button onClick={() => insertVariable(vr.name)} className="p-1 text-[10px] bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 hover:bg-blue-500/20 font-bold" title="Insertar en mensaje activo">📋</button>
-                    <span className="text-[10px] text-gray-500 font-mono">{`{ `}</span>
-                    <input value={vr.name} onChange={e => setVars(prev => prev.map((pv, j) => j === i ? { ...pv, name: e.target.value } : pv))} className="flex-1 bg-black/50 border border-white/10 rounded px-2 py-1 text-xs text-white" placeholder="saludo" />
-                    <span className="text-[10px] text-gray-500 font-mono">{` }`}</span>
-                    <button onClick={() => setVars(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300"><X className="w-3 h-3" /></button>
+                    <button onClick={() => insertVariable(vr.name)} className="p-1 text-xs bg-blue-500/10 border border-blue-500/20 rounded text-blue-400 hover:bg-blue-500/20 font-bold" title="Insertar en mensaje activo">📋</button>
+                    <span className="text-xs text-gray-500 font-mono">{`{ `}</span>
+                    <input value={vr.name} onChange={e => setVars(prev => prev.map((pv, j) => j === i ? { ...pv, name: e.target.value } : pv))} className="flex-1 bg-black/50 border border-white/10 rounded px-3 py-1.5 text-xs text-white" placeholder="saludo" />
+                    <span className="text-xs text-gray-500 font-mono">{` }`}</span>
+                    <button onClick={() => setVars(prev => prev.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300"><X className="w-3.5 h-3.5" /></button>
                   </div>
-                  <textarea value={vr.options} onChange={e => setVars(prev => prev.map((pv, j) => j === i ? { ...pv, options: e.target.value } : pv))} rows={2} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-xs text-white resize-none" placeholder="Una opción por línea" />
+                  <textarea value={vr.options} onChange={e => setVars(prev => prev.map((pv, j) => j === i ? { ...pv, options: e.target.value } : pv))} rows={2} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white resize-none" placeholder="Una opción por línea" />
                 </div>
               ))}
-              <button type="button" onClick={() => setVars(prev => [...prev, { name: "", options: "" }])} className="mt-2 text-[10px] text-blue-400 font-bold flex items-center gap-1 hover:text-blue-300"><Plus className="w-3 h-3" /> Agregar variable</button>
+              <button type="button" onClick={() => setVars(prev => [...prev, { name: "", options: "" }])} className="mt-2 text-xs text-blue-400 font-bold flex items-center gap-1 hover:text-blue-300"><Plus className="w-3.5 h-3.5" /> Agregar variable</button>
             </div>
 
             {/* Contacts */}
             <div>
-              <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold mb-2 block">Destinatarios</label>
+              <label className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2 block">Destinatarios</label>
               <div className="flex gap-1.5 flex-wrap">
                 {contactTabs.map(tab => (
                   <button key={tab.id} onClick={() => { setContactMode(tab.id); setSelectedProductId(""); setSelectedRol(""); setSelectedBuyerIds([]); setSelectedEmployeeIds([]); setSelectedPhoneListId(""); }}
                     className={`p-2 rounded-lg border text-center transition-all ${contactMode === tab.id ? "bg-emerald-500/10 border-emerald-500/30" : "bg-white/[0.02] border-white/5 hover:border-white/10"}`}>
-                    <tab.icon className={`w-4 h-4 mx-auto mb-0.5 ${contactMode === tab.id ? "text-emerald-400" : "text-gray-500"}`} /><p className="text-[9px] font-bold text-white">{tab.label}</p>
+                    <tab.icon className={`w-4 h-4 mx-auto mb-0.5 ${contactMode === tab.id ? "text-emerald-400" : "text-gray-500"}`} /><p className="text-sm font-bold text-white">{tab.label}</p>
                   </button>
                 ))}
               </div>
             </div>
 
-            {contactMode === "leads" && <div className="grid grid-cols-2 gap-3"><div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Estado</label><select value={leadEstado} onChange={e => setLeadEstado(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1"><option value="">Todos</option><option value="nuevo">Nuevo</option><option value="contactado">Contactado</option><option value="calificado">Calificado</option><option value="cliente">Cliente</option></select></div><div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Campaña</label><SearchableSelect options={campanasList.map((c: any) => ({ value: c.id, label: c.nombre }))} value={leadCampanaId} onChange={setLeadCampanaId} placeholder="Todas" /></div></div>}
-            {contactMode === "manual" && <div><textarea value={manualPhones} onChange={e => setManualPhones(e.target.value)} rows={3} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1 resize-none" placeholder="+51999999999&#10;+593939011068&#10;o: +51..., +593..." /></div>}
-            {contactMode === "csv" && <div><input ref={csvRef} type="file" accept=".csv" onChange={handleCsvImport} className="hidden" /><button onClick={() => csvRef.current?.click()} className="w-full flex items-center gap-3 p-4 bg-black/50 border border-dashed border-white/10 rounded-lg hover:border-emerald-500/30"><Upload className="w-5 h-5 text-gray-500" /><div className="text-left"><p className="text-sm text-white">{csvFileName || "Importar CSV"}</p><p className="text-[10px] text-gray-500">Columna: telefono/phone/celular</p></div></button>{csvPhones.length > 0 && <div className="mt-2 flex gap-2"><span className="text-[10px] text-emerald-400">{csvPhones.length} teléfonos</span><button onClick={() => { setCsvPhones([]); setCsvFileName(""); }} className="text-[10px] text-red-400">Limpiar</button></div>}</div>}
-            {contactMode === "clientes" && <div className="space-y-3"><div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Producto</label><SearchableSelect options={productosList.map((p: any) => ({ value: p.id, label: p.nombre, image: p.imagen_principal }))} value={selectedProductId} onChange={setSelectedProductId} placeholder="Seleccionar producto..." /></div>{buyers.length > 0 && <div className="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2"><div className="flex items-center justify-between"><button onClick={toggleAllBuyers} className="text-[10px] font-bold text-gray-400 hover:text-white flex items-center gap-1"><Check className="w-3 h-3" />{selectedBuyerIds.length === buyers.length ? "Deseleccionar" : "Seleccionar"} ({buyers.length})</button><div className="flex items-center gap-2 flex-1 max-w-[200px]"><Search className="w-3 h-3 text-gray-500" /><input value={buyerSearch} onChange={e => setBuyerSearch(e.target.value)} placeholder="Filtrar..." className="w-full bg-transparent text-[10px] text-white placeholder-gray-600 outline-none" /></div></div><div className="max-h-48 overflow-y-auto space-y-0.5">{filteredBuyers.map(b => { const sel = selectedBuyerIds.includes(b.id); return <button key={b.id} onClick={() => setSelectedBuyerIds(prev => prev.includes(b.id) ? prev.filter(id => id !== b.id) : [...prev, b.id])} className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors ${sel ? "bg-emerald-500/10" : "hover:bg-white/[0.02]"}`}><div className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[7px] shrink-0 ${sel ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/10"}`}>{sel ? "✓" : ""}</div><div className="min-w-0"><p className={`text-[11px] font-bold truncate ${sel ? "text-white" : "text-gray-400"}`}>{b.nombre}</p><p className="text-[9px] text-gray-600 truncate">{b.email} {b.telefono ? `· ${b.telefono}` : ""}</p></div></button> })}</div></div>}</div>}
-            {contactMode === "empleados" && <div className="space-y-3"><div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Rol</label><select value={selectedRol} onChange={e => setSelectedRol(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1"><option value="">Seleccionar...</option><option value="superadmin">Super Admin</option><option value="admin">Admin</option><option value="editor">Editor</option><option value="empleado">Empleado</option></select></div>{employees.length > 0 && <div className="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2"><div className="flex items-center justify-between"><button onClick={toggleAllEmployees} className="text-[10px] font-bold text-gray-400 hover:text-white flex items-center gap-1"><Check className="w-3 h-3" />{selectedEmployeeIds.length === employees.length ? "Deseleccionar" : "Seleccionar"} ({employees.length})</button><div className="flex items-center gap-2 flex-1 max-w-[200px]"><Search className="w-3 h-3 text-gray-500" /><input value={employeeSearch} onChange={e => setEmployeeSearch(e.target.value)} placeholder="Filtrar..." className="w-full bg-transparent text-[10px] text-white placeholder-gray-600 outline-none" /></div></div><div className="max-h-48 overflow-y-auto space-y-0.5">{filteredEmployees.map(e => { const sel = selectedEmployeeIds.includes(e.id); return <button key={e.id} onClick={() => setSelectedEmployeeIds(prev => prev.includes(e.id) ? prev.filter(id => id !== e.id) : [...prev, e.id])} className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors ${sel ? "bg-emerald-500/10" : "hover:bg-white/[0.02]"}`}><div className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[7px] shrink-0 ${sel ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/10"}`}>{sel ? "✓" : ""}</div><div className="min-w-0"><p className={`text-[11px] font-bold truncate ${sel ? "text-white" : "text-gray-400"}`}>{e.nombre}</p><p className="text-[9px] text-gray-600 truncate">{e.email} {e.telefono ? `· ${e.telefono}` : ""}</p></div></button> })}</div></div>}</div>}
-            {contactMode === "phone_list" && <div className="space-y-3"><div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Lista guardada</label><select value={selectedPhoneListId} onChange={e => setSelectedPhoneListId(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1"><option value="">Seleccionar...</option>{phoneLists.map((l: any) => <option key={l.id} value={l.id}>{l.nombre} ({l.phones?.length || 0})</option>)}</select></div>{selectedPhoneListId && <div><span className="text-[10px] text-emerald-400">{phoneLists.find(l => l.id === selectedPhoneListId)?.phones?.length || 0} números</span></div>}</div>}
+            {contactMode === "leads" && <div className="grid grid-cols-2 gap-3"><div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Estado</label><select value={leadEstado} onChange={e => setLeadEstado(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1"><option value="">Todos</option><option value="nuevo">Nuevo</option><option value="contactado">Contactado</option><option value="calificado">Calificado</option><option value="cliente">Cliente</option></select></div><div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Campaña</label><SearchableSelect options={campanasList.map((c: any) => ({ value: c.id, label: c.nombre }))} value={leadCampanaId} onChange={setLeadCampanaId} placeholder="Todas" /></div></div>}
+            {contactMode === "manual" && <div><textarea value={manualPhones} onChange={e => setManualPhones(e.target.value)} rows={3} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1 resize-none" placeholder="+51999999999&#10;+593939011068&#10;o: +51..., +593..." /></div>}
+            {contactMode === "csv" && <div><input ref={csvRef} type="file" accept=".csv" onChange={handleCsvImport} className="hidden" /><button onClick={() => csvRef.current?.click()} className="w-full flex items-center gap-3 p-4 bg-black/50 border border-dashed border-white/10 rounded-lg hover:border-emerald-500/30"><Upload className="w-5 h-5 text-gray-500" /><div className="text-left"><p className="text-sm text-white">{csvFileName || "Importar CSV"}</p><p className="text-xs text-gray-500">Columna: telefono/phone/celular</p></div></button>{csvPhones.length > 0 && <div className="mt-2 flex gap-2"><span className="text-xs text-emerald-400">{csvPhones.length} teléfonos</span><button onClick={() => { setCsvPhones([]); setCsvFileName(""); }} className="text-xs text-red-400">Limpiar</button></div>}</div>}
+            {contactMode === "clientes" && <div className="space-y-3"><div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Producto</label><SearchableSelect options={productosList.map((p: any) => ({ value: p.id, label: p.nombre, image: p.imagen_principal }))} value={selectedProductId} onChange={setSelectedProductId} placeholder="Seleccionar producto..." /></div>{buyers.length > 0 && <div className="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2"><div className="flex items-center justify-between"><button onClick={toggleAllBuyers} className="text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1"><Check className="w-3.5 h-3.5" />{selectedBuyerIds.length === buyers.length ? "Deseleccionar" : "Seleccionar"} ({buyers.length})</button><div className="flex items-center gap-2 flex-1 max-w-[200px]"><Search className="w-3.5 h-3.5 text-gray-500" /><input value={buyerSearch} onChange={e => setBuyerSearch(e.target.value)} placeholder="Filtrar..." className="w-full bg-transparent text-xs text-white placeholder-gray-600 outline-none" /></div></div><div className="max-h-48 overflow-y-auto space-y-0.5">{filteredBuyers.map(b => { const sel = selectedBuyerIds.includes(b.id); return <button key={b.id} onClick={() => setSelectedBuyerIds(prev => prev.includes(b.id) ? prev.filter(id => id !== b.id) : [...prev, b.id])} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors ${sel ? "bg-emerald-500/10" : "hover:bg-white/[0.02]"}`}><div className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[10px] shrink-0 ${sel ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/10"}`}>{sel ? "✓" : ""}</div><div className="min-w-0"><p className={`text-sm font-bold truncate ${sel ? "text-white" : "text-gray-400"}`}>{b.nombre}</p><p className="text-sm text-gray-600 truncate">{b.email} {b.telefono ? `· ${b.telefono}` : ""}</p></div></button> })}</div></div>}</div>}
+            {contactMode === "empleados" && <div className="space-y-3"><div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Rol</label><select value={selectedRol} onChange={e => setSelectedRol(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1"><option value="">Seleccionar...</option><option value="superadmin">Super Admin</option><option value="admin">Admin</option><option value="editor">Editor</option><option value="empleado">Empleado</option></select></div>{employees.length > 0 && <div className="bg-black/30 border border-white/5 rounded-xl p-3 space-y-2"><div className="flex items-center justify-between"><button onClick={toggleAllEmployees} className="text-xs font-bold text-gray-400 hover:text-white flex items-center gap-1"><Check className="w-3.5 h-3.5" />{selectedEmployeeIds.length === employees.length ? "Deseleccionar" : "Seleccionar"} ({employees.length})</button><div className="flex items-center gap-2 flex-1 max-w-[200px]"><Search className="w-3.5 h-3.5 text-gray-500" /><input value={employeeSearch} onChange={e => setEmployeeSearch(e.target.value)} placeholder="Filtrar..." className="w-full bg-transparent text-xs text-white placeholder-gray-600 outline-none" /></div></div><div className="max-h-48 overflow-y-auto space-y-0.5">{filteredEmployees.map(e => { const sel = selectedEmployeeIds.includes(e.id); return <button key={e.id} onClick={() => setSelectedEmployeeIds(prev => prev.includes(e.id) ? prev.filter(id => id !== e.id) : [...prev, e.id])} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors ${sel ? "bg-emerald-500/10" : "hover:bg-white/[0.02]"}`}><div className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[10px] shrink-0 ${sel ? "bg-emerald-500 border-emerald-500 text-white" : "border-white/10"}`}>{sel ? "✓" : ""}</div><div className="min-w-0"><p className={`text-sm font-bold truncate ${sel ? "text-white" : "text-gray-400"}`}>{e.nombre}</p><p className="text-sm text-gray-600 truncate">{e.email} {e.telefono ? `· ${e.telefono}` : ""}</p></div></button> })}</div></div>}</div>}
+            {contactMode === "phone_list" && <div className="space-y-3"><div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Lista guardada</label><select value={selectedPhoneListId} onChange={e => setSelectedPhoneListId(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1"><option value="">Seleccionar...</option>{phoneLists.map((l: any) => <option key={l.id} value={l.id}>{l.nombre} ({l.phones?.length || 0})</option>)}</select></div>{selectedPhoneListId && <div><span className="text-xs text-emerald-400">{phoneLists.find(l => l.id === selectedPhoneListId)?.phones?.length || 0} números</span></div>}</div>}
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10"><span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Destinatarios</span><span className="text-lg font-black text-emerald-400">{leadCount}</span></div>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10"><span className="text-xs text-gray-400 uppercase tracking-widest font-bold">Destinatarios</span><span className="text-xl font-black text-emerald-400">{leadCount}</span></div>
 
             <div className="grid grid-cols-3 gap-3">
-              <div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Entre mensajes (seg)</label><input type="number" value={delayBetweenMessages} onChange={e => setDelayBetweenMessages(parseInt(e.target.value) || 30)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" /></div>
-              <div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Delay min (seg)</label><input type="number" value={minDelay} onChange={e => setMinDelay(parseInt(e.target.value) || 30)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" /></div>
-              <div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Delay max (seg)</label><input type="number" value={maxDelay} onChange={e => setMaxDelay(parseInt(e.target.value) || 120)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" /></div>
+              <div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Entre mensajes (seg)</label><input type="number" value={delayBetweenMessages} onChange={e => setDelayBetweenMessages(parseInt(e.target.value) || 30)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1" /></div>
+              <div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Delay min (seg)</label><input type="number" value={minDelay} onChange={e => setMinDelay(parseInt(e.target.value) || 30)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1" /></div>
+              <div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Delay max (seg)</label><input type="number" value={maxDelay} onChange={e => setMaxDelay(parseInt(e.target.value) || 120)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1" /></div>
             </div>
 
             <div className="flex gap-2">
@@ -451,7 +451,7 @@ export default function WhatsAppPage() {
         {loading ? <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-16 bg-white/[0.02] rounded-xl animate-pulse" />)}</div>
         : campaigns.length === 0 ? <div className="text-center py-16 bg-zinc-900/20 border border-white/5 rounded-2xl"><Send className="w-12 h-12 text-gray-700 mx-auto mb-4" /><p className="text-gray-500 text-sm">Sin campañas</p></div>
         : <>
-          <h2 className="text-lg font-black flex items-center gap-2"><Clock className="w-5 h-5 text-gray-500" /> Historial</h2>
+          <h2 className="text-xl font-black flex items-center gap-2"><Clock className="w-5 h-5 text-gray-500" /> Historial</h2>
           <div className="space-y-3">
             {campaigns.map((wc: any) => (
               <div key={wc.id} className="bg-zinc-900/30 border border-white/5 rounded-xl overflow-hidden hover:border-white/10 transition-colors">
@@ -459,23 +459,23 @@ export default function WhatsAppPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-3">
-                        <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${wc.status === "sending" || sendingIds.has(wc.id) ? "bg-emerald-500 animate-pulse" : wc.status === "completed" ? "bg-blue-500" : wc.status === "failed" ? "bg-red-500" : wc.status === "paused" ? "bg-yellow-500" : "bg-gray-600"}`} />
+                        <div className={`w-3 h-3 rounded-full shrink-0 ${wc.status === "sending" || sendingIds.has(wc.id) ? "bg-emerald-500 animate-pulse" : wc.status === "completed" ? "bg-blue-500" : wc.status === "failed" ? "bg-red-500" : wc.status === "paused" ? "bg-yellow-500" : "bg-gray-600"}`} />
                         <h3 className="text-white font-bold truncate">{wc.nombre}</h3>
-                        <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${statusColor(sendingIds.has(wc.id) ? "sending" : wc.status)}`}>{sendingIds.has(wc.id) ? "sending" : wc.status}</span>
+                        <span className={`text-sm px-2 py-0.5 rounded-full font-bold uppercase ${statusColor(sendingIds.has(wc.id) ? "sending" : wc.status)}`}>{sendingIds.has(wc.id) ? "sending" : wc.status}</span>
                       </div>
                       <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-gray-500">
-                        <span><BarChart3 className="w-3 h-3 inline mr-1" />{wc.sent_count}/{wc.total_recipients}</span>
-                        {sendingProgress[wc.id] && <span className="text-emerald-400"><Loader2 className="w-3 h-3 inline animate-spin mr-1" />{sendingProgress[wc.id]}</span>}
+                        <span><BarChart3 className="w-3.5 h-3.5 inline mr-1" />{wc.sent_count}/{wc.total_recipients}</span>
+                        {sendingProgress[wc.id] && <span className="text-emerald-400"><Loader2 className="w-3.5 h-3.5 inline animate-spin mr-1" />{sendingProgress[wc.id]}</span>}
                         <span className="text-gray-600">{new Date(wc.creado_en).toLocaleDateString("es-MX")}</span>
                       </div>
                       {wc.total_recipients > 0 && <div className="mt-3 w-full bg-white/5 rounded-full h-1.5 overflow-hidden"><div className="bg-emerald-500 h-full rounded-full transition-all" style={{ width: `${(wc.sent_count / wc.total_recipients) * 100}%` }} /></div>}
                     </div>
                     <div className="flex gap-1.5 shrink-0">
-                      {wc.status === "draft" && !sendingIds.has(wc.id) && (<><button onClick={() => handleEdit(wc)} className="px-2.5 py-2 bg-white/10 rounded-lg text-gray-400 text-[10px] font-bold hover:text-white"><Edit2 className="w-3 h-3" /></button><button onClick={() => handleAction(wc.id, "start")} className="px-3 py-2 bg-emerald-600 rounded-lg text-white text-[10px] font-bold flex items-center gap-1 hover:bg-emerald-500"><Play className="w-3 h-3" /> Iniciar</button></>)}
-                      {wc.status === "sending" && <button onClick={() => handleAction(wc.id, "pause")} className="px-3 py-2 bg-amber-600 rounded-lg text-white text-[10px] font-bold flex items-center gap-1 hover:bg-amber-500"><Pause className="w-3 h-3" /> Pausar</button>}
-                      <button onClick={() => handleAction(wc.id, "duplicate")} className="px-2.5 py-2 bg-white/10 rounded-lg text-gray-400 text-[10px] font-bold hover:text-white"><Copy className="w-3 h-3" /></button>
-                      <button onClick={() => handleViewDetail(wc.id)} className="px-2.5 py-2 bg-white/10 rounded-lg text-gray-400 text-[10px] font-bold hover:text-white">{expandedCampaign === wc.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}</button>
-                      <button onClick={() => { if (confirm("¿Eliminar?")) handleAction(wc.id, "delete"); }} className="px-2.5 py-2 bg-red-500/10 rounded-lg text-red-400 text-[10px] font-bold hover:bg-red-500/20"><Trash2 className="w-3 h-3" /></button>
+                      {wc.status === "draft" && !sendingIds.has(wc.id) && (<><button onClick={() => handleEdit(wc)} className="px-3 py-2.5 bg-white/10 rounded-lg text-gray-400 text-xs font-bold hover:text-white"><Edit2 className="w-3.5 h-3.5" /></button><button onClick={() => handleAction(wc.id, "start")} className="px-3 py-2 bg-emerald-600 rounded-lg text-white text-xs font-bold flex items-center gap-1 hover:bg-emerald-500"><Play className="w-3.5 h-3.5" /> Iniciar</button></>)}
+                      {wc.status === "sending" && <button onClick={() => handleAction(wc.id, "pause")} className="px-3 py-2 bg-amber-600 rounded-lg text-white text-xs font-bold flex items-center gap-1 hover:bg-amber-500"><Pause className="w-3.5 h-3.5" /> Pausar</button>}
+                      <button onClick={() => handleAction(wc.id, "duplicate")} className="px-3 py-2.5 bg-white/10 rounded-lg text-gray-400 text-xs font-bold hover:text-white"><Copy className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleViewDetail(wc.id)} className="px-3 py-2.5 bg-white/10 rounded-lg text-gray-400 text-xs font-bold hover:text-white">{expandedCampaign === wc.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}</button>
+                      <button onClick={() => { if (confirm("¿Eliminar?")) handleAction(wc.id, "delete"); }} className="px-3 py-2.5 bg-red-500/10 rounded-lg text-red-400 text-xs font-bold hover:bg-red-500/20"><Trash2 className="w-3.5 h-3.5" /></button>
                     </div>
                   </div>
                 </div>
@@ -485,7 +485,7 @@ export default function WhatsAppPage() {
                     {campaignRecipients.length > 0 ? (
                       <div className="overflow-x-auto">
                         <table className="w-full text-xs">
-                          <thead><tr className="text-gray-500 border-b border-white/5"><th className="text-left py-2 font-bold uppercase tracking-wider text-[9px]">Teléfono</th><th className="text-left py-2 font-bold uppercase tracking-wider text-[9px]">Grupo</th><th className="text-left py-2 font-bold uppercase tracking-wider text-[9px]">Estado</th><th className="text-left py-2 font-bold uppercase tracking-wider text-[9px]">Hora</th><th className="text-left py-2 font-bold uppercase tracking-wider text-[9px]">Error</th></tr></thead>
+                          <thead><tr className="text-gray-500 border-b border-white/5"><th className="text-left py-2 font-bold uppercase tracking-wider text-sm">Teléfono</th><th className="text-left py-2 font-bold uppercase tracking-wider text-sm">Grupo</th><th className="text-left py-2 font-bold uppercase tracking-wider text-sm">Estado</th><th className="text-left py-2 font-bold uppercase tracking-wider text-sm">Hora</th><th className="text-left py-2 font-bold uppercase tracking-wider text-sm">Error</th></tr></thead>
                           <tbody>
                             {campaignRecipients.map((r: any) => (
                               <tr key={r.id} className="border-b border-white/[0.02]">
@@ -500,7 +500,7 @@ export default function WhatsAppPage() {
                         </table>
                       </div>
                     ) : <p className="text-xs text-gray-600">No hay registros de envío</p>}
-                    {recipientsPolling && <p className="text-[9px] text-gray-700 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Actualizando cada 30s</p>}
+                    {recipientsPolling && <p className="text-sm text-gray-700 flex items-center gap-1"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Actualizando cada 30s</p>}
                   </div>
                 )}
               </div>
