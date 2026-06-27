@@ -23,6 +23,7 @@ export default function WhatsAppPage() {
   const [uploading, setUploading] = useState(false);
 
   const [nombre, setNombre] = useState("");
+  const [categoria, setCategoria] = useState("");
   const [messageGroups, setMessageGroups] = useState<any[]>([{ texts: "", media_url: "", filename: "" }]);
   const [vars, setVars] = useState<{ name: string; options: string }[]>([]);
   const [minDelay, setMinDelay] = useState(60);
@@ -160,7 +161,7 @@ export default function WhatsAppPage() {
   };
 
   const resetForm = () => {
-    setNombre(""); setMessageGroups([{ texts: "", media_url: "", filename: "" }]); setVars([]);
+    setNombre(""); setCategoria(""); setMessageGroups([{ texts: "", media_url: "", filename: "" }]); setVars([]);
     setMinDelay(60); setMaxDelay(180); setDelayBetweenMessages(30);
     setManualPhones(""); setLeadEstado(""); setLeadCampanaId("");
     setCsvPhones([]); setCsvFileName(""); setEditingId(null); setLeadCount(0);
@@ -192,7 +193,7 @@ export default function WhatsAppPage() {
 
       const body: any = {
         action: editingId ? "update" : "create",
-        nombre, message_groups: groups, variables: varsObj,
+        nombre, categoria: categoria || null, message_groups: groups, variables: varsObj,
         min_delay_seconds: minDelay, max_delay_seconds: maxDelay,
         delay_between_messages: delayBetweenMessages, lead_filter: filter,
       };
@@ -254,7 +255,7 @@ export default function WhatsAppPage() {
   };
 
   const handleEdit = (wc: any) => {
-    setEditingId(wc.id); setNombre(wc.nombre || "");
+    setEditingId(wc.id); setNombre(wc.nombre || ""); setCategoria(wc.categoria || "");
     const groups = wc.message_groups && wc.message_groups.length > 0 ? wc.message_groups : [{ texts: [wc.mensaje || ""], media_url: wc.media_url || null, filename: wc.filename || null }];
     setMessageGroups(groups.map((g: any) => ({ texts: (g.texts || [g.text || ""]).join("\n"), media_url: g.media_url || "", filename: g.filename || "" })));
     const v = wc.variables || {}; setVars(Object.entries(v).map(([name, opts]: [string, any]) => ({ name, options: Array.isArray(opts) ? opts.join("\n") : "" })));
@@ -337,7 +338,16 @@ export default function WhatsAppPage() {
           <div className="bg-zinc-900/50 border border-emerald-500/20 rounded-2xl p-6 space-y-5">
             <h3 className="text-white font-bold text-sm flex items-center gap-2">{editingId ? <Edit2 className="w-4 h-4 text-amber-400" /> : <Plus className="w-4 h-4 text-emerald-400" />}{editingId ? "Editar Campaña" : "Nueva Campaña WhatsApp"}</h3>
 
-            <div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Nombre *</label><input value={nombre} onChange={e => setNombre(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1" placeholder="Oferta Julio 2026" /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Nombre *</label><input value={nombre} onChange={e => setNombre(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1" placeholder="Oferta Julio 2026" /></div>
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-widest font-bold">Categoría</label>
+                <input value={categoria} onChange={e => setCategoria(e.target.value)} list="categoria-list" className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-3 text-sm text-white mt-1" placeholder="Montebello, Curso, Villa Victoria..." />
+                <datalist id="categoria-list">
+                  {[...new Set(campaigns.map((c: any) => c.categoria).filter(Boolean))].map((cat: any) => <option key={cat} value={cat} />)}
+                </datalist>
+              </div>
+            </div>
 
             {/* Message Groups */}
             <div>
@@ -452,8 +462,15 @@ export default function WhatsAppPage() {
         : campaigns.length === 0 ? <div className="text-center py-16 bg-zinc-900/20 border border-white/5 rounded-2xl"><Send className="w-12 h-12 text-gray-700 mx-auto mb-4" /><p className="text-gray-500 text-sm">Sin campañas</p></div>
         : <>
           <h2 className="text-xl font-black flex items-center gap-2"><Clock className="w-5 h-5 text-gray-500" /> Historial</h2>
+          {/* Filtro categoría */}
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={() => setCategoria("")} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${!categoria ? "bg-emerald-500/20 text-emerald-400" : "bg-white/5 text-gray-500 hover:text-white"}`}>📁 Todas</button>
+            {[...new Set(campaigns.map((c: any) => c.categoria).filter(Boolean))].map((cat: any) => (
+              <button key={cat} onClick={() => setCategoria(cat)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${categoria === cat ? "bg-emerald-500/20 text-emerald-400" : "bg-white/5 text-gray-500 hover:text-white"}`}>📁 {cat}</button>
+            ))}
+          </div>
           <div className="space-y-3">
-            {campaigns.map((wc: any) => (
+            {campaigns.filter((wc: any) => !categoria || wc.categoria === categoria).map((wc: any) => (
               <div key={wc.id} className="bg-zinc-900/30 border border-white/5 rounded-xl overflow-hidden hover:border-white/10 transition-colors">
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-4">
