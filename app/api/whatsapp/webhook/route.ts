@@ -9,6 +9,7 @@ function getAdmin() { return createClient(supabaseUrl, supabaseServiceKey) }
 
 function cleanJid(raw: string): string {
   return raw
+    .trim()
     .replace(/:(\d+)$/, '')
     .replace(/@(s\.whatsapp\.net|hosted\.lid|lid|g\.us|c\.us|broadcast)$/, '')
 }
@@ -41,15 +42,27 @@ function extractBody(msg: Record<string, any>): { body: string | null; caption: 
 }
 
 function parseEntry(entry: Record<string, any>, eventName: string): Record<string, any> | null {
+  // 0. received_message (Planifyx alternate format)
+  if (eventName === 'received_message' && entry.message?.body_message) {
+    const bm = entry.message.body_message
+    return {
+      event_type: 'message',
+      from_number: entry.message.from || cleanJid(entry.message.remoteJid || bm.sender || bm.author || ''),
+      to_number: null, message_type: bm.type === 'textMessage' ? 'text' : bm.type || 'text',
+      body: bm.content || bm.messages?.conversation || bm.text || '[Mensaje]',
+      caption: null, media_url: bm.media?.url || null, media_mime: bm.media?.mime || null,
+    }
+  }
+
+  // 1. Contacts / Presence — ignorar metadata
+  if (entry.notify || entry.verifiedName || eventName === 'presence.update' || entry.presences) return null
+
+  // 2. Status updates — tienen update.status
   const key = entry.key || {}
   const msg = entry.message || {}
   const update = entry.update || {}
   const rawJid = key.remoteJid || entry.remoteJid || entry.id || ''
 
-  // 1. Contacts — ignorar
-  if (entry.notify || entry.verifiedName) return null
-
-  // 2. Status updates — tienen update.status
   if (Object.keys(update).length > 0 && update.status !== undefined) {
     const statusMap: Record<number, string> = { 1: 'server_ack', 2: 'delivered', 3: 'read', 4: 'played' }
     return {
@@ -135,14 +148,28 @@ export async function POST(request: NextRequest) {
     // Planifyx puede enviar el evento en diferentes ubicaciones
     const eventName = body.event || body.data?.event || body.type || ''
 
-    // Aplanar entradas: prueba varios formatos
-    let entries: Record<string, any>[]
-    if (Array.isArray(body.data?.data)) entries = body.data.data
-    else if (Array.isArray(body.messages)) entries = body.messages
-    else if (Array.isArray(body.data)) entries = body.data
-    else if (Array.isArray(body.notifications)) entries = body.notifications
-    else if (typeof body.data === 'object' && body.data !== null && !Array.isArray(body.data)) entries = [body.data]
-    else entries = [body]
+    // Aplanar entradas: Planifyx usa muchos formatos distintos
+    let entries: Record<string, any>[] = []
+
+    if (Array.isArray(body.data?.data)) {
+      entries = body.data.data
+    } else if (Array.isArray(body.data?.data?.messages)) {
+      entries = body.data.data.messages
+    } else if (Array.isArray(body.messages)) {
+      entries = body.messages
+    } else if (Array.isArray(body.data)) {
+      entries = body.data
+    } else if (Array.isArray(body.notifications)) {
+      entries = body.notifications
+    } else if (body.data?.message) {
+      // received_message: {data:{message:{body_message:{content:"Hola"}}}}
+      entries = [body.data]
+    } else if (body.data?.data?.messages) {
+      // messages.upsert con objeto (no array): {data:{data:{messages:[{...}]}}}
+      entries = Array.isArray(body.data.data.messages) ? body.data.data.messages : [body.data]
+    } else {
+      entries = [body]
+    }
 
     const messages: Record<string, any>[] = []
 
