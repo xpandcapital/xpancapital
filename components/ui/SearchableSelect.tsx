@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, ChevronDown, Check } from 'lucide-react'
 
@@ -36,8 +37,11 @@ export function SearchableSelect({
 }: SearchableSelectProps) {
   const [abierto, setAbierto] = useState(false)
   const [busqueda, setBusqueda] = useState('')
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 0 })
+  const triggerRef = useRef<HTMLButtonElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const selectedOpt = options.find((o) => o.value === value)
 
@@ -47,8 +51,31 @@ export function SearchableSelect({
 
   const mostrarBusqueda = options.length > 10
 
+  const actualizarPosicion = useCallback(() => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setPos({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (abierto) {
+      actualizarPosicion()
+      window.addEventListener('scroll', actualizarPosicion, true)
+      window.addEventListener('resize', actualizarPosicion)
+    }
+    return () => {
+      window.removeEventListener('scroll', actualizarPosicion, true)
+      window.removeEventListener('resize', actualizarPosicion)
+    }
+  }, [abierto, actualizarPosicion])
+
   const handleClickOutside = useCallback((e: MouseEvent) => {
-    if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+    const target = e.target as Node
+    if (
+      containerRef.current && !containerRef.current.contains(target) &&
+      dropdownRef.current && !dropdownRef.current.contains(target)
+    ) {
       setAbierto(false)
       setBusqueda('')
     }
@@ -84,10 +111,88 @@ export function SearchableSelect({
   const SelectedIconComp = selectedOpt?.icon
   const SelectedImage = selectedOpt?.image
 
+  const dropdown = (
+    <AnimatePresence>
+      {abierto && (
+        <motion.div
+          ref={dropdownRef}
+          initial={{ opacity: 0, y: -4, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -4, scale: 0.98 }}
+          transition={{ duration: 0.15 }}
+          style={{
+            position: 'fixed',
+            top: pos.top,
+            left: pos.left,
+            width: pos.width,
+            zIndex: 9999,
+          }}
+          className="bg-zinc-900 border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden"
+        >
+          {mostrarBusqueda && (
+            <div className="p-2 border-b border-white/5">
+              <div className="flex items-center gap-2 bg-white/[0.03] rounded-lg px-3 py-2">
+                <Search className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="w-full bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="max-h-[220px] overflow-y-auto py-1">
+            {filtrados.length > 0 ? (
+              filtrados.map((opt) => {
+                const isSelected = opt.value === value
+                const OptIcon = opt.icon
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => handleSelect(opt.value)}
+                    className={`w-full flex items-start gap-3 px-3 py-2 text-left transition-colors ${
+                      isSelected ? 'bg-blis-red/10' : 'hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    {opt.image ? (
+                      <img src={opt.image} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0 mt-0.5" />
+                    ) : OptIcon ? (
+                      <OptIcon className={`w-5 h-5 mt-0.5 shrink-0 ${isSelected ? 'text-blis-red' : 'text-gray-500'}`} />
+                    ) : (
+                      <div className="w-5 shrink-0" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-sm font-medium line-clamp-2 ${isSelected ? 'text-white' : 'text-gray-200'}`}>
+                        {opt.label}
+                      </p>
+                      {opt.sublabel && (
+                        <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-1">{opt.sublabel}</p>
+                      )}
+                    </div>
+                    {isSelected && <Check className="w-4 h-4 text-blis-red shrink-0 mt-0.5" />}
+                  </button>
+                )
+              })
+            ) : (
+              <div className="px-4 py-8 text-center">
+                <p className="text-xs text-gray-600">{emptyText}</p>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      {/* Trigger */}
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setAbierto(!abierto)}
         className={`w-full flex items-center justify-between gap-2 ${SELECT_CLASSES} ${
@@ -108,97 +213,7 @@ export function SearchableSelect({
         </motion.span>
       </button>
 
-      {/* Dropdown */}
-      <AnimatePresence>
-        {abierto && (
-          <motion.div
-            initial={{ opacity: 0, y: -4, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -4, scale: 0.98 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-50 mt-1 w-full bg-zinc-900 border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden"
-          >
-            {/* Search input */}
-            {mostrarBusqueda && (
-              <div className="p-2 border-b border-white/5">
-                <div className="flex items-center gap-2 bg-white/[0.03] rounded-lg px-3 py-2">
-                  <Search className="w-3.5 h-3.5 text-gray-500 shrink-0" />
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                    placeholder={searchPlaceholder}
-                    className="w-full bg-transparent text-sm text-white placeholder-gray-600 focus:outline-none"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Options list */}
-            <div className="max-h-[220px] overflow-y-auto py-1">
-              {filtrados.length > 0 ? (
-                filtrados.map((opt) => {
-                  const isSelected = opt.value === value
-                  const OptIcon = opt.icon
-                  return (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => handleSelect(opt.value)}
-                      className={`w-full flex items-start gap-3 px-3 py-2 text-left transition-colors ${
-                        isSelected ? 'bg-blis-red/10' : 'hover:bg-white/[0.04]'
-                      }`}
-                    >
-                      {/* Thumbnail or icon */}
-                      {opt.image ? (
-                        <img
-                          src={opt.image}
-                          alt=""
-                          className="w-8 h-8 rounded-lg object-cover shrink-0 mt-0.5"
-                        />
-                      ) : OptIcon ? (
-                        <OptIcon
-                          className={`w-5 h-5 mt-0.5 shrink-0 ${
-                            isSelected ? 'text-blis-red' : 'text-gray-500'
-                          }`}
-                        />
-                      ) : (
-                        <div className="w-5 shrink-0" />
-                      )}
-
-                      {/* Text */}
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className={`text-sm font-medium line-clamp-2 ${
-                            isSelected ? 'text-white' : 'text-gray-200'
-                          }`}
-                        >
-                          {opt.label}
-                        </p>
-                        {opt.sublabel && (
-                          <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-1">
-                            {opt.sublabel}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Checkmark */}
-                      {isSelected && (
-                        <Check className="w-4 h-4 text-blis-red shrink-0 mt-0.5" />
-                      )}
-                    </button>
-                  )
-                })
-              ) : (
-                <div className="px-4 py-8 text-center">
-                  <p className="text-xs text-gray-600">{emptyText}</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {typeof window !== 'undefined' && createPortal(dropdown, document.body)}
     </div>
   )
 }

@@ -392,7 +392,7 @@ export default function FormasPagoAdminPage() {
                                                                     { value: 'percentage', label: '%' },
                                                                 ]}
                                                                 placeholder="Sin costo"
-                                                                className="bg-white/5 border border-white/10 rounded px-2 py-1.5 text-xs text-white col-span-1" />
+                                                                className="col-span-1" />
                                                             <Input value={forma.config?.processing_fee_value || ''}
                                                                 onChange={e => updateSimple(forma.id, 'processing_fee_value', e.target.value)}
                                                                 type="number" step="0.01" placeholder="Valor"

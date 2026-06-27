@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
     const { error } = await supabaseAdmin
       .from("push_subscriptions")
       .upsert({
-        user_id: auth.id,
-        empresa_id: auth.empresa_id,
+        user_id: auth.userId,
+        empresa_id: auth.empresaId,
         endpoint,
         p256dh: keys.p256dh,
         auth: keys.auth,

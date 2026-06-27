@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
     console.log(`[PayPal Webhook] Event: ${eventType}`)
 
     if (eventType === 'PAYMENT.CAPTURE.COMPLETED') {
-      const resource = body.resource as Record<string, unknown> | undefined
-      const purchaseUnits = resource?.supplementary_data?.related_ids as Record<string, unknown> | undefined
+      const resource = body.resource as Record<string, any> | undefined
+      const purchaseUnits = resource?.supplementary_data?.related_ids as Record<string, any> | undefined
       const orderId = purchaseUnits?.order_id as string || resource?.custom_id as string
 
       if (orderId) {
