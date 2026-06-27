@@ -44,12 +44,10 @@ async function getCredentials(userId?: string, empresaId?: string): Promise<What
         const token = data.find((r: any) => r.key_name === 'planifyx_access_token')
         const instance = data.find((r: any) => r.key_name === 'planifyx_instance_id')
         if (token?.key_value) {
-          const decrypted = decryptApiKey(token.key_value)
-          console.log('[WhatsApp] Token desencriptado:', decrypted ? `${decrypted.substring(0, 6)}...` : 'FALLÓ')
-          return {
-            accessToken: decrypted || '',
-            instanceId: instance?.key_value ? decryptApiKey(instance.key_value) : '',
-          }
+          const decToken = decryptApiKey(token.key_value)
+          const decInstance = instance?.key_value ? decryptApiKey(instance.key_value) : ''
+          console.log('[WhatsApp] Credenciales leídas:', { tokenOK: !!decToken, instanceValue: decInstance || 'VACÍO' })
+          return { accessToken: decToken || '', instanceId: decInstance }
         }
       }
     } catch (e) {
@@ -93,6 +91,7 @@ export async function sendWhatsApp({
 
   try {
     const numberClean = number.replace(/\D/g, '')
+    console.log('[WhatsApp] sendWhatsApp llamando con:', { number: numberClean, instanceId: creds.instanceId, tokenPrefix: creds.accessToken?.substring(0, 8) })
 
     // Planifyx requiere POST con query params en la URL (NO JSON body)
     const params = new URLSearchParams({
