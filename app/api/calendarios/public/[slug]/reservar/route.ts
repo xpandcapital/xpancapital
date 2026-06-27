@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       const { data: asesor } = await supabase
         .from('asesores').select('whatsapp').eq('id', calendario.campana.asesor_id).single()
       if (asesor?.whatsapp) {
-        notifyNewLead(nombre || 'Nuevo lead', email || '', telefono, asesor.whatsapp).catch(() => {})
+        notifyNewLead(nombre || 'Nuevo lead', email || '', telefono, asesor.whatsapp, undefined, empresaId).catch(() => {})
       }
     }
 

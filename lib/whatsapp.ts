@@ -1,6 +1,48 @@
+import { createClient } from '@/lib/supabase/server'
+import { getApiKeys } from '@/lib/api-keys'
+
 const API_BASE = 'https://socialposter.planifyx.com/api'
-const ACCESS_TOKEN = '68471a588a44b'
-const INSTANCE_ID = '609ACF283XXXX'
+
+interface WhatsAppCredentials {
+  accessToken: string
+  instanceId: string
+}
+
+async function getCredentials(userId?: string, empresaId?: string): Promise<WhatsAppCredentials> {
+  // 1. Leer de api_keys (personal → global)
+  if (userId && empresaId) {
+    try {
+      const supabase = createClient()
+      const keys = await getApiKeys(
+        supabase,
+        ['planifyx_access_token', 'planifyx_instance_id'],
+        userId,
+        empresaId
+      )
+      if (keys.planifyx_access_token) {
+        return {
+          accessToken: keys.planifyx_access_token,
+          instanceId: keys.planifyx_instance_id || '',
+        }
+      }
+    } catch {
+      // Fall through to next fallback
+    }
+  }
+
+  // 2. Fallback: localStorage (client-side cache)
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('planifyx_access_token')
+    const instance = localStorage.getItem('planifyx_instance_id')
+    if (token) return { accessToken: token, instanceId: instance || '' }
+  }
+
+  // 3. Fallback: variables de entorno (.env.local)
+  return {
+    accessToken: process.env.PLANIFYX_ACCESS_TOKEN || '',
+    instanceId: process.env.PLANIFYX_INSTANCE_ID || '',
+  }
+}
 
 interface WhatsAppSendParams {
   number: string
@@ -8,16 +50,27 @@ interface WhatsAppSendParams {
   type?: 'text' | 'media'
   media_url?: string
   filename?: string
+  userId?: string
+  empresaId?: string
 }
 
-export async function sendWhatsApp({ number, message, type = 'text', media_url, filename }: WhatsAppSendParams) {
+export async function sendWhatsApp({
+  number, message, type = 'text', media_url, filename,
+  userId, empresaId,
+}: WhatsAppSendParams) {
+  const { accessToken, instanceId } = await getCredentials(userId, empresaId)
+  if (!accessToken || !instanceId) {
+    console.error('[WhatsApp] Credenciales no configuradas')
+    return { success: false, error: 'Credenciales no configuradas' }
+  }
+
   try {
     const params = new URLSearchParams({
       number: number.replace(/\D/g, ''),
       type,
       message,
-      instance_id: INSTANCE_ID,
-      access_token: ACCESS_TOKEN,
+      instance_id: instanceId,
+      access_token: accessToken,
     })
     if (media_url) params.set('media_url', media_url)
     if (filename) params.set('filename', filename)
@@ -31,10 +84,13 @@ export async function sendWhatsApp({ number, message, type = 'text', media_url, 
   }
 }
 
-export async function checkWhatsAppPhone(phone: string) {
+export async function checkWhatsAppPhone(phone: string, userId?: string, empresaId?: string) {
+  const { accessToken } = await getCredentials(userId, empresaId)
+  if (!accessToken) return { registered: false, error: 'Credenciales no configuradas' }
+
   try {
     const res = await fetch(
-      `${API_BASE}/check_phone?access_token=${ACCESS_TOKEN}&phone=${phone.replace(/\D/g, '')}`
+      `${API_BASE}/check_phone?access_token=${accessToken}&phone=${phone.replace(/\D/g, '')}`
     )
     const data = await res.json()
     return { registered: data?.status === 'success', data }
@@ -44,8 +100,11 @@ export async function checkWhatsAppPhone(phone: string) {
   }
 }
 
-export async function notifyNewLead(leadName: string, leadEmail: string, leadPhone: string, asesorWhatsapp?: string) {
+export async function notifyNewLead(
+  leadName: string, leadEmail: string, leadPhone: string,
+  asesorWhatsapp?: string, userId?: string, empresaId?: string
+) {
   if (!asesorWhatsapp) return
   const message = `🔔 *Nuevo Lead*\n\nNombre: ${leadName}\nEmail: ${leadEmail}\nTeléfono: ${leadPhone}\n\nRevisa el panel para más detalles.`
-  return sendWhatsApp({ number: asesorWhatsapp, message })
+  return sendWhatsApp({ number: asesorWhatsapp, message, userId, empresaId })
 }
