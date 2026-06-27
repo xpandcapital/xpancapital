@@ -239,7 +239,7 @@ export function LiveTransmissionBanner() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -80, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-          className="sticky top-20 z-40"
+          className="sticky top-20 z-[149]"
         >
           <div className={`relative overflow-hidden bg-gradient-to-r ${palette.bg} border-b ${palette.border}`}>
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
