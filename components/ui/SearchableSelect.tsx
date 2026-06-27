@@ -21,6 +21,7 @@ interface SearchableSelectProps {
   searchPlaceholder?: string
   emptyText?: string
   className?: string
+  buttonClassName?: string
 }
 
 const SELECT_CLASSES =
@@ -34,6 +35,7 @@ export function SearchableSelect({
   searchPlaceholder = 'Buscar...',
   emptyText = 'Sin resultados',
   className = '',
+  buttonClassName = '',
 }: SearchableSelectProps) {
   const [abierto, setAbierto] = useState(false)
   const [busqueda, setBusqueda] = useState('')
@@ -195,7 +197,7 @@ export function SearchableSelect({
         ref={triggerRef}
         type="button"
         onClick={() => setAbierto(!abierto)}
-        className={`w-full flex items-center justify-between gap-2 ${SELECT_CLASSES} ${
+        className={`w-full flex items-center justify-between gap-2 ${SELECT_CLASSES} ${buttonClassName} ${
           abierto ? 'border-blis-red/30 ring-1 ring-blis-red/10' : ''
         }`}
       >

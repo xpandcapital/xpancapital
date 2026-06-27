@@ -419,7 +419,10 @@ export function ProductFormModal({
               )}
               <SearchableSelect
                 value={formData.category}
-                onChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                onChange={(value) => {
+                  const cat = categories.find(c => c.name === value)
+                  setFormData(prev => ({ ...prev, category: value, skuPrefix: cat?.skuPrefix || prev.skuPrefix }))
+                }}
                 options={categories.length === 0 ? [{ value: "", label: "-- Sin categoría --" }] : categories.map(c => ({ value: c.name, label: `${c.name} (${c.skuPrefix})` }))}
                 placeholder="Seleccionar categoría..."
                 className={`w-full ${categories.length === 0 ? "opacity-50 pointer-events-none" : ""}`}
@@ -482,13 +485,14 @@ export function ProductFormModal({
                   options={categories.map(c => ({ value: c.skuPrefix, label: c.skuPrefix }))}
                   placeholder="SKU"
                   className="w-[120px]"
+                  buttonClassName="py-4 rounded-2xl"
                 />
                 <input
                   value={formData.sku}
                   onChange={(e) => setFormData(prev => ({ ...prev, sku: e.target.value }))}
                   type="text"
                   placeholder="SKU Manual"
-                  className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-blue-500 transition-all"
+                  className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 transition-all"
                 />
               </div>
             </div>
