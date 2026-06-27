@@ -97,11 +97,13 @@ export async function sendWhatsApp({
     const params = new URLSearchParams()
     params.set('number', numberClean)
     params.set('type', type)
-    params.set('message', message) // URLSearchParams codifica saltos de línea automáticamente
     params.set('instance_id', creds.instanceId)
     params.set('access_token', creds.accessToken)
     if (media_url) params.set('media_url', media_url)
     if (filename) params.set('filename', filename)
+
+    // Construir URL manualmente para evitar doble encoding del mensaje
+    let url = `${API_BASE}/send?${params.toString()}&message=${encodeURIComponent(message)}`
 
     const res = await fetch(`${API_BASE}/send?${params.toString()}`, { method: 'POST' })
     const text = await res.text()
