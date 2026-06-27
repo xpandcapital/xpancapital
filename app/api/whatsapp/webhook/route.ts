@@ -45,9 +45,10 @@ function parseEntry(entry: Record<string, any>, eventName: string): Record<strin
   // 0. received_message (Planifyx alternate format)
   if (eventName === 'received_message' && entry.message?.body_message) {
     const bm = entry.message.body_message
+    const jid = entry.message?._data?.key?.remoteJid || entry.message?.key?.remoteJid || entry.from || ''
     return {
       event_type: 'message',
-      from_number: entry.message.from || cleanJid(entry.message.remoteJid || bm.sender || bm.author || ''),
+      from_number: cleanJid(jid) || null,
       to_number: null, message_type: bm.type === 'textMessage' ? 'text' : bm.type || 'text',
       body: bm.content || bm.messages?.conversation || bm.text || '[Mensaje]',
       caption: null, media_url: bm.media?.url || null, media_mime: bm.media?.mime || null,
@@ -172,10 +173,27 @@ export async function POST(request: NextRequest) {
     }
 
     const messages: Record<string, any>[] = []
+    const recentBodies = new Set<string>()
+
+    // Cargar mensajes recientes para deduplicar (received_message + messages.upsert duplicados)
+    try {
+      const { data: recent } = await supabase
+        .from('whatsapp_messages')
+        .select('body')
+        .eq('empresa_id', empresaId)
+        .eq('event_type', 'message')
+        .gte('created_at', new Date(Date.now() - 10000).toISOString())
+        .limit(20)
+      if (recent) recent.forEach((r: any) => { if (r.body) recentBodies.add(r.body) })
+    } catch {}
 
     for (const entry of entries) {
       const parsed = parseEntry(entry, eventName)
       if (!parsed) continue
+
+      // Deduplicar: saltar received_message si el mismo body ya llegó vía messages.upsert
+      if (parsed.body && recentBodies.has(parsed.body)) continue
+      if (parsed.body) recentBodies.add(parsed.body)
 
       messages.push({
         empresa_id: empresaId,
