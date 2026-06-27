@@ -156,9 +156,14 @@ export default function WhatsAppPage() {
         showToast(editingId ? "Actualizada" : "Creada", "success");
         if (startNow && (d.data?.id || editingId)) {
           const cid = d.data?.id || editingId;
-          await fetch("/api/campanas/whatsapp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "start", id: cid }) });
-          startBatchLoop(cid);
-          showToast("Envío iniciado", "success");
+          const sr = await fetch("/api/campanas/whatsapp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "start", id: cid }) });
+          const sd = await sr.json();
+          if (sd.success && sd.total > 0) {
+            startBatchLoop(cid);
+            showToast(`Envío iniciado (${sd.total} mensajes)`, "success");
+          } else {
+            showToast(sd.error || "Sin destinatarios válidos", "error");
+          }
         }
         setShowForm(false); resetForm(); loadCampaigns();
       } else { showToast(d.error || "Error", "error"); }
@@ -168,18 +173,31 @@ export default function WhatsAppPage() {
 
   const startBatchLoop = async (campaignId: string) => {
     setSendingIds(prev => new Set(prev).add(campaignId));
+    let retries = 0;
     const loop = async () => {
       try {
         const r = await fetch("/api/campanas/whatsapp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "process_batch", id: campaignId }) });
         const d = await r.json();
         if (d.success) {
           setSendingProgress(prev => ({ ...prev, [campaignId]: `${d.remaining} restantes` }));
-          if (d.done) { setSendingIds(prev => { const n = new Set(prev); n.delete(campaignId); return n; }); loadCampaigns(); return; }
-          // Random delay between batches
+          if (d.done) {
+            setSendingIds(prev => { const n = new Set(prev); n.delete(campaignId); return n; });
+            loadCampaigns();
+            return;
+          }
+          retries = 0;
           const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay) * 1000;
-          setTimeout(loop, Math.min(delay, 30000)); // Cap at 30s for serverless
-        } else { setSendingIds(prev => { const n = new Set(prev); n.delete(campaignId); return n; }); }
-      } catch { setSendingIds(prev => { const n = new Set(prev); n.delete(campaignId); return n; }); }
+          setTimeout(loop, Math.min(delay, 15000));
+        } else {
+          retries++;
+          if (retries > 3) { setSendingIds(prev => { const n = new Set(prev); n.delete(campaignId); return n; }); return; }
+          setTimeout(loop, 3000);
+        }
+      } catch {
+        retries++;
+        if (retries > 3) { setSendingIds(prev => { const n = new Set(prev); n.delete(campaignId); return n; }); return; }
+        setTimeout(loop, 3000);
+      }
     };
     setTimeout(loop, 500);
   };

@@ -5,7 +5,19 @@ import { createNotionPage } from '@/lib/integrations/notion'
 import { logger } from '@/lib/utils/logger'
 import { verifyTurnstileToken } from '@/lib/bot-protection'
 import { cleanPhone } from '@/lib/phone'
-import { notifyAsesor, NTemplates } from '@/lib/notifications'
+
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.blis-corp.com'
+
+async function notifyAsesorViaWhatsApp(asesorId: string, lead: any) {
+  try {
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+    const { data: asesor } = await supabase.from('asesores').select('whatsapp').eq('id', asesorId).maybeSingle()
+    if (!asesor?.whatsapp) return
+    const { sendWhatsApp } = await import('@/lib/whatsapp')
+    const msg = `🔔 *Nuevo Lead*\n\n*${lead.nombre}*\n📧 ${lead.email || 'Sin email'}\n📱 ${lead.telefono || 'Sin teléfono'}\n💰 ${lead.presupuesto || 'No especificado'}\n\n👉 ${appUrl}/superadmin/leads`
+    await sendWhatsApp({ number: asesor.whatsapp, message: msg, empresaId: lead.empresa_id || DEFAULT_EMPRESA_ID })
+  } catch {}
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -231,8 +243,9 @@ export async function POST(request: NextRequest) {
     let campana = null
     let asesor = null
 
+    // Notificar asesor por WhatsApp si existe
     if (newLead && asesor_id) {
-      notifyAsesor(asesor_id, NTemplates.nuevo_lead(newLead).titulo, NTemplates.nuevo_lead(newLead).mensaje, NTemplates.nuevo_lead(newLead).link).catch(() => {})
+      notifyAsesorViaWhatsApp(asesor_id, newLead).catch(() => {})
     }
 
     if (campana_id) {
@@ -395,7 +408,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (data && data.asesor_id && estado) {
-      notifyAsesor(data.asesor_id as string, NTemplates.nuevo_lead(data).titulo, NTemplates.nuevo_lead(data).mensaje, NTemplates.nuevo_lead(data).link).catch(() => {})
+      notifyAsesorViaWhatsApp(data.asesor_id as string, data).catch(() => {})
     }
 
     return NextResponse.json({ 

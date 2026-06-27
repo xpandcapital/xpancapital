@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (toInsert.length === 0) {
-      return NextResponse.json({ success: true, message: 'Sin teléfonos válidos', total: 0 })
+      return NextResponse.json({ success: false, error: 'Ningún destinatario tiene teléfono válido. Agrega números de teléfono a los contactos.' })
     }
 
     await supabase.from('whatsapp_campaign_recipients').insert(toInsert)
