@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { getApiKeys } from '@/lib/api-keys'
+import { decryptApiKey } from '@/lib/api-crypto'
 
 const API_BASE = 'https://socialposter.planifyx.com/api'
 
@@ -21,10 +23,14 @@ async function getCredentials(userId?: string, empresaId?: string): Promise<What
     } catch { /* fall through */ }
   }
 
-  // 1b. Solo empresaId (sin userId) — leer keys globales directamente
+  // 1b. Solo empresaId (sin userId) — usar service key para leer keys globales
   if (!userId && empresaId) {
     try {
-      const { data } = await supabase
+      const supabaseAdmin = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      const { data } = await supabaseAdmin
         .from('api_keys')
         .select('key_name, key_value')
         .eq('empresa_id', empresaId)
@@ -35,7 +41,6 @@ async function getCredentials(userId?: string, empresaId?: string): Promise<What
         const token = data.find((r: any) => r.key_name === 'planifyx_access_token')
         const instance = data.find((r: any) => r.key_name === 'planifyx_instance_id')
         if (token?.key_value) {
-          const { decryptApiKey } = await import('@/lib/api-crypto')
           return {
             accessToken: decryptApiKey(token.key_value),
             instanceId: instance?.key_value ? decryptApiKey(instance.key_value) : '',
