@@ -3,17 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Bell,
-  ShoppingCart,
-  GraduationCap,
-  FileText,
-  MessageSquare,
-  Settings,
-  UserPlus,
-  CheckCheck,
-  ExternalLink,
-  Banknote,
-  Trash2,
+  Bell, ShoppingCart, GraduationCap, FileText, MessageSquare,
+  Settings, UserPlus, CheckCheck, ExternalLink, Banknote,
+  Trash2, AlertTriangle, Clock, TrendingUp, ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
@@ -30,26 +22,39 @@ interface Notificacion {
   leida: boolean;
   leida_en: string | null;
   creado_en: string;
-  data?: { url?: string | null } | null;
 }
 
 const TIPO_ICONOS: Record<string, React.ComponentType<{ className?: string }>> = {
-  blog: FileText,
-  leads: UserPlus,
-  compras: ShoppingCart,
-  venta: Banknote,
-  cursos: GraduationCap,
   sistema: Settings,
+  chat: MessageSquare,
+  lead: UserPlus,
+  venta: Banknote,
+  alerta: AlertTriangle,
+  recordatorio: Clock,
+  info: FileText,
+  warning: AlertTriangle,
+  success: CheckCheck,
+  error: AlertTriangle,
+  blog: FileText,
+  compras: ShoppingCart,
+  cursos: GraduationCap,
   mensaje: MessageSquare,
 };
 
 const TIPO_COLORES: Record<string, string> = {
-  blog: "text-violet-400 bg-violet-400/10",
-  leads: "text-emerald-400 bg-emerald-400/10",
-  compras: "text-amber-400 bg-amber-400/10",
-  venta: "text-emerald-400 bg-emerald-400/10",
-  cursos: "text-blue-400 bg-blue-400/10",
   sistema: "text-gray-400 bg-gray-400/10",
+  chat: "text-violet-400 bg-violet-400/10",
+  lead: "text-emerald-400 bg-emerald-400/10",
+  venta: "text-emerald-400 bg-emerald-400/10",
+  alerta: "text-amber-400 bg-amber-400/10",
+  recordatorio: "text-blue-400 bg-blue-400/10",
+  info: "text-cyan-400 bg-cyan-400/10",
+  warning: "text-orange-400 bg-orange-400/10",
+  success: "text-emerald-400 bg-emerald-400/10",
+  error: "text-red-400 bg-red-400/10",
+  blog: "text-violet-400 bg-violet-400/10",
+  compras: "text-amber-400 bg-amber-400/10",
+  cursos: "text-blue-400 bg-blue-400/10",
   mensaje: "text-rose-400 bg-rose-400/10",
 };
 
@@ -65,10 +70,7 @@ function tiempoRelativo(fecha: string): string {
   if (minutos < 60) return `Hace ${minutos}m`;
   if (horas < 24) return `Hace ${horas}h`;
   if (dias < 7) return `Hace ${dias}d`;
-  return new Date(fecha).toLocaleDateString("es-ES", {
-    day: "numeric",
-    month: "short",
-  });
+  return new Date(fecha).toLocaleDateString("es-ES", { day: "numeric", month: "short" });
 }
 
 export function NotificationBell() {
@@ -79,7 +81,7 @@ export function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const fetchRef = useRef<() => void>(() => {});
-  const channelName = useRef(`notifications-${Date.now()}`).current;
+  const channelRef = useRef<string>(`notifications-bell`);
   const router = useRouter();
   const { user } = useAuth();
 
@@ -87,16 +89,6 @@ export function NotificationBell() {
     if (!user) {
       setLoading(false);
       return;
-    }
-
-    try {
-      const res = await fetch("/api/notificaciones?unread=true");
-      const countData = await res.json();
-      if (countData.success && typeof countData.count === "number") {
-        setUnreadCount(countData.count);
-      }
-    } catch {
-      // silencioso
     }
 
     try {
@@ -114,17 +106,23 @@ export function NotificationBell() {
   }, [user]);
 
   fetchRef.current = fetchNotifications;
-  // Realtime: suscripción a nuevas notificaciones (sin polling)
+
+  useEffect(() => { fetchRef.current(); }, []);
+
+  // Realtime: INSERT + UPDATE + DELETE
   useEffect(() => {
     if (!user) return;
 
     const supabase = getSupabase();
+    if (!supabase) return;
+
     const channel = supabase
-      .channel(channelName)
+      .channel(channelRef.current)
       .on('postgres_changes', {
-        event: 'INSERT',
+        event: '*',
         schema: 'public',
         table: 'notificaciones',
+        filter: `user_id=eq.${user.id}`,
       }, () => {
         fetchRef.current();
       })
@@ -138,10 +136,8 @@ export function NotificationBell() {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(e.target as Node)
+        dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
+        buttonRef.current && !buttonRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -157,28 +153,19 @@ export function NotificationBell() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-
       setNotifications((prev) =>
-        prev.map((n) =>
-          n.id === id
-            ? { ...n, leida: true, leida_en: new Date().toISOString() }
-            : n
-        )
+        prev.map((n) => n.id === id ? { ...n, leida: true, leida_en: new Date().toISOString() } : n)
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
-    } catch {
-      // silencioso
-    }
+    } catch { /* silencioso */ }
 
     if (rawLink) {
       setIsOpen(false);
       const link = rawLink.trim();
       if (link.startsWith("http://") || link.startsWith("https://")) {
-        window.location.href = link;
-      } else if (link.startsWith("/")) {
-        router.push(link);
+        window.open(link, "_blank");
       } else {
-        router.push(`/${link}`);
+        router.push(link.startsWith("/") ? link : `/${link}`);
       }
     }
   };
@@ -190,14 +177,9 @@ export function NotificationBell() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ marcar_todas: true }),
       });
-
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, leida: true, leida_en: new Date().toISOString() }))
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, leida: true, leida_en: new Date().toISOString() })));
       setUnreadCount(0);
-    } catch {
-      // silencioso
-    }
+    } catch { /* silencioso */ }
   };
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
@@ -209,12 +191,10 @@ export function NotificationBell() {
         const removed = notifications.find((n) => n.id === id);
         return removed && !removed.leida ? Math.max(0, prev - 1) : prev;
       });
-    } catch {
-      // silencioso
-    }
+    } catch { /* silencioso */ }
   };
 
-  const IconoComponent = TIPO_ICONOS;
+  const isAdmin = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'editor';
   const displayNotifications = notifications.slice(0, 10);
 
   return (
@@ -287,54 +267,35 @@ export function NotificationBell() {
               ) : (
                 <div className="py-1">
                   {displayNotifications.map((n) => {
-                    const Icon = IconoComponent[n.tipo] || Settings;
-                    const colorClass =
-                      TIPO_COLORES[n.tipo] || TIPO_COLORES.sistema;
-
+                    const Icon = TIPO_ICONOS[n.tipo] || Settings;
+                    const colorClass = TIPO_COLORES[n.tipo] || TIPO_COLORES.sistema;
                     return (
                       <button
                         key={n.id}
-                        onClick={() => handleMarkRead(n.id, n.link || n.data?.url || null)}
-                        className={`w-full text-left px-4 py-3 flex gap-3 hover:bg-white/[0.03] transition-colors group ${
-                          !n.leida ? "bg-white/[0.02]" : ""
-                        }`}
+                        onClick={() => handleMarkRead(n.id, n.link)}
+                        className={`w-full text-left px-4 py-3 flex gap-3 hover:bg-white/[0.03] transition-colors group ${!n.leida ? "bg-white/[0.02]" : ""}`}
                       >
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${colorClass}`}
-                        >
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${colorClass}`}>
                           <Icon className="w-4 h-4" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
-                            <p
-                              className={`text-[13px] leading-snug ${
-                                n.leida
-                                  ? "text-gray-400 font-medium"
-                                  : "text-white font-bold"
-                              }`}
-                            >
+                            <p className={`text-[13px] leading-snug ${n.leida ? "text-gray-400 font-medium" : "text-white font-bold"}`}>
                               {n.titulo}
                             </p>
-                            {!n.leida && (
-                              <span className="w-2 h-2 bg-blis-red rounded-full flex-shrink-0 mt-1.5" />
-                            )}
+                            {!n.leida && <span className="w-2 h-2 bg-blis-red rounded-full flex-shrink-0 mt-1.5" />}
                           </div>
-                          <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1 leading-relaxed">
-                            {n.mensaje}
-                          </p>
+                          <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-1 leading-relaxed">{n.mensaje}</p>
                           <div className="flex items-center justify-between mt-1.5">
                             <span className="text-[10px] text-gray-600 font-medium uppercase tracking-wider">
                               {tiempoRelativo(n.creado_en)}
                             </span>
-                            {(n.link || n.data?.url) ? (
-                              <ExternalLink className="w-3 h-3 text-gray-600 group-hover:text-blis-red transition-colors" />
-                            ) : <span className="w-3 h-3" />}
-                            <button
-                              onClick={(e) => handleDelete(e, n.id)}
-                              className="p-0.5 hover:bg-red-500/10 rounded text-gray-600 hover:text-red-400 transition-colors"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                              {n.link && <ExternalLink className="w-3 h-3 text-gray-600 group-hover:text-blis-red transition-colors" />}
+                              <button onClick={(e) => handleDelete(e, n.id)} className="p-0.5 hover:bg-red-500/10 rounded text-gray-600 hover:text-red-400 transition-colors">
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </button>
@@ -342,6 +303,20 @@ export function NotificationBell() {
                   })}
                 </div>
               )}
+            </div>
+
+            {/* Footer: Ver todas */}
+            <div className="border-t border-white/5 px-4 py-2.5">
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  router.push(isAdmin ? "/superadmin/notificaciones" : "/miembros/notificaciones");
+                }}
+                className="w-full flex items-center justify-center gap-1.5 text-[10px] font-bold text-gray-500 hover:text-white uppercase tracking-wider transition-colors"
+              >
+                Ver todas
+                <ArrowRight className="w-3 h-3" />
+              </button>
             </div>
           </motion.div>
         )}

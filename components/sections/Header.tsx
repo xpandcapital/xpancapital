@@ -623,6 +623,9 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                             <p className="text-[7px] font-bold uppercase tracking-widest opacity-60 leading-none mb-1">Favoritos</p>
                                             <p className="text-xs font-black">{favorites.length}</p>
                                         </div>
+                                        <div className="flex items-center justify-center">
+                                            <NotificationBell />
+                                        </div>
                                     </div>
                                 </div>
                             )}
