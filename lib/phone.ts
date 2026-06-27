@@ -25,36 +25,24 @@ const COUNTRY_CODES: Record<string, { code: string; prefix: string }> = {
 export function cleanPhone(raw: string | null | undefined, defaultCountry: string = 'PE'): string | null {
   if (!raw) return null
 
-  let phone = raw.trim()
+  // PRIMERO: quitar todo lo que no sea dígito
+  const digits = raw.trim().replace(/\D/g, '')
+  if (digits.length < 7) return null
 
-  // Caso: +51 999 999 999 o 0051 999 999 999
-  const plusMatch = phone.match(/^\+([1-9]\d{0,2})(\d+)/)
-  if (plusMatch) {
-    return `+${plusMatch[1]}${plusMatch[2]}`
-  }
-
-  const doubleZeroMatch = phone.match(/^00([1-9]\d{0,2})(\d+)/)
-  if (doubleZeroMatch) {
-    return `+${doubleZeroMatch[1]}${doubleZeroMatch[2]}`
-  }
-
-  // Quitar todo lo que no sea dígito
-  const digits = phone.replace(/\D/g, '')
-
-  // Detectar si el número ya incluye código de país
+  // Detectar si empieza con código de país conocido
   for (const country of Object.values(COUNTRY_CODES)) {
     if (digits.startsWith(country.prefix)) {
       return `+${digits}`
     }
   }
 
-  // Sin código de país: agregar el del país por defecto, quitando el 0 delante si existe
+  // Sin código de país: agregar el del país por defecto
   const country = COUNTRY_CODES[defaultCountry]
-  if (!country) return digits.length >= 7 ? `+${digits}` : null
+  if (!country) return `+${digits}`
 
+  // Quitar 0 delante si existe (ej: 0939011068 → 939011068)
   let local = digits
-  // Remover 0 delante (ej: 0939011068 → 939011068 en Ecuador, 0999999999 → 999999999 en Perú)
-  if (local.length >= 9 && local.startsWith('0')) {
+  if (local.startsWith('0')) {
     local = local.slice(1)
   }
 
@@ -91,5 +79,5 @@ export function phoneLocalDigits(phone: string | null | undefined, defaultCountr
  */
 export function isValidPhone(phone: string | null | undefined): boolean {
   if (!phone) return false
-  return /^\+[1-9]\d{6,14}$/.test(phone)
+  return /^\+[1-9]\d{6,15}$/.test(phone)
 }
