@@ -105,6 +105,12 @@ function tieneAccesoCompra(t: TransmisionData, purchasedProducts: { id: string }
 
 export function LiveTransmissionBanner() {
   const pathname = usePathname()
+
+  // No mostrar en panel admin — solo en páginas públicas
+  if (pathname.startsWith('/superadmin') || pathname.startsWith('/admin')) {
+    return null
+  }
+
   const { user } = useAuth()
   const { purchasedProducts } = useShop()
 
