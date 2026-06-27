@@ -103,9 +103,12 @@ export async function sendWhatsApp({
     if (filename) params.set('filename', filename)
 
     // Construir URL manualmente para evitar doble encoding del mensaje
-    let url = `${API_BASE}/send?${params.toString()}&message=${encodeURIComponent(message)}`
+    const url = `${API_BASE}/send?${params.toString()}&message=${encodeURIComponent(message)}`
 
-    const res = await fetch(`${API_BASE}/send?${params.toString()}`, { method: 'POST' })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 15000)
+    const res = await fetch(url, { method: 'POST', signal: controller.signal })
+    clearTimeout(timeout)
     const text = await res.text()
     console.log('[WhatsApp] Enviado:', numberClean, text.substring(0, 100))
 
