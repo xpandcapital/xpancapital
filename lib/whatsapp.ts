@@ -108,3 +108,37 @@ export async function notifyNewLead(
   const message = `🔔 *Nuevo Lead*\n\nNombre: ${leadName}\nEmail: ${leadEmail}\nTeléfono: ${leadPhone}\n\nRevisa el panel para más detalles.`
   return sendWhatsApp({ number: asesorWhatsapp, message, userId, empresaId })
 }
+
+/**
+ * Valida que tanto el access_token como el instance_id sean correctos.
+ * Llama al endpoint de instancia de Planifyx que requiere AMBOS.
+ */
+export async function testWhatsAppConnection(userId?: string, empresaId?: string) {
+  const { accessToken, instanceId } = await getCredentials(userId, empresaId)
+  if (!accessToken) return { success: false, error: 'Access Token no configurado. Configúralo en Api-Nube → Comunicaciones → Planifyx.' }
+  if (!instanceId) return { success: false, error: 'Instance ID no configurado. Configúralo en Api-Nube → Comunicaciones → Planifyx.' }
+
+  try {
+    // Este endpoint requiere ambos: token + instance_id
+    const res = await fetch(
+      `${API_BASE}/get_qrcode?instance_id=${instanceId}&access_token=${accessToken}`,
+      { method: 'POST' }
+    )
+    const data = await res.json()
+
+    if (data?.status === 'success') {
+      return {
+        success: true,
+        message: 'Conexión exitosa. Escanea el QR en WhatsApp para vincular.',
+        qr: data?.qrcode || data?.qr || null,
+      }
+    }
+
+    return {
+      success: false,
+      error: data?.message || data?.error || 'Error al conectar con la instancia. Verifica que el Instance ID sea correcto.',
+    }
+  } catch (error) {
+    return { success: false, error: 'Error de conexión con Planifyx' }
+  }
+}
