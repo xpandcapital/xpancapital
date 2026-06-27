@@ -27,17 +27,10 @@ export function useTransmisiones(empresaId: string) {
     if (!empresaId) { setLoading(false); return }
     setLoading(true)
     try {
-      const supabase = getSupabase()
-      if (!supabase) { setLoading(false); return }
-      const { data, error } = await supabase
-        .from('transmisiones')
-        .select('*')
-        .eq('empresa_id', empresaId)
-        .order('creado_en', { ascending: false })
-        .limit(50)
-
-      if (!error && data) {
-        setHistorial(data as Transmision[])
+      const res = await fetch(`/api/transmisiones?empresa_id=${empresaId}&historial=true`)
+      const data = await res.json()
+      if (data.success && data.data) {
+        setHistorial(data.data as Transmision[])
       }
     } catch {
       // Silencioso

@@ -14,8 +14,24 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const empresaId = searchParams.get('empresa_id') || DEFAULT_EMPRESA_ID
+    const historial = searchParams.get('historial')
 
     const supabaseAdmin = getAdminClient()
+
+    if (historial === 'true') {
+      const { data, error } = await supabaseAdmin
+        .from('transmisiones')
+        .select('*')
+        .eq('empresa_id', empresaId)
+        .order('creado_en', { ascending: false })
+        .limit(50)
+
+      if (error) {
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true, data })
+    }
 
     const { data, error } = await supabaseAdmin
       .from('transmisiones')

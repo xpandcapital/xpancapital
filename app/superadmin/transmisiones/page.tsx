@@ -7,7 +7,6 @@ import { useTransmisiones } from './_hooks'
 import { TransmisionForm, TransmisionActiva, TransmisionHistorial } from './_components'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
-import { getSupabase } from '@/lib/supabase'
 import type { TransmisionFormData } from './_types'
 
 interface ProductoItem {
@@ -34,20 +33,22 @@ export default function TransmisionesPage() {
 
   useEffect(() => {
     async function fetchProductos() {
-      const supabase = getSupabase()
-      if (!supabase || !user?.empresa_id) return
-      const { data } = await supabase
-        .from('productos')
-        .select('id, nombre, imagen_principal')
-        .eq('empresa_id', user.empresa_id)
-        .eq('activo', true)
-        .order('nombre')
-        .limit(200)
-
-      if (data) setProductos(data)
+      try {
+        const res = await fetch('/api/productos?all=true')
+        const data = await res.json()
+        if (data.success && data.data) {
+          setProductos(data.data.map((p: any) => ({
+            id: p.id,
+            nombre: p.nombre,
+            imagen_principal: p.imagen_principal,
+          })))
+        }
+      } catch {
+        // Silencioso
+      }
     }
     fetchProductos()
-  }, [user?.empresa_id])
+  }, [])
 
   const handleIniciar = async (form: TransmisionFormData) => {
     try {
