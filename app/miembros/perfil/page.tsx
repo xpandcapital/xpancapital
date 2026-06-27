@@ -294,23 +294,24 @@ function PushNotificationToggle() {
     if (typeof window === 'undefined') return
     const s = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window
     setSupported(s)
-    if (s) {
-      setGranted(Notification.permission === 'granted')
-      navigator.serviceWorker.ready.then(sw => {
-        sw.pushManager.getSubscription().then(sub => {
-          setSubscribed(!!sub)
-          if (sub) endpointRef.current = sub.endpoint
-        })
+    if (!s) return
+    setGranted(Notification.permission === 'granted')
+    Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<ServiceWorkerRegistration>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+    ]).then(sw => {
+      sw.pushManager.getSubscription().then(sub => {
+        setSubscribed(!!sub)
+        if (sub) endpointRef.current = sub.endpoint
       })
-    }
+    }).catch(() => {})
   }, [])
 
   const toggle = async () => {
     if (subscribed) {
       await fetch(`/api/notificaciones/suscribir?endpoint=${encodeURIComponent(endpointRef.current || '')}`, { method: 'DELETE' })
-      const sw = await navigator.serviceWorker.ready
-      const sub = await sw.pushManager.getSubscription()
-      if (sub) await sub.unsubscribe()
+      const reg = await navigator.serviceWorker.getRegistration()
+      if (reg) { const sub = await reg.pushManager.getSubscription(); if (sub) await sub.unsubscribe() }
       setSubscribed(false)
       endpointRef.current = null
       return
@@ -320,9 +321,10 @@ function PushNotificationToggle() {
       const perm = await Notification.requestPermission()
       setGranted(perm === 'granted')
       if (perm !== 'granted') return
-      const sw = await navigator.serviceWorker.ready
+      const reg = await navigator.serviceWorker.getRegistration()
+      if (!reg) return
       const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
-      const sub = await sw.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidPublic })
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidPublic })
       const rawKey = sub.getKey ? sub.getKey('p256dh') : null
       const rawAuth = sub.getKey ? sub.getKey('auth') : null
       const p256dh = rawKey ? btoa(String.fromCharCode(...new Uint8Array(rawKey))) : ''

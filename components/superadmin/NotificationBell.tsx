@@ -96,24 +96,33 @@ export function NotificationBell() {
     if (typeof window === 'undefined') return;
     const supported = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
     setPushSupported(supported);
-    if (supported) {
-      setPushGranted(Notification.permission === 'granted');
-      navigator.serviceWorker.ready.then(sw => {
-        sw.pushManager.getSubscription().then(sub => {
-          setPushSubscribed(!!sub);
-          if (sub) currentEndpoint.current = sub.endpoint;
-        });
+    if (!supported) return;
+    setPushGranted(Notification.permission === 'granted');
+
+    const timeout = setTimeout(() => {}, 3000);
+    Promise.race([
+      navigator.serviceWorker.ready,
+      new Promise<ServiceWorkerRegistration>((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+    ]).then(sw => {
+      clearTimeout(timeout);
+      sw.pushManager.getSubscription().then(sub => {
+        setPushSubscribed(!!sub);
+        if (sub) currentEndpoint.current = sub.endpoint;
       });
-    }
+    }).catch(() => {
+      // SW no disponible
+    });
   }, []);
 
   const handleTogglePush = async () => {
     if (pushSubscribed) {
       try {
         await fetch(`/api/notificaciones/suscribir?endpoint=${encodeURIComponent(currentEndpoint.current || '')}`, { method: 'DELETE' });
-        const sw = await navigator.serviceWorker.ready;
-        const sub = await sw.pushManager.getSubscription();
-        if (sub) await sub.unsubscribe();
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) {
+          const sub = await reg.pushManager.getSubscription();
+          if (sub) await sub.unsubscribe();
+        }
         setPushSubscribed(false);
         currentEndpoint.current = null;
       } catch { /* silencioso */ }
@@ -126,9 +135,10 @@ export function NotificationBell() {
       setPushGranted(perm === 'granted');
       if (perm !== 'granted') { setPushLoading(false); return; }
 
-      const sw = await navigator.serviceWorker.ready;
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) { setPushLoading(false); return; }
       const vapidPublic = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
-      const sub = await sw.pushManager.subscribe({
+      const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: vapidPublic,
       });
