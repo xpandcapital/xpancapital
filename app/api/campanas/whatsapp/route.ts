@@ -279,6 +279,14 @@ async function processOneBatch(campaignId: string) {
       sent_at: result.success ? new Date().toISOString() : null,
       error: result.success ? null : String(result.error || 'Error'),
     }).eq('id', r.id)
+
+    // Delay aleatorio entre mensajes individuales (parece humano)
+    if (recipients.length > 1) {
+      const minDelay = (campaign?.min_delay_seconds || 30) * 1000
+      const maxDelay = (campaign?.max_delay_seconds || 120) * 1000
+      const delay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay
+      await new Promise(resolve => setTimeout(resolve, Math.min(delay, 30000)))
+    }
   }
 
   // Update sent_count
