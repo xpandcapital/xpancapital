@@ -303,7 +303,7 @@ export default function WhatsAppPage() {
 
             {/* Cascade: Manual */}
             {contactMode === "manual" && (
-              <div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Números <span className="text-gray-600 normal-case">(1 por línea o separados por comas)</span></label><textarea value={manualPhones} onChange={e => setManualPhones(e.target.value)} rows={3} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1 resize-none" placeholder="+51999999999&#10;+593939011068" /></div>
+              <div><label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Números <span className="text-gray-600 normal-case">(1 por línea o separados por comas)</span></label>      <textarea value={manualPhones} onChange={e => setManualPhones(e.target.value)} rows={3} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1 resize-none" placeholder="+51999999999&#10;+593939011068&#10;o separados por coma: +51..., +593..." /></div>
             )}
 
             {/* Cascade: CSV */}

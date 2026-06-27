@@ -280,7 +280,7 @@ async function processOneBatch(campaignId: string) {
     await supabase.from('whatsapp_campaign_recipients').update({
       status: result.success ? 'sent' : 'failed',
       sent_at: result.success ? new Date().toISOString() : null,
-      error: result.success ? null : String(result.error || 'Error'),
+      error: result.success ? null : (typeof result.data === 'string' ? result.data : JSON.stringify(result.data || result.error || 'Error')).substring(0, 500),
     }).eq('id', r.id)
 
     // Delay aleatorio entre mensajes individuales
