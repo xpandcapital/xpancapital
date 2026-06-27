@@ -26,27 +26,35 @@ async function getCredentials(userId?: string, empresaId?: string): Promise<What
   // 1b. Solo empresaId (sin userId) — usar service key para leer keys
   if (!userId && empresaId) {
     try {
+      const svcKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+      console.log('[WhatsApp] Buscando credenciales en api_keys para empresa:', empresaId, 'svcKey presente:', !!svcKey)
       const supabaseAdmin = createAdminClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
+        svcKey
       )
-      const { data } = await supabaseAdmin
+      const { data, error } = await supabaseAdmin
         .from('api_keys')
         .select('key_name, key_value')
         .eq('empresa_id', empresaId)
         .in('key_name', ['planifyx_access_token', 'planifyx_instance_id'])
 
+      console.log('[WhatsApp] api_keys resultado:', data?.length || 0, 'rows, error:', error?.message || 'none')
+
       if (data) {
         const token = data.find((r: any) => r.key_name === 'planifyx_access_token')
         const instance = data.find((r: any) => r.key_name === 'planifyx_instance_id')
         if (token?.key_value) {
+          const decrypted = decryptApiKey(token.key_value)
+          console.log('[WhatsApp] Token desencriptado:', decrypted ? `${decrypted.substring(0, 6)}...` : 'FALLÓ')
           return {
-            accessToken: decryptApiKey(token.key_value),
+            accessToken: decrypted || '',
             instanceId: instance?.key_value ? decryptApiKey(instance.key_value) : '',
           }
         }
       }
-    } catch { /* fall through */ }
+    } catch (e) {
+      console.error('[WhatsApp] Error leyendo api_keys:', e)
+    }
   }
 
   // 2. Fallback: localStorage (client-side cache)
