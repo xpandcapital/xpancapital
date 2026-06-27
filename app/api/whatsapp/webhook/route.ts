@@ -46,11 +46,11 @@ function parseEntry(entry: Record<string, any>, eventName: string): Record<strin
   const update = entry.update || {}
   const rawJid = key.remoteJid || entry.remoteJid || entry.id || ''
 
-  // 1. Contacts update — ignorar (es metadata, no mensaje)
-  if (eventName === 'contacts.update' || entry.notify || entry.verifiedName) return null
+  // 1. Contacts — ignorar
+  if (entry.notify || entry.verifiedName) return null
 
-  // 2. Messages update (estados de entrega)
-  if (eventName === 'messages.update') {
+  // 2. Status updates — tienen update.status
+  if (Object.keys(update).length > 0 && update.status !== undefined) {
     const statusMap: Record<number, string> = { 1: 'server_ack', 2: 'delivered', 3: 'read', 4: 'played' }
     return {
       event_type: statusMap[update.status] || `status_${update.status}`,
@@ -61,8 +61,8 @@ function parseEntry(entry: Record<string, any>, eventName: string): Record<strin
     }
   }
 
-  // 3. Messages upsert (mensajes reales)
-  if (eventName === 'messages.upsert' && Object.keys(msg).length > 0) {
+  // 3. Mensaje real — detectar por contenido en message
+  if (Object.keys(msg).length > 0 && (msg.conversation || msg.extendedTextMessage || msg.imageMessage || msg.videoMessage || msg.documentMessage || msg.audioMessage || msg.stickerMessage || msg.locationMessage || msg.contactMessage || msg.reactionMessage || msg.buttonsMessage || msg.listMessage || msg.templateMessage || msg.interactiveMessage)) {
     const { body, caption, mediaUrl, mediaMime } = extractBody(msg)
     if (!body && Object.keys(msg).length > 1) {
       // Mensaje con contenido no reconocido — loguear para debug
