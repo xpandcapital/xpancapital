@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Trash2, RefreshCw, ExternalLink, Loader2, Upload, X, Plus, Globe, MapPin, Sparkles, FolderOpen } from 'lucide-react'
 import { useActionGuard } from '@/hooks/useActionGuard'
 import { supabase } from '@/lib/supabase'
-import { NativeSelect } from '@/components/ui/SearchableSelect'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 const STATUS_OPTIONS = ['EN PLANOS', 'PREVENTA', 'VENTA CON ESCRITURA', 'VENTA FINALIZADA', 'PROYECTO ENTREGADO']
 
@@ -175,7 +175,7 @@ export default function ProjectDetailPage() {
                 <div>
                   <label className="text-[10px] uppercase tracking-widest text-gray-500 font-bold block mb-2">Estado</label>
                   <div className="relative">
-                    <NativeSelect value={formData.status} onChange={v => setFormData(prev => ({ ...prev, status: v }))}
+                    <SearchableSelect value={formData.status} onChange={v => setFormData(prev => ({ ...prev, status: v }))}
                       options={STATUS_OPTIONS.map(s => ({ value: s, label: s }))}
                       className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 appearance-none [color-scheme:dark]" />
                     <ChevronDownAbsolute />

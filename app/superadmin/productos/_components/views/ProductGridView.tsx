@@ -3,7 +3,7 @@
 import React, { useState } from "react"
 import { motion } from "framer-motion"
 import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check, GraduationCap } from "lucide-react"
-import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import Image from "next/image"
 import type { Product, Category, Status } from '../../_types'
 
@@ -188,7 +188,7 @@ export const ProductGridView = React.memo(function ProductGridView({
                 {isBulkEditing ? (
                   <div className="flex flex-col flex-1 items-end">
                     <span className="text-[9px] text-gray-500 uppercase font-black">Estado</span>
-                    <NativeSelect
+                    <SearchableSelect
                       value={product.status}
                       onChange={(value) => onUpdateBulk(product.id, 'status', value)}
                       options={statuses.map(s => ({ value: s.name, label: s.name }))}

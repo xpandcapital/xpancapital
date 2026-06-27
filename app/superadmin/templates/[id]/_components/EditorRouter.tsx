@@ -6,7 +6,7 @@ import { InputField, TextAreaField, LinkField, ColorPicker, SectionCard, Visibil
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { MapEditor } from "@/components/editor/MapEditor";
 import { CaptureHeroEditor } from "./editors/CaptureHeroEditor";
-import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface EditorRouterProps {
   activeSection: string;
@@ -175,7 +175,7 @@ export function EditorRouter({
           </div>
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <NativeSelect
+            <SearchableSelect
               value={sections.funnelCountdown?.layout || 'card'}
               onChange={(v) => updateSection('funnelCountdown', { layout: v })}
               options={[
@@ -202,7 +202,7 @@ export function EditorRouter({
             <InputField label="Texto Overlay" value={sections.funnelVideo?.overlayText || ''} onChange={(v) => updateSection('funnelVideo', { overlayText: v })} placeholder="Duración: 5 min" />
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-              <NativeSelect
+              <SearchableSelect
                 value={sections.funnelVideo?.layout || 'boxed'}
                 onChange={(v) => updateSection('funnelVideo', { layout: v })}
                 options={[
@@ -259,7 +259,7 @@ export function EditorRouter({
           </div>
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <NativeSelect
+            <SearchableSelect
               value={sections.funnelBenefits?.layout || 'grid'}
               onChange={(v) => updateSection('funnelBenefits', { layout: v })}
               options={[
@@ -328,7 +328,7 @@ export function EditorRouter({
           </div>
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <NativeSelect
+            <SearchableSelect
               value={sections.stats?.layout || 'grid'}
               onChange={(v) => updateSection('stats', { layout: v })}
               options={[
@@ -353,7 +353,7 @@ export function EditorRouter({
           
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <NativeSelect
+            <SearchableSelect
               value={sections.funnelTestimonials?.layout || 'carousel'}
               onChange={(v) => updateSection('funnelTestimonials', { layout: v })}
               options={[
@@ -405,7 +405,7 @@ export function EditorRouter({
           <ColorPicker label="Color de Acento" value={sections.funnelPricing?.accentColor || '#B10D24'} onChange={(v) => updateSection('funnelPricing', { accentColor: v })} />
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-            <NativeSelect
+            <SearchableSelect
               value={sections.funnelPricing?.layout || 'cards'}
               onChange={(v) => updateSection('funnelPricing', { layout: v })}
               options={[
@@ -530,7 +530,7 @@ export function EditorRouter({
           <ImageUpload value={sections.content?.image || ''} onChange={(v) => updateSection('content', { image: v })} folder="cms/content" />
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Posición de Imagen</label>
-            <NativeSelect
+            <SearchableSelect
               value={sections.content?.imagePosition || 'right'}
               onChange={(v) => updateSection('content', { imagePosition: v })}
               options={[
@@ -581,7 +581,7 @@ export function EditorRouter({
           <div className="grid grid-cols-2 gap-4 mt-4">
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Variante</label>
-              <NativeSelect
+              <SearchableSelect
                 value={sections.blogPosts?.variant || 'light'}
                 onChange={(v) => updateSection('blogPosts', { variant: v })}
                 options={[
@@ -592,7 +592,7 @@ export function EditorRouter({
             </div>
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Diseño</label>
-              <NativeSelect
+              <SearchableSelect
                 value={sections.blogPosts?.layout || 'grid'}
                 onChange={(v) => updateSection('blogPosts', { layout: v })}
                 options={[
@@ -660,7 +660,7 @@ export function EditorRouter({
             <InputField label="Máx. Categorías" value={sections.shopCategories?.maxCategories?.toString() || '10'} onChange={(v) => updateSection('shopCategories', { maxCategories: parseInt(v) || 10 })} type="number" />
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-              <NativeSelect
+              <SearchableSelect
                 value={sections.shopCategories?.layout || 'slider'}
                 onChange={(v) => updateSection('shopCategories', { layout: v })}
                 options={[
@@ -699,7 +699,7 @@ export function EditorRouter({
             </label>
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Orden por Defecto</label>
-              <NativeSelect
+              <SearchableSelect
                 value={sections.shopSidebar?.defaultSort || 'recent'}
                 onChange={(v) => updateSection('shopSidebar', { defaultSort: v })}
                 options={[
@@ -723,7 +723,7 @@ export function EditorRouter({
             <InputField label="Máx. Productos" value={sections.shopProducts?.maxProducts?.toString() || '12'} onChange={(v) => updateSection('shopProducts', { maxProducts: parseInt(v) || 12 })} type="number" />
             <div>
               <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
-              <NativeSelect
+              <SearchableSelect
                 value={sections.shopProducts?.layout || 'grid'}
                 onChange={(v) => updateSection('shopProducts', { layout: v })}
                 options={[
@@ -1008,7 +1008,7 @@ export function EditorRouter({
                 <div className="grid grid-cols-2 gap-3 mt-2">
                   <div>
                     <label className="text-[10px] text-gray-400 uppercase mb-1 block">Ícono</label>
-                    <NativeSelect
+                    <SearchableSelect
                       value={stat.icon || 'TrendingUp'}
                       onChange={(v) => updateArrayItem('market', 'stats', idx, { icon: v })}
                       options={[

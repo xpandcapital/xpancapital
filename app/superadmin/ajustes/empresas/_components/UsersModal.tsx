@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { X, UserPlus, Trash2, Search, UserCheck } from 'lucide-react'
 import { Empresa, EmpresaUser, ROLE_LABELS, ROLE_COLORS } from '../_types'
 import { useToast } from '@/components/ui/Toast'
-import { NativeSelect } from '@/components/ui/SearchableSelect'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 interface Props {
   empresa: Empresa | undefined
@@ -125,7 +125,7 @@ export function UsersModal({ empresa, users, loadingUsers, searchResults, newUse
               </div>
               <div>
                 <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Rol al asignar</label>
-                <NativeSelect value={assignRole} onChange={setAssignRole} options={Object.entries(ROLE_LABELS).map(([k, v]) => ({ value: k, label: v }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 appearance-none" />
+                <SearchableSelect value={assignRole} onChange={setAssignRole} options={Object.entries(ROLE_LABELS).map(([k, v]) => ({ value: k, label: v }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 appearance-none" />
               </div>
               {searchQuery.length >= 2 && (
                 <div className="space-y-2">
@@ -168,7 +168,7 @@ export function UsersModal({ empresa, users, loadingUsers, searchResults, newUse
               <div><label className="text-[9px] text-gray-600 uppercase tracking-wider mb-1 block">Email *</label><input type="email" value={newUser.email} onChange={e => setNewUser(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" placeholder="correo@empresa.com" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="text-[9px] text-gray-600 uppercase tracking-wider mb-1 block">Contraseña</label><input type="password" value={newUser.password} onChange={e => setNewUser(prev => ({ ...prev, password: e.target.value }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" placeholder="Auto-generada" /></div>
-                <div><label className="text-[9px] text-gray-600 uppercase tracking-wider mb-1 block">Rol</label><NativeSelect value={newUser.rol} onChange={v => setNewUser(prev => ({ ...prev, rol: v }))} options={Object.entries(ROLE_LABELS).map(([k, v]) => ({ value: k, label: v }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50 appearance-none" /></div>
+                <div><label className="text-[9px] text-gray-600 uppercase tracking-wider mb-1 block">Rol</label><SearchableSelect value={newUser.rol} onChange={v => setNewUser(prev => ({ ...prev, rol: v }))} options={Object.entries(ROLE_LABELS).map(([k, v]) => ({ value: k, label: v }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50 appearance-none" /></div>
               </div>
               <button onClick={handleCreate} disabled={localSaving || !newUser.email || !newUser.nombre} className="w-full bg-blis-red text-white py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                 <UserPlus className="w-4 h-4" />{localSaving ? 'Creando...' : 'Crear Usuario'}

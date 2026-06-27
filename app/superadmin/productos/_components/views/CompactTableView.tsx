@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { CheckSquare, Square, ChevronUp, ChevronDown, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check } from "lucide-react"
-import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import type { Product, ProductSort, Category, Status, Currency } from '../../_types'
 
 const SITE_DOMAIN = 'blis-corp.com'
@@ -202,7 +202,7 @@ export function CompactTableView({
               </td>
               <td className="px-4 py-2 align-middle text-left">
                 {isBulkEditing ? (
-                  <NativeSelect
+                  <SearchableSelect
                     value={product.status}
                     onChange={(value) => onUpdateBulk(product.id, 'status', value)}
                     options={statuses.map(s => ({ value: s.name, label: s.name }))}

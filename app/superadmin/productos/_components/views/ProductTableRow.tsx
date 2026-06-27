@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon, Link2, ExternalLink, Check } from "lucide-react"
-import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import type { Product, Category, Status, Currency } from '../../_types'
 
 const SITE_DOMAIN = 'blis-corp.com'
@@ -99,7 +99,7 @@ return (
                     className="accent-blue-500 w-3 h-3 flex-shrink-0"
                     title="Auto SKU"
                   />
-                  <NativeSelect
+                  <SearchableSelect
                     value={product.skuPrefix || product.sku?.split('-')[0] || 'SKU'}
                     onChange={(value) => onUpdateBulk(product.id, 'skuPrefix', value)}
                     options={[
@@ -166,7 +166,7 @@ return (
                   placeholder="0.00"
                 />
                 {isMultiCurrencyEnabled && (
-                    <NativeSelect
+                    <SearchableSelect
                       value={product.currencyCode || selectedCurrency.code}
                       onChange={(value) => onUpdateBulk(product.id, 'currencyCode', value)}
                       options={currencies.map(c => ({ value: c.code, label: c.code }))}

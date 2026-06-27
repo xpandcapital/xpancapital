@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import Flag from 'react-world-flags';
 import type { AccessLogsStats, AccessLogEntry } from '../_types';
-import { NativeSelect } from '@/components/ui/SearchableSelect';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 
 const PAISES: Record<string, string> = {
   CN: "China", RU: "Rusia", US: "EE.UU.", GB: "Reino Unido", DE: "Alemania", FR: "Francia",
@@ -188,7 +188,7 @@ export function AccessLogsTool() {
         {/* Filtros compactos */}
         <div className="flex items-center gap-1.5 flex-wrap">
           <Filter className="w-3 h-3 text-gray-500 shrink-0" />
-          <NativeSelect value={filtroMotivo} onChange={setFiltroMotivo}
+          <SearchableSelect value={filtroMotivo} onChange={setFiltroMotivo}
             options={[
               { value: 'geobloqueo', label: 'Geobloqueo' },
               { value: 'rate_limit', label: 'Rate Limit' },

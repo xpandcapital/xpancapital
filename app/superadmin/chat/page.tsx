@@ -27,7 +27,7 @@ import { Switch } from "@/components/ui/switch";
 import type { ChatSala, ChatMensaje, ChatVisitante } from "@/lib/chat/types";
 import { CallModal } from "@/components/chat/CallModal";
 import { usePushNotifications } from "@/lib/hooks/usePushNotifications";
-import { NativeSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 export default function ChatAdminPage() {
   const { user } = useAuth();
@@ -863,7 +863,7 @@ export default function ChatAdminPage() {
 
                           <div>
                             <label className="text-xs text-gray-400 uppercase tracking-wider font-bold block mb-2">Modelo de IA</label>
-                            <NativeSelect
+                            <SearchableSelect
                               value={configEditada.ia_modelo || "gemini-2.5-flash-preview-05-20"}
                               onChange={(v) => setConfigEditada({ ...configEditada, ia_modelo: v })}
                               options={[
@@ -947,7 +947,7 @@ export default function ChatAdminPage() {
                                 placeholder="Atajo (ej: /saludo)"
                                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 text-sm flex-1"
                               />
-                              <NativeSelect
+                              <SearchableSelect
                                 value={editandoPlantilla ? editandoPlantilla.departamento || "general" : nuevaPlantilla.departamento}
                                 onChange={(v) =>
                                   editandoPlantilla

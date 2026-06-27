@@ -5,7 +5,7 @@ import { Eye, EyeOff, Star, Trash2 } from "lucide-react";
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { TemplateData } from "../_types";
 import { InputField, TextAreaField, ColorPicker, SectionCard } from "./ui";
-import { NativeSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface ConfigPanelProps {
   template: TemplateData | null;
@@ -358,7 +358,7 @@ export function ConfigPanel({
                 />
                 <div>
                   <label className="text-[10px] text-gray-400 uppercase mb-1 block">Estilo</label>
-                  <NativeSelect
+                  <SearchableSelect
                     value={templateConfig?.customHeader?.cta?.style || 'primary'}
                     onChange={(v) => setTemplateConfig(prev => ({
                       ...prev,

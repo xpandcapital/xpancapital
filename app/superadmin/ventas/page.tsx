@@ -7,7 +7,7 @@ import {
     Banknote, CreditCard, History, ShieldCheck,
     Coins, Clock3, GraduationCap, Calendar
 } from "lucide-react";
-import { SearchableSelect, NativeSelect, type SearchableOption } from "@/components/ui/SearchableSelect";
+import { SearchableSelect, type SearchableOption } from "@/components/ui/SearchableSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -215,7 +215,7 @@ export default function VentasAdminPage() {
                         <Input value={search} onChange={e => setSearch(e.target.value)}
                             placeholder="Buscar por cliente, email o producto..." className="bg-zinc-900/50 border-white/10 text-white placeholder:text-gray-600 rounded-xl pl-10" />
                     </div>
-                    <NativeSelect value={filtroEstado} onChange={v => { setFiltroEstado(v); setPage(1); }}
+                    <SearchableSelect value={filtroEstado} onChange={v => { setFiltroEstado(v); setPage(1); }}
                         options={[
                             { value: 'completado', label: 'Completado' },
                             { value: 'pendiente', label: 'Pendiente' },
@@ -452,7 +452,7 @@ export default function VentasAdminPage() {
                         </div>
                         <div>
                             <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Método de Pago</label>
-                            <NativeSelect
+                            <SearchableSelect
                                 value={formNueva.metodo_pago}
                                 onChange={(v) => setFormNueva({ ...formNueva, metodo_pago: v })}
                                 options={[
@@ -502,7 +502,7 @@ export default function VentasAdminPage() {
                         {modalVerificar?.metodo_pago === 'whatsapp' && (
                             <div>
                                 <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Sub-tipo de pago</label>
-                                <NativeSelect
+                                <SearchableSelect
                                     value={subTipoPago}
                                     onChange={setSubTipoPago}
                                     options={[

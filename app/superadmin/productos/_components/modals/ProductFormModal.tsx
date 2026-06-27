@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Globe, Copy, Check, Loader2, X, Search, GraduationCap, Link2, Unlink2 } from "lucide-react"
-import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import { ProductImageUploader } from './ProductImageUploader'
 import { ProductPriceSection } from './ProductPriceSection'
 import { ProductStockSection } from './ProductStockSection'

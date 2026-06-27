@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/Toast";
-import { NativeSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface Bank { name: string; account_number: string; account_holder: string; cci: string; currency: string; account_type: string; }
 interface Wallet { network: string; address: string; label: string; qr_url?: string; holder?: string; }
@@ -229,11 +229,11 @@ export default function FormasPagoAdminPage() {
                                                                                                         })}
                                                                                                         <div>
                                                                                                             <label className="text-[9px] text-gray-600 block mb-0.5">Tipo</label>
-                                            <NativeSelect value={bank.account_type} onChange={v => updateBankField(forma.id, key, idx, 'account_type', v)} options={[{ value: 'ahorros', label: 'Ahorros' }, { value: 'corriente', label: 'Corriente' }]} className="w-full bg-white/5 border border-white/10 rounded-lg p-1 text-[10px] text-white h-7" />
+                                            <SearchableSelect value={bank.account_type} onChange={v => updateBankField(forma.id, key, idx, 'account_type', v)} options={[{ value: 'ahorros', label: 'Ahorros' }, { value: 'corriente', label: 'Corriente' }]} className="w-full bg-white/5 border border-white/10 rounded-lg p-1 text-[10px] text-white h-7" />
                                                                                                         </div>
                                                                                                         <div>
                                                                                                             <label className="text-[9px] text-gray-600 block mb-0.5">Moneda</label>
-                                            <NativeSelect value={bank.currency} onChange={v => updateBankField(forma.id, key, idx, 'currency', v)} options={[{ value: 'PEN', label: 'S/' }, { value: 'USD', label: '$' }]} className="w-full bg-white/5 border border-white/10 rounded-lg p-1 text-[10px] text-white h-7" />
+                                            <SearchableSelect value={bank.currency} onChange={v => updateBankField(forma.id, key, idx, 'currency', v)} options={[{ value: 'PEN', label: 'S/' }, { value: 'USD', label: '$' }]} className="w-full bg-white/5 border border-white/10 rounded-lg p-1 text-[10px] text-white h-7" />
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </div>
@@ -307,7 +307,7 @@ export default function FormasPagoAdminPage() {
                                                         <div className="space-y-3">
                                                             <div>
                                                 <label className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Modo de asignación</label>
-                                                <NativeSelect
+                                                <SearchableSelect
                                                     value={forma.config?.modo_asignacion || 'manual'}
                                                     onChange={v => updateSimple(forma.id, 'modo_asignacion', v)}
                                                     options={[
@@ -385,7 +385,7 @@ export default function FormasPagoAdminPage() {
                                                     <div className="border-t border-white/5 pt-3 mt-2">
                                                         <p className="text-[10px] font-black uppercase text-gray-500 tracking-widest mb-2">Costo de procesamiento</p>
                                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                                            <NativeSelect value={forma.config?.processing_fee_type || ''}
+                                                            <SearchableSelect value={forma.config?.processing_fee_type || ''}
                                                                 onChange={v => updateSimple(forma.id, 'processing_fee_type', v)}
                                                                 options={[
                                                                     { value: 'fixed', label: 'Fijo ($)' },

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { X, Check } from "lucide-react"
-import { NativeSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 
 interface LabelSettingsPanelProps {
   labelSettings: {
@@ -150,7 +150,7 @@ export function LabelSettingsPanel({
       <div className="flex gap-2">
         <div className="flex-1 space-y-2">
           <h4 className="text-[8px] font-black text-white/40 uppercase tracking-widest px-1">Hoja Impresión</h4>
-          <NativeSelect
+          <SearchableSelect
             value={labelSettings.paperSize}
             onChange={(v) => onUpdate({ paperSize: v as typeof labelSettings.paperSize })}
             options={[

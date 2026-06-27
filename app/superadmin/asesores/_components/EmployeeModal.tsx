@@ -6,7 +6,7 @@ import type { Advisor, Role } from '../_types'
 import { PermissionSelector } from '@/components/ui/PermissionSelector'
 import type { PermisosAdicionales, UserRole } from '@/lib/auth/permissions'
 import { ROLE_CONFIG } from '@/lib/auth/permissions'
-import { NativeSelect } from '@/components/ui/SearchableSelect'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 interface EmployeeModalProps {
   advisor: Advisor | null
@@ -204,7 +204,7 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
                       return (
                         <div key={field.key} className="space-y-1">
                           <label className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{field.label}</label>
-                          <NativeSelect options={opts} value={form[field.key as keyof typeof form] as string} onChange={(val) => updateField(field.key, val)} />
+                          <SearchableSelect options={opts} value={form[field.key as keyof typeof form] as string} onChange={(val) => updateField(field.key, val)} />
                         </div>
                       )
                     }

@@ -6,7 +6,7 @@ import { PERMISSIONS, AVAILABLE_ROUTES, ROLE_CONFIG, buildPermission } from '@/l
 import { getAllItemPerms, PERMISSION_TREE, ACTION_COLORS, ACTION_ICONS } from '../_types'
 import type { CustomRole } from '../_hooks'
 import type { PermGroup, PermItem } from '../_types'
-import { NativeSelect } from '@/components/ui/SearchableSelect'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 export interface PermissionsGridProps {
   role: CustomRole
@@ -65,7 +65,7 @@ export function PermissionsGrid({
           <Home className="w-3.5 h-3.5 text-blis-red" />
           <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Página de inicio al iniciar sesión</p>
         </div>
-        <NativeSelect
+        <SearchableSelect
           value={role.ruta_inicio || ''}
           onChange={async (val) => {
             await onUpdateRole(role.id!, { ruta_inicio: val || null })

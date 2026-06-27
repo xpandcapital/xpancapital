@@ -6,7 +6,7 @@ import { UserPlus, Shield, Download, Search, Filter, User, CheckCircle2, X, Load
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard';
-import { NativeSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 const ROLE_OPTIONS = [
     { value: 'superadmin', label: 'Super Admin' },
@@ -152,7 +152,7 @@ export default function AdminUsers() {
                 <div className="flex flex-col md:flex-row gap-4 min-w-max">
                     <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
                         <Filter className="w-4 h-4 text-gray-500" />
-                        <NativeSelect
+                        <SearchableSelect
                             value={roleFilter}
                             onChange={(value) => setRoleFilter(value)}
                             options={[
@@ -164,7 +164,7 @@ export default function AdminUsers() {
                     </div>
                     <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
                         <CheckCircle2 className="w-4 h-4 text-gray-500" />
-                        <NativeSelect
+                        <SearchableSelect
                             value={statusFilter}
                             onChange={(value) => setStatusFilter(value)}
                             options={[
@@ -348,7 +348,7 @@ export default function AdminUsers() {
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Rol</label>
-                                        <NativeSelect
+                                        <SearchableSelect
                                             value={newUserRole}
                                             onChange={(value) => setNewUserRole(value)}
                                             options={ROLE_OPTIONS}

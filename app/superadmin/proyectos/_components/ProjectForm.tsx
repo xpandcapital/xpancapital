@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Plus, Upload, Loader2, X, Globe, MapPin } from 'lucide-react'
 import type { Project, ProjectFormData } from '../_types'
 import { STATUS_OPTIONS } from '../_types'
-import { NativeSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 
 interface ProjectFormProps {
   isOpen: boolean
@@ -73,7 +73,7 @@ export function ProjectForm({
                     </div>
                     <div>
                       <label className="text-[10px] uppercase tracking-widest text-white/40 font-medium block mb-2">Estado</label>
-                      <NativeSelect
+                      <SearchableSelect
                         value={formData.status}
                         onChange={(value) => setFormData({ ...formData, status: value })}
                         options={STATUS_OPTIONS.map(s => ({ value: s, label: s }))}

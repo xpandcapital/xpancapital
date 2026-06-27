@@ -7,7 +7,7 @@ import {
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { PAISES } from "@/lib/paises";
 
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {

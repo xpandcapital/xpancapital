@@ -11,7 +11,7 @@ import {
   Palette,
 } from "lucide-react";
 import type { CertificateElement } from "../_types";
-import { NativeSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface Props {
   selectedId: string | null;
@@ -191,7 +191,7 @@ export function ElementSettings({
                       onChange={e => onUpdate(activeElement.id, { color: e.target.value })}
                       className="w-full h-12 bg-black/40 border border-white/5 rounded-xl cursor-pointer p-1"
                     />
-                    <NativeSelect
+                    <SearchableSelect
                       value={activeElement.fontWeight}
                       onChange={(value) => onUpdate(activeElement.id, { fontWeight: value })}
                       options={[

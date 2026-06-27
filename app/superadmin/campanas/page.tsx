@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useCampanas } from "@/lib/hooks/useCampanas";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard'
-import { NativeSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import { Plus, Edit2, Trash2, Megaphone, Users, Mail, Phone, X, Check, Settings } from "lucide-react";
 
 export default function CampanasPage() {
@@ -313,7 +313,7 @@ export default function CampanasPage() {
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
                   Estado
                 </label>
-                <NativeSelect
+                <SearchableSelect
                   value={formData.estado}
                   onChange={(value) => setFormData({ ...formData, estado: value })}
                   options={[

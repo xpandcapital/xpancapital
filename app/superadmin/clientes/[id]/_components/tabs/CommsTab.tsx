@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import type { Client } from '../../../_types';
 import { useToast } from '@/components/ui/Toast';
-import { NativeSelect } from '@/components/ui/SearchableSelect';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 
 interface CommsTabProps {
     client: Client;
@@ -31,7 +31,7 @@ export function CommsTab({ client, onUpdate }: CommsTabProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <label className="text-[10px] text-gray-600 font-black uppercase ml-1">Template</label>
-                        <NativeSelect
+                        <SearchableSelect
                             value={noticeContent.template}
                             onChange={v => {
                                 if (v === 'welcome') setNoticeContent({ template: v, title: '¡Bienvenido a Blis Corp!', message: `Hola ${client.firstName}, es un gusto tenerte.` });

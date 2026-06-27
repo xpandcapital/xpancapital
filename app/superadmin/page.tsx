@@ -1,5 +1,5 @@
 import { Activity, Users, Eye, TrendingUp, ShieldCheck, DollarSign, Target, ArrowUpRight, ArrowDownRight, Clock, Star } from "lucide-react";
-import { NativeSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 export default function AdminDashboard() {
     const kpis = [
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
                 <div className="lg:col-span-2 bg-zinc-950 border border-white/5 rounded-2xl p-6 flex flex-col">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-lg font-bold text-white">Ingresos vs Proyección (2026)</h2>
-                        <NativeSelect options={[{ value: 'year', label: 'Este Año' }, { value: '6months', label: 'Últimos 6 Meses' }]} value="year" onChange={() => {}} className="bg-black border border-white/10 text-xs text-gray-400 px-3 py-1 rounded-lg focus:outline-none" />
+                        <SearchableSelect options={[{ value: 'year', label: 'Este Año' }, { value: '6months', label: 'Últimos 6 Meses' }]} value="year" onChange={() => {}} className="bg-black border border-white/10 text-xs text-gray-400 px-3 py-1 rounded-lg focus:outline-none" />
                     </div>
                     {/* Fake Chart Area */}
                     <div className="flex-1 min-h-[300px] w-full rounded-xl border border-white/5 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] relative flex items-end px-4 gap-4 pb-4 pt-10">

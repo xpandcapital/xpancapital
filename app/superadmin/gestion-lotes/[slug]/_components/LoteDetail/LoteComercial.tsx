@@ -4,7 +4,7 @@ import { Lote } from '../../_types';
 import { SubCard } from '../shared/GlassCard';
 import { formatCurrency } from '../../_utils/formatters';
 import { Briefcase } from 'lucide-react';
-import { NativeSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface Props {
   lot: Lote;
@@ -32,7 +32,7 @@ export function LoteComercial({ lot, onChange }: Props) {
           <div>
             <label className="text-[10px] font-bold text-emerald-400 uppercase block mb-1">Comision a pagar</label>
             <div className="flex gap-2">
-              <NativeSelect
+              <SearchableSelect
                 value={lot.commissionType}
                 onChange={(v) => onChange('commissionType', v)}
                 options={[

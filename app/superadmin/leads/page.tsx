@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/Toast";
 import { Search, Filter, Download, User, Mail, Phone, Calendar, ChevronDown, X, Check, Eye } from "lucide-react";
-import { SearchableSelect, NativeSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface Lead {
   id: string;
@@ -185,7 +185,7 @@ export default function LeadsPage() {
             </div>
           </div>
 
-          <NativeSelect
+          <SearchableSelect
             value={estadoFilter}
             onChange={setEstadoFilter}
             placeholder="Todos los estados"
@@ -282,7 +282,7 @@ export default function LeadsPage() {
                         </span>
                       </td>
                       <td className="p-4">
-                        <NativeSelect
+                        <SearchableSelect
                           value={lead.estado}
                           onChange={(v) => updateLeadEstado(lead.id, v)}
                           options={ESTADOS}

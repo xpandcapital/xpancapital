@@ -15,7 +15,7 @@ import { useApiState } from '../_hooks/useApiState'
 import { categories } from '../_data/apiCategories'
 import { getAppIdeas } from '../_data/apiIdeas'
 import type { ApiApp, ApiField, ApiCategory } from '../_types'
-import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 
 export function ApiCloudPage() {
     const config = useApiConfig()
@@ -792,7 +792,7 @@ export function ApiCloudPage() {
                                                                                                 </div>
                                                                                              ) : (field as any).type === 'select' ? (
                                                                                                 ((field as any).options || []).length <= 10 ? (
-                                                                                                    <NativeSelect
+                                                                                                    <SearchableSelect
                                                                                                         options={(field as any).options}
                                                                                                         value={config.apiValues[field.id] || ''}
                                                                                                         onChange={(val) => config.handleKeyChange(field.id, val)}

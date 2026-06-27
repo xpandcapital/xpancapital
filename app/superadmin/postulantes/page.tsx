@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useToast } from "@/components/ui/Toast"
 import { useActionGuard } from '@/hooks/useActionGuard'
-import { NativeSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import { Postulante, EMPRESA_ID, ESTADOS, ESTADO_LABELS, ESTADO_COLORS, diccionarioPreguntas } from "./_types"
 import { PostulanteDetailModal } from "./_components/PostulanteDetailModal"
 import { PostulanteFormModal } from "./_components/PostulanteFormModal"
@@ -181,7 +181,7 @@ export default function AdminPostulantes() {
         </div>
         <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
           <Filter className="w-4 h-4 text-gray-500" />
-          <NativeSelect
+          <SearchableSelect
             value={statusFilter}
             onChange={(value) => setStatusFilter(value)}
             options={[

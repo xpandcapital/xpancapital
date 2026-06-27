@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { PlusCircle, Trash2, GripVertical, Layout } from 'lucide-react'
 import type { useCalendarEditor } from '../_hooks/useCalendarEditor'
-import { NativeSelect } from '@/components/ui/SearchableSelect'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 type Editor = ReturnType<typeof useCalendarEditor>
 
@@ -87,7 +87,7 @@ export function EditorForm({ editor }: { editor: Editor }) {
                   onChange={e => setNewField(prev => ({ ...prev, label: e.target.value }))}
                   placeholder="Ej. Tu usuario de Instagram..."
                   className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blis-red" />
-                <NativeSelect value={newField.type}
+                <SearchableSelect value={newField.type}
                   onChange={v => setNewField(prev => ({ ...prev, type: v }))}
                   options={fieldTypes.map(ft => ({ value: ft.value, label: ft.label }))}
                   className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blis-red" />

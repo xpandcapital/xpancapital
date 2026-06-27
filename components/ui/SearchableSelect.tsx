@@ -202,36 +202,3 @@ export function SearchableSelect({
     </div>
   )
 }
-
-/**
- * Simple native <select> with consistent dark styling.
- * Use when ≤5 options (no search needed).
- */
-export function NativeSelect({
-  value,
-  onChange,
-  options,
-  placeholder,
-  className = '',
-}: {
-  value: string
-  onChange: (value: string) => void
-  options: { value: string; label: string }[]
-  placeholder?: string
-  className?: string
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={`${SELECT_CLASSES} ${className}`}
-    >
-      {placeholder && <option value="">{placeholder}</option>}
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  )
-}

@@ -7,7 +7,7 @@ import { useEmpresaEdit } from './useEmpresaEdit'
 import { useToast } from '@/components/ui/Toast'
 import { ImageUpload } from '@/components/editor/ImageUpload'
 import { PLANES, PAISES, MONEDAS, ZONAS_HORARIAS } from '../_types'
-import { NativeSelect, SearchableSelect } from '@/components/ui/SearchableSelect'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 type Tab = 'identidad' | 'apariencia' | 'regional' | 'fiscal' | 'plan' | 'features'
 
@@ -153,7 +153,7 @@ export default function EmpresaEditPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className={label}>Idioma</label>
-                <NativeSelect value={(empresaForm.idioma as string) || 'es'} onChange={v => upd('idioma', v)} options={[{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }, { value: 'pt', label: 'Português' }]} className={input} />
+                <SearchableSelect value={(empresaForm.idioma as string) || 'es'} onChange={v => upd('idioma', v)} options={[{ value: 'es', label: 'Español' }, { value: 'en', label: 'English' }, { value: 'pt', label: 'Português' }]} className={input} />
               </div>
               <div>
                 <label className={label}>Zona Horaria</label>
@@ -180,7 +180,7 @@ export default function EmpresaEditPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div>
                 <label className={label}>Plan</label>
-                <NativeSelect value={(empresaForm.plan as string) || 'free'} onChange={v => upd('plan', v)} options={PLANES.map(p => ({ value: p.id, label: `${p.nombre} (hasta ${p.usuarios} usuarios)` }))} className={input} />
+                <SearchableSelect value={(empresaForm.plan as string) || 'free'} onChange={v => upd('plan', v)} options={PLANES.map(p => ({ value: p.id, label: `${p.nombre} (hasta ${p.usuarios} usuarios)` }))} className={input} />
               </div>
               <div><label className={label}>Límite de Usuarios</label><input type="number" value={(empresaForm.plan_limite_usuarios as number) || 5} onChange={e => upd('plan_limite_usuarios', parseInt(e.target.value))} className={input} /></div>
               <div><label className={label}>Límite de Productos</label><input type="number" value={(empresaForm.plan_limite_productos as number) || 50} onChange={e => upd('plan_limite_productos', parseInt(e.target.value))} className={input} /></div>

@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import type { RateLimitingConfig, RateLimitRule } from '../_types';
 import { defaultRateLimitingConfig } from '../_types';
-import { NativeSelect } from '@/components/ui/SearchableSelect';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 
 const RUTAS_SUGERIDAS = [
   { ruta: '/api/leads', metodo: 'POST', descripcion: 'Formularios de leads', protege_contra: 'Spam masivo de leads falsos' },
@@ -337,7 +337,7 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
                     </div>
                     <div>
                       <label className="block text-[10px] text-gray-500 mb-1">Método</label>
-                      <NativeSelect
+                      <SearchableSelect
                         value={newMetodo}
                         onChange={setNewMetodo}
                         options={METODOS.map(m => ({ value: m, label: m }))}

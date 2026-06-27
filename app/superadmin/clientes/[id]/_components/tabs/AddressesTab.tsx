@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { MapPin, Plus, X } from 'lucide-react';
 import type { Client, Address } from '../../../_types';
 import { useToast } from '@/components/ui/Toast';
-import { NativeSelect } from '@/components/ui/SearchableSelect';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 
 interface AddressesTabProps {
     client: Client;
@@ -55,7 +55,7 @@ export function AddressesTab({ client, onUpdate }: AddressesTabProps) {
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] text-gray-600 font-black uppercase ml-1">Tipo</label>
-                            <NativeSelect
+                            <SearchableSelect
                                 value={newAddress.type || 'Envio'}
                                 onChange={v => setNewAddress({ ...newAddress, type: v as Address['type'] })}
                                 options={[

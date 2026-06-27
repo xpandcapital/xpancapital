@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { Layers, X } from "lucide-react"
-import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect"
+import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import { createPortal } from "react-dom"
 
 interface MassEditModalProps {
@@ -70,7 +70,7 @@ export function MassEditModal({
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Cambiar Estado</label>
-              <NativeSelect
+              <SearchableSelect
                 value={massEditData.status}
                 onChange={(value) => onStatusChange(value)}
                 options={[

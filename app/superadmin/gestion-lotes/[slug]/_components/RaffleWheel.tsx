@@ -2,7 +2,7 @@
 
 import { Lote, RaffleState } from '../_types';
 import { Dices, Trophy, Printer, RotateCcw } from 'lucide-react';
-import { NativeSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface Props {
   state: RaffleState;
@@ -37,7 +37,7 @@ export function RaffleWheel({ state, lots, participants, onExecute, onReset, onP
           <div className="space-y-4">
             <div className="flex items-center justify-center gap-3">
               <label className="text-[9px] font-bold text-zinc-500 uppercase">Duracion:</label>
-              <NativeSelect
+              <SearchableSelect
                 value={String(state.duration)}
                 onChange={(v) => onSetDuration(Number(v))}
                 options={[5, 10, 15, 20].map(d => ({ value: String(d), label: `${d}s` }))}

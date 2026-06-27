@@ -3,7 +3,7 @@
 import { Info } from 'lucide-react'
 import type { useCalendarEditor } from '../_hooks/useCalendarEditor'
 import { calendarTypeLabels } from '../_types'
-import { NativeSelect } from '@/components/ui/SearchableSelect'
+import { SearchableSelect } from '@/components/ui/SearchableSelect'
 
 type Editor = ReturnType<typeof useCalendarEditor>
 
@@ -36,7 +36,7 @@ export function EditorTeam({ editor }: { editor: Editor }) {
             <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">
               Método de distribución
             </label>
-            <NativeSelect
+            <SearchableSelect
               value={(formData.configuracion as Record<string, unknown>)?.logic as string || 'round_robin'}
               onChange={v => {
                 const newConfig = { ...(formData.configuracion as Record<string, unknown>), logic: v }

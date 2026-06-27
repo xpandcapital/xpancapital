@@ -3,7 +3,7 @@
 import { Plus, Trash2, Megaphone, Users } from "lucide-react";
 import { InputField, TextAreaField, LinkField, ColorPicker, SectionCard, VisibilityToggle } from "../ui";
 import { ImageUpload } from "@/components/editor/ImageUpload";
-import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 interface CaptureHeroEditorProps {
   sections: Record<string, any>;
@@ -214,7 +214,7 @@ export function CaptureHeroEditor({
                   <div className="grid grid-cols-3 gap-3 mt-3">
                     <div>
                       <label className="text-[10px] text-gray-400 uppercase mb-1 block">Tipo</label>
-                      <NativeSelect
+                      <SearchableSelect
                         value={field.type || 'text'}
                         onChange={(v) => {
                           const newFields = [...(sections.captureHero?.form?.fields || [])];
