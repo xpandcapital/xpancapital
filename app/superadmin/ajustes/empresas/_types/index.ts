@@ -72,16 +72,8 @@ export const PLANES = [
   { id: 'enterprise', nombre: 'Enterprise', usuarios: 500, productos: 5000 },
 ]
 
-export const PAISES = [
-  { code: 'PE', nombre: 'Perú' },
-  { code: 'CO', nombre: 'Colombia' },
-  { code: 'EC', nombre: 'Ecuador' },
-  { code: 'MX', nombre: 'México' },
-  { code: 'AR', nombre: 'Argentina' },
-  { code: 'CL', nombre: 'Chile' },
-  { code: 'ES', nombre: 'España' },
-  { code: 'US', nombre: 'Estados Unidos' },
-]
+import { PAISES as PAISES_FLAGS } from '@/lib/paises'
+export { PAISES_FLAGS as PAISES }
 
 export const MONEDAS = [
   { code: 'USD', nombre: 'USD - Dólar americano' },

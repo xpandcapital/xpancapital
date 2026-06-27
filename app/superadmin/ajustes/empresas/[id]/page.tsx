@@ -143,7 +143,7 @@ export default function EmpresaEditPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className={label}>País Fiscal</label>
-                <SearchableSelect value={(empresaForm.pais_fiscal as string) || 'PE'} onChange={v => upd('pais_fiscal', v)} options={PAISES.map(p => ({ value: p.code, label: p.nombre }))} className={input} />
+                <SearchableSelect value={(empresaForm.pais_fiscal as string) || 'PE'} onChange={v => upd('pais_fiscal', v)} options={PAISES.map(p => ({ value: p.code, label: `${p.flag} ${p.nombre}` }))} className={input} />
               </div>
               <div>
                 <label className={label}>Moneda Base</label>

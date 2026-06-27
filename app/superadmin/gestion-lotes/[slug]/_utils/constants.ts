@@ -1,15 +1,11 @@
 import { CountryCode, Owner, AlternateContact, InitialPayment, Reminder, Lote } from '../_types';
+import { PAISES_TELEFONO } from '@/lib/paises';
 
-export const COUNTRY_CODES: CountryCode[] = [
-  { code: '+593', flag: '🇪🇨', name: 'Ecuador' },
-  { code: '+1', flag: '🇺🇸', name: 'USA' },
-  { code: '+34', flag: '🇪🇸', name: 'España' },
-  { code: '+57', flag: '🇨🇴', name: 'Colombia' },
-  { code: '+51', flag: '🇵🇪', name: 'Perú' },
-  { code: '+52', flag: '🇲🇽', name: 'México' },
-  { code: '+54', flag: '🇦🇷', name: 'Argentina' },
-  { code: '+56', flag: '🇨🇱', name: 'Chile' },
-];
+export const COUNTRY_CODES: CountryCode[] = PAISES_TELEFONO.map(p => ({
+  code: p.code,
+  flag: p.flag,
+  name: p.pais,
+}));
 
 export const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',

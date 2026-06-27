@@ -7,7 +7,8 @@ import {
 import { useLandingCMS } from "@/context/LandingCMSContext";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { NativeSelect } from "@/components/ui/SearchableSelect";
+import { NativeSelect, SearchableSelect } from "@/components/ui/SearchableSelect";
+import { PAISES } from "@/lib/paises";
 
 function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
     return (
@@ -84,22 +85,18 @@ export default function ComercioSettings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     <Field label="País de Operación Fiscal">
                         <div className="relative">
-                            <NativeSelect
+                            <SearchableSelect
                                 value={cmsData.commercial.country}
                                 onChange={handleCountryChange}
                                 options={[
-                                    { value: 'PE', label: 'Perú 🇵🇪' },
-                                    { value: 'MX', label: 'México 🇲🇽' },
-                                    { value: 'CO', label: 'Colombia 🇨🇴' },
-                                    { value: 'CL', label: 'Chile 🇨🇱' },
-                                    { value: 'EC', label: 'Ecuador 🇪🇨' },
-                                    { value: 'ES', label: 'España 🇪🇸' },
-                                    { value: 'US', label: 'Estados Unidos 🇺🇸' },
-                                    { value: 'GLOBAL', label: 'Global / Otros 🌎' },
+                                    ...PAISES.map(p => ({ value: p.code, label: `${p.flag} ${p.nombre}` })),
+                                    { value: 'GLOBAL', label: '🌎 Global / Otros' },
                                 ]}
-                                className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blue-500/50 appearance-none font-bold"
+                                placeholder="Seleccionar país..."
+                                searchPlaceholder="Buscar país..."
+                                className="w-full"
                             />
-                            <MapPin className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-700 pointer-events-none" />
+                            <MapPin className="absolute right-4 top-[14px] w-4 h-4 text-zinc-700 pointer-events-none z-10" />
                         </div>
                     </Field>
 

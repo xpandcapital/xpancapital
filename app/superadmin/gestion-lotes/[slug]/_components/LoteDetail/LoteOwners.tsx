@@ -73,7 +73,7 @@ function OwnerCard({ owner, canRemove, onUpdate, onRemove }: {
             <SearchableSelect
               value={owner.phoneCode}
               onChange={v => onUpdate('phoneCode', v)}
-              options={COUNTRY_CODES.map(c => ({ value: c.code, label: `${c.flag} ${c.code}` }))}
+              options={COUNTRY_CODES.map(c => ({ value: c.code, label: `${c.flag} ${c.code}`, sublabel: c.name }))}
               className="w-20 p-1.5 text-xs text-white bg-black border border-white/[0.06] rounded-md outline-none"
             />
             <input
