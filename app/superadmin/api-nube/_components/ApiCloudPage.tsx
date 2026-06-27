@@ -789,7 +789,7 @@ export function ApiCloudPage() {
                                                                                                         {config.apiValues[field.id] ? 'Cambiar' : 'Subir'}
                                                                                                     </label>
                                                                                                 </div>
-                                                                                             ) : field.type === 'select' ? (
+                                                                                             ) : (field as any).type === 'select' ? (
                                                                                                 <select
                                                                                                     value={config.apiValues[field.id] || ''}
                                                                                                     onChange={(e) => config.handleKeyChange(field.id, e.target.value)}

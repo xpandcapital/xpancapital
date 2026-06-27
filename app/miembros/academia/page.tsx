@@ -13,6 +13,7 @@ interface Lesson {
     id: string;
     title: string;
     type: 'video' | 'text' | 'quiz';
+    duration?: string;
     content: string;
     videoUrl?: string;
     attachments?: string[];

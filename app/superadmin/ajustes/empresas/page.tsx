@@ -26,6 +26,7 @@ export default function EmpresasPage() {
     } else {
       showToast(typeof result === 'string' ? result : 'Error al crear', 'error')
     }
+    return result
   }
 
   const onDelete = async (id: string) => {
@@ -33,6 +34,7 @@ export default function EmpresasPage() {
     if (typeof result === 'string') {
       showToast(result, 'error')
     }
+    return result
   }
 
   if (loading) {

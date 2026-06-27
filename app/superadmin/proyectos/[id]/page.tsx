@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Trash2, RefreshCw, ExternalLink, Loader2, Upload, X, Plus, Globe, MapPin, Sparkles, FolderOpen } from 'lucide-react'
 import { useActionGuard } from '@/hooks/useActionGuard'
+import { supabase } from '@/lib/supabase'
 
 const STATUS_OPTIONS = ['EN PLANOS', 'PREVENTA', 'VENTA CON ESCRITURA', 'VENTA FINALIZADA', 'PROYECTO ENTREGADO']
 

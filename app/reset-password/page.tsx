@@ -20,7 +20,7 @@ function ResetPasswordForm() {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [loadingSession, setLoadingSession] = useState(true)
-  const recoveryRef = useRef<ReturnType<typeof createClient> | null>(null)
+  const recoveryRef = useRef<any>(null)
 
   useEffect(() => {
     if (!supabase) return

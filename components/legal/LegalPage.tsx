@@ -390,7 +390,7 @@ export function LegalPage({ data, slug }: LegalPageProps) {
                   onClick={handleShare}
                   className="w-full text-left px-4 py-2 rounded-xl hover:bg-white/5 text-sm text-gray-400 hover:text-white transition-all whitespace-nowrap"
                 >
-                  {navigator.share ? "Compartir enlace" : "Copiar enlace"}
+                  {typeof navigator !== 'undefined' && (navigator as any).share ? "Compartir enlace" : "Copiar enlace"}
                 </button>
               </motion.div>
             )}

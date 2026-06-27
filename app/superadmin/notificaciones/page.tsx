@@ -21,6 +21,7 @@ interface Notificacion {
   mensaje: string;
   tipo: string;
   link?: string;
+  user_id?: string;
   destinatario_tipo?: string;
   destinatario_ids?: string[];
   leida: boolean;

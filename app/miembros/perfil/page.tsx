@@ -486,14 +486,14 @@ export default function ProfilePage() {
                         </span>
                     </div>
                     <p className="text-gray-400 font-medium text-xs sm:text-sm leading-relaxed max-w-xl">
-                        {user?.bio || `${user?.rol || 'Miembro'} de Blis Corp`}
+                        {user?.role || 'Miembro de Blis Corp'}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-4 mt-2">
                         <div className="bg-white/5 border border-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-500">
                             ID: {user?.id?.slice(0, 8)?.toUpperCase() || 'N/A'}
                         </div>
                         <div className="bg-white/5 border border-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-500">
-                            {user?.role || user?.rol ? (user.role || user.rol).charAt(0).toUpperCase() + (user.role || user.rol).slice(1) : 'Miembro'}
+                            {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Miembro'}
                         </div>
                     </div>
                 </div>
