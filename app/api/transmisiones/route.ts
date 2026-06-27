@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { titulo, subtitulo, link, texto_boton, duracion_minutos, paginas } = body
+    const { titulo, subtitulo, link, texto_boton, duracion_minutos, paginas, tipo, color, productos_ids } = body
 
     if (!link || !duracion_minutos) {
       return NextResponse.json({ success: false, error: 'Link y duración requeridos' }, { status: 400 })
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       .from('transmisiones')
       .insert({
         empresa_id: auth.empresaId!,
-        tipo: 'publica',
+        tipo: tipo || 'publica',
         titulo: titulo || 'Estamos en vivo',
         subtitulo: subtitulo || null,
         link,
@@ -75,8 +75,9 @@ export async function POST(request: NextRequest) {
         duracion_minutos,
         inicio,
         fin,
-        color: 'verde',
+        color: color || 'verde',
         paginas: paginas || ['landing', 'tienda', 'blog', 'miembros'],
+        productos_ids: productos_ids || [],
         creado_por: auth.userId,
         creado_en: inicio,
         actualizado_en: inicio,

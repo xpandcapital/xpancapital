@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Radio, ExternalLink } from 'lucide-react'
+import { Radio, ExternalLink, Users } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { getSupabase } from '@/lib/supabase'
+import { useAuth } from '@/hooks/useAuth'
+import { useShop } from '@/context/ShopContext'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 interface TransmisionData {
@@ -24,12 +26,68 @@ interface TransmisionData {
   productos_ids: string[]
 }
 
+type PaletteKey = 'verde' | 'azul'
+
+interface Palette {
+  bg: string
+  border: string
+  orb1: string
+  orb2: string
+  dot1: string
+  dot2: string
+  dot3: string
+  text: string
+  subtext: string
+  time: string
+  btn: string
+  btnHover: string
+  btnShadow: string
+  badge: string
+  badgeBorder: string
+}
+
+const PALETTES: Record<PaletteKey, Palette> = {
+  verde: {
+    bg: 'from-emerald-950 via-emerald-900 to-emerald-950',
+    border: 'border-emerald-500/30',
+    orb1: 'bg-emerald-500/10',
+    orb2: 'bg-emerald-400/10',
+    dot1: 'bg-emerald-400/30',
+    dot2: 'bg-emerald-400/20',
+    dot3: 'bg-emerald-400',
+    text: 'text-emerald-400',
+    subtext: 'text-emerald-300/80',
+    time: 'text-emerald-500/60',
+    btn: 'bg-emerald-500',
+    btnHover: 'hover:bg-emerald-400',
+    btnShadow: 'shadow-emerald-500/25 hover:shadow-emerald-500/40',
+    badge: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+    badgeBorder: 'border-emerald-500/30',
+  },
+  azul: {
+    bg: 'from-blue-950 via-blue-900 to-blue-950',
+    border: 'border-blue-500/30',
+    orb1: 'bg-blue-500/10',
+    orb2: 'bg-blue-400/10',
+    dot1: 'bg-blue-400/30',
+    dot2: 'bg-blue-400/20',
+    dot3: 'bg-blue-400',
+    text: 'text-blue-400',
+    subtext: 'text-blue-300/80',
+    time: 'text-blue-500/60',
+    btn: 'bg-blue-500',
+    btnHover: 'hover:bg-blue-400',
+    btnShadow: 'shadow-blue-500/25 hover:shadow-blue-500/40',
+    badge: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+    badgeBorder: 'border-blue-500/30',
+  },
+}
+
 function detectarTipoPagina(pathname: string): string | null {
   if (pathname === '/') return 'landing'
   if (pathname.startsWith('/tienda')) return 'tienda'
   if (pathname.startsWith('/blog')) return 'blog'
   if (pathname.startsWith('/miembros')) return 'miembros'
-  // landing dinámicas: /[slug]
   if (pathname.split('/').filter(Boolean).length === 1) return 'landing'
   return null
 }
@@ -39,8 +97,17 @@ function formatHora(iso: string | null | undefined): string {
   return new Date(iso).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })
 }
 
+function tieneAccesoCompra(t: TransmisionData, purchasedProducts: { id: string }[]): boolean {
+  if (t.tipo !== 'clase') return true
+  if (!t.productos_ids || t.productos_ids.length === 0) return false
+  return t.productos_ids.some((pid) => purchasedProducts.some((p) => p.id === pid))
+}
+
 export function LiveTransmissionBanner() {
   const pathname = usePathname()
+  const { user } = useAuth()
+  const { purchasedProducts } = useShop()
+
   const [transmision, setTransmision] = useState<TransmisionData | null>(null)
   const [visible, setVisible] = useState(false)
   const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout> | null>(null)
@@ -68,7 +135,16 @@ export function LiveTransmissionBanner() {
     }
   }, [limpiarTimeout])
 
-  // Carga inicial
+  const puedeMostrar = useCallback((t: TransmisionData): boolean => {
+    const tipoPagina = detectarTipoPagina(pathname)
+    if (!tipoPagina || !t.paginas.includes(tipoPagina)) return false
+    if (t.tipo === 'clase') {
+      if (!user) return false
+      if (!tieneAccesoCompra(t, purchasedProducts)) return false
+    }
+    return true
+  }, [pathname, user, purchasedProducts])
+
   useEffect(() => {
     async function cargarEstado() {
       try {
@@ -76,8 +152,7 @@ export function LiveTransmissionBanner() {
         const data = await res.json()
         if (data.success && data.data) {
           const t = data.data as TransmisionData
-          const tipoPagina = detectarTipoPagina(pathname)
-          if (tipoPagina && t.paginas.includes(tipoPagina)) {
+          if (puedeMostrar(t)) {
             setTransmision(t)
             setVisible(true)
             programarAutoOcultar(t.fin)
@@ -90,7 +165,6 @@ export function LiveTransmissionBanner() {
     cargarEstado()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Realtime subscription
   useEffect(() => {
     const supabase = getSupabase()
     if (!supabase) return
@@ -109,8 +183,7 @@ export function LiveTransmissionBanner() {
           const nuevo = payload.new as TransmisionData
 
           if (payload.eventType === 'INSERT') {
-            const tipoPagina = detectarTipoPagina(pathname)
-            if (nuevo.activo && tipoPagina && nuevo.paginas.includes(tipoPagina)) {
+            if (nuevo.activo && puedeMostrar(nuevo)) {
               setTransmision(nuevo)
               setVisible(true)
               programarAutoOcultar(nuevo.fin)
@@ -121,8 +194,7 @@ export function LiveTransmissionBanner() {
               limpiarTimeout()
               setTimeout(() => setTransmision(null), 500)
             } else {
-              const tipoPagina = detectarTipoPagina(pathname)
-              if (tipoPagina && nuevo.paginas.includes(tipoPagina)) {
+              if (puedeMostrar(nuevo)) {
                 setTransmision(nuevo)
                 setVisible(true)
                 programarAutoOcultar(nuevo.fin)
@@ -140,18 +212,18 @@ export function LiveTransmissionBanner() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [pathname, limpiarTimeout, programarAutoOcultar])
+  }, [puedeMostrar, limpiarTimeout, programarAutoOcultar])
 
-  // Limpiar timeout al desmontar
   useEffect(() => {
     return () => limpiarTimeout()
   }, [limpiarTimeout])
 
-  const tipoPaginaActual = detectarTipoPagina(pathname)
-
-  if (!transmision || !tipoPaginaActual || !transmision.paginas.includes(tipoPaginaActual)) {
+  if (!transmision || !puedeMostrar(transmision)) {
     return null
   }
+
+  const palette = PALETTES[(transmision.color as PaletteKey) || 'verde']
+  const isClase = transmision.tipo === 'clase'
 
   return (
     <AnimatePresence>
@@ -163,69 +235,65 @@ export function LiveTransmissionBanner() {
           transition={{ type: 'spring', stiffness: 200, damping: 25 }}
           className="sticky top-20 z-40"
         >
-          <div className="relative overflow-hidden bg-gradient-to-r from-emerald-950 via-emerald-900 to-emerald-950 border-b border-emerald-500/30">
-            {/* Fondo animado */}
+          <div className={`relative overflow-hidden bg-gradient-to-r ${palette.bg} border-b ${palette.border}`}>
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <motion.div
-                className="absolute -top-40 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"
+                className={`absolute -top-40 left-1/4 w-96 h-96 ${palette.orb1} rounded-full blur-3xl`}
                 animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.5, 0.3] }}
                 transition={{ duration: 4, repeat: Infinity }}
               />
               <motion.div
-                className="absolute -bottom-40 right-1/4 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl"
+                className={`absolute -bottom-40 right-1/4 w-80 h-80 ${palette.orb2} rounded-full blur-3xl`}
                 animate={{ scale: [1.1, 1, 1.1], opacity: [0.4, 0.2, 0.4] }}
                 transition={{ duration: 3, repeat: Infinity }}
               />
             </div>
 
             <div className="max-w-screen-xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4 relative">
-              {/* Izquierda: indicador EN VIVO */}
               <div className="flex items-center gap-3 shrink-0">
                 <div className="relative flex items-center justify-center">
                   <motion.div
-                    className="absolute w-4 h-4 rounded-full bg-emerald-400/30"
+                    className={`absolute w-4 h-4 rounded-full ${palette.dot1}`}
                     animate={{ scale: [1, 2.5], opacity: [0.6, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
                   />
                   <motion.div
-                    className="absolute w-4 h-4 rounded-full bg-emerald-400/20"
+                    className={`absolute w-4 h-4 rounded-full ${palette.dot2}`}
                     animate={{ scale: [1, 2.5], opacity: [0.4, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
                   />
                   <motion.div
-                    className="relative w-2.5 h-2.5 rounded-full bg-emerald-400"
+                    className={`relative w-2.5 h-2.5 rounded-full ${palette.dot3}`}
                     animate={{ scale: [1, 1.3, 1] }}
                     transition={{ duration: 1, repeat: Infinity }}
                   />
                 </div>
-                <span className="text-emerald-400 text-[10px] uppercase tracking-[0.2em] font-black">
-                  EN VIVO
+                <span className={`${palette.text} text-[10px] uppercase tracking-[0.2em] font-black`}>
+                  {isClase ? 'CLASE PRIVADA' : 'EN VIVO'}
                 </span>
               </div>
 
-              {/* Centro: textos */}
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <div className="min-w-0">
                   <p className="text-white text-sm md:text-base font-bold truncate">
                     {transmision.titulo}
                   </p>
                   {transmision.subtitulo && (
-                    <p className="text-emerald-300/80 text-[11px] md:text-xs truncate">
+                    <p className={`${palette.subtext} text-[11px] md:text-xs truncate`}>
                       {transmision.subtitulo}
                     </p>
                   )}
                 </div>
-                <span className="hidden sm:inline text-[10px] text-emerald-500/60 font-bold shrink-0">
+                <span className={`hidden sm:inline text-[10px] ${palette.time} font-bold shrink-0`}>
                   Inició {formatHora(transmision.inicio)}
                 </span>
               </div>
 
-              {/* Derecha: botón */}
               <a
                 href={transmision.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 group flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs md:text-sm font-bold hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40"
+                className={`shrink-0 group flex items-center gap-2 px-4 py-2 rounded-xl ${palette.btn} text-white text-xs md:text-sm font-bold ${palette.btnHover} transition-all shadow-lg ${palette.btnShadow}`}
               >
                 {transmision.texto_boton}
                 <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

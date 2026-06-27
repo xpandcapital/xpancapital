@@ -1,16 +1,25 @@
 "use client"
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Radio, Clock } from 'lucide-react'
 import { useTransmisiones } from './_hooks'
 import { TransmisionForm, TransmisionActiva, TransmisionHistorial } from './_components'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/hooks/useAuth'
+import { getSupabase } from '@/lib/supabase'
 import type { TransmisionFormData } from './_types'
+
+interface ProductoItem {
+  id: string
+  nombre: string
+  imagen_principal?: string | null
+}
 
 export default function TransmisionesPage() {
   const { showToast } = useToast()
   const { user } = useAuth()
+  const [productos, setProductos] = useState<ProductoItem[]>([])
 
   const {
     transmisionActiva,
@@ -22,6 +31,23 @@ export default function TransmisionesPage() {
     cancelarTransmision,
     eliminarTransmision,
   } = useTransmisiones(user?.empresa_id || '')
+
+  useEffect(() => {
+    async function fetchProductos() {
+      const supabase = getSupabase()
+      if (!supabase || !user?.empresa_id) return
+      const { data } = await supabase
+        .from('productos')
+        .select('id, nombre, imagen_principal')
+        .eq('empresa_id', user.empresa_id)
+        .eq('activo', true)
+        .order('nombre')
+        .limit(200)
+
+      if (data) setProductos(data)
+    }
+    fetchProductos()
+  }, [user?.empresa_id])
 
   const handleIniciar = async (form: TransmisionFormData) => {
     try {
@@ -68,12 +94,12 @@ export default function TransmisionesPage() {
         animate={{ opacity: 1, y: 0 }}
         className="flex items-center gap-4"
       >
-        <div className="p-2.5 rounded-xl bg-emerald-500/10">
+        <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500/10 to-blue-500/10">
           <Radio className="w-5 h-5 text-emerald-400" />
         </div>
         <div>
           <h1 className="text-xl font-black text-white">Transmisiones</h1>
-          <p className="text-gray-500 text-xs">Gestiona banners de transmisión en vivo</p>
+          <p className="text-gray-500 text-xs">Gestiona transmisiones públicas y clases privadas</p>
         </div>
       </motion.div>
 
@@ -82,11 +108,13 @@ export default function TransmisionesPage() {
           <TransmisionForm
             activa={transmisionActiva}
             saving={saving}
+            productos={productos}
             onIniciar={handleIniciar}
           />
           {transmisionActiva && (
             <TransmisionActiva
               transmision={transmisionActiva}
+              productos={productos}
               onExtender={handleExtender}
               onCancelar={handleCancelar}
             />

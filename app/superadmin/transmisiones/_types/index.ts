@@ -25,6 +25,9 @@ export interface TransmisionFormData {
   texto_boton: string
   duracion_minutos: number
   paginas: string[]
+  tipo: 'publica' | 'clase'
+  color: 'verde' | 'azul'
+  productos_ids: string[]
 }
 
 export const PAGINAS_OPCIONES = [
