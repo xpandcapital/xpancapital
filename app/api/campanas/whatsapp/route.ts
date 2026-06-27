@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
   // List employees by role
   if (action === 'employees') {
     const rol = searchParams.get('rol')
-    const { data } = await supabase.from('profiles').select('id,nombre,email,telefono').eq('empresa_id', empresaId).not('telefono', 'is', null).limit(200)
+    const { data } = await supabase.from('profiles').select('id,nombre,email,telefono').eq('empresa_id', empresaId).limit(200)
     const filtered = rol ? (data || []).filter((p: any) => p.rol === rol) : (data || [])
     return NextResponse.json({ success: true, employees: filtered })
   }
@@ -237,7 +237,6 @@ async function getProductBuyers(supabase: any, productoId: string, empresaId: st
     .from('profiles')
     .select('id, nombre, email, telefono')
     .in('id', matchingUserIds)
-    .not('telefono', 'is', null)
     .limit(500)
 
   return profiles || []
