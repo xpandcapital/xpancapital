@@ -11,6 +11,7 @@ export function useTransmisiones(empresaId: string) {
   const [saving, setSaving] = useState(false)
 
   const fetchEstado = useCallback(async () => {
+    if (!empresaId) return
     try {
       const res = await fetch(`/api/transmisiones?empresa_id=${empresaId}`)
       const data = await res.json()
@@ -23,9 +24,11 @@ export function useTransmisiones(empresaId: string) {
   }, [empresaId])
 
   const fetchHistorial = useCallback(async () => {
+    if (!empresaId) { setLoading(false); return }
     setLoading(true)
     try {
       const supabase = getSupabase()
+      if (!supabase) { setLoading(false); return }
       const { data, error } = await supabase
         .from('transmisiones')
         .select('*')
@@ -84,6 +87,8 @@ export function useTransmisiones(empresaId: string) {
       })
       const data = await res.json()
       if (!data.success) throw new Error(data.error)
+      await fetchEstado()
+      await fetchHistorial()
       return data.data as Transmision
     } finally {
       setSaving(false)
@@ -99,6 +104,7 @@ export function useTransmisiones(empresaId: string) {
       })
       const data = await res.json()
       if (!data.success) throw new Error(data.error)
+      await fetchEstado()
     } catch (e) {
       throw e
     }
@@ -113,6 +119,8 @@ export function useTransmisiones(empresaId: string) {
       })
       const data = await res.json()
       if (!data.success) throw new Error(data.error)
+      await fetchEstado()
+      await fetchHistorial()
     } catch (e) {
       throw e
     }
