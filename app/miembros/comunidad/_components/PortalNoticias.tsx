@@ -4,9 +4,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Calendar, Newspaper, ExternalLink, Loader2, Clock,
-  MapPin, AlertCircle, User, Shield, RefreshCw, X, ChevronLeft
+  MapPin, AlertCircle, Shield, RefreshCw, ChevronLeft
 } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
 
 interface NewsItem {
   id: string
@@ -37,13 +36,15 @@ interface MentorEvent {
 }
 
 export function PortalNoticias() {
-  const { user } = useAuth()
   const [news, setNews] = useState<NewsItem[]>([])
   const [mentorEvents, setMentorEvents] = useState<MentorEvent[]>([])
   const [loadingNews, setLoadingNews] = useState(true)
   const [loadingMentor, setLoadingMentor] = useState(true)
   const [newsErrors, setNewsErrors] = useState<string[]>([])
   const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
+  const [articleContent, setArticleContent] = useState<{ loading: boolean; text: string; error: string }>({
+    loading: false, text: '', error: ''
+  })
 
   useEffect(() => {
     fetchNews()
@@ -75,6 +76,28 @@ export function PortalNoticias() {
       if (data.success) setMentorEvents(data.data || [])
     } catch { /* silencioso */ }
     finally { setLoadingMentor(false) }
+  }
+
+  const openArticle = (article: NewsItem) => {
+    setSelectedArticle(article)
+    setArticleContent({ loading: true, text: '', error: '' })
+    fetch(`/api/portal/leer?url=${encodeURIComponent(article.url)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          setArticleContent({ loading: false, text: data.content, error: '' })
+        } else {
+          setArticleContent({ loading: false, text: article.summary, error: data.error })
+        }
+      })
+      .catch(() => {
+        setArticleContent({ loading: false, text: article.summary, error: '' })
+      })
+  }
+
+  const closeArticle = () => {
+    setSelectedArticle(null)
+    setArticleContent({ loading: false, text: '', error: '' })
   }
 
   const timeAgo = (date: string) => {
@@ -255,7 +278,7 @@ export function PortalNoticias() {
               {/* Hero article */}
               {news[0] && (
                 <button
-                  onClick={() => setSelectedArticle(news[0])}
+                  onClick={() => openArticle(news[0])}
                   className="w-full text-left bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden hover:border-blue-500/20 transition-colors group"
                 >
                   {news[0].image && (
@@ -287,7 +310,7 @@ export function PortalNoticias() {
                 {news.slice(1, 7).map(item => (
                   <button
                     key={item.id}
-                    onClick={() => setSelectedArticle(item)}
+                    onClick={() => openArticle(item)}
                     className="text-left bg-zinc-950 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/20 transition-colors group"
                   >
                     {item.image && (
@@ -315,7 +338,7 @@ export function PortalNoticias() {
                   {news.slice(7).map(item => (
                     <button
                       key={item.id}
-                      onClick={() => setSelectedArticle(item)}
+                      onClick={() => openArticle(item)}
                       className="w-full text-left flex items-start gap-3 p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-blue-500/20 transition-colors group"
                     >
                       {item.image && (
@@ -346,7 +369,7 @@ export function PortalNoticias() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-start justify-center pt-[5vh] px-4 overflow-y-auto"
-            onClick={() => setSelectedArticle(null)}
+            onClick={() => closeArticle()}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -359,7 +382,7 @@ export function PortalNoticias() {
               {/* Back button */}
               <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
                 <button
-                  onClick={() => setSelectedArticle(null)}
+                  onClick={() => closeArticle()}
                   className="p-1.5 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -386,9 +409,25 @@ export function PortalNoticias() {
                   )}
                   <h2 className="text-white font-black text-lg leading-tight">{selectedArticle.title}</h2>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
-                  {selectedArticle.summary || 'Sin resumen disponible.'}
-                </p>
+
+                {articleContent.loading ? (
+                  <div className="flex items-center gap-3 py-8 text-gray-500">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-xs">Cargando artículo completo...</span>
+                  </div>
+                ) : (
+                  <>
+                    {articleContent.error && (
+                      <p className="text-amber-400/60 text-[10px]">
+                        Se muestra el resumen (no se pudo extraer el original).{' '}
+                        <span className="text-gray-500">Motivo: {articleContent.error}</span>
+                      </p>
+                    )}
+                    <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-line max-h-[50vh] overflow-y-auto pr-2">
+                      {articleContent.text || selectedArticle.summary || 'Sin contenido disponible.'}
+                    </div>
+                  </>
+                )}
                 <div className="flex items-center justify-between pt-3 border-t border-white/5">
                   <span className="text-[11px] text-gray-500">
                     Fuente: <span className="text-gray-400 font-bold">{selectedArticle.source}</span>
