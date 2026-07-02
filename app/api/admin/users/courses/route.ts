@@ -27,9 +27,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
     }
 
-    let assignedCourses: any[] = []
+    const assignedCourses: any[] = []
     let advisorId: string | null = null
+    const assignedCourseIdsSet = new Set<string>()
 
+    // Query 1: por advisor_id (email del perfil)
     const { data: advisor } = await supabase
       .from('advisors')
       .select('id')
@@ -40,11 +42,32 @@ export async function GET(request: NextRequest) {
       advisorId = advisor.id
       const { data: equipoCursos } = await supabase
         .from('equipo_cursos')
-        .select('id, advisor_id, curso_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en')
+        .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en')
         .eq('advisor_id', advisor.id)
         .order('asignado_en', { ascending: false })
 
-      assignedCourses = equipoCursos || []
+      if (equipoCursos) {
+        for (const c of equipoCursos) {
+          assignedCourses.push(c)
+          assignedCourseIdsSet.add(c.curso_id)
+        }
+      }
+    }
+
+    // Query 2: por user_id directo (asignaciones via compras/trigger)
+    const { data: byUserId } = await supabase
+      .from('equipo_cursos')
+      .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en')
+      .eq('user_id', userId)
+      .order('asignado_en', { ascending: false })
+
+    if (byUserId) {
+      for (const c of byUserId) {
+        if (!assignedCourseIdsSet.has(c.curso_id)) {
+          assignedCourses.push(c)
+          assignedCourseIdsSet.add(c.curso_id)
+        }
+      }
     }
 
     const { data: allCursos } = await supabase

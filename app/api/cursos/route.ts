@@ -60,18 +60,19 @@ export async function GET(request: NextRequest) {
 
     const { data: cursos, error } = await supabase
       .from('cursos')
-      .select('id, nombre, slug, descripcion, precio_coins, precio_usd, creado_en, imagen_principal, modulos')
+      .select('id, nombre, slug, descripcion, precio_coins, precio_usd, creado_en, imagen_principal, modulos, para_equipo')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .eq('activo', true)
-      .neq('para_equipo', true)
       .order('creado_en', { ascending: false })
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    const allCursos = cursos || []
+
     // Filtrar solo cursos matriculados del usuario + añadir progreso
-    if (userId && cursos) {
+    if (userId && allCursos.length) {
       // Consulta 1: equipo_cursos donde user_id coincide directamente
       const { data: enrolled } = await supabase
         .from('equipo_cursos')
@@ -113,7 +114,7 @@ export async function GET(request: NextRequest) {
         }
       })
 
-      const filtered = cursos
+      const filtered = allCursos
         .filter(c => enrolledMap.has(c.id))
         .map(c => ({
           ...c,
@@ -169,7 +170,7 @@ export async function GET(request: NextRequest) {
 
         const cursoIds = linkedCursos?.map(p => p.curso_id) || []
         const enrolledIds = new Set(filtered.map(c => c.id))
-        purchased = cursos
+        purchased = allCursos
           .filter(c => cursoIds.includes(c.id) && !enrolledIds.has(c.id))
           .map(c => ({
             ...c,
@@ -181,7 +182,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: [...filtered, ...purchased] })
     }
 
-    return NextResponse.json({ success: true, data: cursos })
+    // Listado público: excluir cursos solo-equipo
+    const publicos = allCursos.filter(c => !(c as any).para_equipo)
+    return NextResponse.json({ success: true, data: publicos })
   } catch {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
