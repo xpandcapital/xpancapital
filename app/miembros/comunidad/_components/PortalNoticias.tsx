@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Calendar, Newspaper, TrendingUp, ExternalLink, Loader2, Clock,
-  MapPin, Globe, AlertCircle, User, ChevronRight, Shield, RefreshCw
+  Calendar, Newspaper, ExternalLink, Loader2, Clock,
+  MapPin, Globe, AlertCircle, User, Shield, RefreshCw
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -53,6 +53,7 @@ export function PortalNoticias() {
   const [mentorEvents, setMentorEvents] = useState<MentorEvent[]>([])
   const [loadingNews, setLoadingNews] = useState(true)
   const [loadingMentor, setLoadingMentor] = useState(true)
+  const [newsErrors, setNewsErrors] = useState<string[]>([])
 
   useEffect(() => {
     fetchNews()
@@ -70,8 +71,13 @@ export function PortalNoticias() {
       ])
       const newsData = await newsRes.json()
       const calData = await calRes.json()
-      if (newsData.success) setNews(newsData.data?.news || [])
-      if (calData.success) setCalendar(calData.data?.calendar || [])
+      if (newsData.success) {
+        setNews(newsData.data?.news || [])
+        setCalendar(newsData.data?.calendar || [])
+        if (newsData.errors?.length) setNewsErrors(newsData.errors)
+        else if (newsData.debug) setNewsErrors([JSON.stringify(newsData.debug)])
+        else setNewsErrors([])
+      }
     } catch { /* silencioso */ }
     finally { setLoadingNews(false) }
   }
@@ -240,6 +246,17 @@ export function PortalNoticias() {
             {loadingNews ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+              </div>
+            ) : news.length === 0 && calendar.length === 0 && newsErrors.length > 0 ? (
+              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 text-center space-y-2">
+                <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
+                <p className="text-amber-400 text-xs font-bold">Error al cargar datos</p>
+                {newsErrors.map((e, i) => (
+                  <p key={i} className="text-gray-500 text-[10px] break-all">{e}</p>
+                ))}
+                <button onClick={() => fetchNews(true)} className="mt-2 px-3 py-1.5 bg-white/5 rounded-lg text-[10px] text-gray-400 hover:text-white transition-colors">
+                  Reintentar
+                </button>
               </div>
             ) : news.length === 0 ? (
               <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-center">

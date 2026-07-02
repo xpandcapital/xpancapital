@@ -42,20 +42,26 @@ export async function GET(request: NextRequest) {
 
     const encrypted = keys?.key_value || ''
     let apiKey = ''
+    let decryptError = ''
     if (encrypted) {
       try {
         apiKey = decryptApiKey(encrypted)
-      } catch (e) {
-        console.error('[Portal] Error desencriptando Finnhub key:', e)
+      } catch (e: any) {
+        decryptError = e.message || 'desconocido'
       }
     }
 
     if (!apiKey) {
-      const result = { success: true, data: { news: [], calendar: [], hint: 'API key de Finnhub no configurada en api-nube' } }
+      const result = {
+        success: true,
+        data: { news: [], calendar: [] },
+        debug: { hint: 'API key no configurada o error al desencriptar', decryptError, hasRecord: !!keys }
+      }
       return NextResponse.json(result)
     }
 
     const data: any = {}
+    const errors: string[] = []
 
     if (type === 'news') {
       try {
@@ -64,9 +70,9 @@ export async function GET(request: NextRequest) {
           10000
         )
         if (res.ok) {
-          const news = await res.json()
-          if (Array.isArray(news)) {
-            data.news = news.slice(0, 12).map((n: any) => ({
+          const raw = await res.json()
+          if (Array.isArray(raw)) {
+            data.news = raw.slice(0, 12).map((n: any) => ({
               id: String(n.id || Math.random()),
               title: n.headline || n.title || 'Sin título',
               summary: n.summary || '',
@@ -77,16 +83,16 @@ export async function GET(request: NextRequest) {
               category: n.category || 'general',
             }))
           } else {
-            console.error('[Portal] Finnhub news no es array:', typeof news, JSON.stringify(news).slice(0, 200))
+            errors.push(`news: no es array (${typeof raw})`)
             data.news = []
           }
         } else {
           const errText = await res.text().catch(() => '')
-          console.error(`[Portal] Finnhub news error ${res.status}:`, errText.slice(0, 200))
+          errors.push(`news: HTTP ${res.status} - ${errText.slice(0, 100)}`)
           data.news = []
         }
       } catch (e: any) {
-        console.error('[Portal] Finnhub news fetch error:', e.message || e)
+        errors.push(`news: ${e.message || 'fetch failed'}`)
         data.news = []
       }
     }
@@ -121,18 +127,18 @@ export async function GET(request: NextRequest) {
           }
         } else {
           const errText = await res.text().catch(() => '')
-          console.error(`[Portal] Finnhub calendar error ${res.status}:`, errText.slice(0, 200))
+          errors.push(`calendar: HTTP ${res.status} - ${errText.slice(0, 100)}`)
           data.calendar = []
         }
-      } catch (e: any) {
-        console.error('[Portal] Finnhub calendar fetch error:', e.message || e)
+        } catch (e: any) {
+        errors.push(`calendar: ${e.message || 'fetch failed'}`)
         data.calendar = []
       }
     }
 
     // Only cache if we got actual data
     const hasData = (data.news?.length > 0) || (data.calendar?.length > 0)
-    const result = { success: true, data, _fromCache: false }
+    const result = { success: true, data, _fromCache: false, errors: errors.length ? errors : undefined }
 
     if (hasData) {
       cacheStore.set(cacheKey, { data: result, timestamp: Date.now() })
