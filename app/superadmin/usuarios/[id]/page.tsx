@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Shield, CheckCircle2, X, Loader2, Pencil, Mail, User,
     ToggleLeft, Save, KeyRound, Send, Eye, EyeOff, GraduationCap,
-    Plus, Trash2, Copy, Bell
+    Plus, Trash2, Copy, Bell, CheckSquare, Square
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard';
@@ -93,12 +93,15 @@ export default function EditarUsuarioPage() {
     const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
 
     const [assignedCourses, setAssignedCourses] = useState<AssignedCourse[]>([]);
+    const [teamAvailableCourses, setTeamAvailableCourses] = useState<any[]>([]);
     const [availableCourses, setAvailableCourses] = useState<AvailableCourse[]>([]);
     const [advisorId, setAdvisorId] = useState<string | null>(null);
     const [loadingCourses, setLoadingCourses] = useState(false);
     const [showAddCourse, setShowAddCourse] = useState(false);
     const [assigning, setAssigning] = useState<string | null>(null);
     const [removing, setRemoving] = useState<string | null>(null);
+    const [selectedAssign, setSelectedAssign] = useState<Set<string>>(new Set());
+    const [bulkAssigning, setBulkAssigning] = useState(false);
 
     useEffect(() => { fetchUser(); }, [userId]);
 
@@ -133,8 +136,10 @@ export default function EditarUsuarioPage() {
             const data = await res.json();
             if (data.success) {
                 setAssignedCourses(data.assigned || []);
+                setTeamAvailableCourses(data.teamAvailable || []);
                 setAvailableCourses(data.available || []);
                 setAdvisorId(data.advisorId);
+                setSelectedAssign(new Set());
             }
         } catch {}
         finally { setLoadingCourses(false); }
@@ -235,6 +240,40 @@ export default function EditarUsuarioPage() {
         finally { setRemoving(null); }
     };
 
+    const toggleSelectCourse = (courseId: string) => {
+        setSelectedAssign(prev => {
+            const next = new Set(prev);
+            if (next.has(courseId)) next.delete(courseId);
+            else next.add(courseId);
+            return next;
+        });
+    };
+
+    const handleBulkAssign = async () => {
+        if (selectedAssign.size === 0) return;
+        setBulkAssigning(true);
+        let success = 0;
+        let fail = 0;
+        for (const courseId of selectedAssign) {
+            try {
+                const res = await fetch('/api/equipo-cursos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ curso_id: courseId, email: user?.email, nombre: user?.nombre }),
+                });
+                const data = await res.json();
+                if (data.success) success++;
+                else fail++;
+            } catch { fail++; }
+        }
+        setBulkAssigning(false);
+        setSelectedAssign(new Set());
+        if (fail === 0) showToast(`${success} curso(s) asignado(s)`);
+        else showToast(`${success} asignado(s), ${fail} error(es)`, fail > 0 ? 'error' : 'success');
+        fetchCourses(userId);
+        setShowAddCourse(false);
+    };
+
     if (loading) {
         return <div className="flex items-center justify-center h-[60vh]"><Loader2 className="w-8 h-8 text-blis-red animate-spin" /></div>;
     }
@@ -243,6 +282,9 @@ export default function EditarUsuarioPage() {
 
     const currentRole = ROLE_OPTIONS.find(r => r.value === rol);
     const assignedCourseIds = new Set(assignedCourses.map(c => c.curso_id).filter(Boolean));
+    const teamCourseIds = new Set(teamAvailableCourses.map(c => c.curso_id).filter(Boolean));
+    const allAssignedIds = new Set([...assignedCourseIds, ...teamCourseIds]);
+    const availableForAssign = availableCourses.filter(c => !allAssignedIds.has(c.id));
 
     return (
         <div className="w-full mx-auto px-4 md:px-8 pt-8 pb-20">
@@ -367,7 +409,7 @@ export default function EditarUsuarioPage() {
                                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center"><GraduationCap className="w-5 h-5" /></div>
                                 <div>
                                     <h3 className="text-white font-black uppercase tracking-wider text-sm">Capacitaciones</h3>
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{assignedCourses.length} curso(s) asignado(s)</p>
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{assignedCourses.length + teamAvailableCourses.length} curso(s) asignado(s)</p>
                                 </div>
                             </div>
                             <button onClick={() => setShowAddCourse(!showAddCourse)} className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-500/20 transition-colors">
@@ -377,22 +419,31 @@ export default function EditarUsuarioPage() {
 
                         {showAddCourse && (
                             <div className="border-b border-white/5 p-4 bg-white/[0.01]">
-                                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Cursos disponibles para asignar</p>
+                                <div className="flex items-center justify-between mb-3">
+                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Cursos disponibles para asignar</p>
+                                    {selectedAssign.size > 0 && (
+                                        <button onClick={handleBulkAssign} disabled={bulkAssigning} className="flex items-center gap-1 px-3 py-1.5 bg-blis-red text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:scale-[1.02] transition-all disabled:opacity-50">
+                                            {bulkAssigning ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckSquare className="w-3 h-3" />}
+                                            Asignar {selectedAssign.size}
+                                        </button>
+                                    )}
+                                </div>
                                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                                    {availableCourses.filter(c => !assignedCourseIds.has(c.id)).length === 0 ? (
+                                    {availableForAssign.length === 0 ? (
                                         <p className="text-gray-500 text-sm py-3 text-center">Todos los cursos ya están asignados</p>
                                     ) : (
-                                        availableCourses.filter(c => !assignedCourseIds.has(c.id)).map(course => (
-                                            <div key={course.id} className="flex items-center justify-between p-3 bg-black/30 border border-white/5 rounded-xl">
-                                                <div className="flex items-center gap-3">
-                                                    {course.imagen_principal ? (
-                                                        <img src={course.imagen_principal} alt="" className="w-10 h-10 rounded-lg object-cover" />
-                                                    ) : (
-                                                        <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center"><GraduationCap className="w-5 h-5 text-gray-600" /></div>
-                                                    )}
-                                                    <p className="text-white text-sm font-bold">{course.nombre}</p>
-                                                </div>
-                                                <button onClick={() => handleAssignCourse(course.id)} disabled={assigning === course.id} className="px-3 py-1.5 bg-blis-red text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center gap-1">
+                                        availableForAssign.map(course => (
+                                            <div key={course.id} className="flex items-center gap-3 p-3 bg-black/30 border border-white/5 rounded-xl">
+                                                <button onClick={() => toggleSelectCourse(course.id)} className="shrink-0 text-gray-500 hover:text-blis-red transition-colors">
+                                                    {selectedAssign.has(course.id) ? <CheckSquare className="w-4 h-4 text-blis-red" /> : <Square className="w-4 h-4" />}
+                                                </button>
+                                                {course.imagen_principal ? (
+                                                    <img src={course.imagen_principal} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0"><GraduationCap className="w-5 h-5 text-gray-600" /></div>
+                                                )}
+                                                <p className="text-white text-sm font-bold flex-1 min-w-0 truncate">{course.nombre}</p>
+                                                <button onClick={() => { handleAssignCourse(course.id); }} disabled={assigning === course.id} className="px-3 py-1.5 bg-blis-red text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center gap-1 shrink-0">
                                                     {assigning === course.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
                                                     Asignar
                                                 </button>
@@ -406,7 +457,7 @@ export default function EditarUsuarioPage() {
                         <div className="p-4">
                             {loadingCourses ? (
                                 <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 text-emerald-400 animate-spin" /></div>
-                            ) : assignedCourses.length === 0 ? (
+                            ) : (assignedCourses.length === 0 && teamAvailableCourses.length === 0) ? (
                                 <div className="text-center py-8">
                                     <GraduationCap className="w-12 h-12 text-gray-700 mx-auto mb-3" />
                                     <p className="text-gray-500 text-sm">Sin capacitaciones asignadas</p>
@@ -435,6 +486,23 @@ export default function EditarUsuarioPage() {
                                             <button onClick={() => handleRemoveCourse(course.id)} disabled={removing === course.id} className="p-2 hover:bg-red-500/10 rounded-lg text-gray-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50">
                                                 {removing === course.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                                             </button>
+                                        </div>
+                                    ))}
+                                    {teamAvailableCourses.map(course => (
+                                        <div key={`team-${course.curso_id}`} className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl group hover:border-white/10 transition-colors">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                {course.cursos?.imagen_principal ? (
+                                                    <img src={course.cursos.imagen_principal} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0 opacity-60" />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0"><GraduationCap className="w-5 h-5 text-gray-600" /></div>
+                                                )}
+                                                <div className="min-w-0">
+                                                    <p className="text-white text-sm font-bold truncate">{course.cursos?.nombre || 'Curso'}</p>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-lg border bg-purple-500/10 text-purple-400 border-purple-500/20">Solo Equipo</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>

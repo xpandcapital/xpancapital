@@ -88,11 +88,24 @@ export async function GET(request: NextRequest) {
 
       let enrolledByAdvisor: any[] = []
       if (userProfile?.email) {
-        const { data: advisorRecord } = await supabase
+        let { data: advisorRecord } = await supabase
           .from('advisors')
           .select('id')
           .eq('email', userProfile.email.toLowerCase())
           .maybeSingle()
+
+        if (!advisorRecord) {
+          const { data: newAdvisor } = await supabase
+            .from('advisors')
+            .insert({
+              email: userProfile.email.toLowerCase(),
+              nombre: userProfile.email.split('@')[0],
+              empresa_id: DEFAULT_EMPRESA_ID,
+            })
+            .select('id')
+            .single()
+          advisorRecord = newAdvisor
+        }
 
         if (advisorRecord?.id) {
           const { data: advisorCourses } = await supabase

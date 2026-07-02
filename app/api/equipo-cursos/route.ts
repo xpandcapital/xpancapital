@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,7 +26,8 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
-    let { advisor_id, curso_id, email, nombre, user_id } = body
+    const { email, nombre, user_id, curso_id } = body
+    let { advisor_id } = body
 
     if (!curso_id) {
       return NextResponse.json({ error: 'curso_id es requerido' }, { status: 400 })
@@ -86,6 +86,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Una sola query al curso (no duplicar en success + error)
     const { data: cursoInfo } = await supabase.from('cursos').select('id, nombre, imagen_principal, para_equipo, precio_usd').eq('id', curso_id).single()
     return NextResponse.json({ success: true, data: { ...inserted, cursos: cursoInfo } })
   } catch (error) {
