@@ -7,11 +7,12 @@ import { useComunidad } from './_hooks/useComunidad'
 import { useAuth } from '@/hooks/useAuth'
 import {
   PostCard, PostCreator, PerfilHeader, ComunidadTabs,
-  MiembrosSeguidos, ConexionesLista, CompletarPerfil, UltimasActualizaciones
+  MiembrosSeguidos, ConexionesLista, CompletarPerfil, UltimasActualizaciones,
+  PortalNoticias
 } from './_components'
 import type { ComunidadPost, ComunidadComentario } from './_types'
 
-type TabId = 'timeline' | 'conexiones' | 'grupos' | 'cursos' | 'documentos' | 'fotos'
+type TabId = 'timeline' | 'conexiones' | 'grupos' | 'cursos' | 'documentos' | 'fotos' | 'portal'
 
 export default function ComunidadPage() {
   const { user } = useAuth()
@@ -63,7 +64,9 @@ export default function ComunidadPage() {
       <ComunidadTabs active={activeTab} onChange={setActiveTab} counts={tabCounts} />
 
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-6">
-        {activeTab === 'timeline' ? (
+        {activeTab === 'portal' ? (
+          <PortalNoticias />
+        ) : activeTab === 'timeline' ? (
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] xl:grid-cols-[300px_1fr_300px] gap-4 md:gap-6">
             {/* === COLUMNA IZQUIERDA === */}
             <div className="hidden lg:flex flex-col gap-4">

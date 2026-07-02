@@ -54,9 +54,11 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
   const [evUrlEvento, setEvUrlEvento] = useState('')
   const [evCapacidad, setEvCapacidad] = useState<number | null>(null)
   const [evImagen, setEvImagen] = useState('')
+  const [evEventoMentor, setEvEventoMentor] = useState(false)
 
   const avatarUrl = user?.profilePic || (user as any)?.avatar_url
   const nombre = user?.nombre || 'U'
+  const isMentor = ['superadmin', 'admin', 'editor'].includes(user?.role || '')
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, tipo: 'imagen' | 'video' | 'archivo') => {
     const files = Array.from(e.target.files || [])
@@ -89,6 +91,7 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
     setEvUrlEvento('')
     setEvCapacidad(null)
     setEvImagen('')
+    setEvEventoMentor(false)
     setExpanded(false)
     setTab('post')
   }
@@ -132,6 +135,7 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
       }
 
       if (uploadedIds.length > 0) body.media_ids = uploadedIds
+      if (isMentor && evEventoMentor) body.es_evento_mentor = true
 
       const res = await fetch('/api/comunidad', {
         method: 'POST',
@@ -263,6 +267,22 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
                     </select>
                     <input type="number" value={evCapacidad || ''} onChange={e => setEvCapacidad(e.target.value ? parseInt(e.target.value) : null)} placeholder="👥 Capacidad (opcional)" className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-white/10" />
                   </div>
+
+                  {/* Evento del Mentor checkbox (solo admins) */}
+                  {isMentor && (
+                    <label className="flex items-center gap-2.5 p-2.5 bg-amber-500/5 border border-amber-500/10 rounded-lg cursor-pointer hover:border-amber-500/20 transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={evEventoMentor}
+                        onChange={e => setEvEventoMentor(e.target.checked)}
+                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-blis-red focus:ring-blis-red/30 cursor-pointer"
+                      />
+                      <div>
+                        <span className="text-[11px] text-amber-400 font-bold block">Destacar como Evento del Mentor</span>
+                        <span className="text-[9px] text-gray-500">Aparecerá en la sección Portal de la comunidad</span>
+                      </div>
+                    </label>
+                  )}
 
                   {/* Fechas */}
                   <div>

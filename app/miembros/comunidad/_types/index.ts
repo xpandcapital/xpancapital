@@ -97,6 +97,7 @@ export interface ComunidadPost {
   origen_id?: string
   fijado: boolean
   oculto: boolean
+  es_evento_mentor?: boolean
   created_at: string
   updated_at: string
   autor?: ComunidadAutor

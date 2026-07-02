@@ -215,6 +215,7 @@ const DEFAULT_VALUES: Record<string, string> = {
   blis_blog_coins: '5',
   ilovepdf_public_key: '',
   ilovepdf_secret_key: '',
+  finnhub_api_key: '',
 }
 
 export function useApiConfig() {
