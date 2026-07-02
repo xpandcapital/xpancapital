@@ -1,0 +1,1 @@
+export { useGamificacionAdmin } from './useGamificacionAdmin'

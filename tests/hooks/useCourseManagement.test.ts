@@ -86,7 +86,10 @@ describe('useModuleActions', () => {
     productoNombre: null,
     linkProductoId: null,
     precioComparacion: 0,
-    descuentoPorcentaje: 0
+    descuentoPorcentaje: 0,
+    puntosCompletado: 500,
+    puntosPorLeccion: 50,
+    puntosCertificado: 1000,
   }
 
   it('should add a module', () => {
@@ -162,7 +165,10 @@ describe('useLessonActions', () => {
     productoNombre: null,
     linkProductoId: null,
     precioComparacion: 0,
-    descuentoPorcentaje: 0
+    descuentoPorcentaje: 0,
+    puntosCompletado: 500,
+    puntosPorLeccion: 50,
+    puntosCertificado: 1000,
   }
 
   it('should add a lesson', () => {

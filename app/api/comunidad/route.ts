@@ -280,6 +280,19 @@ export async function POST(request: NextRequest) {
 
     const enriched = await enrichPosts(supabase, [post], user.userId)
 
+    fetch(`${request.nextUrl.origin}/api/gamificacion/otorgar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: user.userId,
+        empresa_id: user.empresaId,
+        tipo: 'post_comunidad',
+        referencia_tipo: 'comunidad_posts',
+        referencia_id: post.id,
+        descripcion: 'Post en la comunidad',
+      }),
+    }).catch(err => console.error('[gamificacion] Error otorgando puntos:', err))
+
     return NextResponse.json({ success: true, data: enriched[0] })
   } catch (error) {
     return NextResponse.json({

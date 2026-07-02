@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
@@ -13,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     const { data: equipoCurso, error: fetchError } = await supabase
       .from('equipo_cursos')
-      .select('id, lecciones_completadas, curso_id')
+      .select('id, lecciones_completadas, curso_id, user_id')
       .eq('id', equipo_curso_id)
       .single()
 
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     const { data: cursoData } = await supabase
       .from('cursos')
-      .select('modulos')
+      .select('modulos, empresa_id, puntos_por_leccion, puntos_completado')
       .eq('id', equipoCurso.curso_id)
       .single()
 
@@ -78,6 +80,45 @@ export async function POST(request: NextRequest) {
     }
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Otorgar puntos de gamificación (fire & forget)
+    const userId = equipoCurso.user_id
+    const empresaId = cursoData?.empresa_id
+
+    if (userId && empresaId && completado) {
+      const ptsLeccion = cursoData?.puntos_por_leccion || 50
+      fetch(`${supabaseUrl.replace('/rest/v1', '')}/api/gamificacion/otorgar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          empresa_id: empresaId,
+          tipo: 'leccion_completada',
+          referencia_tipo: 'equipo_cursos',
+          referencia_id: equipo_curso_id,
+          descripcion: 'Lección completada',
+          puntos_override: ptsLeccion,
+        }),
+      }).catch(err => console.error('[gamificacion] Error otorgando puntos:', err))
+
+      if (estado === 'completado') {
+        const ptsCurso = cursoData?.puntos_completado || 500
+        fetch(`${supabaseUrl.replace('/rest/v1', '')}/api/gamificacion/otorgar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            empresa_id: empresaId,
+            tipo: 'curso_completado',
+            referencia_tipo: 'cursos',
+            referencia_id: equipoCurso.curso_id,
+            descripcion: 'Curso completado',
+            puntos_override: ptsCurso,
+          }),
+        }).catch(err => console.error('[gamificacion] Error otorgando puntos:', err))
+      }
+    }
+
     return NextResponse.json({ success: true, data: { ...data, cursos: cursoInfo } })
   } catch (err: any) {
     console.error('[POST /api/equipo-cursos/progress]', err)

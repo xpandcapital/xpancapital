@@ -13,6 +13,7 @@ import { CommsTab } from './tabs/CommsTab';
 import { AiInsightsTab } from './tabs/AiInsightsTab';
 import { AutomationsTab } from './tabs/AutomationsTab';
 import { HistoryTab } from './tabs/HistoryTab';
+import { GamificacionTab } from './tabs/GamificacionTab';
 
 interface ClientDetailProps {
     client: Client;
@@ -58,6 +59,7 @@ export function ClientDetail({
             case 'ai': return <AiInsightsTab {...baseProps} insights={insights} />;
             case 'automations': return <AutomationsTab {...baseProps} automations={automations} />;
             case 'history': return <HistoryTab {...baseProps} history={history} />;
+            case 'gamificacion': return <GamificacionTab client={client} />;
             default: return <ProfileTab {...baseProps} />;
         }
     };

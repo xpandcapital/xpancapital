@@ -47,6 +47,9 @@ export interface Course {
   linkProductoId?: string | null
   precioComparacion: number
   descuentoPorcentaje: number
+  puntosCompletado: number
+  puntosPorLeccion: number
+  puntosCertificado: number
 }
 
 export interface CertificateTemplate {

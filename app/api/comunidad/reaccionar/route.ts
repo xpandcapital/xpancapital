@@ -53,6 +53,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 400 })
     }
 
+    fetch(`${request.nextUrl.origin}/api/gamificacion/otorgar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: user.userId,
+        empresa_id: user.empresaId,
+        tipo: 'reaccion',
+        referencia_tipo: 'comunidad_post_reacciones',
+        referencia_id: post_id,
+        descripcion: 'Reacción en la comunidad',
+      }),
+    }).catch(err => console.error('[gamificacion] Error otorgando puntos:', err))
+
     return NextResponse.json({ success: true, accion: 'creado', tipo })
   } catch (error) {
     return NextResponse.json({

@@ -209,7 +209,16 @@ export interface Profile {
   total_compras: number
   total_gastado_usd: number
   total_referidos: number
-  
+   
+  // Gamificación
+  puntos: number
+  puntos_nivel: number
+  puntos_cursos: number
+  puntos_comunidad: number
+  puntos_blog: number
+  racha_dias: number
+  ultima_actividad?: string
+
   creado_en: string
   actualizado_en: string
 }
@@ -658,6 +667,11 @@ export interface Curso {
   max_intentos: number
   nota_aprobacion: number
   
+  // Gamificación — puntos configurables por curso
+  puntos_completado: number
+  puntos_por_leccion: number
+  puntos_certificado: number
+   
   certificado_template?: string
   
   activo: boolean
@@ -694,6 +708,136 @@ export interface Certificado {
   codigo_verificacion: string
   archivo_url?: string
   
+  creado_en: string
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GAMIFICACIÓN
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export interface GamificacionNivel {
+  id: string
+  empresa_id: string
+  nivel: number
+  nombre: string
+  color: string
+  icono_svg?: string
+  imagen_url?: string
+  puntos_requeridos: number
+  orden: number
+  creado_en: string
+  actualizado_en: string
+}
+
+export interface GamificacionConfig {
+  id: string
+  empresa_id: string
+  activo: boolean
+  puntos_leccion_completada: number
+  puntos_curso_completado: number
+  puntos_post_comunidad: number
+  puntos_comentario_comunidad: number
+  puntos_reaccion: number
+  puntos_comentario_blog: number
+  puntos_lectura_blog: number
+  puntos_dia_activo: number
+  puntos_certificado_base: number
+  puntos_certificado_decremento_intento: number
+  puntos_certificado_decremento_bloqueo: number
+  max_intentos_certificado: number
+  max_comentarios_comunidad_dia: number
+  max_posts_comunidad_dia: number
+  max_reacciones_dia: number
+  max_comentarios_blog_dia: number
+  max_lecturas_blog_dia: number
+  creado_en: string
+  actualizado_en: string
+}
+
+export type TipoPuntosGamificacion =
+  | 'leccion_completada'
+  | 'curso_completado'
+  | 'certificado'
+  | 'post_comunidad'
+  | 'comentario_comunidad'
+  | 'reaccion'
+  | 'comentario_blog'
+  | 'lectura_blog'
+  | 'dia_activo'
+  | 'logro_desbloqueado'
+  | 'admin_ajuste'
+
+export interface GamificacionPuntos {
+  id: string
+  empresa_id: string
+  user_id: string
+  puntos: number
+  tipo: TipoPuntosGamificacion
+  referencia_tipo?: string
+  referencia_id?: string
+  descripcion?: string
+  creado_en: string
+}
+
+export interface CertificadoIntento {
+  id: string
+  certificado_id?: string
+  user_id: string
+  curso_id?: string
+  ciclo: number
+  intento_en_ciclo: number
+  puntos_otorgados?: number
+  descripcion?: string
+  bloqueado: boolean
+  aprobado_por?: string
+  desbloqueado_por?: string
+  desbloqueado_en?: string
+  creado_en: string
+}
+
+export interface GamificacionLogro {
+  id: string
+  empresa_id: string
+  nombre: string
+  descripcion?: string
+  icono_svg?: string
+  imagen_url?: string
+  tipo: 'cursos' | 'comunidad' | 'blog' | 'certificados' | 'racha' | 'social' | 'especial'
+  condicion: Record<string, any>
+  puntos_bonus: number
+  activo: boolean
+  creado_en: string
+  actualizado_en: string
+}
+
+export interface GamificacionLogroUsuario {
+  id: string
+  user_id: string
+  logro_id: string
+  logro?: GamificacionLogro
+  desbloqueado_en: string
+}
+
+export interface RankingEntry {
+  posicion: number
+  user_id: string
+  nombre: string
+  apellido?: string
+  avatar_url?: string
+  puntos: number
+  nivel: number
+  nivelNombre?: string
+}
+
+export interface GamificacionHistorico {
+  id: string
+  user_id: string
+  empresa_id: string
+  periodo: string
+  puntos_cursos: number
+  puntos_comunidad: number
+  puntos_blog: number
+  ranking_global?: number
   creado_en: string
 }
 
@@ -868,6 +1012,36 @@ export type Database = {
         Row: BovedaTransaccion
         Insert: Omit<BovedaTransaccion, 'id' | 'creado_en'>
         Update: Partial<Omit<BovedaTransaccion, 'id'>>
+      }
+      gamificacion_niveles: {
+        Row: GamificacionNivel
+        Insert: Omit<GamificacionNivel, 'id' | 'creado_en' | 'actualizado_en'>
+        Update: Partial<Omit<GamificacionNivel, 'id' | 'creado_en'>>
+      }
+      gamificacion_config: {
+        Row: GamificacionConfig
+        Insert: Omit<GamificacionConfig, 'id' | 'creado_en' | 'actualizado_en'>
+        Update: Partial<Omit<GamificacionConfig, 'id' | 'creado_en'>>
+      }
+      gamificacion_puntos: {
+        Row: GamificacionPuntos
+        Insert: Omit<GamificacionPuntos, 'id' | 'creado_en'>
+        Update: Partial<Omit<GamificacionPuntos, 'id'>>
+      }
+      certificado_intentos: {
+        Row: CertificadoIntento
+        Insert: Omit<CertificadoIntento, 'id' | 'creado_en'>
+        Update: Partial<Omit<CertificadoIntento, 'id'>>
+      }
+      gamificacion_logros: {
+        Row: GamificacionLogro
+        Insert: Omit<GamificacionLogro, 'id' | 'creado_en' | 'actualizado_en'>
+        Update: Partial<Omit<GamificacionLogro, 'id' | 'creado_en'>>
+      }
+      gamificacion_logros_usuarios: {
+        Row: GamificacionLogroUsuario
+        Insert: Omit<GamificacionLogroUsuario, 'id' | 'desbloqueado_en'>
+        Update: Partial<Omit<GamificacionLogroUsuario, 'id'>>
       }
     }
     Views: {

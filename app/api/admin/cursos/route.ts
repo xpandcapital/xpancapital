@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
     const {
       nombre, descripcion, modulos, precio_coins, precio_usd,
       max_intentos, nota_aprobacion, certificado_template_id, imagen_principal,
-      para_equipo, activo = true
+      para_equipo, activo = true, puntos_completado, puntos_por_leccion, puntos_certificado
     } = body
     let { slug } = body
 
@@ -177,6 +177,9 @@ export async function POST(request: NextRequest) {
       para_equipo, activo
     }
 
+    if (puntos_completado !== undefined) insertData.puntos_completado = puntos_completado
+    if (puntos_por_leccion !== undefined) insertData.puntos_por_leccion = puntos_por_leccion
+    if (puntos_certificado !== undefined) insertData.puntos_certificado = puntos_certificado
     if (certificado_template_id) insertData.certificado_template_id = certificado_template_id
     if (imagen_principal) insertData.imagen_principal = imagen_principal
 

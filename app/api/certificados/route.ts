@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const baseOrigin = supabaseUrl.replace('/rest/v1', '')
 
 function getSupabase() {
   return createClient(supabaseUrl, supabaseServiceKey)
@@ -110,8 +111,102 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Registrar intento de certificado y otorgar puntos
+    if (curso_id && user?.empresa_id) {
+      registrarIntentoYCertificado(data, user.empresa_id).catch(() => {})
+    }
+
     return NextResponse.json({ success: true, data })
   } catch {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  }
+}
+
+async function registrarIntentoYCertificado(
+  certificado: { id: string; user_id: string; curso_id?: string },
+  empresaId: string
+) {
+  try {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    const { data: config } = await supabase
+      .from('gamificacion_config')
+      .select('*')
+      .eq('empresa_id', empresaId)
+      .single()
+
+    if (!config || !config.activo) return
+
+    const { data: intentosPrevios } = await supabase
+      .from('certificado_intentos')
+      .select('ciclo, intento_en_ciclo, bloqueado')
+      .eq('user_id', certificado.user_id)
+      .eq('curso_id', certificado.curso_id)
+      .order('creado_en', { ascending: false })
+
+    // Puntos del curso (si tiene configurado, sino usa el global)
+    let puntosBaseCurso = config.puntos_certificado_base
+    if (certificado.curso_id) {
+      const { data: curso } = await supabase
+        .from('cursos')
+        .select('puntos_certificado')
+        .eq('id', certificado.curso_id)
+        .single()
+      if (curso?.puntos_certificado !== undefined && curso.puntos_certificado !== null) puntosBaseCurso = curso.puntos_certificado
+    }
+
+    let ciclo = 1
+    let intentoEnCiclo = 1
+
+    if (intentosPrevios?.length) {
+      const ultimo = intentosPrevios[0]
+      if (ultimo.bloqueado) {
+        ciclo = ultimo.ciclo + 1
+        intentoEnCiclo = 1
+      } else {
+        ciclo = ultimo.ciclo
+        intentoEnCiclo = Math.min(ultimo.intento_en_ciclo + 1, config.max_intentos_certificado)
+      }
+    }
+
+    const puntos =
+      puntosBaseCurso -
+      config.puntos_certificado_decremento_intento * (intentoEnCiclo - 1) -
+      config.puntos_certificado_decremento_bloqueo * (ciclo - 1)
+
+    const puntosFinal = Math.max(puntos, 0)
+
+    const { error: intentoErr } = await supabase
+      .from('certificado_intentos')
+      .insert({
+        certificado_id: certificado.id,
+        user_id: certificado.user_id,
+        curso_id: certificado.curso_id,
+        ciclo,
+        intento_en_ciclo: intentoEnCiclo,
+        puntos_otorgados: puntosFinal,
+        bloqueado: intentoEnCiclo >= config.max_intentos_certificado,
+      })
+
+    if (intentoErr) {
+      console.error('[certificados] Error registrando intento:', intentoErr.message)
+      return
+    }
+
+    await fetch(`${baseOrigin}/api/gamificacion/otorgar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: certificado.user_id,
+        empresa_id: empresaId,
+        tipo: 'certificado',
+        referencia_tipo: 'certificados',
+        referencia_id: certificado.id,
+        descripcion: `Certificado emitido (ciclo ${ciclo}, intento ${intentoEnCiclo})`,
+        puntos_override: puntosFinal,
+      }),
+    })
+  } catch (err) {
+    console.error('[certificados] Error en registrarIntento:', err)
   }
 }

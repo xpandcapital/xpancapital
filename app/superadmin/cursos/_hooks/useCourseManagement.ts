@@ -37,6 +37,9 @@ export function useCourseManagement() {
           linked_product_name?: string | null
           linked_product_precio_comparacion?: number | null
           linked_product_descuento?: number | null
+          puntos_completado?: number
+          puntos_por_leccion?: number
+          puntos_certificado?: number
         }) => ({
           id: c.id,
           title: c.nombre,
@@ -58,6 +61,9 @@ export function useCourseManagement() {
           linkProductoId: null,
           precioComparacion: c.linked_product_precio_comparacion || 0,
           descuentoPorcentaje: c.linked_product_descuento || 0,
+          puntosCompletado: c.puntos_completado || 500,
+          puntosPorLeccion: c.puntos_por_leccion || 50,
+          puntosCertificado: c.puntos_certificado || 1000,
         }))
         setCourses(mappedCourses)
       }
@@ -104,7 +110,11 @@ export function useCourseManagement() {
     return () => {
       if (autoSaveRef.current) clearTimeout(autoSaveRef.current)
     }
-  }, [currentCourse?.title, currentCourse?.modules?.length, currentCourse?.price, currentCourse?.paraEquipo])
+  }, [currentCourse?.title, currentCourse?.modules?.length, currentCourse?.price,
+      currentCourse?.paraEquipo, currentCourse?.puntosCompletado,
+      currentCourse?.puntosPorLeccion, currentCourse?.puntosCertificado,
+      currentCourse?.bliscoins, currentCourse?.sequentialProgress,
+      currentCourse?.requireCompletion, currentCourse?.category])
 
   const saveBorrador = useCallback(async (statusOverride?: 'Borrador' | 'Publicado') => {
     if (!currentCourse) return
@@ -137,6 +147,9 @@ export function useCourseManagement() {
         link_producto_id: currentCourse.linkProductoId || null,
         precio_comparacion: currentCourse.precioComparacion || 0,
         descuento_porcentaje: currentCourse.descuentoPorcentaje || 0,
+        puntos_completado: currentCourse.puntosCompletado ?? null,
+        puntos_por_leccion: currentCourse.puntosPorLeccion ?? null,
+        puntos_certificado: currentCourse.puntosCertificado ?? null,
       }
 
       if (currentCourse.image) courseData.imagen_principal = currentCourse.image
@@ -230,7 +243,10 @@ export function useCourseManagement() {
       productoNombre: null,
       linkProductoId: null,
       precioComparacion: 0,
-      descuentoPorcentaje: 0
+      descuentoPorcentaje: 0,
+      puntosCompletado: 500,
+      puntosPorLeccion: 50,
+      puntosCertificado: 1000,
     }
     setCourses(prev => [...prev, newCourse])
     setCurrentCourse(newCourse)

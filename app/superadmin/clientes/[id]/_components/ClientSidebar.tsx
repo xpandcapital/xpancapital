@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
     X, User, Mail, Phone, MapPin, Shield, Star, Ban, Trash2,
     Crown, Bell, DollarSign, ShoppingBag, GraduationCap, Users, MessageCircle,
-    Sparkles, Zap, Clock, ChevronRight
+    Sparkles, Zap, Clock, ChevronRight, TrendingUp
 } from 'lucide-react';
 import type { Client } from '../../_types';
 import { useToast } from '@/components/ui/Toast';
@@ -23,6 +23,7 @@ const tabs = [
     { id: 'sales', label: 'Ventas', icon: ShoppingBag },
     { id: 'addresses', label: 'Direcciones', icon: MapPin },
     { id: 'academia', label: 'Academia', icon: GraduationCap },
+    { id: 'gamificacion', label: 'Gamificación', icon: TrendingUp },
     { id: 'referrals', label: 'Referidos', icon: Users },
     { id: 'comms', label: 'Comunicaciones', icon: MessageCircle },
     { id: 'ai', label: 'Insights IA', icon: Sparkles },

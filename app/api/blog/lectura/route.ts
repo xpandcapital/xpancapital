@@ -117,6 +117,8 @@ export async function POST(request: NextRequest) {
         referencia_tipo: 'blog_post'
       })
 
+    otorgarPuntosLectura(user_id).catch(err => console.error('[gamificacion] Error otorgando puntos:', err))
+
     return NextResponse.json({ 
       success: true, 
       data: { 
@@ -130,6 +132,36 @@ export async function POST(request: NextRequest) {
       error: error instanceof Error ? error.message : 'Error desconocido' 
     }, { status: 500 })
   }
+}
+
+// POST handler — se ejecuta después del registro de lectura exitoso
+// (otorga puntos de gamificación)
+async function otorgarPuntosLectura(userId: string) {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('empresa_id')
+      .eq('id', userId)
+      .single()
+
+    if (!profile?.empresa_id) return
+
+    await fetch(`${supabaseUrl.replace('/rest/v1', '')}/api/gamificacion/otorgar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: userId,
+        empresa_id: profile.empresa_id,
+        tipo: 'lectura_blog',
+        referencia_tipo: 'blog_lecturas',
+        descripcion: 'Lectura de artículo',
+      }),
+    })
+  } catch (err) { console.error('[gamificacion] Error otorgando puntos:', err) }
 }
 
 // PUT - Actualizar progreso de lectura

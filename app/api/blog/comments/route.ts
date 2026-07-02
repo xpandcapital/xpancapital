@@ -113,6 +113,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 400 })
     }
 
+    fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL!.replace('/rest/v1', '')}/api/gamificacion/otorgar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id,
+        empresa_id,
+        tipo: 'comentario_blog',
+        referencia_tipo: 'blog_comments',
+        referencia_id: data.id,
+        descripcion: 'Comentario en el blog',
+      }),
+    }).catch(err => console.error('[gamificacion] Error otorgando puntos:', err))
+
     return NextResponse.json({ success: true, data })
   } catch (error) {
     return NextResponse.json({ 

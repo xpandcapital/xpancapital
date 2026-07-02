@@ -110,6 +110,22 @@ export function CourseDetailsForm({
                 </button>
                 <p className="text-[8px] text-gray-600">Marcar como completado para avanzar</p>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-[#ff1e56] uppercase tracking-widest">Pts por Completar Curso</label>
+                <input type="number" value={course.puntosCompletado || 500} onChange={(e) => onUpdate({ ...course, puntosCompletado: parseInt(e.target.value) || 0 })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red transition-all text-xs font-bold" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-[#ff1e56] uppercase tracking-widest">Pts por Lección</label>
+                <input type="number" value={course.puntosPorLeccion || 50} onChange={(e) => onUpdate({ ...course, puntosPorLeccion: parseInt(e.target.value) || 0 })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red transition-all text-xs font-bold" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[9px] font-black text-[#ff1e56] uppercase tracking-widest">Pts por Certificado</label>
+                <input type="number" value={course.puntosCertificado || 1000} onChange={(e) => onUpdate({ ...course, puntosCertificado: parseInt(e.target.value) || 0 })}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red transition-all text-xs font-bold" />
+              </div>
             </div>
           </div>
         </div>

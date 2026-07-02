@@ -226,4 +226,4 @@ export interface Referral {
     commissionPercent?: number;
 }
 
-export type ClientTab = 'profile' | 'economy' | 'sales' | 'referrals' | 'comms' | 'addresses' | 'academia' | 'ai_insights' | 'automations' | 'history';
+export type ClientTab = 'profile' | 'economy' | 'sales' | 'referrals' | 'comms' | 'addresses' | 'academia' | 'ai_insights' | 'automations' | 'history' | 'gamificacion';

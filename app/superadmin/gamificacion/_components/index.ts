@@ -1,0 +1,7 @@
+export { ConfigTab } from './ConfigTab'
+export { NivelesTab } from './NivelesTab'
+export { NivelForm } from './NivelForm'
+export { RankingTab } from './RankingTab'
+export { LogrosTab } from './LogrosTab'
+export { LogroForm } from './LogroForm'
+export { CertificadoIntentosTab } from './CertificadoIntentosTab'
