@@ -35,9 +35,11 @@ interface MentorEvent {
   id: string
   autor: { nombre: string; apellido?: string; avatar_url?: string }
   contenido?: string
+  media?: { id: string; tipo: string; url_original: string; url_comprimida?: string; url_thumbnail?: string; mime_type?: string }[]
   evento?: {
     titulo: string
     descripcion?: string
+    imagen_url?: string
     fecha_inicio: string
     hora_inicio?: string
     tipo: string
@@ -202,6 +204,19 @@ export function PortalNoticias() {
                           </div>
                         </div>
                       </div>
+                      {(event.evento.imagen_url || (event.media && event.media.length > 0)) && (
+                        <div className="mt-3 rounded-xl overflow-hidden">
+                          {event.media?.filter(m => m.tipo === 'imagen').length ? (
+                            <div className={`grid gap-1 ${event.media.filter(m => m.tipo === 'imagen').length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                              {event.media.filter(m => m.tipo === 'imagen').slice(0, 4).map(m => (
+                                <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-32 object-cover" loading="lazy" />
+                              ))}
+                            </div>
+                          ) : event.evento.imagen_url ? (
+                            <img src={event.evento.imagen_url} alt="" className="w-full h-40 object-cover" loading="lazy" />
+                          ) : null}
+                        </div>
+                      )}
                       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/5">
                         <div className="flex items-center gap-1.5">
                           <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center">
@@ -215,17 +230,26 @@ export function PortalNoticias() {
                       </div>
                     </>
                   ) : (
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-                        <User className="w-5 h-5 text-gray-500" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-gray-300 text-sm">{event.contenido || 'Anuncio del mentor'}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-[10px] text-gray-500">{event.autor?.nombre}</span>
-                          <span className="text-[10px] text-gray-600">{timeAgo(event.created_at)}</span>
+                    <div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+                          <User className="w-5 h-5 text-gray-500" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-gray-300 text-sm">{event.contenido || 'Anuncio del mentor'}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="text-[10px] text-gray-500">{event.autor?.nombre}</span>
+                            <span className="text-[10px] text-gray-600">{timeAgo(event.created_at)}</span>
+                          </div>
                         </div>
                       </div>
+                      {event.media?.filter(m => m.tipo === 'imagen').length ? (
+                        <div className={`mt-3 rounded-xl overflow-hidden grid gap-1 ${event.media.filter(m => m.tipo === 'imagen').length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                          {event.media.filter(m => m.tipo === 'imagen').slice(0, 4).map(m => (
+                            <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-32 object-cover" loading="lazy" />
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                   )}
                 </motion.div>

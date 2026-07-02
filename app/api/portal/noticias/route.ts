@@ -31,14 +31,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Get Finnhub API key
+    // Get Finnhub API key — buscar por key_name, sin filtrar por empresa/is_global
     const { data: keys } = await supabase
       .from('api_keys')
       .select('key_name, key_value')
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .eq('is_global', true)
       .eq('key_name', 'finnhub_api_key')
-      .single()
+      .maybeSingle()
 
     const encrypted = keys?.key_value || ''
     let apiKey = ''
