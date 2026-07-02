@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Calendar, Newspaper, ExternalLink, Loader2, Clock,
@@ -37,6 +37,7 @@ interface MentorEvent {
 
 export function PortalNoticias() {
   const [news, setNews] = useState<NewsItem[]>([])
+  const [headlines, setHeadlines] = useState<NewsItem[]>([])
   const [mentorEvents, setMentorEvents] = useState<MentorEvent[]>([])
   const [loadingNews, setLoadingNews] = useState(true)
   const [validatingCount, setValidatingCount] = useState(0)
@@ -57,6 +58,7 @@ export function PortalNoticias() {
 
       setLoadingNews(true)
       setNews([])
+      setHeadlines([])
       setError('')
 
       try {
@@ -81,26 +83,35 @@ export function PortalNoticias() {
         }
 
         const validated: NewsItem[] = []
+        const failed: NewsItem[] = []
         setValidatingCount(allArticles.length)
         const startTime = Date.now()
         const TIMEOUT = 12000
 
         for (const article of allArticles) {
           if (controller.signal.aborted) break
-          if (Date.now() - startTime > TIMEOUT) break
+          if (Date.now() - startTime > TIMEOUT) {
+            // Agregar lo que no se alcanzó a validar como titulares
+            const remaining = allArticles.filter(a => !validated.includes(a) && !failed.includes(a))
+            failed.push(...remaining)
+            break
+          }
 
           let isValid = false
           try {
             const res = await fetch(`/api/portal/leer?url=${encodeURIComponent(article.url)}`)
             const data = await res.json()
             isValid = data.success && data.content && data.content.length > 100
-          } catch { /* fallará → se descarta */ }
+          } catch { /* fallará → titulares */ }
 
           if (controller.signal.aborted) break
 
           if (isValid) {
             validated.push(article)
             setNews([...validated])
+          } else {
+            failed.push(article)
+            setHeadlines([...failed])
           }
 
           setValidatingCount(prev => prev - 1)
@@ -113,8 +124,9 @@ export function PortalNoticias() {
 
         if (!controller.signal.aborted) {
           setNews(validated)
-          if (validated.length === 0 && allArticles.length > 0) {
-            setError('Ningún artículo superó la validación')
+          setHeadlines(failed)
+          if (validated.length === 0 && failed.length === 0 && allArticles.length > 0) {
+            setError('Ningún artículo disponible')
           }
         }
       } catch {
@@ -471,8 +483,41 @@ export function PortalNoticias() {
                 </div>
               )}
 
+              {/* Titulares — sin validar, link externo */}
+              {headlines.length > 0 && (
+                <div className="pt-3 border-t border-white/5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ExternalLink className="w-3 h-3 text-gray-500" />
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Titulares</span>
+                    <span className="text-[9px] text-gray-600">{headlines.length}</span>
+                  </div>
+                  <div className="space-y-1">
+                    {headlines.map((item, i) => (
+                      <motion.a
+                        key={item.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: Math.min(i * 0.04, 0.4) }}
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg hover:bg-white/[0.02] transition-colors group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <span className="text-gray-400 text-[11px] line-clamp-1 group-hover:text-white transition-colors">{item.title}</span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[9px] text-gray-600 font-bold">{item.source}</span>
+                          <ExternalLink className="w-3 h-3 text-gray-600 group-hover:text-blue-400 transition-colors" />
+                        </div>
+                      </motion.a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <p className="text-center text-[9px] text-gray-600 pt-2">
-                {news.length} artículo{news.length !== 1 ? 's' : ''} verificado{news.length !== 1 ? 's' : ''}
+                {news.length} artículo{news.length !== 1 ? 's' : ''} verificado{news.length !== 1 ? 's' : ''}{headlines.length > 0 ? ` + ${headlines.length} titular${headlines.length !== 1 ? 'es' : ''}` : ''}
               </p>
             </div>
           )}
