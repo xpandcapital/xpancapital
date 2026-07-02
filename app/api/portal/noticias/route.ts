@@ -5,6 +5,16 @@ import { decryptApiKey } from '@/lib/api-crypto'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
+// Fuentes con paywall — se descartan antes de validar (ahorra tiempo)
+const BLOCKED_SOURCES = ['Reuters', 'The Wall Street Journal', 'WSJ', 'Financial Times',
+  'Bloomberg', "Barron's", 'The Economist', 'Nikkei', 'Business Insider']
+
+function isBlocked(source: string): boolean {
+  if (!source) return false
+  const s = source.toLowerCase()
+  return BLOCKED_SOURCES.some(b => s.includes(b.toLowerCase()))
+}
+
 function decodeEntities(text: string): string {
   return text
     .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
@@ -83,7 +93,10 @@ export async function GET(request: NextRequest) {
         if (res.ok) {
           const raw = await res.json()
           if (Array.isArray(raw)) {
-            data.news = raw.slice(0, 18).map((n: any) => ({
+            data.news = raw
+              .filter((n: any) => !isBlocked(n.source))
+              .slice(0, 18)
+              .map((n: any) => ({
               id: String(n.id || Math.random()),
               title: decodeEntities(n.headline || n.title || 'Sin título'),
               summary: decodeEntities(n.summary || ''),

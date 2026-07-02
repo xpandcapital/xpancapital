@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { Loader2, RefreshCw } from 'lucide-react'
 import { useComunidad } from './_hooks/useComunidad'
@@ -23,6 +23,27 @@ export default function ComunidadPage() {
   const isAdmin = ['superadmin', 'admin'].includes(user?.role || '')
 
   useEffect(() => { fetchPosts(true) }, [])
+
+  // Infinite scroll: auto-cargar más al hacer scroll al final
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const loadingMoreRef = useRef(loadingMore)
+  loadingMoreRef.current = loadingMore
+
+  useEffect(() => {
+    if (!hasMore) return
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !loadingMoreRef.current) {
+          fetchPosts(false)
+        }
+      },
+      { rootMargin: '300px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasMore, fetchPosts])
 
   // Cargar miembros de la empresa
   useEffect(() => {
@@ -152,19 +173,17 @@ export default function ComunidadPage() {
                   </div>
 
                   {hasMore && (
-                    <div className="flex justify-center py-4">
-                      <button
-                        onClick={() => fetchPosts(false)}
-                        disabled={loadingMore}
-                        className="px-5 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-gray-400 hover:text-white hover:border-white/10 transition-colors disabled:opacity-40 flex items-center gap-2"
-                      >
-                        {loadingMore ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
-                        Cargar más
-                      </button>
+                    <div ref={sentinelRef} className="flex justify-center py-6">
+                      {loadingMore ? (
+                        <span className="flex items-center gap-2 text-xs text-gray-500">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Cargando más...
+                        </span>
+                      ) : null}
                     </div>
                   )}
 
-                  {!hasMore && posts.length >= 20 && (
+                  {!hasMore && posts.length >= 12 && (
                     <p className="text-center text-gray-600 text-[11px] py-4">— Fin del feed —</p>
                   )}
                 </>
