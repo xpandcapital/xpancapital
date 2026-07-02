@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useMisCapacitaciones } from './_hooks/useMisCapacitaciones'
 import { useRouter } from 'next/navigation'
-import { GraduationCap, Loader2, BookOpen, CheckCircle2, PlayCircle, AlertCircle, Clock, Trophy, TrendingUp, ChevronRight, BookMarked } from 'lucide-react'
+import { GraduationCap, Loader2, BookOpen, CheckCircle2, PlayCircle, AlertCircle, Clock, Trophy, TrendingUp, ChevronRight, BookMarked, ShoppingBag, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const ESTADO_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; dot: string; icon: any }> = {
@@ -189,6 +189,19 @@ export default function MisCapacitacionesPage() {
     )
   }
 
+  const cursosPublicos = cursos.filter(c => !((c.cursos as any)?.para_equipo))
+  const capacitacionesEquipo = cursos.filter(c => (c.cursos as any)?.para_equipo)
+
+  const totalPublicos = cursosPublicos.length
+  const publicosEnProgreso = cursosPublicos.filter(c => c.estado === 'en_progreso').length
+  const publicosCompletados = cursosPublicos.filter(c => c.estado === 'completado').length
+  const promedioPublicos = totalPublicos ? Math.round(cursosPublicos.reduce((acc, c) => acc + c.progreso, 0) / totalPublicos) : 0
+
+  const totalEquipo = capacitacionesEquipo.length
+  const equipoEnProgreso = capacitacionesEquipo.filter(c => c.estado === 'en_progreso').length
+  const equipoCompletados = capacitacionesEquipo.filter(c => c.estado === 'completado').length
+  const promedioEquipo = totalEquipo ? Math.round(capacitacionesEquipo.reduce((acc, c) => acc + c.progreso, 0) / totalEquipo) : 0
+
   const asignados = cursos.filter(c => c.estado === 'asignado').length
   const enProgreso = cursos.filter(c => c.estado === 'en_progreso').length
   const completados = cursos.filter(c => c.estado === 'completado').length
@@ -210,35 +223,49 @@ export default function MisCapacitacionesPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-        <StatCard
-          icon={BookOpen}
-          value={cursos.length}
-          label="Total Cursos"
-          colorClass="text-blue-400"
-          bgClass="bg-blue-500/10"
-        />
-        <StatCard
-          icon={Clock}
-          value={asignados}
-          label="Sin Iniciar"
-          colorClass="text-gray-400"
-          bgClass="bg-white/5"
-        />
-        <StatCard
-          icon={TrendingUp}
-          value={enProgreso}
-          label="En Progreso"
-          colorClass="text-amber-400"
-          bgClass="bg-amber-500/10"
-        />
-        <StatCard
-          icon={Trophy}
-          value={completados}
-          label="Completados"
-          colorClass="text-emerald-400"
-          bgClass="bg-emerald-500/10"
-        />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+        <StatCard icon={BookOpen} value={cursos.length} label="Total Cursos" colorClass="text-blue-400" bgClass="bg-blue-500/10" />
+        <StatCard icon={Clock} value={asignados} label="Sin Iniciar" colorClass="text-gray-400" bgClass="bg-white/5" />
+        <StatCard icon={TrendingUp} value={enProgreso} label="En Progreso" colorClass="text-amber-400" bgClass="bg-amber-500/10" />
+        <StatCard icon={Trophy} value={completados} label="Completados" colorClass="text-emerald-400" bgClass="bg-emerald-500/10" />
+      </div>
+
+      {/* Breakdown by type */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
+        <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
+              <ShoppingBag className="w-4 h-4" />
+              Cursos / En Venta
+            </h3>
+            <span className="text-2xl font-black text-white">{totalPublicos}</span>
+          </div>
+          <div className="flex items-center gap-3 text-[11px]">
+            <span className="text-amber-400 font-bold">{publicosEnProgreso} en progreso</span>
+            <span className="text-gray-600">·</span>
+            <span className="text-emerald-400 font-bold">{publicosCompletados} completados</span>
+          </div>
+          <div className="mt-3 w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-700" style={{ width: `${promedioPublicos}%` }} />
+          </div>
+        </div>
+        <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs font-black text-purple-400 uppercase tracking-wider flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Capacitaciones de Equipo
+            </h3>
+            <span className="text-2xl font-black text-white">{totalEquipo}</span>
+          </div>
+          <div className="flex items-center gap-3 text-[11px]">
+            <span className="text-purple-400 font-bold">{equipoEnProgreso} en progreso</span>
+            <span className="text-gray-600">·</span>
+            <span className="text-emerald-400 font-bold">{equipoCompletados} completados</span>
+          </div>
+          <div className="mt-3 w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-purple-400 transition-all duration-700" style={{ width: `${promedioEquipo}%` }} />
+          </div>
+        </div>
       </div>
 
       {/* Overall Progress Banner */}
@@ -260,8 +287,12 @@ export default function MisCapacitacionesPage() {
         </div>
         <div className="hidden md:flex items-center gap-6 pl-6 border-l border-white/5 text-center">
           <div>
-            <p className="text-xl font-black text-white">{completados}</p>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Finalizados</p>
+            <p className="text-xl font-black text-amber-400">{publicosCompletados}</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Cursos</p>
+          </div>
+          <div>
+            <p className="text-xl font-black text-purple-400">{equipoCompletados}</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Equipo</p>
           </div>
           <div>
             <p className="text-xl font-black text-amber-400">{enProgreso}</p>
@@ -270,29 +301,57 @@ export default function MisCapacitacionesPage() {
         </div>
       </div>
 
-      {/* Course Grid */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Tus Cursos</h2>
-        <span className="text-xs text-gray-600">{cursos.length} cursos</span>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-        {cursos.map(curso => {
-          const estado = ESTADO_CONFIG[curso.estado] || ESTADO_CONFIG.asignado
-          const EstadoIcon = estado.icon
-          const cursoData = curso.cursos as any
-          return (
-            <CourseCard
-              key={curso.id}
-              curso={curso}
-              navigatingTo={navigatingTo}
-              onClick={() => {
-                setNavigatingTo(curso.curso_id)
-                router.push(`/superadmin/mis-capacitaciones/${curso.curso_id}`)
-              }}
-            />
-          )
-        })}
-      </div>
+      {/* Courses Grid - Public/For Sale */}
+      {cursosPublicos.length > 0 && (
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+              <ShoppingBag className="w-4 h-4" />
+              Cursos / En Venta
+            </h2>
+            <span className="text-xs text-gray-600">{cursosPublicos.length} cursos</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-10">
+            {cursosPublicos.map(curso => (
+              <CourseCard
+                key={curso.id}
+                curso={curso}
+                navigatingTo={navigatingTo}
+                onClick={() => {
+                  setNavigatingTo(curso.curso_id)
+                  router.push(`/superadmin/mis-capacitaciones/${curso.curso_id}`)
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Courses Grid - Team */}
+      {capacitacionesEquipo.length > 0 && (
+        <>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Capacitaciones de Equipo
+            </h2>
+            <span className="text-xs text-gray-600">{capacitacionesEquipo.length} cursos</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            {capacitacionesEquipo.map(curso => (
+              <CourseCard
+                key={curso.id}
+                curso={curso}
+                navigatingTo={navigatingTo}
+                onClick={() => {
+                  setNavigatingTo(curso.curso_id)
+                  router.push(`/superadmin/mis-capacitaciones/${curso.curso_id}`)
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }
