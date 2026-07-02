@@ -6,6 +6,20 @@ import { decryptApiKey } from '@/lib/api-crypto'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&rsquo;|&lsquo;/g, "'")
+    .replace(/&rdquo;|&ldquo;/g, '"')
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+}
+
 const cacheStore = new Map<string, { data: any; timestamp: number }>()
 const CACHE_TTL = 5 * 60 * 1000
 
@@ -72,8 +86,8 @@ export async function GET(request: NextRequest) {
           if (Array.isArray(raw)) {
             data.news = raw.slice(0, 12).map((n: any) => ({
               id: String(n.id || Math.random()),
-              title: n.headline || n.title || 'Sin título',
-              summary: n.summary || '',
+              title: decodeEntities(n.headline || n.title || 'Sin título'),
+              summary: decodeEntities(n.summary || ''),
               source: n.source || '',
               url: n.url || '',
               image: n.image || '',

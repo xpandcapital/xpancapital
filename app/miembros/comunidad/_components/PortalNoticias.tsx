@@ -176,7 +176,7 @@ export function PortalNoticias() {
                               ))}
                             </div>
                           ) : event.evento.imagen_url ? (
-                            <img src={event.evento.imagen_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                            <img src={event.evento.imagen_url} alt="" className="w-full h-full object-contain bg-zinc-900" loading="lazy" />
                           ) : null}
                         </div>
                       ) : null}

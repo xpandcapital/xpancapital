@@ -100,6 +100,8 @@ function stripHtml(html: string): string {
     .replace(/&rdquo;|&ldquo;/g, '"')
     .replace(/&mdash;/g, '—')
     .replace(/&ndash;/g, '–')
+    .replace(/&#x([0-9a-fA-F]+);/g, (_: string, hex: string) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_: string, dec: string) => String.fromCharCode(parseInt(dec, 10)))
     .replace(/\s+/g, ' ')
     .replace(/\n\s*\n\s*/g, '\n\n')
     .trim()
