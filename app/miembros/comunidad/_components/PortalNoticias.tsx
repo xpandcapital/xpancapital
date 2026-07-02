@@ -1,10 +1,10 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Calendar, Newspaper, ExternalLink, Loader2, Clock,
-  MapPin, Globe, AlertCircle, User, Shield, RefreshCw
+  MapPin, AlertCircle, User, Shield, RefreshCw, X, ChevronLeft
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -17,18 +17,6 @@ interface NewsItem {
   image: string
   date: string
   category: string
-}
-
-interface CalendarItem {
-  date: string
-  time: string
-  country: string
-  event: string
-  actual: string | null
-  previous: string | null
-  estimate: string | null
-  impact: string
-  unit: string
 }
 
 interface MentorEvent {
@@ -51,11 +39,11 @@ interface MentorEvent {
 export function PortalNoticias() {
   const { user } = useAuth()
   const [news, setNews] = useState<NewsItem[]>([])
-  const [calendar, setCalendar] = useState<CalendarItem[]>([])
   const [mentorEvents, setMentorEvents] = useState<MentorEvent[]>([])
   const [loadingNews, setLoadingNews] = useState(true)
   const [loadingMentor, setLoadingMentor] = useState(true)
   const [newsErrors, setNewsErrors] = useState<string[]>([])
+  const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
 
   useEffect(() => {
     fetchNews()
@@ -67,15 +55,10 @@ export function PortalNoticias() {
     try {
       const cacheBust = force ? '&force=true' : ''
       const t = Date.now()
-      const [newsRes, calRes] = await Promise.all([
-        fetch(`/api/portal/noticias?type=news&cacheBust=${t}${cacheBust}`),
-        fetch(`/api/portal/noticias?type=calendar&cacheBust=${t}${cacheBust}`),
-      ])
+      const newsRes = await fetch(`/api/portal/noticias?type=news&cacheBust=${t}${cacheBust}`)
       const newsData = await newsRes.json()
-      const calData = await calRes.json()
       if (newsData.success) {
         setNews(newsData.data?.news || [])
-        setCalendar(newsData.data?.calendar || [])
         if (newsData.errors?.length) setNewsErrors(newsData.errors)
         else if (newsData.debug) setNewsErrors([JSON.stringify(newsData.debug)])
         else setNewsErrors([])
@@ -94,14 +77,6 @@ export function PortalNoticias() {
     finally { setLoadingMentor(false) }
   }
 
-  const impactColor = (impact: string) => {
-    if (!impact) return 'text-gray-600 bg-white/5'
-    const v = impact.toLowerCase()
-    if (v.includes('high') || v.includes('alta') || v.includes('3') || v.includes('alto')) return 'text-red-400 bg-red-500/10 border-red-500/20'
-    if (v.includes('med') || v.includes('media') || v.includes('2') || v.includes('moderado')) return 'text-amber-400 bg-amber-500/10 border-amber-500/20'
-    return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-  }
-
   const timeAgo = (date: string) => {
     const mins = Math.floor((Date.now() - new Date(date).getTime()) / 60000)
     if (mins < 1) return 'Ahora'
@@ -111,11 +86,6 @@ export function PortalNoticias() {
     const dias = Math.floor(hrs / 24)
     if (dias < 7) return `Hace ${dias}d`
     return new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
-  }
-
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr + 'T00:00:00')
-    return d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
   }
 
   return (
@@ -129,7 +99,7 @@ export function PortalNoticias() {
             </div>
             <div>
               <h1 className="text-lg font-black text-white">Portal de Noticias y Agenda</h1>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Eventos del mentor · Calendario macro · Noticias globales</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Eventos del mentor · Noticias globales</p>
             </div>
           </div>
           <button
@@ -143,13 +113,13 @@ export function PortalNoticias() {
         </div>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6">
+      {/* 50/50 Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* LEFT: Mentor Events */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-1">
+        <div className="space-y-4 order-2 lg:order-1">
+          <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-amber-400" />
-            <h2 className="text-sm font-black text-amber-400 uppercase tracking-wider">Eventos Clave del Mentor</h2>
+            <h2 className="text-sm font-black text-amber-400 uppercase tracking-wider">Mentor</h2>
           </div>
 
           {loadingMentor ? (
@@ -157,10 +127,10 @@ export function PortalNoticias() {
               <Loader2 className="w-6 h-6 text-amber-400 animate-spin" />
             </div>
           ) : mentorEvents.length === 0 ? (
-            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-center">
+            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-8 text-center">
               <Calendar className="w-10 h-10 text-gray-700 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">No hay eventos del mentor aún</p>
-              <p className="text-gray-600 text-xs mt-1">Los admins pueden crear eventos destacados desde el PostCreator</p>
+              <p className="text-gray-500 text-sm">No hay publicaciones del mentor aún</p>
+              <p className="text-gray-600 text-xs mt-1">Activa el checkbox al publicar para destacar aquí</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -170,87 +140,79 @@ export function PortalNoticias() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="bg-zinc-950 border border-white/5 rounded-2xl p-5 hover:border-amber-500/20 transition-colors"
+                  className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden hover:border-amber-500/20 transition-colors"
                 >
                   {event.evento ? (
                     <>
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
-                          <Calendar className="w-5 h-5 text-amber-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-white font-bold text-sm">{event.evento.titulo}</h3>
-                          {event.evento.descripcion && (
-                            <p className="text-gray-400 text-xs mt-1 line-clamp-2">{event.evento.descripcion}</p>
-                          )}
-                          <div className="flex items-center gap-3 mt-2 flex-wrap">
-                            <span className="flex items-center gap-1 text-[10px] text-amber-400 font-bold">
-                              <Clock className="w-3 h-3" />
-                              {new Date(event.evento.fecha_inicio).toLocaleDateString('es-ES', {
-                                day: 'numeric', month: 'short', year: 'numeric'
-                              })}
-                              {event.evento.hora_inicio && ` · ${event.evento.hora_inicio}`}
-                            </span>
-                            {event.evento.tipo && (
-                              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-gray-400 uppercase">
-                                {event.evento.tipo === 'digital' ? '💻 Digital' : event.evento.tipo === 'presencial' ? '📍 Presencial' : '🔀 Híbrido'}
-                              </span>
-                            )}
-                            {event.evento.ubicacion && (
-                              <span className="flex items-center gap-1 text-[10px] text-gray-500">
-                                <MapPin className="w-3 h-3" />{event.evento.ubicacion}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      {(event.evento.imagen_url || (event.media && event.media.length > 0)) && (
-                        <div className="mt-3 rounded-xl overflow-hidden">
+                      {(event.evento.imagen_url || event.media?.filter(m => m.tipo === 'imagen').length) ? (
+                        <div className="relative aspect-[2/1] overflow-hidden bg-zinc-900">
                           {event.media?.filter(m => m.tipo === 'imagen').length ? (
-                            <div className={`grid gap-1 ${event.media.filter(m => m.tipo === 'imagen').length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                              {event.media.filter(m => m.tipo === 'imagen').slice(0, 4).map(m => (
-                                <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-32 object-cover" loading="lazy" />
+                            <div className={`grid gap-0.5 h-full ${event.media.filter(m => m.tipo === 'imagen').length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                              {event.media.filter(m => m.tipo === 'imagen').slice(0, 2).map(m => (
+                                <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-full object-cover" loading="lazy" />
                               ))}
                             </div>
                           ) : event.evento.imagen_url ? (
-                            <img src={event.evento.imagen_url} alt="" className="w-full h-40 object-cover" loading="lazy" />
+                            <img src={event.evento.imagen_url} alt="" className="w-full h-full object-cover" loading="lazy" />
                           ) : null}
                         </div>
-                      )}
-                      <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/5">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-white/5 flex items-center justify-center">
-                            <User className="w-3 h-3 text-gray-500" />
+                      ) : null}
+                      <div className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+                            <Calendar className="w-4 h-4 text-amber-400" />
                           </div>
-                          <span className="text-[10px] text-gray-500">
-                            {event.autor?.nombre || 'Mentor'}
-                          </span>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-white font-bold text-sm leading-snug">{event.evento.titulo}</h3>
+                            {event.evento.descripcion && (
+                              <p className="text-gray-400 text-xs mt-1 line-clamp-2">{event.evento.descripcion}</p>
+                            )}
+                            <div className="flex items-center gap-3 mt-2 flex-wrap">
+                              <span className="flex items-center gap-1 text-[10px] text-amber-400 font-bold">
+                                <Clock className="w-3 h-3" />
+                                {new Date(event.evento.fecha_inicio).toLocaleDateString('es-ES', {
+                                  day: 'numeric', month: 'short', year: 'numeric'
+                                })}
+                                {event.evento.hora_inicio && ` · ${event.evento.hora_inicio}`}
+                              </span>
+                              {event.evento.tipo && (
+                                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-gray-400 uppercase">
+                                  {event.evento.tipo === 'digital' ? 'Digital' : event.evento.tipo === 'presencial' ? 'Presencial' : 'Híbrido'}
+                                </span>
+                              )}
+                              {event.evento.ubicacion && (
+                                <span className="flex items-center gap-1 text-[10px] text-gray-500">
+                                  <MapPin className="w-3 h-3" />{event.evento.ubicacion}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <span className="text-[10px] text-gray-600">{timeAgo(event.created_at)}</span>
+                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/5">
+                          <span className="text-[10px] text-gray-500">{event.autor?.nombre || 'Mentor'}</span>
+                          <span className="text-[10px] text-gray-600">{timeAgo(event.created_at)}</span>
+                        </div>
                       </div>
                     </>
                   ) : (
-                    <div>
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-                          <User className="w-5 h-5 text-gray-500" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-gray-300 text-sm">{event.contenido || 'Anuncio del mentor'}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="text-[10px] text-gray-500">{event.autor?.nombre}</span>
-                            <span className="text-[10px] text-gray-600">{timeAgo(event.created_at)}</span>
+                    <>
+                      {event.media?.filter(m => m.tipo === 'imagen').length ? (
+                        <div className="relative aspect-[2/1] overflow-hidden bg-zinc-900">
+                          <div className={`grid gap-0.5 h-full ${event.media.filter(m => m.tipo === 'imagen').length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                            {event.media.filter(m => m.tipo === 'imagen').slice(0, 2).map(m => (
+                              <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-full object-cover" loading="lazy" />
+                            ))}
                           </div>
                         </div>
-                      </div>
-                      {event.media?.filter(m => m.tipo === 'imagen').length ? (
-                        <div className={`mt-3 rounded-xl overflow-hidden grid gap-1 ${event.media.filter(m => m.tipo === 'imagen').length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                          {event.media.filter(m => m.tipo === 'imagen').slice(0, 4).map(m => (
-                            <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-32 object-cover" loading="lazy" />
-                          ))}
-                        </div>
                       ) : null}
-                    </div>
+                      <div className="p-4">
+                        <p className="text-gray-300 text-sm leading-relaxed">{event.contenido || 'Anuncio del mentor'}</p>
+                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/5">
+                          <span className="text-[10px] text-gray-500">{event.autor?.nombre}</span>
+                          <span className="text-[10px] text-gray-600">{timeAgo(event.created_at)}</span>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </motion.div>
               ))}
@@ -258,118 +220,194 @@ export function PortalNoticias() {
           )}
         </div>
 
-        {/* RIGHT: Global News + Calendar */}
-        <div className="space-y-6">
-          {/* News Feed */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Globe className="w-4 h-4 text-blue-400" />
-              <h2 className="text-sm font-black text-blue-400 uppercase tracking-wider">Noticias Globales</h2>
-            </div>
-
-            {loadingNews ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
-              </div>
-            ) : news.length === 0 && calendar.length === 0 && newsErrors.length > 0 ? (
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 text-center space-y-2">
-                <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
-                <p className="text-amber-400 text-xs font-bold">Error al cargar datos</p>
-                {newsErrors.map((e, i) => (
-                  <p key={i} className="text-gray-500 text-[10px] break-all">{e}</p>
-                ))}
-                <button onClick={() => fetchNews(true)} className="mt-2 px-3 py-1.5 bg-white/5 rounded-lg text-[10px] text-gray-400 hover:text-white transition-colors">
-                  Reintentar
-                </button>
-              </div>
-            ) : news.length === 0 ? (
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-center">
-                <Globe className="w-10 h-10 text-gray-700 mx-auto mb-3" />
-                <p className="text-gray-500 text-sm">Sin noticias disponibles</p>
-                <p className="text-gray-600 text-xs mt-1">Configura tu API key de Finnhub en api-nube</p>
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                {news.map((item, i) => (
-                  <a
-                    key={item.id || i}
-                    href={item.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block bg-white/[0.02] border border-white/5 rounded-xl p-3.5 hover:border-blue-500/20 transition-colors group"
-                  >
-                    <div className="flex items-start gap-3">
-                      {item.image && (
-                        <img src={item.image} alt="" className="w-14 h-14 rounded-lg object-cover shrink-0" loading="lazy" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-white text-xs font-bold line-clamp-2 group-hover:text-blue-400 transition-colors leading-snug">
-                          {item.title}
-                        </h4>
-                        <div className="flex items-center gap-2 mt-1.5">
-                          <span className="text-[9px] text-gray-500">{item.source}</span>
-                          <span className="text-[9px] text-gray-600">·</span>
-                          <span className="text-[9px] text-gray-500">{timeAgo(item.date)}</span>
-                        </div>
-                      </div>
-                      <ExternalLink className="w-3 h-3 text-gray-600 group-hover:text-blue-400 transition-colors shrink-0 mt-1" />
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
+        {/* RIGHT: News Feed (Magazine Style) */}
+        <div className="order-1 lg:order-2">
+          <div className="flex items-center gap-2 mb-4">
+            <Newspaper className="w-4 h-4 text-blue-400" />
+            <h2 className="text-sm font-black text-blue-400 uppercase tracking-wider">Noticias Globales</h2>
+            <span className="text-[9px] text-gray-600">· Inglés</span>
           </div>
 
-          {/* Economic Calendar */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-sm font-black text-emerald-400 uppercase tracking-wider">Calendario Económico</h2>
+          {loadingNews ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
             </div>
-
-            {loadingNews ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
-              </div>
-            ) : calendar.length === 0 ? (
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 text-center">
-                <Calendar className="w-8 h-8 text-gray-700 mx-auto mb-2" />
-                <p className="text-gray-500 text-sm">Próximamente</p>
-              </div>
-            ) : (
-              <div className="space-y-1.5 max-h-[400px] overflow-y-auto pr-1">
-                {calendar.map((item, i) => (
-                  <div key={`${item.date}-${item.event}-${i}`} className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-white text-xs font-medium line-clamp-1">{item.event}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-[9px] text-gray-500 flex items-center gap-1">
-                            <Clock className="w-2.5 h-2.5" />
-                            {item.time || '—'} · {formatDate(item.date)}
-                          </span>
-                          <span className="text-[9px] text-gray-600">{item.country}</span>
-                        </div>
+          ) : news.length === 0 && newsErrors.length > 0 ? (
+            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 text-center space-y-2">
+              <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
+              <p className="text-amber-400 text-xs font-bold">Error al cargar datos</p>
+              {newsErrors.map((e, i) => (
+                <p key={i} className="text-gray-500 text-[10px] break-all">{e}</p>
+              ))}
+              <button onClick={() => fetchNews(true)} className="mt-2 px-3 py-1.5 bg-white/5 rounded-lg text-[10px] text-gray-400 hover:text-white transition-colors">
+                Reintentar
+              </button>
+            </div>
+          ) : news.length === 0 ? (
+            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-8 text-center">
+              <Newspaper className="w-10 h-10 text-gray-700 mx-auto mb-3" />
+              <p className="text-gray-500 text-sm">Sin noticias disponibles</p>
+              <p className="text-gray-600 text-xs mt-1">Configura tu API key de Finnhub en api-nube</p>
+            </div>
+          ) : (
+            /* Magazine Grid */
+            <div className="space-y-4">
+              {/* Hero article */}
+              {news[0] && (
+                <button
+                  onClick={() => setSelectedArticle(news[0])}
+                  className="w-full text-left bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden hover:border-blue-500/20 transition-colors group"
+                >
+                  {news[0].image && (
+                    <div className="relative aspect-[16/9] overflow-hidden bg-zinc-900">
+                      <img src={news[0].image} alt="" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500" loading="lazy" />
+                      <div className="absolute top-3 left-3">
+                        <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-blis-red text-white uppercase tracking-wider">
+                          {news[0].category || 'Última hora'}
+                        </span>
                       </div>
-                      <div className="flex flex-col items-end gap-0.5 shrink-0">
-                        {item.impact && (
-                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded border ${impactColor(item.impact)}`}>
-                            {item.impact}
-                          </span>
-                        )}
-                        <div className="flex items-center gap-1.5 text-[9px]">
-                          {item.actual && <span className="text-white font-bold">{item.actual}{item.unit}</span>}
-                          {item.previous && <span className="text-gray-600">Prev: {item.previous}{item.unit}</span>}
-                        </div>
-                      </div>
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <h3 className="text-white font-bold text-base leading-snug group-hover:text-blue-400 transition-colors line-clamp-2">
+                      {news[0].title}
+                    </h3>
+                    <p className="text-gray-400 text-xs mt-2 line-clamp-2 leading-relaxed">{news[0].summary}</p>
+                    <div className="flex items-center gap-2 mt-3 text-[10px]">
+                      <span className="text-gray-500 font-bold">{news[0].source}</span>
+                      <span className="text-gray-600">·</span>
+                      <span className="text-gray-500">{timeAgo(news[0].date)}</span>
                     </div>
                   </div>
+                </button>
+              )}
+
+              {/* Secondary articles - 2 column grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {news.slice(1, 7).map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => setSelectedArticle(item)}
+                    className="text-left bg-zinc-950 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/20 transition-colors group"
+                  >
+                    {item.image && (
+                      <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900">
+                        <img src={item.image} alt="" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500" loading="lazy" />
+                      </div>
+                    )}
+                    <div className="p-3.5">
+                      <h4 className="text-white font-bold text-xs leading-snug line-clamp-2 group-hover:text-blue-400 transition-colors">
+                        {item.title}
+                      </h4>
+                      <div className="flex items-center gap-2 mt-2 text-[9px]">
+                        <span className="text-gray-500 font-bold">{item.source}</span>
+                        <span className="text-gray-600">·</span>
+                        <span className="text-gray-500">{timeAgo(item.date)}</span>
+                      </div>
+                    </div>
+                  </button>
                 ))}
               </div>
-            )}
-          </div>
+
+              {/* More articles - compact list */}
+              {news.slice(7).length > 0 && (
+                <div className="space-y-2 pt-2">
+                  {news.slice(7).map(item => (
+                    <button
+                      key={item.id}
+                      onClick={() => setSelectedArticle(item)}
+                      className="w-full text-left flex items-start gap-3 p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-blue-500/20 transition-colors group"
+                    >
+                      {item.image && (
+                        <img src={item.image} alt="" className="w-16 h-16 rounded-lg object-cover shrink-0" loading="lazy" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-white text-xs font-bold line-clamp-2 group-hover:text-blue-400 transition-colors leading-snug">{item.title}</h4>
+                        <div className="flex items-center gap-2 mt-1.5 text-[9px]">
+                          <span className="text-gray-500 font-bold">{item.source}</span>
+                          <span className="text-gray-600">·</span>
+                          <span className="text-gray-500">{timeAgo(item.date)}</span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Article Modal */}
+      <AnimatePresence>
+        {selectedArticle && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-start justify-center pt-[5vh] px-4 overflow-y-auto"
+            onClick={() => setSelectedArticle(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden my-8"
+            >
+              {/* Back button */}
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
+                <button
+                  onClick={() => setSelectedArticle(null)}
+                  className="p-1.5 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">
+                  {selectedArticle.source} · {timeAgo(selectedArticle.date)}
+                </span>
+              </div>
+
+              {/* Image */}
+              {selectedArticle.image && (
+                <div className="relative aspect-[16/9] overflow-hidden bg-zinc-900">
+                  <img src={selectedArticle.image} alt="" className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              {/* Content */}
+              <div className="p-5 sm:p-6 space-y-4">
+                <div>
+                  {selectedArticle.category && (
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blis-red/10 text-blis-red border border-blis-red/20 uppercase tracking-wider mb-2 inline-block">
+                      {selectedArticle.category}
+                    </span>
+                  )}
+                  <h2 className="text-white font-black text-lg leading-tight">{selectedArticle.title}</h2>
+                </div>
+                <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-line">
+                  {selectedArticle.summary || 'Sin resumen disponible.'}
+                </p>
+                <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                  <span className="text-[11px] text-gray-500">
+                    Fuente: <span className="text-gray-400 font-bold">{selectedArticle.source}</span>
+                  </span>
+                  <a
+                    href={selectedArticle.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-4 py-2 bg-blis-red text-white rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-blis-red/80 transition-colors"
+                  >
+                    Leer artículo completo
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
