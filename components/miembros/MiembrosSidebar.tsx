@@ -17,7 +17,8 @@ import {
     Menu,
     X,
     Award,
-    Users
+    Users,
+    Wrench
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -59,6 +60,12 @@ export function MiembrosSidebar() {
             separator: true,
             items: [
                 { icon: BookOpen, label: "Biblioteca Digital", href: "/miembros/biblioteca" },
+            ]
+        },
+        {
+            separator: true,
+            items: [
+                { icon: Wrench, label: "Herramientas", href: "/miembros/herramientas" },
             ]
         },
         {
