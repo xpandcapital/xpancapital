@@ -22,6 +22,62 @@ function isMissingColError(error: { message?: string }): boolean {
   return MISSING_COLS_PATTERNS.some(p => error.message?.includes(p))
 }
 
+async function autoAsignarCurso(supabase: ReturnType<typeof getSupabase>, request: NextRequest, curso: { id: string }) {
+  try {
+    const creatorUserId = request.headers.get('x-blis-user-id')
+    if (!creatorUserId) return
+
+    const { data: creatorProfile } = await supabase
+      .from('profiles')
+      .select('email, rol')
+      .eq('id', creatorUserId)
+      .single()
+
+    if (!creatorProfile?.email) return
+    if (!['superadmin', 'admin', 'editor', 'empleado'].includes(creatorProfile.rol)) return
+
+    let { data: creatorAdvisor } = await supabase
+      .from('advisors')
+      .select('id')
+      .eq('email', creatorProfile.email)
+      .single()
+
+    if (!creatorAdvisor) {
+      const { data: newAdvisor } = await supabase
+        .from('advisors')
+        .insert({
+          email: creatorProfile.email,
+          nombre: creatorProfile.email.split('@')[0],
+          empresa_id: DEFAULT_EMPRESA_ID,
+        })
+        .select('id')
+        .single()
+      creatorAdvisor = newAdvisor
+    }
+
+    if (creatorAdvisor) {
+      const { data: existing } = await supabase
+        .from('equipo_cursos')
+        .select('id')
+        .eq('advisor_id', creatorAdvisor.id)
+        .eq('curso_id', curso.id)
+        .maybeSingle()
+
+      if (!existing) {
+        await supabase.from('equipo_cursos').insert({
+          advisor_id: creatorAdvisor.id,
+          curso_id: curso.id,
+          user_id: creatorUserId,
+          estado: 'asignado',
+          lecciones_completadas: [],
+        })
+      }
+    }
+  } catch {
+    // Silently fail — no interrumpir la creación del curso
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabase()
@@ -89,11 +145,12 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabase()
     const body = await request.json()
 
-    let {
-      nombre, slug, descripcion, modulos, precio_coins, precio_usd,
+    const {
+      nombre, descripcion, modulos, precio_coins, precio_usd,
       max_intentos, nota_aprobacion, certificado_template_id, imagen_principal,
       para_equipo, activo = true
     } = body
+    let { slug } = body
 
     if (!nombre || !slug) {
       return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 })
@@ -141,11 +198,13 @@ export async function POST(request: NextRequest) {
         if (retryError) {
           return NextResponse.json({ error: retryError.message }, { status: 500 })
         }
+        await autoAsignarCurso(supabase, request, retryData)
         return NextResponse.json({ success: true, data: retryData })
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    await autoAsignarCurso(supabase, request, data)
     return NextResponse.json({ success: true, data })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Error del servidor' }, { status: 500 })

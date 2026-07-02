@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('id, email')
+      .select('id, email, rol')
       .eq('id', userId)
       .single()
 
@@ -77,10 +77,38 @@ export async function GET(request: NextRequest) {
 
     const assignedCourseIds = new Set(assignedCourses.map(c => c.curso_id).filter(Boolean))
 
-    const cursosConInfo = assignedCourses.map(ac => {
+    // Para admins: agregar cursos de equipo como disponibles automáticamente
+    const isAdmin = ['superadmin', 'admin', 'editor', 'empleado'].includes(profile.rol || '')
+    const teamCourseEntries: any[] = []
+
+    if (isAdmin && allCursos) {
+      for (const curso of allCursos) {
+        if (curso.para_equipo && !assignedCourseIds.has(curso.id)) {
+          teamCourseEntries.push({
+            id: `pending-${curso.id}`,
+            advisor_id: advisorId || 'admin',
+            curso_id: curso.id,
+            user_id: userId,
+            progreso: 0,
+            estado: 'asignado',
+            lecciones_completadas: [],
+            nota_final: null,
+            asignado_en: new Date().toISOString(),
+            completado_en: null,
+            cursos: curso,
+            _virtual: true,
+          })
+          assignedCourseIds.add(curso.id)
+        }
+      }
+    }
+
+    const allAssigned = [...assignedCourses.map(ac => {
       const info = allCursos?.find(c => c.id === ac.curso_id)
       return { ...ac, cursos: info || null }
-    })
+    }), ...teamCourseEntries]
+
+    const cursosConInfo = allAssigned
 
     return NextResponse.json({
       success: true,

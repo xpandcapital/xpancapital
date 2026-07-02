@@ -99,7 +99,6 @@ export async function GET(request: NextRequest) {
             .from('equipo_cursos')
             .select('curso_id, progreso')
             .eq('advisor_id', advisorRecord.id)
-            .is('user_id', null)
 
           enrolledByAdvisor = advisorCourses || []
         }
@@ -114,8 +113,9 @@ export async function GET(request: NextRequest) {
         }
       })
 
+      // Solo cursos públicos (para_equipo=false) que estén matriculados
       const filtered = allCursos
-        .filter(c => enrolledMap.has(c.id))
+        .filter(c => !(c as any).para_equipo && enrolledMap.has(c.id))
         .map(c => ({
           ...c,
           progreso: { progreso: enrolledMap.get(c.id) || 0 },
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
         const cursoIds = linkedCursos?.map(p => p.curso_id) || []
         const enrolledIds = new Set(filtered.map(c => c.id))
         purchased = allCursos
-          .filter(c => cursoIds.includes(c.id) && !enrolledIds.has(c.id))
+          .filter(c => !(c as any).para_equipo && cursoIds.includes(c.id) && !enrolledIds.has(c.id))
           .map(c => ({
             ...c,
             progreso: { progreso: 0 },
