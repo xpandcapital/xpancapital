@@ -38,6 +38,15 @@ const PATH_TO_SECTION: Record<string, string> = {
   '/superadmin/ajustes/empresas': 'empresas:ver',
   '/superadmin/perfil': 'perfil:ver',
   '/superadmin/integraciones': 'configuracion:ver',
+  '/superadmin/chat': 'chat:ver',
+  '/superadmin/correo': 'correo:ver',
+  '/superadmin/notificaciones': 'notificaciones:ver',
+  '/superadmin/transmisiones': 'transmisiones:ver',
+  '/superadmin/whatsapp': 'campanas:ver',
+  '/superadmin/blog/rutas': 'blog:ver',
+  '/superadmin/configuracion/seguridad': 'configuracion:ver',
+  '/superadmin/configuracion/correo': 'configuracion:ver',
+  '/superadmin/productos/entregas': 'productos:ver',
 }
 
 function getSectionFromPath(pathname: string): string | null {

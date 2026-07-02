@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { SECTION_PERMISSIONS, ROLE_DEFAULTS } from '@/lib/auth/permissions'
+import { ROLE_DEFAULTS } from '@/lib/auth/permissions'
 import type { UserRole } from '@/lib/auth/permissions'
 
 const SECTION_ROUTES: Record<string, string[]> = {
@@ -23,7 +23,7 @@ const SECTION_ROUTES: Record<string, string[]> = {
   'calendarios:ver': ['/superadmin/calendarios'],
   'formularios:ver': ['/superadmin/formularios'],
   'leads:ver': ['/superadmin/leads'],
-  'campanas:ver': ['/superadmin/campanas'],
+  'campanas:ver': ['/superadmin/campanas', '/superadmin/whatsapp'],
   'blog:ver': ['/superadmin/blog'],
   'equipo:ver': ['/superadmin/usuarios'],
   'postulantes:ver': ['/superadmin/postulantes'],
@@ -36,6 +36,10 @@ const SECTION_ROUTES: Record<string, string[]> = {
   'empresas:ver': ['/superadmin/ajustes/empresas'],
   'perfil:ver': ['/superadmin/perfil'],
   'miembros:ver': ['/miembros'],
+  'chat:ver': ['/superadmin/chat'],
+  'correo:ver': ['/superadmin/correo'],
+  'notificaciones:ver': ['/superadmin/notificaciones'],
+  'transmisiones:ver': ['/superadmin/transmisiones'],
 }
 
 function canAccess(rol: string, pathname: string): boolean {
@@ -226,7 +230,7 @@ export async function updateSession(request: NextRequest) {
     if (profileRol) supabaseResponse.headers.set('x-blis-user-rol', profileRol)
     if (user.email) supabaseResponse.headers.set('x-blis-user-email', user.email)
     // empresa_id desde profile (mas confiable que app_metadata)
-    // @ts-ignore
+    // @ts-expect-error app_metadata might not have empresa_id in type definitions
     const empresaId = profileEmpresaId || user.app_metadata?.empresa_id
     if (empresaId) supabaseResponse.headers.set('x-blis-empresa-id', empresaId)
   }

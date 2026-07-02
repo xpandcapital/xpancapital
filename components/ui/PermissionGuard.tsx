@@ -10,13 +10,13 @@ interface PermissionGuardProps {
 }
 
 export function PermissionGuard({ section, children }: PermissionGuardProps) {
-  const { canAccessSection, loading, defaultRoute } = usePermissions()
+  const { hasPermission, loading, defaultRoute } = usePermissions()
 
   useEffect(() => {
-    if (!loading && !canAccessSection(section)) {
+    if (!loading && !hasPermission(section)) {
       window.location.href = defaultRoute || '/superadmin'
     }
-  }, [loading, canAccessSection, section, defaultRoute])
+  }, [loading, hasPermission, section, defaultRoute])
 
   if (loading) {
     return (
@@ -26,7 +26,7 @@ export function PermissionGuard({ section, children }: PermissionGuardProps) {
     )
   }
 
-  if (!canAccessSection(section)) {
+  if (!hasPermission(section)) {
     return null
   }
 

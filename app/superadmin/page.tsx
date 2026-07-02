@@ -1,4 +1,6 @@
-import { Activity, Users, Eye, TrendingUp, ShieldCheck, DollarSign, Target, ArrowUpRight, ArrowDownRight, Clock, Star } from "lucide-react";
+"use client"
+
+import { Activity, TrendingUp, DollarSign, Target, ArrowUpRight, ArrowDownRight, Clock, Star } from "lucide-react";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 export default function AdminDashboard() {
