@@ -47,101 +47,96 @@ export function PortalNoticias() {
     loading: false, text: '', error: ''
   })
   const abortRef = useRef<AbortController | null>(null)
+  const fetchNewsRef = useRef<((force?: boolean) => Promise<void>) | null>(null)
 
   useEffect(() => {
-    fetchNews()
-    return () => {
+    fetchNewsRef.current = async (force = false) => {
       abortRef.current?.abort()
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      setLoadingNews(true)
+      setNews([])
+      setError('')
+
+      try {
+        const cacheBust = force ? '&force=true' : ''
+        const t = Date.now()
+        const newsRes = await fetch(`/api/portal/noticias?type=news&cacheBust=${t}${cacheBust}`)
+        const newsData = await newsRes.json()
+
+        if (controller.signal.aborted) return
+
+        if (!newsData.success) {
+          setError('Error al cargar noticias')
+          setLoadingNews(false)
+          return
+        }
+
+        const allArticles: NewsItem[] = newsData.data?.news || []
+
+        if (allArticles.length === 0) {
+          setLoadingNews(false)
+          return
+        }
+
+        const validated: NewsItem[] = []
+        setValidatingCount(allArticles.length)
+        const startTime = Date.now()
+        const TIMEOUT = 12000
+
+        for (const article of allArticles) {
+          if (controller.signal.aborted) break
+          if (Date.now() - startTime > TIMEOUT) break
+
+          let isValid = false
+          try {
+            const res = await fetch(`/api/portal/leer?url=${encodeURIComponent(article.url)}`)
+            const data = await res.json()
+            isValid = data.success && data.content && data.content.length > 100
+          } catch { /* fallará → se descarta */ }
+
+          if (controller.signal.aborted) break
+
+          if (isValid) {
+            validated.push(article)
+            setNews([...validated])
+          }
+
+          setValidatingCount(prev => prev - 1)
+
+          const idx = allArticles.indexOf(article)
+          if (idx < allArticles.length - 1 && !controller.signal.aborted) {
+            await new Promise(r => setTimeout(r, 120))
+          }
+        }
+
+        if (!controller.signal.aborted) {
+          setNews(validated)
+          if (validated.length === 0 && allArticles.length > 0) {
+            setError('Ningún artículo superó la validación')
+          }
+        }
+      } catch {
+        if (!controller.signal.aborted) setError('Error de conexión')
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoadingNews(false)
+          setValidatingCount(0)
+        }
+      }
     }
-  }, [fetchNews])
+
+    fetchNewsRef.current()
+    return () => { abortRef.current?.abort() }
+  }, [])
+
+  const fetchNews = (force?: boolean) => {
+    fetchNewsRef.current?.(force)
+  }
 
   useEffect(() => {
     fetchMentorEvents()
-  }, [])
-
-  const validateArticle = async (item: NewsItem): Promise<boolean> => {
-    try {
-      const res = await fetch(`/api/portal/leer?url=${encodeURIComponent(item.url)}`)
-      const data = await res.json()
-      return data.success && data.content && data.content.length > 100
-    } catch {
-      return false
-    }
-  }
-
-  const fetchNews = useCallback(async (force = false) => {
-    abortRef.current?.abort()
-    const controller = new AbortController()
-    abortRef.current = controller
-
-    setLoadingNews(true)
-    setNews([])
-    setError('')
-
-    try {
-      const cacheBust = force ? '&force=true' : ''
-      const t = Date.now()
-      const newsRes = await fetch(`/api/portal/noticias?type=news&cacheBust=${t}${cacheBust}`)
-      const newsData = await newsRes.json()
-
-      if (controller.signal.aborted) return
-
-      if (!newsData.success) {
-        setError('Error al cargar noticias')
-        setLoadingNews(false)
-        return
-      }
-
-      const allArticles: NewsItem[] = newsData.data?.news || []
-
-      if (allArticles.length === 0) {
-        setLoadingNews(false)
-        return
-      }
-
-      // Validación secuencial con timeout global de 12s
-      const validated: NewsItem[] = []
-      setValidatingCount(allArticles.length)
-      const startTime = Date.now()
-      const TIMEOUT = 12000
-      const DELAY_BETWEEN = 150 // ms entre validaciones
-
-      for (const article of allArticles) {
-        if (controller.signal.aborted) break
-        if (Date.now() - startTime > TIMEOUT) break
-
-        const isValid = await validateArticle(article)
-        if (controller.signal.aborted) break
-
-        if (isValid) {
-          validated.push(article)
-          setNews([...validated])
-        }
-
-        setValidatingCount(prev => prev - 1)
-
-        // Pequeña pausa para no saturar
-        if (allArticles.indexOf(article) < allArticles.length - 1) {
-          await new Promise(r => setTimeout(r, DELAY_BETWEEN))
-        }
-      }
-
-      if (!controller.signal.aborted) {
-        setNews(validated)
-        if (validated.length === 0 && allArticles.length > 0) {
-          setError('Ningún artículo superó la validación')
-        }
-      }
-    } catch {
-      if (!controller.signal.aborted) {
-        setError('Error de conexión')
-      }
-    } finally {
-      if (!controller.signal.aborted) {
-        setLoadingNews(false)
-        setValidatingCount(0)
-      }
-    }
   }, [])
 
   const fetchMentorEvents = async () => {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Loader2, RefreshCw } from 'lucide-react'
 import { useComunidad } from './_hooks/useComunidad'
 import { useAuth } from '@/hooks/useAuth'
@@ -130,13 +130,14 @@ export default function ComunidadPage() {
                 </div>
               ) : (
                 <>
-                  <AnimatePresence mode="popLayout">
-                    {posts.map((post, i) => (
+                  <div className="space-y-4">
+                    {posts.map((post) => (
                       <motion.div
                         key={post.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: Math.min(i * 0.03, 0.3) }}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-40px" }}
+                        transition={{ duration: 0.25 }}
                       >
                         <PostCard
                           post={post}
@@ -148,7 +149,7 @@ export default function ComunidadPage() {
                         />
                       </motion.div>
                     ))}
-                  </AnimatePresence>
+                  </div>
 
                   {hasMore && (
                     <div className="flex justify-center py-4">
