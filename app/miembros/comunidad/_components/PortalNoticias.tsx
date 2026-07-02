@@ -149,7 +149,7 @@ export function PortalNoticias() {
                           {event.media?.filter(m => m.tipo === 'imagen').length ? (
                             <div className={`grid gap-0.5 h-full ${event.media.filter(m => m.tipo === 'imagen').length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                               {event.media.filter(m => m.tipo === 'imagen').slice(0, 2).map(m => (
-                                <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-full object-contain bg-zinc-900" loading="lazy" />
                               ))}
                             </div>
                           ) : event.evento.imagen_url ? (
@@ -200,7 +200,7 @@ export function PortalNoticias() {
                         <div className="relative aspect-[2/1] overflow-hidden bg-zinc-900">
                           <div className={`grid gap-0.5 h-full ${event.media.filter(m => m.tipo === 'imagen').length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                             {event.media.filter(m => m.tipo === 'imagen').slice(0, 2).map(m => (
-                              <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-full object-cover" loading="lazy" />
+                              <img key={m.id} src={m.url_comprimida || m.url_original} alt="" className="w-full h-full object-contain bg-zinc-900" loading="lazy" />
                             ))}
                           </div>
                         </div>
