@@ -80,6 +80,7 @@ export function BitacoraTab() {
   const [page, setPage] = useState(0)
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Partial<BitacoraEntry> & { user_id: string } | null>(null)
+  const [modalSaved, setModalSaved] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
 
   // Filtrado
@@ -101,11 +102,13 @@ export function BitacoraTab() {
   const openNew = () => {
     if (!user?.id) return
     setEditing(emptyEntry(user.id))
+    setModalSaved(false)
     setModalOpen(true)
   }
 
   const openEdit = (entry: BitacoraEntry) => {
     setEditing({ ...entry })
+    setModalSaved(false)
     setModalOpen(true)
   }
 
@@ -117,7 +120,11 @@ export function BitacoraTab() {
 
   const handleSave = async () => {
     if (!editing) return
-    await saveEntry(editing as any)
+    const ok = await saveEntry(editing as any)
+    if (ok) {
+      setModalSaved(true)
+      setTimeout(() => closeModal(), 500)
+    }
   }
 
   const formatDate = (d: string | null) => {
@@ -560,21 +567,32 @@ export function BitacoraTab() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/5 bg-white/[0.01]">
-                <button
-                  onClick={closeModal}
-                  className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-400 font-bold hover:text-white transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saving || !editing.fecha_inicio}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-blis-red/80 transition-colors disabled:opacity-50 shadow-lg shadow-blis-red/20"
-                >
-                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  {editing.id ? 'Actualizar' : 'Guardar'}
-                </button>
+              <div className="flex items-center justify-between px-6 py-4 border-t border-white/5 bg-white/[0.01]">
+                {modalSaved ? (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span className="text-emerald-400 text-xs font-bold">¡Guardado!</span>
+                  </div>
+                ) : (
+                  <div />
+                )}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={closeModal}
+                    disabled={saving}
+                    className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-400 font-bold hover:text-white transition-colors disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={saving || modalSaved}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:bg-blis-red/80 transition-colors disabled:opacity-50 shadow-lg shadow-blis-red/20"
+                  >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : modalSaved ? <CheckCircle2 className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                    {modalSaved ? 'Guardado' : editing?.id ? 'Actualizar' : 'Guardar'}
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
