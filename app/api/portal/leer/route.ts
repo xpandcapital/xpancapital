@@ -11,13 +11,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'URL requerida' }, { status: 400 })
     }
 
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 6000)
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; BlisCorp/1.0; +https://blis-corp.com)',
         'Accept': 'text/html,application/xhtml+xml',
       },
-      signal: AbortSignal.timeout(8000),
+      signal: controller.signal,
     })
+    clearTimeout(timeout)
 
     if (!res.ok) {
       return NextResponse.json({ success: false, error: `HTTP ${res.status}` })

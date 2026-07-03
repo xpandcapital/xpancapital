@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 
 interface HistoryEntry {
@@ -96,19 +96,33 @@ export function useRiskCalculator() {
     setLastSave(null)
   }, [])
 
+  const historyAbortRef = useRef<AbortController | null>(null)
+
   const fetchHistory = useCallback(async () => {
     if (!user?.id) return
+    historyAbortRef.current?.abort()
+    const controller = new AbortController()
+    historyAbortRef.current = controller
+    const timeout = setTimeout(() => controller.abort(), 8000)
+
     setHistoryLoading(true)
     try {
-      const res = await fetch(`/api/miembros/trading-calculations?user_id=${user.id}`)
+      const res = await fetch(`/api/miembros/trading-calculations?user_id=${user.id}`, {
+        signal: controller.signal
+      })
       const data = await res.json()
       if (data.success) setHistory(data.data || [])
-    } catch { /* silencioso */ }
-    finally { setHistoryLoading(false) }
+    } catch (e: any) {
+      if (e.name !== 'AbortError') console.error('[RiskCalc] fetchHistory error:', e)
+    } finally {
+      clearTimeout(timeout)
+      setHistoryLoading(false)
+    }
   }, [user?.id])
 
   useEffect(() => {
     if (user?.id) fetchHistory()
+    return () => { historyAbortRef.current?.abort() }
   }, [user?.id, fetchHistory])
 
   const saveCalculation = useCallback(async (): Promise<boolean> => {

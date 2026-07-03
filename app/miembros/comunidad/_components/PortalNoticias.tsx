@@ -99,10 +99,15 @@ export function PortalNoticias() {
 
           let isValid = false
           try {
-            const res = await fetch(`/api/portal/leer?url=${encodeURIComponent(article.url)}`)
+            const artController = new AbortController()
+            const artTimeout = setTimeout(() => artController.abort(), 5000)
+            const res = await fetch(`/api/portal/leer?url=${encodeURIComponent(article.url)}`, {
+              signal: artController.signal
+            })
+            clearTimeout(artTimeout)
             const data = await res.json()
             isValid = data.success && data.content && data.content.length > 100
-          } catch { /* fallará → titulares */ }
+          } catch { /* timeout o error → titulares */ }
 
           if (controller.signal.aborted) break
 
