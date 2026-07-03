@@ -82,6 +82,7 @@ const ALL_SECTIONS: Section[] = [
                     { icon: Library, label: "Biblioteca", href: "/superadmin/biblioteca", permission: "biblioteca:ver" },
                     { icon: BookOpenCheck, label: "Mis cursos", href: "/superadmin/mis-capacitaciones", permission: "capacitaciones:ver" },
                     { icon: Award, label: "Certificados", href: "/superadmin/certificados", permission: "certificados:ver" },
+                    { icon: TrendingUp, label: "Gamificación", href: "/superadmin/gamificacion", permission: "certificados:ver" },
                 ]
             },
             {
