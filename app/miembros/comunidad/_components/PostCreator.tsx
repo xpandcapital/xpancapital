@@ -54,11 +54,9 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
   const [evUrlEvento, setEvUrlEvento] = useState('')
   const [evCapacidad, setEvCapacidad] = useState<number | null>(null)
   const [evImagen, setEvImagen] = useState('')
-  const [esMentorHighlight, setEsMentorHighlight] = useState(false)
 
   const avatarUrl = user?.profilePic || (user as any)?.avatar_url
   const nombre = user?.nombre || 'U'
-  const isMentor = ['superadmin', 'admin', 'editor'].includes(user?.role || '')
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, tipo: 'imagen' | 'video' | 'archivo') => {
     const files = Array.from(e.target.files || [])
@@ -91,7 +89,6 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
     setEvUrlEvento('')
     setEvCapacidad(null)
     setEvImagen('')
-    setEsMentorHighlight(false)
     setExpanded(false)
     setTab('post')
   }
@@ -135,7 +132,6 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
       }
 
       if (uploadedIds.length > 0) body.media_ids = uploadedIds
-      if (isMentor && esMentorHighlight) body.es_evento_mentor = true
 
       const res = await fetch('/api/comunidad', {
         method: 'POST',
@@ -307,22 +303,6 @@ export function PostCreator({ onCreated }: PostCreatorProps) {
                     </div>
                   )}
                 </div>
-              )}
-
-              {/* Mentor Highlight checkbox (disponible para todos los tipos de post) */}
-              {isMentor && (
-                <label className="flex items-center gap-2.5 p-2.5 bg-amber-500/5 border border-amber-500/10 rounded-lg cursor-pointer hover:border-amber-500/20 transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={esMentorHighlight}
-                    onChange={e => setEsMentorHighlight(e.target.checked)}
-                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-blis-red focus:ring-blis-red/30 cursor-pointer"
-                  />
-                  <div>
-                    <span className="text-[11px] text-amber-400 font-bold block">Destacar como Evento del Mentor</span>
-                    <span className="text-[9px] text-gray-500">Aparecerá en la sección Portal de la comunidad</span>
-                  </div>
-                </label>
               )}
 
               {/* Media preview carousel */}

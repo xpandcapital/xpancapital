@@ -16,8 +16,7 @@ import {
     ChevronLeft,
     Award,
     Users,
-    Wrench,
-    TrendingUp
+    Wrench
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -63,10 +62,8 @@ export function MiembrosSidebar() {
         },
         {
             separator: true,
-            title: "Herramientas",
             items: [
-                { icon: Wrench, label: "Calculadora", href: "/miembros/herramientas" },
-                { icon: TrendingUp, label: "Forex", href: "/miembros/herramientas/forex" },
+                { icon: Wrench, label: "Herramientas", href: "/miembros/herramientas" },
             ]
         },
         {
