@@ -1,69 +1,38 @@
 "use client"
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import {
-  Wrench, Shield, DollarSign, TrendingUp, Activity, Target, Trash2,
-  Loader2, Save, History, ChevronDown, Calculator, AlertTriangle, CheckCircle2
+  Wrench, Shield, DollarSign, Activity, Trash2, Loader2,
+  Save, History, ChevronDown, Calculator, CheckCircle2, AlertCircle
 } from 'lucide-react'
 import { useRiskCalculator } from './_hooks/useRiskCalculator'
 
 const INPUT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors placeholder:text-gray-600"
-
 const SELECT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors appearance-none cursor-pointer"
 
-function ResultRow({ label, value, suffix, color = 'text-white', sub }: {
-  label: string, value: string, suffix?: string, color?: string, sub?: string
-}) {
-  return (
-    <div className="flex items-center justify-between py-2.5 px-4 bg-white/[0.02] rounded-xl">
-      <span className="text-[11px] text-gray-400 font-medium">{label}</span>
-      <div className="text-right">
-        <span className={`text-sm font-black ${color}`}>{value}{suffix}</span>
-        {sub && <span className="text-[10px] text-gray-600 block">{sub}</span>}
-      </div>
-    </div>
-  )
-}
+const CURRENCY_PAIRS = [
+  'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF',
+  'AUD/USD', 'NZD/USD', 'USD/CAD', 'EUR/GBP',
+  'EUR/JPY', 'GBP/JPY', 'EUR/CHF', 'GBP/CHF',
+]
 
-function RiskBar({ pct }: { pct: number }) {
-  const level = pct <= 1 ? 'low' : pct <= 3 ? 'med' : 'high'
-  const config = {
-    low: { color: 'bg-emerald-500', text: 'text-emerald-400', label: 'Riesgo bajo', icon: CheckCircle2 },
-    med: { color: 'bg-amber-500', text: 'text-amber-400', label: 'Riesgo moderado', icon: AlertTriangle },
-    high: { color: 'bg-red-500', text: 'text-red-400', label: 'Riesgo alto', icon: AlertTriangle },
-  }
-  const c = config[level]
-  const Icon = c.icon
-  const width = Math.min(Math.abs(pct) * 20, 100)
-
-  return (
-    <div className="mt-3">
-      <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden mb-1.5">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${width}%` }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className={`h-full rounded-full ${c.color}`}
-        />
-      </div>
-      <div className="flex items-center gap-1.5">
-        <Icon className={`w-3 h-3 ${c.text}`} />
-        <span className={`text-[10px] font-bold uppercase tracking-wider ${c.text}`}>{c.label}</span>
-      </div>
-    </div>
-  )
-}
+const ACCOUNT_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'CAD', 'MXN', 'COP', 'PEN']
 
 export default function HerramientasPage() {
   const {
     inputs, setInput, results, history, historyLoading,
-    saving, loadFromHistory, saveCalculation, deleteCalculation,
+    saving, lastSave, lastError, clearSaveStatus,
+    loadFromHistory, saveCalculation, deleteCalculation,
   } = useRiskCalculator()
 
   const [tab, setTab] = useState('riesgo')
   const [showHistory, setShowHistory] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+
+  const handleSave = async () => {
+    const ok = await saveCalculation()
+    if (ok) setShowHistory(true)
+  }
 
   const tabs = [
     { id: 'riesgo', label: 'Gestión de Riesgo', icon: Shield },
@@ -111,91 +80,93 @@ export default function HerramientasPage() {
               </div>
               <div>
                 <h2 className="text-white font-black uppercase tracking-wider text-sm">Calculadora de Gestión de Riesgo</h2>
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Lotaje y porcentajes de capital</p>
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Dimensionamiento de lotes por pips</p>
               </div>
             </div>
 
             <div className="p-6 space-y-5">
-              {/* Row 1: Capital + Riesgo */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Row 1: Par de divisas + Divisa cuenta */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <DollarSign className="w-3 h-3" /> Capital ($)
+                    <DollarSign className="w-3 h-3" /> Par de Divisas
+                  </label>
+                  <select
+                    value={inputs.currencyPair}
+                    onChange={e => setInput('currencyPair', e.target.value)}
+                    className={SELECT_CLASSES}
+                  >
+                    {CURRENCY_PAIRS.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <DollarSign className="w-3 h-3" /> Divisa de la Cuenta
+                  </label>
+                  <select
+                    value={inputs.accountCurrency}
+                    onChange={e => setInput('accountCurrency', e.target.value)}
+                    className={SELECT_CLASSES}
+                  >
+                    {ACCOUNT_CURRENCIES.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 2: Tamaño cuenta + Ratio riesgo */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <DollarSign className="w-3 h-3" /> Tamaño de la Cuenta
                   </label>
                   <input
                     type="number" step="any" min="0"
-                    value={inputs.capital}
-                    onChange={e => setInput('capital', e.target.value)}
+                    value={inputs.accountSize}
+                    onChange={e => setInput('accountSize', e.target.value)}
                     placeholder="10000"
                     className={INPUT_CLASSES}
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <Activity className="w-3 h-3" /> Riesgo (%)
+                    <Activity className="w-3 h-3" /> Ratio de Riesgo (%)
                   </label>
                   <input
                     type="number" step="any" min="0" max="100"
-                    value={inputs.riesgoPct}
-                    onChange={e => setInput('riesgoPct', e.target.value)}
+                    value={inputs.riskRatio}
+                    onChange={e => setInput('riskRatio', e.target.value)}
                     placeholder="1"
                     className={INPUT_CLASSES}
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <TrendingUp className="w-3 h-3" /> Tipo de Lote
-                  </label>
-                  <select
-                    value={inputs.lotType}
-                    onChange={e => setInput('lotType', e.target.value)}
-                    className={SELECT_CLASSES}
-                  >
-                    <option value="forex_std">Forex Standard (100k)</option>
-                    <option value="forex_mini">Forex Mini (10k)</option>
-                    <option value="forex_micro">Forex Micro (1k)</option>
-                    <option value="crypto">Crypto (1 unidad)</option>
-                  </select>
-                </div>
               </div>
 
-              {/* Row 2: Entry + SL + TP */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Row 3: Stop Loss + Pips */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <Target className="w-3 h-3" /> Precio Entrada ($)
+                    <Shield className="w-3 h-3" /> Detención de Pérdida (pips)
                   </label>
                   <input
                     type="number" step="any" min="0"
-                    value={inputs.entryPrice}
-                    onChange={e => setInput('entryPrice', e.target.value)}
-                    placeholder="50.00"
+                    value={inputs.stopLossPips}
+                    onChange={e => setInput('stopLossPips', e.target.value)}
+                    placeholder="50"
                     className={INPUT_CLASSES}
                   />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <Shield className="w-3 h-3" /> Stop Loss ($)
+                    <Shield className="w-3 h-3" /> Tamaño de la Transacción
                   </label>
-                  <input
-                    type="number" step="any" min="0"
-                    value={inputs.stopLoss}
-                    onChange={e => setInput('stopLoss', e.target.value)}
-                    placeholder="48.50"
-                    className={INPUT_CLASSES}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                    <TrendingUp className="w-3 h-3" /> Take Profit ($)
-                  </label>
-                  <input
-                    type="number" step="any" min="0"
-                    value={inputs.takeProfit}
-                    onChange={e => setInput('takeProfit', e.target.value)}
-                    placeholder="Opcional"
-                    className={INPUT_CLASSES}
-                  />
+                  <div className={`${INPUT_CLASSES} flex items-center justify-between bg-black/80`}>
+                    <span className="text-amber-400 font-black">{results.lotes.toFixed(2)}</span>
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">lotes</span>
+                  </div>
                 </div>
               </div>
 
@@ -206,7 +177,7 @@ export default function HerramientasPage() {
                   type="text"
                   value={inputs.nota}
                   onChange={e => setInput('nota', e.target.value)}
-                  placeholder="Ej: EUR/USD largo, BTC spot..."
+                  placeholder="Ej: EUR/USD largo, soporte en 1.0800..."
                   className={INPUT_CLASSES}
                 />
               </div>
@@ -214,57 +185,43 @@ export default function HerramientasPage() {
               {/* Results */}
               <div className="bg-white/[0.01] border border-white/5 rounded-xl p-4 space-y-1">
                 <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3">Resultados</p>
-                <ResultRow
-                  label="Riesgo en USD"
-                  value={`$${results.riesgoUsd.toFixed(2)}`}
-                  color="text-red-400"
-                />
-                <ResultRow
-                  label="Distancia al SL"
-                  value={`${results.distanciaSlPct.toFixed(2)}%`}
-                  sub={`$${Math.abs(parseFloat(inputs.entryPrice) - parseFloat(inputs.stopLoss)).toFixed(6)} por unidad`}
-                />
-                <ResultRow
-                  label="Tamaño de posición"
-                  value={results.tamanoPosicion.toLocaleString('en-US', { maximumFractionDigits: 2 })}
-                  sub="unidades"
-                  color="text-blue-400"
-                />
-                <ResultRow
-                  label="Lotes"
-                  value={results.lotes.toFixed(4)}
-                  color="text-amber-400"
-                />
-                <ResultRow
-                  label="Valor de posición"
-                  value={`$${results.valorPosicion.toFixed(2)}`}
-                />
-                <ResultRow
-                  label="Apalancamiento"
-                  value={`${results.apalancamiento.toFixed(2)}x`}
-                  color={results.apalancamiento > 10 ? 'text-red-400' : 'text-emerald-400'}
-                />
-                {results.ratioRr !== null && (
-                  <ResultRow
-                    label="Ratio Riesgo/Beneficio"
-                    value={`1:${results.ratioRr.toFixed(2)}`}
-                    color={results.ratioRr >= 1.5 ? 'text-emerald-400' : 'text-amber-400'}
-                    sub={`TP: ${results.distanciaTpPct?.toFixed(2)}%`}
-                  />
-                )}
-                {results.gananciaPotencial !== null && (
-                  <ResultRow
-                    label="Ganancia potencial"
-                    value={`$${results.gananciaPotencial.toFixed(2)}`}
-                    color="text-emerald-400"
-                  />
-                )}
-                <RiskBar pct={parseFloat(inputs.riesgoPct) || 0} />
+
+                <div className="flex items-center justify-between py-2.5 px-4 bg-white/[0.02] rounded-xl">
+                  <span className="text-[11px] text-gray-400 font-medium">Dinero en riesgo</span>
+                  <div className="text-right">
+                    <span className="text-sm font-black text-red-400">${results.riesgoUsd.toFixed(2)}</span>
+                    <span className="text-[10px] text-gray-600 block">USD</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between py-2.5 px-4 bg-white/[0.02] rounded-xl">
+                  <span className="text-[11px] text-gray-400 font-medium">Dimensionamiento</span>
+                  <div className="text-right">
+                    <span className="text-sm font-black text-amber-400">{results.lotes.toFixed(2)}</span>
+                    <span className="text-[10px] text-gray-600 block">lotes</span>
+                  </div>
+                </div>
               </div>
+
+              {/* Save feedback */}
+              {lastSave === 'success' && (
+                <div className="flex items-center gap-2 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl animate-pulse">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="text-emerald-400 text-xs font-bold">Cálculo guardado exitosamente</span>
+                  <button onClick={clearSaveStatus} className="ml-auto text-emerald-400/60 hover:text-emerald-400 text-[10px]">✕</button>
+                </div>
+              )}
+              {lastSave === 'error' && (
+                <div className="flex items-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                  <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span className="text-red-400 text-xs font-bold">{lastError || 'Error al guardar'}</span>
+                  <button onClick={clearSaveStatus} className="ml-auto text-red-400/60 hover:text-red-400 text-[10px]">✕</button>
+                </div>
+              )}
 
               {/* Save button */}
               <button
-                onClick={saveCalculation}
+                onClick={handleSave}
                 disabled={saving}
                 className="w-full flex items-center justify-center gap-2 py-3 bg-blis-red/10 border border-blis-red/20 text-blis-red rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-blis-red/20 transition-colors disabled:opacity-50"
               >
@@ -315,29 +272,20 @@ export default function HerramientasPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             <p className="text-white text-xs font-bold truncate">
-                              {entry.nota || `$${Number(entry.capital).toLocaleString()} @ ${Number(entry.entry_price)}`
-                              }
+                              {entry.currency_pair || '?'} · {entry.nota || `$${Number(entry.capital || entry.account_size || 0).toLocaleString()}`}
                             </p>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               <span className="text-[9px] text-red-400 font-bold">
-                                SL: ${Number(entry.stop_loss)}
+                                SL: {entry.stop_loss_pips || entry.stop_loss}pips
                               </span>
                               <span className="text-[9px] text-gray-600">·</span>
                               <span className="text-[9px] text-amber-400 font-bold">
-                                {Number(entry.lotes).toFixed(2)} lotes
+                                {Number(entry.lotes || 0).toFixed(2)} lotes
                               </span>
                               <span className="text-[9px] text-gray-600">·</span>
                               <span className="text-[9px] text-gray-500">
-                                Riesgo {Number(entry.riesgo_pct)}%
+                                Riesgo {entry.risk_ratio || entry.riesgo_pct || 0}%
                               </span>
-                              {entry.ratio_rr && (
-                                <>
-                                  <span className="text-[9px] text-gray-600">·</span>
-                                  <span className="text-[9px] text-emerald-400 font-bold">
-                                    R/R {Number(entry.ratio_rr).toFixed(2)}
-                                  </span>
-                                </>
-                              )}
                             </div>
                             <p className="text-[9px] text-gray-600 mt-1">
                               {new Date(entry.creado_en).toLocaleDateString('es-ES', {

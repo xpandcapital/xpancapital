@@ -38,33 +38,23 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabase()
     const body = await request.json()
     const {
-      user_id, capital, entry_price, stop_loss, take_profit,
-      riesgo_pct, riesgo_usd, distancia_sl_pct, tamano_posicion,
-      lotes, tamano_lote, valor_posicion, apalancamiento,
-      ratio_rr, distancia_tp_pct, ganancia_potencial, nota
+      user_id, capital, account_currency, currency_pair,
+      risk_ratio, stop_loss_pips, riesgo_pct, riesgo_usd, lotes, nota
     } = body
 
-    if (!user_id || !capital || !entry_price || !stop_loss) {
+    if (!user_id || !capital) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 })
     }
 
-    const insertData = {
+    const insertData: Record<string, any> = {
       user_id,
       capital,
-      entry_price,
-      stop_loss,
-      take_profit: take_profit || null,
-      riesgo_pct,
-      riesgo_usd,
-      distancia_sl_pct,
-      tamano_posicion,
-      lotes,
-      tamano_lote: tamano_lote || 100000,
-      valor_posicion,
-      apalancamiento: apalancamiento || null,
-      ratio_rr: ratio_rr || null,
-      distancia_tp_pct: distancia_tp_pct || null,
-      ganancia_potencial: ganancia_potencial || null,
+      account_currency: account_currency || 'USD',
+      currency_pair: currency_pair || null,
+      riesgo_pct: riesgo_pct || risk_ratio || 0,
+      riesgo_usd: riesgo_usd || 0,
+      lotes: lotes || 0,
+      stop_loss_pips: stop_loss_pips || null,
       nota: nota || null,
     }
 

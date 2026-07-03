@@ -3,105 +3,68 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 
-const LOT_SIZES: Record<string, number> = {
-  forex_std: 100000,
-  forex_mini: 10000,
-  forex_micro: 1000,
-  crypto: 1,
-  custom: 100000,
-}
-
 interface HistoryEntry {
   id: string
-  capital: number
-  entry_price: number
-  stop_loss: number
-  take_profit: number | null
-  riesgo_pct: number
+  account_size: number
+  account_currency: string
+  currency_pair: string
+  risk_ratio: number
+  stop_loss_pips: number
   riesgo_usd: number
-  distancia_sl_pct: number
-  tamano_posicion: number
   lotes: number
-  tamano_lote: number
-  valor_posicion: number
-  apalancamiento: number | null
-  ratio_rr: number | null
-  distancia_tp_pct: number | null
-  ganancia_potencial: number | null
   nota: string | null
   creado_en: string
+  capital?: number
+  entry_price?: number
+  stop_loss?: number
+  take_profit?: number
+  riesgo_pct?: number
+  distancia_sl_pct?: number
+  tamano_posicion?: number
+  tamano_lote?: number
+  valor_posicion?: number
+  apalancamiento?: number
+  ratio_rr?: number
+  ganancia_potencial?: number
 }
 
 interface CalculatorInputs {
-  capital: string
-  riesgoPct: string
-  entryPrice: string
-  stopLoss: string
-  takeProfit: string
-  lotType: string
+  accountSize: string
+  accountCurrency: string
+  currencyPair: string
+  riskRatio: string
+  stopLossPips: string
   nota: string
 }
 
 const defaultInputs: CalculatorInputs = {
-  capital: '10000',
-  riesgoPct: '1',
-  entryPrice: '50',
-  stopLoss: '48.5',
-  takeProfit: '',
-  lotType: 'forex_std',
+  accountSize: '10000',
+  accountCurrency: 'USD',
+  currencyPair: 'EUR/USD',
+  riskRatio: '1',
+  stopLossPips: '50',
   nota: '',
 }
 
-function calc(inputs: CalculatorInputs, lotSize: number) {
-  const capital = parseFloat(inputs.capital) || 0
-  const riesgoPct = parseFloat(inputs.riesgoPct) || 0
-  const entryPrice = parseFloat(inputs.entryPrice) || 0
-  const stopLoss = parseFloat(inputs.stopLoss) || 0
-  const takeProfit = parseFloat(inputs.takeProfit) || 0
+function calc(inputs: CalculatorInputs) {
+  const accountSize = parseFloat(inputs.accountSize) || 0
+  const riskRatio = parseFloat(inputs.riskRatio) || 0
+  const stopLossPips = parseFloat(inputs.stopLossPips) || 0
 
-  if (!capital || !entryPrice || !stopLoss || entryPrice === stopLoss) {
-    return {
-      riesgoUsd: 0,
-      distanciaSlPct: 0,
-      tamanoPosicion: 0,
-      lotes: 0,
-      valorPosicion: 0,
-      apalancamiento: 0,
-      ratioRr: null as number | null,
-      distanciaTpPct: null as number | null,
-      gananciaPotencial: null as number | null,
-    }
+  if (!accountSize || !stopLossPips) {
+    return { riesgoUsd: 0, lotes: 0 }
   }
 
-  const riesgoUsd = (capital * riesgoPct) / 100
-  const distanciaSlPct = ((entryPrice - stopLoss) / entryPrice) * 100
-  const tamanoPosicion = riesgoUsd / Math.abs(entryPrice - stopLoss)
-  const lotes = lotSize > 0 ? tamanoPosicion / lotSize : 0
-  const valorPosicion = tamanoPosicion * entryPrice
-  const apalancamiento = capital > 0 ? valorPosicion / capital : 0
+  const riesgoUsd = (accountSize * riskRatio) / 100
 
-  let ratioRr: number | null = null
-  let distanciaTpPct: number | null = null
-  let gananciaPotencial: number | null = null
-
-  if (takeProfit && takeProfit !== entryPrice) {
-    distanciaTpPct = ((takeProfit - entryPrice) / entryPrice) * 100
-    gananciaPotencial = tamanoPosicion * Math.abs(takeProfit - entryPrice)
-    if (distanciaSlPct !== 0) {
-      ratioRr = Math.abs(distanciaTpPct / distanciaSlPct)
-    }
-  }
+  // Para pares XXX/USD: 1 pip = $10 por lote estándar (100k unidades)
+  // Para pares USD/XXX: el valor varía con el tipo de cambio, simplificamos a $10
+  const pipValuePerStandardLot = 10
+  const lotes = riesgoUsd / (stopLossPips * pipValuePerStandardLot)
 
   return {
-    riesgoUsd,
-    distanciaSlPct,
-    tamanoPosicion,
-    lotes,
-    valorPosicion,
-    apalancamiento,
-    ratioRr,
-    distanciaTpPct,
-    gananciaPotencial,
+    riesgoUsd: Math.round(riesgoUsd * 100) / 100,
+    lotes: Math.round(lotes * 10000) / 10000,
   }
 }
 
@@ -111,27 +74,26 @@ export function useRiskCalculator() {
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [lastSave, setLastSave] = useState<'success' | 'error' | null>(null)
+  const [lastError, setLastError] = useState('')
 
-  const lotSize = LOT_SIZES[inputs.lotType] || 100000
-  const results = useMemo(() => calc(inputs, lotSize), [inputs, lotSize])
+  const results = useMemo(() => calc(inputs), [inputs])
 
   const setInput = useCallback((key: keyof CalculatorInputs, value: string) => {
     setInputs(prev => ({ ...prev, [key]: value }))
-  }, [])
+    if (lastSave) setLastSave(null)
+  }, [lastSave])
 
   const loadFromHistory = useCallback((entry: HistoryEntry) => {
     setInputs({
-      capital: String(entry.capital),
-      riesgoPct: String(entry.riesgo_pct),
-      entryPrice: String(entry.entry_price),
-      stopLoss: String(entry.stop_loss),
-      takeProfit: entry.take_profit ? String(entry.take_profit) : '',
-      lotType: entry.tamano_lote === 100000 ? 'forex_std' :
-               entry.tamano_lote === 10000 ? 'forex_mini' :
-               entry.tamano_lote === 1000 ? 'forex_micro' :
-               entry.tamano_lote === 1 ? 'crypto' : 'custom',
+      accountSize: String(entry.account_size || entry.capital || ''),
+      accountCurrency: entry.account_currency || 'USD',
+      currencyPair: entry.currency_pair || '',
+      riskRatio: String(entry.risk_ratio || entry.riesgo_pct || ''),
+      stopLossPips: String(entry.stop_loss_pips || ''),
       nota: entry.nota || '',
     })
+    setLastSave(null)
   }, [])
 
   const fetchHistory = useCallback(async () => {
@@ -149,42 +111,59 @@ export function useRiskCalculator() {
     if (user?.id) fetchHistory()
   }, [user?.id, fetchHistory])
 
-  const saveCalculation = useCallback(async () => {
-    if (!user?.id) return false
+  const saveCalculation = useCallback(async (): Promise<boolean> => {
+    if (!user?.id) {
+      setLastSave('error')
+      setLastError('No has iniciado sesión')
+      return false
+    }
+
+    const accountSize = parseFloat(inputs.accountSize)
+    if (!accountSize || accountSize <= 0) {
+      setLastSave('error')
+      setLastError('El tamaño de la cuenta es requerido')
+      return false
+    }
+
     setSaving(true)
+    setLastSave(null)
+    setLastError('')
+
     try {
       const res = await fetch('/api/miembros/trading-calculations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: user.id,
-          capital: parseFloat(inputs.capital),
-          entry_price: parseFloat(inputs.entryPrice),
-          stop_loss: parseFloat(inputs.stopLoss),
-          take_profit: inputs.takeProfit ? parseFloat(inputs.takeProfit) : null,
-          riesgo_pct: parseFloat(inputs.riesgoPct),
+          capital: accountSize,
+          account_currency: inputs.accountCurrency,
+          currency_pair: inputs.currencyPair,
+          risk_ratio: parseFloat(inputs.riskRatio),
+          stop_loss_pips: parseFloat(inputs.stopLossPips),
+          riesgo_pct: parseFloat(inputs.riskRatio),
           riesgo_usd: results.riesgoUsd,
-          distancia_sl_pct: results.distanciaSlPct,
-          tamano_posicion: results.tamanoPosicion,
           lotes: results.lotes,
-          tamano_lote: lotSize,
-          valor_posicion: results.valorPosicion,
-          apalancamiento: results.apalancamiento,
-          ratio_rr: results.ratioRr,
-          distancia_tp_pct: results.distanciaTpPct,
-          ganancia_potencial: results.gananciaPotencial,
           nota: inputs.nota || null,
         }),
       })
       const data = await res.json()
       if (data.success) {
+        setLastSave('success')
         await fetchHistory()
         return true
+      } else {
+        setLastSave('error')
+        setLastError(data.error || 'Error al guardar')
+        return false
       }
+    } catch (e: any) {
+      setLastSave('error')
+      setLastError(e.message || 'Error de conexión')
       return false
-    } catch { return false }
-    finally { setSaving(false) }
-  }, [user?.id, inputs, results, lotSize, fetchHistory])
+    } finally {
+      setSaving(false)
+    }
+  }, [user?.id, inputs, results, fetchHistory])
 
   const deleteCalculation = useCallback(async (id: string) => {
     try {
@@ -202,11 +181,12 @@ export function useRiskCalculator() {
     inputs,
     setInput,
     results,
-    lotSize,
-    lotTypes: LOT_SIZES,
     history,
     historyLoading,
     saving,
+    lastSave,
+    lastError,
+    clearSaveStatus: () => setLastSave(null),
     loadFromHistory,
     saveCalculation,
     deleteCalculation,
