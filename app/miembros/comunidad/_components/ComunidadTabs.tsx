@@ -1,6 +1,6 @@
 "use client"
 
-type TabId = 'timeline' | 'conexiones' | 'grupos' | 'cursos' | 'documentos' | 'fotos'
+type TabId = 'timeline'
 
 interface ComunidadTabsProps {
   active: TabId
@@ -10,11 +10,6 @@ interface ComunidadTabsProps {
 
 const TABS: { id: TabId; label: string }[] = [
   { id: 'timeline', label: 'Timeline' },
-  { id: 'conexiones', label: 'Conexiones' },
-  { id: 'grupos', label: 'Grupos' },
-  { id: 'cursos', label: 'Cursos' },
-  { id: 'documentos', label: 'Documentos' },
-  { id: 'fotos', label: 'Fotos' },
 ]
 
 export function ComunidadTabs({ active, onChange, counts = {} }: ComunidadTabsProps) {

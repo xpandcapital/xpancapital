@@ -2,31 +2,27 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Loader2, RefreshCw } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useComunidad } from './_hooks/useComunidad'
 import { useAuth } from '@/hooks/useAuth'
 import {
-  PostCard, PostCreator, PerfilHeader, ComunidadTabs,
+  PostCard, PostCreator, PerfilHeader,
   MiembrosSeguidos, ConexionesLista, CompletarPerfil, UltimasActualizaciones
 } from './_components'
-import type { ComunidadPost, ComunidadComentario } from './_types'
-
-type TabId = 'timeline' | 'conexiones' | 'grupos' | 'cursos' | 'documentos' | 'fotos'
+import type { ComunidadPost } from './_types'
 
 export default function ComunidadPage() {
   const { user } = useAuth()
   const { posts, loading, loadingMore, error, hasMore, fetchPosts, eliminarPost, reaccionar, votar, inscribirEvento, cancelarInscripcion } = useComunidad()
-  const [activeTab, setActiveTab] = useState<TabId>('timeline')
   const [miembros, setMiembros] = useState<any[]>([])
   const [actualizaciones, setActualizaciones] = useState<any[]>([])
-  const isAdmin = ['superadmin', 'admin'].includes(user?.role || '')
 
   useEffect(() => { fetchPosts(true) }, [])
 
   // Infinite scroll: auto-cargar más al hacer scroll al final
   const sentinelRef = useRef<HTMLDivElement>(null)
   const loadingMoreRef = useRef(loadingMore)
-  loadingMoreRef.current = loadingMore
+  useEffect(() => { loadingMoreRef.current = loadingMore }, [loadingMore])
 
   useEffect(() => {
     if (!hasMore) return
@@ -66,26 +62,13 @@ export default function ComunidadPage() {
     setActualizaciones(acts)
   }, [posts])
 
-  const tabCounts = {
-    timeline: undefined,
-    conexiones: miembros.length || undefined,
-    grupos: undefined,
-    cursos: undefined,
-    documentos: undefined,
-    fotos: posts.filter(p => p.media && p.media.length > 0).length || undefined
-  }
-
   return (
     <div className="min-h-screen">
       {/* Perfil Header */}
       <PerfilHeader stats={{ seguidores: miembros.length, siguiendo: Math.min(miembros.length, 13) }} />
 
-      {/* Tabs */}
-      <ComunidadTabs active={activeTab} onChange={setActiveTab} counts={tabCounts} />
-
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-6">
-        {activeTab === 'timeline' ? (
-          <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] xl:grid-cols-[300px_1fr_300px] gap-4 md:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] xl:grid-cols-[300px_1fr_300px] gap-4 md:gap-6">
             {/* === COLUMNA IZQUIERDA === */}
             <div className="hidden lg:flex flex-col gap-4">
               {/* Miembros */}
@@ -196,12 +179,6 @@ export default function ComunidadPage() {
               <UltimasActualizaciones actualizaciones={actualizaciones} />
             </div>
           </div>
-        ) : (
-          /* Otras pestañas placeholder */
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-sm">Sección en desarrollo</p>
-          </div>
-        )}
       </div>
     </div>
   )
