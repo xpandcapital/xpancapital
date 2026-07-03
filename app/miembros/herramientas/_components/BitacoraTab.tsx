@@ -325,7 +325,7 @@ export function BitacoraTab() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-start justify-center pt-[3vh] px-4 overflow-y-auto pb-10"
+            className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-start justify-center py-[6vh] px-4 overflow-y-auto"
             onClick={closeModal}
           >
             <motion.div
@@ -334,7 +334,7 @@ export function BitacoraTab() {
               exit={{ opacity: 0, scale: 0.97, y: 20 }}
               transition={{ duration: 0.2 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden my-8"
+              className="w-full max-w-xl bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden my-8"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 bg-white/[0.02]">
@@ -355,9 +355,9 @@ export function BitacoraTab() {
               </div>
 
               {/* Form */}
-              <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+              <div className="p-5 space-y-3.5 max-h-[50vh] overflow-y-auto">
                 {/* Row 1: Fecha Inicio / Fecha Fin / Hora */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2.5">
                   <div className="space-y-1">
                     <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                       Fecha Inicio <FieldTooltip text="Fecha de apertura de la operación." />
