@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import {
   Wrench, Shield, DollarSign, Activity, Trash2, Loader2,
-  Save, History, ChevronDown, Calculator, CheckCircle2, AlertCircle
+  Save, History, ChevronDown, Calculator, CheckCircle2, AlertCircle, ScrollText
 } from 'lucide-react'
 import { useRiskCalculator } from './_hooks/useRiskCalculator'
+import { BitacoraTab } from './_components/BitacoraTab'
 
 const INPUT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors placeholder:text-gray-600"
 const SELECT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors appearance-none cursor-pointer"
@@ -36,6 +37,7 @@ export default function HerramientasPage() {
 
   const tabs = [
     { id: 'riesgo', label: 'Gestión de Riesgo', icon: Shield },
+    { id: 'bitacora', label: 'Bitácora', icon: ScrollText },
   ]
 
   return (
@@ -318,6 +320,8 @@ export default function HerramientasPage() {
           </div>
         </div>
       )}
+
+      {tab === 'bitacora' && <BitacoraTab />}
     </div>
   )
 }
