@@ -38,11 +38,11 @@ interface CalculatorInputs {
 }
 
 const defaultInputs: CalculatorInputs = {
-  accountSize: '10000',
+  accountSize: '',
   accountCurrency: 'USD',
   currencyPair: 'EUR/USD',
-  riskRatio: '1',
-  stopLossPips: '50',
+  riskRatio: '',
+  stopLossPips: '',
   nota: '',
 }
 
