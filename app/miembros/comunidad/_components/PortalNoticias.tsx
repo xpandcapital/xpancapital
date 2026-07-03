@@ -48,6 +48,7 @@ export function PortalNoticias() {
   const [loadingForex, setLoadingForex] = useState(true)
   const [loadingMentor, setLoadingMentor] = useState(true)
   const [error, setError] = useState('')
+  const [debugInfo, setDebugInfo] = useState<any>(null)
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null)
 
   // Filtros
@@ -80,16 +81,18 @@ export function PortalNoticias() {
 
     setLoadingForex(true)
     setError('')
+    setDebugInfo(null)
     try {
-      const res = await fetch('/api/portal/forex-news?type=today')
+      const res = await fetch('/api/portal/forex-news?type=today&debug=true')
       const data = await res.json()
+      if (data.debug) setDebugInfo(data.debug)
       if (data.success) {
         setForexEvents(data.data?.events || [])
       } else {
         setError(data.error || data.data?.hint || 'Error cargando forex')
       }
-    } catch {
-      setError('Error de conexión')
+    } catch (e: any) {
+      setError('Error de conexión: ' + (e.message || 'desconocido'))
     } finally {
       setLoadingForex(false)
     }
@@ -386,11 +389,32 @@ export function PortalNoticias() {
                 </div>
               ))}
             </div>
-          ) : error ? (
-            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 text-center space-y-3">
-              <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
-              <p className="text-amber-400 text-xs font-bold">{error}</p>
-              <button onClick={fetchForexNews} className="px-3 py-1.5 bg-white/5 rounded-lg text-[10px] text-gray-400 hover:text-white">
+          ) : error || filteredEvents.length === 0 ? (
+            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 text-center space-y-2">
+              {error ? (
+                <>
+                  <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
+                  <p className="text-amber-400 text-xs font-bold">{error}</p>
+                </>
+              ) : (
+                <>
+                  <Calendar className="w-10 h-10 text-gray-700 mx-auto mb-3" />
+                  <p className="text-gray-500 text-sm">Sin eventos disponibles</p>
+                  <p className="text-gray-600 text-xs mt-1">Configura tu API key de JBlanked en api-nube</p>
+                </>
+              )}
+              {debugInfo && (
+                <div className="mt-3 p-3 bg-black/30 border border-white/5 rounded-lg text-left max-h-[300px] overflow-y-auto">
+                  <p className="text-[9px] text-cyan-400 uppercase tracking-wider font-bold mb-2">Debug</p>
+                  {Object.entries(debugInfo).map(([k, v]) => (
+                    <p key={k} className="text-[10px] text-gray-400 leading-relaxed">
+                      <span className="text-gray-500 font-bold">{k}:</span>{' '}
+                      <span className="text-gray-300 break-all">{typeof v === 'object' ? JSON.stringify(v) : String(v)}</span>
+                    </p>
+                  ))}
+                </div>
+              )}
+              <button onClick={fetchForexNews} className="mt-2 px-3 py-1.5 bg-white/5 rounded-lg text-[10px] text-gray-400 hover:text-white">
                 Reintentar
               </button>
             </div>
