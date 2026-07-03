@@ -216,6 +216,7 @@ const DEFAULT_VALUES: Record<string, string> = {
   ilovepdf_public_key: '',
   ilovepdf_secret_key: '',
   finnhub_api_key: '',
+  jbnews_api_key: '',
 }
 
 export function useApiConfig() {

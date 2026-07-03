@@ -1,21 +1,25 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
-  Calendar, Newspaper, ExternalLink, Loader2, Clock,
-  MapPin, AlertCircle, Shield, RefreshCw, ChevronLeft
+  Calendar, Newspaper, Loader2, Clock,
+  MapPin, Shield, RefreshCw, TrendingUp, AlertCircle,
+  Filter, ChevronDown
 } from 'lucide-react'
 
-interface NewsItem {
+interface ForexEvent {
   id: string
-  title: string
-  summary: string
-  source: string
-  url: string
-  image: string
-  date: string
-  category: string
+  event: string
+  currency: string
+  time: string
+  impact: string
+  outcome: string
+  strength: string
+  quality: string
+  forecast: string | null
+  previous: string | null
+  actual: string | null
 }
 
 interface MentorEvent {
@@ -35,157 +39,117 @@ interface MentorEvent {
   created_at: string
 }
 
+const CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'AUD', 'NZD', 'CAD']
+
 export function PortalNoticias() {
-  const [news, setNews] = useState<NewsItem[]>([])
-  const [headlines, setHeadlines] = useState<NewsItem[]>([])
+  const [forexEvents, setForexEvents] = useState<ForexEvent[]>([])
+  const [filteredEvents, setFilteredEvents] = useState<ForexEvent[]>([])
   const [mentorEvents, setMentorEvents] = useState<MentorEvent[]>([])
-  const [loadingNews, setLoadingNews] = useState(true)
-  const [validatingCount, setValidatingCount] = useState(0)
+  const [loadingForex, setLoadingForex] = useState(true)
   const [loadingMentor, setLoadingMentor] = useState(true)
   const [error, setError] = useState('')
-  const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null)
-  const [articleContent, setArticleContent] = useState<{ loading: boolean; text: string; error: string }>({
-    loading: false, text: '', error: ''
-  })
+  const [expandedEvent, setExpandedEvent] = useState<string | null>(null)
+
+  // Filtros
+  const [filterImpact, setFilterImpact] = useState<string[]>(['high', 'medium'])
+  const [filterCurrency, setFilterCurrency] = useState<string[]>(CURRENCIES)
+  const [showFilters, setShowFilters] = useState(false)
+
   const abortRef = useRef<AbortController | null>(null)
-  const fetchNewsRef = useRef<((force?: boolean) => Promise<void>) | null>(null)
 
   useEffect(() => {
-    fetchNewsRef.current = async (force = false) => {
-      abortRef.current?.abort()
-      const controller = new AbortController()
-      abortRef.current = controller
-
-      setLoadingNews(true)
-      setNews([])
-      setHeadlines([])
-      setError('')
-
-      try {
-        const cacheBust = force ? '&force=true' : ''
-        const t = Date.now()
-        const newsRes = await fetch(`/api/portal/noticias?type=news&cacheBust=${t}${cacheBust}`)
-        const newsData = await newsRes.json()
-
-        if (controller.signal.aborted) return
-
-        if (!newsData.success) {
-          setError('Error al cargar noticias')
-          setLoadingNews(false)
-          return
-        }
-
-        const allArticles: NewsItem[] = newsData.data?.news || []
-
-        if (allArticles.length === 0) {
-          setLoadingNews(false)
-          return
-        }
-
-        const validated: NewsItem[] = []
-        const failed: NewsItem[] = []
-        setValidatingCount(allArticles.length)
-        const startTime = Date.now()
-        const TIMEOUT = 12000
-
-        for (const article of allArticles) {
-          if (controller.signal.aborted) break
-          if (Date.now() - startTime > TIMEOUT) {
-            // Agregar lo que no se alcanzó a validar como titulares
-            const remaining = allArticles.filter(a => !validated.includes(a) && !failed.includes(a))
-            failed.push(...remaining)
-            break
-          }
-
-          let isValid = false
-          try {
-            const artController = new AbortController()
-            const artTimeout = setTimeout(() => artController.abort(), 5000)
-            const res = await fetch(`/api/portal/leer?url=${encodeURIComponent(article.url)}`, {
-              signal: artController.signal
-            })
-            clearTimeout(artTimeout)
-            const data = await res.json()
-            isValid = data.success && data.content && data.content.length > 100
-          } catch { /* timeout o error → titulares */ }
-
-          if (controller.signal.aborted) break
-
-          if (isValid) {
-            validated.push(article)
-            setNews([...validated])
-          } else {
-            failed.push(article)
-            setHeadlines([...failed])
-          }
-
-          setValidatingCount(prev => prev - 1)
-
-          const idx = allArticles.indexOf(article)
-          if (idx < allArticles.length - 1 && !controller.signal.aborted) {
-            await new Promise(r => setTimeout(r, 120))
-          }
-        }
-
-        if (!controller.signal.aborted) {
-          setNews(validated)
-          setHeadlines(failed)
-          if (validated.length === 0 && failed.length === 0 && allArticles.length > 0) {
-            setError('Ningún artículo disponible')
-          }
-        }
-      } catch {
-        if (!controller.signal.aborted) setError('Error de conexión')
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoadingNews(false)
-          setValidatingCount(0)
-        }
-      }
-    }
-
-    fetchNewsRef.current()
+    fetchForexNews()
+    fetchMentorEvents()
     return () => { abortRef.current?.abort() }
   }, [])
 
-  const fetchNews = (force?: boolean) => {
-    fetchNewsRef.current?.(force)
-  }
-
+  // Aplicar filtros cuando cambian eventos o filtros
   useEffect(() => {
-    fetchMentorEvents()
-  }, [])
+    setFilteredEvents(
+      forexEvents.filter(e =>
+        filterImpact.includes(e.impact) &&
+        filterCurrency.includes(e.currency)
+      )
+    )
+  }, [forexEvents, filterImpact, filterCurrency])
+
+  const fetchForexNews = async () => {
+    abortRef.current?.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    setLoadingForex(true)
+    setError('')
+    try {
+      const res = await fetch('/api/portal/forex-news?type=today')
+      const data = await res.json()
+      if (data.success) {
+        setForexEvents(data.data?.events || [])
+      } else {
+        setError(data.error || data.data?.hint || 'Error cargando forex')
+      }
+    } catch {
+      setError('Error de conexión')
+    } finally {
+      setLoadingForex(false)
+    }
+  }
 
   const fetchMentorEvents = async () => {
     setLoadingMentor(true)
     try {
-      const res = await fetch(`/api/comunidad?es_evento_mentor=true&limit=15`)
+      const res = await fetch('/api/comunidad?es_evento_mentor=true&limit=15')
       const data = await res.json()
       if (data.success) setMentorEvents(data.data || [])
     } catch { /* silencioso */ }
     finally { setLoadingMentor(false) }
   }
 
-  const openArticle = (article: NewsItem) => {
-    setSelectedArticle(article)
-    setArticleContent({ loading: true, text: '', error: '' })
-    fetch(`/api/portal/leer?url=${encodeURIComponent(article.url)}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          setArticleContent({ loading: false, text: data.content, error: '' })
-        } else {
-          setArticleContent({ loading: false, text: article.summary, error: data.error })
-        }
-      })
-      .catch(() => {
-        setArticleContent({ loading: false, text: article.summary, error: '' })
-      })
+  const toggleFilter = (type: 'impact' | 'currency', value: string) => {
+    if (type === 'impact') {
+      setFilterImpact(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value])
+    } else {
+      setFilterCurrency(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value])
+    }
   }
 
-  const closeArticle = () => {
-    setSelectedArticle(null)
-    setArticleContent({ loading: false, text: '', error: '' })
+  const impactConfig = (impact: string) => {
+    const map: Record<string, { color: string; bg: string; border: string; label: string; dot: string }> = {
+      high: { color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', label: 'Alto', dot: 'bg-red-400' },
+      medium: { color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', label: 'Medio', dot: 'bg-amber-400' },
+      low: { color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', label: 'Bajo', dot: 'bg-emerald-400' },
+    }
+    return map[impact] || map.low
+  }
+
+  const strengthBadge = (s: string) => {
+    if (!s) return null
+    return s.toLowerCase().includes('strong') || s.toLowerCase().includes('fuerte')
+      ? <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">FUERTE</span>
+      : <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-white/5 text-gray-500 border border-white/10">DÉBIL</span>
+  }
+
+  const qualityBadge = (q: string) => {
+    if (!q) return null
+    return q.toLowerCase().includes('good') || q.toLowerCase().includes('bueno')
+      ? <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">BUENO</span>
+      : <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">MALO</span>
+  }
+
+  const outcomeIcon = (o: string) => {
+    if (!o) return null
+    const v = o.toLowerCase()
+    if (v.includes('actual >') || v.includes('better') || v.includes('above')) return '▲'
+    if (v.includes('actual <') || v.includes('worse') || v.includes('below')) return '▼'
+    return '●'
+  }
+
+  const outcomeColor = (o: string) => {
+    if (!o) return 'text-gray-500'
+    const v = o.toLowerCase()
+    if (v.includes('actual >') || v.includes('better') || v.includes('above')) return 'text-emerald-400'
+    if (v.includes('actual <') || v.includes('worse') || v.includes('below')) return 'text-red-400'
+    return 'text-gray-400'
   }
 
   const timeAgo = (date: string) => {
@@ -199,6 +163,13 @@ export function PortalNoticias() {
     return new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
   }
 
+  const formatTime = (t: string) => {
+    try {
+      const d = new Date(t)
+      return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
+    } catch { return t }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -210,15 +181,15 @@ export function PortalNoticias() {
             </div>
             <div>
               <h1 className="text-lg font-black text-white">Portal de Noticias y Agenda</h1>
-              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Eventos del mentor · Noticias globales</p>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Eventos del mentor · Forex News IA</p>
             </div>
           </div>
           <button
-            onClick={() => fetchNews(true)}
-            disabled={loadingNews}
+            onClick={fetchForexNews}
+            disabled={loadingForex}
             className="flex items-center gap-1.5 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] text-gray-400 font-bold uppercase tracking-wider hover:text-white hover:border-white/20 transition-colors disabled:opacity-50"
           >
-            {loadingNews ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+            {loadingForex ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
             Actualizar
           </button>
         </div>
@@ -331,287 +302,201 @@ export function PortalNoticias() {
           )}
         </div>
 
-        {/* RIGHT: News Feed */}
+        {/* RIGHT: Forex News (JBlanked) */}
         <div className="order-1 lg:order-2">
-          <div className="flex items-center gap-2 mb-4">
-            <Newspaper className="w-4 h-4 text-blue-400" />
-            <h2 className="text-sm font-black text-blue-400 uppercase tracking-wider">Noticias Globales</h2>
-            <span className="text-[9px] text-gray-600">· Inglés</span>
-            {validatingCount > 0 && (
-              <span className="text-[9px] text-gray-500 flex items-center gap-1">
-                <Loader2 className="w-2.5 h-2.5 animate-spin" />
-                validando...
-              </span>
-            )}
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="w-4 h-4 text-cyan-400" />
+            <h2 className="text-sm font-black text-cyan-400 uppercase tracking-wider">Forex News IA</h2>
+            <span className="text-[9px] text-gray-600">· JBlanked</span>
           </div>
 
-          {loadingNews ? (
-            <div className="space-y-4">
-              {/* Hero skeleton */}
-              <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden animate-pulse">
-                <div className="aspect-[16/9] bg-white/[0.03]" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-white/[0.04] rounded w-3/4" />
-                  <div className="h-3 bg-white/[0.03] rounded w-full" />
-                  <div className="h-3 bg-white/[0.03] rounded w-2/3" />
-                  <div className="flex gap-2">
-                    <div className="h-3 bg-white/[0.03] rounded w-20" />
-                    <div className="h-3 bg-white/[0.03] rounded w-16" />
+          {/* Filtros */}
+          <div className="mb-3">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-1.5 text-[10px] text-gray-500 hover:text-white transition-colors"
+            >
+              <Filter className="w-3 h-3" />
+              Filtros
+              <span className="text-gray-600">
+                ({filterImpact.length + filterCurrency.length})
+              </span>
+              <ChevronDown className={`w-3 h-3 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showFilters && (
+              <div className="mt-2 p-3 bg-white/[0.02] border border-white/5 rounded-xl space-y-3">
+                {/* Impacto */}
+                <div>
+                  <p className="text-[9px] text-gray-500 uppercase tracking-wider mb-1.5">Impacto</p>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {['high', 'medium', 'low'].map(impact => {
+                      const cfg = impactConfig(impact)
+                      return (
+                        <button
+                          key={impact}
+                          onClick={() => toggleFilter('impact', impact)}
+                          className={`text-[9px] font-bold px-2.5 py-1 rounded-full border transition-colors ${
+                            filterImpact.includes(impact)
+                              ? `${cfg.bg} ${cfg.color} ${cfg.border}`
+                              : 'bg-white/5 text-gray-600 border-white/5 hover:border-white/10'
+                          }`}
+                        >
+                          {cfg.label}
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
-              </div>
-              {/* Secondary skeletons */}
-              <div className="grid grid-cols-2 gap-3">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="bg-zinc-950 border border-white/5 rounded-xl overflow-hidden animate-pulse">
-                    <div className="aspect-[16/10] bg-white/[0.03]" />
-                    <div className="p-3.5 space-y-2">
-                      <div className="h-3 bg-white/[0.04] rounded w-full" />
-                      <div className="h-3 bg-white/[0.04] rounded w-2/3" />
-                      <div className="h-2 bg-white/[0.03] rounded w-16" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* validation indicator */}
-              <div className="flex items-center justify-center gap-2 py-3 text-[10px] text-gray-500">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                Validando {validatingCount > 0 ? `${validatingCount} artículos...` : 'artículos...'}
-              </div>
-            </div>
-          ) : error ? (
-            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-8 text-center space-y-3">
-              <AlertCircle className="w-10 h-10 text-amber-400 mx-auto" />
-              <p className="text-amber-400 text-sm font-bold">{error}</p>
-              <button onClick={() => fetchNews(true)} className="px-4 py-2 bg-white/5 rounded-xl text-xs text-gray-400 hover:text-white transition-colors">
-                Reintentar
-              </button>
-            </div>
-          ) : news.length === 0 ? (
-            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-8 text-center">
-              <Newspaper className="w-10 h-10 text-gray-700 mx-auto mb-3" />
-              <p className="text-gray-500 text-sm">Sin noticias disponibles</p>
-              <p className="text-gray-600 text-xs mt-1">Configura tu API key de Finnhub en api-nube</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Hero article */}
-              {news[0] && (
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  onClick={() => openArticle(news[0])}
-                  className="w-full text-left bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden hover:border-blue-500/20 transition-colors group"
-                >
-                  {news[0].image && (
-                    <div className="relative aspect-[16/9] overflow-hidden bg-zinc-900">
-                      <img src={news[0].image} alt="" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500" loading="lazy" />
-                      <div className="absolute top-3 left-3">
-                        <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-blis-red text-white uppercase tracking-wider">
-                          {news[0].category || 'Última hora'}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <h3 className="text-white font-bold text-base leading-snug group-hover:text-blue-400 transition-colors line-clamp-2">
-                      {news[0].title}
-                    </h3>
-                    <p className="text-gray-400 text-xs mt-2 line-clamp-2 leading-relaxed">{news[0].summary}</p>
-                    <div className="flex items-center gap-2 mt-3 text-[10px]">
-                      <span className="text-gray-500 font-bold">{news[0].source}</span>
-                      <span className="text-gray-600">·</span>
-                      <span className="text-gray-500">{timeAgo(news[0].date)}</span>
-                    </div>
-                  </div>
-                </motion.button>
-              )}
-
-              {/* Secondary grid */}
-              {news.length > 1 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {news.slice(1, 7).map((item, i) => (
-                    <motion.button
-                      key={item.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(i * 0.08, 0.5), duration: 0.3 }}
-                      onClick={() => openArticle(item)}
-                      className="text-left bg-zinc-950 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/20 transition-colors group"
-                    >
-                      {item.image && (
-                        <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900">
-                          <img src={item.image} alt="" className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500" loading="lazy" />
-                        </div>
-                      )}
-                      <div className="p-3.5">
-                        <h4 className="text-white font-bold text-xs leading-snug line-clamp-2 group-hover:text-blue-400 transition-colors">
-                          {item.title}
-                        </h4>
-                        <div className="flex items-center gap-2 mt-2 text-[9px]">
-                          <span className="text-gray-500 font-bold">{item.source}</span>
-                          <span className="text-gray-600">·</span>
-                          <span className="text-gray-500">{timeAgo(item.date)}</span>
-                        </div>
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
-              )}
-
-              {/* Compact list */}
-              {news.length > 7 && (
-                <div className="space-y-2 pt-2">
-                  {news.slice(7).map((item, i) => (
-                    <motion.button
-                      key={item.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min((i + 7) * 0.05, 0.8), duration: 0.3 }}
-                      onClick={() => openArticle(item)}
-                      className="w-full text-left flex items-start gap-3 p-3 bg-white/[0.02] border border-white/5 rounded-xl hover:border-blue-500/20 transition-colors group"
-                    >
-                      {item.image && (
-                        <img src={item.image} alt="" className="w-16 h-16 rounded-lg object-cover shrink-0" loading="lazy" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-white text-xs font-bold line-clamp-2 group-hover:text-blue-400 transition-colors leading-snug">{item.title}</h4>
-                        <div className="flex items-center gap-2 mt-1.5 text-[9px]">
-                          <span className="text-gray-500 font-bold">{item.source}</span>
-                          <span className="text-gray-600">·</span>
-                          <span className="text-gray-500">{timeAgo(item.date)}</span>
-                        </div>
-                      </div>
-                    </motion.button>
-                  ))}
-                </div>
-              )}
-
-              {/* Titulares — sin validar, link externo */}
-              {headlines.length > 0 && (
-                <div className="pt-3 border-t border-white/5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <ExternalLink className="w-3 h-3 text-gray-500" />
-                    <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Titulares</span>
-                    <span className="text-[9px] text-gray-600">{headlines.length}</span>
-                  </div>
-                  <div className="space-y-1">
-                    {headlines.map((item, i) => (
-                      <motion.a
-                        key={item.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: Math.min(i * 0.04, 0.4) }}
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg hover:bg-white/[0.02] transition-colors group"
+                {/* Divisa */}
+                <div>
+                  <p className="text-[9px] text-gray-500 uppercase tracking-wider mb-1.5">Divisa</p>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {CURRENCIES.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => toggleFilter('currency', c)}
+                        className={`text-[9px] font-bold px-2 py-1 rounded-full border transition-colors ${
+                          filterCurrency.includes(c)
+                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                            : 'bg-white/5 text-gray-600 border-white/5 hover:border-white/10'
+                        }`}
                       >
-                        <div className="flex-1 min-w-0">
-                          <span className="text-gray-400 text-[11px] line-clamp-1 group-hover:text-white transition-colors">{item.title}</span>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[9px] text-gray-600 font-bold">{item.source}</span>
-                          <ExternalLink className="w-3 h-3 text-gray-600 group-hover:text-blue-400 transition-colors" />
-                        </div>
-                      </motion.a>
+                        {c}
+                      </button>
                     ))}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
+          </div>
+
+          {/* Forex Events List */}
+          {loadingForex ? (
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="bg-zinc-950 border border-white/5 rounded-xl p-4 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-white/[0.06]" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 bg-white/[0.04] rounded w-3/4" />
+                      <div className="h-2 bg-white/[0.03] rounded w-1/2" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 text-center space-y-3">
+              <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
+              <p className="text-amber-400 text-xs font-bold">{error}</p>
+              <button onClick={fetchForexNews} className="px-3 py-1.5 bg-white/5 rounded-lg text-[10px] text-gray-400 hover:text-white">
+                Reintentar
+              </button>
+            </div>
+          ) : filteredEvents.length === 0 ? (
+            <div className="bg-zinc-950 border border-white/5 rounded-2xl p-8 text-center">
+              <Calendar className="w-10 h-10 text-gray-700 mx-auto mb-3" />
+              <p className="text-gray-500 text-sm">Sin eventos disponibles</p>
+              <p className="text-gray-600 text-xs mt-1">Configura tu API key de JBlanked en api-nube</p>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              {filteredEvents.map((event, i) => {
+                const cfg = impactConfig(event.impact)
+                return (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                  >
+                    <button
+                      onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
+                      className={`w-full text-left p-3.5 rounded-xl border transition-colors ${
+                        expandedEvent === event.id
+                          ? `${cfg.bg} ${cfg.border}`
+                          : 'bg-zinc-950 border-white/5 hover:border-white/10'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {/* Impact dot */}
+                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${cfg.dot}`} />
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <h4 className="text-white text-xs font-bold leading-snug">{event.event}</h4>
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                <span className="text-[9px] text-gray-400 font-bold">{event.currency}</span>
+                                <span className="text-gray-600">·</span>
+                                <span className="flex items-center gap-1 text-[9px] text-gray-500">
+                                  <Clock className="w-2.5 h-2.5" />
+                                  {formatTime(event.time)}
+                                </span>
+                                <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${cfg.bg} ${cfg.color} border ${cfg.border} uppercase tracking-wider`}>
+                                  {cfg.label}
+                                </span>
+                              </div>
+                            </div>
+                            <ChevronDown className={`w-3.5 h-3.5 text-gray-500 mt-1 shrink-0 transition-transform ${expandedEvent === event.id ? 'rotate-180' : ''}`} />
+                          </div>
+
+                          {/* Expanded details */}
+                          {expandedEvent === event.id && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              className="mt-3 pt-3 border-t border-white/5 space-y-2 overflow-hidden"
+                            >
+                              {/* Forecast / Previous */}
+                              {(event.forecast || event.previous) && (
+                                <div className="grid grid-cols-2 gap-2">
+                                  {event.forecast && (
+                                    <div className="bg-white/[0.02] rounded-lg p-2">
+                                      <p className="text-[8px] text-gray-500 uppercase tracking-wider">Forecast</p>
+                                      <p className="text-white text-xs font-bold">{event.forecast}</p>
+                                    </div>
+                                  )}
+                                  {event.previous && (
+                                    <div className="bg-white/[0.02] rounded-lg p-2">
+                                      <p className="text-[8px] text-gray-500 uppercase tracking-wider">Previous</p>
+                                      <p className="text-white text-xs font-bold">{event.previous}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Outcome */}
+                              {event.outcome && (
+                                <div className="flex items-center gap-2 text-[10px]">
+                                  <span className={`font-black ${outcomeColor(event.outcome)}`}>
+                                    {outcomeIcon(event.outcome)} {event.outcome}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Strength + Quality */}
+                              <div className="flex items-center gap-2">
+                                {strengthBadge(event.strength)}
+                                {qualityBadge(event.quality)}
+                              </div>
+                            </motion.div>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  </motion.div>
+                )
+              })}
 
               <p className="text-center text-[9px] text-gray-600 pt-2">
-                {news.length} artículo{news.length !== 1 ? 's' : ''} verificado{news.length !== 1 ? 's' : ''}{headlines.length > 0 ? ` + ${headlines.length} titular${headlines.length !== 1 ? 'es' : ''}` : ''}
+                {filteredEvents.length} evento{filteredEvents.length !== 1 ? 's' : ''}
               </p>
             </div>
           )}
         </div>
       </div>
-
-      {/* Article Modal */}
-      <AnimatePresence>
-        {selectedArticle && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-start justify-center pt-[5vh] px-4 overflow-y-auto"
-            onClick={() => closeArticle()}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              onClick={e => e.stopPropagation()}
-              className="w-full max-w-2xl bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden my-8"
-            >
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
-                <button
-                  onClick={() => closeArticle()}
-                  className="p-1.5 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">
-                  {selectedArticle.source} · {timeAgo(selectedArticle.date)}
-                </span>
-              </div>
-
-              {selectedArticle.image && (
-                <div className="relative aspect-[16/9] overflow-hidden bg-zinc-900">
-                  <img src={selectedArticle.image} alt="" className="w-full h-full object-cover" />
-                </div>
-              )}
-
-              <div className="p-5 sm:p-6 space-y-4">
-                <div>
-                  {selectedArticle.category && (
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blis-red/10 text-blis-red border border-blis-red/20 uppercase tracking-wider mb-2 inline-block">
-                      {selectedArticle.category}
-                    </span>
-                  )}
-                  <h2 className="text-white font-black text-lg leading-tight">{selectedArticle.title}</h2>
-                </div>
-
-                {articleContent.loading ? (
-                  <div className="flex items-center gap-3 py-8 text-gray-500">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-xs">Cargando artículo completo...</span>
-                  </div>
-                ) : (
-                  <>
-                    {articleContent.error && (
-                      <p className="text-amber-400/60 text-[10px]">
-                        No se pudo extraer el artículo completo.{' '}
-                        <span className="text-gray-500">Motivo: {articleContent.error}</span>
-                      </p>
-                    )}
-                    <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-line max-h-[50vh] overflow-y-auto pr-2">
-                      {articleContent.text || selectedArticle.summary || 'Sin contenido disponible.'}
-                    </div>
-                  </>
-                )}
-                <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                  <span className="text-[11px] text-gray-500">
-                    Fuente: <span className="text-gray-400 font-bold">{selectedArticle.source}</span>
-                  </span>
-                  <a
-                    href={selectedArticle.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-4 py-2 bg-blis-red text-white rounded-xl text-[10px] font-bold uppercase tracking-wider hover:bg-blis-red/80 transition-colors"
-                  >
-                    Leer artículo completo
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
