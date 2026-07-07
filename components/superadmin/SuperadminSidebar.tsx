@@ -19,7 +19,6 @@ import { usePermissions } from "@/hooks/usePermissions"
 import { useAuth } from "@/hooks/useAuth"
 import { SECTION_PERMISSIONS, hasPermission, type Permission } from "@/lib/auth/permissions"
 import { CompanySwitcher } from "./CompanySwitcher"
-import { NotificationBell } from "./NotificationBell"
 
 type SubItem = {
     icon: React.ComponentType<LucideProps>
@@ -278,7 +277,6 @@ export function SuperadminSidebar() {
                         )}
                     </AnimatePresence>
                     <div className="flex items-center gap-1">
-                        {isExpanded && <NotificationBell />}
                         <button
                             onClick={() => setIsCollapsed(!isCollapsed)}
                             className={`p-2 hover:bg-white/5 rounded-xl text-gray-400 transition-colors ${isCollapsed ? 'hover:text-blis-red' : ''}`}

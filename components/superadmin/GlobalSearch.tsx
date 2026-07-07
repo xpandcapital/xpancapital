@@ -8,7 +8,6 @@ import {
   Loader2, CornerDownLeft
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { DEFAULT_EMPRESA_ID } from "@/lib/empresa"
 
 interface SearchResult {
   id: string
@@ -94,7 +93,7 @@ export function GlobalSearch() {
     setLoading(true)
 
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&empresa_id=${DEFAULT_EMPRESA_ID}`, {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
         signal: controller.signal,
       })
       const data = await res.json()
@@ -106,8 +105,9 @@ export function GlobalSearch() {
         setNoResults(Object.values(r as Record<string, any[]>).flat().length === 0)
         setSelectedIndex(0)
       }
-    } catch {
+    } catch (err) {
       if (!controller.signal.aborted) {
+        console.error('[GlobalSearch] Error fetching results:', err)
         setResults({})
         setNoResults(true)
       }

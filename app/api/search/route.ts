@@ -12,10 +12,20 @@ function getAdminClient() {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q')?.trim()
-  const empresaId = searchParams.get('empresa_id') || DEFAULT_EMPRESA_ID
+
+  // Obtener empresa_id: prioridad al header del middleware > query param > default
+  const empresaId =
+    request.headers.get('x-blis-empresa-id') ||
+    searchParams.get('empresa_id') ||
+    DEFAULT_EMPRESA_ID
 
   if (!q || q.length < 2) {
     return NextResponse.json({ success: true, results: [] })
+  }
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('[Search API] Missing Supabase environment variables')
+    return NextResponse.json({ success: false, error: 'Configuración del servidor incompleta' }, { status: 500 })
   }
 
   try {
@@ -24,11 +34,26 @@ export async function GET(request: NextRequest) {
 
     const [productos, clientes, leads, blog, proyectos] = await Promise.allSettled([
       supabase.from('productos').select('id,nombre,precio_usd,imagen_principal').eq('empresa_id', empresaId).ilike('nombre', pattern).limit(5),
-      supabase.from('profiles').select('id,nombre,email').eq('empresa_id', empresaId).ilike('nombre', pattern).limit(5),
-      supabase.from('leads').select('id,nombre,email,estado').eq('empresa_id', empresaId).ilike('nombre', pattern).limit(5),
+      supabase.from('profiles').select('id,nombre,email').eq('empresa_id', empresaId).or(`nombre.ilike.${pattern},email.ilike.${pattern}`).limit(5),
+      supabase.from('leads').select('id,nombre,email,estado').eq('empresa_id', empresaId).or(`nombre.ilike.${pattern},email.ilike.${pattern}`).limit(5),
       supabase.from('blog_posts').select('id,titulo,estado').eq('empresa_id', empresaId).ilike('titulo', pattern).limit(5),
       supabase.from('projects').select('id,name,status').eq('empresa_id', empresaId).ilike('name', pattern).limit(5),
     ])
+
+    // Log failures for debugging
+    const failures = [
+      { name: 'productos', result: productos },
+      { name: 'clientes', result: clientes },
+      { name: 'leads', result: leads },
+      { name: 'blog', result: blog },
+      { name: 'proyectos', result: proyectos },
+    ].filter(f => f.result.status === 'rejected' || f.result.value?.error)
+    if (failures.length > 0) {
+      console.error('[Search API] Query failures:', failures.map(f => ({
+        name: f.name,
+        reason: f.result.status === 'rejected' ? f.result.reason : f.result.value?.error
+      })))
+    }
 
     const results: Record<string, any[]> = {}
 
@@ -79,7 +104,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, results })
-  } catch {
+  } catch (err) {
+    console.error('[Search API] Error:', err)
     return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 })
   }
 }
