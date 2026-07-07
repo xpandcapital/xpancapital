@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { cleanPhone } from '@/lib/phone'
 import { notifyAsesor, NTemplates } from '@/lib/notifications'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const DEFAULT_EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
 function getAdmin() { return createClient(supabaseUrl, supabaseServiceKey) }
 

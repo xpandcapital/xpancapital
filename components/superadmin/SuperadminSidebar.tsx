@@ -107,7 +107,6 @@ const ALL_SECTIONS: Section[] = [
                 icon: Mail,
                 label: "Comunicación",
                 subItems: [
-                    { icon: MessageCircle, label: "Chat", href: "/superadmin/chat", permission: "chat:ver" },
                     { icon: Mail, label: "Correos", href: "/superadmin/mails", permission: "mails:ver" },
                     { icon: Inbox, label: "Correo IMAP", href: "/superadmin/correo", permission: "correo:ver" },
                     { icon: CalendarDays, label: "Calendarios", href: "/superadmin/calendarios", permission: "calendarios:ver" },

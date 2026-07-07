@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
       activa = true
     } = body;
     
-    const empresaId = '6186f014-c8c7-4027-9f08-8acf2bae3eae'; // TODO: Obtener del contexto
+    const empresaId = DEFAULT_EMPRESA_ID; // TODO: Obtener del contexto
     
     // Verificar si ya existe una integración de este tipo
     const { data: existing } = await supabase

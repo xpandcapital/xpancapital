@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { getSupabase } from '@/lib/supabase'
 import type { UserRole } from '@/lib/auth/permissions'
 import type { PermisosAdicionales } from '@/lib/auth/permissions'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 interface User {
   id: string
@@ -38,8 +39,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 
 // Obtener el cliente singleton de Supabase (compatible con SSR)
 function getSupabaseClient() {
@@ -80,7 +79,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
               email,
               nombre,
               rol,
-              empresa_id: EMPRESA_ID,
+              empresa_id: DEFAULT_EMPRESA_ID,
             })
             return {
               id: userId,
@@ -90,7 +89,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
               apellido: '',
               role: rol as UserRole,
               blis_coins: 0,
-              empresa_id: EMPRESA_ID,
+              empresa_id: DEFAULT_EMPRESA_ID,
               permisos_adicionales: null,
               ruta_inicio: null,
             }
@@ -111,7 +110,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
           blis_coins: p.blis_coins || 0,
           role: normalizedRol,
           phone: p.telefono || '',
-          empresa_id: p.empresa_id || EMPRESA_ID,
+          empresa_id: p.empresa_id || DEFAULT_EMPRESA_ID,
           permisos_adicionales: p.permisos_adicionales || null,
           ruta_inicio: null,
         }
@@ -151,7 +150,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
       blis_coins: profile.blis_coins || 0,
       role: normalizedRol,
       phone: profile.telefono || '',
-      empresa_id: profile.empresa_id || EMPRESA_ID,
+      empresa_id: profile.empresa_id || DEFAULT_EMPRESA_ID,
       permisos_adicionales: profile.permisos_adicionales || null,
       ruta_inicio: null,
     }
@@ -212,10 +211,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(prev => {
               if (prev && prev.id === session.user.id) {
                 // Ya tenemos datos del cache — solo actualizar rol y empresa_id
-                return { ...prev, role: rol, empresa_id: session.user.app_metadata?.empresa_id || prev.empresa_id || EMPRESA_ID }
+                return { ...prev, role: rol, empresa_id: session.user.app_metadata?.empresa_id || prev.empresa_id || DEFAULT_EMPRESA_ID }
               }
               // No hay cache — crear usuario básico del JWT
-              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
+              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || DEFAULT_EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
             })
           }
         } catch (err) {
@@ -226,7 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (prev && prev.id === session.user.id) {
                 return { ...prev, role: rol }
               }
-              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
+              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || DEFAULT_EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
             })
           }
         }
@@ -303,7 +302,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: data.user.email || email,
           role: rol,
           blis_coins: 0,
-          empresa_id: data.user.app_metadata?.empresa_id || EMPRESA_ID,
+          empresa_id: data.user.app_metadata?.empresa_id || DEFAULT_EMPRESA_ID,
           permisos_adicionales: null,
           ruta_inicio: null,
         })

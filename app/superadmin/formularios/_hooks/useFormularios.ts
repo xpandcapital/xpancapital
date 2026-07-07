@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { Formulario } from '../_types'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 export type { Formulario }
 
-const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
+const EMPRESA_ID = DEFAULT_EMPRESA_ID
 
 interface UseFormulariosReturn {
   formularios: Formulario[]

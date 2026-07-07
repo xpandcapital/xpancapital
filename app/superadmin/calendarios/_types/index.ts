@@ -60,6 +60,8 @@ export interface FormFieldCal {
   system?: boolean
 }
 
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
+
 export const defaultSchedule: WeekSchedule = {
   monday: { active: true, start: '09:00', end: '17:00' },
   tuesday: { active: true, start: '09:00', end: '17:00' },
@@ -85,7 +87,7 @@ export const calendarTypeLabels: Record<string, string> = {
 }
 
 export const defaultCalendar: Omit<Calendario, 'id' | 'creado_en' | 'actualizado_en'> = {
-  empresa_id: '6186f014-c8c7-4027-9f08-8acf2bae3eae',
+  empresa_id: DEFAULT_EMPRESA_ID,
   nombre: 'Nuevo Calendario',
   slug: `calendario-${Date.now().toString().slice(-4)}`,
   tipo: 'personal',

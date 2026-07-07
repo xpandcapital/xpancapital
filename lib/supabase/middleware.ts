@@ -230,8 +230,7 @@ export async function updateSession(request: NextRequest) {
     if (profileRol) supabaseResponse.headers.set('x-blis-user-rol', profileRol)
     if (user.email) supabaseResponse.headers.set('x-blis-user-email', user.email)
     // empresa_id desde profile (mas confiable que app_metadata)
-    // @ts-expect-error app_metadata might not have empresa_id in type definitions
-    const empresaId = profileEmpresaId || user.app_metadata?.empresa_id
+    const empresaId = profileEmpresaId || (user.app_metadata as any)?.empresa_id
     if (empresaId) supabaseResponse.headers.set('x-blis-empresa-id', empresaId)
   }
 

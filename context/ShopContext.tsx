@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/Toast";
+import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 
 interface Product {
     id: string;
@@ -285,7 +286,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    empresa_id: '6186f014-c8c7-4027-9f08-8acf2bae3eae',
+                    empresa_id: DEFAULT_EMPRESA_ID,
                     user_id: user.id,
                     nombre: user.name || user.email || '',
                     email: user.email || '',

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { X, BookOpen, Package, Plus, Trash2, Loader2, Search } from 'lucide-react'
 import { useEquipoCursos, useEquipoProductos } from '../_hooks'
 import type { Advisor } from '../_types'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 interface AssignmentModalProps {
   advisor: Advisor
@@ -21,7 +22,7 @@ export function AssignmentModal({ advisor, onClose }: AssignmentModalProps) {
 
   useEffect(() => {
     fetch('/api/admin/cursos').then(r => r.json()).then(d => { if (d.data) setAvailableCursos(d.data) }).catch(() => {})
-    fetch(`/api/productos?empresa_id=6186f014-c8c7-4027-9f08-8acf2bae3eae`).then(r => r.json()).then(d => { if (d.data) setAvailableProductos(d.data) }).catch(() => {})
+    fetch(`/api/productos?empresa_id=${DEFAULT_EMPRESA_ID}`).then(r => r.json()).then(d => { if (d.data) setAvailableProductos(d.data) }).catch(() => {})
   }, [])
 
   const handleAssignCurso = async (cursoId: string) => {

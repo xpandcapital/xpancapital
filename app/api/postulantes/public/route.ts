@@ -2,8 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { verifyTurnstileToken } from '@/lib/bot-protection'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
-const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
+const EMPRESA_ID = DEFAULT_EMPRESA_ID
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 

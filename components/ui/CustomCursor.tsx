@@ -8,6 +8,14 @@ export function CustomCursor() {
     const spinnerRef = useRef<HTMLDivElement>(null);
     const mounted = useRef(false);
 
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+            setIsTouchDevice(true);
+        }
+    }, []);
+
     const pos = useRef({ x: -999, y: -999 });
     const ringPos = useRef({ x: -999, y: -999 });
     const animFrame = useRef<number>(0);
@@ -112,6 +120,8 @@ export function CustomCursor() {
             if (touchFadeTimer) clearTimeout(touchFadeTimer);
         };
     }, []);
+
+    if (isTouchDevice) return null;
 
     return (
         <>

@@ -27,8 +27,9 @@ type EquipoProductoRow = Omit<EquipoProducto, 'productos'>;
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
-const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
+const EMPRESA_ID = DEFAULT_EMPRESA_ID
 
 export function useAsesores() {
   const [advisors, setAdvisors] = useState<Advisor[]>([])

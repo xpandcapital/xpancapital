@@ -2,6 +2,8 @@
 // POSTULANTES - TIPOS DEL SISTEMA DE FORMULARIOS DINÁMICOS
 // ═══════════════════════════════════════════════════════════════
 
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
+
 export interface Postulante {
   id: string
   empresa_id: string
@@ -119,7 +121,7 @@ export interface PostulanteRespuesta {
 
 // ═══════════ CONSTANTES ═══════════
 
-export const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
+export const EMPRESA_ID = DEFAULT_EMPRESA_ID
 
 export const ESTADOS = ['nuevo', 'en_revision', 'entrevista', 'aceptado', 'rechazado'] as const
 

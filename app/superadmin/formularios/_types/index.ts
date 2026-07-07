@@ -51,6 +51,8 @@ export interface FlowStep {
   url: string
 }
 
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
+
 export const defaultAppearance: FormAppearance = {
   primaryColor: '#be0b3c',
   buttonTextColor: '#ffffff',
@@ -71,7 +73,7 @@ export const defaultAppearance: FormAppearance = {
 }
 
 export const defaultFormulario: Omit<Formulario, 'id' | 'creado_en' | 'actualizado_en'> = {
-  empresa_id: '6186f014-c8c7-4027-9f08-8acf2bae3eae',
+  empresa_id: DEFAULT_EMPRESA_ID,
   nombre: 'Nuevo Formulario',
   slug: `form-${Date.now().toString().slice(-4)}`,
   estado: 'borrador',

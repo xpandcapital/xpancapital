@@ -153,6 +153,22 @@ export async function POST(request: NextRequest) {
 
     const tel = cleanPhone(telefono || whatsapp, 'PE');
 
+    // Función de similitud para nombres
+    function nombresSimilares(a: string, b: string): boolean {
+      if (!a || !b) return false
+      const na = a.trim().toLowerCase()
+      const nb = b.trim().toLowerCase()
+      if (na === nb) return true
+      const pa = na.split(/\s+/).sort().join(' ')
+      const pb = nb.split(/\s+/).sort().join(' ')
+      if (pa.length > 3 && pb.length > 3 && pa === pb) return true
+      const charsA = new Set(na.replace(/\s/g, ''))
+      const charsB = new Set(nb.replace(/\s/g, ''))
+      const intersection = new Set([...charsA].filter(x => charsB.has(x)))
+      const union = new Set([...charsA, ...charsB])
+      return intersection.size / union.size >= 0.7
+    }
+
     if (!nombre || (!email && !telefono)) {
       return NextResponse.json({ 
         success: false, 
@@ -163,7 +179,7 @@ export async function POST(request: NextRequest) {
     // Verificar si ya existe el lead por email o teléfono
     let existingQuery = supabase
       .from('leads')
-      .select('id')
+      .select('id, nombre')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
     
     if (email) {
@@ -175,12 +191,17 @@ export async function POST(request: NextRequest) {
     const { data: existingLead } = await existingQuery.single()
 
     if (existingLead) {
-      // Actualizar lead existente
-      const { error: updateError } = await supabase
-        .from('leads')
-        .update({
-          nombre: nombre || undefined,
-          telefono: tel || telefono || undefined,
+      // Verificar si el nombre coincide antes de actualizar
+      if (nombre && existingLead.nombre && !nombresSimilares(nombre, existingLead.nombre)) {
+        // Nombre no coincide: crear nuevo lead como posible duplicado
+        logger.debug(`[LEADS] Posible duplicado detectado: "${nombre}" vs "${existingLead.nombre}"`)
+      } else {
+        // Actualizar lead existente (mismo nombre o uno de los dos sin nombre)
+        const { error: updateError } = await supabase
+          .from('leads')
+          .update({
+            nombre: nombre || undefined,
+            telefono: tel || telefono || undefined,
           whatsapp: whatsapp || undefined,
           ciudad: ciudad || undefined,
           presupuesto: presupuesto || undefined,
@@ -197,11 +218,12 @@ export async function POST(request: NextRequest) {
         console.error('Error updating lead:', updateError)
       }
 
-      return NextResponse.json({ 
-        success: true, 
-        data: { id: existingLead.id, is_new: false },
-        message: 'Lead actualizado correctamente'
-      })
+        return NextResponse.json({ 
+          success: true, 
+          data: { id: existingLead.id, is_new: false },
+          message: 'Lead actualizado correctamente'
+        })
+      }
     }
 
     // Crear nuevo lead

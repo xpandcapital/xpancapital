@@ -14,8 +14,9 @@ import { CustomCursor } from "@/components/ui/CustomCursor";
 import { mapProductoToProductDef, ProductDef } from "@/lib/types/shop";
 import { ProductSearch } from "@/components/tienda/ProductSearch";
 import type { ProductoCategoria } from "@/lib/hooks/useProducts";
+import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 
-const EMPRESA_ID = "6186f014-c8c7-4027-9f08-8acf2bae3eae";
+const EMPRESA_ID = DEFAULT_EMPRESA_ID;
 
 export default function ShopPage() {
   const [allProducts, setAllProducts] = useState<ProductDef[]>([]);

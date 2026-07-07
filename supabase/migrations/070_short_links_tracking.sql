@@ -9,4 +9,4 @@ RETURNS void AS $$
 BEGIN
   UPDATE short_links SET clicks = COALESCE(clicks, 0) + 1, ultimo_click = NOW() WHERE codigo = link_code;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;

@@ -11,7 +11,6 @@ import { PWARegistrar } from "@/components/utils/PWARegistrar"
 import { DynamicMetadata } from "@/components/utils/DynamicMetadata"
 import { FaviconBadge } from "@/components/layout/FaviconBadge"
 import { LiveTransmissionBanner } from "@/components/ui/LiveTransmissionBanner"
-// import { ChatWidget } from "@/components/chat/ChatWidget"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
 interface LayoutProvidersProps {
@@ -52,7 +51,6 @@ export function LayoutProviders({
                   logoVertical={logoVertical}
                 />
                 {children}
-                {/* <ChatWidget /> */}
               </SalesProvider>
             </ShopProvider>
           </ToastProvider>

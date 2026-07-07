@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae';
+const EMPRESA_ID = DEFAULT_EMPRESA_ID;
 
 export async function POST(request: NextRequest) {
   try {

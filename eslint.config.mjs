@@ -19,8 +19,7 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-explicit-any": "warn",
       // Allow unused vars with underscore prefix
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-      // React hooks setState in effect warning
-      "react-hooks/set-state-in-effect": "warn",
+      // Note: react-hooks rules are already included in eslint-config-next
     }
   }
 ]);

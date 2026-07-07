@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react'
-
-const DEFAULT_EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 interface EmailTemplate {
   id: string

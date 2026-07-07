@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Lock, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 
 interface BlogHeroProps {
   data?: {
@@ -26,7 +27,7 @@ export function BlogHero({ data = {} }: BlogHeroProps) {
     let isMounted = true;
     const fetchBlog = async () => {
       try {
-        const postsRes = await fetch(`/api/blog?empresa_id=6186f014-c8c7-4027-9f08-8acf2bae3eae`);
+        const postsRes = await fetch(`/api/blog?empresa_id=${DEFAULT_EMPRESA_ID}`);
         const postsData = await postsRes.json();
         if (postsData.success && postsData.data && isMounted) {
           const mapped = postsData.data

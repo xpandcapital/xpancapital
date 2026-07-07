@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 interface EmailMedia {
   id: string
@@ -47,7 +48,7 @@ export function useEmailMedia() {
       // Primero subir a Supabase Storage
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('empresa_id', '6186f014-c8c7-4027-9f08-8acf2bae3eae')
+      formData.append('empresa_id', DEFAULT_EMPRESA_ID)
       
       const uploadRes = await fetch('/api/images', {
         method: 'POST',

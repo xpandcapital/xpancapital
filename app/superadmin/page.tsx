@@ -1,190 +1,502 @@
-"use client"
+"use client";
 
-import { Activity, TrendingUp, DollarSign, Target, ArrowUpRight, ArrowDownRight, Clock, Star } from "lucide-react";
-import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import {
+  DollarSign, Package, Users, Eye, Contact, Briefcase,
+  ShoppingCart, FileText, TrendingUp, RefreshCw, Clock, AlertTriangle
+} from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+} from 'recharts';
+import { supabase } from '@/lib/supabaseClient';
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 
-export default function AdminDashboard() {
-    const kpis = [
-        { title: "Ingresos (YTD)", value: "$2.4M", trend: "+15.3%", positive: true, icon: DollarSign },
-        { title: "Nuevos Prospectos", value: "342", trend: "+24%", positive: true, icon: Target },
-        { title: "Conversión de Cierre", value: "4.8%", trend: "-0.5%", positive: false, icon: Activity },
-        { title: "TIR Histórica Promedio", value: "22.4%", trend: "+1.2%", positive: true, icon: TrendingUp },
-    ];
+const formatCurrency = (val: number) =>
+  new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'USD' }).format(val);
 
-    const recentTransactions = [
-        { client: "Roberto M.", lot: "Fase 1 - Lote 12", amount: "$120,500", status: "Completado", date: "Hoy, 10:42 AM", type: "Liquidación" },
-        { client: "Familia Garza", lot: "Premium - Lote 05", amount: "$15,000", status: "Procesando", date: "Hoy, 09:15 AM", type: "Enganche" },
-        { client: "Inversiones Capital", lot: "Fase 2 - Multi", amount: "$450,000", status: "Completado", date: "Ayer", type: "Liquidación" },
-        { client: "Ana S.", lot: "Fase 1 - Lote 44", amount: "$5,000", status: "Pendiente", date: "Ayer", type: "Apartado" },
-    ];
+const formatNumber = (val: number) => new Intl.NumberFormat('es-PE').format(val);
 
-    const recentLeads = [
-        { name: "Carlos López", email: "carlos.l@gmail.com", interest: "Alta Plusvalía", time: "hace 5 min" },
-        { name: "Diana V.", email: "dvdiana@empresa.com", interest: "Fase 2", time: "hace 32 min" },
-        { name: "M. Torres", email: "mtorres90@yahoo.com", interest: "Catálogo General", time: "hace 2 horas" },
-    ];
+const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-    return (
-        <div className="space-y-8 pb-12 w-full px-4 md:px-8 pt-8 md:pt-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
-                <div className="w-full sm:w-auto">
-                    <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none sm:leading-tight">Dashboard HQ</h1>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl leading-tight">Centro de comando operativo: Finanzas, CRM, Inventario y Analíticas.</p>
-                </div>
+function SkeletonStats() {
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl animate-pulse">
+            <div className="w-10 h-10 bg-white/5 rounded-xl mb-4" />
+            <div className="h-3 w-24 bg-white/5 rounded mb-3" />
+            <div className="h-8 w-20 bg-white/5 rounded" />
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="bg-[#0a0a0a] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl flex items-center gap-5 animate-pulse">
+            <div className="w-14 h-14 bg-white/5 rounded-2xl" />
+            <div className="space-y-3">
+              <div className="h-3 w-20 bg-white/5 rounded" />
+              <div className="h-8 w-16 bg-white/5 rounded" />
             </div>
-
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-6">
-                {kpis.map((kpi, i) => (
-                    <div key={i} className="bg-zinc-950 border border-white/5 p-3.5 sm:p-6 rounded-xl sm:rounded-2xl relative overflow-hidden group hover:border-white/10 transition-colors">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blis-red/10 transition-colors" />
-                        <div className="flex items-center gap-3 sm:gap-5 relative z-10">
-                            <div className={`p-2 sm:p-4 rounded-xl sm:rounded-2xl shrink-0 ${kpi.positive ? 'bg-emerald-400/10 text-emerald-400' : 'bg-blis-red/10 text-blis-red'}`}>
-                                <kpi.icon className="w-5 h-5 sm:w-8 h-8" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <p className="text-gray-400 font-bold uppercase tracking-widest text-[7px] sm:text-xs mb-0.5 sm:mb-1 line-clamp-2 h-[1.8em] sm:h-[2.5em] leading-tight flex items-end">{kpi.title}</p>
-                                <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
-                                    <h3 className="text-xl sm:text-3xl font-black text-white leading-none">{kpi.value}</h3>
-                                    <span className={`text-[8px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md flex items-center gap-1 ${kpi.positive ? 'bg-emerald-400/10 text-emerald-400' : 'bg-blis-red/10 text-blis-red'}`}>
-                                        {kpi.positive ? <ArrowUpRight className="w-2.5 h-2.5 sm:w-3 h-3" /> : <ArrowDownRight className="w-2.5 h-2.5 sm:w-3 h-3" />}
-                                        {kpi.trend}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* Main Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                {/* Revenue Chart */}
-                <div className="lg:col-span-2 bg-zinc-950 border border-white/5 rounded-2xl p-6 flex flex-col">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-lg font-bold text-white">Ingresos vs Proyección (2026)</h2>
-                        <SearchableSelect options={[{ value: 'year', label: 'Este Año' }, { value: '6months', label: 'Últimos 6 Meses' }]} value="year" onChange={() => {}} className="bg-black border border-white/10 text-xs text-gray-400 px-3 py-1 rounded-lg focus:outline-none" />
-                    </div>
-                    {/* Fake Chart Area */}
-                    <div className="flex-1 min-h-[300px] w-full rounded-xl border border-white/5 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] relative flex items-end px-4 gap-4 pb-4 pt-10">
-                        {/* SVG Line mockup */}
-                        <svg className="absolute inset-0 w-full h-full text-blis-red/40 drop-shadow-[0_0_10px_rgba(190,11,60,0.8)]" preserveAspectRatio="none" viewBox="0 0 100 100">
-                            <path d="M0,90 Q10,70 20,80 T40,60 T60,50 T80,20 T100,10" fill="none" stroke="currentColor" strokeWidth="3" />
-                            <path d="M0,90 Q10,70 20,80 T40,60 T60,50 T80,20 T100,10 L100,100 L0,100 Z" fill="currentColor" opacity="0.1" />
-                        </svg>
-                        {/* Y-Axis Labels */}
-                        <div className="absolute left-4 top-4 bottom-4 flex flex-col justify-between text-[10px] text-gray-500 font-mono">
-                            <span>$1M</span>
-                            <span>$500k</span>
-                            <span>$0</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Inventory Status */}
-                <div className="bg-zinc-950 border border-white/5 rounded-2xl p-6 flex flex-col">
-                    <h2 className="text-lg font-bold text-white mb-6">Estado de Inventario</h2>
-                    <div className="flex-1 flex flex-col items-center justify-center relative">
-                        {/* Fake Doughnut */}
-                        <div className="w-48 h-48 rounded-full border-[16px] border-zinc-900 border-t-blis-red border-r-blis-red border-b-emerald-500 relative flex items-center justify-center shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-                            <div className="text-center">
-                                <span className="block text-3xl font-black text-white">124</span>
-                                <span className="text-xs text-gray-500 uppercase tracking-widest">Totales</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="mt-8 space-y-3">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="flex items-center gap-2 text-gray-400"><span className="w-3 h-3 rounded-full bg-emerald-500"></span> Disponibles</span>
-                            <span className="font-bold text-white">45 <span className="text-gray-600 font-normal">(36%)</span></span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="flex items-center gap-2 text-gray-400"><span className="w-3 h-3 rounded-full bg-blis-red"></span> Reservados</span>
-                            <span className="font-bold text-white">22 <span className="text-gray-600 font-normal">(18%)</span></span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="flex items-center gap-2 text-gray-400"><span className="w-3 h-3 rounded-full bg-zinc-700"></span> Vendidos</span>
-                            <span className="font-bold text-white">57 <span className="text-gray-600 font-normal">(46%)</span></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* CRM Row: Transactions & Leads */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                {/* Recent Transactions Table */}
-                <div className="lg:col-span-2 bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden flex flex-col">
-                    <div className="p-6 border-b border-white/5 flex justify-between items-center">
-                        <h2 className="text-lg font-bold text-white">Últimas Transacciones (Compras y Reservas)</h2>
-                        <button className="text-xs text-blis-red hover:text-white uppercase font-bold tracking-widest transition-colors">Ver Todo</button>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-gray-400">
-                            <thead className="bg-white/[0.02] text-gray-500 font-medium">
-                                <tr>
-                                    <th className="px-6 py-4 font-normal">Cliente</th>
-                                    <th className="px-6 py-4 font-normal">Lote / Proyecto</th>
-                                    <th className="px-6 py-4 font-normal">Monto</th>
-                                    <th className="px-6 py-4 font-normal">Tipo</th>
-                                    <th className="px-6 py-4 font-normal">Estado</th>
-                                    <th className="px-6 py-4 font-normal">Fecha</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {recentTransactions.map((tx, i) => (
-                                    <tr key={i} className="hover:bg-white/[0.02] transition-colors">
-                                        <td className="px-6 py-4 font-medium text-white">{tx.client}</td>
-                                        <td className="px-6 py-4">{tx.lot}</td>
-                                        <td className="px-6 py-4 font-mono text-white">{tx.amount}</td>
-                                        <td className="px-6 py-4 text-xs">{tx.type}</td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2 py-1 rounded-md text-xs font-bold ${tx.status === 'Completado' ? 'bg-emerald-400/10 text-emerald-400' :
-                                                tx.status === 'Procesando' ? 'bg-blue-400/10 text-blue-400' :
-                                                    'bg-amber-400/10 text-amber-400'
-                                                }`}>
-                                                {tx.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 flex items-center gap-2 text-xs">
-                                            <Clock className="w-3 h-3" /> {tx.date}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {/* Hot Leads from Capture popup */}
-                <div className="bg-zinc-950 border border-white/5 rounded-2xl flex flex-col overflow-hidden">
-                    <div className="p-6 border-b border-white/5 flex justify-between items-center">
-                        <h2 className="text-lg font-bold text-white flex items-center gap-2"><Star className="w-4 h-4 text-amber-400" /> Prospectos Activos</h2>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                        {recentLeads.map((lead, i) => (
-                            <div key={i} className="p-4 bg-white/[0.02] border border-white/5 rounded-xl hover:border-blis-red/30 transition-colors cursor-pointer group">
-                                <div className="flex justify-between items-start mb-1">
-                                    <span className="font-bold text-white group-hover:text-blis-red transition-colors">{lead.name}</span>
-                                    <span className="text-[10px] text-gray-500">{lead.time}</span>
-                                </div>
-                                <p className="text-xs text-gray-400 mb-2">{lead.email}</p>
-                                <span className="inline-block px-2 py-1 bg-white/5 rounded text-xs text-gray-300">
-                                    Interés: <span className="text-white font-medium">{lead.interest}</span>
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="p-4 border-t border-white/5 bg-black">
-                        <button className="w-full py-2 bg-white/5 text-gray-300 rounded-lg text-sm font-bold hover:bg-white/10 transition-colors">
-                            Ver CRM Completo
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl animate-pulse">
+          <div className="h-4 w-40 bg-white/5 rounded mb-8" />
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-6 bg-white/5 rounded-lg" style={{ width: `${40 + Math.random() * 50}%` }} />
+            ))}
+          </div>
         </div>
-    );
+        <div className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl animate-pulse">
+          <div className="h-4 w-32 bg-white/5 rounded mb-8" />
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <div className="h-6 w-6 bg-white/5 rounded" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-white/5 rounded w-3/4" />
+                  <div className="h-1.5 bg-white/5 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="bg-[#0a0a0a] border border-white/5 rounded-[2.5rem] p-6 shadow-2xl animate-pulse">
+            <div className="h-4 w-32 bg-white/5 rounded mb-6" />
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, j) => (
+                <div key={j} className="space-y-2">
+                  <div className="h-4 bg-white/5 rounded w-3/4" />
+                  <div className="h-3 bg-white/5 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function ErrorBanner({ message }: { message: string }) {
+  if (!message) return null;
+  return (
+    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 flex items-center gap-3">
+      <AlertTriangle size={18} className="text-red-400 shrink-0" />
+      <p className="text-sm text-red-300">{message}</p>
+    </div>
+  );
+}
+
+function getActiveEmpresaId(): string {
+  if (typeof window === 'undefined') return DEFAULT_EMPRESA_ID;
+  try {
+    const stored = localStorage.getItem('blis_active_empresa');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed?.id) return parsed.id;
+    }
+  } catch {}
+  return DEFAULT_EMPRESA_ID;
+}
+
+export default function Dashboard() {
+  const [empresa, setEmpresa] = useState<{ nombre: string; id: string }>({ nombre: 'BLIS Corp', id: DEFAULT_EMPRESA_ID });
+  const [productsCount, setProductsCount] = useState(0);
+  const [clientsCount, setClientsCount] = useState(0);
+  const [blogViews, setBlogViews] = useState(0);
+  const [leadsCount, setLeadsCount] = useState(0);
+  const [projectsCount, setProjectsCount] = useState(0);
+  const [compras, setCompras] = useState<any[]>([]);
+  const [topProducts, setTopProducts] = useState<{ nombre: string; ventas: number }[]>([]);
+  const [lastLeads, setLastLeads] = useState<any[]>([]);
+  const [lastCompras, setLastCompras] = useState<any[]>([]);
+  const [lastPosts, setLastPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [chartMonths, setChartMonths] = useState(6);
+  const empresaIdRef = useRef(getActiveEmpresaId());
+
+  const fetchData = useCallback(async (empresaIdOverride?: string) => {
+    const empresaId = empresaIdOverride || getActiveEmpresaId();
+    empresaIdRef.current = empresaId;
+    setError('');
+
+    try {
+      const [
+        rEmpresa,
+        rProdCount,
+        rCliCount,
+        rBlogData,
+        rLeadsTotal,
+        rProjectsData,
+        rComprasData,
+        rTopProdData,
+        rLastLeadsData,
+        rLastComprasData,
+        rLastPostsData,
+      ] = await Promise.all([
+        supabase.from('empresas').select('id, nombre').eq('id', empresaId).single(),
+        supabase.from('productos').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('activo', true),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('rol', 'cliente'),
+        supabase.from('blog_posts').select('vistas').eq('empresa_id', empresaId),
+        supabase.from('leads').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
+        supabase.from('projects').select('id').eq('empresa_id', empresaId).eq('is_active', true),
+        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('empresa_id', empresaId).eq('estado', 'completado'),
+        supabase.from('compra_items').select('cantidad, compra_id, producto:productos!inner(nombre)').eq('empresa_id', empresaId).order('compra_id').limit(2000),
+        supabase.from('leads').select('id, nombre, email, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
+        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
+        supabase.from('blog_posts').select('id, titulo, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
+      ]);
+
+      // Verificar errores individuales
+      const errors: string[] = [];
+      if (rEmpresa.error) errors.push('empresa');
+      if (rProdCount.error) errors.push('productos');
+      if (rCliCount.error) errors.push('clientes');
+      if (rBlogData.error) errors.push('blog');
+      if (rLeadsTotal.error) errors.push('leads');
+      if (rProjectsData.error) errors.push('proyectos');
+      if (rComprasData.error) errors.push('compras');
+      if (rTopProdData.error) errors.push('compra_items');
+      if (rLastLeadsData.error) errors.push('leads recientes');
+      if (rLastComprasData.error) errors.push('compras recientes');
+      if (rLastPostsData.error) errors.push('posts recientes');
+      if (errors.length > 0) {
+        setError(`Error al cargar: ${errors.join(', ')}`);
+      }
+
+      const { data: empresaData } = rEmpresa;
+      const { count: prodCount } = rProdCount;
+      const { count: cliCount } = rCliCount;
+      const { data: blogData } = rBlogData;
+      const { count: leadsTotal } = rLeadsTotal;
+      const { data: projectsData } = rProjectsData;
+      const { data: comprasData } = rComprasData;
+      const { data: topProdData } = rTopProdData;
+      const { data: lastLeadsData } = rLastLeadsData;
+      const { data: lastComprasData } = rLastComprasData;
+      const { data: lastPostsData } = rLastPostsData;
+
+      if (empresaData) setEmpresa({ nombre: empresaData.nombre, id: empresaData.id });
+      setProductsCount(prodCount || 0);
+      setClientsCount(cliCount || 0);
+      setBlogViews((blogData || []).reduce((s: number, p: any) => s + (p.vistas || 0), 0));
+      setLeadsCount(leadsTotal || 0);
+      setProjectsCount((projectsData || []).length);
+      setCompras(comprasData || []);
+      setLastLeads(lastLeadsData || []);
+      setLastCompras(lastComprasData || []);
+      setLastPosts(lastPostsData || []);
+
+      if (comprasData && topProdData) {
+        const completedIds = new Set(comprasData.map((c: any) => c.id));
+        const filtered = (topProdData || []).filter((item: any) => completedIds.has(item.compra_id));
+        const productMap = new Map<string, number>();
+        for (const item of filtered) {
+          const prod = Array.isArray(item.producto) ? item.producto[0] : item.producto;
+          const name = prod?.nombre || 'Sin nombre';
+          productMap.set(name, (productMap.get(name) || 0) + (item.cantidad || 1));
+        }
+        const sorted = [...productMap.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([nombre, ventas]) => ({ nombre, ventas }));
+        setTopProducts(sorted);
+      }
+
+      setLastUpdated(new Date());
+    } catch (err: any) {
+      setError(`Error de conexión: ${err.message || 'Error desconocido'}`);
+    }
+
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Escuchar cambios de empresa desde el CompanySwitcher
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'blis_active_empresa') {
+        const newId = getActiveEmpresaId();
+        if (newId !== empresaIdRef.current) {
+          setLoading(true);
+          fetchData(newId);
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [fetchData]);
+
+  // Realtime: actualización incremental
+  useEffect(() => {
+    const comprasChannel = supabase
+      .channel('dashboard-compras')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'compras', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => { fetchData() })
+      .subscribe()
+
+    const leadsChannel = supabase
+      .channel('dashboard-leads')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => { fetchData() })
+      .subscribe()
+
+    const blogChannel = supabase
+      .channel('dashboard-blog')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => { fetchData() })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => { fetchData() })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(comprasChannel)
+      supabase.removeChannel(leadsChannel)
+      supabase.removeChannel(blogChannel)
+    }
+  }, [fetchData]);
+
+  // Re-fetch cuando cambia empresaIdRef (CompanySwitcher hace reload, así que este efecto cubre el caso post-reload)
+  useEffect(() => {
+    const id = getActiveEmpresaId();
+    if (id !== empresaIdRef.current) {
+      empresaIdRef.current = id;
+      setLoading(true);
+      fetchData(id);
+    }
+  }, []);
+
+  const totalVentas = useMemo(() => compras.reduce((s, c) => s + (Number(c.monto_usd) || 0), 0), [compras]);
+
+  const monthlySales = useMemo(() => {
+    const now = new Date();
+    const months: { label: string; ventas: number }[] = [];
+    for (let i = chartMonths - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ label: MESES[d.getMonth()], ventas: 0 });
+    }
+    for (const c of compras) {
+      if (!c.creado_en) continue;
+      const d = new Date(c.creado_en);
+      const key = MESES[d.getMonth()];
+      const monthAgo = new Date();
+      monthAgo.setMonth(monthAgo.getMonth() - chartMonths);
+      if (d < monthAgo) continue;
+      const entry = months.find(m => m.label === key);
+      if (entry) entry.ventas += Number(c.monto_usd) || 0;
+    }
+    return months;
+  }, [compras, chartMonths]);
+
+  const timeSinceUpdate = lastUpdated
+    ? Math.round((Date.now() - lastUpdated.getTime()) / 1000)
+    : null;
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] text-white p-4 md:p-8 font-sans">
+      <div className="max-w-[1600px] mx-auto space-y-8">
+
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tighter">
+                {empresa.nombre} <span className="text-blis-red">Panel</span>
+              </h1>
+              <button onClick={() => { setLoading(true); fetchData(); }} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-all">
+                <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+              </button>
+            </div>
+            <p className="text-zinc-500 text-xs font-black uppercase tracking-normal md:tracking-[0.4em] mt-2 flex items-center gap-2">
+              <TrendingUp size={14} className="text-emerald-500" /> Panel de Control Corporativo
+              {timeSinceUpdate !== null && !loading && (
+                <span className="flex items-center gap-1 text-zinc-700">
+                  <Clock size={10} /> Actualizado hace {timeSinceUpdate < 60 ? `${timeSinceUpdate}s` : `${Math.floor(timeSinceUpdate / 60)}min`}
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="bg-[#050505] border border-white/5 p-4 rounded-2xl flex items-center gap-4 shadow-xl">
+            <div className="p-3 bg-emerald-500/10 rounded-xl"><DollarSign size={20} className="text-emerald-500" /></div>
+            <div>
+              <p className="text-[9px] font-black text-zinc-600 uppercase">Ventas Totales</p>
+              <p className="text-xl font-black text-white">{formatCurrency(totalVentas)}</p>
+            </div>
+          </div>
+        </div>
+
+        <ErrorBanner message={error} />
+
+        {loading ? (
+          <SkeletonStats />
+        ) : (
+          <>
+        {/* Top Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { label: 'Productos Activos', val: productsCount, icon: Package, color: 'text-emerald-500', bg: 'bg-emerald-500/5', fmt: formatNumber },
+            { label: 'Clientes', val: clientsCount, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/5', fmt: formatNumber },
+            { label: 'Visitas al Blog', val: blogViews, icon: Eye, color: 'text-amber-500', bg: 'bg-amber-500/5', fmt: formatNumber },
+            { label: 'Ventas Totales', val: totalVentas, icon: DollarSign, color: 'text-blis-red', bg: 'bg-blis-red/5', fmt: formatCurrency },
+          ].map((s, i) => (
+            <div key={i} className="bg-[#050505] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl">
+              <div className={`absolute top-0 right-0 w-24 h-24 ${s.bg} blur-3xl rounded-full -translate-y-1/2 translate-x-1/2`} />
+              <s.icon className={`${s.color} mb-4 relative z-10`} size={24} />
+              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest relative z-10">{s.label}</p>
+              <h4 className="text-3xl font-black text-white mt-1 relative z-10">{s.fmt(s.val)}</h4>
+            </div>
+          ))}
+        </div>
+
+        {/* Second Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            { label: 'Leads', val: leadsCount, icon: Contact, color: 'text-purple-500', bg: 'bg-purple-500/5', fmt: formatNumber },
+            { label: 'Proyectos Activos', val: projectsCount, icon: Briefcase, color: 'text-cyan-500', bg: 'bg-cyan-500/5', fmt: formatNumber },
+          ].map((s, i) => (
+            <div key={i} className="bg-[#050505] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl flex items-center gap-5">
+              <div className={`absolute top-0 right-0 w-24 h-24 ${s.bg} blur-3xl rounded-full -translate-y-1/2 translate-x-1/2`} />
+              <div className={`p-4 ${s.bg} rounded-2xl relative z-10`}><s.icon className={s.color} size={28} /></div>
+              <div className="relative z-10">
+                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{s.label}</p>
+                <h4 className="text-4xl font-black text-white mt-1">{s.fmt(s.val)}</h4>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Monthly Sales Bar Chart */}
+          <div className="xl:col-span-2 bg-[#050505] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-sm font-black uppercase tracking-[0.3em] flex items-center gap-3">
+                <TrendingUp size={18} className="text-blis-red" /> Ventas Mensuales
+              </h3>
+              <div className="flex gap-1 bg-white/5 rounded-xl p-1">
+                {[6, 12].map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setChartMonths(n)}
+                    className={`px-3 py-1 text-[10px] font-black uppercase rounded-lg transition-all ${
+                      chartMonths === n ? 'bg-blis-red text-white' : 'text-zinc-500 hover:text-white'
+                    }`}
+                  >
+                    {n}M
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlySales}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" />
+                  <XAxis dataKey="label" stroke="#52525b" tick={{ fontSize: 11, fontWeight: 700 }} />
+                  <YAxis stroke="#52525b" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '1rem' }}
+                    formatter={(value: any) => [formatCurrency(Number(value) || 0), 'Ventas']}
+                    labelStyle={{ color: '#a1a1aa', fontWeight: 700, fontSize: 12 }}
+                  />
+                  <Bar dataKey="ventas" fill="#be0b3c" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Top Products */}
+          <div className="bg-[#050505] border border-white/5 rounded-[2.5rem] p-8 shadow-2xl">
+            <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+              <Package size={18} className="text-emerald-500" /> Top Productos
+            </h3>
+            {topProducts.length === 0 ? (
+              <p className="text-zinc-500 text-xs text-center py-12">Sin datos de ventas</p>
+            ) : (
+              <div className="space-y-4">
+                {topProducts.map((p, i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <span className="text-xl font-black text-zinc-700 w-6 text-right">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{p.nombre}</p>
+                      <div className="mt-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-emerald-500 rounded-full"
+                          style={{ width: `${topProducts[0] ? (p.ventas / topProducts[0].ventas) * 100 : 0}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-zinc-500">{p.ventas} ventas</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Activity Feed */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {[
+            {
+              title: 'Últimos Leads', icon: Contact, color: 'text-purple-500',
+              data: lastLeads, empty: 'Sin leads recientes',
+              render: (item: any) => (
+                <div key={item.id}>
+                  <p className="text-sm font-bold text-white">{item.nombre}</p>
+                  <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
+                    {item.email || 'Sin email'} • {item.estado || 'nuevo'}
+                  </p>
+                </div>
+              )
+            },
+            {
+              title: 'Últimas Compras', icon: ShoppingCart, color: 'text-emerald-500',
+              data: lastCompras, empty: 'Sin compras recientes',
+              render: (item: any) => (
+                <div key={item.id}>
+                  <p className="text-sm font-bold text-white">{formatCurrency(item.monto_usd || 0)}</p>
+                  <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
+                    {item.id?.slice(0, 8)}... • {item.estado || 'pendiente'}
+                  </p>
+                </div>
+              )
+            },
+            {
+              title: 'Últimos Posts', icon: FileText, color: 'text-amber-500',
+              data: lastPosts, empty: 'Sin posts recientes',
+              render: (item: any) => (
+                <div key={item.id}>
+                  <p className="text-sm font-bold text-white truncate">{item.titulo}</p>
+                  <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
+                    {item.estado || 'borrador'} • {item.creado_en ? new Date(item.creado_en).toLocaleDateString('es-PE') : ''}
+                  </p>
+                </div>
+              )
+            },
+          ].map((col, i) => (
+            <div key={i} className="bg-[#050505] border border-white/5 rounded-[2.5rem] p-6 shadow-2xl">
+              <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-6 flex items-center gap-3">
+                <col.icon size={18} className={col.color} /> {col.title}
+              </h3>
+              <div className="space-y-4">
+                {col.data.length === 0 ? (
+                  <p className="text-zinc-500 text-xs py-8 text-center">{col.empty}</p>
+                ) : (
+                  col.data.map(col.render)
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+          </>
+        )}
+
+      </div>
+    </div>
+  );
 }

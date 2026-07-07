@@ -36,8 +36,7 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-"exclude": [
-    "node_modules",
-    "components_disabled"
+  "exclude": [
+    "node_modules"
   ]
 }

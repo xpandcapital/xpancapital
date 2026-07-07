@@ -11,6 +11,18 @@ export function useCourseManagement() {
   const [certificateTemplates, setCertificateTemplates] = useState<{ id: string; nombre: string }[]>([])
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null)
   const saveVersionRef = useRef(0)
+  const hasUnsavedRef = useRef(false)
+
+  // Advertir al usuario si cierra la pestaña con cambios sin guardar
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedRef.current) {
+        e.preventDefault()
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [])
 
   const fetchCourses = useCallback(async () => {
     setLoading(true)
@@ -102,6 +114,7 @@ export function useCourseManagement() {
 
   useEffect(() => {
     if (currentCourse && currentCourse.title.trim()) {
+      hasUnsavedRef.current = true
       if (autoSaveRef.current) clearTimeout(autoSaveRef.current)
       autoSaveRef.current = setTimeout(() => {
         saveBorrador()
@@ -175,6 +188,7 @@ export function useCourseManagement() {
         } else if (!isNew) {
           setCurrentCourse(prev => prev ? { ...prev, status: effectiveStatus, productoId, lastSaved: new Date().toLocaleTimeString() } : null)
         }
+        hasUnsavedRef.current = false
         return true
       } else if (data.error?.includes('slug') || data.error?.includes('duplicate')) {
         if (isNew) {
@@ -189,6 +203,7 @@ export function useCourseManagement() {
           if (retryResult.success && retryResult.data?.id) {
             setCurrentCourse(prev => prev ? { ...prev, id: retryResult.data.id, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null)
             await fetchCourses()
+            hasUnsavedRef.current = false
             return true
           } else {
             alert('Error al guardar: ' + (retryResult.error || 'Error desconocido'))
@@ -203,6 +218,7 @@ export function useCourseManagement() {
           const retryResult = await retryRes.json()
           if (retryResult.success) {
             setCurrentCourse(prev => prev ? { ...prev, status: effectiveStatus, lastSaved: new Date().toLocaleTimeString() } : null)
+            hasUnsavedRef.current = false
             return true
           } else {
             alert('Error al guardar: ' + (retryResult.error || 'Error desconocido'))

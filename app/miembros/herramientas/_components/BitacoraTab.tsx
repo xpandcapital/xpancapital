@@ -41,7 +41,7 @@ const PAGE_SIZE = 10
 function FieldTooltip({ text }: { text: string }) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
+      <TooltipTrigger>
         <span className="inline-flex items-center cursor-help ml-1">
           <Info className="w-3 h-3 text-gray-600 hover:text-gray-400 transition-colors" />
         </span>

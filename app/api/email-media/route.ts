@@ -1,12 +1,13 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-const EMPRESA_ID = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
+const EMPRESA_ID = DEFAULT_EMPRESA_ID
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
