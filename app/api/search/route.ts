@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q')?.trim()
 
-  // Obtener empresa_id: prioridad al header del middleware > query param > default
   const empresaId =
     request.headers.get('x-blis-empresa-id') ||
     searchParams.get('empresa_id') ||
@@ -34,13 +33,12 @@ export async function GET(request: NextRequest) {
 
     const [productos, clientes, leads, blog, proyectos] = await Promise.allSettled([
       supabase.from('productos').select('id,nombre,precio_usd,imagen_principal').eq('empresa_id', empresaId).ilike('nombre', pattern).limit(5),
-      supabase.from('profiles').select('id,nombre,email').eq('empresa_id', empresaId).or(`nombre.ilike.${pattern},email.ilike.${pattern}`).limit(5),
-      supabase.from('leads').select('id,nombre,email,estado').eq('empresa_id', empresaId).or(`nombre.ilike.${pattern},email.ilike.${pattern}`).limit(5),
-      supabase.from('blog_posts').select('id,titulo,estado').eq('empresa_id', empresaId).ilike('titulo', pattern).limit(5),
+      supabase.from('profiles').select('id,nombre,email').eq('empresa_id', empresaId).or(`nombre.ilike.*${q}*,email.ilike.*${q}*`).limit(5),
+      supabase.from('leads').select('id,nombre,email,estado').eq('empresa_id', empresaId).or(`nombre.ilike.*${q}*,email.ilike.*${q}*`).limit(5),
+      supabase.from('blog_posts').select('id,titulo,slug,estado').eq('empresa_id', empresaId).ilike('titulo', pattern).limit(5),
       supabase.from('projects').select('id,name,status').eq('empresa_id', empresaId).ilike('name', pattern).limit(5),
     ])
 
-    // Log failures for debugging
     const failures = [
       { name: 'productos', result: productos },
       { name: 'clientes', result: clientes },
@@ -91,6 +89,7 @@ export async function GET(request: NextRequest) {
         title: b.titulo,
         subtitle: b.estado || undefined,
         url: `/superadmin/blog/crear?id=${b.id}`,
+        publicUrl: b.slug ? `/blog/articulo/${b.slug}` : undefined,
       }))
     }
 
