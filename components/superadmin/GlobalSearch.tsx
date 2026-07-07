@@ -34,13 +34,13 @@ export function GlobalSearch() {
   const [loading, setLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [noResults, setNoResults] = useState(false)
+  const [searchError, setSearchError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const cacheRef = useRef<Map<string, Record<string, SearchResult[]>>>(new Map())
 
-  // Limpiar cache al cerrar y limitar tamaño
   useEffect(() => {
     if (open) {
       const cache = cacheRef.current
@@ -66,6 +66,7 @@ export function GlobalSearch() {
       setResults({})
       setSelectedIndex(0)
       setNoResults(false)
+      setSearchError('')
       setTimeout(() => inputRef.current?.focus(), 100)
     }
   }, [open])
@@ -93,16 +94,31 @@ export function GlobalSearch() {
     setLoading(true)
 
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, {
+      let empresaId = '';
+      try {
+        const stored = localStorage.getItem('blis_active_empresa');
+        if (stored) empresaId = JSON.parse(stored)?.id || '';
+      } catch {}
+
+      const params = new URLSearchParams({ q });
+      if (empresaId) params.set('empresa_id', empresaId);
+      const res = await fetch(`/api/search?${params.toString()}`, {
         signal: controller.signal,
       })
       const data = await res.json()
 
       if (!controller.signal.aborted) {
-        const r = (data.success && data.results) ? data.results : {}
-        setResults(r)
-        cacheRef.current.set(q.toLowerCase(), r)
-        setNoResults(Object.values(r as Record<string, any[]>).flat().length === 0)
+        if (!data.success) {
+          setSearchError(data.error || 'Error desconocido')
+          setResults({})
+          setNoResults(false)
+        } else {
+          const r = data.results || {}
+          setResults(r)
+          setSearchError('')
+          cacheRef.current.set(q.toLowerCase(), r)
+          setNoResults(Object.values(r as Record<string, any[]>).flat().length === 0)
+        }
         setSelectedIndex(0)
       }
     } catch (err) {
@@ -110,6 +126,7 @@ export function GlobalSearch() {
         console.error('[GlobalSearch] Error fetching results:', err)
         setResults({})
         setNoResults(true)
+        setSearchError(err instanceof TypeError ? 'Error de conexión' : 'Error al buscar')
       }
     } finally {
       if (!controller.signal.aborted) setLoading(false)
@@ -241,6 +258,7 @@ export function GlobalSearch() {
                 <div className="px-4 py-12 text-center">
                   <Search className="w-8 h-8 text-gray-700 mx-auto mb-3" />
                   <p className="text-sm text-gray-500">Sin resultados para &quot;{query}&quot;</p>
+                  {searchError && <p className="text-xs text-red-400 mt-2">{searchError}</p>}
                 </div>
               )}
 
