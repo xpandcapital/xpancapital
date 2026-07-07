@@ -5,6 +5,7 @@ import { createPortal } from "react-dom"
 import { useRouter } from "next/navigation"
 import {
   Search, Package, Users, Contact, FileText, Briefcase,
+  GraduationCap, Layout,
   Loader2, CornerDownLeft
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
@@ -17,14 +18,16 @@ interface SearchResult {
   url: string
 }
 
-type CategoryKey = "productos" | "clientes" | "leads" | "blog" | "proyectos"
+type CategoryKey = "productos" | "clientes" | "leads" | "blog" | "proyectos" | "cursos" | "templates"
 
 const CATEGORY_CONFIG: Record<CategoryKey, { label: string; icon: typeof Package; color: string; bg: string }> = {
-  productos: { label: "Productos", icon: Package, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-  clientes: { label: "Clientes", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-  leads: { label: "Leads", icon: Contact, color: "text-purple-500", bg: "bg-purple-500/10" },
-  blog: { label: "Blog", icon: FileText, color: "text-amber-500", bg: "bg-amber-500/10" },
-  proyectos: { label: "Proyectos", icon: Briefcase, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+  productos:  { label: "Productos",  icon: Package,        color: "text-emerald-500", bg: "bg-emerald-500/10" },
+  clientes:   { label: "Clientes",   icon: Users,          color: "text-blue-500",    bg: "bg-blue-500/10" },
+  leads:      { label: "Leads",      icon: Contact,        color: "text-purple-500",  bg: "bg-purple-500/10" },
+  blog:       { label: "Blog",       icon: FileText,       color: "text-amber-500",   bg: "bg-amber-500/10" },
+  proyectos:  { label: "Proyectos",  icon: Briefcase,      color: "text-cyan-500",    bg: "bg-cyan-500/10" },
+  cursos:     { label: "Cursos",     icon: GraduationCap,  color: "text-rose-500",    bg: "bg-rose-500/10" },
+  templates:  { label: "Páginas",    icon: Layout,         color: "text-indigo-500",  bg: "bg-indigo-500/10" },
 }
 
 export function GlobalSearch() {
@@ -266,7 +269,7 @@ export function GlobalSearch() {
                 <div className="px-4 py-12 text-center">
                   <Search className="w-8 h-8 text-gray-700 mx-auto mb-3" />
                   <p className="text-sm text-gray-500">Escribe al menos 2 caracteres para buscar</p>
-                  <p className="text-[10px] text-gray-700 mt-1">Productos, clientes, leads, blog y proyectos</p>
+                  <p className="text-[10px] text-gray-700 mt-1">Productos, clientes, leads, blog, proyectos, cursos y páginas</p>
                 </div>
               )}
             </div>

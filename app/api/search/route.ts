@@ -9,121 +9,171 @@ function getAdminClient() {
   return createClient(supabaseUrl, supabaseServiceKey)
 }
 
+function stripAccents(str: string): string {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const q = searchParams.get('q')?.trim()
-
+  const rawQ = searchParams.get('q')?.trim()
   const empresaId = searchParams.get('empresa_id') || DEFAULT_EMPRESA_ID
 
-  if (!q || q.length < 2) {
-    return NextResponse.json({ success: true, results: {} })
+  if (!rawQ || rawQ.length < 2) {
+    return NextResponse.json({ success: true, results: {}, query: rawQ || '' })
   }
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('[Search API] Missing Supabase ENV vars')
     return NextResponse.json({ success: false, error: 'Configuración del servidor incompleta' }, { status: 500 })
+  }
+
+  const q = stripAccents(rawQ.toLowerCase()).replace(/[^a-z0-9\s]/g, ' ').trim()
+  if (q.length < 2) {
+    return NextResponse.json({ success: true, results: {}, query: rawQ })
   }
 
   try {
     const supabase = getAdminClient()
-    const pattern = `%${q}%`
 
-    const [productos, clientes, leads, blog, proyectos] = await Promise.allSettled([
-      supabase.from('productos')
-        .select('id,nombre,precio_usd,imagen_principal')
-        .eq('empresa_id', empresaId)
-        .or(`nombre.ilike.*${q}*,descripcion.ilike.*${q}*`)
-        .limit(5),
-      supabase.from('profiles')
-        .select('id,nombre,email')
-        .eq('empresa_id', empresaId)
-        .or(`nombre.ilike.*${q}*,email.ilike.*${q}*`)
-        .limit(5),
-      supabase.from('leads')
-        .select('id,nombre,email,estado')
-        .eq('empresa_id', empresaId)
-        .or(`nombre.ilike.*${q}*,email.ilike.*${q}*`)
-        .limit(5),
-      supabase.from('blog_posts')
-        .select('id,titulo,slug,estado')
-        .eq('empresa_id', empresaId)
-        .or(`titulo.ilike.*${q}*,contenido.ilike.*${q}*,extracto.ilike.*${q}*`)
-        .limit(5),
-      supabase.from('projects')
-        .select('id,name,status')
-        .eq('empresa_id', empresaId)
-        .or(`name.ilike.*${q}*,description.ilike.*${q}*`)
-        .limit(5),
-    ])
+    const queries = [
+      {
+        key: 'productos',
+        run: () => supabase.from('productos')
+          .select('id,nombre,descripcion,precio_usd,imagen_principal,slug')
+          .eq('empresa_id', empresaId)
+          .or(`nombre.ilike.%${q}%,descripcion.ilike.%${q}%`)
+          .eq('activo', true)
+          .limit(8),
+        map: (p: any) => ({
+          id: p.id,
+          title: p.nombre,
+          subtitle: p.precio_usd ? `USD ${p.precio_usd}` : (p.descripcion?.slice(0, 60) || ''),
+          url: `/superadmin/productos?id=${p.id}`,
+          image: p.imagen_principal || undefined,
+        })
+      },
+      {
+        key: 'clientes',
+        run: () => supabase.from('profiles')
+          .select('id,nombre,email,profilepic')
+          .eq('empresa_id', empresaId)
+          .or(`nombre.ilike.%${q}%,email.ilike.%${q}%`)
+          .limit(8),
+        map: (c: any) => ({
+          id: c.id,
+          title: c.nombre || c.email,
+          subtitle: c.email || '',
+          url: `/superadmin/clientes/${c.id}`,
+          image: c.profilepic || undefined,
+        })
+      },
+      {
+        key: 'leads',
+        run: () => supabase.from('leads')
+          .select('id,nombre,email,estado')
+          .eq('empresa_id', empresaId)
+          .or(`nombre.ilike.%${q}%,email.ilike.%${q}%`)
+          .limit(8),
+        map: (l: any) => ({
+          id: l.id,
+          title: l.nombre,
+          subtitle: `${l.email || 'Sin email'} · ${l.estado || 'nuevo'}`,
+          url: `/superadmin/leads?id=${l.id}`,
+          image: undefined as string | undefined,
+        })
+      },
+      {
+        key: 'blog',
+        run: () => supabase.from('blog_posts')
+          .select('id,titulo,slug,estado,extracto,imagen_url')
+          .eq('empresa_id', empresaId)
+          .or(`titulo.ilike.%${q}%,contenido.ilike.%${q}%,extracto.ilike.%${q}%`)
+          .limit(8),
+        map: (b: any) => ({
+          id: b.id,
+          title: b.titulo,
+          subtitle: b.extracto?.slice(0, 80) || b.estado || '',
+          url: `/superadmin/blog/crear?id=${b.id}`,
+          image: b.imagen_url || undefined,
+        })
+      },
+      {
+        key: 'proyectos',
+        run: () => supabase.from('projects')
+          .select('id,name,status,description,cover_image')
+          .eq('empresa_id', empresaId)
+          .or(`name.ilike.%${q}%,description.ilike.%${q}%`)
+          .limit(8),
+        map: (p: any) => ({
+          id: p.id,
+          title: p.name,
+          subtitle: p.status || '',
+          url: `/superadmin/proyectos/${p.id}`,
+          image: p.cover_image || undefined,
+        })
+      },
+      {
+        key: 'cursos',
+        run: () => supabase.from('cursos')
+          .select('id,nombre,descripcion,imagen_principal,slug')
+          .or(`nombre.ilike.%${q}%,descripcion.ilike.%${q}%`)
+          .limit(8),
+        map: (c: any) => ({
+          id: c.id,
+          title: c.nombre,
+          subtitle: c.descripcion?.slice(0, 60) || '',
+          url: `/superadmin/cursos?id=${c.id}`,
+          image: c.imagen_principal || undefined,
+        })
+      },
+      {
+        key: 'templates',
+        run: () => supabase.from('templates')
+          .select('id,nombre,slug,tipo_contenido,estado,thumbnail_url')
+          .eq('empresa_id', empresaId)
+          .or(`nombre.ilike.%${q}%,slug.ilike.%${q}%`)
+          .limit(8),
+        map: (t: any) => ({
+          id: t.id,
+          title: t.nombre,
+          subtitle: `${t.tipo_contenido || 'pagina'} · ${t.estado || 'borrador'}`,
+          url: `/superadmin/templates?id=${t.id}`,
+          image: t.thumbnail_url || undefined,
+        })
+      },
+    ]
 
-    const failures = [
-      { name: 'productos', result: productos },
-      { name: 'clientes', result: clientes },
-      { name: 'leads', result: leads },
-      { name: 'blog', result: blog },
-      { name: 'proyectos', result: proyectos },
-    ].filter(f => f.result.status === 'rejected' || f.result.value?.error)
+    const settled = await Promise.allSettled(queries.map(q => q.run()))
 
-    if (failures.length > 0) {
-      console.error('[Search API] Fallos:', JSON.stringify(failures.map(f => ({
-        name: f.name,
-        error: f.result.status === 'rejected'
-          ? String(f.result.reason)
-          : JSON.stringify(f.result.value?.error)
-      }))))
-    }
-
+    const failures: string[] = []
     const results: Record<string, any[]> = {}
 
-    if (productos.status === 'fulfilled' && !productos.value.error && productos.value.data) {
-      results.productos = productos.value.data.map((p: any) => ({
-        id: p.id,
-        title: p.nombre,
-        subtitle: p.precio_usd ? `$${p.precio_usd}` : undefined,
-        url: `/superadmin/productos?id=${p.id}`,
-        image: p.imagen_principal || undefined,
-      }))
+    for (let i = 0; i < queries.length; i++) {
+      const q = queries[i]
+      const s = settled[i]
+
+      if (s.status === 'rejected') {
+        failures.push(`${q.key}: ${String(s.reason).slice(0, 100)}`)
+        continue
+      }
+
+      if (s.value.error) {
+        failures.push(`${q.key}: ${JSON.stringify(s.value.error).slice(0, 200)}`)
+        continue
+      }
+
+      const data = s.value.data
+      if (data && data.length > 0) {
+        results[q.key] = data.map(q.map)
+      }
     }
 
-    if (clientes.status === 'fulfilled' && !clientes.value.error && clientes.value.data) {
-      results.clientes = clientes.value.data.map((c: any) => ({
-        id: c.id,
-        title: c.nombre || c.email,
-        subtitle: c.email || undefined,
-        url: `/superadmin/clientes/${c.id}`,
-      }))
+    if (failures.length > 0) {
+      console.error(`[Search API] Query failures for "${rawQ}" → "${q}": ${failures.join(' | ')}`)
     }
 
-    if (leads.status === 'fulfilled' && !leads.value.error && leads.value.data) {
-      results.leads = leads.value.data.map((l: any) => ({
-        id: l.id,
-        title: l.nombre,
-        subtitle: l.email || l.estado || undefined,
-        url: `/superadmin/leads?id=${l.id}`,
-      }))
-    }
-
-    if (blog.status === 'fulfilled' && !blog.value.error && blog.value.data) {
-      results.blog = blog.value.data.map((b: any) => ({
-        id: b.id,
-        title: b.titulo,
-        subtitle: b.estado || undefined,
-        url: `/superadmin/blog/crear?id=${b.id}`,
-      }))
-    }
-
-    if (proyectos.status === 'fulfilled' && !proyectos.value.error && proyectos.value.data) {
-      results.proyectos = proyectos.value.data.map((pr: any) => ({
-        id: pr.id,
-        title: pr.name,
-        subtitle: pr.status || undefined,
-        url: `/superadmin/proyectos/${pr.id}`,
-      }))
-    }
-
-    return NextResponse.json({ success: true, results })
+    return NextResponse.json({ success: true, results, query: rawQ })
   } catch (err) {
-    console.error('[Search API] Error general:', err)
+    console.error('[Search API] Fatal error:', err)
     return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 })
   }
 }
