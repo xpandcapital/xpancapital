@@ -13,7 +13,6 @@ const TABS: { key: TabGamificacion; label: string }[] = [
   { key: 'ajustes', label: 'Ajustes' },
   { key: 'historial', label: 'Historial' },
   { key: 'logros', label: 'Logros' },
-  { key: 'certificados', label: 'Certificados' },
 ]
 
 export default function GamificacionPage() {

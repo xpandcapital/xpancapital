@@ -23,11 +23,11 @@ export async function GET(request: NextRequest) {
       .from('gamificacion_config')
       .select('*')
       .eq('empresa_id', empresaId)
-      .single()
+      .maybeSingle()
 
     let config = initialConfig
 
-    if (error && !error.message.includes('No rows')) {
+    if (error) {
       return NextResponse.json({ success: false, error: error.message }, { status: 400 })
     }
 
