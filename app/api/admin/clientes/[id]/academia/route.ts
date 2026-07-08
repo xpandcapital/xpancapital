@@ -164,6 +164,45 @@ export async function GET(
       })
     }
 
+    // Cursos con progreso en curso_progreso pero sin matrícula ni compra (academia pública)
+    const cursosMatriculadosIds = new Set((equipoCursos || []).map(e => e.curso_id))
+    const cursosCompradosIds = new Set(cursosComprados.map(c => c.id))
+    const cursosConProgresoIds = new Set((cursoProgreso || []).map(p => p.curso_id))
+
+    const cursosHuerfanosIds = [...cursosConProgresoIds].filter(
+      id => !cursosMatriculadosIds.has(id) && !cursosCompradosIds.has(id)
+    )
+
+    if (cursosHuerfanosIds.length) {
+      const { data: huerfanos } = await supabase
+        .from('cursos')
+        .select('id, nombre, imagen_principal, modulos, slug')
+        .in('id', cursosHuerfanosIds)
+      if (huerfanos) {
+        for (const h of huerfanos) {
+          const modulos = h.modulos as any[] || []
+          const totalLessons = modulos.reduce((sum: number, m: any) => sum + (m.lessons?.length || 0), 0)
+          const p = cursoProgreso?.find(cp => cp.curso_id === h.id)
+          progress.push({
+            id: `publico-${h.id}`,
+            courseId: h.id,
+            course: h.nombre || 'Curso',
+            slug: h.slug || '',
+            imagen: h.imagen_principal || null,
+            progress: p?.progreso || 0,
+            grade: null,
+            leccionesCompletadas: 0,
+            totalLecciones: totalLessons,
+            attempts: 0,
+            maxAttempts: 3,
+            examStatus: 'open',
+            ultimoAcceso: p?.actualizado_en || null,
+            matriculado: false,
+          })
+        }
+      }
+    }
+
     const certs = (certificados || []).map((c: any) => ({
       id: c.id,
       name: c.nombre,
