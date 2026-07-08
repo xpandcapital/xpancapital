@@ -1,13 +1,15 @@
 "use client"
 
 import { useEffect, useState, useRef } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Trophy } from 'lucide-react'
 import { useComunidad } from './_hooks/useComunidad'
 import { useAuth } from '@/hooks/useAuth'
+import { useRanking } from '@/lib/hooks/useGamificacion'
 import {
   PostCard, PostCreator, PerfilHeader,
-  MiembrosSeguidos, ConexionesLista, CompletarPerfil, UltimasActualizaciones
+  MiembrosSeguidos, CompletarPerfil, UltimasActualizaciones
 } from './_components'
 import type { ComunidadPost } from './_types'
 
@@ -16,6 +18,7 @@ export default function ComunidadPage() {
   const { posts, loading, loadingMore, error, hasMore, fetchPosts, eliminarPost, reaccionar, votar, inscribirEvento, cancelarInscripcion } = useComunidad()
   const [miembros, setMiembros] = useState<any[]>([])
   const [actualizaciones, setActualizaciones] = useState<any[]>([])
+  const { top10, loading: rankingLoading } = useRanking(user?.empresa_id, user?.id)
 
   useEffect(() => { fetchPosts(true) }, [])
 
@@ -74,17 +77,49 @@ export default function ComunidadPage() {
               {/* Miembros */}
               <MiembrosSeguidos miembros={miembros} total={miembros.length} />
 
-              {/* Conexiones */}
-              <ConexionesLista
-                conexiones={miembros.map((m: any) => ({
-                  id: m.id,
-                  nombre: m.nombre || m.email?.split('@')[0] || '',
-                  apellido: m.apellido,
-                  avatar_url: m.avatar_url,
-                  rol: m.rol
-                }))}
-                total={miembros.length}
-              />
+              {/* Ranking */}
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
+                <div className="p-4 border-b border-white/[0.04] flex items-center justify-between">
+                  <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                    <Trophy className="w-3.5 h-3.5 text-yellow-400" />
+                    Ranking
+                  </h3>
+                  <span className="text-[10px] text-gray-500 bg-white/[0.03] px-2 py-0.5 rounded-full">{top10.length}</span>
+                </div>
+                {rankingLoading ? (
+                  <div className="flex items-center justify-center py-10">
+                    <p className="text-xs text-zinc-500 flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-600" />
+                      Cargando ranking...
+                    </p>
+                  </div>
+                ) : top10.length === 0 ? (
+                  <div className="py-10 text-center">
+                    <p className="text-xs text-zinc-500">Sin ranking aún</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-white/[0.03]">
+                    {top10.slice(0, 6).map((entry) => (
+                      <div key={entry.user_id} className="px-4 py-3 flex items-center gap-3 hover:bg-white/[0.02] transition-colors">
+                        <span className={`text-xs font-bold w-5 ${entry.posicion <= 3 ? 'text-yellow-400' : 'text-gray-500'}`}>
+                          {entry.posicion}
+                        </span>
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-700 ring-1 ring-white/[0.04] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                          {entry.avatar_url ? (
+                            <Image src={entry.avatar_url} alt="" width={36} height={36} className="object-cover w-full h-full" />
+                          ) : (
+                            <span className="text-xs font-bold text-white/40">{entry.nombre?.charAt(0).toUpperCase()}</span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-white font-medium truncate">{entry.nombre} {entry.apellido || ''}</p>
+                          <p className="text-[10px] text-gray-600">Nv.{entry.nivel} · {entry.puntos.toLocaleString()} pts</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* === COLUMNA CENTRAL === */}

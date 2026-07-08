@@ -11,7 +11,7 @@ function baseQuery() {
     .from('comunidad_posts')
     .select(`
       id, empresa_id, autor_id, tipo, contenido, origen, origen_id,
-      fijado, oculto, es_evento_mentor, created_at, updated_at,
+      fijado, oculto, created_at, updated_at,
       autor:autor_id(id, nombre, apellido, avatar_url, rol),
       media:comunidad_post_media(id, post_id, tipo, url_original, url_comprimida, url_thumbnail, mime_type, nombre_archivo, tamaño_original, tamaño_comprimido, duracion_segundos, orden)
     `, { count: 'exact' })
@@ -160,7 +160,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const cursor = searchParams.get('cursor')
     const tipo = searchParams.get('tipo')
-    const esEventoMentor = searchParams.get('es_evento_mentor')
     const limit = parseInt(searchParams.get('limit') || String(PAGE_SIZE))
 
     let query = baseQuery().eq('empresa_id', user.empresaId).eq('oculto', false).order('fijado', { ascending: false }).order('created_at', { ascending: false })
@@ -171,9 +170,10 @@ export async function GET(request: NextRequest) {
     if (tipo) {
       query = query.eq('tipo', tipo)
     }
-    if (esEventoMentor === 'true') {
-      query = query.eq('es_evento_mentor', true)
-    }
+    // TODO: re-activar cuando se ejecute migración 116 (es_evento_mentor)
+    // if (esEventoMentor === 'true') {
+    //   query = query.eq('es_evento_mentor', true)
+    // }
 
     query = query.limit(limit)
 
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const body = await request.json()
 
-    const { tipo = 'post', contenido, encuesta, evento, media_ids, es_evento_mentor } = body
+    const { tipo = 'post', contenido, encuesta, evento, media_ids } = body
 
     if (tipo === 'anuncio' && !isAdmin(user)) {
       return NextResponse.json({ success: false, error: 'Solo admins pueden crear anuncios' }, { status: 403 })
@@ -219,8 +219,7 @@ export async function POST(request: NextRequest) {
         autor_id: user.userId,
         tipo,
         contenido: contenido || null,
-        origen: 'manual',
-        es_evento_mentor: es_evento_mentor === true
+        origen: 'manual'
       })
       .select()
       .single()
@@ -326,7 +325,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No autorizado para editar' }, { status: 403 })
     }
 
-    const allowed = ['contenido', 'fijado', 'oculto', 'es_evento_mentor']
+    const allowed = ['contenido', 'fijado', 'oculto']
     const filtered: Record<string, any> = {}
     for (const key of allowed) {
       if (key in updates) filtered[key] = updates[key]

@@ -130,14 +130,6 @@ export default function UserDashboard() {
         }
     }, [user?.id, fetchUserPurchases]);
 
-    if (statsLoading || (userCursosLoading && comprasLoading)) {
-        return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
-            </div>
-        );
-    }
-
     if (!user) {
         return (
             <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8">
@@ -391,6 +383,13 @@ export default function UserDashboard() {
                                     </Link>
                                 )
                             ))}
+                        </div>
+                    ) : (userCursosLoading || comprasLoading) ? (
+                        <div className="flex items-center justify-center py-16">
+                            <p className="text-sm text-zinc-500 flex items-center gap-2">
+                                <Loader2 className="w-4 h-4 animate-spin text-zinc-600" />
+                                Cargando tus cursos...
+                            </p>
                         </div>
                     ) : (
                         <div className="bg-black/40 border border-white/5 rounded-[2rem] p-8 text-center">
