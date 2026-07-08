@@ -62,6 +62,11 @@ interface DbProfile {
     cuenta_congelada: boolean;
     cuenta_fusionada_con: string | null;
     ultimo_login: string | null;
+    puntos: number;
+    puntos_nivel: number;
+    puntos_cursos: number;
+    puntos_comunidad: number;
+    puntos_blog: number;
     addresses: DbAddress[];
 }
 
@@ -88,6 +93,11 @@ interface Client {
     blisCoins: number;
     purchases: number;
     income: number;
+    puntos: number;
+    puntosNivel: number;
+    puntosCursos: number;
+    puntosComunidad: number;
+    puntosBlog: number;
     lastActive: string;
     status: string;
     joined: string;
@@ -192,6 +202,11 @@ function mapDbToClient(profile: DbProfile): Client {
         blisCoins: profile.blis_coins || 0,
         purchases: profile.total_compras || 0,
         income: Number(profile.total_gastado_usd) || 0,
+        puntos: profile.puntos || 0,
+        puntosNivel: profile.puntos_nivel || 1,
+        puntosCursos: profile.puntos_cursos || 0,
+        puntosComunidad: profile.puntos_comunidad || 0,
+        puntosBlog: profile.puntos_blog || 0,
         lastActive: profile.ultimo_login ? `Hace ${Math.floor((Date.now() - new Date(profile.ultimo_login).getTime()) / 3600000)} horas` : 'Nunca',
         status,
         joined: new Date(profile.creado_en).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }),
@@ -403,6 +418,7 @@ export default function AdminClientes() {
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Nivel / Tier</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Estado Ops</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Boveda (BC)</th>
+                                        <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Pts (Nivel)</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Total Compra</th>
                                         <th className="px-4 md:px-8 py-4 md:py-6 text-right">Acciones Directas</th>
                                     </tr>
@@ -438,6 +454,10 @@ export default function AdminClientes() {
                                                 }`}>{c.status}</span>
                                             </td>
                                             <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell font-black text-amber-500 text-xs tracking-widest">{formatCurrency(c.blisCoins)} BC</td>
+                                            <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">
+                                              <span className="font-black text-white text-xs">{c.puntos.toLocaleString()}</span>
+                                              <span className="text-[9px] text-gray-500 block">Nv.{c.puntosNivel} · C:{c.puntosCursos} Co:{c.puntosComunidad} B:{c.puntosBlog}</span>
+                                            </td>
                                             <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell font-black text-white text-xs">${formatCurrency(c.income)}</td>
                                             <td className="px-4 md:px-8 py-4 md:py-6 text-right" onClick={e => e.stopPropagation()}>
                                                 <div className="flex justify-end gap-2">
@@ -486,6 +506,7 @@ export default function AdminClientes() {
                                     </div>
                                     <div className="flex flex-col gap-2 pt-2 w-full">
                                         <div className="text-emerald-500 font-black text-lg">{formatCurrency(c.blisCoins)} <span className="text-[10px]">BC</span></div>
+                                        <div className="text-white font-bold text-sm">{c.puntos.toLocaleString()} <span className="text-[10px] text-gray-500">pts Nv.{c.puntosNivel}</span></div>
                                         <span className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border self-center ${
                                             c.status === 'Verificado' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
                                             c.status === 'Premium' ? 'bg-blis-red/10 border-blis-red/20 text-blis-red' :
