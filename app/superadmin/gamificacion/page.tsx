@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import type { TabGamificacion } from './_types'
 import { useGamificacionAdmin } from './_hooks'
 import { ConfigTab, NivelesTab, RankingTab, LogrosTab, CertificadoIntentosTab, AjustesTab, HistorialTab } from './_components'
@@ -18,7 +19,7 @@ const TABS: { key: TabGamificacion; label: string }[] = [
 export default function GamificacionPage() {
   const { user } = useAuth()
   const [tab, setTab] = useState<TabGamificacion>('config')
-  const empresaId = user?.empresa_id
+  const empresaId = user?.empresa_id || DEFAULT_EMPRESA_ID
 
   const {
     config, niveles, logros, intentos, loading,
@@ -88,29 +89,34 @@ export default function GamificacionPage() {
         </div>
 
         <div className="bg-gray-900/40 border border-gray-800 rounded-lg p-6">
-          {tab === 'config' && config && (
-            <ConfigTab config={config} onSave={updateConfig} />
+          {tab === 'config' && (
+            config ? <ConfigTab config={config} onSave={updateConfig} /> : <EmptyState msg="No se pudo cargar la configuración. Verifica que la tabla gamificacion_config existe en Supabase." />
           )}
           {tab === 'niveles' && (
             <NivelesTab niveles={niveles} onSave={saveNivel} onDelete={deleteNivel} />
           )}
-          {tab === 'ranking' && empresaId && (
+          {tab === 'ranking' && (
             <RankingTab empresaId={empresaId} />
           )}
-          {tab === 'ajustes' && empresaId && (
+          {tab === 'ajustes' && (
             <AjustesTab empresaId={empresaId} />
           )}
-          {tab === 'historial' && empresaId && (
+          {tab === 'historial' && (
             <HistorialTab empresaId={empresaId} />
           )}
           {tab === 'logros' && (
             <LogrosTab logros={logros} onSave={saveLogro} onDelete={deleteLogro} />
           )}
-          {tab === 'certificados' && (
-            <CertificadoIntentosTab intentos={intentos} onFetch={fetchIntentos} onDesbloquear={desbloquearIntentos} />
-          )}
         </div>
       </div>
+    </div>
+  )
+}
+
+function EmptyState({ msg }: { msg: string }) {
+  return (
+    <div className="py-16 text-center">
+      <p className="text-sm text-gray-500">{msg}</p>
     </div>
   )
 }
