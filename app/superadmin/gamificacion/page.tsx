@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { useAuth } from '@/lib/hooks/useAuth'
 import type { TabGamificacion } from './_types'
 import { useGamificacionAdmin } from './_hooks'
-import { ConfigTab, NivelesTab, RankingTab, LogrosTab, CertificadoIntentosTab } from './_components'
+import { ConfigTab, NivelesTab, RankingTab, LogrosTab, CertificadoIntentosTab, AjustesTab, HistorialTab } from './_components'
 
 const TABS: { key: TabGamificacion; label: string }[] = [
   { key: 'config', label: 'Config' },
   { key: 'niveles', label: 'Niveles' },
   { key: 'ranking', label: 'Ranking' },
+  { key: 'ajustes', label: 'Ajustes' },
+  { key: 'historial', label: 'Historial' },
   { key: 'logros', label: 'Logros' },
   { key: 'certificados', label: 'Certificados' },
 ]
@@ -95,6 +97,12 @@ export default function GamificacionPage() {
           )}
           {tab === 'ranking' && empresaId && (
             <RankingTab empresaId={empresaId} />
+          )}
+          {tab === 'ajustes' && empresaId && (
+            <AjustesTab empresaId={empresaId} />
+          )}
+          {tab === 'historial' && empresaId && (
+            <HistorialTab empresaId={empresaId} />
           )}
           {tab === 'logros' && (
             <LogrosTab logros={logros} onSave={saveLogro} onDelete={deleteLogro} />

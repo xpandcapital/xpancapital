@@ -2,7 +2,7 @@ import type { GamificacionNivel, GamificacionConfig, GamificacionLogro, RankingE
 
 export type { GamificacionNivel, GamificacionConfig, GamificacionLogro, RankingEntry }
 
-export type TabGamificacion = 'config' | 'niveles' | 'ranking' | 'logros' | 'certificados'
+export type TabGamificacion = 'config' | 'niveles' | 'ranking' | 'logros' | 'certificados' | 'ajustes' | 'historial'
 
 export interface NivelFormData {
   nombre: string
