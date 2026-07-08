@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/hooks/useAuth'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import type { TabGamificacion } from './_types'
 import { useGamificacionAdmin } from './_hooks'
-import { ConfigTab, NivelesTab, RankingTab, LogrosTab, CertificadoIntentosTab, AjustesTab, HistorialTab } from './_components'
+import { ConfigTab, NivelesTab, RankingTab, LogrosTab, AjustesTab, HistorialTab } from './_components'
 
 const TABS: { key: TabGamificacion; label: string }[] = [
   { key: 'config', label: 'Config' },
