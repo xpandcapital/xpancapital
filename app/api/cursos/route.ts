@@ -297,39 +297,35 @@ async function otorgarPuntos(userId: string, cursoId: string, lessonId?: string,
     const puntosLeccion = curso.puntos_por_leccion || 50
     const puntosCurso = curso.puntos_completado || 500
 
-    const baseUrl = supabaseUrl.replace('/rest/v1', '')
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${supabaseServiceKey}`,
-    }
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
     // Puntos por lección completada
-    await fetch(`${baseUrl}/api/gamificacion/otorgar`, {
+    await fetch(`${siteUrl}/api/gamificacion/otorgar`, {
       method: 'POST',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         user_id: userId,
         empresa_id: curso.empresa_id,
         tipo: 'leccion_completada',
         referencia_tipo: 'cursos',
         referencia_id: cursoId,
-        descripcion: `Lección completada`,
+        descripcion: 'Lección completada',
         puntos_override: puntosLeccion,
       }),
     })
 
     // Si completó el curso entero, puntos bonus
     if (completed) {
-      await fetch(`${baseUrl}/api/gamificacion/otorgar`, {
+      await fetch(`${siteUrl}/api/gamificacion/otorgar`, {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
           empresa_id: curso.empresa_id,
           tipo: 'curso_completado',
           referencia_tipo: 'cursos',
           referencia_id: cursoId,
-          descripcion: `Curso completado`,
+          descripcion: 'Curso completado',
           puntos_override: puntosCurso,
         }),
       })

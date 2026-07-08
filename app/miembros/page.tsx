@@ -130,6 +130,19 @@ export default function UserDashboard() {
         }
     }, [user?.id, fetchUserPurchases]);
 
+    // Refrescar al regresar de la academia u otras páginas
+    useEffect(() => {
+      const handleVisible = () => {
+        if (document.visibilityState === 'visible' && user?.id) {
+          refetchUserCursos()
+          fetchUserPurchases(user.id)
+          fetchUserStats(user.id)
+        }
+      }
+      document.addEventListener('visibilitychange', handleVisible)
+      return () => document.removeEventListener('visibilitychange', handleVisible)
+    }, [user?.id, refetchUserCursos, fetchUserPurchases, fetchUserStats])
+
     if (!user) {
         return (
             <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8">
