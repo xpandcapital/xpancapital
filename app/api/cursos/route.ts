@@ -297,38 +297,56 @@ async function otorgarPuntos(userId: string, cursoId: string, lessonId?: string,
     const puntosLeccion = curso.puntos_por_leccion || 50
     const puntosCurso = curso.puntos_completado || 500
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    // Calcular total: lección + bonus si completó el curso
+    const puntosOtorgados = puntosLeccion + (completed ? puntosCurso : 0)
+    if (puntosOtorgados <= 0) return
 
-    // Puntos por lección completada
-    await fetch(`${siteUrl}/api/gamificacion/otorgar`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: userId,
-        empresa_id: curso.empresa_id,
-        tipo: 'leccion_completada',
-        referencia_tipo: 'cursos',
-        referencia_id: cursoId,
-        descripcion: 'Lección completada',
-        puntos_override: puntosLeccion,
-      }),
-    })
+    // Leer perfil actual
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('puntos, puntos_cursos, puntos_nivel')
+      .eq('id', userId)
+      .single()
 
-    // Si completó el curso entero, puntos bonus
-    if (completed) {
-      await fetch(`${siteUrl}/api/gamificacion/otorgar`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          empresa_id: curso.empresa_id,
-          tipo: 'curso_completado',
-          referencia_tipo: 'cursos',
-          referencia_id: cursoId,
-          descripcion: 'Curso completado',
-          puntos_override: puntosCurso,
-        }),
+    if (!profile) return
+
+    const nuevosPuntos = (profile.puntos || 0) + puntosOtorgados
+    const nuevosPuntosCurso = (profile.puntos_cursos || 0) + puntosOtorgados
+
+    // Calcular nuevo nivel basado en puntos_cursos
+    const { data: niveles } = await supabase
+      .from('gamificacion_niveles')
+      .select('*')
+      .eq('empresa_id', curso.empresa_id)
+      .order('orden', { ascending: true })
+
+    let nuevoNivel = profile.puntos_nivel || 1
+    if (niveles && niveles.length > 0) {
+      for (let i = niveles.length - 1; i >= 0; i--) {
+        if (nuevosPuntosCurso >= (niveles[i].puntos_requeridos || 0)) {
+          nuevoNivel = niveles[i].nivel
+          break
+        }
+      }
+    }
+
+    // Actualizar perfil directamente
+    const hoy = new Date().toISOString().slice(0, 10)
+    const { error: updateErr } = await supabase
+      .from('profiles')
+      .update({
+        puntos: nuevosPuntos,
+        puntos_cursos: nuevosPuntosCurso,
+        puntos_nivel: nuevoNivel,
+        ultima_actividad: hoy,
+        actualizado_en: new Date().toISOString(),
       })
+      .eq('id', userId)
+
+    if (updateErr) {
+      console.error('[cursos] Error actualizando puntos:', updateErr)
+    } else {
+      console.log(`[cursos] +${puntosOtorgados}pts a ${userId} (total: ${nuevosPuntos}, nivel: ${nuevoNivel})`)
     }
   } catch (err) {
     console.error('[cursos] Error otorgando puntos:', err)
