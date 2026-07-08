@@ -168,13 +168,20 @@ export interface Client {
 }
 
 export interface AcademicCourse {
+    id: string;
+    courseId: string;
     course: string;
+    slug: string;
+    imagen: string | null;
     progress: number;
     grade?: number;
+    leccionesCompletadas: number;
+    totalLecciones: number;
     attempts: number;
     maxAttempts: number;
     examStatus: 'open' | 'failed_blocked' | 'passed';
-    examReleaseDate?: string;
+    ultimoAcceso: string | null;
+    matriculado: boolean;
 }
 
 export interface Certificate {

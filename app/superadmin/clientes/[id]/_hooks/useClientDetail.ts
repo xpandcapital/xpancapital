@@ -223,6 +223,40 @@ export function useClientDetail(clientId: string) {
         }
     }, [client, fetchTransactions, showToast]);
 
+    const desbloquearCurso = useCallback(async (userId: string, cursoId: string) => {
+      try {
+        const res = await fetch('/api/admin/certificados/intentos', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ desbloquear: true, user_id: userId, curso_id: cursoId }),
+        })
+        const data = await res.json()
+        if (data.success) {
+          showToast('Examen desbloqueado. Nuevo ciclo de intentos.', 'success')
+          fetchAcademia()
+        } else {
+          showToast(data.error || 'Error al desbloquear', 'error')
+        }
+      } catch {
+        showToast('Error al desbloquear examen', 'error')
+      }
+    }, [fetchAcademia, showToast])
+
+    const deleteCertificate = useCallback(async (certId: string) => {
+      try {
+        const res = await fetch(`/api/certificados?id=${certId}`, { method: 'DELETE' })
+        const data = await res.json()
+        if (data.success) {
+          showToast('Certificado eliminado', 'success')
+          fetchAcademia()
+        } else {
+          showToast(data.error || 'Error al eliminar', 'error')
+        }
+      } catch {
+        showToast('Error al eliminar certificado', 'error')
+      }
+    }, [fetchAcademia, showToast])
+
     return {
         client,
         loading,
@@ -245,6 +279,8 @@ export function useClientDetail(clientId: string) {
         fetchReferrals,
         fetchAcademia,
         updateClient,
-        adjustCoins
+        adjustCoins,
+        desbloquearCurso,
+        deleteCertificate
     };
 }

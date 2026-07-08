@@ -27,6 +27,8 @@ interface ClientDetailProps {
     academicData: { progress: AcademicCourse[]; certificates: Certificate[] };
     onUpdate: (fields: Partial<Client>, showToast?: boolean) => void;
     onAdjustCoins: (amount: number, reason: string) => void;
+    onDesbloquear: (userId: string, cursoId: string) => Promise<void>;
+    onDeleteCertificate: (certId: string) => Promise<void>;
     onClose?: () => void;
 }
 
@@ -42,6 +44,8 @@ export function ClientDetail({
     academicData,
     onUpdate,
     onAdjustCoins,
+    onDesbloquear,
+    onDeleteCertificate,
     onClose
 }: ClientDetailProps) {
     const [activeTab, setActiveTab] = useState('profile');
@@ -53,7 +57,7 @@ export function ClientDetail({
             case 'economy': return <EconomyTab {...baseProps} transactions={transactions} />;
             case 'sales': return <SalesTab {...baseProps} orders={orders} />;
             case 'addresses': return <AddressesTab {...baseProps} />;
-            case 'academia': return <AcademiaTab {...baseProps} academicData={academicData} />;
+            case 'academia': return <AcademiaTab academicData={academicData} clientId={client.id} onDesbloquear={onDesbloquear} onDeleteCertificate={onDeleteCertificate} />;
             case 'referrals': return <ReferralsTab {...baseProps} referrals={referrals} />;
             case 'comms': return <CommsTab client={client} onUpdate={onUpdate} />;
             case 'ai': return <AiInsightsTab {...baseProps} insights={insights} />;
