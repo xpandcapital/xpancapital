@@ -235,6 +235,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
 
+      // Otorgar puntos de gamificación
+      otorgarPuntos(user_id, curso_id, lesson_id, completed).catch(() => {})
+
       return NextResponse.json({ success: true, data })
     }
 
@@ -253,8 +256,68 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Otorgar puntos de gamificación
+    otorgarPuntos(user_id, curso_id, lesson_id, completed).catch(() => {})
+
     return NextResponse.json({ success: true, data })
   } catch {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  }
+}
+
+async function otorgarPuntos(userId: string, cursoId: string, lessonId?: string, completed?: boolean) {
+  try {
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    const { data: curso } = await supabase
+      .from('cursos')
+      .select('empresa_id, puntos_por_leccion, puntos_completado')
+      .eq('id', cursoId)
+      .single()
+
+    if (!curso?.empresa_id) return
+
+    const puntosLeccion = curso.puntos_por_leccion || 50
+    const puntosCurso = curso.puntos_completado || 500
+
+    const baseUrl = supabaseUrl.replace('/rest/v1', '')
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${supabaseServiceKey}`,
+    }
+
+    // Puntos por lección completada
+    await fetch(`${baseUrl}/api/gamificacion/otorgar`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        user_id: userId,
+        empresa_id: curso.empresa_id,
+        tipo: 'leccion_completada',
+        referencia_tipo: 'cursos',
+        referencia_id: cursoId,
+        descripcion: `Lección completada`,
+        puntos_override: puntosLeccion,
+      }),
+    })
+
+    // Si completó el curso entero, puntos bonus
+    if (completed) {
+      await fetch(`${baseUrl}/api/gamificacion/otorgar`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          user_id: userId,
+          empresa_id: curso.empresa_id,
+          tipo: 'curso_completado',
+          referencia_tipo: 'cursos',
+          referencia_id: cursoId,
+          descripcion: `Curso completado`,
+          puntos_override: puntosCurso,
+        }),
+      })
+    }
+  } catch (err) {
+    console.error('[cursos] Error otorgando puntos:', err)
   }
 }
