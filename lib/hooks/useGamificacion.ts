@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { RankingEntry, GamificacionConfig, GamificacionPuntos, GamificacionLogroUsuario } from '@/lib/types/database'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 interface GamificacionStats {
   puntos: number
@@ -57,7 +58,7 @@ export function useRanking(empresaId: string | undefined, userId?: string) {
   const fetchRanking = useCallback(async () => {
     try {
       const params = new URLSearchParams()
-      if (empresaId) params.set('empresa_id', empresaId)
+      params.set('empresa_id', empresaId || DEFAULT_EMPRESA_ID)
       if (userId) params.set('user_id', userId)
       const res = await fetch(`${API}/ranking?${params}`)
       if (res.ok) {
