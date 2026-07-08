@@ -126,6 +126,23 @@ export async function GET(request: NextRequest) {
         }
       })
 
+      // Consultar progreso real desde curso_progreso (tabla que usa la academia)
+      const progressEnrolledIds = allEnrolled.map(e => e.curso_id).filter(Boolean)
+      if (progressEnrolledIds.length > 0) {
+        const { data: progressList } = await supabase
+          .from('curso_progreso')
+          .select('curso_id, progreso')
+          .eq('user_id', userId)
+          .in('curso_id', progressEnrolledIds)
+
+        if (progressList) {
+          for (const p of progressList) {
+            const existing = enrolledMap.get(p.curso_id) || 0
+            enrolledMap.set(p.curso_id, Math.max(existing, p.progreso || 0))
+          }
+        }
+      }
+
       // Solo cursos públicos (para_equipo=false) que estén matriculados
       const filtered = allCursos
         .filter(c => !(c as any).para_equipo && enrolledMap.has(c.id))
