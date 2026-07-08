@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
         if (advisorRecord?.id) {
           const { data: advisorCourses } = await supabase
             .from('equipo_cursos')
-            .select('curso_id, progreso')
+          .select('curso_id, progreso, lecciones_completadas')
             .eq('advisor_id', advisorRecord.id)
 
           enrolledByAdvisor = advisorCourses || []
@@ -230,6 +230,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'user_id y curso_id son requeridos' }, { status: 400 })
     }
 
+    // Obtener total de lecciones del curso
+    const { data: curso } = await supabase
+      .from('cursos')
+      .select('modulos')
+      .eq('id', curso_id)
+      .single()
+
+    const modulos = curso?.modulos as any[] || []
+    const totalLessons = modulos.reduce((sum: number, m: any) => sum + (m.lessons?.length || 0), 0)
+
+    // Construir array actualizado de lecciones completadas
+    let leccionesActualizadas: string[] = []
+
     const { data: existingProgress } = await supabase
       .from('curso_progreso')
       .select('*')
@@ -237,11 +250,28 @@ export async function POST(request: NextRequest) {
       .eq('curso_id', curso_id)
       .single()
 
+    const leccionesPrevias: string[] = existingProgress?.lecciones_completadas || []
+
+    if (lesson_id) {
+      // Agregar lesson_id si no existe ya
+      leccionesActualizadas = leccionesPrevias.includes(lesson_id)
+        ? leccionesPrevias
+        : [...leccionesPrevias, lesson_id]
+    } else {
+      leccionesActualizadas = leccionesPrevias
+    }
+
+    // Calcular progreso como porcentaje real
+    const progresoCalculado = totalLessons > 0
+      ? Math.round((leccionesActualizadas.length / totalLessons) * 100)
+      : (completed ? 100 : 0)
+
     if (existingProgress) {
       const { data, error } = await supabase
         .from('curso_progreso')
         .update({
-          progreso: completed ? 100 : existingProgress.progreso,
+          progreso: progresoCalculado,
+          lecciones_completadas: leccionesActualizadas,
           actualizado_en: new Date().toISOString()
         })
         .eq('id', existingProgress.id)
@@ -252,7 +282,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
 
-      // Otorgar puntos de gamificación
       otorgarPuntos(user_id, curso_id, lesson_id, completed).catch(() => {})
 
       return NextResponse.json({ success: true, data })
@@ -263,7 +292,8 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id,
         curso_id,
-        progreso: completed ? 100 : 0,
+        progreso: progresoCalculado,
+        lecciones_completadas: leccionesActualizadas,
         examen_estado: 'pendiente'
       })
       .select()
@@ -273,7 +303,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Otorgar puntos de gamificación
     otorgarPuntos(user_id, curso_id, lesson_id, completed).catch(() => {})
 
     return NextResponse.json({ success: true, data })

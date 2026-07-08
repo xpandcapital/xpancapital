@@ -34,7 +34,7 @@ interface CursoData {
     descripcion?: string;
     imagen_principal?: string | null;
     modulos?: Module[];
-    progreso?: { progreso: number };
+    progreso?: { progreso: number; lecciones_completadas?: string[] };
 }
 
 const TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
@@ -84,7 +84,6 @@ function AcademyContent() {
         setActiveModule(null);
         setOpenModules(new Set());
         setCompletedLessons([]);
-        // Actualizar URL sin recargar para reflejar el curso actual
         const newUrl = course.slug
             ? `/miembros/academia/${course.slug}`
             : `/miembros/academia?iniciar=${course.cursoId || course.id}`;
@@ -109,6 +108,13 @@ function AcademyContent() {
             }
         }
     }, [fullCurso]);
+
+    // Inicializar lecciones completadas desde el progreso guardado en BD
+    useEffect(() => {
+        if (fullCurso?.progreso?.lecciones_completadas) {
+            setCompletedLessons(fullCurso.progreso.lecciones_completadas)
+        }
+    }, [fullCurso?.progreso?.lecciones_completadas])
 
     useEffect(() => {
         const fetchPurchasedCourses = async () => {

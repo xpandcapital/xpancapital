@@ -33,6 +33,7 @@ export interface Curso {
   progreso?: {
     id: string
     progreso: number
+    lecciones_completadas?: string[]
     nota_final?: number
     intentos: number
     examen_estado: string
@@ -43,6 +44,7 @@ export interface CursoWithProgress extends Curso {
   progreso?: {
     id: string
     progreso: number
+    lecciones_completadas?: string[]
     nota_final?: number
     intentos: number
     examen_estado: string
