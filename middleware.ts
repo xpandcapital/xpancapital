@@ -82,24 +82,16 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. Auth (solo para rutas protegidas o con cookie)
+  // Para rutas protegidas, si Supabase no responde a tiempo, redirigir a login
+  // en vez de dejar pasar con NextResponse.next() que causa pantalla en blanco
+  const fallbackResponse = isProtected
+    ? NextResponse.redirect(new URL(`/login?redirect=${encodeURIComponent(pathname)}`, request.url))
+    : NextResponse.next({ request })
   let response: NextResponse
   if (isProtected || hasSupabaseCookie || pathname === '/login') {
-    response = await timeout(updateSession(request), SUPABASE_TIMEOUT_MS, NextResponse.next({ request }))
+    response = await timeout(updateSession(request), SUPABASE_TIMEOUT_MS, fallbackResponse)
   } else {
     response = NextResponse.next({ request })
-  }
-
-  // Seguridad extra: si es ruta protegida y no hay cookie de sesión, redirigir a login
-  // Cubre el caso donde el timeout de Supabase deja pasar la request sin verificar auth
-  if (isProtected && pathname !== '/login') {
-    const hasSessionCookie = response.cookies.getAll().some(c => c.name.startsWith('sb-')) ||
-                              request.cookies.getAll().some(c => c.name.startsWith('sb-'))
-    if (!hasSessionCookie) {
-      const loginUrl = request.nextUrl.clone()
-      loginUrl.pathname = '/login'
-      loginUrl.searchParams.set('redirect', pathname)
-      return NextResponse.redirect(loginUrl)
-    }
   }
 
   // 4. Security Headers
