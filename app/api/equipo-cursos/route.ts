@@ -33,11 +33,48 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'curso_id es requerido' }, { status: 400 })
     }
 
-    // Permitir crear entrada de bloqueo sin advisor (solo user_id + curso_id)
+    // Permitir crear entrada de bloqueo: resuelve advisor por email del perfil
     if (estado === 'bloqueado' && user_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, nombre, empresa_id')
+        .eq('id', user_id)
+        .single()
+
+      let advisorId = advisor_id
+      if (!advisorId && profile?.email) {
+        const { data: existingAdvisor } = await supabase
+          .from('advisors')
+          .select('id')
+          .eq('email', profile.email.toLowerCase())
+          .maybeSingle()
+
+        if (existingAdvisor) {
+          advisorId = existingAdvisor.id
+        } else {
+          const { data: newAdvisor, error: createErr } = await supabase
+            .from('advisors')
+            .insert({
+              email: profile.email.toLowerCase(),
+              nombre: profile.nombre || profile.email.split('@')[0],
+              empresa_id: profile.empresa_id,
+            })
+            .select('id')
+            .single()
+          if (createErr) {
+            return NextResponse.json({ error: `Error creando advisor: ${createErr.message}` }, { status: 500 })
+          }
+          advisorId = newAdvisor?.id
+        }
+      }
+
+      if (!advisorId) {
+        return NextResponse.json({ error: 'No se pudo resolver advisor_id para el bloqueo' }, { status: 400 })
+      }
+
       const { data: inserted, error: insertErr } = await supabase
         .from('equipo_cursos')
-        .insert({ user_id, curso_id, estado: 'bloqueado', lecciones_completadas: [], progreso: 0 })
+        .insert({ user_id, curso_id, advisor_id: advisorId, estado: 'bloqueado', lecciones_completadas: [], progreso: 0 })
         .select('id, user_id, curso_id, progreso, estado, lecciones_completadas, asignado_en')
         .single()
 
