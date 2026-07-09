@@ -240,6 +240,26 @@ export default function EditarUsuarioPage() {
         finally { setRemoving(null); }
     };
 
+    const handleBlockTeamCourse = async (cursoId: string) => {
+        if (!guard('equipo', 'eliminar')) return;
+        setRemoving(cursoId);
+        try {
+            const res = await fetch('/api/equipo-cursos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, curso_id: cursoId, estado: 'bloqueado' }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Curso de equipo bloqueado');
+                fetchCourses(userId);
+            } else {
+                showToast(data.error || 'Error al bloquear curso', 'error');
+            }
+        } catch { showToast('Error al bloquear curso', 'error'); }
+        finally { setRemoving(null); }
+    };
+
     const toggleSelectCourse = (courseId: string) => {
         setSelectedAssign(prev => {
             const next = new Set(prev);
@@ -503,6 +523,9 @@ export default function EditarUsuarioPage() {
                                                     </div>
                                                 </div>
                                             </div>
+                                            <button onClick={() => handleBlockTeamCourse(course.curso_id)} disabled={removing === course.curso_id} className="p-2 hover:bg-red-500/10 rounded-lg text-gray-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50">
+                                                {removing === course.curso_id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                                            </button>
                                         </div>
                                     ))}
                                 </div>

@@ -26,11 +26,26 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
-    const { email, nombre, user_id, curso_id } = body
+    const { email, nombre, user_id, curso_id, estado } = body
     let { advisor_id } = body
 
     if (!curso_id) {
       return NextResponse.json({ error: 'curso_id es requerido' }, { status: 400 })
+    }
+
+    // Permitir crear entrada de bloqueo sin advisor (solo user_id + curso_id)
+    if (estado === 'bloqueado' && user_id) {
+      const { data: inserted, error: insertErr } = await supabase
+        .from('equipo_cursos')
+        .insert({ user_id, curso_id, estado: 'bloqueado', lecciones_completadas: [], progreso: 0 })
+        .select('id, user_id, curso_id, progreso, estado, lecciones_completadas, asignado_en')
+        .single()
+
+      if (insertErr) {
+        if (insertErr.code === '23505') return NextResponse.json({ success: true, data: { ya_existe: true } })
+        return NextResponse.json({ error: insertErr.message }, { status: 500 })
+      }
+      return NextResponse.json({ success: true, data: inserted })
     }
 
     if (!advisor_id && email) {

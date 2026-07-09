@@ -78,13 +78,22 @@ export async function GET(request: NextRequest) {
 
     const assignedCourseIds = new Set(assignedCourses.map(c => c.curso_id).filter(Boolean))
 
+    // Cursos bloqueados manualmente por el admin (estado: 'bloqueado')
+    const { data: blockedCourses } = await supabase
+      .from('equipo_cursos')
+      .select('curso_id')
+      .eq('user_id', userId)
+      .eq('estado', 'bloqueado')
+
+    const blockedIds = new Set((blockedCourses || []).map(b => b.curso_id))
+
     // Para admins: cursos de equipo disponibles automáticamente (no son asignaciones reales)
     const isAdmin = ['superadmin', 'admin', 'editor', 'empleado'].includes(profile.rol || '')
     const teamAvailable: any[] = []
 
     if (isAdmin && allCursos) {
       for (const curso of allCursos) {
-        if (curso.para_equipo && !assignedCourseIds.has(curso.id)) {
+        if (curso.para_equipo && !assignedCourseIds.has(curso.id) && !blockedIds.has(curso.id)) {
           teamAvailable.push({
             curso_id: curso.id,
             cursos: curso,
