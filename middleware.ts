@@ -82,12 +82,24 @@ export async function middleware(request: NextRequest) {
   }
 
   // 3. Auth (solo para rutas protegidas o con cookie)
-  const fallbackAuth = NextResponse.next({ request })
   let response: NextResponse
   if (isProtected || hasSupabaseCookie || pathname === '/login') {
-    response = await timeout(updateSession(request), SUPABASE_TIMEOUT_MS, fallbackAuth)
+    response = await timeout(updateSession(request), SUPABASE_TIMEOUT_MS, NextResponse.next({ request }))
   } else {
     response = NextResponse.next({ request })
+  }
+
+  // Seguridad extra: si es ruta protegida y no hay cookie de sesión, redirigir a login
+  // Cubre el caso donde el timeout de Supabase deja pasar la request sin verificar auth
+  if (isProtected && pathname !== '/login') {
+    const hasSessionCookie = response.cookies.getAll().some(c => c.name.startsWith('sb-')) ||
+                              request.cookies.getAll().some(c => c.name.startsWith('sb-'))
+    if (!hasSessionCookie) {
+      const loginUrl = request.nextUrl.clone()
+      loginUrl.pathname = '/login'
+      loginUrl.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
   }
 
   // 4. Security Headers
