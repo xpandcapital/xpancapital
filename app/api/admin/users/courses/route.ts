@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
         .from('equipo_cursos')
         .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en')
         .eq('advisor_id', advisor.id)
+        .neq('estado', 'bloqueado')
         .order('asignado_en', { ascending: false })
 
       if (equipoCursos) {
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
       .from('equipo_cursos')
       .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en')
       .eq('user_id', userId)
+      .neq('estado', 'bloqueado')
       .order('asignado_en', { ascending: false })
 
     if (byUserId) {

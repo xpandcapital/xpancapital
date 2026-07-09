@@ -101,6 +101,8 @@ export default function EditarUsuarioPage() {
     const [assigning, setAssigning] = useState<string | null>(null);
     const [removing, setRemoving] = useState<string | null>(null);
     const [selectedAssign, setSelectedAssign] = useState<Set<string>>(new Set());
+    const [selectedBlock, setSelectedBlock] = useState<Set<string>>(new Set());
+    const [bulkBlocking, setBulkBlocking] = useState(false);
     const [bulkAssigning, setBulkAssigning] = useState(false);
 
     useEffect(() => { fetchUser(); }, [userId]);
@@ -258,6 +260,36 @@ export default function EditarUsuarioPage() {
             }
         } catch { showToast('Error al bloquear curso', 'error'); }
         finally { setRemoving(null); }
+    };
+
+    const handleBulkBlockTeam = async () => {
+        if (selectedBlock.size === 0) return;
+        setBulkBlocking(true);
+        let blocked = 0;
+        for (const cursoId of selectedBlock) {
+            try {
+                const res = await fetch('/api/equipo-cursos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, curso_id: cursoId, estado: 'bloqueado' }),
+                });
+                const data = await res.json();
+                if (data.success) blocked++;
+            } catch {}
+        }
+        showToast(`${blocked} cursos de equipo bloqueados`);
+        setSelectedBlock(new Set());
+        setBulkBlocking(false);
+        fetchCourses(userId);
+    };
+
+    const toggleBlockCourse = (cursoId: string) => {
+        setSelectedBlock(prev => {
+            const next = new Set(prev);
+            if (next.has(cursoId)) next.delete(cursoId);
+            else next.add(cursoId);
+            return next;
+        });
     };
 
     const toggleSelectCourse = (courseId: string) => {
@@ -437,6 +469,17 @@ export default function EditarUsuarioPage() {
                             </button>
                         </div>
 
+                        {selectedBlock.size > 0 && (
+                            <div className="flex items-center gap-3 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
+                                <span className="text-xs text-red-400 font-bold">{selectedBlock.size} seleccionados</span>
+                                <button onClick={handleBulkBlockTeam} disabled={bulkBlocking} className="px-3 py-1.5 bg-red-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center gap-1">
+                                    {bulkBlocking ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                                    Quitar todos
+                                </button>
+                                <button onClick={() => setSelectedBlock(new Set())} className="text-xs text-gray-500 hover:text-white">Cancelar</button>
+                            </div>
+                        )}
+
                         {showAddCourse && (
                             <div className="border-b border-white/5 p-4 bg-white/[0.01]">
                                 <div className="flex items-center justify-between mb-3">
@@ -511,6 +554,9 @@ export default function EditarUsuarioPage() {
                                     {teamAvailableCourses.map(course => (
                                         <div key={`team-${course.curso_id}`} className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/5 rounded-xl group hover:border-white/10 transition-colors">
                                             <div className="flex items-center gap-3 min-w-0">
+                                                <button onClick={() => toggleBlockCourse(course.curso_id)} className="shrink-0 text-gray-500 hover:text-red-400 transition-colors">
+                                                    {selectedBlock.has(course.curso_id) ? <CheckSquare className="w-4 h-4 text-red-400" /> : <Square className="w-4 h-4" />}
+                                                </button>
                                                 {course.cursos?.imagen_principal ? (
                                                     <img src={course.cursos.imagen_principal} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0 opacity-60" />
                                                 ) : (
