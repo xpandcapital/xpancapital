@@ -202,8 +202,8 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
     if (cuentaActiva) { const id = cuentaActiva.id; desconectarCuenta(id); const r = (cuentas || []).filter(c => c.id !== id); if (r.length > 0) { seleccionarCuenta(r[0]); cargarFolders(r[0].id); cargarMensajes(r[0].id, 'INBOX', 1) } else setConectado(false) }
   }
 
+  if (!conectado && !cuentaActiva) return <CorreoLogin onConectado={handleConectado} />
   if (!cuentaActiva) return <div className="flex items-center justify-center h-[calc(100vh-180px)]"><div className="text-center"><Loader2 className="w-8 h-8 animate-spin text-gray-500 mx-auto mb-3" /><p className="text-sm text-gray-400">Conectando al servidor...</p></div></div>
-  if (!conectado) return <CorreoLogin onConectado={handleConectado} />
 
   const sidebarContent = (
     <div className="flex flex-col flex-1 min-h-0 h-full">
