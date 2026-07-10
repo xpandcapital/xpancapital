@@ -43,6 +43,41 @@ const MAX_VIDEO_SIZE = 50 * 1024 * 1024  // 50MB video
 const IMAGE_MAX_WIDTH = 1920
 const WEBP_QUALITY = 80
 
+async function compressAndUpdate(
+  mediaId: string,
+  supabase: any,
+  buffer: Buffer,
+  folder: string,
+  timestamp: number,
+  random: string
+) {
+  try {
+    const { compressed, compressedSize } = await compressVideo(buffer)
+    if (!compressed) return
+
+    const compressedPath = `${folder}/${timestamp}-${random}-comp.mp4`
+    const { error: uploadErr } = await supabase.storage
+      .from('cms-images')
+      .upload(compressedPath, compressed, { contentType: 'video/mp4', upsert: false })
+
+    if (uploadErr) return
+
+    const { data: compUrlData } = supabase.storage.from('cms-images').getPublicUrl(compressedPath)
+
+    await (supabase as any)
+      .from('comunidad_post_media')
+      .update({
+        url_comprimida: compUrlData.publicUrl,
+        tamaño_comprimido: compressedSize,
+      })
+      .eq('id', mediaId)
+
+    console.log(`[Upload] Video comprimido: ${mediaId} (${(compressedSize / 1024 / 1024).toFixed(1)}MB)`)
+  } catch (err) {
+    console.error('[Upload] Async compression error:', err)
+  }
+}
+
 function getMediaType(mime: string): 'imagen' | 'video' | 'archivo' {
   if (mime.startsWith('image/')) return 'imagen'
   if (mime.startsWith('video/')) return 'video'
@@ -217,14 +252,8 @@ export async function POST(request: NextRequest) {
         urlThumbnail = thumbUrlData.publicUrl
       }
     } else if (isVideo) {
-      const { compressed, compressedSize } = await compressVideo(buffer)
-      if (compressed) {
-        const compressedPath = `${folder}/${timestamp}-${random}-comp.mp4`
-        await supabase.storage.from('cms-images').upload(compressedPath, compressed, { contentType: 'video/mp4', upsert: false })
-        const { data: compUrlData } = supabase.storage.from('cms-images').getPublicUrl(compressedPath)
-        urlComprimida = compUrlData.publicUrl
-        tamañoComprimido = compressedSize
-      }
+      // Video: subir original primero, responder, comprimir en background
+      // (evita bloquear el worker 15-40s con ffmpeg)
     }
 
     // Siempre crear registro en comunidad_post_media
@@ -246,6 +275,14 @@ export async function POST(request: NextRequest) {
 
     if (mediaError) {
       return NextResponse.json({ success: false, error: mediaError.message }, { status: 500 })
+    }
+
+    // Video compression async (fire-and-forget, no bloquea la respuesta)
+    if (isVideo && mediaRecord?.id) {
+      const mediaId = mediaRecord.id
+      compressAndUpdate(mediaId, supabase as any, buffer, folder, timestamp, random).catch(err => {
+        console.error('[Upload] Async video compression failed:', err)
+      })
     }
 
     return NextResponse.json({
