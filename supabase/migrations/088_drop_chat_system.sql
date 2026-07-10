@@ -21,12 +21,12 @@ DROP TABLE IF EXISTS chat_config CASCADE;
 DROP TABLE IF EXISTS chat_salas CASCADE;
 
 -- 4. ELIMINAR del realtime publication
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS chat_salas;
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS chat_miembros;
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS chat_mensajes;
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS chat_presencia;
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS chat_llamadas;
-ALTER PUBLICATION supabase_realtime DROP TABLE IF EXISTS chat_visitantes;
+ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_salas;
+ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_miembros;
+ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_mensajes;
+ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_presencia;
+ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_llamadas;
+ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_visitantes;
 
 -- 5. ELIMINAR columna y política específicas del chat en profiles
 ALTER TABLE profiles DROP COLUMN IF EXISTS estado_chat;
