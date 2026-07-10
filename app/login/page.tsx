@@ -87,6 +87,16 @@ function LoginForm() {
     }
   }, [user, loading, permLoading, redirectTo, defaultRoute, router])
 
+  // Safety: si tarda más de 8s, forzar redirección
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (loading || permLoading) {
+        window.location.href = '/superadmin'
+      }
+    }, 8000)
+    return () => clearTimeout(t)
+  }, [loading, permLoading])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
