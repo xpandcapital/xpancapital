@@ -7,10 +7,22 @@ CREATE POLICY "compras_select_authenticated" ON compras FOR SELECT USING (auth.r
 
 -- 2. contract_reconciliation - sin RLS
 ALTER TABLE contract_reconciliation ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "contract_reconciliation_select" ON contract_reconciliation FOR SELECT USING (true);
-CREATE POLICY "contract_reconciliation_insert" ON contract_reconciliation FOR INSERT WITH CHECK (true);
-CREATE POLICY "contract_reconciliation_update" ON contract_reconciliation FOR UPDATE USING (true);
-CREATE POLICY "contract_reconciliation_delete" ON contract_reconciliation FOR DELETE USING (true);
+DO $$ BEGIN
+  CREATE POLICY "contract_reconciliation_select" ON contract_reconciliation FOR SELECT USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE POLICY "contract_reconciliation_insert" ON contract_reconciliation FOR INSERT WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE POLICY "contract_reconciliation_update" ON contract_reconciliation FOR UPDATE USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+DO $$ BEGIN
+  CREATE POLICY "contract_reconciliation_delete" ON contract_reconciliation FOR DELETE USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 3. v_lotes_sync - SECURITY DEFINER sin search_path → recrear con security_invoker
 DROP VIEW IF EXISTS v_lotes_sync;
