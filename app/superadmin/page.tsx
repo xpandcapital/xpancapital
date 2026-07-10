@@ -154,10 +154,10 @@ export default function Dashboard() {
         supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
         supabase.from('leads').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
         supabase.from('projects').select('id').eq('empresa_id', empresaId).eq('is_active', true),
-        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('empresa_id', empresaId).eq('estado', 'completado'),
+        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id, empresa_id').eq('estado', 'completado').order('creado_en', { ascending: false }).limit(100),
         supabase.from('compra_items').select('cantidad, compra_id, producto:productos!inner(nombre), compras!inner(empresa_id)').eq('compras.empresa_id', empresaId).order('compra_id').limit(500),
         supabase.from('leads').select('id, nombre, email, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
-        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
+        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id, empresa_id').order('creado_en', { ascending: false }).limit(5),
         supabase.from('blog_posts').select('id, titulo, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
       ]);
 
@@ -198,7 +198,7 @@ export default function Dashboard() {
       const comprasCount = (comprasData || []).length
       console.log(`[Dashboard] Compras cargadas: ${comprasCount}, Empresa: ${empresaId}`)
       if (comprasCount === 0 && !rComprasData.error) {
-        setError(prev => prev || `0 compras encontradas (${empresaId.slice(0,8)}). ¿Coincide empresa_id?`)
+        setError(prev => prev || `0 compras (sin filtro empresa). RLS bloqueando?`)
       }
 
       if (empresaData) setEmpresa({ nombre: empresaData.nombre, id: empresaData.id });
