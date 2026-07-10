@@ -245,22 +245,36 @@ export default function Dashboard() {
     return () => window.removeEventListener('storage', handleStorage);
   }, [fetchData]);
 
-  // Realtime: actualización incremental
+  // Realtime: actualización incremental (solo contadores, no 11 queries)
   useEffect(() => {
     const comprasChannel = supabase
       .channel('dashboard-compras')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'compras', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => { fetchData() })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'compras', filter: `empresa_id=eq.${empresaIdRef.current}` }, (payload) => {
+        const monto = (payload.new as any)?.monto_usd || 0
+        setCompras(prev => [payload.new as any, ...prev].slice(0, 50))
+        setLastCompras(prev => [payload.new as any, ...prev].slice(0, 5))
+      })
       .subscribe()
 
     const leadsChannel = supabase
       .channel('dashboard-leads')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => { fetchData() })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads', filter: `empresa_id=eq.${empresaIdRef.current}` }, (payload) => {
+        setLeadsCount(prev => prev + 1)
+        setLastLeads(prev => [payload.new as any, ...prev].slice(0, 5))
+      })
       .subscribe()
 
     const blogChannel = supabase
       .channel('dashboard-blog')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => { fetchData() })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => { fetchData() })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => {
+        setBlogViews(prev => prev + 1)
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => {
+        // Solo refrescar posts recientes (ligero)
+        supabase.from('blog_posts').select('id, titulo, creado_en, estado').eq('empresa_id', empresaIdRef.current).order('creado_en', { ascending: false }).limit(5).then(({ data }) => {
+          if (data) setLastPosts(data)
+        })
+      })
       .subscribe()
 
     return () => {
@@ -268,7 +282,7 @@ export default function Dashboard() {
       supabase.removeChannel(leadsChannel)
       supabase.removeChannel(blogChannel)
     }
-  }, [fetchData]);
+  }, []);
 
   // Re-fetch cuando cambia empresaIdRef (CompanySwitcher hace reload, así que este efecto cubre el caso post-reload)
   useEffect(() => {
