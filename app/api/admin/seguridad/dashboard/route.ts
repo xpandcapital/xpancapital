@@ -4,7 +4,6 @@ import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const MAX_ROWS = 5000
 
 function getSupabase() {
   return createClient(supabaseUrl, supabaseServiceKey)
@@ -27,10 +26,7 @@ export async function GET(request: NextRequest) {
     const [
       { count: totalBloqueos },
       { data: logsRecientes },
-      { data: paisData },
-      { data: rutaData },
-      { data: ipData },
-      { data: porHora },
+      { data: aggregation },
       { count: alertasNoLeidas },
       { data: ultimasAlertas },
       { data: siteConfigData },
@@ -41,11 +37,8 @@ export async function GET(request: NextRequest) {
         .eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()),
       supabase.from('security_logs').select('pais,ruta,metodo,motivo,created_at,ip')
         .eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString())
-        .order('created_at', { ascending: false }).limit(1000),
-      supabase.from('security_logs').select('pais').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()).limit(MAX_ROWS),
-      supabase.from('security_logs').select('ruta').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()).limit(MAX_ROWS),
-      supabase.from('security_logs').select('ip').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()).limit(MAX_ROWS),
-      supabase.from('security_logs').select('created_at').eq('empresa_id', DEFAULT_EMPRESA_ID).gte('created_at', desde.toISOString()).order('created_at', { ascending: true }).limit(MAX_ROWS),
+        .order('created_at', { ascending: false }).limit(200),
+      supabase.rpc('security_logs_aggregation', { p_empresa_id: DEFAULT_EMPRESA_ID, p_desde: desde.toISOString() }),
       supabase.from('security_alerts').select('*', { count: 'exact', head: true }).eq('empresa_id', DEFAULT_EMPRESA_ID).eq('leida', false),
       supabase.from('security_alerts').select('*').eq('empresa_id', DEFAULT_EMPRESA_ID).order('created_at', { ascending: false }).limit(5),
       supabase.from('site_config').select('security_config').eq('empresa_id', DEFAULT_EMPRESA_ID).single(),
@@ -55,27 +48,14 @@ export async function GET(request: NextRequest) {
         .eq('empresa_id', DEFAULT_EMPRESA_ID).eq('motivo', 'rate_limit').gte('created_at', desde.toISOString()),
     ])
 
-    const paisesUnicos = new Set((paisData || []).map(p => p.pais))
-
-    const paisCounts: Record<string, number> = {}
-    for (const p of (paisData || [])) paisCounts[p.pais] = (paisCounts[p.pais] || 0) + 1
-    const topPaises = Object.entries(paisCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([pais, count]) => ({ pais, count }))
-
-    const rutaCounts: Record<string, number> = {}
-    for (const r of (rutaData || [])) rutaCounts[r.ruta] = (rutaCounts[r.ruta] || 0) + 1
-    const topRutas = Object.entries(rutaCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([ruta, count]) => ({ ruta, count }))
-
-    // Top IPs sobre todo el dataset del período (no solo 1000)
-    const ipCounts: Record<string, number> = {}
-    for (const l of (ipData || [])) { if (l.ip) ipCounts[l.ip] = (ipCounts[l.ip] || 0) + 1 }
-    const topIps = Object.entries(ipCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([ip, count]) => ({ ip, count }))
-
-    const horaCounts: Record<string, number> = {}
-    for (const l of (porHora || [])) {
-      const h = new Date(l.created_at).getHours()
-      horaCounts[`${h}h`] = (horaCounts[`${h}h`] || 0) + 1
-    }
-    const barrasPorHora = Array.from({ length: 24 }, (_, h) => ({ hora: `${h}h`, count: horaCounts[`${h}h`] || 0 }))
+    const agg = aggregation || {}
+    const topPaises = agg.top_paises || []
+    const topRutas = agg.top_rutas || []
+    const topIps = agg.top_ips || []
+    const barrasPorHora = Array.from({ length: 24 }, (_, h) => {
+      const found = (agg.por_hora || []).find((e: any) => e.hora === `${h}h`)
+      return { hora: `${h}h`, count: found?.count || 0 }
+    })
 
     const sc = siteConfigData?.security_config
     const herramientas = {
@@ -88,7 +68,6 @@ export async function GET(request: NextRequest) {
 
     const rlConfig = sc?.rate_limiting
     const rlActivas = rlConfig?.reglas?.filter((r: { habilitado: boolean }) => r.habilitado).length || 0
-    const rlTotal = rlConfig?.reglas?.length || 0
 
     const shConfig = sc?.security_headers
     const shActivos = shConfig?.headers ? Object.values(shConfig.headers as Record<string, { habilitado: boolean }>).filter((h) => h.habilitado).length : 0
@@ -100,13 +79,13 @@ export async function GET(request: NextRequest) {
       data: {
         total_bloqueos: totalBloqueos || 0,
         total_ayer: totalAyer || 0,
-        paises_unicos: paisesUnicos.size,
+        paises_unicos: topPaises.length,
         alertas_no_leidas: alertasNoLeidas || 0,
         alertas_criticas: (ultimasAlertas || []).filter((a: { nivel: string; leida: boolean }) => a.nivel === 'critical' && !a.leida).length,
         herramientas_activas: Object.values(herramientas).filter(Boolean).length,
         herramientas,
         rate_limit_bloqueos: rateLimitBloqueos || 0,
-        rate_limit_rules: `${rlActivas}/${rlTotal}`,
+        rate_limit_rules: `${rlActivas}/${rlConfig?.reglas?.length || 0}`,
         sh_grade: shGrade,
         sh_activos: shActivos,
         sh_total: shTotal,
