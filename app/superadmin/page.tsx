@@ -128,7 +128,7 @@ export default function Dashboard() {
   const fetchData = useCallback(async (empresaIdOverride?: string) => {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
-    const empresaId = empresaIdOverride || getActiveEmpresaId();
+    const empresaId = DEFAULT_EMPRESA_ID;
     empresaIdRef.current = empresaId;
     setError('');
 
