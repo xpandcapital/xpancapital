@@ -184,6 +184,7 @@ export function SuperadminSidebar() {
     const pathname = usePathname()
     const { effectivePermissions, loading: permLoading, isAdmin } = usePermissions()
     const { user } = useAuth()
+    const roleLabel = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Usuario'
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
     const isExpanded = !isCollapsed || isHoverExpanded
 
@@ -266,14 +267,15 @@ export function SuperadminSidebar() {
                 <div className={`pt-6 pb-4 px-4 flex items-center ${!isExpanded ? 'justify-center px-0' : 'justify-between'}`}>
                     <AnimatePresence mode="wait">
                         {isExpanded && (
-                            <motion.span
+                            <motion.div
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -10 }}
-                                className="text-xl font-black text-white tracking-widest px-2 whitespace-nowrap"
+                                className="px-2 min-w-0"
                             >
-                                BLIS<span className="text-blis-red">CORP</span>
-                            </motion.span>
+                                <CompanySwitcher compact />
+                                <p className="text-[10px] text-gray-500 font-medium mt-0.5 truncate">{roleLabel || 'Usuario'}</p>
+                            </motion.div>
                         )}
                     </AnimatePresence>
                     <div className="flex items-center gap-1">
@@ -285,12 +287,6 @@ export function SuperadminSidebar() {
                         </button>
                     </div>
                 </div>
-
-                {isExpanded && (
-                    <div className="px-3 pb-2">
-                        <CompanySwitcher />
-                    </div>
-                )}
 
                 <nav className="flex-1 px-3 space-y-6 overflow-y-auto scrollbar-hide py-4">
                     {showSkeleton ? (

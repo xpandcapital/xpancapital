@@ -14,7 +14,7 @@ interface EmpresaOption {
   color_primario?: string | null
 }
 
-export function CompanySwitcher() {
+export function CompanySwitcher({ compact }: { compact?: boolean }) {
   const { user } = useAuth()
   const [empresas, setEmpresas] = useState<EmpresaOption[]>([])
   const [selectedId, setSelectedId] = useState<string>('')
@@ -81,9 +81,18 @@ export function CompanySwitcher() {
     window.location.reload()
   }
 
-  if (!isSuperadmin) return null
+  if (!isSuperadmin && !compact) return null
+  if (!isSuperadmin && compact && empresas.length === 0) return null
 
   const selected = empresas.find(e => e.id === selectedId) || empresas[0]
+
+  if (compact) {
+    return (
+      <div className="text-sm font-bold text-white truncate">
+        {selected?.nombre || 'BLIS Corp'}
+      </div>
+    )
+  }
 
   return (
     <div ref={ref} className="relative">
