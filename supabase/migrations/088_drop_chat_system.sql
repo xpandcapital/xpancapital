@@ -20,13 +20,37 @@ DROP TABLE IF EXISTS chat_plantillas CASCADE;
 DROP TABLE IF EXISTS chat_config CASCADE;
 DROP TABLE IF EXISTS chat_salas CASCADE;
 
--- 4. ELIMINAR del realtime publication
-ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_salas;
-ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_miembros;
-ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_mensajes;
-ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_presencia;
-ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_llamadas;
-ALTER PUBLICATION IF EXISTS supabase_realtime DROP TABLE chat_visitantes;
+-- 4. ELIMINAR del realtime publication (ignorar si no existe)
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE chat_salas;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE chat_miembros;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE chat_mensajes;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE chat_presencia;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE chat_llamadas;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
+DO $$
+BEGIN
+  ALTER PUBLICATION supabase_realtime DROP TABLE chat_visitantes;
+EXCEPTION WHEN OTHERS THEN NULL;
+END $$;
 
 -- 5. ELIMINAR columna y política específicas del chat en profiles
 ALTER TABLE profiles DROP COLUMN IF EXISTS estado_chat;
