@@ -39,6 +39,13 @@ export async function GET(request: NextRequest) {
 
     const rankMap = new Map(rankingGlobal?.map((r: any, i: number) => [r.id, i + 1]) || [])
 
+    // Cargar niveles UNA SOLA VEZ (antes estaba dentro del bucle = N+1)
+    const { data: niveles } = await supabase
+      .from('gamificacion_niveles')
+      .select('nivel, puntos_requeridos')
+      .eq('empresa_id', empresaId)
+      .order('orden', { ascending: true })
+
     let archivados = 0
     for (const p of profiles) {
       const { error } = await supabase
@@ -56,12 +63,6 @@ export async function GET(request: NextRequest) {
       if (!error) archivados++
 
       const nuevosPuntos = p.puntos_cursos || 0
-      const { data: niveles } = await supabase
-        .from('gamificacion_niveles')
-        .select('nivel, puntos_requeridos')
-        .eq('empresa_id', empresaId)
-        .order('orden', { ascending: true })
-
       let nuevoNivel = 1
       if (niveles) {
         for (let i = niveles.length - 1; i >= 0; i--) {

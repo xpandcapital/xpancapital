@@ -23,21 +23,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, mensaje: 'Sin cursos completados para sincronizar', otorgados: 0 })
     }
 
+    // Precargar niveles por empresa (mismo dato para todos = evitar N+1)
+    const nivelesCache = new Map<string, any[]>()
+    const cursoCache = new Map<string, any>()
+    const profileCache = new Map<string, any>()
+
     let otorgados = 0
     for (const cp of completados) {
-      const { data: curso } = await supabase
-        .from('cursos')
-        .select('empresa_id, puntos_por_leccion, puntos_completado')
-        .eq('id', cp.curso_id)
-        .single()
+      let curso = cursoCache.get(cp.curso_id)
+      if (!curso) {
+        const { data: c } = await supabase
+          .from('cursos')
+          .select('empresa_id, puntos_por_leccion, puntos_completado')
+          .eq('id', cp.curso_id)
+          .single()
+        if (c) { curso = c; cursoCache.set(cp.curso_id, c) }
+      }
 
       if (!curso?.empresa_id) continue
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('puntos, puntos_cursos, puntos_nivel')
-        .eq('id', cp.user_id)
-        .single()
+      let profile = profileCache.get(cp.user_id)
+      if (!profile) {
+        const { data: p } = await supabase
+          .from('profiles')
+          .select('puntos, puntos_cursos, puntos_nivel')
+          .eq('id', cp.user_id)
+          .single()
+        if (p) { profile = p; profileCache.set(cp.user_id, p) }
+      }
 
       if (!profile) continue
 
@@ -48,12 +61,17 @@ export async function POST(request: NextRequest) {
       const nuevosPuntos = (profile.puntos || 0) + pts
       const nuevosPuntosCurso = (profile.puntos_cursos || 0) + pts
 
-      // Calcular nivel
-      const { data: niveles } = await supabase
-        .from('gamificacion_niveles')
-        .select('*')
-        .eq('empresa_id', curso.empresa_id)
-        .order('orden', { ascending: true })
+      // Calcular nivel (cacheado por empresa_id)
+      let niveles = nivelesCache.get(curso.empresa_id)
+      if (!niveles) {
+        const { data: niv } = await supabase
+          .from('gamificacion_niveles')
+          .select('*')
+          .eq('empresa_id', curso.empresa_id)
+          .order('orden', { ascending: true })
+        niveles = niv || []
+        nivelesCache.set(curso.empresa_id, niveles)
+      }
 
       let nuevoNivel = profile.puntos_nivel || 1
       if (niveles) {
