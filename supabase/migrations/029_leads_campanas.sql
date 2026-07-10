@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS asesores (
   actualizado_en TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX idx_asesores_empresa ON asesores(empresa_id);
-CREATE INDEX idx_asesores_activo ON asesores(activo);
+CREATE INDEX IF NOT EXISTS idx_asesores_empresa ON asesores(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_asesores_activo ON asesores(activo);
 
 -- 2. TABLA DE CAMPAÑAS
 CREATE TABLE IF NOT EXISTS campanas (
@@ -46,9 +46,9 @@ CREATE TABLE IF NOT EXISTS campanas (
   actualizado_en TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX idx_campanas_empresa ON campanas(empresa_id);
-CREATE INDEX idx_campanas_asesor ON campanas(asesor_id);
-CREATE INDEX idx_campanas_estado ON campanas(estado);
+CREATE INDEX IF NOT EXISTS idx_campanas_empresa ON campanas(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_campanas_asesor ON campanas(asesor_id);
+CREATE INDEX IF NOT EXISTS idx_campanas_estado ON campanas(estado);
 
 -- 3. TABLA DE LEADS
 CREATE TABLE IF NOT EXISTS leads (
@@ -93,11 +93,11 @@ CREATE TABLE IF NOT EXISTS leads (
   convertido_en TIMESTAMPTZ
 );
 
-CREATE INDEX idx_leads_empresa ON leads(empresa_id);
-CREATE INDEX idx_leads_campana ON leads(campana_id);
-CREATE INDEX idx_leads_asesor ON leads(asesor_id);
-CREATE INDEX idx_leads_estado ON leads(estado);
-CREATE INDEX idx_leads_creado ON leads(creado_en DESC);
+CREATE INDEX IF NOT EXISTS idx_leads_empresa ON leads(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_leads_campana ON leads(campana_id);
+CREATE INDEX IF NOT EXISTS idx_leads_asesor ON leads(asesor_id);
+CREATE INDEX IF NOT EXISTS idx_leads_estado ON leads(estado);
+CREATE INDEX IF NOT EXISTS idx_leads_creado ON leads(creado_en DESC);
 
 -- 4. TABLA DE INTEGRACIONES
 CREATE TABLE IF NOT EXISTS integraciones (
@@ -118,8 +118,8 @@ CREATE TABLE IF NOT EXISTS integraciones (
   actualizado_en TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX idx_integraciones_empresa ON integraciones(empresa_id);
-CREATE INDEX idx_integraciones_tipo ON integraciones(tipo);
+CREATE INDEX IF NOT EXISTS idx_integraciones_empresa ON integraciones(empresa_id);
+CREATE INDEX IF NOT EXISTS idx_integraciones_tipo ON integraciones(tipo);
 
 -- 5. AGREGAR CAMPOS DE CONFIGURACIÓN A TEMPLATES
 -- Ya existen en la tabla, solo añadimos campos de formulario

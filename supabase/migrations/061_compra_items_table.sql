@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS compra_items (
     created_at        TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX idx_compra_items_compra ON compra_items(compra_id);
-CREATE INDEX idx_compra_items_producto ON compra_items(producto_id);
+CREATE INDEX IF NOT EXISTS idx_compra_items_compra ON compra_items(compra_id);
+CREATE INDEX IF NOT EXISTS idx_compra_items_producto ON compra_items(producto_id);
 
 -- Enable RLS
 ALTER TABLE compra_items ENABLE ROW LEVEL SECURITY;
