@@ -1,6 +1,7 @@
 // Middleware unificado — Supabase con timeout corto, rutas publicas sin auth
 import { updateSession } from '@/lib/supabase/middleware'
 import { getSecurityConfig } from '@/lib/security-config'
+import type { UnifiedSecurityConfig } from '@/lib/security-config'
 import { getCountryFromRequest, checkGeoBlock } from '@/lib/geoblock'
 import { injectHeaders } from '@/lib/security-headers'
 import { matchRateLimit, checkInMemory } from '@/lib/rate-limit'
@@ -55,48 +56,54 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Solo carga security config si la ruta lo necesita o hay cookie
   const fallbackSec = { geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null }
-  const secConfig = await timeout(getSecurityConfig(), SUPABASE_TIMEOUT_MS, fallbackSec)
 
-  // 1. Geobloqueo
-  if (secConfig.geobloqueo) {
-    const country = getCountryFromRequest(request)
-    const geoResult = checkGeoBlock(country || '', secConfig.geobloqueo)
-    if (geoResult.blocked) {
-      logSecurityEvent({ ip, pais: geoResult.country || 'XX', ruta: pathname, metodo: method, motivo: 'geobloqueo', user_agent: ua })
-      return new NextResponse('Acceso denegado desde tu ubicación', { status: 403, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
-    }
-  }
-
-  // 2. Rate Limiting
-  if (secConfig.rate_limiting) {
-    const regla = matchRateLimit(secConfig.rate_limiting, pathname, method)
-    if (regla) {
-      const result = checkInMemory(ip, pathname, method, regla.limite, regla.ventana_segundos)
-      if (!result.allowed) {
-        logSecurityEvent({ ip, pais: countryFromReq(request) || 'XX', ruta: pathname, metodo: method, motivo: 'rate_limit', user_agent: ua })
-        return new NextResponse(secConfig.rate_limiting.mensaje_limite, { status: 429, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Retry-After': String(Math.ceil(result.resetMs / 1000)) } })
-      }
-    }
-  }
-
-  // 3. Auth (solo para rutas protegidas o con cookie)
-  // Para rutas protegidas, si Supabase no responde a tiempo, redirigir a login
-  // en vez de dejar pasar con NextResponse.next() que causa pantalla en blanco
+  // 3. Auth + Security en PARALELO para rutas protegidas
   const fallbackResponse = isProtected
     ? NextResponse.redirect(new URL(`/login?redirect=${encodeURIComponent(pathname)}`, request.url))
     : NextResponse.next({ request })
+
   let response: NextResponse
   if (isProtected || hasSupabaseCookie || pathname === '/login') {
-    response = await timeout(updateSession(request), SUPABASE_TIMEOUT_MS, fallbackResponse)
-  } else {
-    response = NextResponse.next({ request })
-  }
+    const [sec, auth] = await Promise.all([
+      timeout(getSecurityConfig(), SUPABASE_TIMEOUT_MS, fallbackSec),
+      timeout(updateSession(request), SUPABASE_TIMEOUT_MS, fallbackResponse),
+    ])
+    const secConfig = sec as UnifiedSecurityConfig
+    response = auth
 
-  // 4. Security Headers
-  if (secConfig.security_headers) {
-    try { injectHeaders(response, secConfig.security_headers) } catch {}
+    // 1. Geobloqueo
+    if (secConfig.geobloqueo) {
+      const country = getCountryFromRequest(request)
+      const geoResult = checkGeoBlock(country || '', secConfig.geobloqueo)
+      if (geoResult.blocked) {
+        logSecurityEvent({ ip, pais: geoResult.country || 'XX', ruta: pathname, metodo: method, motivo: 'geobloqueo', user_agent: ua })
+        return new NextResponse('Acceso denegado desde tu ubicación', { status: 403, headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
+      }
+    }
+
+    // 2. Rate Limiting
+    if (secConfig.rate_limiting) {
+      const regla = matchRateLimit(secConfig.rate_limiting, pathname, method)
+      if (regla) {
+        const result = checkInMemory(ip, pathname, method, regla.limite, regla.ventana_segundos)
+        if (!result.allowed) {
+          logSecurityEvent({ ip, pais: countryFromReq(request) || 'XX', ruta: pathname, metodo: method, motivo: 'rate_limit', user_agent: ua })
+          return new NextResponse(secConfig.rate_limiting.mensaje_limite, { status: 429, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Retry-After': String(Math.ceil(result.resetMs / 1000)) } })
+        }
+      }
+    }
+
+    // 3. Security Headers
+    if (secConfig.security_headers) {
+      try { injectHeaders(response, secConfig.security_headers) } catch {}
+    }
+  } else {
+    const secConfig = await timeout(getSecurityConfig(), SUPABASE_TIMEOUT_MS, fallbackSec)
+    response = NextResponse.next({ request })
+    if (secConfig.security_headers) {
+      try { injectHeaders(response, secConfig.security_headers) } catch {}
+    }
   }
 
   return response
