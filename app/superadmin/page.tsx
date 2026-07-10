@@ -178,6 +178,10 @@ export default function Dashboard() {
         setError(`Error al cargar: ${errors.join(', ')}`);
       }
 
+      if (rComprasData.error) {
+        console.error('[Dashboard] compras query error:', rComprasData.error)
+      }
+
       const { data: empresaData } = rEmpresa;
       const { count: prodCount } = rProdCount;
       const { count: cliCount } = rCliCount;
@@ -189,6 +193,13 @@ export default function Dashboard() {
       const { data: lastLeadsData } = rLastLeadsData;
       const { data: lastComprasData } = rLastComprasData;
       const { data: lastPostsData } = rLastPostsData;
+
+      // Debug: mostrar cuántas compras se cargaron
+      const comprasCount = (comprasData || []).length
+      console.log(`[Dashboard] Compras cargadas: ${comprasCount}, Empresa: ${empresaId}`)
+      if (comprasCount === 0 && !rComprasData.error) {
+        setError(prev => prev || `0 compras encontradas (${empresaId.slice(0,8)}). ¿Coincide empresa_id?`)
+      }
 
       if (empresaData) setEmpresa({ nombre: empresaData.nombre, id: empresaData.id });
       setProductsCount(prodCount || 0);
