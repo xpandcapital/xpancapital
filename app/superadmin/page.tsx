@@ -129,11 +129,12 @@ export default function Dashboard() {
     const empresaId = DEFAULT_EMPRESA_ID;
     empresaIdRef.current = empresaId;
     setError('');
+    setLoading(true);
 
     const safetyTimer = setTimeout(() => {
       setLoading(false);
       setInitialLoad(false);
-    }, 15000);
+    }, 8000);
 
     try {
       const [
