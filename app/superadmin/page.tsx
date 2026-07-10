@@ -122,7 +122,6 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [chartMonths, setChartMonths] = useState(6);
-  const [initialLoad, setInitialLoad] = useState(true);
   const empresaIdRef = useRef(getActiveEmpresaId());
 
   const fetchData = useCallback(async (empresaIdOverride?: string) => {
@@ -133,7 +132,6 @@ export default function Dashboard() {
 
     const safetyTimer = setTimeout(() => {
       setLoading(false);
-      setInitialLoad(false);
     }, 8000);
 
     try {
@@ -226,7 +224,6 @@ export default function Dashboard() {
 
     clearTimeout(safetyTimer);
     setLoading(false);
-    setInitialLoad(false);
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -322,7 +319,7 @@ export default function Dashboard() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-[#050505] text-white p-4 md:p-8 font-sans">
       <div className="max-w-[1600px] mx-auto space-y-8">
 
         {/* Header */}
@@ -356,7 +353,7 @@ export default function Dashboard() {
 
         <ErrorBanner message={error} />
 
-        {initialLoad ? (
+        {loading ? (
           <SkeletonStats />
         ) : (
           <>
