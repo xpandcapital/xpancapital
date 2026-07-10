@@ -305,16 +305,16 @@ VALUES (
 
 -- Actualizar sectionOrder para todos
 UPDATE templates SET
-    sectionOrder = ARRAY['thankYouHero', 'thankYouNextSteps', 'funnelCTA', 'stats', 'footer'],
-    sectionVisibility = '{"thankYouHero": true, "thankYouNextSteps": true, "funnelCTA": true, "stats": true, "footer": true}'
+    "sectionOrder" = ARRAY['thankYouHero', 'thankYouNextSteps', 'funnelCTA', 'stats', 'footer'],
+    "sectionVisibility" = '{"thankYouHero": true, "thankYouNextSteps": true, "funnelCTA": true, "stats": true, "footer": true}'
 WHERE slug = 'gracias';
 
 UPDATE templates SET
-    sectionOrder = ARRAY['captureHero', 'funnelVideo', 'funnelBenefits', 'stats', 'funnelTestimonials', 'footer'],
-    sectionVisibility = '{"captureHero": true, "funnelVideo": true, "funnelBenefits": true, "stats": true, "funnelTestimonials": true, "footer": true}'
+    "sectionOrder" = ARRAY['captureHero', 'funnelVideo', 'funnelBenefits', 'stats', 'funnelTestimonials', 'footer'],
+    "sectionVisibility" = '{"captureHero": true, "funnelVideo": true, "funnelBenefits": true, "stats": true, "funnelTestimonials": true, "footer": true}'
 WHERE slug = 'registro-inversores';
 
 UPDATE templates SET
-    sectionOrder = ARRAY['funnelHero', 'funnelCountdown', 'funnelVideo', 'funnelBenefits', 'stats', 'funnelTestimonials', 'funnelPricing', 'funnelCTA', 'footer'],
-    sectionVisibility = '{"funnelHero": true, "funnelCountdown": true, "funnelVideo": true, "funnelBenefits": true, "stats": true, "funnelTestimonials": true, "funnelPricing": true, "funnelCTA": true, "footer": true}'
+    "sectionOrder" = ARRAY['funnelHero', 'funnelCountdown', 'funnelVideo', 'funnelBenefits', 'stats', 'funnelTestimonials', 'funnelPricing', 'funnelCTA', 'footer'],
+    "sectionVisibility" = '{"funnelHero": true, "funnelCountdown": true, "funnelVideo": true, "funnelBenefits": true, "stats": true, "funnelTestimonials": true, "funnelPricing": true, "funnelCTA": true, "footer": true}'
 WHERE slug = 'oportunidad-exclusiva';
