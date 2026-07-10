@@ -348,6 +348,7 @@ export function useTerminalLogic(props: {
   }, [isMounted, syncBinanceWallet]);
 
   useEffect(() => {
+    return; // Auto-scan desactivado. Usar botón "Iniciar Robot" manualmente.
     if (!isMounted) return;
     const WATCH_LIST = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'LINKUSDT', 'AVAXUSDT', 'DOTUSDT', 'MATICUSDT'];
     const MIN_ATR_PCT = 0.05; const MAX_ATR_PCT = 2.5;
