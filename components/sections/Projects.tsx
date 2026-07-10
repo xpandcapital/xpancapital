@@ -191,9 +191,10 @@ export function Projects() {
 
         const { data, error } = await supabase
           .from("projects")
-          .select("id, name, status, website, location, description, cover_image, gallery_images, logo_url, primary_color, secondary_color, start_date, end_date, order_index")
+          .select("id, name, status, website, location, description, cover_image, gallery_images, logo_url, primary_color, secondary_color, start_date, end_date, is_active")
           .abortSignal(controller.signal)
-          .order("order_index", { ascending: true, nullsFirst: false })
+          .eq('is_active', true)
+          .order("created_at", { ascending: false })
           .limit(50);
 
         clearTimeout(timeoutId);
@@ -342,14 +343,32 @@ export function Projects() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project, index) => (
-            <TiltCard
-              key={project.id}
-              project={project}
-              index={index}
-              onOpen={openModal}
-            />
-          ))}
+          {loading ? (
+            <div className="col-span-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="aspect-[4/5] bg-white/[0.02] border border-white/[0.04] rounded-3xl animate-pulse">
+                  <div className="h-3/5 bg-white/[0.03] rounded-t-3xl" />
+                  <div className="p-6 space-y-3">
+                    <div className="h-4 bg-white/[0.04] rounded w-3/4" />
+                    <div className="h-3 bg-white/[0.03] rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="col-span-full py-20 text-center">
+              <p className="text-gray-500 text-sm">No hay proyectos disponibles</p>
+            </div>
+          ) : (
+            projects.map((project, index) => (
+              <TiltCard
+                key={project.id}
+                project={project}
+                index={index}
+                onOpen={openModal}
+              />
+            ))
+          )}
         </div>
       </div>
 
