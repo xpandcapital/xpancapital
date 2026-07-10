@@ -760,6 +760,7 @@ export function useTerminalLogic(props: {
 
   // ── AI Omniscanner de Segundo Plano ──
   useEffect(() => {
+    if (!autoPilot.active) return;  // No escanear si no hay sesión activa
     let bgInterval: ReturnType<typeof setInterval> | undefined;
     const runScan = async () => {
       try {
