@@ -174,23 +174,16 @@ export function useTerminalLogic(props: {
       try {
         const modeFilter = historyFilter !== 'ALL' ? historyFilter : null;
         let pageQuery = supabase.from('trading_history').select('*', { count: 'exact' }).order('created_at', { ascending: false }).range(0, 49);
-        let fullQuery = supabase.from('trading_history').select('*').order('created_at', { ascending: false }).limit(20000);
-        if (modeFilter) { pageQuery = (pageQuery as any).eq('trade_mode', modeFilter); fullQuery = (fullQuery as any).eq('trade_mode', modeFilter); }
-        const [{ data, error, count }, { data: fullData, error: fullError }] = await Promise.all([pageQuery, fullQuery]);
+        if (modeFilter) { pageQuery = (pageQuery as any).eq('trade_mode', modeFilter); }
+        const { data, error, count } = await pageQuery;
         if (error) console.error("Supabase fetchInitialHistory Error:", error);
-        if (fullError) console.error("Supabase fetchFullHistory Error:", fullError);
         if (active && data && !error) {
-          setHistoryTotal(count || fullData?.length || 0);
+          setHistoryTotal(count || data.length || 0);
           const formatted = ((data as unknown) as TradingHistoryRow[]).map((r: TradingHistoryRow) => ({
             id: r.id, symbol: r.symbol, type: r.trade_type, amount: parseFloat(r.amount), leverage: Number(r.leverage), entryPrice: parseFloat(r.entry_price), closePrice: parseFloat(r.close_price), finalPnl: parseFloat(r.final_pnl), duration: Number(r.duration) || 0, closeReason: r.close_reason, candlesAtOpen: r.candles_snapshot, tradeMode: r.trade_mode, closeTime: new Date(r.created_at).getTime()
           } as TradeHistoryEntry));
           setHistoryWindow(formatted as TradeHistoryEntry[]);
-          if (fullData && !fullError) {
-            const formattedFull = ((fullData as unknown) as TradingHistoryRow[]).map((r: TradingHistoryRow) => ({
-              id: r.id, symbol: r.symbol, type: r.trade_type, amount: parseFloat(r.amount), leverage: Number(r.leverage), entryPrice: parseFloat(r.entry_price), closePrice: parseFloat(r.close_price), finalPnl: parseFloat(r.final_pnl), duration: Number(r.duration) || 0, closeReason: r.close_reason, candlesAtOpen: r.candles_snapshot, tradeMode: r.trade_mode, closeTime: new Date(r.created_at).getTime()
-            } as TradeHistoryEntry));
-            setTradeHistory(formattedFull as TradeHistoryEntry[]);
-          }
+          setTradeHistory(formatted as TradeHistoryEntry[]);
           if (data.length < 50) setHasMoreHistory(false);
         }
       } catch (e) { console.error("Exception in fetchInitialHistory:", e); }
