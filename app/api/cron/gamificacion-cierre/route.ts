@@ -47,42 +47,48 @@ export async function GET(request: NextRequest) {
       .order('orden', { ascending: true })
 
     let archivados = 0
-    for (const p of profiles) {
-      const { error } = await supabase
-        .from('gamificacion_historico')
-        .upsert({
-          user_id: p.id,
-          empresa_id: empresaId,
-          periodo: mesAnterior || periodo,
-          puntos_cursos: p.puntos_cursos || 0,
-          puntos_comunidad: p.puntos_comunidad || 0,
-          puntos_blog: p.puntos_blog || 0,
-          ranking_global: rankMap.get(p.id),
-        }, { onConflict: 'user_id,periodo' })
 
-      if (!error) archivados++
+    // Procesar en lotes de 50 para no saturar Supabase
+    const CHUNK_SIZE = 50
+    for (let chunk = 0; chunk < profiles.length; chunk += CHUNK_SIZE) {
+      const batch = profiles.slice(chunk, chunk + CHUNK_SIZE)
+      await Promise.all(batch.map(async (p) => {
+        const { error } = await supabase
+          .from('gamificacion_historico')
+          .upsert({
+            user_id: p.id,
+            empresa_id: empresaId,
+            periodo: mesAnterior || periodo,
+            puntos_cursos: p.puntos_cursos || 0,
+            puntos_comunidad: p.puntos_comunidad || 0,
+            puntos_blog: p.puntos_blog || 0,
+            ranking_global: rankMap.get(p.id),
+          }, { onConflict: 'user_id,periodo' })
 
-      const nuevosPuntos = p.puntos_cursos || 0
-      let nuevoNivel = 1
-      if (niveles) {
-        for (let i = niveles.length - 1; i >= 0; i--) {
-          if (nuevosPuntos >= niveles[i].puntos_requeridos) {
-            nuevoNivel = niveles[i].nivel
-            break
+        if (!error) archivados++
+
+        const nuevosPuntos = p.puntos_cursos || 0
+        let nuevoNivel = 1
+        if (niveles) {
+          for (let i = niveles.length - 1; i >= 0; i--) {
+            if (nuevosPuntos >= niveles[i].puntos_requeridos) {
+              nuevoNivel = niveles[i].nivel
+              break
+            }
           }
         }
-      }
 
-      await supabase
-        .from('profiles')
-        .update({
-          puntos_comunidad: 0,
-          puntos_blog: 0,
-          puntos: nuevosPuntos,
-          puntos_nivel: nuevoNivel,
-          actualizado_en: new Date().toISOString(),
-        })
-        .eq('id', p.id)
+        await supabase
+          .from('profiles')
+          .update({
+            puntos_comunidad: 0,
+            puntos_blog: 0,
+            puntos: nuevosPuntos,
+            puntos_nivel: nuevoNivel,
+            actualizado_en: new Date().toISOString(),
+          })
+          .eq('id', p.id)
+      }))
     }
 
     return NextResponse.json({

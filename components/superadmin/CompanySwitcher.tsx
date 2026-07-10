@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { Building2, ChevronDown, Check } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -16,6 +17,7 @@ interface EmpresaOption {
 
 export function CompanySwitcher({ compact }: { compact?: boolean }) {
   const { user } = useAuth()
+  const router = useRouter()
   const [empresas, setEmpresas] = useState<EmpresaOption[]>([])
   const [selectedId, setSelectedId] = useState<string>('')
   const [open, setOpen] = useState(false)
@@ -78,7 +80,7 @@ export function CompanySwitcher({ compact }: { compact?: boolean }) {
 
     setOpen(false)
     setLoading(false)
-    window.location.reload()
+    router.refresh()
   }
 
   if (!isSuperadmin && !compact) return null
