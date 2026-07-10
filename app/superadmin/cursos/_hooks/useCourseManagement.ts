@@ -159,7 +159,6 @@ export function useCourseManagement() {
         vender_en_tienda: currentCourse.venderEnTienda || false,
         link_producto_id: currentCourse.linkProductoId || null,
         precio_comparacion: currentCourse.precioComparacion || 0,
-        descuento_porcentaje: currentCourse.descuentoPorcentaje || 0,
         puntos_completado: currentCourse.puntosCompletado ?? null,
         puntos_por_leccion: currentCourse.puntosPorLeccion ?? null,
         puntos_certificado: currentCourse.puntosCertificado ?? null,

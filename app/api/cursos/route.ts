@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     const { data: cursos, error } = await supabase
       .from('cursos')
-      .select('id, nombre, slug, descripcion, precio_coins, precio_usd, creado_en, imagen_principal, modulos, para_equipo')
+      .select('id, nombre, slug, descripcion, precio_coins, precio_usd, creado_en, imagen_principal, modulos, para_equipo, sequential_progress, require_completion')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .eq('activo', true)
       .order('creado_en', { ascending: false })

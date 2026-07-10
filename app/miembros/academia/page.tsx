@@ -35,6 +35,8 @@ interface CursoData {
     imagen_principal?: string | null;
     modulos?: Module[];
     progreso?: { progreso: number; lecciones_completadas?: string[] };
+    sequential_progress?: boolean;
+    require_completion?: boolean;
 }
 
 const TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
@@ -196,6 +198,13 @@ function AcademyContent() {
         const total = getTotalLessons();
         if (total === 0) return 0;
         return Math.round((completedLessons.length / total) * 100);
+    };
+
+    const isLessonLocked = (lessonId: string, lessonIdx: number) => {
+        if (!fullCurso?.sequential_progress) return false;
+        if (lessonIdx === 0) return false;
+        const prevLesson = allLessons[lessonIdx - 1];
+        return !completedLessons.includes(prevLesson.lesson.id);
     };
 
     if (loading || loadingPurchased) {
@@ -510,25 +519,31 @@ function AcademyContent() {
 
                                                     {openModules.has(module.id) && (
                                                         <div className="space-y-1 pl-2">
-                                                            {(module.lessons || []).map((lesson) => (
-                                                                <button
-                                                                    key={lesson.id}
-                                                                    onClick={() => { setActiveLesson(lesson); setActiveModule(module.id); }}
-                                                                    className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeLesson?.id === lesson.id ? 'bg-blis-red/20 border border-blis-red/30' : 'hover:bg-white/5 border border-transparent'}`}
-                                                                >
-                                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${completedLessons.includes(lesson.id) ? 'bg-emerald-500/20 text-emerald-500' : 'bg-black/40 text-gray-500'}`}>
-                                                                        {completedLessons.includes(lesson.id) ? (
-                                                                            <CheckCircle2 className="w-4 h-4" />
-                                                                        ) : (
-                                                                            <Play className="w-4 h-4 ml-0.5" />
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="min-w-0 flex-1 text-left">
-                                                                        <h4 className={`text-xs font-bold truncate ${activeLesson?.id === lesson.id ? 'text-white' : 'text-gray-400 group-hover:text-white'}`}>{lesson.title}</h4>
-                                                                        <span className="text-[9px] font-mono text-gray-600 block mt-0.5">{TYPE_CONFIG[lesson.type]?.label || lesson.type}</span>
-                                                                    </div>
-                                                                </button>
-                                                            ))}
+                                                             {(module.lessons || []).map((lesson, lessonIdx) => {
+                                                                     const globalIdx = allLessons.findIndex(a => a.lesson.id === lesson.id);
+                                                                     const locked = isLessonLocked(lesson.id, globalIdx);
+                                                                     return (
+                                                                 <button
+                                                                     key={lesson.id}
+                                                                     onClick={() => { if (!locked) { setActiveLesson(lesson); setActiveModule(module.id); } }}
+                                                                     disabled={locked}
+                                                                     className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeLesson?.id === lesson.id ? 'bg-blis-red/20 border border-blis-red/30' : locked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/5 border border-transparent'}`}
+                                                                 >
+                                                                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${completedLessons.includes(lesson.id) ? 'bg-emerald-500/20 text-emerald-500' : locked ? 'bg-black/40 text-gray-700' : 'bg-black/40 text-gray-500'}`}>
+                                                                         {completedLessons.includes(lesson.id) ? (
+                                                                             <CheckCircle2 className="w-4 h-4" />
+                                                                         ) : locked ? (
+                                                                             <Lock className="w-3.5 h-3.5" />
+                                                                         ) : (
+                                                                             <Play className="w-4 h-4 ml-0.5" />
+                                                                         )}
+                                                                     </div>
+                                                                     <div className="min-w-0 flex-1 text-left">
+                                                                         <h4 className={`text-xs font-bold truncate ${activeLesson?.id === lesson.id ? 'text-white' : locked ? 'text-gray-600' : 'text-gray-400 group-hover:text-white'}`}>{lesson.title}</h4>
+                                                                         <span className="text-[9px] font-mono text-gray-600 block mt-0.5">{locked ? 'Bloqueado' : TYPE_CONFIG[lesson.type]?.label || lesson.type}</span>
+                                                                     </div>
+                                                                 </button>
+                                                                 )})}
                                                         </div>
                                                     )}
                                                 </div>
