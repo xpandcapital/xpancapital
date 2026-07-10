@@ -122,15 +122,18 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [chartMonths, setChartMonths] = useState(6);
+  const [initialLoad, setInitialLoad] = useState(true);
   const empresaIdRef = useRef(getActiveEmpresaId());
 
   const fetchData = useCallback(async (empresaIdOverride?: string) => {
-    setLoading(true);
     const empresaId = DEFAULT_EMPRESA_ID;
     empresaIdRef.current = empresaId;
     setError('');
 
-    const safetyTimer = setTimeout(() => setLoading(false), 15000);
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+      setInitialLoad(false);
+    }, 15000);
 
     try {
       const [
@@ -222,6 +225,7 @@ export default function Dashboard() {
 
     clearTimeout(safetyTimer);
     setLoading(false);
+    setInitialLoad(false);
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -337,7 +341,7 @@ export default function Dashboard() {
 
         <ErrorBanner message={error} />
 
-        {loading ? (
+        {initialLoad ? (
           <SkeletonStats />
         ) : (
           <>
