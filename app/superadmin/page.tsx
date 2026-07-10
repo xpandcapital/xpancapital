@@ -148,7 +148,7 @@ export default function Dashboard() {
       ] = await Promise.all([
         supabase.from('empresas').select('id, nombre').eq('id', empresaId).single(),
         supabase.from('productos').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('activo', true),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('rol', 'cliente'),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).neq('rol', 'superadmin').neq('rol', 'admin'),
         supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
         supabase.from('leads').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
         supabase.from('projects').select('id').eq('empresa_id', empresaId).eq('is_active', true),
