@@ -123,8 +123,11 @@ export default function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [chartMonths, setChartMonths] = useState(6);
   const empresaIdRef = useRef(getActiveEmpresaId());
+  const fetchingRef = useRef(false);
 
   const fetchData = useCallback(async (empresaIdOverride?: string) => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
     const empresaId = empresaIdOverride || getActiveEmpresaId();
     empresaIdRef.current = empresaId;
     setError('');
@@ -134,7 +137,7 @@ export default function Dashboard() {
         rEmpresa,
         rProdCount,
         rCliCount,
-        rBlogData,
+        rBlogViews,
         rLeadsTotal,
         rProjectsData,
         rComprasData,
@@ -146,11 +149,11 @@ export default function Dashboard() {
         supabase.from('empresas').select('id, nombre').eq('id', empresaId).single(),
         supabase.from('productos').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('activo', true),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('rol', 'cliente'),
-        supabase.from('blog_posts').select('vistas').eq('empresa_id', empresaId),
+        supabase.rpc('get_blog_views', { p_empresa_id: empresaId }),
         supabase.from('leads').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
         supabase.from('projects').select('id').eq('empresa_id', empresaId).eq('is_active', true),
         supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('empresa_id', empresaId).eq('estado', 'completado'),
-        supabase.from('compra_items').select('cantidad, compra_id, producto:productos!inner(nombre), compras!inner(empresa_id)').eq('compras.empresa_id', empresaId).order('compra_id').limit(2000),
+        supabase.from('compra_items').select('cantidad, compra_id, producto:productos!inner(nombre)').eq('compras.empresa_id', empresaId).order('compra_id').limit(500),
         supabase.from('leads').select('id, nombre, email, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
         supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
         supabase.from('blog_posts').select('id, titulo, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5),
@@ -161,7 +164,7 @@ export default function Dashboard() {
       if (rEmpresa.error) errors.push('empresa');
       if (rProdCount.error) errors.push('productos');
       if (rCliCount.error) errors.push('clientes');
-      if (rBlogData.error) errors.push('blog');
+      if (rBlogViews.error) errors.push('blog');
       if (rLeadsTotal.error) errors.push('leads');
       if (rProjectsData.error) errors.push('proyectos');
       if (rComprasData.error) errors.push('compras');
@@ -176,7 +179,7 @@ export default function Dashboard() {
       const { data: empresaData } = rEmpresa;
       const { count: prodCount } = rProdCount;
       const { count: cliCount } = rCliCount;
-      const { data: blogData } = rBlogData;
+      const { data: blogViewsRpc } = rBlogViews;
       const { count: leadsTotal } = rLeadsTotal;
       const { data: projectsData } = rProjectsData;
       const { data: comprasData } = rComprasData;
@@ -188,7 +191,7 @@ export default function Dashboard() {
       if (empresaData) setEmpresa({ nombre: empresaData.nombre, id: empresaData.id });
       setProductsCount(prodCount || 0);
       setClientsCount(cliCount || 0);
-      setBlogViews((blogData || []).reduce((s: number, p: any) => s + (p.vistas || 0), 0));
+      setBlogViews(blogViewsRpc || 0);
       setLeadsCount(leadsTotal || 0);
       setProjectsCount((projectsData || []).length);
       setCompras(comprasData || []);
@@ -218,6 +221,7 @@ export default function Dashboard() {
     }
 
     setLoading(false);
+    fetchingRef.current = false;
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
