@@ -137,7 +137,7 @@ export default function Dashboard() {
         rEmpresa,
         rProdCount,
         rCliCount,
-        rBlogViews,
+        rBlogCount,
         rLeadsTotal,
         rProjectsData,
         rComprasData,
@@ -149,7 +149,7 @@ export default function Dashboard() {
         supabase.from('empresas').select('id, nombre').eq('id', empresaId).single(),
         supabase.from('productos').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('activo', true),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('rol', 'cliente'),
-        supabase.rpc('get_blog_views', { p_empresa_id: empresaId }),
+        supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
         supabase.from('leads').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
         supabase.from('projects').select('id').eq('empresa_id', empresaId).eq('is_active', true),
         supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('empresa_id', empresaId).eq('estado', 'completado'),
@@ -164,7 +164,7 @@ export default function Dashboard() {
       if (rEmpresa.error) errors.push('empresa');
       if (rProdCount.error) errors.push('productos');
       if (rCliCount.error) errors.push('clientes');
-      if (rBlogViews.error) errors.push('blog');
+      if (rBlogCount.error) errors.push('blog');
       if (rLeadsTotal.error) errors.push('leads');
       if (rProjectsData.error) errors.push('proyectos');
       if (rComprasData.error) errors.push('compras');
@@ -179,7 +179,7 @@ export default function Dashboard() {
       const { data: empresaData } = rEmpresa;
       const { count: prodCount } = rProdCount;
       const { count: cliCount } = rCliCount;
-      const { data: blogViewsRpc } = rBlogViews;
+      const { count: blogCount } = rBlogCount;
       const { count: leadsTotal } = rLeadsTotal;
       const { data: projectsData } = rProjectsData;
       const { data: comprasData } = rComprasData;
@@ -191,7 +191,7 @@ export default function Dashboard() {
       if (empresaData) setEmpresa({ nombre: empresaData.nombre, id: empresaData.id });
       setProductsCount(prodCount || 0);
       setClientsCount(cliCount || 0);
-      setBlogViews(blogViewsRpc || 0);
+      setBlogViews(blogCount || 0);
       setLeadsCount(leadsTotal || 0);
       setProjectsCount((projectsData || []).length);
       setCompras(comprasData || []);
