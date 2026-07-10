@@ -310,8 +310,7 @@ export function useTerminalLogic(props: {
       const savedRep = localStorage.getItem('blis_saved_reports'); if (savedRep) setSavedReports(JSON.parse(savedRep));
       const savedHistCount = localStorage.getItem('blis_last_history_count'); if (savedHistCount) setLastSeenHistoryCount(Number(savedHistCount));
       const savedRepCount = localStorage.getItem('blis_last_reports_count'); if (savedRepCount) setLastSeenReportsCount(Number(savedRepCount));
-      const savedChat = localStorage.getItem('blis_terminal_chat'); if (savedChat) { const parsed = JSON.parse(savedChat); if (Array.isArray(parsed) && parsed.length > 0) setChatMessages(parsed.slice(-50)); }
-      const savedAuto = localStorage.getItem('blis_autopilot'); if (savedAuto) { const parsed = JSON.parse(savedAuto); if (parsed.active) { setAutoPilot(parsed); setChatMessages(prev => [...prev, { role: 'bot' as const, text: "🟢 **Núcleo Sincronizado**: Reanudando sesión activa de Autopiloto...", timestamp: Date.now() }]); } }
+      const savedAuto = localStorage.getItem('blis_autopilot'); if (savedAuto) { const parsed = JSON.parse(savedAuto); if (parsed.active) { setAutoPilot(parsed); } }
       const b = localStorage.getItem('blis_bot_budget'); if (b) setBotBudget(Number(b));
       const l = localStorage.getItem('blis_user_lev'); if (l) setUserLeverage(Number(l));
       const f = localStorage.getItem('blis_free_budget'); if (f) setFreeBudget(f === 'true');
@@ -449,7 +448,7 @@ export function useTerminalLogic(props: {
 
   useEffect(() => { if (!isMounted) return; localStorage.setItem('blis_balance', String(balance)); }, [balance, isMounted]);
 
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ role: 'bot', text: '¡Terminal Profesional Blis-Corp Activa!\n\n✨ Control Central: Usa el panel superior para cambiar entre el **Puente de Binance** o el **Cerebro de Simulación**.\n✨ Gestión de Capital: Presupuesto por defecto: $500 | Apalancamiento: x2.', timestamp: Date.now() }]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [botBudget, setBotBudget] = useState(500);
   const [botMode, setBotMode] = useState('SCALPING');
@@ -506,10 +505,8 @@ export function useTerminalLogic(props: {
       const savedHistCount = localStorage.getItem('blis_last_history_count'); const savedRepCount = localStorage.getItem('blis_last_reports_count');
       if (savedKnowledge) setAiKnowledge(JSON.parse(savedKnowledge)); if (savedRep) setSavedReports(JSON.parse(savedRep));
       if (savedHistCount) setLastSeenHistoryCount(Number(savedHistCount)); if (savedRepCount) setLastSeenReportsCount(Number(savedRepCount));
-      const savedChat = localStorage.getItem('blis_terminal_chat');
-      if (savedChat) { try { const parsed = JSON.parse(savedChat); if (Array.isArray(parsed) && parsed.length > 0) setChatMessages(parsed); } catch (e) { console.error("Exception in fetchInitialHistory:", e); } }
       const savedAuto = localStorage.getItem('blis_autopilot');
-      if (savedAuto) { const parsed = JSON.parse(savedAuto); if (parsed.active) { setAutoPilot(parsed); try { if (typeof setChatMessages === 'function') { setChatMessages(prev => [...prev, { role: 'bot' as const, type: 'text', text: "🟢 Sincronización completa. Reanudando sesión de trading activa e intentando reconectar con el motor...", timestamp: Date.now() }]); } } catch (e) { console.error("Exception in fetchInitialHistory:", e); } } }
+      if (savedAuto) { const parsed = JSON.parse(savedAuto); if (parsed.active) { setAutoPilot(parsed); } }
       const b = localStorage.getItem('blis_bot_budget'); if (b) setBotBudget(Number(b));
       const l = localStorage.getItem('blis_user_lev'); if (l) setUserLeverage(Number(l));
       const f = localStorage.getItem('blis_free_budget'); if (f) setFreeBudget(f === 'true');

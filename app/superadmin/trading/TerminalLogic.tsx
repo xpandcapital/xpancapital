@@ -320,6 +320,7 @@ export const TradingTerminal: React.FC<TradingTerminalProps> = ({ onScannerLog, 
         now={t.now}
         handleSymbolChange={t.handleSymbolChange}
         onScannerLog={onScannerLog}
+        onClearChat={() => t.setChatMessages([])}
       />
 
       <TerminalModals

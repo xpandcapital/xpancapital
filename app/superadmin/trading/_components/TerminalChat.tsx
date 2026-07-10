@@ -61,6 +61,7 @@ interface TerminalChatProps {
   isBacktesting: boolean;
   backtestResult: BacktestResult | null;
   marketSentiment: MarketSentimentData | null;
+  onClearChat?: () => void;
   isEvaluatingSentiment: boolean;
   handleSentimentEval: () => void;
   aiKnowledge: AiKnowledge[];
@@ -86,7 +87,7 @@ export const TerminalChat: React.FC<TerminalChatProps> = ({
   manualChatHistory, setManualChatHistory, handleManualEval, handleBacktest, isBacktesting,
   backtestResult, marketSentiment, isEvaluatingSentiment, handleSentimentEval,
   aiKnowledge, manualRulesExpanded, setManualRulesExpanded, manualBeExpanded,
-  setManualBeExpanded, closeAllPositions, now, handleSymbolChange, onScannerLog
+  setManualBeExpanded, closeAllPositions, now, handleSymbolChange, onScannerLog, onClearChat
 }) => {
   return (
     <div className="w-full md:w-72 lg:w-80 h-auto md:h-full border-t md:border-t-0 md:border-l border-white/5 bg-[#0b0e11] flex flex-col shrink-0 z-10 relative min-h-0">
@@ -276,7 +277,7 @@ export const TerminalChat: React.FC<TerminalChatProps> = ({
         <>
           <div className="px-4 py-3 bg-[#050505] border-b border-white/5 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2"><Bot size={13} className="text-blis-red-neon" /><span className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Chat con el Agente</span></div>
-            <button onClick={() => setConfirmAction({ title: 'Vaciar Bitácora', msg: '¿Estás seguro que deseas borrar todos los mensajes y alertas del agente? El historial actual se perderá permanentemente.', onConfirm: () => { /* setChatMessages([]) handled by parent */ } })} className="p-1.5 hover:bg-white/5 rounded-lg text-gray-600 hover:text-blis-red transition-colors" title="Limpiar Bitácora"><Trash2 size={13} /></button>
+            <button onClick={() => setConfirmAction({ title: 'Vaciar Bitácora', msg: '¿Estás seguro que deseas borrar todos los mensajes y alertas del agente? El historial actual se perderá permanentemente.', onConfirm: () => { onClearChat?.() } })} className="p-1.5 hover:bg-white/5 rounded-lg text-gray-600 hover:text-blis-red transition-colors" title="Limpiar Bitácora"><Trash2 size={13} /></button>
           </div>
           <div ref={chatScrollRef} className="h-[350px] md:flex-1 overflow-y-auto p-4 space-y-4 bg-[#0b0e11] scrollbar-thin scrollbar-thumb-white/10 chat-selectable relative">
             {chatMessages.map((msg, i) => {
