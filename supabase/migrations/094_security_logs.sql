@@ -21,17 +21,20 @@ CREATE INDEX IF NOT EXISTS idx_security_logs_motivo ON security_logs(motivo);
 
 ALTER TABLE security_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "Admins pueden ver logs" ON security_logs
+DROP POLICY IF EXISTS "Admins pueden ver logs" ON security_logs;
+CREATE POLICY "Admins pueden ver logs" ON security_logs
   FOR SELECT USING (
     empresa_id IN (
       SELECT empresa_id FROM profiles WHERE id = auth.uid() AND rol IN ('admin', 'superadmin')
     )
   );
 
-CREATE POLICY IF NOT EXISTS "Service role puede insertar" ON security_logs
+DROP POLICY IF EXISTS "Service role puede insertar" ON security_logs;
+CREATE POLICY "Service role puede insertar" ON security_logs
   FOR INSERT WITH CHECK (true);
 
-CREATE POLICY IF NOT EXISTS "Admins pueden eliminar logs" ON security_logs
+DROP POLICY IF EXISTS "Admins pueden eliminar logs" ON security_logs;
+CREATE POLICY "Admins pueden eliminar logs" ON security_logs
   FOR DELETE USING (
     empresa_id IN (
       SELECT empresa_id FROM profiles WHERE id = auth.uid() AND rol IN ('admin', 'superadmin')
