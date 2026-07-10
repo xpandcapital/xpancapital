@@ -171,12 +171,12 @@ export async function GET(request: NextRequest) {
           .eq('metadata->>email_cliente', userProfile.email.toLowerCase())
 
         comprasEmail = comprasByEmail || []
-        // Actualizar user_id en compras huérfanas encontradas
-        for (const compra of comprasEmail) {
+        // Actualizar user_id en compras huérfanas (batch, no N+1)
+        if (comprasEmail.length > 0) {
           await supabase
             .from('compras')
             .update({ user_id: userId })
-            .eq('id', compra.id)
+            .in('id', comprasEmail.map(c => c.id))
         }
       }
 

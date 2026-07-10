@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { revalidateTag } from 'next/cache'
+import { getCachedLandingTemplate } from '@/lib/cache/template'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -12,43 +13,19 @@ function getSupabase() {
 
 export async function GET() {
   try {
-    const supabase = getSupabase()
+    const data = await getCachedLandingTemplate()
 
-    const { data, error } = await supabase
-      .from('templates')
-      .select('secciones')
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .eq('tipo_contenido', 'landing')
-      .eq('es_principal', true)
-      .eq('estado', 'activo')
-      .single()
-
-    if (error && error.code !== 'PGRST116') {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
-    }
-
-    if (!data) {
-      const { data: defaultData, error: defaultError } = await supabase
-        .from('templates')
-        .select('secciones')
-        .eq('empresa_id', DEFAULT_EMPRESA_ID)
-        .eq('tipo_contenido', 'landing')
-        .single()
-
-      if (defaultError) {
-        return NextResponse.json({ 
-          success: true, 
-          data: null,
-          message: 'No landing template found. Please run seed script.'
-        })
-      }
-
-      return NextResponse.json({ success: true, data: defaultData?.secciones || {} })
+    if (!data || !data.secciones) {
+      return NextResponse.json({ 
+        success: true, 
+        data: data?.secciones || {},
+        message: 'No landing template found' 
+      })
     }
 
     return NextResponse.json({ success: true, data: data.secciones })
   } catch (e: any) {
-    console.error('[CMS Landing] PUT error:', e?.message, e?.stack?.substring(0, 200))
+    console.error('[CMS Landing] GET error:', e?.message)
     return NextResponse.json({ success: false, error: e?.message || 'Error del servidor' }, { status: 500 })
   }
 }

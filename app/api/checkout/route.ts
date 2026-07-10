@@ -202,12 +202,15 @@ export async function POST(request: NextRequest) {
 
     // ── Si no hay user_id, buscar o crear usuario ────────────────────────────
     if (!finalUserId) {
-      // 1. Buscar si ya existe en auth
-      const { data: existingUsers } = await supabase.auth.admin.listUsers();
-      const existingUser = existingUsers?.users?.find(u => u.email === email.toLowerCase());
+      // 1. Buscar si ya existe en profiles (más rápido que listUsers())
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .maybeSingle()
 
-      if (existingUser) {
-        finalUserId = existingUser.id;
+      if (existingProfile?.id) {
+        finalUserId = existingProfile.id;
       } else {
         // 2. Crear usuario nuevo con contraseña generada
         tempPassword = generateSecurePassword();

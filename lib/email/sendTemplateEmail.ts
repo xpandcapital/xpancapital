@@ -144,6 +144,8 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
         host: sender?.smtp_host || process.env.SMTP_HOST || '',
         port,
         secure: port === 465,
+        connectionTimeout: 5000,
+        socketTimeout: 5000,
         auth: {
           user: sender?.smtp_user || process.env.SMTP_USER || '',
           pass: sender?.smtp_pass || process.env.SMTP_PASS || '',
