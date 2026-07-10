@@ -128,9 +128,13 @@ export default function Dashboard() {
   const fetchData = useCallback(async (empresaIdOverride?: string) => {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
+    setLoading(true);
     const empresaId = DEFAULT_EMPRESA_ID;
     empresaIdRef.current = empresaId;
     setError('');
+
+    // Safety: forzar loading=false si tarda más de 12s
+    const safetyTimer = setTimeout(() => setLoading(false), 12000);
 
     try {
       const [
@@ -220,6 +224,7 @@ export default function Dashboard() {
       setError(`Error de conexión: ${err.message || 'Error desconocido'}`);
     }
 
+    clearTimeout(safetyTimer);
     setLoading(false);
     fetchingRef.current = false;
   }, []);
