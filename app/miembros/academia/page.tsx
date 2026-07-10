@@ -49,6 +49,7 @@ function AcademyContent() {
     const { user } = useAuth();
     const searchParams = useSearchParams();
     const iniciarCursoId = searchParams.get('iniciar');
+    const cursoSlug = searchParams.get('curso');
     const { userCursos, loading, refetch: refetchUserCursos } = useUserCursos(user?.id || null);
     const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
     const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
@@ -165,6 +166,18 @@ function AcademyContent() {
             }
         }
     }, [iniciarCursoId, autoStarted, userCursos, purchasedCourses]);
+
+    // Auto-iniciar curso por slug (vía URL directa /miembros/academia/[slug])
+    useEffect(() => {
+        if (cursoSlug && !autoStarted && (userCursos.length > 0 || purchasedCourses.length > 0)) {
+            const allCourses = [...userCursos, ...purchasedCourses];
+            const target = allCourses.find((c: any) => c.slug === cursoSlug);
+            if (target) {
+                setAutoStarted(true);
+                handleSelectCourse(target);
+            }
+        }
+    }, [cursoSlug, autoStarted, userCursos, purchasedCourses]);
 
     const handleLessonComplete = useCallback((lessonId: string) => {
         if (!completedLessons.includes(lessonId)) {
