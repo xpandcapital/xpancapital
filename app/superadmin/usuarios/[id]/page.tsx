@@ -100,6 +100,23 @@ export default function EditarUsuarioPage() {
     const [showAddCourse, setShowAddCourse] = useState(false);
     const [assigning, setAssigning] = useState<string | null>(null);
     const [removing, setRemoving] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState(false);
+
+    const handleDeleteUser = async () => {
+        if (!confirm(`¿Eliminar permanentemente a ${nombre} ${apellido}? Esta acción no se puede deshacer.`)) return;
+        setDeleting(true);
+        try {
+            const res = await fetch(`/api/admin/users?id=${userId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Usuario eliminado exitosamente');
+                router.push('/superadmin/usuarios');
+            } else {
+                showToast(data.error || 'Error al eliminar', 'error');
+            }
+        } catch { showToast('Error al eliminar usuario', 'error'); }
+        finally { setDeleting(false); }
+    };
     const [selectedAssign, setSelectedAssign] = useState<Set<string>>(new Set());
     const [selectedBlock, setSelectedBlock] = useState<Set<string>>(new Set());
     const [bulkBlocking, setBulkBlocking] = useState(false);
@@ -622,8 +639,17 @@ export default function EditarUsuarioPage() {
                             </div>
                         </div>
                     </div>
+                    </div>
+
+                    <button
+                        onClick={handleDeleteUser}
+                        disabled={deleting}
+                        className="w-full mt-6 px-4 py-3 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-red-500/20 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                        Eliminar Usuario
+                    </button>
                 </div>
-            </div>
         </div>
     );
 }
