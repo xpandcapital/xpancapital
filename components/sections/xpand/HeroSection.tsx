@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ArrowRight, Play, Target, Users, Zap } from "lucide-react"
+import { ArrowRight, Play, Target, Users, Zap, TrendingUp, Activity, BarChart3 } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useRef } from "react"
 
@@ -23,74 +23,48 @@ const signals = [
   "BTC/USD tendencia alcista — objetivo 70K",
 ]
 
+const cornerWidgets = [
+  { position: "top-6 left-4 md:top-10 md:left-8", icon: TrendingUp, label: "EUR/USD", value: "1.0850", change: "+0.32%", up: true },
+  { position: "top-6 right-4 md:top-10 md:right-8", icon: BarChart3, label: "Volatilidad", value: "Media", change: "Sesión London", up: true },
+  { position: "bottom-28 left-4 md:bottom-32 md:left-8", icon: Activity, label: "Señales hoy", value: "12", change: "Activas", up: true },
+  { position: "bottom-28 right-4 md:bottom-32 md:right-8", icon: Target, label: "Win Rate", value: "78%", change: "Este mes", up: true },
+]
+
 function ParticleGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext("2d")
     if (!ctx) return
-
-    const resize = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-    }
-    resize()
-    window.addEventListener("resize", resize)
-
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight }
+    resize(); window.addEventListener("resize", resize)
     const particles: { x: number; y: number; vx: number; vy: number; r: number }[] = []
-    const count = 80
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        r: Math.random() * 1.5 + 0.5,
-      })
+    for (let i = 0; i < 80; i++) {
+      particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, r: Math.random() * 1.5 + 0.5 })
     }
-
     let anim: number
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.fillStyle = "rgba(213,193,8,0.15)"
       for (const p of particles) {
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fill()
-        p.x += p.vx
-        p.y += p.vy
-        if (p.x < 0) p.x = canvas.width
-        if (p.x > canvas.width) p.x = 0
-        if (p.y < 0) p.y = canvas.height
-        if (p.y > canvas.height) p.y = 0
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill()
+        p.x += p.vx; p.y += p.vy
+        if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0
+        if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0
       }
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x
-          const dy = particles[i].y - particles[j].y
+          const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y
           const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < 120) {
-            ctx.strokeStyle = `rgba(213,193,8,${0.06 * (1 - dist / 120)})`
-            ctx.lineWidth = 0.5
-            ctx.beginPath()
-            ctx.moveTo(particles[i].x, particles[i].y)
-            ctx.lineTo(particles[j].x, particles[j].y)
-            ctx.stroke()
-          }
+          if (dist < 120) { ctx.strokeStyle = `rgba(213,193,8,${0.06 * (1 - dist / 120)})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke() }
         }
       }
       anim = requestAnimationFrame(draw)
     }
     draw()
-
-    return () => {
-      cancelAnimationFrame(anim)
-      window.removeEventListener("resize", resize)
-    }
+    return () => { cancelAnimationFrame(anim); window.removeEventListener("resize", resize) }
   }, [])
-
   return <canvas ref={canvasRef} className="absolute inset-0 z-0" />
 }
 
@@ -104,6 +78,25 @@ export function HeroSection() {
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#050505]">
       <ParticleGrid />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.05)_0%,transparent_70%)] z-[1]" />
+
+      {/* 4 corner widgets */}
+      {cornerWidgets.map((w) => (
+        <motion.div key={w.label}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className={`absolute z-20 hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.05] backdrop-blur-sm ${w.position}`}
+        >
+          <w.icon className="w-3.5 h-3.5 text-[#d5c108]/60" />
+          <div className="text-left">
+            <div className="text-[10px] text-white/30 uppercase tracking-wider">{w.label}</div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-bold text-white/80">{w.value}</span>
+              <span className={`text-[10px] ${w.up ? "text-emerald-400" : "text-red-400"}`}>{w.change}</span>
+            </div>
+          </div>
+        </motion.div>
+      ))}
 
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-20 md:pt-0">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full flex flex-col items-center">
@@ -119,9 +112,10 @@ export function HeroSection() {
           </motion.div>
 
           <motion.h1 custom={1} variants={fadeUp}
-            className="text-[clamp(3rem,10vw,9rem)] font-black tracking-tighter leading-[0.9] mb-4 md:mb-6 whitespace-nowrap"
+            className="relative inline-block text-[clamp(3.5rem,11vw,10rem)] font-black tracking-tighter leading-[0.85] mb-4 md:mb-6 whitespace-nowrap"
+            style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            <span className="text-[#d5c108]">XPAND</span>
+            <span className="relative glitch-text text-[#d5c108]" data-text="XPAND">XPAND</span>
             <span className="text-white/90 ml-2 md:ml-4">CAPITAL</span>
           </motion.h1>
 

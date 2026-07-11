@@ -45,8 +45,8 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     const navLinks = [
         { name: "Inicio", href: "/" },
         { name: "Blog", href: "/blog" },
-        { name: "Tienda", href: "/tienda" },
-        { name: "Academia", href: "/tienda#cursos" },
+        // { name: "Tienda", href: "/tienda" },
+        // { name: "Academia", href: "/tienda#cursos" },
         { name: "Contacto", href: "#footer" }
     ]
 
@@ -521,9 +521,9 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Categorías Rápidas</p>
                                         <div className="grid grid-cols-2 gap-2">
                                             {[
-                                                { label: "Inversiones", icon: ShoppingCart, href: "/tienda" },
+                                                // { label: "Inversiones", icon: ShoppingCart, href: "/tienda" },
                                                 { label: "Blog", icon: Music2, href: "/blog" },
-                                                { label: "Academia", icon: LayoutDashboard, href: "/tienda#cursos" },
+                                                // { label: "Academia", icon: LayoutDashboard, href: "/tienda#cursos" },
                                                 { label: "Contacto", icon: Facebook, href: "#footer" }
                                             ].map((cat, i) => (
                                                 <button 

@@ -67,23 +67,23 @@ export function FooterSections() {
 
     const navLinks = [
         { text: "Inicio", href: "/" },
-        { text: "Tienda", href: "/tienda" },
+        // { text: "Tienda", href: "/tienda" },
         { text: "Blog", href: "/blog" },
         { text: "Proyectos", href: "/#projects" },
-        { text: "Academia", href: "/tienda#cursos" },
+        // { text: "Academia", href: "/tienda#cursos" },
     ];
 
     const sitemapSections = [
-        {
-            title: "Explorar",
-            links: [
-                { text: "Tienda", href: "/tienda" },
-                { text: "Cursos", href: "/tienda#cursos" },
-                { text: "Ebooks", href: "/tienda#ebooks" },
-                { text: "Kits", href: "/tienda#kits" },
-                { text: "Mentoría", href: "/tienda#mentoria" },
-            ]
-        },
+        // {
+        //     title: "Explorar",
+        //     links: [
+        //         { text: "Tienda", href: "/tienda" },
+        //         { text: "Cursos", href: "/tienda#cursos" },
+        //         { text: "Ebooks", href: "/tienda#ebooks" },
+        //         { text: "Kits", href: "/tienda#kits" },
+        //         { text: "Mentoría", href: "/tienda#mentoria" },
+        //     ]
+        // },
         {
             title: "Empresa",
             links: [
