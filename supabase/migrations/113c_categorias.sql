@@ -1,5 +1,5 @@
--- Migración: 113c_categorias.sql
-ALTER TABLE whatsapp_campaigns ADD COLUMN IF NOT EXISTS categoria TEXT;
-ALTER TABLE whatsapp_variable_templates ADD COLUMN IF NOT EXISTS categoria TEXT;
-ALTER TABLE whatsapp_message_templates ADD COLUMN IF NOT EXISTS categoria TEXT;
-ALTER TABLE whatsapp_phone_lists ADD COLUMN IF NOT EXISTS categoria TEXT;
+-- Migración: 113c_categorias.sql (tolerante a errores)
+DO $$ BEGIN ALTER TABLE whatsapp_campaigns ADD COLUMN IF NOT EXISTS categoria TEXT; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE whatsapp_variable_templates ADD COLUMN IF NOT EXISTS categoria TEXT; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE whatsapp_message_templates ADD COLUMN IF NOT EXISTS categoria TEXT; EXCEPTION WHEN OTHERS THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE whatsapp_phone_lists ADD COLUMN IF NOT EXISTS categoria TEXT; EXCEPTION WHEN OTHERS THEN NULL; END $$;

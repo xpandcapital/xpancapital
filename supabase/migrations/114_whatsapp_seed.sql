@@ -247,4 +247,5 @@ INSERT INTO whatsapp_message_templates (empresa_id, categoria, nombre, message_g
 VALUES (empresa_id, 'Asesoría', 'Seguimiento Asesoría', '[{"texts":["{saludo} {nombre}\n\n¿Pudiste revisar lo que te propuse de la asesoría?\n\n{beneficio_asesoria}\n\n{cierre_asesoria}"],"media_url":null,"filename":null}]', user_id)
 ON CONFLICT DO NOTHING;
 
+EXCEPTION WHEN OTHERS THEN NULL;
 END $$;
