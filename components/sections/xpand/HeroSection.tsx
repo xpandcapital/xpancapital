@@ -98,7 +98,7 @@ export function HeroSection() {
         </motion.div>
       ))}
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-20 md:pt-0">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-28 md:pt-0">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full flex flex-col items-center">
 
           <motion.div custom={0} variants={fadeUp} className="mb-6 md:mb-10">
@@ -112,21 +112,21 @@ export function HeroSection() {
           </motion.div>
 
           <motion.h1 custom={1} variants={fadeUp}
-            className="relative inline-block text-[clamp(3.5rem,11vw,10rem)] font-black tracking-tighter leading-[0.85] mb-4 md:mb-6 whitespace-nowrap"
+            className="relative text-center mb-6 md:mb-8"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            <span className="relative glitch-text text-[#d5c108]" data-text="XPAND">XPAND</span>
-            <span className="relative glitch-text text-white/90 ml-2 md:ml-4" data-text="CAPITAL">CAPITAL</span>
+            <span className="relative glitch-text block md:inline text-[clamp(6.3rem,18vw,10rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#d5c108" }}>XPAND</span>
+            <span className="relative glitch-text block md:inline text-[clamp(6.3rem,18vw,10rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
           </motion.h1>
 
           <motion.p custom={2} variants={fadeUp}
-            className="text-base md:text-xl text-white/50 max-w-lg md:max-w-xl mx-auto mb-3 md:mb-4 leading-relaxed px-2"
+            className="text-sm md:text-xl text-white/50 max-w-xs md:max-w-xl mx-auto mb-8 md:mb-10 leading-relaxed px-2"
           >
             Educación financiera de élite y estrategias de inversión diseñadas para generar resultados reales en el mercado de divisas.
           </motion.p>
 
           <motion.div custom={2.5} variants={fadeUp}
-            className="mb-6 md:mb-8 w-full max-w-2xl overflow-hidden"
+            className="mb-8 md:mb-10 w-full max-w-2xl overflow-hidden"
           >
             <div className="flex animate-marquee-slow whitespace-nowrap">
               {[...signals, ...signals].map((s, i) => (
@@ -139,20 +139,20 @@ export function HeroSection() {
           </motion.div>
 
           <motion.div custom={3} variants={fadeUp}
-            className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 w-full sm:w-auto px-4 sm:px-0"
+            className="flex flex-row items-center justify-center gap-2 md:gap-4 w-full px-2 md:px-0"
           >
-            <Link href="/login" className="group inline-flex items-center justify-center gap-2 bg-[#d5c108] text-black font-bold px-8 py-4 rounded-xl text-base w-full sm:w-auto hover:bg-[#e5d100] transition-all hover:shadow-[0_0_30px_rgba(213,193,8,0.4)]">
+            <Link href="/login" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 bg-[#d5c108] text-black font-bold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:bg-[#e5d100] transition-all hover:shadow-[0_0_30px_rgba(213,193,8,0.4)] whitespace-nowrap">
               Inscríbete Ahora
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="#ecosistema" className="group inline-flex items-center justify-center gap-2 border border-white/20 text-white font-semibold px-8 py-4 rounded-xl text-base w-full sm:w-auto hover:border-[#d5c108]/60 hover:text-[#d5c108] hover:shadow-[0_0_15px_rgba(213,193,8,0.2)] transition-all">
-              <Play className="w-5 h-5" />
+            <Link href="#ecosistema" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 border border-white/20 text-white font-semibold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:border-[#d5c108]/60 hover:text-[#d5c108] hover:shadow-[0_0_15px_rgba(213,193,8,0.2)] transition-all whitespace-nowrap">
+              <Play className="w-4 h-4 md:w-5 md:h-5" />
               Ver Campus
             </Link>
           </motion.div>
 
           <motion.div custom={4} variants={fadeUp}
-            className="mt-10 md:mt-14 grid grid-cols-3 gap-2 md:gap-4 w-full max-w-md md:max-w-lg px-2"
+            className="mt-12 md:mt-16 grid grid-cols-3 gap-3 md:gap-4 w-full max-w-md md:max-w-lg px-2"
           >
             {[
               { icon: Target, value: "94%", label: "Tasa de éxito" },
