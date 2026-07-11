@@ -13,8 +13,8 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Blis Corp | Luxury Tech Real Estate",
-  description: "El futuro de las inversiones inmobiliarias",
+  title: "Xpand Capital | Academia de Trading & Forex",
+  description: "Educación financiera de élite y estrategias de inversión diseñadas para generar resultados reales en el mercado de divisas.",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.png",
@@ -36,7 +36,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: `if(window.location.hash.includes("type=recovery"))window.location.replace("/reset-password"+window.location.hash)` }} />
       </head>
-      <body className={`${montserrat.variable} font-sans antialiased bg-black text-white selection:bg-blis-red/30 selection:text-white`}>
+      <body className={`${montserrat.variable} font-sans antialiased bg-[#050505] text-white`}>
         <LayoutShell>{children}</LayoutShell>
         <Analytics />
       </body>

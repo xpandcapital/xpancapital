@@ -1,0 +1,82 @@
+"use client"
+
+import { motion } from "framer-motion"
+import { Award, ShieldCheck, TrendingUp } from "lucide-react"
+
+export function InstructorProfile() {
+  return (
+    <section className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden">
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#d5c108]/5 blur-[120px]" />
+
+      <div className="relative max-w-6xl mx-auto px-6">
+        <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <span className="text-[#d5c108] text-sm font-semibold tracking-widest uppercase">
+              El Estratega
+            </span>
+            <h2 className="text-3xl md:text-5xl font-bold mt-3 mb-6 leading-tight">
+              Hebed Berrio
+              <span className="block text-white/60 text-xl md:text-2xl font-normal mt-2">
+                Director &amp; Trader Profesional
+              </span>
+            </h2>
+
+            <div className="space-y-4 text-white/60 text-base leading-relaxed mb-8">
+              <p>
+                Más de <span className="text-[#d5c108] font-semibold">13 años</span> en
+                mercados financieros y{" "}
+                <span className="text-[#d5c108] font-semibold">8 años</span> dominando
+                Forex. Su trayectoria combina experiencia institucional con una visión
+                pedagógica única.
+              </p>
+              <p className="text-white/40 italic border-l-2 border-[#d5c108]/50 pl-4">
+                &ldquo;Mi filosofía se basa en tres pilares: Gestión de riesgo
+                inquebrantable, dominio absoluto de la psicología del trading y lectura
+                institucional del precio.&rdquo;
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              {[
+                { icon: ShieldCheck, label: "Gestión de Riesgo" },
+                { icon: TrendingUp, label: "Psicología del Trading" },
+                { icon: Award, label: "Lectura Institucional" },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/5 text-sm text-white/70"
+                >
+                  <item.icon className="w-4 h-4 text-[#d5c108]" />
+                  {item.label}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="relative"
+          >
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-[#d5c108]/30 to-transparent blur-sm opacity-50" />
+            <div className="relative aspect-[3/4] rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden flex items-center justify-center">
+              <div className="text-center p-8">
+                <div className="w-32 h-32 mx-auto rounded-full bg-[#d5c108]/10 border border-[#d5c108]/30 flex items-center justify-center mb-6">
+                  <Award className="w-16 h-16 text-[#d5c108]" />
+                </div>
+                <p className="text-white/30 text-sm">Foto del Instructor</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  )
+}

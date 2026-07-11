@@ -1,0 +1,7 @@
+export { HeroSection } from "./HeroSection"
+export { AuthorityBar } from "./AuthorityBar"
+export { Ecosystem } from "./Ecosystem"
+export { InstructorProfile } from "./InstructorProfile"
+export { SocialProof } from "./SocialProof"
+export { MasterclassCTA } from "./MasterclassCTA"
+export { XpandFooter } from "./XpandFooter"
