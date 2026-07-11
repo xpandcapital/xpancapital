@@ -4,15 +4,19 @@ import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 export const getCachedLandingTemplate = unstable_cache(
   async () => {
-    const { data } = await supabaseAdmin
-      .from('templates')
-      .select('*')
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .eq('tipo_contenido', 'landing')
-      .eq('es_principal', true)
-      .eq('estado', 'activo')
-      .maybeSingle()
-    return data
+    try {
+      const { data } = await supabaseAdmin
+        .from('templates')
+        .select('*')
+        .eq('empresa_id', DEFAULT_EMPRESA_ID)
+        .eq('tipo_contenido', 'landing')
+        .eq('es_principal', true)
+        .eq('estado', 'activo')
+        .maybeSingle()
+      return data
+    } catch {
+      return null
+    }
   },
   ['landing-template'],
   { revalidate: 60, tags: ['landing-template'] }
@@ -20,12 +24,16 @@ export const getCachedLandingTemplate = unstable_cache(
 
 export const getCachedSiteConfig = unstable_cache(
   async () => {
-    const { data } = await supabaseAdmin
-      .from('site_config')
-      .select('*')
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .single()
-    return data
+    try {
+      const { data } = await supabaseAdmin
+        .from('site_config')
+        .select('*')
+        .eq('empresa_id', DEFAULT_EMPRESA_ID)
+        .single()
+      return data
+    } catch {
+      return null
+    }
   },
   ['site-config'],
   { revalidate: 86400, tags: ['site-config', 'landing-template'] }
