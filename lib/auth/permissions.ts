@@ -139,10 +139,6 @@ export const PERMISSIONS = {
   'roles:crear': 'Crear Roles y Niveles',
   'roles:editar': 'Editar Roles y Niveles',
   'roles:eliminar': 'Eliminar Roles y Niveles',
-  'empresas:ver': 'Ver Empresas',
-  'empresas:crear': 'Crear Empresas',
-  'empresas:editar': 'Editar Empresas',
-  'empresas:eliminar': 'Eliminar Empresas',
   'perfil:ver': 'Ver Perfil',
   'perfil:editar': 'Editar Perfil',
   // Panel Cliente
@@ -187,7 +183,6 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
     'postulantes:ver', 'postulantes:crear', 'postulantes:editar',
     'configuracion:ver', 'configuracion:crear', 'configuracion:editar',
     'roles:ver', 'roles:crear', 'roles:editar',
-    'empresas:ver', 'empresas:crear', 'empresas:editar',
     'perfil:ver', 'perfil:editar',
   ],
   empleado: [
@@ -269,7 +264,6 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
   'api-nube': 'api-nube:ver',
   'analiticas': 'analiticas:ver',
   'ajustes/roles': 'roles:ver',
-  'ajustes/empresas': 'empresas:ver',
   'perfil': 'perfil:ver',
 }
 
@@ -465,12 +459,6 @@ export const PERMISSION_ACTIONS: Record<string, { action: string; label: string;
     { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
   ],
   'roles': [
-    { action: 'ver', label: 'Ver', icon: 'eye' },
-    { action: 'crear', label: 'Crear', icon: 'plus' },
-    { action: 'editar', label: 'Editar', icon: 'pencil' },
-    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
-  ],
-  'empresas': [
     { action: 'ver', label: 'Ver', icon: 'eye' },
     { action: 'crear', label: 'Crear', icon: 'plus' },
     { action: 'editar', label: 'Editar', icon: 'pencil' },

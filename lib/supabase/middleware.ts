@@ -33,7 +33,6 @@ const SECTION_ROUTES: Record<string, string[]> = {
   'analiticas:ver': ['/superadmin/analiticas'],
   'ajustes:ver': ['/superadmin/ajustes'],
   'roles:ver': ['/superadmin/ajustes/roles'],
-  'empresas:ver': ['/superadmin/ajustes/empresas'],
   'perfil:ver': ['/superadmin/perfil'],
   'miembros:ver': ['/miembros'],
   'chat:ver': ['/superadmin/chat'],

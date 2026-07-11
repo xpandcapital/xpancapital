@@ -9,6 +9,7 @@ import {
   Loader2, CornerDownLeft
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { DEFAULT_EMPRESA_ID } from "@/lib/empresa"
 
 interface SearchResult {
   id: string
@@ -97,14 +98,7 @@ export function GlobalSearch() {
     setLoading(true)
 
     try {
-      let empresaId = '';
-      try {
-        const stored = localStorage.getItem('blis_active_empresa');
-        if (stored) empresaId = JSON.parse(stored)?.id || '';
-      } catch {}
-
-      const params = new URLSearchParams({ q });
-      if (empresaId) params.set('empresa_id', empresaId);
+      const params = new URLSearchParams({ q, empresa_id: DEFAULT_EMPRESA_ID });
       const res = await fetch(`/api/search?${params.toString()}`, {
         signal: controller.signal,
       })

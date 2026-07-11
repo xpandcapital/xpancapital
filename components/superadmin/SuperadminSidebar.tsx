@@ -18,7 +18,6 @@ import { LucideProps } from "lucide-react"
 import { usePermissions } from "@/hooks/usePermissions"
 import { useAuth } from "@/hooks/useAuth"
 import { SECTION_PERMISSIONS, hasPermission, type Permission } from "@/lib/auth/permissions"
-import { CompanySwitcher } from "./CompanySwitcher"
 
 type SubItem = {
     icon: React.ComponentType<LucideProps>
@@ -150,7 +149,6 @@ const ALL_SECTIONS: Section[] = [
                     { icon: Activity, label: "Métricas y SEO", href: "/superadmin/analiticas", permission: "analiticas:ver" },
                     { icon: ShoppingCart, label: "Comercio", href: "/superadmin/ajustes/comercio", permission: "ajustes:ver" },
                     { icon: Shield, label: "Roles y Niveles", href: "/superadmin/ajustes/roles", permission: "roles:ver" },
-                    { icon: Building2, label: "Empresas", href: "/superadmin/ajustes/empresas", permission: "empresas:ver" },
                     { icon: Shield, label: "Seguridad", href: "/superadmin/configuracion/seguridad", permission: "configuracion:ver" },
                     { icon: Server, label: "Config Correo", href: "/superadmin/configuracion/correo", permission: "configuracion:ver" },
                 ]
@@ -273,7 +271,6 @@ export function SuperadminSidebar() {
                                 exit={{ opacity: 0, x: -10 }}
                                 className="px-2 min-w-0"
                             >
-                                <CompanySwitcher compact />
                                 <p className="text-[10px] text-gray-500 font-medium mt-0.5 truncate">{roleLabel || 'Usuario'}</p>
                             </motion.div>
                         )}

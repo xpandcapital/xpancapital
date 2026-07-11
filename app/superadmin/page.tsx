@@ -94,20 +94,7 @@ function ErrorBanner({ message }: { message: string }) {
   );
 }
 
-function getActiveEmpresaId(): string {
-  if (typeof window === 'undefined') return DEFAULT_EMPRESA_ID;
-  try {
-    const stored = localStorage.getItem('blis_active_empresa');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed?.id) return parsed.id;
-    }
-  } catch {}
-  return DEFAULT_EMPRESA_ID;
-}
-
 export default function Dashboard() {
-  const [empresa, setEmpresa] = useState<{ nombre: string; id: string }>({ nombre: 'BLIS Corp', id: DEFAULT_EMPRESA_ID });
   const [productsCount, setProductsCount] = useState(0);
   const [clientsCount, setClientsCount] = useState(0);
   const [blogViews, setBlogViews] = useState(0);
@@ -122,7 +109,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [chartMonths, setChartMonths] = useState(6);
-  const empresaIdRef = useRef(getActiveEmpresaId());
+  const empresaIdRef = useRef(DEFAULT_EMPRESA_ID);
 
   const fetchData = useCallback(async (empresaIdOverride?: string) => {
     const empresaId = DEFAULT_EMPRESA_ID;
@@ -201,7 +188,6 @@ export default function Dashboard() {
         setError(prev => prev || `0 compras (sin filtro empresa). RLS bloqueando?`)
       }
 
-      if (empresaData) setEmpresa({ nombre: empresaData.nombre, id: empresaData.id });
       setProductsCount(prodCount || 0);
       setClientsCount(cliCount || 0);
       setBlogViews(blogCount || 0);
@@ -238,21 +224,6 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
-
-  // Escuchar cambios de empresa desde el CompanySwitcher
-  useEffect(() => {
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'blis_active_empresa') {
-        const newId = getActiveEmpresaId();
-        if (newId !== empresaIdRef.current) {
-          setLoading(true);
-          fetchData(newId);
-        }
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, [fetchData]);
 
   // Realtime: actualización incremental (solo contadores, no 11 queries)
   useEffect(() => {
@@ -293,16 +264,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Re-fetch cuando cambia empresaIdRef (CompanySwitcher hace reload, así que este efecto cubre el caso post-reload)
-  useEffect(() => {
-    const id = getActiveEmpresaId();
-    if (id !== empresaIdRef.current) {
-      empresaIdRef.current = id;
-      setLoading(true);
-      fetchData(id);
-    }
-  }, []);
-
   const totalVentas = useMemo(() => compras.reduce((s, c) => s + (Number(c.monto_usd) || 0), 0), [compras]);
 
   const monthlySales = useMemo(() => {
@@ -338,7 +299,7 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tighter">
-                {empresa.nombre} <span className="text-blis-red">Panel</span>
+                BLIS Corp <span className="text-blis-red">Panel</span>
               </h1>
               <button onClick={() => { setLoading(true); fetchData(); }} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-all">
                 <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />

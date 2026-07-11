@@ -35,7 +35,6 @@ const PATH_TO_SECTION: Record<string, string> = {
   '/superadmin/analiticas': 'analiticas:ver',
   '/superadmin/ajustes/comercio': 'ajustes:ver',
   '/superadmin/ajustes/roles': 'roles:ver',
-  '/superadmin/ajustes/empresas': 'empresas:ver',
   '/superadmin/perfil': 'perfil:ver',
   '/superadmin/integraciones': 'configuracion:ver',
   '/superadmin/chat': 'chat:ver',
