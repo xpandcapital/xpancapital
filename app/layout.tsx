@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   description: "Educación financiera de élite y estrategias de inversión diseñadas para generar resultados reales en el mercado de divisas.",
   manifest: "/manifest.json",
   icons: {
-    icon: "/favicon.png",
-    apple: "/pwa-icon.png",
+    icon: "/images/favicon%20xpand.png",
+    apple: "/images/favicon%20xpand.png",
   },
 };
 
