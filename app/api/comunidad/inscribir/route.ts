@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
@@ -159,3 +161,4 @@ export async function DELETE(request: NextRequest) {
     }, { status: 500 })
   }
 }
+

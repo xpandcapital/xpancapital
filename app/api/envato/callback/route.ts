@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
@@ -68,3 +70,4 @@ export async function GET(request: NextRequest) {
     `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/superadmin/mails?envato_connected=1`
   );
 }
+

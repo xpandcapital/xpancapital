@@ -156,15 +156,21 @@ export interface LotRecord {
 // Implementation
 // ═══════════════════════════════════════════════════════════════════════════════
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { createClient as createSupabaseClient } from './supabase/server';
 import { getApiKey } from './api-keys';
 import { parseFormaDePago } from './parse-forma-pago';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let _notionSupabase: SupabaseClient | null = null
+
+function getNotionSupabase(): SupabaseClient {
+  if (_notionSupabase) return _notionSupabase
+  _notionSupabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  return _notionSupabase
+}
 
 async function getNotionToken(userId?: string, empresaId?: string): Promise<string> {
   if (userId && empresaId) {
@@ -176,7 +182,7 @@ async function getNotionToken(userId?: string, empresaId?: string): Promise<stri
     return '';
   }
 
-  const { data } = await supabase.from('api_keys').select('key_name, key_value');
+  const { data } = await getNotionSupabase().from('api_keys').select('key_name, key_value');
   const keys: Record<string, string> = {};
   data?.forEach((k: NotionAPIKeyRow) => { keys[k.key_name] = k.key_value || ''; });
   return keys.notion_token || keys.notion_api_key || '';

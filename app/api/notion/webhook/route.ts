@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * Webhook de Notion → BLIS Corp
  * 
@@ -87,3 +89,4 @@ export async function GET() {
     timestamp: new Date().toISOString(),
   });
 }
+

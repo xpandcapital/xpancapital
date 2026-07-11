@@ -1,21 +1,40 @@
-// Cliente admin para API routes (Service Role - bypass RLS)
-// Usar createClient() para crear instancias con service role
-// Usar supabaseAdmin como singleton para conveniencia
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+let _client: SupabaseClient | null = null
 
-export function createClient() {
-  return createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+function getClient(): SupabaseClient {
+  if (_client) return _client
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+  _client = createSupabaseClient(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
-      persistSession: false
-    }
+      persistSession: false,
+    },
   })
+
+  return _client
 }
 
-export const supabase = createClient()
+export function createClient() {
+  return getClient()
+}
 
-// Admin client singleton (service role, bypass RLS) para importar en API routes
+function createSupabaseProxy(): SupabaseClient {
+  const handler: ProxyHandler<object> = {
+    get(_, prop: string) {
+      return (getClient() as Record<string, unknown>)[prop]
+    },
+    apply(_, thisArg, args) {
+      return Reflect.apply(getClient() as (...args: unknown[]) => unknown, thisArg, args)
+    },
+  }
+  return new Proxy({}, handler) as unknown as SupabaseClient
+}
+
+// Lazy singleton - only creates client on first access (safe for build time)
+export const supabase = createSupabaseProxy()
+
 export const supabaseAdmin = supabase

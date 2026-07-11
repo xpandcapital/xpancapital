@@ -1,9 +1,20 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+let _storageClient: SupabaseClient | null = null
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+function getStorageClient(): SupabaseClient {
+  if (_storageClient) return _storageClient
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  _storageClient = createClient(supabaseUrl, supabaseAnonKey)
+  return _storageClient
+}
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_, prop: string) {
+    return (getStorageClient() as Record<string, unknown>)[prop]
+  },
+})
 
 export interface UploadResult {
   url: string

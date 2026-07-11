@@ -3,14 +3,22 @@ import { createClient } from '@supabase/supabase-js'
 import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+export const dynamic = 'force-dynamic'
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: { autoRefreshToken: false, persistSession: false }
-})
+let _supabase: ReturnType<typeof createClient> | null = null
+
+function getSupabase() {
+  if (_supabase) return _supabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  _supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { autoRefreshToken: false, persistSession: false }
+  })
+  return _supabase
+}
 
 export async function POST(request: NextRequest) {
+  const supabase = getSupabase()
   try {
     const { email } = await request.json()
 

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { parseFormaDePago, validarPagoRecibo, getEstadoColor } from '@/lib/parse-forma-pago';

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
@@ -59,3 +61,4 @@ export async function GET(
     return NextResponse.json({ error: error.message || 'Error al cargar mensaje' }, { status: 500 })
   }
 }
+

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 
@@ -85,3 +87,4 @@ Redacta una respuesta de correo profesional. SOLO devuelve el cuerpo del correo,
     return NextResponse.json({ error: error.message || 'Error al redactar respuesta' }, { status: 500 })
   }
 }
+

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getAuthUser } from '@/lib/supabase/api-auth'
@@ -327,3 +329,4 @@ async function processOneBatch(campaignId: string) {
   const { count } = await supabase.from('whatsapp_campaign_recipients').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId).eq('status', 'pending')
   return { remaining: count || 0, sentBatch: recipients.length, done: (count || 0) === 0 }
 }
+

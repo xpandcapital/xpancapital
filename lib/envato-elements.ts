@@ -4,12 +4,18 @@
  * ya que Envato Elements no tiene API pública
  */
 import puppeteer, { Browser, Page } from 'puppeteer';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+let _envatoSupabase: SupabaseClient | null = null
+
+function getEnvatoSupabase(): SupabaseClient {
+  if (_envatoSupabase) return _envatoSupabase
+  _envatoSupabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  return _envatoSupabase
+}
 
 // Cache del browser para reutilizar sesión
 let cachedBrowser: Browser | null = null;
@@ -18,7 +24,7 @@ let sessionCookies: any[] = [];
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function getCredentials() {
-  const { data } = await supabase.from('api_keys').select('key_name, key_value');
+  const { data } = await getEnvatoSupabase().from('api_keys').select('key_name, key_value');
   const keys: Record<string, string> = {};
   data?.forEach((k: any) => { keys[k.key_name] = k.key_value || ''; });
   return {

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
@@ -230,3 +232,4 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({ status: 'active', webhook: 'WhatsApp Planifyx Webhook' })
 }
+

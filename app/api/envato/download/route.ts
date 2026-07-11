@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import JSZip from 'jszip';
@@ -231,3 +233,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 });
   }
 }
+

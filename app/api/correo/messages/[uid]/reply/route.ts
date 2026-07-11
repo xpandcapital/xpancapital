@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 // @ts-nocheck
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
@@ -204,3 +206,4 @@ export async function POST(
     return NextResponse.json({ error: error.message || 'Error al enviar respuesta' }, { status: 500 })
   }
 }
+
