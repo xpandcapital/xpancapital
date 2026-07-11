@@ -12,6 +12,7 @@ export function useCourseManagement() {
   const autoSaveRef = useRef<NodeJS.Timeout | null>(null)
   const saveVersionRef = useRef(0)
   const hasUnsavedRef = useRef(false)
+  const isSavingRef = useRef(false)
 
   // Advertir al usuario si cierra la pestaña con cambios sin guardar
   useEffect(() => {
@@ -131,6 +132,8 @@ export function useCourseManagement() {
 
   const saveBorrador = useCallback(async (statusOverride?: 'Borrador' | 'Publicado') => {
     if (!currentCourse) return
+    if (isSavingRef.current) return
+    isSavingRef.current = true
     const currentVersion = ++saveVersionRef.current
     setIsSaving(true)
 
@@ -231,6 +234,7 @@ export function useCourseManagement() {
       alert('Error de conexión al guardar')
     } finally {
       setIsSaving(false)
+      isSavingRef.current = false
     }
     return false
   }, [currentCourse, fetchCourses])
@@ -276,14 +280,19 @@ export function useCourseManagement() {
         method: 'DELETE'
       })
 
-      if (response.ok) {
+      const data = await response.json()
+
+      if (response.ok && data.success) {
         setCourses(prev => prev.filter(c => c.id !== courseId))
         if (currentCourse?.id === courseId) {
           setCurrentCourse(null)
         }
+      } else {
+        alert('Error al eliminar: ' + (data.error || 'No se pudo eliminar el curso'))
       }
     } catch (error) {
       console.error('Error deleting course:', error)
+      alert('Error de conexión al eliminar el curso')
     }
   }, [currentCourse])
 
