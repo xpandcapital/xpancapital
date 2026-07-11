@@ -66,13 +66,12 @@ export function InstructorProfile() {
             className="relative"
           >
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-[#d5c108]/30 to-transparent blur-sm opacity-50" />
-            <div className="relative aspect-[3/4] rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden flex items-center justify-center">
-              <div className="text-center p-8">
-                <div className="w-32 h-32 mx-auto rounded-full bg-[#d5c108]/10 border border-[#d5c108]/30 flex items-center justify-center mb-6">
-                  <Award className="w-16 h-16 text-[#d5c108]" />
-                </div>
-                <p className="text-white/30 text-sm">Foto del Instructor</p>
-              </div>
+            <div className="relative aspect-[3/4] rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden">
+              <img
+                src="/images/hebed%20perfil%20p.png"
+                alt="Hebed Berrio — Director & Trader Profesional"
+                className="w-full h-full object-cover"
+              />
             </div>
           </motion.div>
         </div>
