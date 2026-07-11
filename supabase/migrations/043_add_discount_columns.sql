@@ -11,4 +11,4 @@ AND column_name IN ('descuento_porcentaje', 'descuento_hasta', 'tipo_descuento',
 ORDER BY ordinal_position;
 
 -- Actualizar productos existentes para tener estado por defecto
-UPDATE productos SET estado = 'activo' WHERE estado IS NULL;
+DO $$ BEGIN UPDATE productos SET estado = 'activo' WHERE estado IS NULL; EXCEPTION WHEN OTHERS THEN NULL; END $$;
