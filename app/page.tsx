@@ -3,10 +3,17 @@ import {
   HeroSection,
   AuthorityBar,
   Ecosystem,
+  TrackRecord,
+  Roadmap,
   InstructorProfile,
   SocialProof,
+  Pricing,
+  Tools,
+  VideoPreviews,
+  FaqSection,
   MasterclassCTA,
   XpandFooter,
+  WhatsAppFAB,
 } from "@/components/sections/xpand"
 
 export default function Home() {
@@ -16,10 +23,17 @@ export default function Home() {
       <HeroSection />
       <AuthorityBar />
       <Ecosystem />
+      <TrackRecord />
+      <Roadmap />
       <InstructorProfile />
       <SocialProof />
+      <Pricing />
+      <Tools />
+      <VideoPreviews />
+      <FaqSection />
       <MasterclassCTA />
       <XpandFooter />
+      <WhatsAppFAB />
     </main>
   )
 }

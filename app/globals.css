@@ -216,6 +216,22 @@
   }
 }
 
+/* ─── MARQUEE ANIMATIONS ─── */
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-slow {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+.animate-marquee-slow {
+  animation: marquee-slow 60s linear infinite;
+}
+
 /* ─── LATIDO DE VELA EN TIEMPO REAL (Heartbeat) ─── */
 @keyframes ping {
   0%   { transform: scale(1);   opacity: 0.8; }
