@@ -24,8 +24,8 @@ const signals = [
 ]
 
 const cornerWidgets = [
-  { position: "top-6 left-4 md:top-10 md:left-8", icon: TrendingUp, label: "EUR/USD", value: "1.0850", change: "+0.32%", up: true },
-  { position: "top-6 right-4 md:top-10 md:right-8", icon: BarChart3, label: "Volatilidad", value: "Media", change: "Sesión London", up: true },
+  { position: "top-24 left-4 md:top-28 md:left-8", icon: TrendingUp, label: "EUR/USD", value: "1.0850", change: "+0.32%", up: true },
+  { position: "top-24 right-4 md:top-28 md:right-8", icon: BarChart3, label: "Volatilidad", value: "Media", change: "Sesión London", up: true },
   { position: "bottom-28 left-4 md:bottom-32 md:left-8", icon: Activity, label: "Señales hoy", value: "12", change: "Activas", up: true },
   { position: "bottom-28 right-4 md:bottom-32 md:right-8", icon: Target, label: "Win Rate", value: "78%", change: "Este mes", up: true },
 ]
@@ -85,14 +85,14 @@ export function HeroSection() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
-          className={`absolute z-20 hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.05] backdrop-blur-sm ${w.position}`}
+          className={`absolute z-20 hidden sm:flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] backdrop-blur-sm ${w.position}`}
         >
-          <w.icon className="w-3.5 h-3.5 text-[#d5c108]/60" />
+          <w.icon className="w-5 h-5 text-[#d5c108]/60" />
           <div className="text-left">
-            <div className="text-[10px] text-white/30 uppercase tracking-wider">{w.label}</div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm font-bold text-white/80">{w.value}</span>
-              <span className={`text-[10px] ${w.up ? "text-emerald-400" : "text-red-400"}`}>{w.change}</span>
+            <div className="text-xs text-white/30 uppercase tracking-wider mb-0.5">{w.label}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold text-white/80">{w.value}</span>
+              <span className={`text-xs ${w.up ? "text-emerald-400" : "text-red-400"}`}>{w.change}</span>
             </div>
           </div>
         </motion.div>
@@ -101,7 +101,7 @@ export function HeroSection() {
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-20 md:pt-0">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full flex flex-col items-center">
 
-          <motion.div custom={0} variants={fadeUp} className="mb-4 md:mb-6">
+          <motion.div custom={0} variants={fadeUp} className="mb-6 md:mb-10">
             <span className="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-[#d5c108]/30 bg-[#d5c108]/5 text-[#d5c108] text-xs md:text-sm font-medium">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -116,7 +116,7 @@ export function HeroSection() {
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
             <span className="relative glitch-text text-[#d5c108]" data-text="XPAND">XPAND</span>
-            <span className="text-white/90 ml-2 md:ml-4">CAPITAL</span>
+            <span className="relative glitch-text text-white/90 ml-2 md:ml-4" data-text="CAPITAL">CAPITAL</span>
           </motion.h1>
 
           <motion.p custom={2} variants={fadeUp}
