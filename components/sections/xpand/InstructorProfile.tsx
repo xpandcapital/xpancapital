@@ -70,7 +70,7 @@ export function InstructorProfile() {
               <img
                 src="/images/hebed%20perfil%20p.png"
                 alt="Hebed Berrio — Director & Trader Profesional"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-top"
               />
             </div>
           </motion.div>

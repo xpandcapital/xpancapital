@@ -101,7 +101,7 @@ export function HeroSection() {
       <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-28 md:pt-0">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full flex flex-col items-center">
 
-          <motion.div custom={0} variants={fadeUp} className="mb-6 md:mb-10">
+          <motion.div custom={0} variants={fadeUp} className="mb-6 md:mb-14">
             <span className="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-[#d5c108]/30 bg-[#d5c108]/5 text-[#d5c108] text-xs md:text-sm font-medium">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -112,7 +112,7 @@ export function HeroSection() {
           </motion.div>
 
           <motion.h1 custom={1} variants={fadeUp}
-            className="relative text-center mb-6 md:mb-8"
+            className="relative text-center mb-6 md:mb-12"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
             <span className="relative glitch-text block md:inline text-[clamp(6.3rem,18vw,10rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#d5c108" }}>XPAND</span>
@@ -120,13 +120,13 @@ export function HeroSection() {
           </motion.h1>
 
           <motion.p custom={2} variants={fadeUp}
-            className="text-sm md:text-xl text-white/50 max-w-xs md:max-w-xl mx-auto mb-8 md:mb-10 leading-relaxed px-2"
+            className="text-sm md:text-xl text-white/50 max-w-xs md:max-w-xl mx-auto mb-8 md:mb-14 leading-relaxed px-2"
           >
             Educación financiera de élite y estrategias de inversión diseñadas para generar resultados reales en el mercado de divisas.
           </motion.p>
 
           <motion.div custom={2.5} variants={fadeUp}
-            className="mb-8 md:mb-10 w-full max-w-2xl overflow-hidden"
+            className="mb-8 md:mb-16 w-full max-w-2xl overflow-hidden"
           >
             <div className="flex animate-marquee-slow whitespace-nowrap">
               {[...signals, ...signals].map((s, i) => (
@@ -152,7 +152,7 @@ export function HeroSection() {
           </motion.div>
 
           <motion.div custom={4} variants={fadeUp}
-            className="mt-12 md:mt-16 grid grid-cols-3 gap-3 md:gap-4 w-full max-w-md md:max-w-lg px-2"
+            className="mt-12 md:mt-20 grid grid-cols-3 gap-3 md:gap-4 w-full max-w-md md:max-w-lg px-2"
           >
             {[
               { icon: Target, value: "94%", label: "Tasa de éxito" },
