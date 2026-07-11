@@ -63,8 +63,7 @@ const ALL_SECTIONS: Section[] = [
                 icon: ShoppingCart,
                 label: "Punto de Venta",
                 subItems: [
-                    { icon: ShoppingCart, label: "Terminal POS", href: "/superadmin/pos", permission: "pos:ver" },
-                    { icon: DollarSign, label: "Historial de Ventas", href: "/superadmin/ventas", permission: "ventas:ver" },
+                    { icon: ShoppingCart, label: "Historial de Ventas", href: "/superadmin/ventas", permission: "ventas:ver" },
                     { icon: Settings, label: "Formas de Pago", href: "/superadmin/formasdepago", permission: "formasdepago:ver" },
                     { icon: ShoppingBag, label: "Productos", href: "/superadmin/productos", permission: "productos:ver" },
                     { icon: Package, label: "Entregas Digitales", href: "/superadmin/productos/entregas", permission: "productos:ver" },
@@ -107,10 +106,6 @@ const ALL_SECTIONS: Section[] = [
                 subItems: [
                     { icon: Mail, label: "Correos", href: "/superadmin/mails", permission: "mails:ver" },
                     { icon: Inbox, label: "Correo IMAP", href: "/superadmin/correo", permission: "correo:ver" },
-                    { icon: CalendarDays, label: "Calendarios", href: "/superadmin/calendarios", permission: "calendarios:ver" },
-                    { icon: FileText, label: "Formularios", href: "/superadmin/formularios", permission: "formularios:ver" },
-                    { icon: UsersRound, label: "Leads", href: "/superadmin/leads", permission: "leads:ver" },
-                    { icon: Megaphone, label: "Campañas", href: "/superadmin/campanas", permission: "campanas:ver" },
                     { icon: Bell, label: "Notificaciones", href: "/superadmin/notificaciones", permission: "notificaciones:ver" },
                     { icon: Radio, label: "Transmisiones", href: "/superadmin/transmisiones", permission: "transmisiones:ver" },
                     { icon: MessageCircle, label: "WhatsApp", href: "/superadmin/whatsapp", permission: "campanas:ver" },
@@ -121,7 +116,6 @@ const ALL_SECTIONS: Section[] = [
                 label: "Blog",
                 subItems: [
                     { icon: FileText, label: "Entradas", href: "/superadmin/blog", permission: "blog:ver" },
-                    { icon: ImageIcon, label: "Rutas", href: "/superadmin/blog/rutas", permission: "blog:ver" },
                 ]
             },
         ]
@@ -139,12 +133,10 @@ const ALL_SECTIONS: Section[] = [
                     { icon: ClipboardList, label: "Preguntas", href: "/superadmin/postulantes/preguntas", permission: "postulantes:ver" },
                 ]
             },
-            { icon: Wrench, label: "Utilidades", href: "/superadmin/utilidades", permission: "utilidades:ver" },
             {
                 icon: Settings,
                 label: "Configuración",
                 subItems: [
-                    { icon: ImageIcon, label: "Sitio y Branding", href: "/superadmin/configuracion", permission: "configuracion:ver" },
                     { icon: Cloud, label: "APIs y Nube", href: "/superadmin/api-nube", permission: "api-nube:ver" },
                     { icon: Activity, label: "Métricas y SEO", href: "/superadmin/analiticas", permission: "analiticas:ver" },
                     { icon: ShoppingCart, label: "Comercio", href: "/superadmin/ajustes/comercio", permission: "ajustes:ver" },
