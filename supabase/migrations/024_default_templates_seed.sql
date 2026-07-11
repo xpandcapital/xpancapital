@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- BLIS CORP - TEMPLATES POR DEFECTO (THANK YOU, CAPTURA, FUNNEL)
+-- Xpand Capital - TEMPLATES POR DEFECTO (THANK YOU, CAPTURA, FUNNEL)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 -- TEMPLATE DE THANK YOU (PÁGINA DE AGRADECIMIENTO)
@@ -62,7 +62,7 @@ VALUES (
             ],
             "contactInfo": {
                 "phone": "+51 999 999 999",
-                "email": "contacto@bliscorp.com",
+                "email": "contacto@xpancapital.com",
                 "whatsapp": "51999999999"
             },
             "accentColor": "#10B981"
@@ -77,12 +77,12 @@ VALUES (
             "accentColor": "#B10D24"
         },
         "footer": {
-            "description": "BLIS Corp - Tu socio inmobiliario de confianza.",
-            "copyright": "© 2026 Blis Corp. Todos los derechos reservados."
+            "description": "Xpand Capital - Tu socio inmobiliario de confianza.",
+            "copyright": "© 2026 Xpand Capital. Todos los derechos reservados."
         }
     }',
-    '¡Gracias! | BLIS Corp',
-    'Tu operación ha sido procesada exitosamente. BLIS Corp - Inmobiliaria de confianza.',
+    '¡Gracias! | Xpand Capital',
+    'Tu operación ha sido procesada exitosamente. Xpand Capital - Inmobiliaria de confianza.',
     'Página de agradecimiento principal para post-venta y post-registro'
 ) ON CONFLICT (empresa_id, slug) DO NOTHING;
 
@@ -158,11 +158,11 @@ VALUES (
             "layout": "grid"
         },
         "footer": {
-            "description": "BLIS Corp - Tu socio inmobiliario de confianza.",
-            "copyright": "© 2026 Blis Corp. Todos los derechos reservados."
+            "description": "Xpand Capital - Tu socio inmobiliario de confianza.",
+            "copyright": "© 2026 Xpand Capital. Todos los derechos reservados."
         }
     }',
-    'Registro de Inversores | BLIS Corp',
+    'Registro de Inversores | Xpand Capital',
     'Únete a la élite inmobiliaria y accede a proyectos exclusivos de alta plusvalía.',
     'Formulario de captura principal para leads de inversión'
 ) ON CONFLICT (empresa_id, slug) DO NOTHING;
@@ -206,7 +206,7 @@ VALUES (
             "showCountdown": true
         },
         "funnelBenefits": {
-            "title": "¿Por qué invertir con BLIS Corp?",
+            "title": "¿Por qué invertir con Xpand Capital?",
             "subtitle": "Ventajas Exclusivas",
             "accentColor": "#B10D24",
             "benefits": [
@@ -222,7 +222,7 @@ VALUES (
             "subtitle": "Testimonios Reales",
             "items": [
                 {
-                    "quote": "Invertí en Montana y en 18 meses mi terreno vale el triple. BLIS Corp cambió mi vida financiera.",
+                    "quote": "Invertí en Montana y en 18 meses mi terreno vale el triple. Xpand Capital cambió mi vida financiera.",
                     "author": "Rafael S.",
                     "role": "Inversor",
                     "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=256&q=80"
@@ -254,11 +254,12 @@ VALUES (
             "urgencyText": "Solo quedan 12 lugares"
         },
         "footer": {
-            "description": "BLIS Corp - Líderes en desarrollo inmobiliario de alta plusvalía.",
-            "copyright": "© 2026 Blis Corp. Todos los derechos reservados."
+            "description": "Xpand Capital - Líderes en desarrollo inmobiliario de alta plusvalía.",
+            "copyright": "© 2026 Xpand Capital. Todos los derechos reservados."
         }
     }',
-    'Oportunidad Exclusiva | BLIS Corp',
+    'Oportunidad Exclusiva | Xpand Capital',
     'Invierte en terrenos de alta plusvalía. Plusvalía garantizada del 200-400% en 3-5 años.',
     'Embudo de venta principal para conversión de leads'
 ) ON CONFLICT (empresa_id, slug) DO NOTHING;
+

@@ -85,7 +85,7 @@ export default function CreateBlogPostContent() {
   useEffect(() => {
     const loadInitial = async () => {
       try {
-        const empresaRes = await fetch('/api/empresas?slug=blis-corp');
+        const empresaRes = await fetch('/api/empresas?slug=xpancapital');
         const empresaData = await empresaRes.json();
         if (empresaData.success && empresaData.data?.id) {
           const eid = empresaData.data.id;
@@ -137,7 +137,7 @@ export default function CreateBlogPostContent() {
     if (!post.slug) return;
     const checkShortLink = async () => {
       try {
-        const fullUrl = `https://www.blis-corp.com/blog/articulo/${post.slug}`;
+        const fullUrl = `https://www.xpancapital.org/blog/articulo/${post.slug}`;
         const res = await fetch('/api/short-links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: fullUrl }) });
         const data = await res.json();
         if (data.success && data.codigo && !data.existente) {
@@ -347,7 +347,7 @@ export default function CreateBlogPostContent() {
     if (!saveSuccess?.slug) return;
     setGeneratingLink(true);
     try {
-      const fullUrl = `https://www.blis-corp.com/blog/articulo/${saveSuccess.slug}`;
+      const fullUrl = `https://www.xpancapital.org/blog/articulo/${saveSuccess.slug}`;
       const res = await fetch('/api/short-links', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -355,7 +355,7 @@ export default function CreateBlogPostContent() {
       });
       const data = await res.json();
       if (data.success) {
-        setShortLink(`blis-corp.com/s/${data.codigo}`);
+        setShortLink(`xpancapital.org/s/${data.codigo}`);
       }
     } catch {} finally {
       setGeneratingLink(false);
@@ -373,7 +373,7 @@ export default function CreateBlogPostContent() {
     if (!post.slug || !shortCode.trim()) return;
     setShortCodeSaving(true);
     try {
-      const fullUrl = `https://www.blis-corp.com/blog/articulo/${post.slug}`;
+      const fullUrl = `https://www.xpancapital.org/blog/articulo/${post.slug}`;
       const res = await fetch('/api/short-links', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -395,7 +395,7 @@ export default function CreateBlogPostContent() {
   };
 
   const handleCopyShortCode = () => {
-    navigator.clipboard.writeText(`https://blis-corp.com/s/${shortCode}`);
+    navigator.clipboard.writeText(`https://xpancapital.org/s/${shortCode}`);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
   };
@@ -662,3 +662,4 @@ export default function CreateBlogPostContent() {
     </div>
   );
 }
+

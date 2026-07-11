@@ -1,5 +1,5 @@
 /**
- * Webhook de Notion → BLIS Corp
+ * Webhook de Notion → Xpand Capital
  * 
  * Notion no tiene webhooks nativos. Para sincronización en tiempo real usamos
  * dos estrategias combinadas:
@@ -91,9 +91,10 @@ export async function GET() {
   return NextResponse.json({
     status: 'ok',
     endpoint: '/api/notion/webhook',
-    description: 'Webhook para sincronización de Notion → BLIS Corp',
+    description: 'Webhook para sincronización de Notion → Xpand Capital',
     usage: 'POST a este endpoint desde Make.com o Zapier cuando cambie algo en Notion',
     timestamp: new Date().toISOString(),
   });
 }
+
 

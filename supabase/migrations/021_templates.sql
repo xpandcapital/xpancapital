@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- BLIS CORP - SISTEMA DE TEMPLATES
+-- Xpand Capital - SISTEMA DE TEMPLATES
 -- Tabla para gestionar plantillas de contenido (landing, blog, tienda, etc.)
 -- ═══════════════════════════════════════════════════════════════════════════════
 
@@ -196,7 +196,7 @@ VALUES (
     true,
     '{
         "hero": {
-            "title1": "BLIS",
+            "title1": "XPAND",
             "title2": "CORP",
             "subtitle": "Tu Próximo Gran Patrimonio",
             "description": "Desarrollamos Macro-Lotes y Terrenos con alta plusvalía.",
@@ -272,7 +272,7 @@ VALUES (
             "subtitle": "Testimonios",
             "items": [
                 {
-                    "quote": "Blis Corp redefinió nuestra estrategia de inversión.",
+                    "quote": "Xpand Capital redefinió nuestra estrategia de inversión.",
                     "author": "Rafael S.",
                     "role": "Inversor",
                     "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=256&q=80"
@@ -285,7 +285,7 @@ VALUES (
         },
         "footer": {
             "description": "Liderando la transformación digital.",
-            "copyright": "© 2026 Blis Corp.",
+            "copyright": "© 2026 Xpand Capital.",
             "logoVertical": "/images/logo-blis-vertical.png",
             "logoHorizontal": "/images/blis-logo.png",
             "socials": {}
@@ -302,3 +302,4 @@ WHERE empresa_id = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 AND slug = '' 
 AND tipo_contenido = 'landing'
 ON CONFLICT DO NOTHING;
+

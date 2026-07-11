@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       .from("biblioteca_libros")
       .insert({
         titulo,
-        autor: autor || "Blis Editorial",
+        autor: autor || "Xpand Editorial",
         categoria: categoria || "General",
         portada_url: portada_url || null,
         descripcion: descripcion || null,
@@ -119,3 +119,4 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+

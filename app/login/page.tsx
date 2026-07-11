@@ -155,7 +155,7 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center relative overflow-hidden">
-      {/* Efectos de fondo estilo BLIS */}
+      {/* Efectos de fondo estilo XPAND */}
       <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[150px] opacity-[0.08] bg-blis-red pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full blur-[120px] opacity-[0.04] bg-blis-red pointer-events-none" />
 
@@ -166,7 +166,7 @@ function LoginForm() {
             <ShieldCheck className="w-8 h-8 text-blis-red" />
           </div>
           <h1 className="text-3xl font-black uppercase tracking-widest text-white mb-2">
-            BLIS CORP
+            Xpand Capital
           </h1>
           <p className="text-blis-red text-sm font-bold tracking-widest">HQ</p>
           <p className="text-gray-500 mt-2 text-xs uppercase tracking-widest">
@@ -200,7 +200,7 @@ function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@blis-corp.com"
+              placeholder="admin@xpancapital.org"
               className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blis-red/50 focus:bg-black/70 transition-all"
               autoComplete="email"
             />
@@ -333,7 +333,7 @@ function LoginForm() {
 
         {/* Footer */}
         <p className="text-center text-[10px] text-gray-600 mt-8 font-mono tracking-wider">
-          IP Registrada y Monitoreada • Blis Corp SecureNet
+          IP Registrada y Monitoreada • Xpand Capital SecureNet
         </p>
       </div>
     </div>
@@ -351,3 +351,5 @@ export default function LoginPage() {
     </Suspense>
   )
 }
+
+

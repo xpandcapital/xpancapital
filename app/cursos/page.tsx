@@ -28,7 +28,7 @@ export default function CursosPage() {
     const [search, setSearch] = useState('');
 
     useEffect(() => {
-        document.title = "Cursos | BLIS Corp";
+        document.title = "Cursos | Xpand Capital";
     }, []);
 
     const filteredCursos = cursos.filter(curso =>

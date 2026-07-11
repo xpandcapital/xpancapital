@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS biblioteca_libros (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   empresa_id uuid DEFAULT '6186f014-c8c7-4027-9f08-8acf2bae3eae',
   titulo text NOT NULL,
-  autor text DEFAULT 'Blis Editorial',
+  autor text DEFAULT 'Xpand Editorial',
   categoria text DEFAULT 'General',
   portada_url text,
   descripcion text,
@@ -56,3 +56,4 @@ STABLE
 AS $$
   SELECT * FROM biblioteca_libros ORDER BY orden ASC, created_at DESC;
 $$;
+

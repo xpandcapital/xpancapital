@@ -120,7 +120,7 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
     .map(p => `<li style="margin-bottom:6px;font-size:14px;color:#e5e7eb;">✅ ${p}</li>`)
     .join('')
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://xpancapital.org'
 
   // La contraseña temporal solo se incluye para usuarios NUEVOS.
   // Si es invitado pero su email ya existe, no se modifica su contraseña y se usa
@@ -174,3 +174,4 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
 
   return { userId, isNewUser, tempPassword }
 }
+

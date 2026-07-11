@@ -225,7 +225,7 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                                             ${product.price.toFixed(2)}
                                         </span>
                                         <span className={`text-emerald-500 font-black text-[10px] mt-2 flex items-center gap-1 uppercase tracking-widest transition-opacity ${user ? 'opacity-100' : 'opacity-40'}`} suppressHydrationWarning>
-                                            {Math.round(product.price * 10).toLocaleString()} BLISC
+                                            {Math.round(product.price * 10).toLocaleString()} XPANDC
                                         </span>
                                     </div>
                                 </>
@@ -294,7 +294,7 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                             onClick={() => {
                                 const coinPrice = product.precio_coins || Math.round((product.price || 0) * 10);
                                 if (blisCoins < coinPrice) {
-                                    showToast("No tienes suficientes BLISCOINS para este producto.", "error");
+                                    showToast("No tienes suficientes XPANDCOINS para este producto.", "error");
                                     return;
                                 }
                                 addToCart({
@@ -312,7 +312,7 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                             className="w-full py-4 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center gap-3 hover:bg-emerald-500 hover:text-white transition-all font-black uppercase tracking-widest text-[11px] group/redeem"
                         >
                             <Star className="w-4 h-4 fill-current group-hover/redeem:animate-spin" />
-                            Canjear por BLISCOINS
+                            Canjear por XPANDCOINS
                         </button>
                     )}
                 </div>
@@ -320,4 +320,5 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
         </div>
     );
 }
+
 

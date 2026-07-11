@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- BLIS CORP - TEMPLATES ACTUALIZADOS CON SECCIONES COMPLETAS
+-- Xpand Capital - TEMPLATES ACTUALIZADOS CON SECCIONES COMPLETAS
 -- Ejecutar en Supabase Dashboard > SQL Editor
 -- ═══════════════════════════════════════════════════════════════════════════════
 
@@ -41,7 +41,7 @@ VALUES (
             ],
             "contactInfo": {
                 "phone": "+51 999 999 999",
-                "email": "contacto@bliscorp.com",
+                "email": "contacto@xpancapital.com",
                 "whatsapp": "51999999999"
             },
             "accentColor": "#10B981"
@@ -58,12 +58,12 @@ VALUES (
             "showUrgency": false
         },
         "footer": {
-            "description": "BLIS Corp - Tu socio inmobiliario de confianza.",
-            "copyright": "© 2026 Blis Corp. Todos los derechos reservados."
+            "description": "Xpand Capital - Tu socio inmobiliario de confianza.",
+            "copyright": "© 2026 Xpand Capital. Todos los derechos reservados."
         }
     }',
-    '¡Gracias! | BLIS Corp',
-    'Tu operación ha sido procesada exitosamente. BLIS Corp - Inmobiliaria de confianza.'
+    '¡Gracias! | Xpand Capital',
+    'Tu operación ha sido procesada exitosamente. Xpand Capital - Inmobiliaria de confianza.'
 ) ON CONFLICT (empresa_id, slug) DO UPDATE SET
     secciones = EXCLUDED.secciones,
     actualizado_en = NOW();
@@ -131,7 +131,7 @@ VALUES (
             "accentColor": "#B10D24"
         },
         "funnelBenefits": {
-            "title": "¿Por qué invertir con BLIS Corp?",
+            "title": "¿Por qué invertir con Xpand Capital?",
             "subtitle": "Ventajas Exclusivas",
             "accentColor": "#B10D24",
             "benefits": [
@@ -161,7 +161,7 @@ VALUES (
             "title": "Historias de Éxito",
             "subtitle": "Testimonios Reales",
             "testimonials": [
-                { "quote": "Invertí en Montana y en 18 meses mi terreno vale el triple. BLIS Corp cambió mi vida financiera.", "author": "Rafael S.", "role": "Inversor", "rating": 5 },
+                { "quote": "Invertí en Montana y en 18 meses mi terreno vale el triple. Xpand Capital cambió mi vida financiera.", "author": "Rafael S.", "role": "Inversor", "rating": 5 },
                 { "quote": "La seguridad legal fue lo que más me convenció. Todo documentado y transparente desde el día uno.", "author": "María G.", "role": "Propietaria", "rating": 5 },
                 { "quote": "El equipo de asesoría me guió en todo el proceso. No tenía experiencia y ahora tengo 3 terrenos.", "author": "Carlos M.", "role": "Primerizo en Inversiones", "rating": 5 }
             ],
@@ -169,11 +169,11 @@ VALUES (
             "layout": "carousel"
         },
         "footer": {
-            "description": "BLIS Corp - Tu socio inmobiliario de confianza.",
-            "copyright": "© 2026 Blis Corp. Todos los derechos reservados."
+            "description": "Xpand Capital - Tu socio inmobiliario de confianza.",
+            "copyright": "© 2026 Xpand Capital. Todos los derechos reservados."
         }
     }',
-    'Registro de Inversores | BLIS Corp',
+    'Registro de Inversores | Xpand Capital',
     'Únete a la élite inmobiliaria y accede a proyectos exclusivos de alta plusvalía.'
 ) ON CONFLICT (empresa_id, slug) DO UPDATE SET
     secciones = EXCLUDED.secciones,
@@ -234,7 +234,7 @@ VALUES (
             "accentColor": "#B10D24"
         },
         "funnelBenefits": {
-            "title": "¿Por qué invertir con BLIS Corp?",
+            "title": "¿Por qué invertir con Xpand Capital?",
             "subtitle": "Ventajas Exclusivas",
             "accentColor": "#B10D24",
             "benefits": [
@@ -261,7 +261,7 @@ VALUES (
             "title": "Historias de Éxito",
             "subtitle": "Testimonios Reales",
             "testimonials": [
-                { "quote": "Invertí en Montana y en 18 meses mi terreno vale el triple. BLIS Corp cambió mi vida financiera.", "author": "Rafael S.", "role": "Inversor", "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=256&q=80", "rating": 5 },
+                { "quote": "Invertí en Montana y en 18 meses mi terreno vale el triple. Xpand Capital cambió mi vida financiera.", "author": "Rafael S.", "role": "Inversor", "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=256&q=80", "rating": 5 },
                 { "quote": "La seguridad legal fue lo que más me convenció. Todo documentado y transparente desde el día uno.", "author": "María G.", "role": "Propietaria", "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&q=80", "rating": 5 },
                 { "quote": "El equipo de asesoría me guió en todo el proceso. No tenía experiencia y ahora tengo 3 terrenos.", "author": "Carlos M.", "role": "Primerizo en Inversiones", "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=256&q=80", "rating": 5 }
             ],
@@ -293,11 +293,11 @@ VALUES (
             "urgencyText": "Solo quedan 12 lugares"
         },
         "footer": {
-            "description": "BLIS Corp - Líderes en desarrollo inmobiliario de alta plusvalía.",
-            "copyright": "© 2026 Blis Corp. Todos los derechos reservados."
+            "description": "Xpand Capital - Líderes en desarrollo inmobiliario de alta plusvalía.",
+            "copyright": "© 2026 Xpand Capital. Todos los derechos reservados."
         }
     }',
-    'Oportunidad Exclusiva | BLIS Corp',
+    'Oportunidad Exclusiva | Xpand Capital',
     'Invierte en terrenos de alta plusvalía. Plusvalía garantizada del 200-400% en 3-5 años.'
 ) ON CONFLICT (empresa_id, slug) DO UPDATE SET
     secciones = EXCLUDED.secciones,
@@ -318,3 +318,4 @@ UPDATE templates SET
     "sectionOrder" = ARRAY['funnelHero', 'funnelCountdown', 'funnelVideo', 'funnelBenefits', 'stats', 'funnelTestimonials', 'funnelPricing', 'funnelCTA', 'footer'],
     "sectionVisibility" = '{"funnelHero": true, "funnelCountdown": true, "funnelVideo": true, "funnelBenefits": true, "stats": true, "funnelTestimonials": true, "funnelPricing": true, "funnelCTA": true, "footer": true}'
 WHERE slug = 'oportunidad-exclusiva';
+

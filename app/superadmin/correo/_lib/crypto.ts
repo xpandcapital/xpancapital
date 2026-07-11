@@ -1,10 +1,10 @@
 import crypto from 'crypto'
 
 const ALGORITHM = 'aes-256-gcm'
-const ENV_KEY = process.env.EMAIL_ENCRYPTION_KEY || 'blis-corp-email-cipher-key-32chr!'
+const ENV_KEY = process.env.EMAIL_ENCRYPTION_KEY || 'xpancapital-email-cipher-key-32chr!'
 
 function getKey(): Buffer {
-  return crypto.scryptSync(ENV_KEY, 'blis-corp-salt', 32)
+  return crypto.scryptSync(ENV_KEY, 'xpancapital-salt', 32)
 }
 
 export function encrypt(text: string): string {
@@ -26,3 +26,4 @@ export function decrypt(data: string): string {
   decipher.setAuthTag(tag)
   return decipher.update(encrypted) + decipher.final('utf8')
 }
+

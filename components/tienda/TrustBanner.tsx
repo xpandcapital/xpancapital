@@ -31,7 +31,7 @@ const TRUST_ITEMS = [
   {
     icon: BadgeCheck,
     title: "Contenido Certificado",
-    desc: "Creado por expertos BLIS con más de 10 años en el mercado inmobiliario.",
+    desc: "Creado por expertos XPAND con más de 10 años en el mercado inmobiliario.",
     color: "text-purple-400",
     bg: "bg-purple-400/5 border-purple-400/20",
     glow: "group-hover:shadow-[0_0_20px_rgba(192,132,252,0.15)]",
@@ -39,7 +39,7 @@ const TRUST_ITEMS = [
   {
     icon: Headphones,
     title: "Soporte Prioritario",
-    desc: "Equipo BLIS disponible para resolver dudas sobre tu producto adquirido.",
+    desc: "Equipo XPAND disponible para resolver dudas sobre tu producto adquirido.",
     color: "text-blis-red",
     bg: "bg-blis-red/5 border-blis-red/20",
     glow: "group-hover:shadow-[0_0_20px_rgba(213,193,8,0.15)]",
@@ -97,4 +97,5 @@ export function TrustBanner() {
     </section>
   );
 }
+
 

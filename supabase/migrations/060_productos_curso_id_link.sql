@@ -1,6 +1,6 @@
 -- Migration: 060_productos_curso_id_link.sql
 -- Objetivo: Vincular productos de tipo 'servicio' (cursos) con su registro en la tabla cursos
--- Esto permite que el checkout auto-asigne correctamente los cursos comprados por BLIS Coins
+-- Esto permite que el checkout auto-asigne correctamente los cursos comprados por XPAND Coins
 
 -- 1. Agregar columna curso_id a productos
 ALTER TABLE productos
@@ -25,3 +25,4 @@ WHERE p.tipo = 'servicio'
     -- O coincidencia por nombre (case insensitive)
     OR LOWER(TRIM(p.nombre)) = LOWER(TRIM(c.nombre))
   );
+

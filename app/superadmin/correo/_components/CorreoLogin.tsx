@@ -78,7 +78,7 @@ export function CorreoLogin({ onConectado }: Props) {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="tu-nombre@blis-corp.com"
+                    placeholder="tu-nombre@xpancapital.org"
                     className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
                     autoFocus
                     disabled={loading}
@@ -100,7 +100,7 @@ export function CorreoLogin({ onConectado }: Props) {
                   type="text"
                   value={nombreMostrado}
                   onChange={(e) => setNombreMostrado(e.target.value)}
-                  placeholder="Central Blis Corp"
+                  placeholder="Central Xpand Capital"
                   className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
                   disabled={loading}
                 />
@@ -166,3 +166,4 @@ export function CorreoLogin({ onConectado }: Props) {
     </div>
   )
 }
+

@@ -269,7 +269,7 @@ export default function VentasAdminPage() {
                                             </span>
                                             <span className="text-white font-mono font-bold">
                                                 {venta.monto_coins > 0 && coinsEnabled
-                                                    ? <span className="text-amber-400">{venta.monto_coins.toLocaleString()} BLIS</span>
+                                                    ? <span className="text-amber-400">{venta.monto_coins.toLocaleString()} XPAND</span>
                                                     : `$${venta.monto_usd?.toLocaleString() || '0'}`}
                                             </span>
                                         </div>
@@ -364,7 +364,7 @@ export default function VentasAdminPage() {
                                                     </td>
                                                     <td className="p-4 font-mono font-bold text-white">
                                                         {venta.monto_coins > 0 && coinsEnabled ? (
-                                                            <span className="text-amber-400">{venta.monto_coins.toLocaleString()} BLIS</span>
+                                                            <span className="text-amber-400">{venta.monto_coins.toLocaleString()} XPAND</span>
                                                         ) : `$${venta.monto_usd?.toLocaleString() || '0'}`}
                                                     </td>
                                                     <td className="p-4">
@@ -426,7 +426,7 @@ export default function VentasAdminPage() {
                 <DialogContent className="bg-[#111] border-white/10 text-white max-w-md">
                     <DialogHeader>
                         <DialogTitle className="text-sm font-black uppercase tracking-wider">Registrar Venta</DialogTitle>
-                        <p className="text-xs text-gray-500 mt-1">Para pagos por transferencia, efectivo, BLISCOINS u otros.</p>
+                        <p className="text-xs text-gray-500 mt-1">Para pagos por transferencia, efectivo, XPANDCOINS u otros.</p>
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
                         <div>
@@ -459,7 +459,7 @@ export default function VentasAdminPage() {
                                     { value: 'transferencia', label: 'Transferencia' },
                                     { value: 'efectivo', label: 'Efectivo' },
                                     { value: 'tarjeta', label: 'Tarjeta' },
-                                    ...(coinsEnabled ? [{ value: 'bliscoins', label: 'BLISCOINS' }] : []),
+                                    ...(coinsEnabled ? [{ value: 'bliscoins', label: 'XPANDCOINS' }] : []),
                                     { value: 'otro', label: 'Otro' },
                                 ]}
                                 className="w-full"
@@ -467,7 +467,7 @@ export default function VentasAdminPage() {
                         </div>
                         {formNueva.metodo_pago === "bliscoins" && coinsEnabled ? (
                             <div>
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Monto BLISCOINS</label>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Monto XPANDCOINS</label>
                                 <Input type="number" value={formNueva.monto_coins || ""} onChange={e => setFormNueva({ ...formNueva, monto_coins: parseInt(e.target.value) || 0 })}
                                     placeholder="0" className="bg-white/5 border-white/10 text-white" />
                             </div>
@@ -495,7 +495,7 @@ export default function VentasAdminPage() {
                             {modalVerificar?.cliente?.nombre} — {modalVerificar?.producto?.nombre}
                         </p>
                         <p className="text-xs text-amber-400 mt-1 font-bold">
-                            Método: {modalVerificar?.metodo_pago} — {modalVerificar?.monto_coins ? `${modalVerificar.monto_coins} BLIS` : `$${modalVerificar?.monto_usd || 0}`}
+                            Método: {modalVerificar?.metodo_pago} — {modalVerificar?.monto_coins ? `${modalVerificar.monto_coins} XPAND` : `$${modalVerificar?.monto_usd || 0}`}
                         </p>
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
@@ -572,3 +572,4 @@ export default function VentasAdminPage() {
         </div>
     );
 }
+

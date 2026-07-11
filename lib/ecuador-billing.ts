@@ -123,7 +123,7 @@ export const mapCartToEcuadorInvoice = (
     infoTributaria: {
       ambiente: issuerData.env === 'produccion' ? '2' : '1',
       tipoEmision: '1',
-      razonSocial: issuerData.razonSocial || 'BLIS CORP ECUADOR S.A.S.',
+      razonSocial: issuerData.razonSocial || 'XPAND CORP ECUADOR S.A.S.',
       ruc: issuerData.ruc || '1790000000001',
       codDoc: '01',
       estab: issuerData.estab || '001',
@@ -157,3 +157,4 @@ export const mapCartToEcuadorInvoice = (
     detalles
   };
 };
+

@@ -30,25 +30,25 @@ CREATE INDEX IF NOT EXISTS idx_email_palettes_empresa ON email_palettes(empresa_
 INSERT INTO email_palettes (empresa_id, nombre, body_bg, container_bg, text, primary_color)
 SELECT 
   id,
-  'BlisCorp Oscuro',
+  'XpandCapital Oscuro',
   '#181818',
   '#181818',
   '#e5e7eb',
   '#e11d48'
 FROM empresas
 WHERE NOT EXISTS (
-  SELECT 1 FROM email_palettes WHERE nombre = 'BlisCorp Oscuro'
+  SELECT 1 FROM email_palettes WHERE nombre = 'XpandCapital Oscuro'
 );
 
 INSERT INTO email_palettes (empresa_id, nombre, body_bg, container_bg, text, primary_color)
 SELECT 
   id,
-  'BlisCorp Claro',
+  'XpandCapital Claro',
   '#F3F4F6',
   '#FFFFFF',
   '#333333',
   '#e11d48'
 FROM empresas
 WHERE NOT EXISTS (
-  SELECT 1 FROM email_palettes WHERE nombre = 'BlisCorp Claro'
+  SELECT 1 FROM email_palettes WHERE nombre = 'XpandCapital Claro'
 );

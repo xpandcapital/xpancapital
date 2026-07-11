@@ -299,7 +299,7 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tighter">
-                BLIS Corp <span className="text-blis-red">Panel</span>
+                Xpand Capital <span className="text-blis-red">Panel</span>
               </h1>
               <button onClick={() => { setLoading(true); fetchData(); }} className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-all">
                 <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
@@ -492,4 +492,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
 

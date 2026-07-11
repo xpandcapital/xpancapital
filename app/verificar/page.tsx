@@ -122,13 +122,13 @@ function VerificationContent() {
                             </div>
                             <div className="text-center p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
                                 <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-1">Emitido por</p>
-                                <p className="text-sm font-black text-white">BlisCorp Academy</p>
+                                <p className="text-sm font-black text-white">XpandCapital Academy</p>
                             </div>
                         </div>
 
                         <div className="flex flex-col gap-3">
                             <button className="w-full py-5 bg-blis-red text-white rounded-2xl font-black uppercase tracking-widest text-[11px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
-                                <Globe className="w-4 h-4" /> Ir a BlisCorp Academy
+                                <Globe className="w-4 h-4" /> Ir a XpandCapital Academy
                             </button>
                             <button className="w-full py-5 bg-white/5 border border-white/10 text-gray-400 rounded-2xl font-black uppercase tracking-widest text-[11px] hover:bg-white/10 transition-all flex items-center justify-center gap-3">
                                 <Share2 className="w-4 h-4" /> Compartir en LinkedIn
@@ -173,7 +173,7 @@ function VerificationContent() {
                 transition={{ delay: 1 }}
                 className="mt-10 text-[9px] font-black text-gray-600 uppercase tracking-[0.5em] flex items-center gap-4"
             >
-                Blis Corp <span className="w-1 h-1 bg-gray-800 rounded-full" /> Digital Trust Network
+                Xpand Capital <span className="w-1 h-1 bg-gray-800 rounded-full" /> Digital Trust Network
             </motion.p>
         </div>
     );
@@ -190,3 +190,5 @@ export default function VerificationPage() {
         </Suspense>
     );
 }
+
+

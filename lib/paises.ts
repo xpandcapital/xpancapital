@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP — LISTA CENTRALIZADA DE PAÍSES CON BANDERAS EMOJI
+// XPAND CORP — LISTA CENTRALIZADA DE PAÍSES CON BANDERAS EMOJI
 // Fuente unificada para todos los dropdowns de país y código telefónico
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -120,3 +120,4 @@ export const PAISES_TELEFONO: PaisTelefono[] = [
 export function getPaisTelefonoByCode(code: string): PaisTelefono | undefined {
   return PAISES_TELEFONO.find((p) => p.code === code)
 }
+

@@ -29,7 +29,7 @@ export function MiembrosHeader() {
                 {coinsEnabled && (
                 <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                     <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
-                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">{blisCoins.toLocaleString()} BLISCOINS</span>
+                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">{blisCoins.toLocaleString()} XPANDCOINS</span>
                 </div>
                 )}
 
@@ -69,4 +69,5 @@ export function MiembrosHeader() {
         </header>
     );
 }
+
 

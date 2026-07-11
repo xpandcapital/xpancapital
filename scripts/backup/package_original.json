@@ -1,5 +1,5 @@
 {
-  "name": "blis-corp",
+  "name": "xpancapital",
   "version": "0.1.0",
   "private": true,
   "engines": {
@@ -49,3 +49,4 @@
     "typescript": "^5"
   }
 }
+

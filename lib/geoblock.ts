@@ -1,5 +1,5 @@
 /**
- * Sistema de Geobloqueo para BLIS Corp
+ * Sistema de Geobloqueo para Xpand Capital
  *
  * Usa el header `x-vercel-ip-country` inyectado por Vercel Edge Network.
  * La configuración se recibe desde el middleware (consultada una sola vez vía security-config.ts).
@@ -127,3 +127,4 @@ export function checkGeoBlock(
 
   return checkHardcoded(country)
 }
+

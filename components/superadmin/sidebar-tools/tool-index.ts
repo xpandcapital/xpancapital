@@ -212,7 +212,7 @@ const TOOL_INDEX: ToolDef[] = [
         help: "Genera enlaces directos para Google Calendar, Outlook o iCal con recordatorios inteligentes.",
         examples: {
             simple: "Link para reunión mañana a las 4pm sobre auditoría.",
-            advanced: "Crea un evento: Lanzamiento oficial BlisCorp, 20 de mayo, de 9am a 1pm en el Hotel Westin. Incluye descripción persuasiva para los invitados."
+            advanced: "Crea un evento: Lanzamiento oficial XpandCapital, 20 de mayo, de 9am a 1pm en el Hotel Westin. Incluye descripción persuasiva para los invitados."
         }
     },
 
@@ -320,7 +320,7 @@ const TOOL_INDEX: ToolDef[] = [
         help: "Crea nombres de usuario únicos y profesionales basados en tu identidad o marca.",
         examples: {
             simple: "Usuario para Kevin Rojas.",
-            advanced: "Genera 10 nombres de usuario creativos para una empresa de consultoría en IA llamada 'Blis Intelligence'. Deben sonar modernos y premium."
+            advanced: "Genera 10 nombres de usuario creativos para una empresa de consultoría en IA llamada 'Xpand Intelligence'. Deben sonar modernos y premium."
         }
     },
     {

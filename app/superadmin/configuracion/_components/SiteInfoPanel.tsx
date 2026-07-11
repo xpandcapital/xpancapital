@@ -35,7 +35,7 @@ export function SiteInfoPanel({ config, updateField }: SiteInfoPanelProps) {
           label="Nombre del Sitio"
           value={config.site_name}
           onChange={(v) => updateField('site_name', v)}
-          placeholder="BLIS Corp"
+          placeholder="Xpand Capital"
         />
         <InputField
           label="Tagline / Eslogan"
@@ -47,3 +47,4 @@ export function SiteInfoPanel({ config, updateField }: SiteInfoPanelProps) {
     </SectionCard>
   )
 }
+

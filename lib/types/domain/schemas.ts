@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP - SCHEMAS DE VALIDACIÓN ZOD
+// XPAND CORP - SCHEMAS DE VALIDACIÓN ZOD
 // Esquemas para validar datos JSONB de Supabase
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -696,3 +696,4 @@ export function clasificarHistorialPagos(lote: {
   // Ordenar por fecha descendente
   return historial.sort((a, b) => b.fecha.getTime() - a.fecha.getTime())
 }
+

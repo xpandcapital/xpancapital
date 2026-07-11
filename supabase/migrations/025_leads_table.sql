@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- BLIS CORP - TABLA DE LEADS
+-- XPAND CORP - TABLA DE LEADS
 -- Sistema de gestión de leads para formularios de captura
 -- ═══════════════════════════════════════════════════════════════════════════════
 

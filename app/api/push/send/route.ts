@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     const webPush = await import("web-push");
     webPush.default.setVapidDetails(
-      "mailto:soporte@bliscorp.com",
+      "mailto:soporte@xpancapital.com",
       process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
       process.env.VAPID_PRIVATE_KEY
     );
@@ -57,3 +57,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }
+

@@ -22,7 +22,7 @@ export default function BillingPage() {
         <div className="space-y-10 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
             <div className="w-full mx-auto">
                 <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none">Finanzas & Facturación</h1>
-                <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">Gestiona tus pagos, BLISCOINS de lealtad y descarga tus facturas.</p>
+                <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">Gestiona tus pagos, XPANDCOINS de lealtad y descarga tus facturas.</p>
             </div>
 
             {loading || statsLoading ? (
@@ -34,8 +34,8 @@ export default function BillingPage() {
                         <div className="bg-zinc-950 border border-white/5 p-8 rounded-[2.5rem] relative overflow-hidden group shadow-2xl">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[60px] -mr-16 -mt-16 pointer-events-none" />
                             <Star className="w-8 h-8 text-emerald-500 mb-4 fill-emerald-500" />
-                            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-1">BLISCOINS Acumulados</p>
-                            <h3 className="text-4xl font-black text-white">{blisCoins.toLocaleString()} <span className="text-sm text-emerald-500 uppercase">BLIS</span></h3>
+                            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px] mb-1">XPANDCOINS Acumulados</p>
+                            <h3 className="text-4xl font-black text-white">{blisCoins.toLocaleString()} <span className="text-sm text-emerald-500 uppercase">XPAND</span></h3>
                             <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-4">Nivel: {nivel}</p>
                         </div>
                     )}
@@ -126,8 +126,8 @@ export default function BillingPage() {
                                     </div>
                                     {coinsEnabled && (
                                     <div className="bg-black/40 rounded-2xl p-4 border border-white/5">
-                                        <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest block mb-1">BLISCOINS</span>
-                                        <span className="text-2xl font-black text-emerald-400">{blisCoins.toLocaleString()} <span className="text-sm text-emerald-600">BLIS</span></span>
+                                        <span className="text-[9px] text-gray-600 font-black uppercase tracking-widest block mb-1">XPANDCOINS</span>
+                                        <span className="text-2xl font-black text-emerald-400">{blisCoins.toLocaleString()} <span className="text-sm text-emerald-600">XPAND</span></span>
                                     </div>
                                     )}
                                 </div>
@@ -139,4 +139,5 @@ export default function BillingPage() {
         </div>
     );
 }
+
 

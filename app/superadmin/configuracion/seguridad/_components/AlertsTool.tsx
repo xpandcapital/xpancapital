@@ -460,7 +460,7 @@ export function AlertsTool({ config, saving, onSave, onUpdate }: Props) {
                 type="email"
                 value={al.email_destino}
                 onChange={e => onUpdate?.({ email_destino: e.target.value })}
-                placeholder="admin@bliscorp.com"
+                placeholder="admin@xpancapital.com"
                 className="w-full bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5 focus:border-blue-500/30"
               />
               <input
@@ -510,3 +510,4 @@ function generatePulsePath(alerts: SecurityAlertEntry[]): string {
   }
   return path + `L${(points.length - 1) * stepX},60 L0,60 Z`
 }
+

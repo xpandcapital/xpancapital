@@ -789,7 +789,7 @@ export function EditorRouter({
         <SectionCard title="Inicio / Hero">
           <VisibilityToggle section="hero" isVisible={isSectionVisible('hero')} onToggle={() => toggleSectionVisibility('hero')} />
           <div className="grid grid-cols-2 gap-4">
-            <InputField label="Título 1" value={sections.hero?.title1 || ''} onChange={(v) => updateSection('hero', { title1: v })} placeholder="BLIS" />
+            <InputField label="Título 1" value={sections.hero?.title1 || ''} onChange={(v) => updateSection('hero', { title1: v })} placeholder="XPAND" />
             <InputField label="Título 2" value={sections.hero?.title2 || ''} onChange={(v) => updateSection('hero', { title2: v })} placeholder="CORP" />
           </div>
           <InputField label="Subtítulo" value={sections.hero?.subtitle || ''} onChange={(v) => updateSection('hero', { subtitle: v })} placeholder="Tu Próximo Gran Patrimonio" />
@@ -1251,7 +1251,7 @@ export function EditorRouter({
           
           <h4 className="text-xs font-bold text-gray-400 uppercase mt-4 mb-3">Contenido</h4>
           <TextAreaField label="Descripción" value={sections.footer?.description || ''} onChange={(v) => updateSection('footer', { description: v })} rows={2} placeholder="Descripción de la empresa..." />
-          <InputField label="Copyright" value={sections.footer?.copyright || ''} onChange={(v) => updateSection('footer', { copyright: v })} placeholder="© 2026 Blis Corp." />
+          <InputField label="Copyright" value={sections.footer?.copyright || ''} onChange={(v) => updateSection('footer', { copyright: v })} placeholder="© 2026 Xpand Capital." />
           <InputField label="Texto de Ubicación" value={sections.footer?.locationText || ''} onChange={(v) => updateSection('footer', { locationText: v })} placeholder="Diseñado con visión en 🇪🇨 Ecuador · 🇵🇪 Perú" />
           
           <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Acceso VIP</h4>
@@ -1307,12 +1307,12 @@ export function EditorRouter({
           <p className="text-[10px] text-gray-500 mb-3">Deja vacío para ocultar el ícono. También puedes configurarlas en Ajustes → Configuración del Sitio.</p>
           <div className="grid grid-cols-2 gap-3">
             <InputField label="WhatsApp" value={sections.footer?.socials?.whatsapp || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), whatsapp: v } })} placeholder="https://wa.me/51999999999" />
-            <InputField label="Instagram" value={sections.footer?.socials?.instagram || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), instagram: v } })} placeholder="https://instagram.com/bliscorp" />
-            <InputField label="Facebook" value={sections.footer?.socials?.facebook || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), facebook: v } })} placeholder="https://facebook.com/bliscorp" />
-            <InputField label="YouTube" value={sections.footer?.socials?.youtube || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), youtube: v } })} placeholder="https://youtube.com/@bliscorp" />
-            <InputField label="TikTok" value={sections.footer?.socials?.tiktok || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), tiktok: v } })} placeholder="https://tiktok.com/@bliscorp" />
-            <InputField label="LinkedIn" value={sections.footer?.socials?.linkedin || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), linkedin: v } })} placeholder="https://linkedin.com/company/bliscorp" />
-            <InputField label="X (Twitter)" value={sections.footer?.socials?.twitter || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), twitter: v } })} placeholder="https://x.com/bliscorp" />
+            <InputField label="Instagram" value={sections.footer?.socials?.instagram || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), instagram: v } })} placeholder="https://instagram.com/xpancapital" />
+            <InputField label="Facebook" value={sections.footer?.socials?.facebook || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), facebook: v } })} placeholder="https://facebook.com/xpancapital" />
+            <InputField label="YouTube" value={sections.footer?.socials?.youtube || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), youtube: v } })} placeholder="https://youtube.com/@xpancapital" />
+            <InputField label="TikTok" value={sections.footer?.socials?.tiktok || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), tiktok: v } })} placeholder="https://tiktok.com/@xpancapital" />
+            <InputField label="LinkedIn" value={sections.footer?.socials?.linkedin || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), linkedin: v } })} placeholder="https://linkedin.com/company/xpancapital" />
+            <InputField label="X (Twitter)" value={sections.footer?.socials?.twitter || ''} onChange={(v) => updateSection('footer', { socials: { ...(sections.footer?.socials || {}), twitter: v } })} placeholder="https://x.com/xpancapital" />
           </div>
           
           <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Video (Dentro de la Fábrica)</h4>
@@ -1326,4 +1326,7 @@ export function EditorRouter({
     </div>
   );
 }
+
+
+
 

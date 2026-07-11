@@ -1,4 +1,4 @@
-# BLIS Corp - Plataforma Inmobiliaria Multi-Tenant
+# Xpand Capital - Plataforma Inmobiliaria Multi-Tenant
 
 Plataforma SaaS para gestión inmobiliaria con sistema de leads, campañas, y landing pages personalizables.
 
@@ -20,7 +20,7 @@ Abrir [http://localhost:3000](http://localhost:3000)
 ## 📁 Estructura del Proyecto
 
 ```
-blis-corp/
+xpancapital/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/           # Autenticación
 │   ├── (public)/         # Páginas públicas
@@ -122,4 +122,4 @@ SUPABASE_SERVICE_KEY=           # Clave de servicio
 
 ## 📄 Licencia
 
-Privado - BLIS Corp © 2026
+Privado - Xpand Capital © 2026

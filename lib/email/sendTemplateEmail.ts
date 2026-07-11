@@ -75,7 +75,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
 
         // Inyectar productos en bloques receipt
         if (products && products.length > 0) {
-          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xpancapital.org'
           const placeholderImage = `https://placehold.co/100x100/181818/ffffff?text=Producto`
           const normalizeImage = (url?: string) => {
             if (!url) return placeholderImage
@@ -134,7 +134,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
       .eq('is_default', true)
       .maybeSingle()
 
-    let fromName = 'BLIS Corp'
+    let fromName = 'Xpand Capital'
     let fromEmail = process.env.SMTP_USER || ''
 
     // 5. Enviar
@@ -155,7 +155,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
       if (sender?.from_name) fromName = sender.from_name
       if (sender?.from_email) fromEmail = sender.from_email
 
-      let finalSubject = subject || template?.settings?.subject || 'Confirmación de compra — BLIS Corp'
+      let finalSubject = subject || template?.settings?.subject || 'Confirmación de compra — Xpand Capital'
       for (const [key, value] of Object.entries(variables)) {
         finalSubject = finalSubject.replace(new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g'), value)
       }
@@ -184,7 +184,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
         body: JSON.stringify({
           from: `${fromName} <${fromEmail}>`,
           to,
-          subject: subject || 'Confirmación de compra — BLIS Corp',
+          subject: subject || 'Confirmación de compra — Xpand Capital',
           html,
         }),
       })
@@ -208,7 +208,7 @@ function buildFallbackHTML(vars: Record<string, string>): string {
   return `
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#050505;color:#fff;font-family:Arial,sans-serif;">
     <div style="text-align:center;margin-bottom:24px;">
-      <span style="background:#c9b500;padding:12px 24px;border-radius:12px;font-size:20px;font-weight:900;letter-spacing:2px;">BLIS Corp</span>
+      <span style="background:#c9b500;padding:12px 24px;border-radius:12px;font-size:20px;font-weight:900;letter-spacing:2px;">Xpand Capital</span>
     </div>
     <h1 style="font-size:24px;font-weight:900;text-transform:uppercase;text-align:center;">¡Pago Confirmado!</h1>
     <p style="text-align:center;color:#9ca3af;">Gracias <strong style="color:#fff">${nombre}</strong>, hemos recibido tu pago de <strong style="color:#4ade80">${total}</strong>.</p>
@@ -216,7 +216,8 @@ function buildFallbackHTML(vars: Record<string, string>): string {
     <div style="text-align:center;">
       <a href="${enlace}" style="display:inline-block;background:#16a34a;color:#fff;text-decoration:none;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:2px;padding:16px 40px;border-radius:12px;">Acceder a Mis Productos →</a>
     </div>
-    <p style="text-align:center;color:#4b5563;font-size:11px;margin-top:24px;">BLIS Corp · Gracias por tu compra</p>
+    <p style="text-align:center;color:#4b5563;font-size:11px;margin-top:24px;">Xpand Capital · Gracias por tu compra</p>
   </div>`
 }
+
 

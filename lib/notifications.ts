@@ -3,7 +3,7 @@ import { sendWhatsApp } from '@/lib/whatsapp'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.blis-corp.com'
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.xpancapital.org'
 
 function getAdmin() { return createClient(supabaseUrl, supabaseServiceKey) }
 
@@ -101,3 +101,4 @@ export const NTemplates = {
     ].filter(Boolean).join('\n'),
   }),
 }
+

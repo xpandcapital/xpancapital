@@ -114,7 +114,7 @@ function WhatsAppGraciasContent() {
     window.open(base + encodeURIComponent(decoded), '_blank')
   };
 
-  const asesorNombre = metadata?.asesor_nombre || "Blis Expert Team";
+  const asesorNombre = metadata?.asesor_nombre || "Xpand Expert Team";
   const asesorFoto = metadata?.asesor_foto || null;
 
   const steps = [
@@ -253,7 +253,7 @@ function WhatsAppGraciasContent() {
                         )}
                         <div>
                           <p className="text-xs font-bold text-white">{asesorNombre}</p>
-                          <p className="text-[10px] text-gray-500">Blis Expert Team</p>
+                          <p className="text-[10px] text-gray-500">Xpand Expert Team</p>
                         </div>
                       </div>
                     )}
@@ -303,3 +303,4 @@ function WhatsAppGraciasContent() {
     </main>
   );
 }
+

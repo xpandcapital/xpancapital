@@ -21,13 +21,13 @@ const getUniqueId = (type: string) => `${type}-evt-${Date.now()}-${Math.floor(Ma
 // ─── Plantilla Base ──
 function buildTemplate(nombre: string, evento: string, subject: string, previewText: string, blocks: any[], dark = false) {
   const base = dark
-    ? { bodyBg: '#0a0a0a', containerBg: '#111111', activePaletteId: 'bliscorp-dark' }
-    : { bodyBg: '#F3F4F6', containerBg: '#FFFFFF', activePaletteId: 'bliscorp-light' };
+    ? { bodyBg: '#0a0a0a', containerBg: '#111111', activePaletteId: 'xpancapital-dark' }
+    : { bodyBg: '#F3F4F6', containerBg: '#FFFFFF', activePaletteId: 'xpancapital-light' };
   const settings = {
     ...base, width: 600, fontFamily: 'Verdana, Geneva, sans-serif', sectionGap: 0,
     palettes: [
-      { id: 'bliscorp-dark', name: 'BlisCorp Oscuro', bodyBg: '#181818', containerBg: '#181818', text: '#e5e7eb', primary: '#e11d48' },
-      { id: 'bliscorp-light', name: 'BlisCorp Claro', bodyBg: '#F3F4F6', containerBg: '#FFFFFF', text: '#333333', primary: '#e11d48' }
+      { id: 'xpancapital-dark', name: 'XpandCapital Oscuro', bodyBg: '#181818', containerBg: '#181818', text: '#e5e7eb', primary: '#e11d48' },
+      { id: 'xpancapital-light', name: 'XpandCapital Claro', bodyBg: '#F3F4F6', containerBg: '#FFFFFF', text: '#333333', primary: '#e11d48' }
     ],
     subject, previewText, evento
   };
@@ -57,10 +57,10 @@ function soc(networks: any[], opts: any = {}) {
   return { id: getUniqueId('social'), type: 'social', content: { align: 'center', bgColor: 'transparent', padding: 0, iconSize: opts.iconSize || 28, borderRadius: 8, networks } };
 }
 function ftr() {
-  return { id: getUniqueId('footer'), type: 'footer', content: { text: '© 2026 BLIS Corp. Todos los derechos reservados.\nDesarrollo inmobiliario de alta precision y rentabilidad.', bgColor: 'transparent', textColor: '#9ca3af', padding: 0, fontSize: 12, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' } };
+  return { id: getUniqueId('footer'), type: 'footer', content: { text: '© 2026 Xpand Capital. Todos los derechos reservados.\nDesarrollo inmobiliario de alta precision y rentabilidad.', bgColor: 'transparent', textColor: '#9ca3af', padding: 0, fontSize: 12, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' } };
 }
 function ftrDark() {
-  return { id: getUniqueId('footer'), type: 'footer', content: { text: '© 2026 BLIS Corp. Todos los derechos reservados.', bgColor: 'transparent', textColor: '#6b7280', padding: 0, fontSize: 11, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' } };
+  return { id: getUniqueId('footer'), type: 'footer', content: { text: '© 2026 Xpand Capital. Todos los derechos reservados.', bgColor: 'transparent', textColor: '#6b7280', padding: 0, fontSize: 11, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' } };
 }
 
 function receipt(items?: any[]) {
@@ -92,11 +92,11 @@ function receiptPendiente() {
 
 
 const defaultNets = [
-  { id: getUniqueId('net'), network: 'facebook', url: 'https://www.facebook.com/BlisCorp', iconColor: '#ffffff', bgColor: '#181818' },
+  { id: getUniqueId('net'), network: 'facebook', url: 'https://www.facebook.com/XpandCapital', iconColor: '#ffffff', bgColor: '#181818' },
   { id: getUniqueId('net'), network: 'instagram', url: 'https://www.instagram.com/kevinvaldezdelacruz/', iconColor: '#ffffff', bgColor: '#e11d48' },
   { id: getUniqueId('net'), network: 'twitter', url: 'https://x.com/kevinVdlc/', iconColor: '#ffffff', bgColor: '#000000' },
   { id: getUniqueId('net'), network: 'whatsapp', url: 'https://wa.me/51934111007', iconColor: '#ffffff', bgColor: '#e11d48' },
-  { id: getUniqueId('net'), network: 'youtube', url: 'https://www.youtube.com/c/BlisCorp', iconColor: '#ffffff', bgColor: '#181818' }
+  { id: getUniqueId('net'), network: 'youtube', url: 'https://www.youtube.com/c/XpandCapital', iconColor: '#ffffff', bgColor: '#181818' }
 ];
 
 // ─── 1. TRANSACCIONES & PAGOS (10) ──
@@ -115,7 +115,7 @@ const transacciones = [
       div('#1a1a1a'), soc(defaultNets), ftrDark(), spac(12)]
   , true),
   buildTemplate('Confirmacion de Compra (Invitado)', 'transaccion_compra_completada_invitado',
-    '¡Gracias por tu compra en BLIS Corp!',
+    '¡Gracias por tu compra en Xpand Capital!',
     'Tu pedido #{{comprobante_id}} ha sido confirmado.',
     [hdrDark(), spac(20),
       txtDark('¡Gracias por tu compra!', { fontSize: 22, fontWeight: 'bold', align: 'center', paddingTop: 0, paddingBottom: 4, textColor: '#ffffff' }),
@@ -232,7 +232,7 @@ const transacciones = [
 // ─── 2. CUENTA & ACCESO (10) ──
 const cuenta = [
   buildTemplate('Bienvenida', 'cuenta_bienvenida',
-    'Bienvenido a BLIS Corp, {{nombre}}',
+    'Bienvenido a Xpand Capital, {{nombre}}',
     'Tu cuenta ha sido creada exitosamente. Accede a tu dashboard.',
     [hdr(), spac(20),
       txt('Bienvenido a bordo', { fontSize: 24, fontWeight: 'bold', align: 'center', textColor: '#111827', paddingTop: 0, paddingBottom: 4 }),
@@ -245,11 +245,11 @@ const cuenta = [
       soc(defaultNets), spac(8), ftr(), spac(12)]
   ),
   buildTemplate('Invitacion Crear Cuenta', 'cuenta_invitacion_crear_cuenta',
-    'Completa tu registro en BLIS Corp',
+    'Completa tu registro en Xpand Capital',
     'Crea tu cuenta con la contrasena temporal {{password_temporal}}.',
     [hdr(), spac(20),
       txt('Completa tu registro', { fontSize: 24, fontWeight: 'bold', align: 'center', textColor: '#111827', paddingTop: 0, paddingBottom: 4 }),
-      txt(`Gracias por tu compra en BLIS Corp. Para acceder a tus productos y beneficios, completa tu registro:`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
+      txt(`Gracias por tu compra en Xpand Capital. Para acceder a tus productos y beneficios, completa tu registro:`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
       spac(12),
       btn('Crear Mi Cuenta', '{{enlace_crear_cuenta}}', { paddingX: 40, paddingY: 16, fontSize: 16 }),
       spac(16),
@@ -260,7 +260,7 @@ const cuenta = [
   ),
   buildTemplate('Verificar Email', 'cuenta_verificar_email',
     'Verifica tu correo electronico',
-    'Confirma tu email para activar todas las funciones de BLIS Corp.',
+    'Confirma tu email para activar todas las funciones de Xpand Capital.',
     [hdr(), spac(20),
       txt('Verifica tu correo electronico', { fontSize: 22, fontWeight: 'bold', align: 'center', textColor: '#111827', paddingTop: 0, paddingBottom: 4 }),
       txt(`Hola, {{nombre}}. Por favor verifica tu direccion de correo haciendo clic en el boton:`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
@@ -273,7 +273,7 @@ const cuenta = [
   ),
   buildTemplate('Restablecer Contrasena', 'cuenta_restablecer_password',
     'Restablece tu contrasena',
-    'Solicitud de cambio de contrasena para tu cuenta de BLIS Corp.',
+    'Solicitud de cambio de contrasena para tu cuenta de Xpand Capital.',
     [hdr(), spac(20),
       txt('Restablecer contrasena', { fontSize: 22, fontWeight: 'bold', align: 'center', textColor: '#111827', paddingTop: 0, paddingBottom: 4 }),
       txt(`Hola, {{nombre}}. Recibimos una solicitud para restablecer la contrasena de tu cuenta. Haz clic para crear una nueva:`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
@@ -323,7 +323,7 @@ const cuenta = [
       spac(8),
       txt(`Para reactivar o consultar: {{whatsapp_soporte}}`, { fontSize: 13, textColor: '#9ca3af', align: 'center' }),
       spac(8),
-      txt('Gracias por haber sido parte de BLIS Corp.', { fontSize: 14, textColor: '#6b7280', align: 'center' }),
+      txt('Gracias por haber sido parte de Xpand Capital.', { fontSize: 14, textColor: '#6b7280', align: 'center' }),
       spac(8), div('#e5e7eb'), spac(8),
       soc(defaultNets), spac(8), ftr(), spac(12)]
   ),
@@ -342,7 +342,7 @@ const cuenta = [
   ),
   buildTemplate('Cuenta Reactivada', 'cuenta_reactivada',
     'Tu cuenta ha sido reactivada',
-    'Bienvenido de vuelta a BLIS Corp desde el {{fecha_solicitud}}.',
+    'Bienvenido de vuelta a Xpand Capital desde el {{fecha_solicitud}}.',
     [hdr(), spac(20),
       txt('¡Cuenta reactivada!', { fontSize: 24, fontWeight: 'bold', align: 'center', textColor: '#059669', paddingTop: 0, paddingBottom: 4 }),
       txt(`Bienvenido de vuelta, {{nombre}}. Tu cuenta ha sido reactivada exitosamente el {{fecha_solicitud}}.`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
@@ -360,7 +360,7 @@ const cuenta = [
       txt('Cuenta eliminada', { fontSize: 22, fontWeight: 'bold', align: 'center', textColor: '#111827', paddingTop: 0, paddingBottom: 4 }),
       txt(`Hola, {{nombre}}. Tu cuenta ha sido eliminada permanentemente de nuestra plataforma el {{fecha_solicitud}}.`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
       spac(12),
-      txt('Agradecemos el tiempo que compartiste con nosotros. Las puertas de BLIS Corp estaran siempre abiertas para ti.', { fontSize: 14, textColor: '#6b7280', align: 'center' }),
+      txt('Agradecemos el tiempo que compartiste con nosotros. Las puertas de Xpand Capital estaran siempre abiertas para ti.', { fontSize: 14, textColor: '#6b7280', align: 'center' }),
       spac(8), div('#e5e7eb'), spac(8),
       soc(defaultNets), spac(8), ftr(), spac(12)]
   ),
@@ -369,7 +369,7 @@ const cuenta = [
 // ─── 3. EMPLEADOS & PERSONAL (10) ──
 const empleados = [
   buildTemplate('Bienvenida al Puesto', 'empleado_bienvenida_puesto',
-    'Bienvenido a BLIS Corp, {{nombre_empleado}}',
+    'Bienvenido a Xpand Capital, {{nombre_empleado}}',
     'Te damos la bienvenida como {{puesto}} en {{departamento}}.',
     [hdr(), spac(20),
       txt('Bienvenido al equipo', { fontSize: 24, fontWeight: 'bold', align: 'center', textColor: '#111827', paddingTop: 0, paddingBottom: 4 }),
@@ -388,11 +388,11 @@ const empleados = [
     'Documentacion de termino de relacion laboral en {{departamento}}.',
     [hdr(), spac(20),
       txt('Confirmacion de cese de servicios', { fontSize: 20, fontWeight: 'bold', align: 'center', textColor: '#111827', paddingTop: 0, paddingBottom: 4 }),
-      txt(`Estimado/a {{nombre_empleado}} {{apellido_empleado}},\n\nPor medio de la presente, confirmamos el termino de tu relacion laboral con BLIS Corp.`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
+      txt(`Estimado/a {{nombre_empleado}} {{apellido_empleado}},\n\nPor medio de la presente, confirmamos el termino de tu relacion laboral con Xpand Capital.`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
       spac(8),
       txt(`Puesto: {{puesto}}\nDepartamento: {{departamento}}\nFecha de cese: {{fecha_cese}}\nMotivo: {{motivo_cese}}\nAnos de servicio: {{anios_servicio}}`, { fontSize: 14, textColor: '#374151', align: 'center', fontWeight: 'bold' }),
       spac(8),
-      txt('Agradecemos profundamente tu dedicacion y contribucion durante estos anos. BLIS Corp siempre sera tu casa.', { fontSize: 14, textColor: '#6b7280', align: 'center' }),
+      txt('Agradecemos profundamente tu dedicacion y contribucion durante estos anos. Xpand Capital siempre sera tu casa.', { fontSize: 14, textColor: '#6b7280', align: 'center' }),
       spac(8), div('#e5e7eb'), spac(8),
       soc(defaultNets), spac(8), ftr(), spac(12)]
   ),
@@ -403,7 +403,7 @@ const empleados = [
       txt('Felicitaciones por tu nuevo rol', { fontSize: 22, fontWeight: 'bold', align: 'center', textColor: '#059669', paddingTop: 0, paddingBottom: 4 }),
       txt(`Estimado/a {{nombre_empleado}} {{apellido_empleado}},\n\nNos complace informarte que has sido asignado/a al puesto de {{puesto}} en el departamento de {{departamento}}.`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
       spac(8),
-      txt(`Efectivo desde: {{fecha_inicio}}\n\nConfiamos en que continuaras contribuyendo al exito de BLIS Corp.`, { fontSize: 14, textColor: '#6b7280', align: 'center' }),
+      txt(`Efectivo desde: {{fecha_inicio}}\n\nConfiamos en que continuaras contribuyendo al exito de Xpand Capital.`, { fontSize: 14, textColor: '#6b7280', align: 'center' }),
       spac(12),
       btn('Ver Mi Perfil', '{{enlace_acceso}}', { paddingX: 40, paddingY: 16, fontSize: 16 }),
       spac(8), div('#e5e7eb'), spac(8),
@@ -426,12 +426,12 @@ const empleados = [
   ),
   buildTemplate('Aniversario Laboral', 'empleado_aniversario_laboral',
     'Feliz aniversario laboral, {{nombre_empleado}}',
-    'Hoy celebras {{anios_servicio}} anos en BLIS Corp.',
+    'Hoy celebras {{anios_servicio}} anos en Xpand Capital.',
     [hdr(), spac(20),
       txt('Feliz aniversario laboral', { fontSize: 24, fontWeight: 'bold', align: 'center', textColor: '#059669', paddingTop: 0, paddingBottom: 4 }),
       txt(`Querido/a {{nombre_empleado}} {{apellido_empleado}},\n\nHoy celebramos {{anios_servicio}} anos desde que te uniste a nuestro equipo como {{puesto}} en {{departamento}}.`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
       spac(8),
-      txt('Gracias por tu compromiso, dedicacion y por ser parte fundamental del crecimiento de BLIS Corp. Cada proyecto, cada logro, lleva tu huella.', { fontSize: 14, textColor: '#6b7280', align: 'center', fontStyle: 'italic' }),
+      txt('Gracias por tu compromiso, dedicacion y por ser parte fundamental del crecimiento de Xpand Capital. Cada proyecto, cada logro, lleva tu huella.', { fontSize: 14, textColor: '#6b7280', align: 'center', fontStyle: 'italic' }),
       spac(8), div('#e5e7eb'), spac(8),
       soc(defaultNets), spac(8), ftr(), spac(12)]
   ),
@@ -478,10 +478,10 @@ const empleados = [
   ),
   buildTemplate('Cumpleanos', 'empleado_cumpleanos',
     'Feliz cumpleanos, {{nombre_empleado}}',
-    'Todo el equipo de BLIS Corp te desea un feliz dia.',
+    'Todo el equipo de Xpand Capital te desea un feliz dia.',
     [hdr(), spac(20),
       txt('¡Feliz Cumpleanos!', { fontSize: 28, fontWeight: 'bold', align: 'center', textColor: '#e11d48', paddingTop: 0, paddingBottom: 4 }),
-      txt(`Querido/a {{nombre_empleado}} {{apellido_empleado}},\n\nDe parte de todo el equipo de BLIS Corp, te deseamos un dia lleno de alegria, salud y exitos.`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
+      txt(`Querido/a {{nombre_empleado}} {{apellido_empleado}},\n\nDe parte de todo el equipo de Xpand Capital, te deseamos un dia lleno de alegria, salud y exitos.`, { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
       spac(8),
       txt(`{{departamento}} — {{puesto}}`, { fontSize: 13, textColor: '#9ca3af', align: 'center' }),
       spac(8),
@@ -575,3 +575,6 @@ async function main() {
 }
 
 main().catch(console.error);
+
+
+

@@ -147,10 +147,10 @@ function CheckoutContent() {
         }
     }, [cart.length, isComplete, router]);
 
-    // En flujo canje BLISCOINS, redirigir si no hay usuario
+    // En flujo canje XPANDCOINS, redirigir si no hay usuario
     useEffect(() => {
         if (isRedeemFlow && !user) {
-            showToast('Inicia sesión para canjear con BLIS Coins.', 'error');
+            showToast('Inicia sesión para canjear con XPAND Coins.', 'error');
             router.push('/tienda');
         }
     }, [isRedeemFlow, user, showToast, router]);
@@ -172,7 +172,7 @@ function CheckoutContent() {
             document.head.appendChild(link)
         }
 
-        // CSS customizado para Blis Corp
+        // CSS customizado para Xpand Capital
         if (!document.getElementById('izipay-kr-blis-css')) {
             const customCss = document.createElement('style')
             customCss.id = 'izipay-kr-blis-css'
@@ -305,7 +305,7 @@ function CheckoutContent() {
             s.src = `${baseUrl}/ext/classic.js`
             s.async = true
             s.onload = () => {
-                // Parchar config con branding Blis Corp
+                // Parchar config con branding Xpand Capital
                 if ((window as any).KR_CONFIGURATION) {
                     const cfg = (window as any).KR_CONFIGURATION
                     if (cfg.button) {
@@ -339,10 +339,10 @@ function CheckoutContent() {
         }
     }, [user]);
 
-    // Si viene de canje BLISCOINS, seleccionar ese método y validar saldo
+    // Si viene de canje XPANDCOINS, seleccionar ese método y validar saldo
     useEffect(() => {
         if (isRedeemFlow && blisCoins < totalCoins) {
-            showToast('Saldo de BLIS Coins insuficiente para completar el canje.', 'error');
+            showToast('Saldo de XPAND Coins insuficiente para completar el canje.', 'error');
             router.push('/tienda');
         } else if (isRedeemFlow) {
             setPaymentMethod('coins');
@@ -369,7 +369,7 @@ function CheckoutContent() {
             return;
         }
         if (paymentMethod === 'coins' && !canPayWithCoins) {
-            showToast('No tienes suficientes BLIS Coins', 'error');
+            showToast('No tienes suficientes XPAND Coins', 'error');
             return;
         }
 
@@ -599,7 +599,7 @@ function CheckoutContent() {
                 return;
             }
 
-            // Flujo BLIS Coins
+            // Flujo XPAND Coins
             const res = await fetch('/api/checkout', {
                 method: 'POST',
                 headers,
@@ -883,7 +883,7 @@ function CheckoutContent() {
                                                 selected={paymentMethod === 'coins'}
                                                 onClick={() => {
                                                     if (disabled) {
-                                                        showToast(totalCoins <= 0 ? "Tu carrito no tiene costo en BLISCOINS" : `Te faltan ${(totalCoins - blisCoins).toLocaleString()} BLISCOINS`, "info");
+                                                        showToast(totalCoins <= 0 ? "Tu carrito no tiene costo en XPANDCOINS" : `Te faltan ${(totalCoins - blisCoins).toLocaleString()} XPANDCOINS`, "info");
                                                         return;
                                                     }
                                                     setPaymentMethod('coins');
@@ -891,8 +891,8 @@ function CheckoutContent() {
                                                 disabled={disabled}
                                                 icon={<Coins className="w-5 h-5 text-amber-400" />}
                                                 bg={disabled ? "bg-amber-500/5 border-amber-500/10 opacity-60" : "bg-amber-500/10 border-amber-500/40"}
-                                                label="Pagar con BLIS Coins"
-                                                sublabel={disabled ? (totalCoins <= 0 ? "Este carrito no aplica para BLISCOINS" : `Te faltan ${(totalCoins - blisCoins).toLocaleString()} BLISCOINS`) : `Saldo: ${blisCoins.toLocaleString()} BLIS`}
+                                                label="Pagar con XPAND Coins"
+                                                sublabel={disabled ? (totalCoins <= 0 ? "Este carrito no aplica para XPANDCOINS" : `Te faltan ${(totalCoins - blisCoins).toLocaleString()} XPANDCOINS`) : `Saldo: ${blisCoins.toLocaleString()} XPAND`}
                                                 amount={`${totalCoins.toLocaleString()} COINS`} />
                                         );
                                     }
@@ -997,7 +997,7 @@ function CheckoutContent() {
                                                                         )}
                                                                         <div>
                                                                             <p className="text-sm font-bold text-white">{a.nombre}</p>
-                                                                            <p className="text-[10px] text-gray-400">Blis Expert Team</p>
+                                                                            <p className="text-[10px] text-gray-400">Xpand Expert Team</p>
                                                                         </div>
                                                                         {selectedAsesor === a.id && <div className="ml-auto w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />}
                                                                     </button>
@@ -1185,7 +1185,7 @@ function CheckoutContent() {
                           <CreditCard className="w-6 h-6 text-white" />
                         </motion.div>
                         <div>
-                          <span className="font-black text-gray-900 text-xl tracking-tight">Blis Bank</span>
+                          <span className="font-black text-gray-900 text-xl tracking-tight">Xpand Bank</span>
                           <p className="text-[10px] text-gray-400 uppercase tracking-widest">Pasarela de pago segura</p>
                         </div>
                       </div>
@@ -1354,3 +1354,5 @@ function IzipayScriptLoader({ loaded, onLoad, onSuccess, onError, publicKey }: {
   }, [loaded])
   return null
 }
+
+

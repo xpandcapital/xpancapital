@@ -65,7 +65,7 @@ function buildFallbackHTML(
   <div style="max-width:560px;margin:0 auto;padding:32px 20px;">
     <div style="text-align:center;margin-bottom:28px;">
       <div style="display:inline-block;background:#c9b500;padding:10px 20px;border-radius:10px;">
-        <span style="font-size:18px;font-weight:900;letter-spacing:3px;text-transform:uppercase;">BLIS Corp</span>
+        <span style="font-size:18px;font-weight:900;letter-spacing:3px;text-transform:uppercase;">Xpand Capital</span>
       </div>
     </div>
     <div style="background:#1a0a0e;border:1px solid #c9b50033;border-radius:14px;padding:20px 24px;margin-bottom:24px;text-align:center;">
@@ -132,7 +132,7 @@ async function sendFallbackEmail(
   let port = 465
   let user = ''
   let pass = ''
-  let fromName = 'BLIS Corp'
+  let fromName = 'Xpand Capital'
   let fromEmail = ''
 
   if (sender?.provider === 'smtp' || !sender) {
@@ -169,7 +169,7 @@ async function sendFallbackEmail(
 
 export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise<void> {
   const supabase = createClient()
-  const siteUrl = params.siteUrl || 'https://www.blis-corp.com'
+  const siteUrl = params.siteUrl || 'https://www.xpancapital.org'
   const empresaId = params.empresaId || DEFAULT_EMPRESA_ID
 
   try {
@@ -316,4 +316,5 @@ export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise
     console.error('[notifyAdminNuevaCompra] Error:', err)
   }
 }
+
 

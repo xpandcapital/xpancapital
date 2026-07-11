@@ -1,5 +1,5 @@
 /**
- * Logs de Acceso para BLIS Corp
+ * Logs de Acceso para Xpand Capital
  *
  * Registra en Supabase cada request bloqueado por:
  * - Geobloqueo (motivo: 'geobloqueo')
@@ -46,3 +46,4 @@ export function logSecurityEvent(entry: LogEntry): void {
       }
     })
 }
+

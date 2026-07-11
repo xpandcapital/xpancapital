@@ -21,7 +21,7 @@ const supabase = new Proxy({} as any, {
   }
 })
 function generateMessageId(from: string): string {
-  const domain = from.split('@')[1] || 'blis-corp.com'
+  const domain = from.split('@')[1] || 'xpancapital.org'
   const timestamp = Date.now()
   const random = Math.random().toString(36).substring(2, 11)
   return `<${timestamp}.${random}@${domain}>`
@@ -213,4 +213,5 @@ export async function POST(
     return NextResponse.json({ error: error.message || 'Error al enviar respuesta' }, { status: 500 })
   }
 }
+
 

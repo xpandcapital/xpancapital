@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     const vb = 1024
     let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vb} ${vb}" width="${vb}" height="${vb}">\n`
-    svgContent += `  <!-- BLIS Bordado - SVG para Wilcom EmbroideryStudio / CorelDRAW -->\n`
+    svgContent += `  <!-- XPAND Bordado - SVG para Wilcom EmbroideryStudio / CorelDRAW -->\n`
     svgContent += `  <!-- Capas detectadas: ${layers.length} | Medidas: ${vb}x${vb}px -->\n`
     svgContent += `  <!-- Importar en CorelDRAW/Wilcom: Archivo > Importar (Ctrl+I) > seleccionar .SVG -->\n\n`
 
@@ -62,3 +62,4 @@ function isBoundingBox(pathD: string, canvasSize: number): boolean {
   const maxY = Math.max(...nums.filter((_, i) => i % 2 === 1))
   return maxX >= canvasSize * 0.95 && maxY >= canvasSize * 0.95
 }
+

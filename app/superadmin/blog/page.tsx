@@ -65,7 +65,7 @@ export default function AdminBlog() {
             setLoading(true);
             setError(null);
 
-            const empresaRes = await fetch('/api/empresas?slug=blis-corp');
+            const empresaRes = await fetch('/api/empresas?slug=xpancapital');
             const empresaData = await empresaRes.json();
             
             if (empresaData.success && empresaData.data?.id) {

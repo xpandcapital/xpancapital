@@ -9,7 +9,7 @@ async function ensureVapid() {
   if (initialized) return;
   if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return;
   webpush.setVapidDetails(
-    "mailto:soporte@blis-corp.com",
+    "mailto:soporte@xpancapital.org",
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );

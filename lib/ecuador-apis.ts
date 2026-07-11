@@ -148,7 +148,7 @@ export const fetchEcuadorData = async (id: string, extended = true): Promise<Ecu
             success: true,
             id: '1790000000001',
             type: 'juridica',
-            name: 'BLIS PRUEBA S.A.S.',
+            name: 'XPAND PRUEBA S.A.S.',
             address: 'Urb. Cotopaxi',
             department: 'Cotopaxi',
             province: 'Cotopaxi',
@@ -316,8 +316,8 @@ export const mapCartToEcuadorInvoice = (cart: any[], customer: any, total: numbe
         infoTributaria: {
             ambiente: storeInfo.env === 'produccion' ? '2' : '1',
             tipoEmision: '1',
-            razonSocial: storeInfo.razonSocial || 'BLIS CORP',
-            nombreComercial: storeInfo.razonSocial || 'BLIS CORP',
+            razonSocial: storeInfo.razonSocial || 'XPAND CORP',
+            nombreComercial: storeInfo.razonSocial || 'XPAND CORP',
             ruc: storeInfo.ruc || '0000000000001',
             codDoc: '01',
             estab: '001',
@@ -371,3 +371,4 @@ export const mapCartToEcuadorInvoice = (cart: any[], customer: any, total: numbe
         }))
     };
 };
+

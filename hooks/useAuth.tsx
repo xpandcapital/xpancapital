@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP - HOOK DE AUTENTICACIÓN
+// XPAND CORP - HOOK DE AUTENTICACIÓN
 // Usa @supabase/ssr createBrowserClient para sincronizar sesión en cookies
 // Compatible con el middleware que lee cookies para verificar auth
 // ═══════════════════════════════════════════════════════════════════════════════

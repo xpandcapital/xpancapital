@@ -52,7 +52,7 @@ const SmartAITool = ({ tool }: { tool: ToolDef }) => {
     const handleExecute = async () => {
         if (!input.trim()) return;
         setLoading(true);
-        const prompt = `Actúa como un CONSULTOR ESTRATÉGICO DE ÉLITE en ${tool.cat} para Blis Corp. 
+        const prompt = `Actúa como un CONSULTOR ESTRATÉGICO DE ÉLITE en ${tool.cat} para Xpand Capital. 
         Tu tarea es procesar: "${input}" usando la herramienta "${tool.name}".
         
         ESTILO DE RESPUESTA REQUERIDO:
@@ -62,7 +62,7 @@ const SmartAITool = ({ tool }: { tool: ToolDef }) => {
         4. TABLAS: Usa tablas solo si hay 3 o más datos comparativos. Si es uno solo, usa un bloque de código 'info'.
         5. RESALTADO: Usa MAYÚSCULAS para conceptos vitales y negrita para montos (**S/ 00.00**).
         6. IDENTIFICACIÓN: Indica claramente qué IA respondió (Gemini o GPT).
-        7. INSIGHTS: Finaliza con la sección "⚡ PERSPECTIVA BLIS CORP" con 3 puntos de acción inmediata.
+        7. INSIGHTS: Finaliza con la sección "⚡ PERSPECTIVA Xpand Capital" con 3 puntos de acción inmediata.
 
         IMPORTANTE: La legibilidad debe ser absoluta. Usa saltos de línea dobles entre secciones.`;
 
@@ -311,7 +311,7 @@ const SmartAITool = ({ tool }: { tool: ToolDef }) => {
                                                         </ReactMarkdown>
                                                         <div className="mt-12 pt-6 border-t border-white/5 flex items-center justify-between">
                                                             <div className="flex flex-col">
-                                                                <span className="text-[7px] font-black text-zinc-700 uppercase tracking-[0.4em] italic mb-1">Blis Neural Fabric v4.0</span>
+                                                                <span className="text-[7px] font-black text-zinc-700 uppercase tracking-[0.4em] italic mb-1">Xpand Neural Fabric v4.0</span>
                                                                 <div className="flex items-center gap-2">
                                                                     <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                                                                     <span className="text-[8px] font-black text-white/40 uppercase tracking-tighter italic">Cálculo Certificado de Alta Precisión</span>
@@ -335,3 +335,4 @@ const SmartAITool = ({ tool }: { tool: ToolDef }) => {
 };
 
 export { SmartAITool };
+

@@ -297,8 +297,8 @@ export default function FormasPagoAdminPage() {
                                                     )}
                                                     {forma.slug === 'coins' && (
                                                         <div className="grid grid-cols-2 gap-3">
-                                                            <Input value={forma.config?.rate || "10"} onChange={e => updateSimple(forma.id, 'rate', e.target.value)} type="number" placeholder="Tasa (1 USD = X BLIS)" className="bg-white/5 border-white/10 text-white text-sm" />
-                                                            <Input value={forma.config?.min_coins || "0"} onChange={e => updateSimple(forma.id, 'min_coins', e.target.value)} type="number" placeholder="Mínimo BLISCOINS" className="bg-white/5 border-white/10 text-white text-sm" />
+                                                            <Input value={forma.config?.rate || "10"} onChange={e => updateSimple(forma.id, 'rate', e.target.value)} type="number" placeholder="Tasa (1 USD = X XPAND)" className="bg-white/5 border-white/10 text-white text-sm" />
+                                                            <Input value={forma.config?.min_coins || "0"} onChange={e => updateSimple(forma.id, 'min_coins', e.target.value)} type="number" placeholder="Mínimo XPANDCOINS" className="bg-white/5 border-white/10 text-white text-sm" />
                                                         </div>
                                                     )}
 
@@ -421,3 +421,4 @@ export default function FormasPagoAdminPage() {
         </div>
     );
 }
+

@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- BLIS CORP - TABLA producto_categorias
+-- XPAND CORP - TABLA producto_categorias
 -- ═══════════════════════════════════════════════════════════════════════════════
 
 -- Crear tabla producto_categorias

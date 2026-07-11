@@ -49,7 +49,7 @@ export function FooterSections() {
     
     const footer = cmsData?.footer || {};
     const description = siteConfig?.footerDescription || footer.description || "Liderando la transformación digital.";
-    const copyright = siteConfig?.footerCopyright || footer.copyright || "© 2026 BLIS Corp. Todos los derechos reservados.";
+    const copyright = siteConfig?.footerCopyright || footer.copyright || "© 2026 Xpand Capital. Todos los derechos reservados.";
     const vipTitle = siteConfig?.footerVipTitle || footer.vipTitle || "Acceso VIP";
     const vipDescription = siteConfig?.footerVipDescription || footer.vipDescription || "Únete a la lista de inversores selectos para recibir análisis de mercado y oportunidades antes del lanzamiento público.";
     const vipPlaceholder = siteConfig?.footerVipPlaceholder || footer.vipPlaceholder || "Tu correo corporativo";
@@ -209,7 +209,7 @@ export function FooterSections() {
                                     className="h-36 w-auto object-contain drop-shadow-[0_0_20px_rgba(213,193,8,0.6)] mb-4"
                                 />
                             ) : (
-                                <span className="text-2xl font-black text-white tracking-wider mb-4">BLIS CORP</span>
+                                <span className="text-2xl font-black text-white tracking-wider mb-4">Xpand Capital</span>
                             )}
                             <p className="text-gray-500 font-light text-sm max-w-xs mb-4">{description}</p>
 
@@ -298,7 +298,7 @@ export function FooterSections() {
                             {logoHorizontal ? (
                                 <img src={logoHorizontal} alt="Logo" className="h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(213,193,8,0.6)] mb-4" />
                             ) : (
-                                <span className="text-xl font-black text-white tracking-wider mb-4">BLIS CORP</span>
+                                <span className="text-xl font-black text-white tracking-wider mb-4">Xpand Capital</span>
                             )}
                             <p className="text-gray-500 font-light text-xs leading-relaxed mb-5 max-w-[220px]">{description}</p>
                             <div className="flex flex-wrap gap-x-4 gap-y-2 mb-5">
@@ -429,4 +429,5 @@ export function FooterSections() {
         </>
     );
 }
+
 

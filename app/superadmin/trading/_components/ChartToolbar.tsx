@@ -63,7 +63,7 @@ export const ChartToolbar = ({
           fontWeight="bold"
           letterSpacing="0.2em"
         >
-          BLIS CORP
+          XPAND CORP
         </text>
       </g>
 
@@ -163,4 +163,5 @@ export const ChartToolbar = ({
     </>
   );
 };
+
 

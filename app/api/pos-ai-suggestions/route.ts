@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         }
 
         const systemInstruction = `
-Eres un ASISTENTE DE VENTAS EXPERTO e Inteligente para el POS de "Blis Corp". 
+Eres un ASISTENTE DE VENTAS EXPERTO e Inteligente para el POS de "Xpand Capital". 
 Tu misión es analizar el carrito actual del cliente y el "contexto del cliente" (lo que quiere lograr) para sugerir productos que aumenten el valor de la venta (Upselling y Cross-selling).
 
 REGLAS DE RESPUESTA:
@@ -124,3 +124,4 @@ CATÁLOGO: ${JSON.stringify(catalog.map((p: any) => ({ id: p.id, title: p.title,
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+

@@ -382,7 +382,7 @@ function AcademyContent() {
                                                 </h3>
                                                 <div className="mt-auto flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
                                                     <Trophy className="w-3.5 h-3.5" />
-                                                    <span>Blis Expert Team</span>
+                                                    <span>Xpand Expert Team</span>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -584,4 +584,5 @@ export default function AcademyPage() {
         </Suspense>
     );
 }
+
 

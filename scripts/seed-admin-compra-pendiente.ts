@@ -35,7 +35,7 @@ function div(color = '#1f1f1f', h = 1) {
   return { id: getUniqueId('divider'), type: 'divider', content: { color, height: h, borderStyle: 'solid', bgColor: 'transparent', padding: 0 } };
 }
 function ftrDark() {
-  return { id: getUniqueId('footer'), type: 'footer', content: { text: '© 2026 BLIS Corp. Todos los derechos reservados.', bgColor: 'transparent', textColor: '#6b7280', padding: 0, fontSize: 11, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' } };
+  return { id: getUniqueId('footer'), type: 'footer', content: { text: '© 2026 Xpand Capital. Todos los derechos reservados.', bgColor: 'transparent', textColor: '#6b7280', padding: 0, fontSize: 11, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' } };
 }
 function receipt() {
   return { id: getUniqueId('receipt'), type: 'receipt', content: {
@@ -79,10 +79,10 @@ const settings = {
   width: 600,
   fontFamily: 'Verdana, Geneva, sans-serif',
   sectionGap: 0,
-  activePaletteId: 'bliscorp-dark',
+  activePaletteId: 'xpancapital-dark',
   palettes: [
-    { id: 'bliscorp-dark', name: 'BlisCorp Oscuro', bodyBg: '#181818', containerBg: '#181818', text: '#e5e7eb', primary: '#e11d48' },
-    { id: 'bliscorp-light', name: 'BlisCorp Claro', bodyBg: '#F3F4F6', containerBg: '#FFFFFF', text: '#333333', primary: '#e11d48' }
+    { id: 'xpancapital-dark', name: 'XpandCapital Oscuro', bodyBg: '#181818', containerBg: '#181818', text: '#e5e7eb', primary: '#e11d48' },
+    { id: 'xpancapital-light', name: 'XpandCapital Claro', bodyBg: '#F3F4F6', containerBg: '#FFFFFF', text: '#333333', primary: '#e11d48' }
   ],
   subject: 'Compra pendiente: {{nombre_comprador}} — {{moneda}} {{total_compra}}',
   previewText: 'Orden #{{comprobante_id}} via {{metodo_pago_compra}}. Acción requerida.',
@@ -136,3 +136,6 @@ async function main() {
 }
 
 main();
+
+
+

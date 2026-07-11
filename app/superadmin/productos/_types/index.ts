@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP - TIPOS DE PRODUCTO
+// XPAND CORP - TIPOS DE PRODUCTO
 // Esquemas tipados para el módulo de productos
 // ═══════════════════════════════════════════════════════════════════════════════
 

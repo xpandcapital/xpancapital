@@ -39,7 +39,7 @@ export default function ShortLinkPanel({
             >
               <span className="flex items-center gap-1.5">
                 <Link2 className="w-3.5 h-3.5 opacity-50" />
-                blis-corp.com/s/{shortCode}
+                xpancapital.org/s/{shortCode}
               </span>
               {linkCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />}
             </button>
@@ -91,7 +91,7 @@ export default function ShortLinkPanel({
       ) : (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <span className="text-gray-500 text-xs font-mono shrink-0">blis-corp.com/s/</span>
+            <span className="text-gray-500 text-xs font-mono shrink-0">xpancapital.org/s/</span>
             <input
               type="text"
               value={shortCode}
@@ -124,3 +124,4 @@ export default function ShortLinkPanel({
     </div>
   );
 }
+

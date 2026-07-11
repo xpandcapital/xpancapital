@@ -158,7 +158,7 @@ export function CartSidebar() {
                                             <span className="text-2xl font-black text-white">${totalUSD.toFixed(2)}</span>
                                             {coinsEnabled && totalCoins > 0 && (
                                                 <p className="text-[10px] text-amber-500 font-bold">
-                                                    o {totalCoins.toLocaleString()} BLIS COINS
+                                                    o {totalCoins.toLocaleString()} XPAND COINS
                                                 </p>
                                             )}
                                         </div>

@@ -49,7 +49,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                                 exit={{ opacity: 0 }}
                                 className="font-black text-xl uppercase tracking-tighter"
                             >
-                                <span className="text-white">BLIS</span>
+                                <span className="text-white">XPAND</span>
                                 <span className="text-blis-red">Admin</span>
                             </motion.div>
                         )}

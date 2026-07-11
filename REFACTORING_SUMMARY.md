@@ -311,4 +311,4 @@ export { useProductSelection } from './useProductSelection'
 ---
 
 *Documento generado: 2026-04-08*
-*BLIS Corp Development Team*
+*Xpand Capital Development Team*

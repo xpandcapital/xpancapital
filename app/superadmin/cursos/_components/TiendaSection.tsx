@@ -216,7 +216,7 @@ export function TiendaSection({ course, onUpdate }: Props) {
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
                 <Coins className="w-3 h-3 inline mr-1" />
-                BLISCOINS
+                XPANDCOINS
               </label>
               <input
                 type="number"
@@ -278,3 +278,4 @@ export function TiendaSection({ course, onUpdate }: Props) {
     </div>
   )
 }
+

@@ -1,4 +1,4 @@
-# BLIS CORP - Diccionario de Dominio
+# Xpand Capital - Diccionario de Dominio
 
 > **Versión:** 1.0  
 > **Última actualización:** 2026-04-08  
@@ -18,7 +18,7 @@
 | **Asesor** | Usuario que solo puede ver sus clientes asignados y descargar sus documentos. No puede editar precios ni ver API Keys. |
 | **Socio** | Cliente que compró productos digitales (eBooks, cursos, asesorías). Tiene cuenta para descargar sus productos. |
 | **Propietario** | Cliente que compró lotes inmobiliarios. Puede o no tener cuenta (el asesor puede cargar sus datos manualmente). |
-| **Empleado** | Personal interno de Blis Corp con acceso limitado según su rol. |
+| **Empleado** | Personal interno de Xpand Capital con acceso limitado según su rol. |
 | **Lead** | Persona interesada que dejó sus datos en una campaña de marketing. No requiere tener cuenta. |
 | **Usuario** | Término genérico que se refiere a cualquier persona con cuenta en la plataforma. |
 
@@ -661,5 +661,5 @@ Procesa Pago
 
 ---
 
-**Mantenido por:** BLIS Corp Development Team  
+**Mantenido por:** Xpand Capital Development Team  
 **Próxima revisión:** 2026-07-08

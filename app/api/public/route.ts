@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 
       const res = await fetch(
         `${nominatimUrl}/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=1`,
-        { headers: { 'User-Agent': 'BlisCorp/1.0' } }
+        { headers: { 'User-Agent': 'XpandCapital/1.0' } }
       )
       const data = await res.json()
       return NextResponse.json({ success: true, data })
@@ -73,3 +73,4 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: false, message: 'Fallo al obtener datos' }, { status: 500 })
   }
 }
+

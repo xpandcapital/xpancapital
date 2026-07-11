@@ -95,7 +95,7 @@ export function NewsletterBanner() {
                   )}
                 </motion.button>
                 <p className="text-[10px] text-gray-600 text-center">
-                  Al suscribirte aceptas recibir comunicaciones de BLIS Corp. Puedes darte de baja en cualquier momento.
+                  Al suscribirte aceptas recibir comunicaciones de Xpand Capital. Puedes darte de baja en cualquier momento.
                 </p>
               </motion.form>
             )}
@@ -105,4 +105,5 @@ export function NewsletterBanner() {
     </section>
   );
 }
+
 

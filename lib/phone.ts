@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP — UTILIDAD DE LIMPIEZA DE TELÉFONOS
+// XPAND CORP — UTILIDAD DE LIMPIEZA DE TELÉFONOS
 // Normaliza a E.164 (+51999999999) removiendo prefijos locales (0 delante),
 // espacios, guiones, paréntesis, y detecta código de país por defecto.
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -81,3 +81,4 @@ export function isValidPhone(phone: string | null | undefined): boolean {
   if (!phone) return false
   return /^\+[1-9]\d{6,15}$/.test(phone)
 }
+

@@ -60,7 +60,7 @@ VALUES (
             ],
             "contactInfo": {
                 "phone": "+51 999 999 999",
-                "email": "contacto@bliscorp.com",
+                "email": "contacto@xpancapital.com",
                 "whatsapp": "51999999999"
             },
             "accentColor": "#10B981"
@@ -92,14 +92,14 @@ VALUES (
             "showIcons": true
         },
         "footer": {
-            "description": "BLIS Corp - Tu socio inmobiliario de confianza.",
-            "copyright": "© 2026 Blis Corp. Todos los derechos reservados."
+            "description": "Xpand Capital - Tu socio inmobiliario de confianza.",
+            "copyright": "© 2026 Xpand Capital. Todos los derechos reservados."
         }
     }',
     ARRAY['thankYouHero', 'thankYouNextSteps', 'funnelCTA', 'stats', 'footer'],
     '{"thankYouHero": true, "thankYouNextSteps": true, "funnelCTA": true, "stats": true, "footer": true}',
-    '¡Gracias! | BLIS Corp',
-    'Tu operación ha sido procesada exitosamente. BLIS Corp - Inmobiliaria de confianza.'
+    '¡Gracias! | Xpand Capital',
+    'Tu operación ha sido procesada exitosamente. Xpand Capital - Inmobiliaria de confianza.'
 ) ON CONFLICT (empresa_id, slug) DO UPDATE SET
     secciones = EXCLUDED.secciones,
     "sectionOrder" = EXCLUDED."sectionOrder",
@@ -192,7 +192,7 @@ UPDATE templates SET
             "accentColor": "#B10D24"
         },
         "funnelBenefits": {
-            "title": "¿Por qué invertir con BLIS Corp?",
+            "title": "¿Por qué invertir con Xpand Capital?",
             "subtitle": "Ventajas Exclusivas",
             "description": "Más de 10 años respaldando inversiones exitosas",
             "accentColor": "#B10D24",
@@ -250,7 +250,7 @@ UPDATE templates SET
             "subtitle": "Testimonios de Nuestros Clientes",
             "testimonials": [
                 {
-                    "quote": "Invertí en Montana hace 18 meses y mi terreno ya vale el triple. BLIS Corp cambió mi vida financiera para siempre.",
+                    "quote": "Invertí en Montana hace 18 meses y mi terreno ya vale el triple. Xpand Capital cambió mi vida financiera para siempre.",
                     "author": "Rafael Sánchez",
                     "role": "Inversor Inmobiliario",
                     "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=256&q=80",
@@ -276,8 +276,8 @@ UPDATE templates SET
             "showRating": true
         },
         "footer": {
-            "description": "BLIS Corp - Tu socio inmobiliario de confianza. Inversiones inteligentes, rendimientos garantizados.",
-            "copyright": "© 2026 Blis Corp. Todos los derechos reservados."
+            "description": "Xpand Capital - Tu socio inmobiliario de confianza. Inversiones inteligentes, rendimientos garantizados.",
+            "copyright": "© 2026 Xpand Capital. Todos los derechos reservados."
         }
     }',
     "sectionOrder" = ARRAY['captureHero', 'funnelVideo', 'funnelBenefits', 'stats', 'funnelTestimonials', 'footer'],
@@ -328,7 +328,7 @@ UPDATE templates SET
             "accentColor": "#B10D24"
         },
         "funnelBenefits": {
-            "title": "¿Por qué invertir con BLIS Corp?",
+            "title": "¿Por qué invertir con Xpand Capital?",
             "subtitle": "Ventajas que nos diferencian",
             "description": "Más de 10 años de experiencia respaldando inversiones exitosas",
             "accentColor": "#B10D24",
@@ -376,7 +376,7 @@ UPDATE templates SET
             "subtitle": "Lo que dicen nuestros clientes",
             "testimonials": [
                 {
-                    "quote": "Invertí hace 2 años y mi terreno ya vale el triple. Fue la mejor decisión financiera que he tomado. BLIS Corp me guió en todo el proceso.",
+                    "quote": "Invertí hace 2 años y mi terreno ya vale el triple. Fue la mejor decisión financiera que he tomado. Xpand Capital me guió en todo el proceso.",
                     "author": "Rafael Sánchez",
                     "role": "Inversor Inmobiliario",
                     "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=256&q=80",
@@ -474,8 +474,8 @@ UPDATE templates SET
             "urgentMessage": "Solo quedan 12 lugares disponibles"
         },
         "footer": {
-            "description": "BLIS Corp - Líderes en desarrollo inmobiliario de alta plusvalía. Tu patrimonio, nuestra prioridad.",
-            "copyright": "© 2026 Blis Corp. Todos los derechos reservados."
+            "description": "Xpand Capital - Líderes en desarrollo inmobiliario de alta plusvalía. Tu patrimonio, nuestra prioridad.",
+            "copyright": "© 2026 Xpand Capital. Todos los derechos reservados."
         }
     }',
     "sectionOrder" = ARRAY['funnelHero', 'funnelCountdown', 'funnelVideo', 'funnelBenefits', 'stats', 'funnelTestimonials', 'funnelPricing', 'funnelCTA', 'footer'],
@@ -494,3 +494,4 @@ SELECT
 FROM templates 
 WHERE empresa_id = '6186f014-c8c7-4027-9f08-8acf2bae3eae'
 AND tipo_contenido IN ('thankyou', 'captura', 'funnel');
+

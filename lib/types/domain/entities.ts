@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP - TIPOS DE DOMINIO
+// XPAND CORP - TIPOS DE DOMINIO
 // Definiciones de todas las entidades del sistema
 // ═══════════════════════════════════════════════════════════════════════════════
 

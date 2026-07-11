@@ -1145,9 +1145,9 @@ export const categories: ApiCategory[] = [
         title: "Gamificación",
         icon: Coins,
         color: "text-emerald-400",
-        description: "Sistema de puntos y recompensas para Blis Corp.",
+        description: "Sistema de puntos y recompensas para Xpand Capital.",
         apps: [
-            { id: "blis_config", name: "Configuración Blis", icon: Coins, color: "text-emerald-400", bg: "bg-emerald-500/10", description: "Parámetros del sistema de gamificación de Blis Corp (puntos, coins, recompensas).", website: "Interno", fields: [{ id: "blis_blog_time", label: "Tiempo de Lectura (seg)", type: "text", description: "Segundos que el usuario debe estar en un artículo para ganar coins.", getFrom: "Configuración interna", accessType: "Pública", cost: "gratis" }, { id: "blis_blog_coins", label: "Coins por Lectura", type: "text", description: "Cantidad de coins otorgados después del tiempo de lectura.", getFrom: "Configuración interna", accessType: "Pública", cost: "gratis" }] },
+            { id: "blis_config", name: "Configuración Blis", icon: Coins, color: "text-emerald-400", bg: "bg-emerald-500/10", description: "Parámetros del sistema de gamificación de Xpand Capital (puntos, coins, recompensas).", website: "Interno", fields: [{ id: "blis_blog_time", label: "Tiempo de Lectura (seg)", type: "text", description: "Segundos que el usuario debe estar en un artículo para ganar coins.", getFrom: "Configuración interna", accessType: "Pública", cost: "gratis" }, { id: "blis_blog_coins", label: "Coins por Lectura", type: "text", description: "Cantidad de coins otorgados después del tiempo de lectura.", getFrom: "Configuración interna", accessType: "Pública", cost: "gratis" }] },
         ]
     },
 ]

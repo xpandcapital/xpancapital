@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS site_config (
     empresa_id UUID NOT NULL REFERENCES empresas(id) ON DELETE CASCADE,
     
     -- Branding
-    site_name VARCHAR(100) DEFAULT 'BLIS Corp',
+    site_name VARCHAR(100) DEFAULT 'Xpand Capital',
     site_tagline VARCHAR(200) DEFAULT 'Luxury Tech Real Estate',
     logo_horizontal TEXT,
     logo_vertical TEXT,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS site_config (
     
     -- Footer
     footer_description TEXT,
-    footer_copyright VARCHAR(100) DEFAULT '© 2026 BLIS Corp. Todos los derechos reservados.',
+    footer_copyright VARCHAR(100) DEFAULT '© 2026 Xpand Capital. Todos los derechos reservados.',
     
     -- Contact
     contact_email TEXT,
@@ -68,7 +68,7 @@ CREATE TRIGGER trigger_update_site_config
 INSERT INTO site_config (empresa_id, site_name, site_tagline, primary_color, secondary_color, background_color, text_color, accent_color)
 VALUES (
     '6186f014-c8c7-4027-9f08-8acf2bae3eae',
-    'BLIS Corp',
+    'Xpand Capital',
     'Luxury Tech Real Estate',
     '#B10D24',
     '#10B981',

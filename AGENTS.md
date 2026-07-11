@@ -1,4 +1,4 @@
-# 📋 BLIS Corp - Documentación de Desarrollo
+# 📋 Xpand Capital - Documentación de Desarrollo
 
 ## ⚠️ IDIOMA OBLIGATORIO
 
@@ -14,7 +14,7 @@
 ## 📁 Estructura del Proyecto
 
 ```
-blis-corp/
+xpancapital/
 ├── app/                      # Next.js App Router
 │   ├── (auth)/              # Rutas de autenticación
 │   ├── (public)/            # Páginas públicas (landing, formularios)
@@ -433,7 +433,7 @@ export function Component({ title, children }: Props) {
 
 ---
 
-*Documento v2.0 - BLIS Corp Development Team*
+*Documento v2.0 - Xpand Capital Development Team*
 
 ---
 
@@ -450,7 +450,7 @@ export function Component({ title, children }: Props) {
 
 ## 📱 REGLA DE ORO: ENFOQUE MOBILE-FIRST Y RENDIMIENTO TÁCTIL OBLIGATORIO
 
-El tráfico principal de Blis Corp proviene de dispositivos móviles. Al refactorizar con Tailwind CSS y Framer Motion, es obligatorio cumplir:
+El tráfico principal de Xpand Capital proviene de dispositivos móviles. Al refactorizar con Tailwind CSS y Framer Motion, es obligatorio cumplir:
 
 1. **Prioridad Tailwind Mobile-First:** Todo el maquetado y espaciado base debe estar pensado para pantallas pequeñas. Usar los prefijos `md:`, `lg:`, `xl:` exclusivamente para escalar el diseño hacia escritorio, nunca al revés.
 2. **Interacciones Táctiles (Touch vs. Hover):** Los efectos avanzados que dependen del cursor (`onMouseMove`, `whileHover`, cursores magnéticos, tarjetas 3D que siguen al mouse) NO funcionan en móvil. Programar SIEMPRE un comportamiento de respaldo elegante para pantallas táctiles (usar `whileTap`, o reemplazar el hover por un revelado suave cuando el elemento entra en el viewport usando `whileInView`).

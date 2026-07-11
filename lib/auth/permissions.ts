@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP - SISTEMA DE PERMISOS Y ROLES
+// XPAND CORP - SISTEMA DE PERMISOS Y ROLES
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export type UserRole = 'superadmin' | 'admin' | 'editor' | 'empleado' | 'cliente' | 'usuario'

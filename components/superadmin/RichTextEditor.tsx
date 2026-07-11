@@ -248,7 +248,7 @@ export default function RichTextEditor({
                                         {modal.message || (modal.type === 'embed' ? 'Pega el código iframe o script profesional aquí. Se cargará instantáneamente en el editor.' : 'Introduce la URL de destino completa para el enlace seleccionado.')}
                                     </p>
                                     {modal.type !== 'error' && modal.type !== 'loading' && (
-                                        <textarea id="modal-input" className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-xs focus:outline-none focus:border-blis-red min-h-[120px] transition-all resize-none" placeholder={modal.type === 'embed' ? '<iframe src="..." />' : 'https://bliscorp.com/...'} />
+                                        <textarea id="modal-input" className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-white text-xs focus:outline-none focus:border-blis-red min-h-[120px] transition-all resize-none" placeholder={modal.type === 'embed' ? '<iframe src="..." />' : 'https://xpancapital.com/...'} />
                                     )}
                                 </div>
 
@@ -488,3 +488,4 @@ export default function RichTextEditor({
         </div>
     );
 }
+

@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Generar link de recuperación de Supabase (el usuario elegirá su contraseña)
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://xpancapital.org'
       const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
         type: 'recovery',
         email: profile.email,

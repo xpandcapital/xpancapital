@@ -26,7 +26,7 @@ export function FooterPanel({ config, updateField }: FooterPanelProps) {
         label="Copyright"
         value={config.footer_copyright}
         onChange={(v) => updateField('footer_copyright', v)}
-        placeholder="© 2026 BLIS Corp. Todos los derechos reservados."
+        placeholder="© 2026 Xpand Capital. Todos los derechos reservados."
       />
       <InputField
         label="Texto de Ubicación"
@@ -102,3 +102,4 @@ export function FooterPanel({ config, updateField }: FooterPanelProps) {
     </SectionCard>
   )
 }
+

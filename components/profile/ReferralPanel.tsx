@@ -35,7 +35,7 @@ export function ReferralPanel() {
     const handleShare = (platform: 'facebook' | 'twitter' | 'email') => {
         if (!referralInfo?.referralLink) return;
 
-        const text = '¡Únete a BLIS Corp y obtén beneficios exclusivos!';
+        const text = '¡Únete a Xpand Capital y obtén beneficios exclusivos!';
         let url = '';
 
         switch (platform) {
@@ -46,7 +46,7 @@ export function ReferralPanel() {
                 url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(referralInfo.referralLink)}`;
                 break;
             case 'email':
-                url = `mailto:?subject=${encodeURIComponent('Invitación a BLIS Corp')}&body=${encodeURIComponent(`${text}\n\n${referralInfo.referralLink}`)}`;
+                url = `mailto:?subject=${encodeURIComponent('Invitación a Xpand Capital')}&body=${encodeURIComponent(`${text}\n\n${referralInfo.referralLink}`)}`;
                 break;
         }
 
@@ -65,7 +65,7 @@ export function ReferralPanel() {
         const result = await useReferralCode(referralCode.trim().toUpperCase());
         
         if (result.success) {
-            showToast(`¡Código aplicado! Ganaste ${result.reward} BLIS Coins`, 'success');
+            showToast(`¡Código aplicado! Ganaste ${result.reward} XPAND Coins`, 'success');
             setReferralCode('');
         } else {
             showToast(result.error || 'Código inválido', 'error');
@@ -99,7 +99,7 @@ export function ReferralPanel() {
                 </div>
                 <div>
                     <h2 className="text-2xl font-black text-white uppercase">Programa de Referidos</h2>
-                    <p className="text-gray-400 text-sm">Comparte y gana BLIS Coins</p>
+                    <p className="text-gray-400 text-sm">Comparte y gana XPAND Coins</p>
                 </div>
             </div>
 
@@ -262,3 +262,4 @@ export function ReferralPanel() {
 }
 
 export default ReferralPanel;
+

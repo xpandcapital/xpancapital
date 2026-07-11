@@ -82,9 +82,9 @@ export const API_IDEAS: Record<string, ApiIdeas> = {
             {
                 "category": "🌐 Infraestructura y Archivos Pesados",
                 "items": [
-                    "Despliegue dinámico de Landing Pages: Crear automáticamente un subdominio (ej: valle.bliscorp.com) vía API al crear un nuevo proyecto en el sistema.",
+                    "Despliegue dinámico de Landing Pages: Crear automáticamente un subdominio (ej: valle.xpancapital.com) vía API al crear un nuevo proyecto en el sistema.",
                     "Storage de Planos 4K: Subir archivos muy pesados (renders de 500MB o DWG de AutoCAD) directamente vía FTP para no saturar la base principal.",
-                    "Creación de correos corporativos temporales o por proyecto (ventas-valle@bliscorp.com) de manera programática.",
+                    "Creación de correos corporativos temporales o por proyecto (ventas-valle@xpancapital.com) de manera programática.",
                     "Automatizar respaldos de la base de datos y archivos críticos enviándolos a una carpeta encriptada del servidor mediante un script.",
                     "Servir brochures en PDF pesados mediante el ancho de banda del hosting tradicional, reduciendo costos de transferencia en la nube (AWS/Supabase)."
                 ]
@@ -336,7 +336,7 @@ export const API_IDEAS: Record<string, ApiIdeas> = {
                 "items": [
                     "Guardar los renders arquitectónicos 4K de los departamentos en AWS S3 y distribuirlos mediante CloudFront para que carguen rápido a nivel mundial.",
                     "Compresión al vuelo (Cloudinary): Si el usuario entra desde un celular 3G, la API reduce inteligentemente la calidad y tamaño de la foto del plano para que cargue en milisegundos.",
-                    "Marcas de agua automáticas en todas las imágenes de avance de obra con el logo de BLIS Corp para evitar robos de identidad visual."
+                    "Marcas de agua automáticas en todas las imágenes de avance de obra con el logo de Xpand Capital para evitar robos de identidad visual."
                 ]
             }
         ]
@@ -348,7 +348,7 @@ export const API_IDEAS: Record<string, ApiIdeas> = {
                 "category": "🏆 Fidelización y Referidos",
                 "items": [
                     "Sistema de puntos (Coins): Otorgar puntos a los clientes cada vez que pagan su cuota mensual a tiempo. Luego pueden canjear esos puntos por mejoras en su terreno o pagos administrativos.",
-                    "Programa de embajadores: Si un cliente trae a un amigo y este compra, el sistema le asigna '10,000 Blis Coins' automáticamente.",
+                    "Programa de embajadores: Si un cliente trae a un amigo y este compra, el sistema le asigna '10,000 Xpand Coins' automáticamente.",
                     "Leaderboard de ventas: Premiar a los asesores comerciales con medallas virtuales o bonuses financieros al alcanzar metas de separaciones mensuales."
                 ]
             }
@@ -390,3 +390,5 @@ export function getAppIdeas(appId: string): ApiIdeas | null {
     const key = APP_IDEAS_MAP[appId] || 'basedatos'
     return API_IDEAS[key] || null
 }
+
+

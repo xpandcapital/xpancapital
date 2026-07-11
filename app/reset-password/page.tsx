@@ -141,7 +141,7 @@ function ResetPasswordForm() {
             <ShieldCheck className="w-8 h-8 text-blis-red" />
           </div>
           <h1 className="text-3xl font-black uppercase tracking-widest text-white mb-2">
-            BLIS CORP
+            Xpand Capital
           </h1>
           <p className="text-blis-red text-sm font-bold tracking-widest">HQ</p>
           <p className="text-gray-500 mt-2 text-xs uppercase tracking-widest">
@@ -233,7 +233,7 @@ function ResetPasswordForm() {
         )}
 
         <p className="text-center text-[10px] text-gray-600 mt-8 font-mono tracking-wider">
-          IP Registrada y Monitoreada • Blis Corp SecureNet
+          IP Registrada y Monitoreada • Xpand Capital SecureNet
         </p>
       </div>
     </div>
@@ -251,4 +251,5 @@ export default function ResetPasswordPage() {
     </Suspense>
   )
 }
+
 

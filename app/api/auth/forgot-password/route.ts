@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true })
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://xpancapital.org'
 
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'recovery',
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     await sendTemplateEmail({
       evento,
-      subject: 'Restablecer contraseña — BLIS Corp',
+      subject: 'Restablecer contraseña — Xpand Capital',
       to: normalizedEmail,
       variables: {
         nombre: user.user_metadata?.nombre || normalizedEmail.split('@')[0],
@@ -84,3 +84,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
   }
 }
+

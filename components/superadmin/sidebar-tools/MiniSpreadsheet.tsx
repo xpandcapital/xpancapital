@@ -44,7 +44,7 @@ function MiniSpreadsheet() {
                     <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                         <TableIcon className="w-4 h-4 text-emerald-500" />
                     </div>
-                    <h4 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Blis Sheets v2.0</h4>
+                    <h4 className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Xpand Sheets v2.0</h4>
                 </div>
                 <button
                     onClick={() => { setData(Array(10).fill(0).map(() => Array(3).fill(''))); setActiveCell(null); }}

@@ -4,9 +4,9 @@ import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const email = body.email || 'test@blis-corp.com'
+    const email = body.email || 'test@xpancapital.org'
     const passwordTemporal = body.password || 'TESTPASS123'
-    const imagen = body.imagen || 'https://www.blis-corp.com/images/placeholder-product.jpg'
+    const imagen = body.imagen || 'https://www.xpancapital.org/images/placeholder-product.jpg'
 
     console.log('[test-email] Iniciando prueba para:', email)
 
@@ -19,13 +19,13 @@ export async function POST(request: NextRequest) {
         apellido: 'Perez',
         email,
         password_temporal: passwordTemporal,
-        enlace_crear_cuenta: 'https://www.blis-corp.com/login',
+        enlace_crear_cuenta: 'https://www.xpancapital.org/login',
         productos: '<ul><li>Producto de prueba</li></ul>',
         total: '100.00',
         subtotal: '100.00',
         metodo_pago: 'transfer',
         fecha_compra: '22 de junio de 2026',
-        enlace_acceso: 'https://www.blis-corp.com/miembros',
+        enlace_acceso: 'https://www.xpancapital.org/miembros',
         descuento_monto: '0.00',
         cupon: '',
       },
@@ -48,3 +48,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 })
   }
 }
+

@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- BLIS CORP - TABLAS PARA CONTEXTOS
+-- XPAND CORP - TABLAS PARA CONTEXTOS
 -- Ejecutar BLOQUE POR BLOQUE en Supabase SQL Editor
 -- ═══════════════════════════════════════════════════════════════════════════════
 

@@ -1,7 +1,7 @@
 
 import fs from 'fs';
 
-const content = fs.readFileSync('c:\\Users\\kevin\\.gemini\\antigravity\\scratch\\blis-corp\\components\\superadmin\\POSManager.tsx', 'utf8');
+const content = fs.readFileSync('c:\\Users\\kevin\\.gemini\\antigravity\\scratch\\xpancapital\\components\\superadmin\\POSManager.tsx', 'utf8');
 
 function findUnclosed(text) {
     const lines = text.split('\n');
@@ -66,3 +66,4 @@ function findUnclosed(text) {
 }
 
 findUnclosed(content);
+

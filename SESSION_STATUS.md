@@ -1,4 +1,4 @@
-# BLIS Corp - Estado de Sesión
+# Xpand Capital - Estado de Sesión
 
 ## Objetivo Actual
 
@@ -142,4 +142,4 @@ Errores pre-existentes en otros archivos:
 ---
 
 *Actualizado: 2026-04-08*
-*BLIS Corp Development Team*
+*Xpand Capital Development Team*

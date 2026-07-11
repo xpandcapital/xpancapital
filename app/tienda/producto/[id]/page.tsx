@@ -49,7 +49,7 @@ const UrgencyBar = () => {
                             OFERTA EXPIRA EN: <span className="text-white font-mono text-xs">{formatTime(timeLeft)}</span>
                         </span>
                         <span className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5" /> ACCESO INMEDIATO</span>
-                        <span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5" /> GARANTÍA BLIS CORP</span>
+                        <span className="flex items-center gap-2"><ShieldCheck className="w-3.5 h-3.5" /> GARANTÍA XPAND CORP</span>
                         <span className="flex items-center gap-2"><Lock className="w-3.5 h-3.5" /> PAGO 100% SEGURO</span>
                     </div>
                 ))}
@@ -114,7 +114,7 @@ const TestimonialSlider = () => {
         {
             name: "Elena Velez",
             avatar: "https://i.pravatar.cc/100?u=elena",
-            text: "El soporte y la comunidad Blis son brutales. Recomendado 100%.",
+            text: "El soporte y la comunidad Xpand son brutales. Recomendado 100%.",
             role: "Consultora Digital"
         }
     ];
@@ -376,10 +376,10 @@ export default function ProductDetailPage() {
                                                     dangerouslySetInnerHTML={{ __html: product.description }}
                                                 />
                                             ) : (
-                                                <p>Este producto incluye todo lo necesario para llevar tu negocio inmobiliario al siguiente nivel. Contenido creado por expertos BLIS con más de 10 años de experiencia en el mercado latinoamericano.</p>
+                                                <p>Este producto incluye todo lo necesario para llevar tu negocio inmobiliario al siguiente nivel. Contenido creado por expertos XPAND con más de 10 años de experiencia en el mercado latinoamericano.</p>
                                             )}
                                             <div className="grid grid-cols-2 gap-3 mt-4">
-                                                {["Acceso inmediato tras la compra", "Licencia de uso permanente", "Actualizaciones incluidas", "Soporte prioritario BLIS"].map((item, i) => (
+                                                {["Acceso inmediato tras la compra", "Licencia de uso permanente", "Actualizaciones incluidas", "Soporte prioritario XPAND"].map((item, i) => (
                                                     <div key={i} className="flex items-center gap-2 text-xs">
                                                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
                                                         <span className="text-gray-300">{item}</span>
@@ -487,7 +487,7 @@ export default function ProductDetailPage() {
                                         <div className="flex items-center gap-4 relative z-10 bg-amber-500/5 px-4 py-2 rounded-2xl border border-amber-500/10">
                                             <div className="flex flex-col items-end">
                                                 <span className="text-2xl font-black text-amber-500 leading-none">{Math.round(product.price * 10)}</span>
-                                                <p className="text-[8px] font-black text-amber-500/60 uppercase tracking-[0.1em] mt-1">BLISCOINS</p>
+                                                <p className="text-[8px] font-black text-amber-500/60 uppercase tracking-[0.1em] mt-1">XPANDCOINS</p>
                                             </div>
                                             <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.2)]">
                                                 <TrendingUp className="w-5 h-5 text-amber-500" />
@@ -618,7 +618,7 @@ export default function ProductDetailPage() {
                     <div className="glass-card p-10 rounded-[2.5rem] border-white/5 text-center space-y-6">
                         <CountdownTimer />
                         <h2 className="text-3xl font-black uppercase">¡No esperes más para dominar el mercado!</h2>
-                        <p className="text-gray-400 max-w-2xl mx-auto text-sm">Únete a miles de profesionales que ya usan las herramientas BLIS para escalar su negocio.</p>
+                        <p className="text-gray-400 max-w-2xl mx-auto text-sm">Únete a miles de profesionales que ya usan las herramientas XPAND para escalar su negocio.</p>
                         <motion.button
                             onClick={() => { addToCart({ ...product, price: product.price }); router.push('/tienda/checkout'); }}
                             whileTap={{ scale: 0.97 }}
@@ -658,4 +658,5 @@ export default function ProductDetailPage() {
         </main >
     );
 }
+
 

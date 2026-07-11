@@ -11,7 +11,7 @@ import RichTextEditor from "@/components/superadmin/RichTextEditor"
 import type { Product, Category, Status, Currency, PerishableHandling } from '../../_types'
 import type { Currency as CurrencyObj } from '@/context/CurrencyContext'
 
-const SITE_DOMAIN = 'blis-corp.com'
+const SITE_DOMAIN = 'xpancapital.org'
 
 function generateSlug(text: string): string {
   return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')

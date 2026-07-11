@@ -157,11 +157,11 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                           {(logoHorizontal || siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal) ? (
                               <img
                                   src={logoHorizontal || siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal}
-                                  alt="Blis Corp Logo"
+                                  alt="Xpand Capital Logo"
                                   className="h-12 sm:h-14 lg:h-14 xl:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(213,193,8,0.5)] mx-auto lg:ml-0"
                               />
                           ) : (
-                              <span className="text-xl font-black text-white tracking-wider">BLIS CORP</span>
+                              <span className="text-xl font-black text-white tracking-wider">Xpand Capital</span>
                           )}
                           </div>
 
@@ -346,7 +346,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                 <div className="p-3 bg-black/50 border-t border-white/5">
                                                     <button
                                                         onClick={() => {
-                                                            const text = `¡Hola! Mira estos productos de Blis Corp que me gustaron: \n${favorites.map(f => `- ${f.title}`).join('\n')}\n\nAyúdame a elegir en bliscorp.com`;
+                                                            const text = `¡Hola! Mira estos productos de Xpand Capital que me gustaron: \n${favorites.map(f => `- ${f.title}`).join('\n')}\n\nAyúdame a elegir en xpancapital.com`;
                                                             window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                                                         }}
                                                         className="w-full py-2.5 rounded-xl bg-[#25D366]/10 border border-[#25D366]/20 text-[#25D366] text-[9px] font-black uppercase tracking-widest hover:bg-[#25D366] hover:text-white transition-all flex items-center justify-center gap-2"
@@ -376,7 +376,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                 <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_5px_white]" />
                                             </motion.div>
                                         </div>
-                                        <span className="text-[11px] font-black uppercase tracking-wider">{blisCoins.toLocaleString()} BLISCOINS</span>
+                                        <span className="text-[11px] font-black uppercase tracking-wider">{blisCoins.toLocaleString()} XPANDCOINS</span>
                                     </div>
                                     )}
 
@@ -581,11 +581,11 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                              {(logoVertical || siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical) ? (
                                  <img
                                      src={logoVertical || siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical}
-                                     alt="Blis Corporation"
+                                     alt="Xpand Capitaloration"
                                      className={`w-auto object-contain drop-shadow-[0_0_20px_rgba(213,193,8,0.4)] ${user ? 'h-20 mb-2' : 'h-28 mb-4'}`}
                                  />
                              ) : (
-                                 <span className={`font-black text-white tracking-wider ${user ? 'text-2xl mb-2' : 'text-3xl mb-4'}`}>BLIS CORP</span>
+                                 <span className={`font-black text-white tracking-wider ${user ? 'text-2xl mb-2' : 'text-3xl mb-4'}`}>Xpand Capital</span>
                              )}
                              </div>
 
@@ -615,7 +615,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                     <div className="mt-3 flex gap-2">
                                         {coinsEnabled && (
                                         <div className="flex-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center">
-                                            <p className="text-[7px] font-bold uppercase tracking-widest opacity-60 leading-none mb-1">BLISCOINS</p>
+                                            <p className="text-[7px] font-bold uppercase tracking-widest opacity-60 leading-none mb-1">XPANDCOINS</p>
                                             <p className="text-xs font-black">{user?.blis_coins?.toLocaleString() || '0'}</p>
                                         </div>
                                         )}
@@ -726,4 +726,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
         </>
     )
 }
+
+
+
 

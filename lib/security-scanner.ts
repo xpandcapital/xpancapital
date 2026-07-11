@@ -1,5 +1,5 @@
 /**
- * AI Security Scanner para BLIS Corp
+ * AI Security Scanner para Xpand Capital
  *
  * Ejecuta 8 queries de auditoría en paralelo sobre Supabase,
  * envía los hallazgos a Gemini AI y retorna un reporte estructurado
@@ -168,7 +168,7 @@ export async function collectScanData(): Promise<ScanRawData> {
 }
 
 export async function runGeminiScan(rawData: ScanRawData): Promise<ScannerResult> {
-  const prompt = `Eres un analista de ciberseguridad experto para BLIS Corp. Has ejecutado un escaneo automático de seguridad y debes generar un reporte ESTRICTAMENTE en formato JSON (sin markdown, sin texto fuera del JSON).
+  const prompt = `Eres un analista de ciberseguridad experto para Xpand Capital. Has ejecutado un escaneo automático de seguridad y debes generar un reporte ESTRICTAMENTE en formato JSON (sin markdown, sin texto fuera del JSON).
 
 DATOS DEL ESCANEO:
 ${JSON.stringify(rawData, null, 2)}
@@ -353,3 +353,4 @@ function fallbackScan(rawData: ScanRawData): ScannerResult {
     raw_data: rawData,
   }
 }
+

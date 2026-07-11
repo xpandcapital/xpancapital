@@ -1,4 +1,4 @@
-# BLIS Corp - Convenciones de Código
+# Xpand Capital - Convenciones de Código
 
 > **Versión:** 1.0  
 > **Última actualización:** 2026-04-07  
@@ -234,5 +234,5 @@ products.forEach(p => p.price *= 1.1);
 
 ---
 
-**Mantenido por:** BLIS Corp Development Team  
+**Mantenido por:** Xpand Capital Development Team  
 **Próxima revisión:** 2026-07-07

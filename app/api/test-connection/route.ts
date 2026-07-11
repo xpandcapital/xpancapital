@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
                         amount: 100,
                         currency: 'USD',
                         orderId: `TEST-${Date.now()}`,
-                        customer: { email: 'test@blis-corp.com' },
+                        customer: { email: 'test@xpancapital.org' },
                     }),
                     next: { revalidate: 0 }
                 });
@@ -204,3 +204,4 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: false, msg: 'Error de Red: El Proxy no alcanzó el destino' }, { status: 500 });
     }
 }
+

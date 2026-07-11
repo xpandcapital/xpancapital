@@ -1,4 +1,4 @@
-# 📦 BLIS Corp - Módulo Productos
+# 📦 Xpand Capital - Módulo Productos
 ## Resumen de Refactoring Completo
 
 ---
@@ -195,4 +195,4 @@ copy page-original-backup.tsx page.tsx
 ---
 
 *Última actualización: Abril 2026*
-*BLIS Corp Development Team*
+*Xpand Capital Development Team*

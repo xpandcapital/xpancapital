@@ -255,7 +255,7 @@ function PagoPendienteContent() {
                               <img src={paymentDetails.asesor_foto} alt="" className="w-10 h-10 rounded-full object-cover border border-white/10" />
                               <div>
                                 <p className="text-xs font-bold text-white">{paymentDetails.asesor_nombre || "Asesor"}</p>
-                                <p className="text-[10px] text-gray-500">Blis Expert Team</p>
+                                <p className="text-[10px] text-gray-500">Xpand Expert Team</p>
                               </div>
                             </div>
                           )}
@@ -353,3 +353,4 @@ function PagoPendienteContent() {
     </main>
   );
 }
+

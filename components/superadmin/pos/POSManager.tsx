@@ -268,7 +268,7 @@ export const POSManager = () => {
 
             <div className="hidden print:block fixed inset-0 bg-white font-mono text-black text-[10px] p-4 leading-relaxed tracking-tight z-[9999999] overflow-visible break-inside-avoid">
                 <div className="w-[80mm] mx-auto break-inside-avoid">
-                    <div className="text-center font-black mb-1 leading-none text-xl">{typeof window !== 'undefined' ? stripHtml(localStorage.getItem('blis_store_name')) || 'BLIS CORP' : 'BLIS CORP'}</div>
+                    <div className="text-center font-black mb-1 leading-none text-xl">{typeof window !== 'undefined' ? stripHtml(localStorage.getItem('blis_store_name')) || 'Xpand Capital' : 'Xpand Capital'}</div>
                     <div className="text-center text-[7px] mb-0.5 leading-none">RUC: {typeof window !== 'undefined' ? stripHtml(localStorage.getItem('blis_store_ruc')) || '20000000001' : '20000000001'}</div>
                     <div className="text-center text-[7px] mb-2 leading-tight uppercase max-w-[80%] mx-auto">{typeof window !== 'undefined' ? stripHtml(localStorage.getItem('blis_store_address')) || 'LIMA - PERÚ' : 'LIMA - PERÚ'}</div>
                     <div className="border-t border-dashed border-black my-2"></div>
@@ -348,10 +348,11 @@ export const POSManager = () => {
 
                     <div className="text-center mt-6 text-[8px] font-bold">
                         <div>GRACIAS POR TU COMPRA</div>
-                        <div className="mt-1">Generado por Blis Corp</div>
+                        <div className="mt-1">Generado por Xpand Capital</div>
                     </div>
                 </div>
             </div>
         </>
     );
 };
+

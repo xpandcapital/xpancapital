@@ -100,7 +100,7 @@ export default function AdminBlogRoutes() {
             generated.id = "ruta-" + Date.now();
             saveRoutes([generated, ...routes]);
             setIsSuggesting(false);
-            alert(`¡La IA de Blis Corp ha generado la ruta: "${generated.name}"!`);
+            alert(`¡La IA de Xpand Capital ha generado la ruta: "${generated.name}"!`);
         }, 2000);
     };
 
@@ -136,7 +136,7 @@ export default function AdminBlogRoutes() {
                             Rutas de Lectura / Playlist
                         </h1>
                         <p className="text-gray-400 mt-2 text-sm max-w-2xl">
-                            Crea secuencias de estudio y líneas de tiempo con tus artículos. Los usuarios públicos podrán seguir esta ruta paso a paso para educarse, ganando experiencia (y Blis Coins) ordenadamente.
+                            Crea secuencias de estudio y líneas de tiempo con tus artículos. Los usuarios públicos podrán seguir esta ruta paso a paso para educarse, ganando experiencia (y Xpand Coins) ordenadamente.
                         </p>
                     </div>
                     <div className="flex gap-3">
@@ -246,3 +246,5 @@ export default function AdminBlogRoutes() {
         </div>
     );
 }
+
+

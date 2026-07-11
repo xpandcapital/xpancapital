@@ -17,37 +17,37 @@ export function SocialPanel({ config, updateField }: SocialPanelProps) {
           label="Instagram"
           value={config.social_instagram}
           onChange={(v) => updateField('social_instagram', v)}
-          placeholder="https://instagram.com/bliscorp"
+          placeholder="https://instagram.com/xpancapital"
         />
         <InputField
           label="Facebook"
           value={config.social_facebook}
           onChange={(v) => updateField('social_facebook', v)}
-          placeholder="https://facebook.com/bliscorp"
+          placeholder="https://facebook.com/xpancapital"
         />
         <InputField
           label="YouTube"
           value={config.social_youtube}
           onChange={(v) => updateField('social_youtube', v)}
-          placeholder="https://youtube.com/@bliscorp"
+          placeholder="https://youtube.com/@xpancapital"
         />
         <InputField
           label="TikTok"
           value={config.social_tiktok}
           onChange={(v) => updateField('social_tiktok', v)}
-          placeholder="https://tiktok.com/@bliscorp"
+          placeholder="https://tiktok.com/@xpancapital"
         />
         <InputField
           label="LinkedIn"
           value={config.social_linkedin}
           onChange={(v) => updateField('social_linkedin', v)}
-          placeholder="https://linkedin.com/company/bliscorp"
+          placeholder="https://linkedin.com/company/xpancapital"
         />
         <InputField
           label="X (Twitter)"
           value={config.social_twitter}
           onChange={(v) => updateField('social_twitter', v)}
-          placeholder="https://x.com/bliscorp"
+          placeholder="https://x.com/xpancapital"
         />
         <InputField
           label="WhatsApp"
@@ -59,3 +59,4 @@ export function SocialPanel({ config, updateField }: SocialPanelProps) {
     </SectionCard>
   )
 }
+

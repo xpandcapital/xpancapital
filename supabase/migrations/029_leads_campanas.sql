@@ -213,10 +213,10 @@ INSERT INTO asesores (empresa_id, nombre, email, telefono, whatsapp)
 SELECT 
   '6186f014-c8c7-4027-9f08-8acf2bae3eae'::UUID,
   'Kevin Valdez',
-  'kevin@bliscorp.com',
+  'kevin@xpancapital.com',
   '+51 999 888 777',
   '51999888777'
-WHERE NOT EXISTS (SELECT 1 FROM asesores WHERE email = 'kevin@bliscorp.com');
+WHERE NOT EXISTS (SELECT 1 FROM asesores WHERE email = 'kevin@xpancapital.com');
 
 INSERT INTO campanas (empresa_id, nombre, descripcion, estado)
 SELECT 

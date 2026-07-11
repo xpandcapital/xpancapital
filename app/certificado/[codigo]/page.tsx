@@ -17,7 +17,7 @@ export default function CertificadoPage() {
     const [downloading, setDownloading] = useState(false);
 
     useEffect(() => {
-        document.title = valid ? "Certificado Válido | BLIS Corp" : "Verificar Certificado | BLIS Corp";
+        document.title = valid ? "Certificado Válido | Xpand Capital" : "Verificar Certificado | Xpand Capital";
     }, [valid]);
 
     const handleDownload = async () => {
@@ -135,7 +135,7 @@ export default function CertificadoPage() {
 
                             <div className="border-t border-white/10 pt-8">
                                 <p className="text-[10px] text-gray-600 tracking-widest">
-                                    Emitido por BLIS CORP
+                                    Emitido por Xpand Capital
                                 </p>
                             </div>
                         </div>

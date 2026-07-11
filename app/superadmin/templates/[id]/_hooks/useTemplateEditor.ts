@@ -28,7 +28,7 @@ export function useTemplateEditor() {
     showHeader: true,
     showFooter: true,
     branding: {
-      name: 'BLIS Corp',
+      name: 'Xpand Capital',
       primaryColor: '#a89a00',
       secondaryColor: '#10B981',
       backgroundColor: '#000000',
@@ -219,4 +219,5 @@ export function useTemplateEditor() {
     isSectionVisible,
   };
 }
+
 

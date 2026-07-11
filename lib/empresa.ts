@@ -1,5 +1,5 @@
 export const DEFAULT_EMPRESA_ID = process.env.NEXT_PUBLIC_EMPRESA_ID || '6186f014-c8c7-4027-9f08-8acf2bae3eae'
-export const DEFAULT_EMPRESA_SLUG = process.env.NEXT_PUBLIC_EMPRESA_SLUG || 'blis-corp'
+export const DEFAULT_EMPRESA_SLUG = process.env.NEXT_PUBLIC_EMPRESA_SLUG || 'xpancapital'
 
 export interface Empresa {
   id: string

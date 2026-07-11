@@ -1,5 +1,5 @@
 /** 
- * ApiSunat Integration Library for Blis Corp
+ * ApiSunat Integration Library for Xpand Capital
  * Based on: https://docs.apisunat.pe/integracion/facturacion-electronica/factura/factura-simple
  */
 
@@ -71,3 +71,4 @@ export const sendToApiSunat = async (doc: ApiSunatDocument, token: string, env: 
         return { success: false, message: 'Error de red al conectar con ApiSunat' };
     }
 };
+

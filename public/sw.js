@@ -10,7 +10,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('push', (event) => {
   const data = event.data ? event.data.json() : {};
-  const titulo = data.titulo || 'BLIS Corp';
+  const titulo = data.titulo || 'Xpand Capital';
   const mensaje = data.mensaje || data.body || '';
   const url = data.url || '/superadmin/chat';
   const tipo = data.tipo || 'chat';

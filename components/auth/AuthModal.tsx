@@ -76,7 +76,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                         {mode === "login" ? "Bienvenido" : "Únete"}
                                     </h2>
                                     <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">
-                                        Acceso Corporativo Blis Corp
+                                        Acceso Corporativo Xpand Capital
                                     </p>
                                 </div>
                                 <button
@@ -177,3 +177,4 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         </AnimatePresence>
     );
 }
+

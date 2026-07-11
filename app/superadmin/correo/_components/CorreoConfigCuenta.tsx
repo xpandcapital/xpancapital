@@ -122,7 +122,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
             <label className="block text-[10px] font-medium text-gray-500 uppercase mb-1">Nombre para mostrar</label>
             <input
               type="text" value={nombre} onChange={e => setNombre(e.target.value)}
-              placeholder="Central Blis Corp"
+              placeholder="Central Xpand Capital"
               className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all"
             />
           </div>
@@ -197,7 +197,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
             <label className="block text-[10px] font-medium text-gray-500 uppercase mb-1">Firma HTML</label>
             <textarea
               value={firma} onChange={e => setFirma(e.target.value)}
-              placeholder='&lt;p&gt;Saludos,&lt;br&gt;&lt;b&gt;Central Blis Corp&lt;/b&gt;&lt;/p&gt;'
+              placeholder='&lt;p&gt;Saludos,&lt;br&gt;&lt;b&gt;Central Xpand Capital&lt;/b&gt;&lt;/p&gt;'
               className="w-full bg-white/[0.03] border border-white/10 rounded-xl p-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all resize-none h-20 font-mono"
             />
           </div>
@@ -241,4 +241,5 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
     </div>
   )
 }
+
 

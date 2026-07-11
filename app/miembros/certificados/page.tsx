@@ -26,7 +26,7 @@ export default function CertificadosPage() {
         <div className="space-y-10 px-4 md:px-8 pt-8 md:pt-8 w-full mx-auto pb-20">
             <div className="w-full mx-auto">
                 <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter leading-none">Mis Certificados</h1>
-                <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">Tus logros académicos y certificaciones obtenidas en Blis Corp.</p>
+                <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light max-w-xl">Tus logros académicos y certificaciones obtenidas en Xpand Capital.</p>
             </div>
 
             {loading ? (
@@ -128,3 +128,4 @@ export default function CertificadosPage() {
         </div>
     );
 }
+

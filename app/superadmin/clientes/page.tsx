@@ -328,7 +328,7 @@ export default function AdminClientes() {
         <div className="space-y-6 w-full mx-auto pb-20 px-4 md:px-8 pt-8 text-white">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-10">
                 <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-blis-red font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse"><Shield className="w-3.5 h-3.5" /> COMUNIDAD BLIS CORP PRO</div>
+                    <div className="flex items-center gap-2 text-blis-red font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse"><Shield className="w-3.5 h-3.5" /> COMUNIDAD XPAND CORP PRO</div>
                     <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">Administracion de Socios</h1>
                     <p className="text-gray-500 text-sm font-medium max-w-2xl">Gestiona el ecosistema de socios y monitorea el flujo de BlisCoins.</p>
                 </div>
@@ -522,3 +522,4 @@ export default function AdminClientes() {
         </div>
     );
 }
+

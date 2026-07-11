@@ -145,7 +145,7 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
                         {timeLeft > 0 ? 'PROCESANDO LECTURA' : '¡RECLAMAR RECOMPENSA!'}
                     </span>
                     <span className={`text-[14px] font-black ${timeLeft > 0 ? 'text-white/80' : 'text-black'}`}>
-                        {timeLeft > 0 ? `FALTAN ${timeLeft} SEG` : `+${article.rewardAmount} BLIS COINS`}
+                        {timeLeft > 0 ? `FALTAN ${timeLeft} SEG` : `+${article.rewardAmount} XPAND COINS`}
                     </span>
                 </div>
             </button>
@@ -446,7 +446,7 @@ function ArticleDetailPage() {
                                 </button>
                             </div>
                             <div className="mt-6 pt-5 border-t border-white/5">
-                                <p className="text-[10px] text-gray-600 font-mono uppercase tracking-widest">Sistema de Seguridad BLIS Corp</p>
+                                <p className="text-[10px] text-gray-600 font-mono uppercase tracking-widest">Sistema de Seguridad Xpand Capital</p>
                             </div>
                         </motion.div>
                     </div>
@@ -838,3 +838,5 @@ export default function ArticlePage() {
     if (!mounted) return <div className="min-h-screen bg-[#020202]" />;
     return <ArticleDetailPage />;
 }
+
+

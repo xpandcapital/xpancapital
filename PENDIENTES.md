@@ -1,4 +1,4 @@
-# BLIS CORP - LISTA DE PENDIENTES
+# XPAND CORP - LISTA DE PENDIENTES
 
 > Última actualización: 08 Abril 2026
 > Estado: En desarrollo
@@ -38,7 +38,7 @@
 
 ### 1.1 Base de Datos ✅
 - [x] Schema SQL creado y ejecutado
-- [x] Empresa BLIS CORP configurada (ID: 6186f014-c8c7-4027-9f08-8acf2bae3eae)
+- [x] Empresa XPAND CORP configurada (ID: 6186f014-c8c7-4027-9f08-8acf2bae3eae)
 - [x] Niveles de cliente creados
 - [x] Categorías de blog creadas
 - [x] Posts de prueba insertados

@@ -109,7 +109,7 @@ export const fetchRucData = async (ruc: string): Promise<PeruCustomerData> => {
   if (ruc === '10000000001') {
     return {
       success: true,
-      name: 'BLIS CORP PERU S.A.C.',
+      name: 'XPAND CORP PERU S.A.C.',
       ruc: '10000000001',
       address: 'Calle Los Negocios 456, San Isidro',
       department: 'LIMA',
@@ -216,3 +216,4 @@ export const fetchWhatsAppStatus = async (phone: string): Promise<{ success: boo
     return { success: false, message: error.message }
   }
 }
+

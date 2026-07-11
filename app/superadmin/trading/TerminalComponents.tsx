@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 // ==========================================
-// ESTILOS GLOBALES RE-ADAPTADOS AL TEMA BLIS-CORP
+// ESTILOS GLOBALES RE-ADAPTADOS AL TEMA XPAND-CORP
 // ==========================================
 export const globalStyles = `
   @keyframes scanLine { 
@@ -73,4 +73,5 @@ export const ToolButton = ({ icon, active, onClick, hoverColor = "hover:bg-blis-
       <div className="pointer-events-none">{icon}</div>
   </button>
 );
+
 

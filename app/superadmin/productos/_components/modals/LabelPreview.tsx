@@ -130,7 +130,7 @@ export function LabelPreview({
             >
               {type === 'qr' || type === 'web-qr' ? (
                 <QRCodeSVG
-                  value={type === 'web-qr' ? `https://bliscorp.com/shop/product/${product.id}` : product.sku}
+                  value={type === 'web-qr' ? `https://xpancapital.com/shop/product/${product.id}` : product.sku}
                   style={{ width: '100%', height: '100%', maxWidth: '100%', maxHeight: '100%' }}
                   level="H"
                   marginSize={0}

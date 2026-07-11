@@ -18,7 +18,7 @@ export function ContactPanel({ config, updateField }: ContactPanelProps) {
           type="email"
           value={config.contact_email}
           onChange={(v) => updateField('contact_email', v)}
-          placeholder="contacto@bliscorp.com"
+          placeholder="contacto@xpancapital.com"
         />
         <InputField
           label="Teléfono"
@@ -36,3 +36,4 @@ export function ContactPanel({ config, updateField }: ContactPanelProps) {
     </SectionCard>
   )
 }
+

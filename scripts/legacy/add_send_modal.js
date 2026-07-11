@@ -1,5 +1,5 @@
 const fs = require('fs');
-let code = fs.readFileSync('C:/Users/kevin/.gemini/antigravity/scratch/blis-corp/app/superadmin/mails/Mails.js', 'utf8');
+let code = fs.readFileSync('C:/Users/kevin/.gemini/antigravity/scratch/xpancapital/app/superadmin/mails/Mails.js', 'utf8');
 
 // 1. Add state variables for Send Modal
 const stateInsert = `  const [showExportHtml, setShowExportHtml] = useState(false);
@@ -95,3 +95,4 @@ const sendModalCode = `      {/* MODAL ENVIAR CORREO */}
                   )}
 
                   {campaignCon
+

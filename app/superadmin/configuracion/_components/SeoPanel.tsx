@@ -19,7 +19,7 @@ export function SeoPanel({ config, updateField, keywordsInput, setKeywordsInput 
         label="Título (meta)"
         value={config.meta_title}
         onChange={(v) => updateField('meta_title', v)}
-        placeholder="BLIS Corp | Luxury Tech Real Estate"
+        placeholder="Xpand Capital | Luxury Tech Real Estate"
       />
       <div className="space-y-1.5">
         <label className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">Descripción (meta)</label>
@@ -52,3 +52,4 @@ export function SeoPanel({ config, updateField, keywordsInput, setKeywordsInput 
     </SectionCard>
   )
 }
+

@@ -42,7 +42,7 @@ export default function ConfigPanel({
 
         {es_premium && coinsEnabled && (
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Precio (BLIS Coins)</label>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Precio (XPAND Coins)</label>
             <input
               type="number"
               value={precio_coins}
@@ -64,7 +64,7 @@ export default function ConfigPanel({
             <Coins className="w-3.5 h-3.5 text-gray-500" /> Sin recompensa de coins
           </label>
         </div>
-        <p className="text-[9px] text-gray-500 mt-1 ml-7">No se otorgarán BLIS Coins por leer este artículo.</p>
+        <p className="text-[9px] text-gray-500 mt-1 ml-7">No se otorgarán XPAND Coins por leer este artículo.</p>
         </>)}
 
         <div className="pt-2 border-t border-white/5">
@@ -89,3 +89,4 @@ export default function ConfigPanel({
     </div>
   );
 }
+

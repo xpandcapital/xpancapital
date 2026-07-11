@@ -31,7 +31,7 @@ BEGIN
   v_mensaje := v_productos || ' — $' || COALESCE(NEW.monto_usd, 0)::text || ' USD';
 
   IF NEW.monto_coins > 0 THEN
-    v_mensaje := v_mensaje || ' + ' || NEW.monto_coins::text || ' BLIS';
+    v_mensaje := v_mensaje || ' + ' || NEW.monto_coins::text || ' XPAND';
   END IF;
 
   v_mensaje := v_mensaje || ' — ' || COALESCE(NEW.metodo_pago, 'manual');
@@ -62,3 +62,4 @@ CREATE TRIGGER trigger_nueva_venta
 AFTER INSERT ON compras
 FOR EACH ROW
 EXECUTE FUNCTION notificar_nueva_venta();
+

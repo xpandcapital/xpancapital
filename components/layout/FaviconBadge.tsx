@@ -11,7 +11,7 @@ export function FaviconBadge() {
   const originalTitleRef = useRef<string>("")
 
   useEffect(() => {
-    originalTitleRef.current = document.title || "BLIS Corp"
+    originalTitleRef.current = document.title || "Xpand Capital"
 
     return () => {
       document.title = originalTitleRef.current
@@ -68,3 +68,4 @@ export function FaviconBadge() {
 
   return null
 }
+

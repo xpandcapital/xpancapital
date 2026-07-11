@@ -28,7 +28,7 @@ const TESTIMONIALS = [
     role: "Broker Senior · Perú",
     avatar: "FR",
     rating: 5,
-    text: "Los Ebooks de BLIS son los más completos del mercado. Lenguaje claro, casos reales y estrategias que funcionan desde el día uno.",
+    text: "Los Ebooks de XPAND son los más completos del mercado. Lenguaje claro, casos reales y estrategias que funcionan desde el día uno.",
     product: "Ebook Técnicas de Cierre",
     color: "from-sky-500/10",
   },
@@ -144,3 +144,4 @@ export function TestimonialsCarousel() {
     </section>
   );
 }
+

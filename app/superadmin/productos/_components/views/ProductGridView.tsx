@@ -7,7 +7,7 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import Image from "next/image"
 import type { Product, Category, Status } from '../../_types'
 
-const SITE_DOMAIN = 'blis-corp.com'
+const SITE_DOMAIN = 'xpancapital.org'
 
 interface ProductGridViewProps {
   products: Product[]
@@ -236,4 +236,5 @@ export const ProductGridView = React.memo(function ProductGridView({
     </div>
   )
 })
+
 

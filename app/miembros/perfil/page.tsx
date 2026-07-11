@@ -464,7 +464,7 @@ export default function ProfilePage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(socialData)
         }).catch(() => {})
-        showToast("¡Éxito! Tus datos han sido actualizados en la base de datos de Blis Corp.", "success");
+        showToast("¡Éxito! Tus datos han sido actualizados en la base de datos de Xpand Capital.", "success");
     };
 
     const handleChangePassword = async () => {
@@ -580,7 +580,7 @@ export default function ProfilePage() {
                         </span>
                     </div>
                     <p className="text-gray-400 font-medium text-xs sm:text-sm leading-relaxed max-w-xl">
-                        {user?.role || 'Miembro de Blis Corp'}
+                        {user?.role || 'Miembro de Xpand Capital'}
                     </p>
                     <div className="flex flex-wrap justify-center md:justify-start gap-2 sm:gap-4 mt-2">
                         <div className="bg-white/5 border border-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-500">
@@ -863,7 +863,7 @@ export default function ProfilePage() {
             {/* Coins Section */}
             <div className={`mt-12 space-y-6 ${!coinsEnabled ? 'hidden' : ''}`}>
                 <h2 className="text-lg font-black text-white uppercase tracking-widest px-4 flex items-center gap-3">
-                    <Coins className="w-5 h-5 text-amber-500" /> Blis Coins
+                    <Coins className="w-5 h-5 text-amber-500" /> Xpand Coins
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -925,7 +925,7 @@ export default function ProfilePage() {
                         <div className="text-center py-12">
                             <Sparkles className="w-12 h-12 text-gray-600 mx-auto mb-4" />
                             <p className="text-gray-500 text-sm">No hay transacciones aún</p>
-                            <p className="text-gray-600 text-xs mt-2">Lee artículos para ganar Blis Coins</p>
+                            <p className="text-gray-600 text-xs mt-2">Lee artículos para ganar Xpand Coins</p>
                         </div>
                     ) : (
                         <div className="space-y-3 max-h-[400px] overflow-y-auto">
@@ -1080,4 +1080,6 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+
 

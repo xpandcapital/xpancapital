@@ -48,7 +48,7 @@ const pages = [
   {
     slug: "aviso",
     title: "Aviso Legal",
-    description: "Información corporativa, registro mercantil y objeto social de BLIS CORP S.A.C.",
+    description: "Información corporativa, registro mercantil y objeto social de XPAND CORP S.A.C.",
     icon: <AlertTriangle className="w-8 h-8" />,
     color: "text-purple-400",
     bg: "bg-purple-500/5",
@@ -95,7 +95,7 @@ export default function LegalHubPage() {
             transition={{ delay: 0.2 }}
             className="text-gray-400 text-lg max-w-xl mx-auto"
           >
-            Toda la información legal de BLIS CORP S.A.C. en un solo lugar. Transparencia y cumplimiento para nuestros clientes en Perú y Ecuador.
+            Toda la información legal de XPAND CORP S.A.C. en un solo lugar. Transparencia y cumplimiento para nuestros clientes en Perú y Ecuador.
           </motion.p>
         </div>
 
@@ -139,8 +139,8 @@ export default function LegalHubPage() {
           className="mt-20 p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 text-center"
         >
           <p className="text-sm text-gray-500 max-w-2xl mx-auto">
-            BLIS CORP S.A.C. — Número de Partida Registral 11449191, Zona Registral N° XII, Arequipa, Perú.
-            Operaciones en Perú y Ecuador. La plataforma digital blis-corp.com se dedica exclusivamente a la
+            XPAND CORP S.A.C. — Número de Partida Registral 11449191, Zona Registral N° XII, Arequipa, Perú.
+            Operaciones en Perú y Ecuador. La plataforma digital xpancapital.org se dedica exclusivamente a la
             comercialización de contenido educativo digital. Las transacciones inmobiliarias se gestionan
             únicamente por canales presenciales a través de nuestro Oficial de Cumplimiento.
           </p>
@@ -151,3 +151,5 @@ export default function LegalHubPage() {
     </main>
   )
 }
+
+

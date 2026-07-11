@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xpancapital.org'
 
 export async function generateMetadata({
   params,
@@ -37,7 +37,7 @@ export async function generateMetadata({
         title: titulo,
         description: descripcion,
         url,
-        siteName: 'BLIS Corp',
+        siteName: 'Xpand Capital',
         type: 'website',
         ...(imagen && { images: [{ url: imagen, width: 1200, height: 630, alt: producto.nombre }] }),
       },
@@ -62,3 +62,4 @@ export default function ProductoLayout({
 }) {
   return children
 }
+

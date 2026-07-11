@@ -120,7 +120,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
-    // Check if BLISCOINS is globally enabled
+    // Check if XPANDCOINS is globally enabled
     useEffect(() => {
         fetch("/api/admin/formas-pago?public=1")
             .then(r => r.json())
@@ -278,7 +278,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         if (!user) return { success: false, error: 'Usuario no autenticado' };
 
         const coinPrice = product.precio_coins || Math.round((product.price || 0) * 10);
-        if (blisCoins < coinPrice) return { success: false, error: 'Saldo insuficiente de BLIS Coins' };
+        if (blisCoins < coinPrice) return { success: false, error: 'Saldo insuficiente de XPAND Coins' };
 
         try {
             // 1. Llamar checkout con método coins - crea orden, asigna cursos, envía email

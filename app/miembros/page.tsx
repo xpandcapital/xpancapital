@@ -37,7 +37,7 @@ export default function UserDashboard() {
         { icon: Package, label: "Productos Adquiridos", color: "text-purple-500", bg: "bg-purple-500/10" },
         { icon: Target, label: "Cursos Completados", color: "text-amber-500", bg: "bg-amber-500/10" },
         { icon: Play, label: "Curso Activo", color: "text-blue-500", bg: "bg-blue-500/10" },
-        { icon: Star, label: "BLISCOINS", color: "text-yellow-500", bg: "bg-yellow-500/10" },
+        { icon: Star, label: "XPANDCOINS", color: "text-yellow-500", bg: "bg-yellow-500/10" },
         { icon: TrendingUp, label: "Inversión Total", color: "text-emerald-500", bg: "bg-emerald-500/10" },
     ];
 
@@ -474,3 +474,4 @@ export default function UserDashboard() {
         </div>
     );
 }
+

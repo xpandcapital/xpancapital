@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP - SUPABASE CLIENT HELPERS
+// XPAND CORP - SUPABASE CLIENT HELPERS
 // Cliente tipado con patrones de seguridad y error handling
 // Usa @supabase/ssr para sincronizar sesión en cookies (compatible con middleware)
 // ⚠️ IMPORTANTE: Un solo singleton para toda la app. Múltiples instancias rompen las cookies.
@@ -210,7 +210,7 @@ export async function getProductos(empresaId: string, options?: {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// HELPERS PARA BLIS COINS
+// HELPERS PARA XPAND COINS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export async function getUserBalance(userId: string): Promise<Result<number>> {

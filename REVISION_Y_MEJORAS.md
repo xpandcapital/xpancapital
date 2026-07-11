@@ -233,7 +233,7 @@ npm install -D eslint-plugin-jsx-a11y
 ```typescript
 // app/layout.tsx
 export const metadata: Metadata = {
-  title: { default: 'BLIS Corp', template: '%s | BLIS Corp' },
+  title: { default: 'Xpand Capital', template: '%s | Xpand Capital' },
   description: '...',
   openGraph: {
     title: '...',
@@ -285,4 +285,4 @@ find app components lib -name "*.tsx" -size +50k
 ---
 
 *Documento generado: 2026-04-08*
-*BLIS Corp Development Team*
+*Xpand Capital Development Team*

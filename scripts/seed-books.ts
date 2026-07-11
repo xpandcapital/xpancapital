@@ -4,7 +4,7 @@
  */
 
 async function main2() {
-  const WP_API = "https://campus.blis-corp.com/wp-json/wp/v2";
+  const WP_API = "https://campus.xpancapital.org/wp-json/wp/v2";
   const { createClient } = await import("@supabase/supabase-js");
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,7 +35,7 @@ async function main2() {
     if (posts.length === 0) break;
 
     for (const post of posts) {
-      const autor = (post.categories || []).map((c: number) => authorMap.get(c) || "").filter(Boolean).join(", ") || "Blis Editorial";
+      const autor = (post.categories || []).map((c: number) => authorMap.get(c) || "").filter(Boolean).join(", ") || "Xpand Editorial";
       const html = post.content?.rendered || "";
       const pdfMatch = html.match(/href="([^"]*\.pdf[^"]*)"/i);
       const driveMatch = html.match(/drive\.google\.com\/file\/d\/([^/"']+)/);
@@ -77,3 +77,5 @@ async function main2() {
 }
 
 main2().catch((err) => { console.error("❌", err); process.exit(1); });
+
+

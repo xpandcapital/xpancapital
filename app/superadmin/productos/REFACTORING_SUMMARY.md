@@ -1,4 +1,4 @@
-# BLIS Corp - Productos Refactoring Summary
+# Xpand Capital - Productos Refactoring Summary
 
 ## Overview
 Successfully refactored the `app/superadmin/productos/page.tsx` from **2,957 lines** to **410 lines** (86% reduction).

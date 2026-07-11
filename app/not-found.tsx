@@ -61,10 +61,11 @@ export default function NotFound() {
         {/* Decorative line */}
         <div className="mt-16 flex items-center gap-4">
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/10">BLIS CORP</span>
+          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/10">XPAND CORP</span>
           <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         </div>
       </div>
     </div>
   )
 }
+

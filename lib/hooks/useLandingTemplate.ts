@@ -25,7 +25,7 @@ const DEFAULT_ORDER_BY_TIPO: Record<string, string[]> = {
 
 const DEFAULT_SECTIONS: TemplateSection = {
   hero: {
-    title1: "BLIS",
+    title1: "XPAND",
     title2: "CORP",
     subtitle: "Tu Próximo Gran Patrimonio",
     description: "Desarrollamos Macro-Lotes y Terrenos con alta plusvalía.",

@@ -67,7 +67,7 @@ export const DEFAULT_CONFIG: TemplateConfig = {
   showFooter: true,
   customFooter: null,
   branding: {
-    name: 'BLIS Corp',
+    name: 'Xpand Capital',
     primaryColor: '#a89a00',
     secondaryColor: '#10B981',
     backgroundColor: '#000000',
@@ -221,3 +221,4 @@ export function useTemplateByTipo(tipo: TipoContenido) {
 export function useTemplateBySlug(slug: string) {
   return useTemplate({ slug });
 }
+

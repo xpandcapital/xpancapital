@@ -87,7 +87,7 @@ export function LoginGeoTool() {
                 Cada vez que un usuario inicia sesión, registramos su país de origen. Si un usuario que normalmente accede desde Ecuador de repente inicia sesión desde México, Brasil o cualquier país nuevo, el sistema lo marca como <strong className="text-red-400">anómalo</strong> y genera una alerta. Esto permite detectar accesos no autorizados aunque las credenciales sean correctas.
               </p>
               <p className="text-[10px] text-gray-600 mt-2">
-                Ejemplo: admin@bliscorp.com siempre entra desde 🇪🇨 Ecuador. Si un atacante roba sus credenciales e inicia sesión desde 🇧🇷 Brasil, el sistema lo detecta inmediatamente.
+                Ejemplo: admin@xpancapital.com siempre entra desde 🇪🇨 Ecuador. Si un atacante roba sus credenciales e inicia sesión desde 🇧🇷 Brasil, el sistema lo detecta inmediatamente.
               </p>
             </div>
           </div>
@@ -165,3 +165,4 @@ export function LoginGeoTool() {
     </div>
   );
 }
+

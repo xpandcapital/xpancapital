@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP - TIPOS PARA CONTEXTOS
+// XPAND CORP - TIPOS PARA CONTEXTOS
 // Tipos unificados para todos los contexts de la aplicación
 // ═══════════════════════════════════════════════════════════════════════════════
 

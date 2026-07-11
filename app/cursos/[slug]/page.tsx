@@ -46,7 +46,7 @@ export default function CursoDetallePage() {
     const [openModules, setOpenModules] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        document.title = curso?.nombre ? `${curso.nombre} | BLIS Corp` : "Cargando curso...";
+        document.title = curso?.nombre ? `${curso.nombre} | Xpand Capital` : "Cargando curso...";
     }, [curso?.nombre]);
 
     useEffect(() => {

@@ -1,4 +1,4 @@
-# MANUAL DEL COPILOTO — BLIS CORP
+# MANUAL DEL COPILOTO — Xpand Capital
 
 > **Documento autocontenido** para una IA copiloto de desarrollo.  
 > Contiene **absolutamente todo** lo construido, resuelto, pendiente y documentado en este proyecto.  
@@ -8,12 +8,12 @@
 
 # 1. VISIÓN GENERAL Y ARQUITECTURA
 
-## 1.1 ¿Qué es BLIS Corp?
+## 1.1 ¿Qué es Xpand Capital?
 
 Plataforma SaaS **multi-tenant** para gestión inmobiliaria. Permite a cada empresa (tenant) gestionar:
 - Landing pages personalizables (editor de templates con 15+ secciones)
 - Sistema de leads y campañas de marketing
-- E-commerce con productos digitales/físicos, BLIS Coins (moneda virtual), pasarelas de pago
+- E-commerce con productos digitales/físicos, XPAND Coins (moneda virtual), pasarelas de pago
 - Cursos y certificados (LMS interno)
 - Proyectos inmobiliarios con lotes, contratos y sincronización Notion
 - Chat en tiempo real con IA
@@ -44,7 +44,7 @@ Plataforma SaaS **multi-tenant** para gestión inmobiliaria. Permite a cada empr
 ## 1.3 Estructura de Directorios
 
 ```
-blis-corp/
+xpancapital/
 ├── app/                          # Next.js App Router
 │   ├── (auth)/                   # Autenticación
 │   ├── (public)/                 # Páginas públicas
@@ -331,7 +331,7 @@ Todas las demás tablas referencian `empresas.id`.
 | `site_config` | Config del sitio | 30+ campos (branding, SEO, redes, footer, seguridad) |
 | `empresa_config` | Config por empresa | features toggle (blog, tienda, academia, referidos, coins, envíos) |
 | `roles` | Roles del sistema | nombre, label, permisos JSONB, color, orden |
-| `boveda_transacciones` | Transacciones BLIS Coins | tipo, monto, balance_antes, balance_despues |
+| `boveda_transacciones` | Transacciones XPAND Coins | tipo, monto, balance_antes, balance_despues |
 | `equipo_cursos` | Cursos asignados a empleados | advisor_id, curso_id, progreso, lecciones_completadas |
 | `equipo_productos` | Productos asignados a empleados | advisor_id, producto_id, estado |
 | `carritos` | Carrito de compras | user_id, items JSONB, total, subtotal, impuesto, descuento |
@@ -612,7 +612,7 @@ middleware.ts (Next.js)
 | POST | `/api/notion/sync-lot-payments` | Sincronizar pagos |
 | POST | `/api/notion/parse-ai` | Parsear con IA |
 
-## 4.14 BLIS Coins / Referidos
+## 4.14 XPAND Coins / Referidos
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -957,7 +957,7 @@ TemplateSidebar, ConfigPanel, EditorRouter, CaptureHeroEditor, SectionCard, Visi
 
 ### Catalog.tsx (391 líneas)
 - Tabs de categorías con contador de productos
-- Product cards con imagen, precio + BLISCOINS, botón "Ver"
+- Product cards con imagen, precio + XPANDCOINS, botón "Ver"
 - Layout especial horizontal para categoría "asesor"
 - Auto-scroll 4.5s por categoría en móvil
 
@@ -991,7 +991,7 @@ BlogPosts (grid/slider), BlogHero (carrusel 5 artículos), BlogPremium, CaptureF
 | Componente | Descripción |
 |------------|-------------|
 | `ProductGrid` | Cards con Shine sweep, badges, rating, botón carrito animado |
-| `CartSidebar` | Sidebar con spring animation, items, subtotal, BLISCOINS, checkout |
+| `CartSidebar` | Sidebar con spring animation, items, subtotal, XPANDCOINS, checkout |
 | `ShopHeroSlider` | Carrusel direccional con gradient mesh + orbe animado |
 | `ProductCategorySlider` | Scroll horizontal con snap, ProductCardInner con badges y favoritos |
 | `FlashDeals` | Countdown + barra progreso + auto-rotación 5s |
@@ -1056,7 +1056,7 @@ BlogPosts (grid/slider), BlogHero (carrusel 5 artículos), BlogPremium, CaptureF
 | `useMonedas()` | Supabase directo `monedas_config` + `tasas_cambio` | Tasas de cambio, refresh desde open.er-api.com |
 | `useCompras()` | GET `/api/compras?user_id=` | Compras con items anidados |
 | `useCampanas()` | GET/POST/PUT/DELETE `/api/campanas` | CRUD campañas (+ useAsesores para `/api/asesores`) |
-| `useCoins()` | `/api/coins/balance`, `/transactions`, `/add`, `/spend` | BLIS Coins |
+| `useCoins()` | `/api/coins/balance`, `/transactions`, `/add`, `/spend` | XPAND Coins |
 | `useBlog()` | GET/POST/PUT/DELETE `/api/blog` + `/api/storage` | Blog posts con SEO, premium, tags |
 | `useReferrals()` | GET/POST/PUT `/api/referidos` | Sistema de referidos |
 | `useUserStats()` | 3 APIs en paralelo | Stats calculados: productos, cursos, coins, inversión, plusvalía |
@@ -1235,7 +1235,7 @@ GEOBLOCK_SIMULATE_COUNTRY=PE
 |---------|-------------|--------|
 | Íconos SVG de marcas (118 íconos) | `github.com/glincker/thesvg` (`public/icons/`) | `scripts/download-brand-icon.ts` |
 | Plantillas de email (71) | Seed local | `scripts/seed-email-event-templates.ts` |
-| Libros (biblioteca) | WordPress API `campus.blis-corp.com` | `scripts/seed-books.ts` |
+| Libros (biblioteca) | WordPress API `campus.xpancapital.org` | `scripts/seed-books.ts` |
 
 ## 9.6 Scripts Disponibles
 
@@ -1496,5 +1496,7 @@ export function Component({ title, children }: Props) {
 
 ---
 
-*Documento generado el 29 de Mayo de 2026 para BLIS Corp — Equipo de Desarrollo*
+*Documento generado el 29 de Mayo de 2026 para Xpand Capital — Equipo de Desarrollo*
+
+
 

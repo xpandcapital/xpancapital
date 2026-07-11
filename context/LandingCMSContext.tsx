@@ -331,7 +331,7 @@ interface LandingCMSContextType {
 
 const DEFAULT_CMS_DATA: LandingCMSData = {
     hero: {
-        title1: "BLIS",
+        title1: "XPAND",
         title2: "CORP",
         subtitle: "",
         description: "",
@@ -692,3 +692,4 @@ export const useLandingCMS = () => {
     }
     return context;
 };
+

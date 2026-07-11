@@ -230,7 +230,7 @@ export function SecurityDashboard() {
           </div>
           <div>
             <h2 className="text-sm font-black uppercase tracking-tight text-white">Centro de Operaciones</h2>
-            <p className="text-[10px] text-gray-500">BLIS Corp · SOC v3.0 · Defensa Activa</p>
+            <p className="text-[10px] text-gray-500">Xpand Capital · SOC v3.0 · Defensa Activa</p>
           </div>
         </div>
         <div className="ml-auto flex items-center gap-1.5">
@@ -441,9 +441,10 @@ export function SecurityDashboard() {
             <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Perimetro activo</span>
             <span>{new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} UTC-5</span>
           </div>
-          <span>BLIS Corp · SOC v3.0 · Inteligencia de Amenazas</span>
+          <span>Xpand Capital · SOC v3.0 · Inteligencia de Amenazas</span>
         </div>
       </div>
     </div>
   )
 }
+

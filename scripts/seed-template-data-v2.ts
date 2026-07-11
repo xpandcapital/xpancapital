@@ -89,7 +89,7 @@ export function getTemplates({ hdr, spac, txt, btn, div, soc, ftr, buildTemplate
 
     buildTemplate('Certificado Emitido', 'curso_certificado_emitido',
       'Tu certificado de {{nombre_curso}} esta listo',
-      'Descarga tu certificado oficial avalado por BLIS Corp.',
+      'Descarga tu certificado oficial avalado por Xpand Capital.',
       [hdr(), spac(20),
         txt('Certificado disponible', { fontSize: 24, fontWeight: 'bold', align: 'center', textColor: '#059669', paddingTop: 0, paddingBottom: 4 }),
         txt('Tu certificado oficial ha sido generado y esta disponible para descarga inmediata. Este documento acredita tu formacion profesional.', { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
@@ -98,7 +98,7 @@ export function getTemplates({ hdr, spac, txt, btn, div, soc, ftr, buildTemplate
         spac(12),
         btn('Ver Certificado', '{{enlace_certificado}}', { paddingX: 40, paddingY: 16, fontSize: 16 }),
         spac(16),
-        txt('Comparte tu logro en redes sociales y etiqueta a @BlisCorp.', { fontSize: 13, textColor: '#9ca3af', align: 'center' }),
+        txt('Comparte tu logro en redes sociales y etiqueta a @XpandCapital.', { fontSize: 13, textColor: '#9ca3af', align: 'center' }),
         spac(8), div('#e5e7eb'), spac(8),
         soc(defaultNets), spac(8), ftr(), spac(12)]
     ),
@@ -242,10 +242,10 @@ export function getTemplates({ hdr, spac, txt, btn, div, soc, ftr, buildTemplate
     ),
 
     buildTemplate('Lead Convertido', 'lead_convertido_cliente',
-      '¡Bienvenido a la familia BLIS Corp, {{nombre_lead}}!',
+      '¡Bienvenido a la familia Xpand Capital, {{nombre_lead}}!',
       'Tu proceso de vinculacion ha sido exitoso.',
       [hdr(), spac(20),
-        txt('Bienvenido a BLIS Corp', { fontSize: 28, fontWeight: 'bold', align: 'center', textColor: '#059669', paddingTop: 0, paddingBottom: 4 }),
+        txt('Bienvenido a Xpand Capital', { fontSize: 28, fontWeight: 'bold', align: 'center', textColor: '#059669', paddingTop: 0, paddingBottom: 4 }),
         txt('Estamos felices de darte la bienvenida como nuevo cliente. Tu proceso de vinculacion ha sido exitoso y ya puedes acceder a todos los beneficios.', { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
         spac(8),
         txt('Tu asesor fue: {{nombre_asesor}}\nEmail: {{email_asesor}}', { fontSize: 14, textColor: '#6b7280', align: 'center' }),
@@ -423,7 +423,7 @@ export function getTemplates({ hdr, spac, txt, btn, div, soc, ftr, buildTemplate
   const comunicacion = [
     buildTemplate('Boletin / Newsletter', 'comunicacion_boletin',
       '{{titulo_boletin}}',
-      'Boletin informativo de BLIS Corp — {{fecha_actual}}.',
+      'Boletin informativo de Xpand Capital — {{fecha_actual}}.',
       [hdr(), spac(20),
         txt('{{titulo_boletin}}', { fontSize: 24, fontWeight: 'bold', align: 'center', textColor: '#111827', paddingTop: 0, paddingBottom: 4 }),
         txt('Te presentamos nuestro boletin informativo con las novedades, articulos y actualizaciones mas relevantes de este periodo.', { fontSize: 16, textColor: '#4b5563', align: 'center', paddingTop: 0 }),
@@ -680,3 +680,5 @@ export function getTemplates({ hdr, spac, txt, btn, div, soc, ftr, buildTemplate
 
   return { cursos, leads, admin, comunicacion, seguridad, documentos };
 }
+
+

@@ -86,7 +86,7 @@ export function ConfigPanel({
               ...prev,
               branding: { ...prev?.branding, name: v }
             }))} 
-            placeholder="BLIS Corp" 
+            placeholder="Xpand Capital" 
           />
           
           <h5 className="text-xs font-medium text-gray-500 mt-4 mb-2">Logos</h5>
@@ -462,6 +462,7 @@ export function ConfigPanel({
     </div>
   );
 }
+
 
 
 

@@ -1,6 +1,6 @@
 {
-  "name": "Blis-Corp Trading",
-  "short_name": "BlisCorp",
+  "name": "Xpand Capital Trading",
+  "short_name": "XpandCapital",
   "description": "Terminal de Trading de Alta Frecuencia e Interfaz Inmobiliaria de Lujo.",
   "scope": "/",
   "start_url": "/",
@@ -24,3 +24,5 @@
   "orientation": "portrait",
   "categories": ["finance", "business"]
 }
+
+

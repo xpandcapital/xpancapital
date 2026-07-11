@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS CORP - TIPOS DE BASE DE DATOS
+// XPAND CORP - TIPOS DE BASE DE DATOS
 // Generado automáticamente desde supabase_complete_schema.sql
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -171,7 +171,7 @@ export interface Profile {
   nivel_id?: string
   nivel?: NivelCliente
   
-  // Blis Coins
+  // Xpand Coins
   blis_coins: number
   coins_totales_ganados: number
   coins_totales_gastados: number
@@ -584,7 +584,7 @@ export interface CarritoAbandonado {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// BLIS COINS
+// XPAND COINS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export interface CoinsPaquete {

@@ -1,9 +1,9 @@
 /**
- * Script: Scraping de libros desde campus.blis-corp.com (WordPress REST API)
+ * Script: Scraping de libros desde campus.xpancapital.org (WordPress REST API)
  * Uso: npx tsx scripts/scrape-books.ts
  */
 
-const WP_API = "https://campus.blis-corp.com/wp-json/wp/v2";
+const WP_API = "https://campus.xpancapital.org/wp-json/wp/v2";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const BUCKET = "biblioteca-portadas";
@@ -66,7 +66,7 @@ function extractDownloadLink(post: WpPost): string {
   const driveMatch = html.match(/drive\.google\.com\/file\/d\/([^/"']+)/);
   if (driveMatch) return `https://drive.google.com/file/d/${driveMatch[1]}/view`;
   const anyLink = html.match(/href="(https?:\/\/[^"]+)"/i);
-  if (anyLink && !anyLink[1].includes("campus.blis-corp.com")) return anyLink[1];
+  if (anyLink && !anyLink[1].includes("campus.xpancapital.org")) return anyLink[1];
   return post.link;
 }
 
@@ -137,7 +137,7 @@ async function main() {
   console.log(`   Total: ${total} libros en ${totalPages} páginas`);
 
   for (const post of firstPage) {
-    const autor = post.categories.map((c) => authorMap.get(c) || "").filter(Boolean).join(", ") || "Blis Editorial";
+    const autor = post.categories.map((c) => authorMap.get(c) || "").filter(Boolean).join(", ") || "Xpand Editorial";
     allBooks.push({
       titulo: post.title.rendered,
       autor,
@@ -152,7 +152,7 @@ async function main() {
   for (let page = 2; page <= totalPages; page++) {
     const { posts } = await fetchPosts(page);
     for (const post of posts) {
-      const autor = post.categories.map((c) => authorMap.get(c) || "").filter(Boolean).join(", ") || "Blis Editorial";
+      const autor = post.categories.map((c) => authorMap.get(c) || "").filter(Boolean).join(", ") || "Xpand Editorial";
       allBooks.push({
         titulo: post.title.rendered,
         autor,
@@ -248,3 +248,5 @@ main().catch((err) => {
   console.error("❌ Error fatal:", err);
   process.exit(1);
 });
+
+

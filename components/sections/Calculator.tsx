@@ -115,7 +115,7 @@ export function Calculator() {
 
                     <div className="text-[11px] font-normal text-gray-400 flex items-start gap-4 p-5 border border-white/10 bg-white/5 rounded-2xl mx-auto w-full">
                         <ShieldCheck className="w-5 h-5 text-blis-red shrink-0 mt-0.5 opacity-80" />
-                        <p className="leading-relaxed">Proyecciones basadas en datos históricos de Blis Corp. Valores aproximados.</p>
+                        <p className="leading-relaxed">Proyecciones basadas en datos históricos de Xpand Capital. Valores aproximados.</p>
                     </div>
 
                     {/* Final Bottom Spacer to avoid cramping */}
@@ -157,7 +157,7 @@ export function Calculator() {
 
                         <div className="text-sm font-light text-gray-400 p-4 border border-[#209f89]/20 bg-[#209f89]/5 rounded-xl flex items-start gap-3">
                             <ShieldCheck className="w-5 h-5 text-[#209f89] flex-shrink-0 mt-0.5" />
-                            <p>Proyecciones basadas en datos históricos de Blis Corp. Valores exactos pueden variar por macro-proyecto y etapas de urbanización.</p>
+                            <p>Proyecciones basadas en datos históricos de Xpand Capital. Valores exactos pueden variar por macro-proyecto y etapas de urbanización.</p>
                         </div>
                     </motion.div>
 
@@ -299,4 +299,5 @@ export function Calculator() {
         </div>
     );
 }
+
 

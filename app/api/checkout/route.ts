@@ -52,7 +52,7 @@ async function sendWelcomeEmail(to: string, nombre: string, password: string, pr
     const productList = productos.map(p => `<li style="margin-bottom:6px;">✅ ${p}</li>`).join('');
 
     await transporter.sendMail({
-      from: `"BLIS Corp" <${process.env.SMTP_USER}>`,
+      from: `"Xpand Capital" <${process.env.SMTP_USER}>`,
       to,
       subject: '🎉 ¡Tu compra fue exitosa! Aquí está tu acceso',
       html: `
@@ -63,7 +63,7 @@ async function sendWelcomeEmail(to: string, nombre: string, password: string, pr
             
             <div style="text-align:center;margin-bottom:32px;">
               <div style="display:inline-block;background:#c9b500;padding:12px 24px;border-radius:12px;">
-                <span style="font-size:20px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">BLIS Corp</span>
+                <span style="font-size:20px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">Xpand Capital</span>
               </div>
             </div>
 
@@ -102,14 +102,14 @@ async function sendWelcomeEmail(to: string, nombre: string, password: string, pr
 
             <!-- CTA -->
             <div style="text-align:center;margin-bottom:32px;">
-              <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://blis-corp.com'}/miembros"
+              <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://xpancapital.org'}/miembros"
                 style="display:inline-block;background:#16a34a;color:#fff;text-decoration:none;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:2px;padding:16px 40px;border-radius:12px;">
                 Acceder a Mis Productos →
               </a>
             </div>
 
             <p style="text-align:center;color:#4b5563;font-size:11px;">
-              BLIS Corp · Si no realizaste esta compra, contáctanos de inmediato.
+              Xpand Capital · Si no realizaste esta compra, contáctanos de inmediato.
             </p>
           </div>
         </body>
@@ -409,10 +409,10 @@ export async function POST(request: NextRequest) {
         const asesor = asesoresWhatsApp.find((a: any) => a.id === asesorId)
 
         if (asesor?.telefono) {
-          const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blis-corp.com'
+          const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xpancapital.org'
           const E = (code: number) => String.fromCodePoint(code)
           const lines: string[] = []
-          lines.push(`${E(0x1F6D2)}  *NUEVO PEDIDO - BLIS Corp*`)
+          lines.push(`${E(0x1F6D2)}  *NUEVO PEDIDO - Xpand Capital*`)
           lines.push('')
           lines.push(`${E(0x1F464)}  *Cliente:* ${nombre || 'Invitado'}`)
           lines.push(`${E(0x1F4E7)}  ${email}`)
@@ -452,7 +452,7 @@ export async function POST(request: NextRequest) {
 
           lines.push('')
           lines.push(`${E(0x1F4B0)}  *Total:* $${(monto_usd || 0).toFixed(2)} USD`)
-          if (monto_coins > 0) lines.push(`${E(0x1FAB6)}  BLISCOINS: ${monto_coins}`)
+          if (monto_coins > 0) lines.push(`${E(0x1FAB6)}  XPANDCOINS: ${monto_coins}`)
           lines.push(`${E(0x1F4CB)}  *Orden:* ${orden.id.substring(0, 8)}`)
           lines.push('')
           lines.push('_Por favor coordina el pago con el cliente._')
@@ -481,7 +481,7 @@ export async function POST(request: NextRequest) {
       if (wpp) {
         const E = (code: number) => String.fromCodePoint(code)
         const lines: string[] = []
-        lines.push(`${E(0x1F4B0)}  *COMPROBANTE DE PAGO - BLIS Corp*`)
+        lines.push(`${E(0x1F4B0)}  *COMPROBANTE DE PAGO - Xpand Capital*`)
         lines.push('')
         lines.push(`${E(0x1F464)}  *Cliente:* ${nombre || 'Invitado'}`)
         lines.push(`${E(0x1F4E7)}  ${email}`)
@@ -702,4 +702,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+
 

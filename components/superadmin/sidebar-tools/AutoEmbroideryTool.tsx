@@ -243,7 +243,7 @@ export function AutoEmbroideryTool() {
               <span className="text-blis-red font-black text-sm">E</span>
             </div>
             <div>
-              <h2 className="text-sm font-black text-white uppercase tracking-wider">BLIS Bordado</h2>
+              <h2 className="text-sm font-black text-white uppercase tracking-wider">XPAND Bordado</h2>
               <p className="text-[10px] text-zinc-600 uppercase tracking-[0.3em] font-black">
                 {status === 'processing' ? 'Procesando' : status === 'done' ? 'Completado' : 'Error'}
               </p>
@@ -327,3 +327,4 @@ export function AutoEmbroideryTool() {
     </div>
   )
 }
+

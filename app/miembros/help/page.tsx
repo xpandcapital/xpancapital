@@ -84,7 +84,7 @@ export default function HelpPage() {
         <p className="text-gray-400 mb-6">Nuestro equipo está disponible 24/7 para ayudarte.</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a
-            href="mailto:soporte@blis-corp.com"
+            href="mailto:soporte@xpancapital.org"
             className="px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors"
           >
             Enviar Email

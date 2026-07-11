@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- BLIS CORP - AGREGAR COLUMNAS DE ORDEN Y VISIBILIDAD A TEMPLATES
+-- Xpand Capital - AGREGAR COLUMNAS DE ORDEN Y VISIBILIDAD A TEMPLATES
 -- Ejecutar PRIMERO antes del seed
 -- ═══════════════════════════════════════════════════════════════════════════════
 
@@ -55,7 +55,7 @@ VALUES (
                 { "icon": "Phone", "title": "Te contactaremos", "description": "Un asesor te llamará en las próximas 24 horas" },
                 { "icon": "Calendar", "title": "Agenda tu cita", "description": "Programa una visita al proyecto", "action": "Agendar", "link": "/contacto" }
             ],
-            "contactInfo": { "phone": "+51 999 999 999", "email": "contacto@bliscorp.com", "whatsapp": "51999999999" },
+            "contactInfo": { "phone": "+51 999 999 999", "email": "contacto@xpancapital.com", "whatsapp": "51999999999" },
             "accentColor": "#10B981"
         },
         "funnelCTA": {
@@ -80,8 +80,8 @@ VALUES (
     }',
     ARRAY['thankYouHero', 'thankYouNextSteps', 'funnelCTA', 'stats', 'footer'],
     '{"thankYouHero": true, "thankYouNextSteps": true, "funnelCTA": true, "stats": true, "footer": true}',
-    '¡Gracias! | BLIS Corp',
-    'Tu operación ha sido procesada exitosamente. BLIS Corp - Inmobiliaria de confianza.'
+    '¡Gracias! | Xpand Capital',
+    'Tu operación ha sido procesada exitosamente. Xpand Capital - Inmobiliaria de confianza.'
 ) ON CONFLICT (empresa_id, slug) DO UPDATE SET
     secciones = EXCLUDED.secciones,
     "sectionOrder" = EXCLUDED."sectionOrder",
@@ -184,7 +184,7 @@ VALUES (
     }',
     ARRAY['captureHero', 'funnelVideo', 'funnelBenefits', 'stats', 'funnelTestimonials', 'footer'],
     '{"captureHero": true, "funnelVideo": true, "funnelBenefits": true, "stats": true, "funnelTestimonials": true, "footer": true}',
-    'Registro de Inversores | BLIS Corp',
+    'Registro de Inversores | Xpand Capital',
     'Únete a la élite inmobiliaria y accede a proyectos exclusivos.'
 ) ON CONFLICT (empresa_id, slug) DO UPDATE SET
     secciones = EXCLUDED.secciones,
@@ -247,7 +247,7 @@ VALUES (
             "accentColor": "#B10D24"
         },
         "funnelBenefits": {
-            "title": "¿Por qué invertir con BLIS Corp?",
+            "title": "¿Por qué invertir con Xpand Capital?",
             "subtitle": "Ventajas Exclusivas",
             "accentColor": "#B10D24",
             "benefits": [
@@ -308,10 +308,11 @@ VALUES (
     }',
     ARRAY['funnelHero', 'funnelCountdown', 'funnelVideo', 'funnelBenefits', 'stats', 'funnelTestimonials', 'funnelPricing', 'funnelCTA', 'footer'],
     '{"funnelHero": true, "funnelCountdown": true, "funnelVideo": true, "funnelBenefits": true, "stats": true, "funnelTestimonials": true, "funnelPricing": true, "funnelCTA": true, "footer": true}',
-    'Oportunidad Exclusiva | BLIS Corp',
+    'Oportunidad Exclusiva | Xpand Capital',
     'Invierte en terrenos de alta plusvalía. Plusvalía garantizada del 200-400% en 3-5 años.'
 ) ON CONFLICT (empresa_id, slug) DO UPDATE SET
     secciones = EXCLUDED.secciones,
     "sectionOrder" = EXCLUDED."sectionOrder",
     "sectionVisibility" = EXCLUDED."sectionVisibility",
     actualizado_en = NOW();
+

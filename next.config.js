@@ -34,11 +34,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'blis-corp.com',
+        hostname: 'xpancapital.org',
       },
       {
         protocol: 'https',
-        hostname: 'campus.blis-corp.com',
+        hostname: 'campus.xpancapital.org',
       },
     ],
   },

@@ -36,7 +36,7 @@ export interface SiteConfig {
 
 const defaultConfig: SiteConfig = {
   id: '',
-  site_name: 'BLIS Corp',
+  site_name: 'Xpand Capital',
   site_tagline: 'Luxury Tech Real Estate',
   logo_horizontal: '/images/blis-logo.png',
   logo_vertical: '/images/logo-blis-vertical.png',
@@ -60,7 +60,7 @@ const defaultConfig: SiteConfig = {
   social_twitter: '',
   social_whatsapp: '',
   footer_description: '',
-  footer_copyright: '© 2026 BLIS Corp. Todos los derechos reservados.',
+  footer_copyright: '© 2026 Xpand Capital. Todos los derechos reservados.',
   contact_email: '',
   contact_phone: '',
   contact_address: ''
@@ -116,3 +116,4 @@ export function useSiteConfig() {
     updateConfig
   };
 }
+

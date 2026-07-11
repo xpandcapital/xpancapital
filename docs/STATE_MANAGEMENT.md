@@ -1,4 +1,4 @@
-# BLIS Corp - Guía de Gestión de Estado
+# Xpand Capital - Guía de Gestión de Estado
 
 > **Versión:** 1.0  
 > **Última actualización:** 2026-04-07  
@@ -443,5 +443,5 @@ Antes de agregar un nuevo estado, verificar:
 
 ---
 
-**Mantenido por:** BLIS Corp Development Team  
+**Mantenido por:** Xpand Capital Development Team  
 **Próxima revisión:** 2026-07-07

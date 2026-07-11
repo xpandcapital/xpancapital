@@ -1,4 +1,4 @@
-# BLIS CORP - Arquitectura del Sistema
+# Xpand Capital - Arquitectura del Sistema
 
 > **Versión:** 1.0  
 > **Última actualización:** 2026-04-08  
@@ -8,7 +8,7 @@
 
 ## Visión General
 
-**BLIS Corp** es una plataforma SaaS multi-tenant para gestión inmobiliaria con módulos integrados de e-commerce, marketing y educación digital.
+**Xpand Capital** es una plataforma SaaS multi-tenant para gestión inmobiliaria con módulos integrados de e-commerce, marketing y educación digital.
 
 ### Módulos Principales
 
@@ -387,7 +387,7 @@ LIVE_EVENT
   ├── sala_externa_url (Meet/Zoom)
   │
   ├── chat_habilitado: boolean
-  │   └── Chat propio de Blis Corp
+  │   └── Chat propio de Xpand Capital
   ││
   └── BlisCoins automáticos
         └── 1 BlisCoin por minuto de visualización
@@ -592,5 +592,5 @@ modulo/
 
 ---
 
-**Mantenido por:** BLIS Corp Development Team  
+**Mantenido por:** Xpand Capital Development Team  
 **Próxima revisión:** 2026-07-08

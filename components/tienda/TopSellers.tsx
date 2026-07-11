@@ -68,7 +68,7 @@ const TOP_PRODUCTS = [
   },
   {
     rank: 5,
-    title: "Mentoría Elite 1:1 con Experto BLIS",
+    title: "Mentoría Elite 1:1 con Experto XPAND",
     category: "Mentoría",
     price: 399,
     originalPrice: 700,
@@ -196,4 +196,5 @@ export function TopSellers() {
     </section>
   );
 }
+
 

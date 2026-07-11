@@ -6,7 +6,7 @@ import { logger } from '@/lib/utils/logger'
 import { verifyTurnstileToken } from '@/lib/bot-protection'
 import { cleanPhone } from '@/lib/phone'
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.blis-corp.com'
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.xpancapital.org'
 
 async function notifyAsesorViaWhatsApp(asesorId: string, lead: any) {
   try {
@@ -458,3 +458,4 @@ export async function PUT(request: NextRequest) {
     }, { status: 500 })
   }
 }
+

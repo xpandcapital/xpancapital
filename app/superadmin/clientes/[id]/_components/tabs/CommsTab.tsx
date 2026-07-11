@@ -34,7 +34,7 @@ export function CommsTab({ client, onUpdate }: CommsTabProps) {
                         <SearchableSelect
                             value={noticeContent.template}
                             onChange={v => {
-                                if (v === 'welcome') setNoticeContent({ template: v, title: '¡Bienvenido a Blis Corp!', message: `Hola ${client.firstName}, es un gusto tenerte.` });
+                                if (v === 'welcome') setNoticeContent({ template: v, title: '¡Bienvenido a Xpand Capital!', message: `Hola ${client.firstName}, es un gusto tenerte.` });
                                 else if (v === 'offer') setNoticeContent({ template: v, title: 'Oferta Exclusiva Gold', message: 'Tienes un 20% de descuento.' });
                                 else setNoticeContent({ template: 'custom', title: '', message: '' });
                             }}
@@ -125,3 +125,4 @@ export function CommsTab({ client, onUpdate }: CommsTabProps) {
         </div>
     );
 }
+

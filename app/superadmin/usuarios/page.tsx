@@ -83,7 +83,7 @@ export default function AdminUsers() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `usuarios_bliscorp_${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `usuarios_xpancapital_${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
     };
 
@@ -419,3 +419,4 @@ export default function AdminUsers() {
         </div>
     );
 }
+

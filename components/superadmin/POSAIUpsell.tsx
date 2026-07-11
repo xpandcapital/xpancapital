@@ -31,7 +31,7 @@ export const POSAIUpsell = ({ cart, catalog, onAddProduct }: POSAIUpsellProps) =
         try {
             const catalogInfo = catalog.map((p: any) => `ID:${p.id} | ${p.name} | ${p.category || 'General'} | $${p.price}`).join('\n');
             const cartInfo = cart.map(c => `${c.name} ($${c.price})`).join(', ');
-            const prompt = `Eres un asistente de ventas de Blis Corp. Tu tarea es analizar el catálogo REAL y el contexto del cliente para sugerir productos.
+            const prompt = `Eres un asistente de ventas de Xpand Capital. Tu tarea es analizar el catálogo REAL y el contexto del cliente para sugerir productos.
 
 ${cart.length > 0 ? `CARRITO ACTUAL: ${cartInfo}` : 'CLIENTE NO HA AGREGADO PRODUCTOS AÚN.'}
 CONTEXTO DEL CLIENTE (lo que quiere lograr): "${context || 'Sin contexto adicional'}"
@@ -222,3 +222,4 @@ Responde SOLO con este JSON:
         </div>
     );
 };
+

@@ -11,7 +11,7 @@ SET config = jsonb_build_object(
     'showHeader', true,
     'showFooter', true,
     'branding', jsonb_build_object(
-        'name', 'BLIS Corp',
+        'name', 'Xpand Capital',
         'primaryColor', '#B10D24',
         'secondaryColor', '#10B981',
         'backgroundColor', '#000000',

@@ -272,7 +272,7 @@ export default function BulkContractReconciliation() {
                             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 via-blue-500 to-amber-500" />
                             
                             <div className="text-center">
-                                <h2 className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.5em] mb-4 italic">Auditoría Financiera Blis Corp - Abril 2026</h2>
+                                <h2 className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.5em] mb-4 italic">Auditoría Financiera Xpand Capital - Abril 2026</h2>
                                 <h3 className="text-5xl font-black text-white tracking-tighter uppercase italic">{contract.clientName}</h3>
                                 {contract.promoterName && (
                                     <p className="text-[10px] font-medium text-zinc-500 mt-2">vs. {contract.promoterName}</p>
@@ -347,3 +347,4 @@ export default function BulkContractReconciliation() {
         </div>
     );
 }
+

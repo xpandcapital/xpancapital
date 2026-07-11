@@ -307,7 +307,7 @@ export function ConstructionLoader() {
               }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              BLIS
+              XPAND
             </motion.span>
             <motion.span
               className="inline-block text-blis-red ml-2"
@@ -399,3 +399,4 @@ export function ConstructionLoader() {
     </div>
   );
 }
+

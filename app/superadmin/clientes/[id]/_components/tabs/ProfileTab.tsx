@@ -108,7 +108,7 @@ export function ProfileTab({ client, onUpdate }: ProfileTabProps) {
             <div className="flex justify-between items-center border-b border-white/5 pb-6">
                 <div>
                     <h3 className="text-lg font-black uppercase tracking-tighter">Expediente del Socio</h3>
-                    <p className="text-[10px] text-gray-500 uppercase font-black">ID: BLIS-{client.id.toString().padStart(4, '0')} • Miembro desde {client.joined}</p>
+                    <p className="text-[10px] text-gray-500 uppercase font-black">ID: XPAND-{client.id.toString().padStart(4, '0')} • Miembro desde {client.joined}</p>
                 </div>
                 <div className="flex gap-3">
                     <a
@@ -308,3 +308,4 @@ export function ProfileTab({ client, onUpdate }: ProfileTabProps) {
         </div>
     );
 }
+

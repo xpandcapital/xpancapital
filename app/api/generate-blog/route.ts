@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         }
 
         const systemInstruction = `
-Eres un copywriter de ÉLITE y experto en educación financiera para Blis Corp. Tu misión es redactar un artículo MONUMENTALMENTE LARGO y EXHAUSTIVO (MÍNIMO 1200 PALABRAS). No es un artículo, es una CLASE MAESTRA.
+Eres un copywriter de ÉLITE y experto en educación financiera para Xpand Capital. Tu misión es redactar un artículo MONUMENTALMENTE LARGO y EXHAUSTIVO (MÍNIMO 1200 PALABRAS). No es un artículo, es una CLASE MAESTRA.
 
 REGLAS DE ORO (INNEGOCIABLES):
 1. **VERACIDAD Y CONTEXTO LOCAL (CRÍTICO)**: No inventes términos. Debes usar terminología real y legal del país en cuestión. 
@@ -99,14 +99,14 @@ REGLAS DE ORO (INNEGOCIABLES):
 Debes devolver un JSON exacto:
 {
   "title": "Un título magnético e informativo",
-  "seoTitle": "Título SEO para Blis Corp",
+  "seoTitle": "Título SEO para Xpand Capital",
   "seoDescription": "Meta description de máximo 160 caracteres, atractiva para Google",
   "excerpt": "Cliffhanger con emojis",
   "category": "Categoría",
   "tags": ["Tag1", "Tag2", "Tag3", "Tag4", "Tag5"],
   "content": "EL ARTÍCULO MONUMENTAL (1200+ PALABRAS) EN HTML. Usa <h2>, <h3>, <p>, <ul>, <li>, <strong>, <em> y los blockquotes morados."
 }
-IMPORTANTE: La precisión técnica combinada con la calidez de Kevin Valdez es lo que hace a Blis Corp único.
+IMPORTANTE: La precisión técnica combinada con la calidez de Kevin Valdez es lo que hace a Xpand Capital único.
 `;
 
         const userPrompt = `Título o Base inicial (únete de esto para mejorar el título final): ${title}
@@ -248,3 +248,4 @@ Idea Principal de lo que debe tratar el blog: ${idea}
         return NextResponse.json({ error: `Excepción crítica: ${error.message}` }, { status: 500 });
     }
 }
+

@@ -20,8 +20,8 @@ export const SOCIAL_CONFIG = {
 };
 
 export const DEFAULT_PALETTES = [
-  { id: 'bliscorp-dark', name: 'BlisCorp Dark', bodyBg: '#181818', containerBg: '#181818', text: '#e5e7eb', primary: '#e11d48' },
-  { id: 'bliscorp-light', name: 'BlisCorp Light', bodyBg: '#F3F4F6', containerBg: '#FFFFFF', text: '#333333', primary: '#e11d48' }
+  { id: 'xpancapital-dark', name: 'XpandCapital Dark', bodyBg: '#181818', containerBg: '#181818', text: '#e5e7eb', primary: '#e11d48' },
+  { id: 'xpancapital-light', name: 'XpandCapital Light', bodyBg: '#F3F4F6', containerBg: '#FFFFFF', text: '#333333', primary: '#e11d48' }
 ];
 
 export const FONTS = [
@@ -71,13 +71,13 @@ export const RECEIPT_DEMO = {
   producto_2_imagen: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=80&q=80',
   producto_3_nombre: 'Ebook: Técnicas de Cierre', producto_3_categoria: 'Ebooks', producto_3_precio: '29.00',
   producto_3_imagen: 'https://images.unsplash.com/photo-1542382257-80dedb725088?w=80&q=80',
-  subtotal: '367.00', descuento_monto: '29.00', cupon: 'BLIS40', total: '338.00',
+  subtotal: '367.00', descuento_monto: '29.00', cupon: 'XPAND40', total: '338.00',
   metodo_pago: 'Tarjeta de Crédito', fecha: new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' }),
 };
 
 export const INITIAL_SETTINGS = {
   bodyBg: '#F3F4F6', containerBg: '#FFFFFF', width: 600, fontFamily: 'Verdana, Geneva, sans-serif',
-  sectionGap: 0, activePaletteId: 'bliscorp-light', palettes: DEFAULT_PALETTES, subject: '', previewText: '', evento: 'ninguno'
+  sectionGap: 0, activePaletteId: 'xpancapital-light', palettes: DEFAULT_PALETTES, subject: '', previewText: '', evento: 'ninguno'
 };
 
 let _uidCounter = 0;
@@ -92,7 +92,7 @@ case 'text': return { text: 'Escribe tu texto aquí...', textColor: activePalett
     case 'columns': return { colCount: 2, bgColor: 'transparent', bgImageUrl: '', bgSize: 'cover', bgPosition: 'center', padding: 0, align: 'top', cols: [[], [], [], []] };
     case 'button': return { text: 'Haz clic aquí', url: '#', buttonBgColor: activePalette.primary, containerBgColor: 'transparent', bgImageUrl: '', bgSize: 'cover', bgPosition: 'center', textColor: '#ffffff', align: 'center', paddingY: 15, paddingX: 30, borderRadius: 6, fontSize: 16, fontWeight: 'bold', fontFamily: 'Verdana, Geneva, sans-serif', width: 'auto', borderStyle: 'none', borderWidth: 0, borderColor: activePalette.primary, padding: 0 };
     case 'divider': return { color: '#e5e7eb', height: 1, borderStyle: 'solid', bgColor: 'transparent', bgImageUrl: '', bgSize: 'cover', bgPosition: 'center', padding: 0 };
-    case 'social': return { align: 'center', bgColor: 'transparent', bgImageUrl: '', bgSize: 'cover', bgPosition: 'center', padding: 0, iconSize: 24, borderRadius: 8, networks: [ { id: getUniqueId('net'), network: 'facebook', url: 'https://facebook.com/bliscorp', iconColor: '#ffffff', bgColor: '#1877F2' }, { id: getUniqueId('net'), network: 'instagram', url: 'https://instagram.com/bliscorp', iconColor: '#ffffff', bgColor: '#E1306C' }, { id: getUniqueId('net'), network: 'linkedin', url: 'https://linkedin.com/company/bliscorp', iconColor: '#ffffff', bgColor: '#0077B5' }, { id: getUniqueId('net'), network: 'youtube', url: 'https://youtube.com/@bliscorp', iconColor: '#ffffff', bgColor: '#FF0000' }, { id: getUniqueId('net'), network: 'whatsapp', url: 'https://wa.me/51999999999', iconColor: '#ffffff', bgColor: '#25D366' }, { id: getUniqueId('net'), network: 'tiktok', url: 'https://tiktok.com/@bliscorp', iconColor: '#ffffff', bgColor: '#000000' } ] };
+    case 'social': return { align: 'center', bgColor: 'transparent', bgImageUrl: '', bgSize: 'cover', bgPosition: 'center', padding: 0, iconSize: 24, borderRadius: 8, networks: [ { id: getUniqueId('net'), network: 'facebook', url: 'https://facebook.com/xpancapital', iconColor: '#ffffff', bgColor: '#1877F2' }, { id: getUniqueId('net'), network: 'instagram', url: 'https://instagram.com/xpancapital', iconColor: '#ffffff', bgColor: '#E1306C' }, { id: getUniqueId('net'), network: 'linkedin', url: 'https://linkedin.com/company/xpancapital', iconColor: '#ffffff', bgColor: '#0077B5' }, { id: getUniqueId('net'), network: 'youtube', url: 'https://youtube.com/@xpancapital', iconColor: '#ffffff', bgColor: '#FF0000' }, { id: getUniqueId('net'), network: 'whatsapp', url: 'https://wa.me/51999999999', iconColor: '#ffffff', bgColor: '#25D366' }, { id: getUniqueId('net'), network: 'tiktok', url: 'https://tiktok.com/@xpancapital', iconColor: '#ffffff', bgColor: '#000000' } ] };
     case 'footer': return { text: '© 2026 Mi Empresa. Todos los derechos reservados.', bgColor: 'transparent', bgImageUrl: '', bgSize: 'cover', bgPosition: 'center', textColor: '#9ca3af', padding: 0, fontSize: 12, fontFamily: 'Verdana, Geneva, sans-serif', align: 'center' };
     default: return {};
   }
@@ -100,26 +100,26 @@ case 'text': return { text: 'Escribe tu texto aquí...', textColor: activePalett
 
 const activePal = DEFAULT_PALETTES[1];
 export const INITIAL_BLOCKS = [
-  { id: getUniqueId('header'), type: 'header', content: { ...getDefaultContent('header', activePal), logoUrl: 'https://cloud.blis-corp.com/d/ucnxd3PrBf1kMBJNb7sE09KUO8Nh6Y/MTMxfHBhZGRpbg.png', bgColor: '#181818', padding: 0, logoWidth: 600, align: 'center' } },
+  { id: getUniqueId('header'), type: 'header', content: { ...getDefaultContent('header', activePal), logoUrl: 'https://cloud.xpancapital.org/d/ucnxd3PrBf1kMBJNb7sE09KUO8Nh6Y/MTMxfHBhZGRpbg.png', bgColor: '#181818', padding: 0, logoWidth: 600, align: 'center' } },
   { id: getUniqueId('video'), type: 'video', content: { ...getDefaultContent('video', activePal), type: 'embed', embedCode: '<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px;"><iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" allowtransparency="true" src="https://adilo.bigcommand.com/watch/9qAchxvC" frameborder="0" allowfullscreen scrolling="no"></iframe></div>', padding: 0, bgColor: 'transparent' } },
   { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'Desarrollo inmobiliario de alta precisión y rentabilidad.', fontSize: 20, fontWeight: 'bold', padding: 0, align: 'center' } },
   { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'El futuro de las inversiones, hoy.', fontSize: 16, fontWeight: 'normal', padding: 0, align: 'center' } },
-  { id: getUniqueId('button'), type: 'button', content: { ...getDefaultContent('button', activePal), text: 'Visita Nuestra Web', url: 'https://blis-corp.com/', borderRadius: 8, paddingY: 15, paddingX: 40, align: 'center' } },
+  { id: getUniqueId('button'), type: 'button', content: { ...getDefaultContent('button', activePal), text: 'Visita Nuestra Web', url: 'https://xpancapital.org/', borderRadius: 8, paddingY: 15, paddingX: 40, align: 'center' } },
   { id: getUniqueId('spacer'), type: 'spacer', content: { height: 0, bgColor: 'transparent' } },
   { id: getUniqueId('columns'), type: 'columns', content: { colCount: 2, bgColor: 'transparent', padding: 0, align: 'top', cols: [
-    [ { id: getUniqueId('image'), type: 'image', content: { ...getDefaultContent('image', activePal), imageUrl: 'https://cloud.blis-corp.com/d/U8IMTGWOIWDocWpLEV8UBqILeC1rd4/MTIxfHBhZGRpbg.jpg', width: 100, borderRadius: 8, padding: 0 } }, { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'Academia BlisCorp', fontSize: 18, fontWeight: 'bold', padding: 0, align: 'left' } }, { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'Accede a nuestros cursos y plataforma de aprendizaje integral.', fontSize: 14, padding: 0, align: 'left', textColor: '#6b7280' } }, { id: getUniqueId('button'), type: 'button', content: { ...getDefaultContent('button', activePal), text: 'Campus Virtual', url: 'https://campus.blis-corp.com/', width: 'full', padding: 0, borderRadius: 6 } } ],
-    [ { id: getUniqueId('image'), type: 'image', content: { ...getDefaultContent('image', activePal), imageUrl: 'https://cloud.blis-corp.com/d/EfP8HeSuCuPi4gXCGMC70uhWknu7XB/MTIzfHBhZGRpbg.png', width: 100, borderRadius: 8, padding: 0 } }, { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'Kevin Valdez', fontSize: 18, fontWeight: 'bold', padding: 0, align: 'right' } }, { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'Master Admin. Gestión de proyectos y utilidades CRM.', fontSize: 14, padding: 0, align: 'right', textColor: '#6b7280' } }, { id: getUniqueId('button'), type: 'button', content: { ...getDefaultContent('button', activePal), text: 'Revista Oficial', url: 'https://revista.blis-corp.com/', width: 'full', padding: 0, buttonBgColor: '#181818', borderRadius: 6 } } ]
+    [ { id: getUniqueId('image'), type: 'image', content: { ...getDefaultContent('image', activePal), imageUrl: 'https://cloud.xpancapital.org/d/U8IMTGWOIWDocWpLEV8UBqILeC1rd4/MTIxfHBhZGRpbg.jpg', width: 100, borderRadius: 8, padding: 0 } }, { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'Academia XpandCapital', fontSize: 18, fontWeight: 'bold', padding: 0, align: 'left' } }, { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'Accede a nuestros cursos y plataforma de aprendizaje integral.', fontSize: 14, padding: 0, align: 'left', textColor: '#6b7280' } }, { id: getUniqueId('button'), type: 'button', content: { ...getDefaultContent('button', activePal), text: 'Campus Virtual', url: 'https://campus.xpancapital.org/', width: 'full', padding: 0, borderRadius: 6 } } ],
+    [ { id: getUniqueId('image'), type: 'image', content: { ...getDefaultContent('image', activePal), imageUrl: 'https://cloud.xpancapital.org/d/EfP8HeSuCuPi4gXCGMC70uhWknu7XB/MTIzfHBhZGRpbg.png', width: 100, borderRadius: 8, padding: 0 } }, { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'Kevin Valdez', fontSize: 18, fontWeight: 'bold', padding: 0, align: 'right' } }, { id: getUniqueId('text'), type: 'text', content: { ...getDefaultContent('text', activePal), text: 'Master Admin. Gestión de proyectos y utilidades CRM.', fontSize: 14, padding: 0, align: 'right', textColor: '#6b7280' } }, { id: getUniqueId('button'), type: 'button', content: { ...getDefaultContent('button', activePal), text: 'Revista Oficial', url: 'https://revista.xpancapital.org/', width: 'full', padding: 0, buttonBgColor: '#181818', borderRadius: 6 } } ]
   ] } },
   { id: getUniqueId('html'), type: 'html', content: { ...getDefaultContent('html', activePal), code: '<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d4477.301976500339!2d-78.64392665094853!3d-1.2807081613055047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2sec!4v1773959115276!5m2!1ses!2sec" width="100%" height="250" style="border:0; border-radius: 8px;" allowfullscreen="" loading="lazy"></iframe>', padding: 0 } },
   { id: getUniqueId('social'), type: 'social', content: { ...getDefaultContent('social', activePal), iconSize: 28, padding: 0, align: 'center', bgColor: '#FFFFFF', borderRadius: 8, networks: [
-    { id: getUniqueId('net'), network: 'facebook', url: 'https://www.facebook.com/BlisCorp', iconColor: '#ffffff', bgColor: '#181818' },
+    { id: getUniqueId('net'), network: 'facebook', url: 'https://www.facebook.com/XpandCapital', iconColor: '#ffffff', bgColor: '#181818' },
     { id: getUniqueId('net'), network: 'instagram', url: 'https://www.instagram.com/kevinvaldezdelacruz/', iconColor: '#ffffff', bgColor: '#e11d48' },
     { id: getUniqueId('net'), network: 'twitter', url: 'https://x.com/kevinVdlc/', iconColor: '#ffffff', bgColor: '#000000' },
     { id: getUniqueId('net'), network: 'whatsapp', url: 'https://wa.me/51934111007', iconColor: '#ffffff', bgColor: '#e11d48' },
-    { id: getUniqueId('net'), network: 'youtube', url: 'https://www.youtube.com/c/BlisCorp', iconColor: '#ffffff', bgColor: '#181818' }
+    { id: getUniqueId('net'), network: 'youtube', url: 'https://www.youtube.com/c/XpandCapital', iconColor: '#ffffff', bgColor: '#181818' }
   ] } },
-  { id: getUniqueId('footer'), type: 'footer', content: { ...getDefaultContent('footer', activePal), text: '© 2026 BlisCorp. Todos los derechos reservados.\nDesarrollo inmobiliario de alta precisión y rentabilidad.', padding: 0, textColor: '#9ca3af', fontSize: 12, align: 'center' } },
-  { id: getUniqueId('image'), type: 'image', content: { ...getDefaultContent('image', activePal), imageUrl: 'https://cloud.blis-corp.com/d/cIVlsARe6fHQu1wRMInI2YkUwjV2Va/MTMwfHBhZGRpbg.png', width: 40, borderRadius: 0, padding: 0, align: 'center' } }
+  { id: getUniqueId('footer'), type: 'footer', content: { ...getDefaultContent('footer', activePal), text: '© 2026 XpandCapital. Todos los derechos reservados.\nDesarrollo inmobiliario de alta precisión y rentabilidad.', padding: 0, textColor: '#9ca3af', fontSize: 12, align: 'center' } },
+  { id: getUniqueId('image'), type: 'image', content: { ...getDefaultContent('image', activePal), imageUrl: 'https://cloud.xpancapital.org/d/cIVlsARe6fHQu1wRMInI2YkUwjV2Va/MTMwfHBhZGRpbg.png', width: 40, borderRadius: 0, padding: 0, align: 'center' } }
 ];
 
 export const AVAILABLE_BLOCKS = [
@@ -136,3 +136,5 @@ export const AVAILABLE_BLOCKS = [
   { type: 'receipt', Icon: Grid, label: 'Productos' },
   { type: 'footer', Icon: AlignLeft, label: 'Pie de pág.' }
 ];
+
+
