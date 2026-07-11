@@ -157,14 +157,14 @@ export default function PostulanteEditPage() {
             </button>
           ))}
         </div>
-        <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+        <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
           <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         {TAB_CONFIG.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-blis-red text-white shadow-[0_4px_12px_rgba(190,11,60,0.4)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}>
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-blis-red text-white shadow-[0_4px_12px_rgba(213,193,8,0.4)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}>
             {tab.label}
           </button>
         ))}
@@ -375,7 +375,7 @@ export default function PostulanteEditPage() {
       </div>
 
       <div className="mt-6 flex justify-end">
-        <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+        <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
           <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar Cambios'}
         </button>
       </div>

@@ -127,7 +127,7 @@ function IzipayContent() {
           </div>
 
           {/* White Card Body */}
-          <div className="bg-white/90 backdrop-blur-xl border-x border-b border-white/20 rounded-b-3xl shadow-[0_20px_80px_rgba(0,0,0,0.5),0_0_60px_rgba(255,30,86,0.05)]">
+          <div className="bg-white/90 backdrop-blur-xl border-x border-b border-white/20 rounded-b-3xl shadow-[0_20px_80px_rgba(0,0,0,0.5),0_0_60px_rgba(245,225,0,0.05)]">
             <div className="p-6 md:p-10">
               {/* Header */}
               <div className="flex items-start gap-4 mb-10">
@@ -187,3 +187,4 @@ function IzipayContent() {
     </main>
   )
 }
+

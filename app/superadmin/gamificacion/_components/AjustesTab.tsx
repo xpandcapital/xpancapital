@@ -183,7 +183,7 @@ export function AjustesTab({ empresaId }: { empresaId: string }) {
                         key={entry.user_id}
                         onClick={() => handleSelectUser(entry)}
                         className={`cursor-pointer hover:bg-white/[0.02] transition-colors ${
-                          selectedUser?.user_id === entry.user_id ? 'bg-[#ff1e56]/5 border-l-2 border-l-[#ff1e56]' : ''
+                          selectedUser?.user_id === entry.user_id ? 'bg-[#f5e100]/5 border-l-2 border-l-[#f5e100]' : ''
                         }`}
                       >
                         <td className="px-4 py-3">
@@ -261,13 +261,13 @@ export function AjustesTab({ empresaId }: { empresaId: string }) {
                     type="number"
                     value={ajusteMonto}
                     onChange={e => setAjusteMonto(Math.max(1, parseInt(e.target.value) || 0))}
-                    className="w-20 bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-white text-sm focus:border-[#ff1e56] focus:outline-none"
+                    className="w-20 bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-white text-sm focus:border-[#f5e100] focus:outline-none"
                   />
                   <input
                     value={ajusteDesc}
                     onChange={e => setAjusteDesc(e.target.value)}
                     placeholder="Motivo del ajuste..."
-                    className="flex-1 bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-white text-sm focus:border-[#ff1e56] focus:outline-none placeholder-gray-600"
+                    className="flex-1 bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-white text-sm focus:border-[#f5e100] focus:outline-none placeholder-gray-600"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -322,3 +322,4 @@ export function AjustesTab({ empresaId }: { empresaId: string }) {
     </div>
   )
 }
+

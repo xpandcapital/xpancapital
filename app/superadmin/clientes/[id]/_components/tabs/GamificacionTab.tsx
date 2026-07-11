@@ -38,7 +38,7 @@ export function GamificacionTab({ client }: Props) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-6 h-6 text-[#ff1e56] animate-spin" />
+        <Loader2 className="w-6 h-6 text-[#f5e100] animate-spin" />
       </div>
     )
   }
@@ -56,7 +56,7 @@ export function GamificacionTab({ client }: Props) {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-zinc-900 border border-white/10 rounded-lg p-4">
-          <TrendingUp className="w-5 h-5 text-[#ff1e56] mb-2" />
+          <TrendingUp className="w-5 h-5 text-[#f5e100] mb-2" />
           <p className="text-2xl font-bold text-white">{stats.puntos.toLocaleString()}</p>
           <p className="text-xs text-gray-500">Puntos totales</p>
         </div>
@@ -123,7 +123,7 @@ export function GamificacionTab({ client }: Props) {
                 {p.descripcion && <span className="text-gray-600 text-xs ml-2">— {p.descripcion}</span>}
               </div>
               <div className="text-right">
-                <span className="text-[#ff1e56] text-sm font-medium">+{p.puntos}</span>
+                <span className="text-[#f5e100] text-sm font-medium">+{p.puntos}</span>
                 <p className="text-gray-600 text-xs">{new Date(p.creado_en).toLocaleDateString()}</p>
               </div>
             </div>
@@ -136,3 +136,4 @@ export function GamificacionTab({ client }: Props) {
     </div>
   )
 }
+

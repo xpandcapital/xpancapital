@@ -30,7 +30,7 @@ export function FunnelVideo({ data = {} }: FunnelVideoProps) {
     autoplay = false,
     showOverlay = true,
     overlayText = "",
-    accentColor = "#B10D24",
+    accentColor = "#a89a00",
     layout = "split"
   } = data;
 

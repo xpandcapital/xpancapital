@@ -211,7 +211,7 @@ export const TerminalStats = React.memo(function TerminalStats({
                         <td className="p-3 md:p-4">
                           {(t.candlesAtClose || t.candlesAtOpen) ? (
                             <button onClick={(e) => { e.stopPropagation(); const rc = t.candlesAtClose || t.candlesAtOpen || []; if (tradeReplayData && tradeReplayData.openTime === t.openTime) { onSetTradeReplayData(null); } else { onSetTradeReplayData({ candles: rc, entryPrice: t.entryPrice, closePrice: t.closePrice, type: t.type as string, symbol: t.symbol, openTime: t.openTime || Date.now(), closeTime: t.closeTime, openedBy: t.openedBy, closedBy: t.closedBy }); } }}
-                              className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg transition-all ${tradeReplayData && tradeReplayData.openTime === t.openTime ? 'bg-blis-red text-white shadow-[0_0_12px_rgba(190,11,60,0.4)]' : 'bg-white/5 text-gray-400 hover:bg-blis-red/20 hover:text-blis-red-neon border border-white/10'}`}>
+                              className={`text-[9px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg transition-all ${tradeReplayData && tradeReplayData.openTime === t.openTime ? 'bg-blis-red text-white shadow-[0_0_12px_rgba(213,193,8,0.4)]' : 'bg-white/5 text-gray-400 hover:bg-blis-red/20 hover:text-blis-red-neon border border-white/10'}`}>
                               {tradeReplayData && tradeReplayData.openTime === t.openTime ? '✕' : '▶'}
                             </button>
                           ) : <span className="text-[9px] text-white/20">—</span>}

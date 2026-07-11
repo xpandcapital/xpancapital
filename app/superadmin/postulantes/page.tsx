@@ -149,7 +149,7 @@ export default function AdminPostulantes() {
           <button onClick={exportCSV} className="flex-1 sm:flex-none bg-white/5 border border-white/10 text-white px-3 sm:px-5 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-wider text-[10px] sm:text-xs hover:bg-white/10 transition-colors flex items-center justify-center gap-2">
             <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" /><span className="hidden sm:inline">Exportar CSV</span><span className="sm:hidden">Exportar</span>
           </button>
-          <button onClick={openCreateModal} className="flex-1 sm:flex-none bg-blis-red text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-wider text-[10px] sm:text-xs hover:bg-white hover:text-black transition-colors flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+          <button onClick={openCreateModal} className="flex-1 sm:flex-none bg-blis-red text-white px-4 sm:px-6 py-3 sm:py-4 rounded-xl font-bold uppercase tracking-wider text-[10px] sm:text-xs hover:bg-white hover:text-black transition-colors flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
             <UserPlus className="w-3.5 h-3.5 sm:w-5 sm:h-5" /><span className="hidden sm:inline">Nuevo Postulante</span><span className="sm:hidden">Nuevo</span>
           </button>
         </div>

@@ -58,7 +58,7 @@ export const ROLE_LABELS: Record<string, string> = {
 }
 
 export const ROLE_COLORS: Record<string, string> = {
-  superadmin: '#be0b3c',
+  superadmin: '#d5c108',
   admin: '#f59e0b',
   editor: '#8b5cf6',
   cliente: '#3b82f6',

@@ -68,7 +68,7 @@ export default function EmpresaEditPage() {
         <button onClick={() => router.push('/superadmin/ajustes/empresas')} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-xl" style={{ backgroundColor: empresaForm.color_primario as string || '#be0b3c' }}>
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-xl" style={{ backgroundColor: empresaForm.color_primario as string || '#d5c108' }}>
           {(empresaForm.nombre as string || '').charAt(0).toUpperCase()}
         </div>
         <div>
@@ -76,14 +76,14 @@ export default function EmpresaEditPage() {
           <p className="text-xs text-gray-500 font-mono">/{empresaForm.slug as string || ''}</p>
         </div>
         <div className="flex-1" />
-        <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+        <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
           <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar'}
         </button>
       </div>
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         {TABS.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-blis-red text-white shadow-[0_4px_12px_rgba(190,11,60,0.4)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}>
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${activeTab === tab.id ? 'bg-blis-red text-white shadow-[0_4px_12px_rgba(213,193,8,0.4)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'}`}>
             {tab.icon}{tab.label}
           </button>
         ))}
@@ -112,7 +112,7 @@ export default function EmpresaEditPage() {
               { field: 'color_secundario', label: 'Color Secundario' },
               { field: 'color_acento', label: 'Color de Acento' },
             ].map(({ field, label: lbl }) => {
-              const val = (empresaForm[field] as string) || '#be0b3c'
+              const val = (empresaForm[field] as string) || '#d5c108'
               return (
                 <div key={field}>
                   <label className={label}>{lbl}</label>
@@ -234,7 +234,7 @@ export default function EmpresaEditPage() {
       </div>
 
       <div className="mt-6 flex justify-end">
-        <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+        <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
           <Save className="w-4 h-4" />{saving ? 'Guardando...' : 'Guardar Cambios'}
         </button>
       </div>

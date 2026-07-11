@@ -133,7 +133,7 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
                 disabled={timeLeft > 0 || isClaiming}
                 className={`px-8 py-4 rounded-[40px] flex items-center gap-4 backdrop-blur-xl border transition-all duration-300 ${
                     timeLeft > 0
-                        ? 'bg-[#BE0B3C]/90 border-red-400/30 text-white'
+                        ? 'bg-[#d5c108]/90 border-red-400/30 text-white'
                         : 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)]'
                 }`}
             >

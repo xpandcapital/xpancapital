@@ -23,7 +23,7 @@ export function CapturePopup() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
                         transition={{ duration: 0.4, ease: "easeOut" }}
-                        className="relative w-full max-w-lg glass-card rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(190,11,60,0.15)]"
+                        className="relative w-full max-w-lg glass-card rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(213,193,8,0.15)]"
                     >
                         {/* Close button */}
                         <button
@@ -88,3 +88,4 @@ export function CapturePopup() {
         </AnimatePresence>
     );
 }
+

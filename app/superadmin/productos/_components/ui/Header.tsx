@@ -48,7 +48,7 @@ export function Header({ onOpenModal, showTools, onToggleTools }: HeaderProps) {
             }}
             className={`p-4 sm:p-5 rounded-3xl transition-all flex items-center justify-center active:scale-95 bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-2xl ${
               showTools
-                ? 'bg-blis-red text-white shadow-[0_0_20px_rgba(190,11,60,0.3)]'
+                ? 'bg-blis-red text-white shadow-[0_0_20px_rgba(213,193,8,0.3)]'
                 : 'hover:bg-white/10 text-gray-400'
             }`}
             title="Configuración de Tienda"
@@ -60,7 +60,7 @@ export function Header({ onOpenModal, showTools, onToggleTools }: HeaderProps) {
 
         <button
           onClick={onOpenModal}
-          className="flex-1 sm:flex-initial sm:min-w-[180px] bg-blis-red text-white py-4 sm:py-5 px-6 sm:px-10 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-[0_10px_40px_rgba(190,11,60,0.3)]"
+          className="flex-1 sm:flex-initial sm:min-w-[180px] bg-blis-red text-white py-4 sm:py-5 px-6 sm:px-10 rounded-3xl font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 shadow-[0_10px_40px_rgba(213,193,8,0.3)]"
         >
           <Plus className="w-5 h-4" />
           <span>Producto</span>

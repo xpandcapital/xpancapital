@@ -126,7 +126,7 @@ export function EditorRouter({
           </div>
           <TextAreaField label="Subtítulo" value={sections.funnelHero?.subtitle || ''} onChange={(v) => updateSection('funnelHero', { subtitle: v })} rows={1} />
           <TextAreaField label="Descripción" value={sections.funnelHero?.description || ''} onChange={(v) => updateSection('funnelHero', { description: v })} rows={2} />
-          <ColorPicker label="Color de Acento" value={sections.funnelHero?.accentColor || '#B10D24'} onChange={(v) => updateSection('funnelHero', { accentColor: v })} />
+          <ColorPicker label="Color de Acento" value={sections.funnelHero?.accentColor || '#a89a00'} onChange={(v) => updateSection('funnelHero', { accentColor: v })} />
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
             <InputField label="URL Video (Embed)" value={sections.funnelHero?.videoUrl || ''} onChange={(v) => updateSection('funnelHero', { videoUrl: v })} placeholder="https://youtube.com/embed/..." />
             <ImageUpload value={sections.funnelHero?.backgroundImage || ''} onChange={(v) => updateSection('funnelHero', { backgroundImage: v })} folder="cms/funnel" />
@@ -154,7 +154,7 @@ export function EditorRouter({
           <InputField label="Fecha Fin (ISO)" value={sections.funnelCountdown?.endDate || ''} onChange={(v) => updateSection('funnelCountdown', { endDate: v })} placeholder="2026-12-31T23:59:59" />
           <InputField label="Mensaje Fin" value={sections.funnelCountdown?.endMessage || ''} onChange={(v) => updateSection('funnelCountdown', { endMessage: v })} placeholder="¡La oferta ha terminado!" />
           <InputField label="Mensaje Urgente" value={sections.funnelCountdown?.urgentMessage || ''} onChange={(v) => updateSection('funnelCountdown', { urgentMessage: v })} placeholder="¡Últimos lugares!" />
-          <ColorPicker label="Color de Acento" value={sections.funnelCountdown?.accentColor || '#B10D24'} onChange={(v) => updateSection('funnelCountdown', { accentColor: v })} />
+          <ColorPicker label="Color de Acento" value={sections.funnelCountdown?.accentColor || '#a89a00'} onChange={(v) => updateSection('funnelCountdown', { accentColor: v })} />
           <div className="grid grid-cols-4 gap-3 pt-4 border-t border-white/10">
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={sections.funnelCountdown?.showDays !== false} onChange={(e) => updateSection('funnelCountdown', { showDays: e.target.checked })} className="w-4 h-4" />
@@ -197,7 +197,7 @@ export function EditorRouter({
           <TextAreaField label="Descripción" value={sections.funnelVideo?.description || ''} onChange={(v) => updateSection('funnelVideo', { description: v })} rows={2} />
           <InputField label="URL Video (Embed)" value={sections.funnelVideo?.videoUrl || ''} onChange={(v) => updateSection('funnelVideo', { videoUrl: v })} placeholder="https://youtube.com/embed/..." />
           <ImageUpload value={sections.funnelVideo?.videoThumbnail || ''} onChange={(v) => updateSection('funnelVideo', { videoThumbnail: v })} folder="cms/funnel" />
-          <ColorPicker label="Color de Acento" value={sections.funnelVideo?.accentColor || '#B10D24'} onChange={(v) => updateSection('funnelVideo', { accentColor: v })} />
+          <ColorPicker label="Color de Acento" value={sections.funnelVideo?.accentColor || '#a89a00'} onChange={(v) => updateSection('funnelVideo', { accentColor: v })} />
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
             <InputField label="Texto Overlay" value={sections.funnelVideo?.overlayText || ''} onChange={(v) => updateSection('funnelVideo', { overlayText: v })} placeholder="Duración: 5 min" />
             <div>
@@ -224,7 +224,7 @@ export function EditorRouter({
             <InputField label="Título" value={sections.funnelBenefits?.title || ''} onChange={(v) => updateSection('funnelBenefits', { title: v })} />
             <InputField label="Subtítulo" value={sections.funnelBenefits?.subtitle || ''} onChange={(v) => updateSection('funnelBenefits', { subtitle: v })} />
           </div>
-          <ColorPicker label="Color de Acento" value={sections.funnelBenefits?.accentColor || '#B10D24'} onChange={(v) => updateSection('funnelBenefits', { accentColor: v })} />
+          <ColorPicker label="Color de Acento" value={sections.funnelBenefits?.accentColor || '#a89a00'} onChange={(v) => updateSection('funnelBenefits', { accentColor: v })} />
           
           <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Beneficios ({(sections.funnelBenefits?.benefits || []).length})</h4>
           <div className="space-y-3">
@@ -280,7 +280,7 @@ export function EditorRouter({
             <InputField label="Subtítulo" value={sections.stats?.subtitle || ''} onChange={(v) => updateSection('stats', { subtitle: v })} placeholder="En Números" />
           </div>
           <TextAreaField label="Descripción" value={sections.stats?.description || ''} onChange={(v) => updateSection('stats', { description: v })} rows={1} />
-          <ColorPicker label="Color de Acento" value={sections.stats?.accentColor || '#B10D24'} onChange={(v) => updateSection('stats', { accentColor: v })} />
+          <ColorPicker label="Color de Acento" value={sections.stats?.accentColor || '#a89a00'} onChange={(v) => updateSection('stats', { accentColor: v })} />
           
           <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Estadísticas ({(sections.stats?.stats || []).length})</h4>
           <div className="space-y-3">
@@ -349,7 +349,7 @@ export function EditorRouter({
             <InputField label="Título" value={sections.funnelTestimonials?.title || ''} onChange={(v) => updateSection('funnelTestimonials', { title: v })} />
             <InputField label="Subtítulo" value={sections.funnelTestimonials?.subtitle || ''} onChange={(v) => updateSection('funnelTestimonials', { subtitle: v })} />
           </div>
-          <ColorPicker label="Color de Acento" value={sections.funnelTestimonials?.accentColor || '#B10D24'} onChange={(v) => updateSection('funnelTestimonials', { accentColor: v })} />
+          <ColorPicker label="Color de Acento" value={sections.funnelTestimonials?.accentColor || '#a89a00'} onChange={(v) => updateSection('funnelTestimonials', { accentColor: v })} />
           
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
@@ -402,7 +402,7 @@ export function EditorRouter({
             <InputField label="Subtítulo" value={sections.funnelPricing?.subtitle || ''} onChange={(v) => updateSection('funnelPricing', { subtitle: v })} />
           </div>
           <TextAreaField label="Descripción" value={sections.funnelPricing?.description || ''} onChange={(v) => updateSection('funnelPricing', { description: v })} rows={1} />
-          <ColorPicker label="Color de Acento" value={sections.funnelPricing?.accentColor || '#B10D24'} onChange={(v) => updateSection('funnelPricing', { accentColor: v })} />
+          <ColorPicker label="Color de Acento" value={sections.funnelPricing?.accentColor || '#a89a00'} onChange={(v) => updateSection('funnelPricing', { accentColor: v })} />
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Layout</label>
             <SearchableSelect
@@ -486,7 +486,7 @@ export function EditorRouter({
           <InputField label="Título" value={sections.funnelCTA?.title || ''} onChange={(v) => updateSection('funnelCTA', { title: v })} placeholder="¿Listo para multiplicar tu patrimonio?" />
           <InputField label="Subtítulo" value={sections.funnelCTA?.subtitle || ''} onChange={(v) => updateSection('funnelCTA', { subtitle: v })} placeholder="Acción Inmediata" />
           <TextAreaField label="Descripción" value={sections.funnelCTA?.description || ''} onChange={(v) => updateSection('funnelCTA', { description: v })} rows={2} />
-          <ColorPicker label="Color de Acento" value={sections.funnelCTA?.accentColor || '#B10D24'} onChange={(v) => updateSection('funnelCTA', { accentColor: v })} />
+          <ColorPicker label="Color de Acento" value={sections.funnelCTA?.accentColor || '#a89a00'} onChange={(v) => updateSection('funnelCTA', { accentColor: v })} />
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
             <InputField label="Texto Botón Principal" value={sections.funnelCTA?.primaryBtnText || ''} onChange={(v) => updateSection('funnelCTA', { primaryBtnText: v })} placeholder="Inscribirme Ahora" />
             <LinkField label="Enlace Botón Principal" value={sections.funnelCTA?.primaryBtnLink || ''} onChange={(v) => updateSection('funnelCTA', { primaryBtnLink: v })} />
@@ -526,7 +526,7 @@ export function EditorRouter({
           <InputField label="Título" value={sections.content?.title || ''} onChange={(v) => updateSection('content', { title: v })} />
           <InputField label="Subtítulo" value={sections.content?.subtitle || ''} onChange={(v) => updateSection('content', { subtitle: v })} />
           <TextAreaField label="Descripción" value={sections.content?.description || ''} onChange={(v) => updateSection('content', { description: v })} rows={2} />
-          <ColorPicker label="Color de Acento" value={sections.content?.accentColor || '#B10D24'} onChange={(v) => updateSection('content', { accentColor: v })} />
+          <ColorPicker label="Color de Acento" value={sections.content?.accentColor || '#a89a00'} onChange={(v) => updateSection('content', { accentColor: v })} />
           <ImageUpload value={sections.content?.image || ''} onChange={(v) => updateSection('content', { image: v })} folder="cms/content" />
           <div className="mt-4">
             <label className="text-[10px] text-gray-400 uppercase mb-1 block">Posición de Imagen</label>
@@ -753,7 +753,7 @@ export function EditorRouter({
           <InputField label="Mensaje" value={sections.shopUrgency?.message || ''} onChange={(v) => updateSection('shopUrgency', { message: v })} placeholder="Aprovecha las ofertas por tiempo limitado" />
           <InputField label="Texto Finaliza En" value={sections.shopUrgency?.endText || ''} onChange={(v) => updateSection('shopUrgency', { endText: v })} placeholder="La oferta finaliza en:" />
           <InputField label="Fecha de Cierre" value={sections.shopUrgency?.endDate || ''} onChange={(v) => updateSection('shopUrgency', { endDate: v })} placeholder="2026-12-31T23:59:59" />
-          <ColorPicker label="Color de Fondo" value={sections.shopUrgency?.backgroundColor || '#B10D24'} onChange={(v) => updateSection('shopUrgency', { backgroundColor: v })} />
+          <ColorPicker label="Color de Fondo" value={sections.shopUrgency?.backgroundColor || '#a89a00'} onChange={(v) => updateSection('shopUrgency', { backgroundColor: v })} />
         </SectionCard>
       )}
 
@@ -1021,11 +1021,11 @@ export function EditorRouter({
                       ]}
                     />
                   </div>
-                  <ColorPicker label="Color" value={stat.color || '#be0b3c'} onChange={(v) => updateArrayItem('market', 'stats', idx, { color: v })} />
+                  <ColorPicker label="Color" value={stat.color || '#d5c108'} onChange={(v) => updateArrayItem('market', 'stats', idx, { color: v })} />
                 </div>
               </div>
             ))}
-            <button onClick={() => addArrayItem('market', 'stats', { title: '', value: '', desc: '', icon: 'TrendingUp', color: '#be0b3c' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
+            <button onClick={() => addArrayItem('market', 'stats', { title: '', value: '', desc: '', icon: 'TrendingUp', color: '#d5c108' })} className="w-full py-2 border border-dashed border-white/20 rounded-xl text-gray-400 hover:text-white text-xs flex items-center justify-center gap-1">
               <Plus className="w-3 h-3" /> Agregar Estadística
             </button>
           </div>
@@ -1326,3 +1326,4 @@ export function EditorRouter({
     </div>
   );
 }
+

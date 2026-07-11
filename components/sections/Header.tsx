@@ -158,7 +158,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                               <img
                                   src={logoHorizontal || siteConfig?.logoHorizontal || templateData?.config?.branding?.logoHorizontal}
                                   alt="Blis Corp Logo"
-                                  className="h-12 sm:h-14 lg:h-14 xl:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(190,11,60,0.5)] mx-auto lg:ml-0"
+                                  className="h-12 sm:h-14 lg:h-14 xl:h-16 w-auto object-contain drop-shadow-[0_0_15px_rgba(213,193,8,0.5)] mx-auto lg:ml-0"
                               />
                           ) : (
                               <span className="text-xl font-black text-white tracking-wider">BLIS CORP</span>
@@ -179,12 +179,12 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         onClick={(e) => handleLinkClick(e, link.href)}
                                         className={`text-[10px] lg:text-xs xl:text-sm 2xl:text-base font-black tracking-tighter lg:tracking-wide xl:tracking-widest uppercase transition-all duration-300 relative group
                                             ${active
-                                                ? 'text-blis-red drop-shadow-[0_0_8px_rgba(190,11,60,0.8)]'
+                                                ? 'text-blis-red drop-shadow-[0_0_8px_rgba(213,193,8,0.8)]'
                                                 : 'text-gray-300 hover:text-white'}`
                                         }
                                     >
                                         {link.name}
-                                        <span className={`absolute -bottom-2 left-0 h-0.5 bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)] transition-all duration-300 
+                                        <span className={`absolute -bottom-2 left-0 h-0.5 bg-blis-red shadow-[0_0_10px_rgba(213,193,8,0.8)] transition-all duration-300 
                                             ${active ? 'w-full' : 'w-0 group-hover:w-full'}`}
                                         />
                                     </Link>
@@ -395,7 +395,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                     {user.role === 'superadmin' ? 'SUPER ADMIN' : user.role === 'admin' ? 'ADMIN' : 'MIEMBRO'}
                                                 </p>
                                             </div>
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blis-red to-red-900 border border-white/20 flex items-center justify-center text-white font-black text-sm shadow-[0_4px_15px_rgba(190,11,60,0.4)] group-hover:scale-105 transition-all overflow-hidden shrink-0">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blis-red to-red-900 border border-white/20 flex items-center justify-center text-white font-black text-sm shadow-[0_4px_15px_rgba(213,193,8,0.4)] group-hover:scale-105 transition-all overflow-hidden shrink-0">
                                                 {user.profilePic ? (
                                                     <img src={user.profilePic} alt="Avatar" className="w-full h-full object-cover" />
                                                 ) : (
@@ -436,7 +436,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                             ) : !loading ? (
                                 <button
                                     onClick={() => router.push('/login')}
-                                    className="flex-shrink-0 px-5 py-2.5 rounded-full bg-blis-red/15 border border-blis-red/40 text-blis-red text-xs font-black uppercase tracking-widest hover:bg-blis-red hover:text-white hover:border-blis-red transition-all duration-300 shadow-[0_0_20px_rgba(190,11,60,0.15)] hover:shadow-[0_0_25px_rgba(190,11,60,0.4)]"
+                                    className="flex-shrink-0 px-5 py-2.5 rounded-full bg-blis-red/15 border border-blis-red/40 text-blis-red text-xs font-black uppercase tracking-widest hover:bg-blis-red hover:text-white hover:border-blis-red transition-all duration-300 shadow-[0_0_20px_rgba(213,193,8,0.15)] hover:shadow-[0_0_25px_rgba(213,193,8,0.4)]"
                                 >
                                     Ingresar
                                 </button>
@@ -582,7 +582,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                  <img
                                      src={logoVertical || siteConfig?.logoVertical || templateData?.config?.branding?.logoVertical}
                                      alt="Blis Corporation"
-                                     className={`w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.4)] ${user ? 'h-20 mb-2' : 'h-28 mb-4'}`}
+                                     className={`w-auto object-contain drop-shadow-[0_0_20px_rgba(213,193,8,0.4)] ${user ? 'h-20 mb-2' : 'h-28 mb-4'}`}
                                  />
                              ) : (
                                  <span className={`font-black text-white tracking-wider ${user ? 'text-2xl mb-2' : 'text-3xl mb-4'}`}>BLIS CORP</span>
@@ -657,8 +657,8 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                     className="w-full flex items-center justify-center gap-3"
                                                 >
                                                     <span>{link.name}</span>
-                                                    {active && <span className="absolute right-4 w-1.5 h-1.5 rounded-full bg-blis-red shadow-[0_0_8px_rgba(190,11,60,0.8)]" />}
-                                                    {active && <span className="absolute left-4 w-1.5 h-1.5 rounded-full bg-blis-red shadow-[0_0_8px_rgba(190,11,60,0.8)]" />}
+                                                    {active && <span className="absolute right-4 w-1.5 h-1.5 rounded-full bg-blis-red shadow-[0_0_8px_rgba(213,193,8,0.8)]" />}
+                                                    {active && <span className="absolute left-4 w-1.5 h-1.5 rounded-full bg-blis-red shadow-[0_0_8px_rgba(213,193,8,0.8)]" />}
                                                 </Link>
                                             </motion.div>
                                         );
@@ -671,7 +671,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         {['superadmin', 'admin', 'editor'].includes(user?.role || '') && (
                                             <button
                                                 onClick={() => handleNavigation('/superadmin')}
-                                                className="w-full py-3 rounded-lg bg-blis-red text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-[0_6px_15px_rgba(190,11,60,0.2)]"
+                                                className="w-full py-3 rounded-lg bg-blis-red text-white font-black uppercase tracking-[0.2em] text-[10px] shadow-[0_6px_15px_rgba(213,193,8,0.2)]"
                                             >
                                                 Panel Administrativo
                                             </button>
@@ -694,7 +694,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                 {!user && !loading && (
                                     <button
                                         onClick={() => { setMobileMenuOpen(false); router.push('/login'); }}
-                                        className="w-full mt-8 py-4 rounded-xl bg-blis-red/15 border border-blis-red/40 text-blis-red font-bold uppercase tracking-widest text-xs hover:bg-blis-red hover:text-white transition-all shadow-[0_0_20px_rgba(190,11,60,0.15)]"
+                                        className="w-full mt-8 py-4 rounded-xl bg-blis-red/15 border border-blis-red/40 text-blis-red font-bold uppercase tracking-widest text-xs hover:bg-blis-red hover:text-white transition-all shadow-[0_0_20px_rgba(213,193,8,0.15)]"
                                     >
                                         Iniciar Sesión
                                     </button>
@@ -726,3 +726,4 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
         </>
     )
 }
+

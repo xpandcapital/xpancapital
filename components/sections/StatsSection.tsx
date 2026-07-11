@@ -81,8 +81,8 @@ function StatSparklineCard({ stat, index }: { stat: Stat; index: number }) {
           <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`} className="overflow-visible">
             <defs>
               <linearGradient id={`sg-${index}`} x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="rgba(255,30,86,0.1)" />
-                <stop offset="100%" stopColor="rgba(255,30,86,0.9)" />
+                <stop offset="0%" stopColor="rgba(245,225,0,0.1)" />
+                <stop offset="100%" stopColor="rgba(245,225,0,0.9)" />
               </linearGradient>
             </defs>
             {/* Área bajo la curva */}
@@ -98,7 +98,7 @@ function StatSparklineCard({ stat, index }: { stat: Stat; index: number }) {
             <motion.path
               d={pathD}
               fill="none"
-              stroke="#ff1e56"
+              stroke="#f5e100"
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -107,7 +107,7 @@ function StatSparklineCard({ stat, index }: { stat: Stat; index: number }) {
               viewport={{ once: true }}
               transition={{ duration: 1.2, delay: 0.2 + index * 0.1, ease: "easeOut" }}
               style={{
-                filter: "drop-shadow(0 0 4px rgba(255,30,86,0.7))",
+                filter: "drop-shadow(0 0 4px rgba(245,225,0,0.7))",
               }}
             />
             {/* Puntos críticos (peak glow) */}
@@ -117,13 +117,13 @@ function StatSparklineCard({ stat, index }: { stat: Stat; index: number }) {
                 cx={i * (svgW / (sparkData.length - 1))}
                 cy={svgH - (v / maxVal) * svgH}
                 r={v === maxVal ? 2.5 : 0}
-                fill="#ff1e56"
+                fill="#f5e100"
                 initial={{ opacity: 0, scale: 0 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 1 + index * 0.1, duration: 0.3 }}
                 style={{
-                  filter: "drop-shadow(0 0 6px rgba(255,30,86,1))",
+                  filter: "drop-shadow(0 0 6px rgba(245,225,0,1))",
                 }}
               />
             ))}
@@ -146,7 +146,7 @@ export function StatsSection({ data = {} }: StatsSectionProps) {
       { value: 10, label: "Años", icon: "Calendar" },
       { value: 15, prefix: "$", suffix: "M+", label: "Vendidos", icon: "TrendingUp" }
     ],
-    accentColor = "#B10D24",
+    accentColor = "#a89a00",
     layout = "grid",
     animated = true,
     showIcons = true
@@ -283,7 +283,7 @@ export function StatsSection({ data = {} }: StatsSectionProps) {
     <section ref={gridSectionRef} className="py-20 md:py-32 bg-zinc-950 relative overflow-hidden">
       {/* Aura gradiente pulsante */}
       <motion.div
-        style={{ opacity: glowOpacity, background: "radial-gradient(ellipse at 50% 40%, rgba(255,30,86,0.15) 0%, transparent 60%)" }}
+        style={{ opacity: glowOpacity, background: "radial-gradient(ellipse at 50% 40%, rgba(245,225,0,0.15) 0%, transparent 60%)" }}
         className="absolute inset-0 pointer-events-none z-0"
       />
       <div className="w-full max-w-7xl mx-auto px-4 md:px-8 relative z-10">
@@ -376,3 +376,4 @@ function useInView(ref: React.RefObject<HTMLElement | null>, options?: { once?: 
 
   return isInView;
 }
+

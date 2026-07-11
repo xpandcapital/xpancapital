@@ -236,7 +236,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         start_date: new Date().toISOString().split('T')[0],
         end_date: null,
         logo_url: null,
-        primary_color: '#be0b3c',
+        primary_color: '#d5c108',
         secondary_color: null,
         signature_month: '2026-04',
         escritura_month: '2027-01',
@@ -429,3 +429,4 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     </ProjectContext.Provider>
   );
 }
+

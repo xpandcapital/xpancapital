@@ -322,7 +322,7 @@ export default function UserDashboard() {
                                             )}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
+                                                <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(213,193,8,0.6)]">
                                                     <Play className="w-5 h-5 text-white fill-white ml-0.5" />
                                                 </div>
                                             </div>
@@ -335,7 +335,7 @@ export default function UserDashboard() {
                                                     <motion.div
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${course.progress}%` }}
-                                                        className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]"
+                                                        className="h-full bg-blis-red shadow-[0_0_10px_rgba(213,193,8,0.8)]"
                                                     />
                                                 </div>
                                             </div>
@@ -369,7 +369,7 @@ export default function UserDashboard() {
                                             )}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)]">
+                                                <div className="w-12 h-12 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(213,193,8,0.6)]">
                                                     <Play className="w-5 h-5 text-white fill-white ml-0.5" />
                                                 </div>
                                             </div>
@@ -388,7 +388,7 @@ export default function UserDashboard() {
                                                     <motion.div
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${course.progress}%` }}
-                                                        className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]"
+                                                        className="h-full bg-blis-red shadow-[0_0_10px_rgba(213,193,8,0.8)]"
                                                     />
                                                 </div>
                                             </div>
@@ -457,7 +457,7 @@ export default function UserDashboard() {
                     </div>
 
                     {/* Pro Insight Card */}
-                    <div className="bg-gradient-to-br from-blis-red to-red-900 p-8 rounded-[2rem] shadow-[0_20px_40px_rgba(190,11,60,0.2)] text-white relative overflow-hidden group">
+                    <div className="bg-gradient-to-br from-blis-red to-red-900 p-8 rounded-[2rem] shadow-[0_20px_40px_rgba(213,193,8,0.2)] text-white relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-20 transform translate-x-4 -translate-y-4 group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform">
                             <Star className="w-24 h-24 stroke-[2px]" />
                         </div>

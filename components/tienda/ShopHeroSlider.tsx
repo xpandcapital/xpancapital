@@ -247,7 +247,7 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
                                 initial={{ height: "0%" }}
                                 animate={{ height: "100%" }}
                                 transition={{ duration: 5, ease: "linear" }}
-                                className="absolute top-0 left-0 w-full bg-blis-red shadow-[0_0_15px_rgba(190,11,60,0.8)]"
+                                className="absolute top-0 left-0 w-full bg-blis-red shadow-[0_0_15px_rgba(213,193,8,0.8)]"
                             />
                         )}
                         {idx < currentIndex && <div className="absolute inset-0 bg-white/60" />}
@@ -257,4 +257,5 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
         </div>
     );
 }
+
 

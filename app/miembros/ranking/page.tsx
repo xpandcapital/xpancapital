@@ -22,7 +22,7 @@ export default function RankingPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#ff1e56] animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#f5e100] animate-spin" />
       </div>
     )
   }
@@ -47,7 +47,7 @@ export default function RankingPage() {
                 key={entry.user_id}
                 variants={item}
                 className={`flex items-center gap-4 px-4 py-3 border-b border-gray-800/50 last:border-b-0 hover:bg-gray-800/30 transition-colors ${
-                  entry.user_id === user?.id ? 'bg-[#ff1e56]/5 border-l-2 border-l-[#ff1e56]' : ''
+                  entry.user_id === user?.id ? 'bg-[#f5e100]/5 border-l-2 border-l-[#f5e100]' : ''
                 }`}
               >
                 <span className={`text-sm font-bold w-8 ${
@@ -70,12 +70,12 @@ export default function RankingPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-sm font-medium truncate">
                     {entry.nombre} {entry.apellido || ''}
-                    {entry.user_id === user?.id && <span className="text-[#ff1e56] ml-1 text-xs">(Tú)</span>}
+                    {entry.user_id === user?.id && <span className="text-[#f5e100] ml-1 text-xs">(Tú)</span>}
                   </p>
                   <p className="text-gray-500 text-xs">Nivel {entry.nivel}</p>
                 </div>
 
-                <p className="text-[#ff1e56] font-semibold text-sm">{entry.puntos.toLocaleString()} pts</p>
+                <p className="text-[#f5e100] font-semibold text-sm">{entry.puntos.toLocaleString()} pts</p>
               </motion.div>
             ))}
             {top10.length === 0 && (
@@ -94,7 +94,7 @@ export default function RankingPage() {
                   key={entry.user_id}
                   variants={item}
                   className={`flex items-center gap-4 px-4 py-3 border-b border-gray-800/50 last:border-b-0 hover:bg-gray-800/30 transition-colors ${
-                    entry.user_id === user?.id ? 'bg-[#ff1e56]/5 border-l-2 border-l-[#ff1e56]' : ''
+                    entry.user_id === user?.id ? 'bg-[#f5e100]/5 border-l-2 border-l-[#f5e100]' : ''
                   }`}
                 >
                   <span className="text-sm text-gray-500 font-bold w-8">#{entry.posicion}</span>
@@ -108,11 +108,11 @@ export default function RankingPage() {
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-sm font-medium truncate">
                       {entry.nombre} {entry.apellido || ''}
-                      {entry.user_id === user?.id && <span className="text-[#ff1e56] ml-1 text-xs">(Tú)</span>}
+                      {entry.user_id === user?.id && <span className="text-[#f5e100] ml-1 text-xs">(Tú)</span>}
                     </p>
                     <p className="text-gray-500 text-xs">Nivel {entry.nivel}</p>
                   </div>
-                  <p className="text-[#ff1e56] font-semibold text-sm">{entry.puntos.toLocaleString()} pts</p>
+                  <p className="text-[#f5e100] font-semibold text-sm">{entry.puntos.toLocaleString()} pts</p>
                 </motion.div>
               ))}
             </div>
@@ -122,3 +122,4 @@ export default function RankingPage() {
     </div>
   )
 }
+

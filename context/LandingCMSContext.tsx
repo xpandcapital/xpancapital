@@ -446,7 +446,7 @@ const DEFAULT_SITE_CONFIG = {
     logoHorizontal: '',
     logoVertical: '',
     favicon: '/favicon.ico',
-    primaryColor: '#B10D24',
+    primaryColor: '#a89a00',
     secondaryColor: '#10B981',
     socialInstagram: '',
     socialFacebook: '',

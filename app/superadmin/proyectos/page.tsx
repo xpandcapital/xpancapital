@@ -12,7 +12,7 @@ const EMPTY_FORM: ProjectFormData = {
   name: '', id: '', status: 'EN PLANOS', website: '', location: '',
   description: '', cover_image: '', gallery_images: [],
   start_date: new Date().toISOString().split('T')[0], end_date: '',
-  logo_url: '', primary_color: '#be0b3c', secondary_color: ''
+  logo_url: '', primary_color: '#d5c108', secondary_color: ''
 }
 
 export default function AdminProjects() {
@@ -74,7 +74,7 @@ export default function AdminProjects() {
       description: formData.description || null, cover_image: formData.cover_image || null,
       gallery_images: formData.gallery_images, start_date: formData.start_date || null,
       end_date: formData.end_date || null, logo_url: formData.logo_url || null,
-      primary_color: formData.primary_color || '#be0b3c', secondary_color: formData.secondary_color || null,
+      primary_color: formData.primary_color || '#d5c108', secondary_color: formData.secondary_color || null,
       is_active: true, order_index: editingProject ? editingProject.order_index : 0,
     }
     const result = await saveProject(projectData, editingProject)
@@ -99,7 +99,7 @@ export default function AdminProjects() {
       gallery_images: project.gallery_images || [],
       start_date: project.start_date || new Date().toISOString().split('T')[0],
       end_date: project.end_date || '', logo_url: project.logo_url || '',
-      primary_color: project.primary_color || '#be0b3c', secondary_color: project.secondary_color || ''
+      primary_color: project.primary_color || '#d5c108', secondary_color: project.secondary_color || ''
     })
     setShowModal(true)
   }
@@ -183,3 +183,4 @@ export default function AdminProjects() {
     </div>
   )
 }
+

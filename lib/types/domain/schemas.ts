@@ -179,7 +179,7 @@ export const projectSchema = z.object({
   end_date: dateStringSchema.optional().nullable(),
   
   logo_url: z.string().url().optional().nullable(),
-  primary_color: z.string().default('#be0b3c'),
+  primary_color: z.string().default('#d5c108'),
   secondary_color: z.string().optional().nullable(),
   
   signature_month: dateStringSchema.optional().nullable(),

@@ -22,7 +22,7 @@ export function EmpresaCard({ empresa, onDelete, onViewUsers, deleting, mainEmpr
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-lg" style={{ backgroundColor: empresa.color_primario || '#be0b3c' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-lg" style={{ backgroundColor: empresa.color_primario || '#d5c108' }}>
               {empresa.nombre.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">

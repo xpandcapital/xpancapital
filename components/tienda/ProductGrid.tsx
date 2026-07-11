@@ -108,7 +108,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
 
                 {product.isHot && (
-                    <div className="absolute top-3 left-3 bg-blis-red text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(190,11,60,0.6)] animate-pulse">
+                    <div className="absolute top-3 left-3 bg-blis-red text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-[0_0_15px_rgba(213,193,8,0.6)] animate-pulse">
                         Más Vendido
                     </div>
                 )}
@@ -156,7 +156,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                                     hover: { y: 0, opacity: 1 }
                                 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                className="w-10 h-10 rounded-xl bg-blis-red/20 text-blis-red border border-blis-red/30 flex items-center justify-center hover:bg-blis-red hover:text-white hover:shadow-[0_0_20px_rgba(190,11,60,0.4)] transition-colors"
+                                className="w-10 h-10 rounded-xl bg-blis-red/20 text-blis-red border border-blis-red/30 flex items-center justify-center hover:bg-blis-red hover:text-white hover:shadow-[0_0_20px_rgba(213,193,8,0.4)] transition-colors"
                             >
                                 <ShoppingCart className="w-5 h-5" />
                             </motion.button>
@@ -167,3 +167,4 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
         </motion.div>
     );
 }
+

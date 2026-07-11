@@ -35,7 +35,7 @@ export function Metrics() {
                                 viewport={{ once: true, amount: 0.5 }}
                                 transition={{ duration: 1.2, delay: 2 + index * 0.15 }}
                                 style={{
-                                    background: "radial-gradient(circle at 50% 50%, rgba(255,30,86,0.3) 0%, transparent 70%)",
+                                    background: "radial-gradient(circle at 50% 50%, rgba(245,225,0,0.3) 0%, transparent 70%)",
                                 }}
                             />
 
@@ -49,7 +49,7 @@ export function Metrics() {
                             {/* Mini progress bar under each metric */}
                             <div className="w-full h-[2px] bg-white/5 rounded-full mt-4 overflow-hidden">
                                 <motion.div
-                                    className="h-full rounded-full bg-blis-red/60 shadow-[0_0_6px_rgba(190,11,60,0.4)]"
+                                    className="h-full rounded-full bg-blis-red/60 shadow-[0_0_6px_rgba(213,193,8,0.4)]"
                                     initial={{ width: 0 }}
                                     whileInView={{ width: `${Math.min(100, 20 + (index + 1) * 22)}%` }}
                                     viewport={{ once: true, amount: 0.5 }}
@@ -63,3 +63,4 @@ export function Metrics() {
         </section>
     );
 }
+

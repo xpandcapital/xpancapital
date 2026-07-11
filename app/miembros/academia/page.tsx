@@ -319,7 +319,7 @@ function AcademyContent() {
                                                         <span className="bg-emerald-500/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full">Nuevo</span>
                                                     </div>
                                                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(190,11,60,0.6)]">
+                                                        <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(213,193,8,0.6)]">
                                                             <Play className="w-6 h-6 text-white fill-white ml-1" />
                                                         </div>
                                                     </div>
@@ -361,7 +361,7 @@ function AcademyContent() {
                                                 )}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
                                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                                    <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(190,11,60,0.6)]">
+                                                    <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(213,193,8,0.6)]">
                                                         <Play className="w-6 h-6 text-white fill-white ml-1" />
                                                     </div>
                                                 </div>
@@ -371,7 +371,7 @@ function AcademyContent() {
                                                         <span>{course.progreso?.progreso || 0}%</span>
                                                     </div>
                                                     <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-blis-red shadow-[0_0_10px_rgba(190,11,60,0.8)]" style={{ width: `${course.progreso?.progreso || 0}%` }} />
+                                                        <div className="h-full bg-blis-red shadow-[0_0_10px_rgba(213,193,8,0.8)]" style={{ width: `${course.progreso?.progreso || 0}%` }} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -584,3 +584,4 @@ export default function AcademyPage() {
         </Suspense>
     );
 }
+

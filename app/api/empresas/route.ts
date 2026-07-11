@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
             id: 'default',
             slug: 'blis-corp',
             nombre: 'BLIS Corp',
-            color_primario: '#B10D24',
+            color_primario: '#a89a00',
             color_secundario: '#000000',
             color_acento: '#10B981',
             config: {
@@ -74,3 +74,4 @@ export async function GET(request: NextRequest) {
     }, { status: 500 })
   }
 }
+

@@ -15,7 +15,7 @@ export default function NotFound() {
         <div className="relative mb-8">
           <h1 className="text-[180px] md:text-[220px] font-black leading-none tracking-tighter"
             style={{
-              background: 'linear-gradient(135deg, #be0b3c 0%, #ff1e56 50%, #be0b3c 100%)',
+              background: 'linear-gradient(135deg, #d5c108 0%, #f5e100 50%, #d5c108 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',

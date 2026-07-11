@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         empresa_id,
         nivel: nextNivel,
         nombre,
-        color: color || '#ff1e56',
+        color: color || '#f5e100',
         icono_svg,
         imagen_url,
         puntos_requeridos,
@@ -131,3 +131,4 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
   }
 }
+

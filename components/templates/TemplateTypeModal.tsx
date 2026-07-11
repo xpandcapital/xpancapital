@@ -223,7 +223,7 @@ export function TemplateTypeModal({ isOpen, onClose, onCreate }: TemplateTypeMod
               <button
                 onClick={handleCreate}
                 disabled={!selectedTipo || !nombre || loading}
-                className="px-6 py-3 bg-blis-red text-white text-xs font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all shadow-[0_10px_20px_rgba(190,11,60,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2"
+                className="px-6 py-3 bg-blis-red text-white text-xs font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all shadow-[0_10px_20px_rgba(213,193,8,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2"
               >
                 {loading ? (
                   <>

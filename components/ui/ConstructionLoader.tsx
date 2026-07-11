@@ -69,8 +69,8 @@ export function ConstructionLoader() {
           className="absolute inset-0"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(190,11,60,0.3) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(190,11,60,0.3) 1px, transparent 1px)
+              linear-gradient(rgba(213,193,8,0.3) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(213,193,8,0.3) 1px, transparent 1px)
             `,
             backgroundSize: '40px 40px',
             animation: 'gridMove 20s linear infinite'
@@ -89,7 +89,7 @@ export function ConstructionLoader() {
         }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         style={{
-          background: 'radial-gradient(circle, rgba(190,11,60,0.4) 0%, transparent 60%)',
+          background: 'radial-gradient(circle, rgba(213,193,8,0.4) 0%, transparent 60%)',
           filter: 'blur(80px)'
         }}
       />
@@ -148,21 +148,21 @@ export function ConstructionLoader() {
             <svg width="60" height="120" viewBox="0 0 60 120" fill="none">
               <motion.rect 
                 x="5" y="0" width="4" height="120" 
-                fill="#be0b3c"
+                fill="#d5c108"
                 initial={{ height: 0, y: 120 }}
                 animate={{ height: 120, y: 0 }}
                 transition={{ duration: 1 }}
               />
               <motion.rect 
                 x="5" y="5" width="50" height="3" 
-                fill="#be0b3c"
+                fill="#d5c108"
                 initial={{ width: 0 }}
                 animate={{ width: 50 }}
                 transition={{ duration: 0.5, delay: 1 }}
               />
               <motion.line 
                 x1="55" y1="8" x2="55" y2="30" 
-                stroke="#be0b3c" strokeWidth="2"
+                stroke="#d5c108" strokeWidth="2"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
                 transition={{ duration: 0.3, delay: 1.5 }}
@@ -267,7 +267,7 @@ export function ConstructionLoader() {
                   key={i}
                   className="absolute w-2 h-2"
                   style={{
-                    background: 'radial-gradient(circle, #fff 0%, #be0b3c 50%, transparent 70%)',
+                    background: 'radial-gradient(circle, #fff 0%, #d5c108 50%, transparent 70%)',
                     borderRadius: '50%',
                   }}
                   animate={{
@@ -300,9 +300,9 @@ export function ConstructionLoader() {
               className="inline-block"
               animate={{ 
                 textShadow: [
-                  '0 0 20px rgba(190,11,60,0.5)',
-                  '0 0 40px rgba(190,11,60,0.8)',
-                  '0 0 20px rgba(190,11,60,0.5)'
+                  '0 0 20px rgba(213,193,8,0.5)',
+                  '0 0 40px rgba(213,193,8,0.8)',
+                  '0 0 20px rgba(213,193,8,0.5)'
                 ]
               }}
               transition={{ duration: 2, repeat: Infinity }}
@@ -313,9 +313,9 @@ export function ConstructionLoader() {
               className="inline-block text-blis-red ml-2"
               animate={{ 
                 textShadow: [
-                  '0 0 20px rgba(190,11,60,0.3)',
-                  '0 0 30px rgba(190,11,60,0.6)',
-                  '0 0 20px rgba(190,11,60,0.3)'
+                  '0 0 20px rgba(213,193,8,0.3)',
+                  '0 0 30px rgba(213,193,8,0.6)',
+                  '0 0 20px rgba(213,193,8,0.3)'
                 ]
               }}
               transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
@@ -348,7 +348,7 @@ export function ConstructionLoader() {
             <motion.div
               className="h-full rounded-full relative"
               style={{
-                background: 'linear-gradient(90deg, #be0b3c 0%, #be0b3c 60%, #209f89 100%)'
+                background: 'linear-gradient(90deg, #d5c108 0%, #d5c108 60%, #209f89 100%)'
               }}
               initial={{ width: "0%" }}
               animate={{ width: `${Math.min(progress, 100)}%` }}

@@ -11,7 +11,7 @@ export const globalStyles = `
   }
   .scanner-beam {
     position: absolute; top: 0; bottom: 0; width: 2px;
-    background: #be0b3c; box-shadow: 0 0 20px 5px rgba(190, 11, 60, 0.5);
+    background: #d5c108; box-shadow: 0 0 20px 5px rgba(213, 193, 8, 0.5);
     animation: scanLine 3s linear infinite; z-index: 5; pointer-events: none;
   }
   .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -21,18 +21,18 @@ export const globalStyles = `
   .bg-signal-green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.4) 100%); border: 1px solid rgba(16, 185, 129, 0.5); }
   .bg-signal-expired { background: rgba(55, 65, 81, 0.1); border: 1px solid rgba(107, 114, 128, 0.1); opacity: 0.7; }
   svg { display: block; }
-  * { scrollbar-color: #be0b3c transparent; }
+  * { scrollbar-color: #d5c108 transparent; }
   .custom-horizontal-range { -webkit-appearance: none; appearance: none; background: transparent; }
-  .custom-horizontal-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 64px; height: 6px; background: linear-gradient(to right, #be0b3c, #ff004c); border-radius: 99px; box-shadow: 0 0 15px rgba(255, 0, 76, 0.6); cursor: pointer; border: none; }
+  .custom-horizontal-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 64px; height: 6px; background: linear-gradient(to right, #d5c108, #f2d600); border-radius: 99px; box-shadow: 0 0 15px rgba(255, 0, 76, 0.6); cursor: pointer; border: none; }
   .custom-red-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
   .custom-red-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
-  .custom-red-scrollbar::-webkit-scrollbar-thumb { background: #be0b3c; border-radius: 10px; }
+  .custom-red-scrollbar::-webkit-scrollbar-thumb { background: #d5c108; border-radius: 10px; }
   .custom-vertical-range { writing-mode: vertical-lr !important; direction: rtl !important; -webkit-appearance: slider-vertical !important; appearance: slider-vertical !important; width: 8px !important; background: transparent !important; outline: none !important; cursor: pointer !important; }
   .custom-vertical-range::-webkit-slider-container { background: transparent !important; }
   .custom-vertical-range::-webkit-slider-runnable-track { background: transparent !important; width: 4px !important; }
-  .custom-vertical-range::-webkit-slider-thumb { -webkit-appearance: none !important; appearance: none !important; width: 10px !important; height: 56px !important; background: linear-gradient(to bottom, #be0b3c, #ff004c) !important; border-radius: 99px !important; box-shadow: 0 0 20px rgba(255, 0, 76, 0.9), 0 0 8px rgba(255,0,76,0.5) !important; cursor: grab !important; border: none !important; margin-top: -24px !important; }
+  .custom-vertical-range::-webkit-slider-thumb { -webkit-appearance: none !important; appearance: none !important; width: 10px !important; height: 56px !important; background: linear-gradient(to bottom, #d5c108, #f2d600) !important; border-radius: 99px !important; box-shadow: 0 0 20px rgba(255, 0, 76, 0.9), 0 0 8px rgba(255,0,76,0.5) !important; cursor: grab !important; border: none !important; margin-top: -24px !important; }
   .custom-vertical-range::-webkit-slider-thumb:active { cursor: grabbing !important; }
-  .custom-vertical-range::-moz-range-thumb { width: 10px !important; height: 56px !important; background: linear-gradient(to bottom, #be0b3c, #ff004c) !important; border-radius: 99px !important; box-shadow: 0 0 20px rgba(255, 0, 76, 0.9) !important; border: none !important; cursor: grab !important; }
+  .custom-vertical-range::-moz-range-thumb { width: 10px !important; height: 56px !important; background: linear-gradient(to bottom, #d5c108, #f2d600) !important; border-radius: 99px !important; box-shadow: 0 0 20px rgba(255, 0, 76, 0.9) !important; border: none !important; cursor: grab !important; }
 `;
 
 export const TerminalStyles: React.FC = () => (
@@ -60,7 +60,7 @@ export const VerticalSlider: React.FC<{ min: number; max: number; value: number;
   return (
     <div ref={trackRef} className="relative h-full w-[14px] flex justify-center cursor-pointer select-none" style={{ touchAction: 'none' }} onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerLeave={onPointerUp}>
       <div className="absolute inset-y-2 w-[6px] rounded-full" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' }} />
-      <div className="absolute rounded-full pointer-events-none" style={{ width: '6px', height: '64px', top: `calc(${thumbPct}% - 32px)`, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(to bottom, #be0b3c, #ff004c)', boxShadow: '0 0 15px rgba(255,0,76,0.8), 0 0 6px rgba(255,0,76,0.5)', borderRadius: '99px' }} />
+      <div className="absolute rounded-full pointer-events-none" style={{ width: '6px', height: '64px', top: `calc(${thumbPct}% - 32px)`, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(to bottom, #d5c108, #f2d600)', boxShadow: '0 0 15px rgba(255,0,76,0.8), 0 0 6px rgba(255,0,76,0.5)', borderRadius: '99px' }} />
     </div>
   );
 };

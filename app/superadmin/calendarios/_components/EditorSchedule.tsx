@@ -20,7 +20,7 @@ const daysOfWeek: { key: keyof WeekSchedule; label: string }[] = [
 function ToggleOn() {
   return (
     <svg width="28" height="16" viewBox="0 0 28 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="28" height="16" rx="8" fill="#be0b3c"/>
+      <rect width="28" height="16" rx="8" fill="#d5c108"/>
       <circle cx="20" cy="8" r="6" fill="white"/>
     </svg>
   )

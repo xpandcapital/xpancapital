@@ -35,7 +35,7 @@ export function FunnelHero({ data = {} }: FunnelHeroProps) {
     primaryBtnLink = "#formulario",
     urgencyText = "Cupos Limitados",
     urgencyCount = 12,
-    accentColor = "#B10D24",
+    accentColor = "#a89a00",
     showCountdown = false,
     countdownEnd
   } = data;

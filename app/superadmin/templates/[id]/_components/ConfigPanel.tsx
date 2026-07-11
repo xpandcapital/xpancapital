@@ -149,7 +149,7 @@ export function ConfigPanel({
           <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-white/10">
             <ColorPicker 
               label="Color Primario" 
-              value={templateConfig?.branding?.primaryColor || '#B10D24'} 
+              value={templateConfig?.branding?.primaryColor || '#a89a00'} 
               onChange={(v) => setTemplateConfig(prev => ({
                 ...prev,
                 branding: { ...prev?.branding, primaryColor: v }
@@ -184,7 +184,7 @@ export function ConfigPanel({
             />
             <ColorPicker 
               label="Color de Acento" 
-              value={templateConfig?.branding?.accentColor || '#B10D24'} 
+              value={templateConfig?.branding?.accentColor || '#a89a00'} 
               onChange={(v) => setTemplateConfig(prev => ({
                 ...prev,
                 branding: { ...prev?.branding, accentColor: v }
@@ -462,5 +462,6 @@ export function ConfigPanel({
     </div>
   );
 }
+
 
 

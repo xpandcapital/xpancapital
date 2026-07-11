@@ -120,12 +120,12 @@ export function ProjectForm({
                     <label className="text-[10px] uppercase tracking-widest text-white/40 font-medium block mb-2">Color Primario</label>
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <input type="color" value={formData.primary_color || '#be0b3c'} onChange={(e) => setFormData({ ...formData, primary_color: e.target.value })} className="w-14 h-14 rounded-xl border border-white/5 cursor-pointer bg-transparent" />
+                        <input type="color" value={formData.primary_color || '#d5c108'} onChange={(e) => setFormData({ ...formData, primary_color: e.target.value })} className="w-14 h-14 rounded-xl border border-white/5 cursor-pointer bg-transparent" />
                         <div className="absolute inset-0 rounded-xl border-2 border-white/10 pointer-events-none" />
                       </div>
                       <div className="flex-1">
-                        <input type="text" value={formData.primary_color} onChange={(e) => setFormData({ ...formData, primary_color: e.target.value })} className="w-full bg-[#050505] border border-white/5 rounded-xl px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-white/10 transition-colors" placeholder="#be0b3c" />
-                        <div className="mt-1.5 h-6 rounded-lg border border-white/5" style={{ backgroundColor: formData.primary_color || '#be0b3c' }} />
+                        <input type="text" value={formData.primary_color} onChange={(e) => setFormData({ ...formData, primary_color: e.target.value })} className="w-full bg-[#050505] border border-white/5 rounded-xl px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-white/10 transition-colors" placeholder="#d5c108" />
+                        <div className="mt-1.5 h-6 rounded-lg border border-white/5" style={{ backgroundColor: formData.primary_color || '#d5c108' }} />
                       </div>
                     </div>
                   </div>
@@ -258,3 +258,4 @@ export function ProjectForm({
     </div>
   )
 }
+

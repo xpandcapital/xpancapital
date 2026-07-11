@@ -203,7 +203,7 @@ export default function EmbedPostulanteForm({ params }: { params: Promise<{ slug
             <span>{progressPct}%</span>
           </div>
           <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #be0b3c, #209f89)' }} />
+            <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progressPct}%`, background: 'linear-gradient(90deg, #d5c108, #209f89)' }} />
           </div>
         </div>
       </div>
@@ -319,7 +319,7 @@ export default function EmbedPostulanteForm({ params }: { params: Promise<{ slug
         )}
 
         <button type="submit" disabled={submitting}
-          className="w-full py-3.5 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(190,11,60,0.3)]">
+          className="w-full py-3.5 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_10px_30px_rgba(213,193,8,0.3)]">
           {submitting ? <><Loader2 className="w-4 h-4 animate-spin" />Enviando...</> : <><Send className="w-4 h-4" />Enviar Postulación</>}
         </button>
         <p className="text-center text-gray-600 text-xs">Al enviar, confirmas que la información es verídica.</p>

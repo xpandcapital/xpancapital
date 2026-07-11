@@ -76,13 +76,13 @@ export function BlogHero({ data = {} }: BlogHeroProps) {
           className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] opacity-[0.15] pointer-events-none"
           animate={{ opacity: [0.12, 0.2, 0.12] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          style={{ background: "radial-gradient(circle, rgba(255,30,86,0.4) 0%, transparent 60%)" }}
+          style={{ background: "radial-gradient(circle, rgba(245,225,0,0.4) 0%, transparent 60%)" }}
         />
         <div className="max-w-[1600px] mx-auto px-4 md:px-8 xl:px-16 flex flex-col md:flex-row items-center gap-12 lg:gap-20 w-full relative z-10">
           <div className="w-full md:w-5/12 flex flex-col justify-center min-h-[500px]">
             <div className="mb-10 cursor-default">
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-black uppercase tracking-tighter">
-                {title.replace("Blog", "")}<span className="text-blis-red drop-shadow-[0_0_15px_rgba(190,11,60,0.8)]">Blog</span>
+                {title.replace("Blog", "")}<span className="text-blis-red drop-shadow-[0_0_15px_rgba(213,193,8,0.8)]">Blog</span>
               </h1>
               <p className="text-gray-400 text-xs font-bold tracking-widest uppercase mt-3">{subtitle}</p>
             </div>
@@ -148,3 +148,4 @@ export function BlogHero({ data = {} }: BlogHeroProps) {
     </div>
   );
 }
+

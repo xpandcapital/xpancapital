@@ -62,7 +62,7 @@ async function sendWelcomeEmail(to: string, nombre: string, password: string, pr
           <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
             
             <div style="text-align:center;margin-bottom:32px;">
-              <div style="display:inline-block;background:#be0b24;padding:12px 24px;border-radius:12px;">
+              <div style="display:inline-block;background:#c9b500;padding:12px 24px;border-radius:12px;">
                 <span style="font-size:20px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">BLIS Corp</span>
               </div>
             </div>
@@ -702,3 +702,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

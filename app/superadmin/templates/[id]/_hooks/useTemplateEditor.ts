@@ -29,11 +29,11 @@ export function useTemplateEditor() {
     showFooter: true,
     branding: {
       name: 'BLIS Corp',
-      primaryColor: '#B10D24',
+      primaryColor: '#a89a00',
       secondaryColor: '#10B981',
       backgroundColor: '#000000',
       textColor: '#ffffff',
-      accentColor: '#B10D24',
+      accentColor: '#a89a00',
     }
   });
 
@@ -219,3 +219,4 @@ export function useTemplateEditor() {
     isSectionVisible,
   };
 }
+

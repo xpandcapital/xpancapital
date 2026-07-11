@@ -124,7 +124,7 @@ export const TerminalModals: React.FC<TerminalModalsProps> = ({
 
       {sessionReport && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-xl p-4">
-          <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-[#050505] border border-white/10 rounded-[40px] w-full max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(190,11,60,0.3)]">
+          <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-[#050505] border border-white/10 rounded-[40px] w-full max-w-2xl overflow-hidden shadow-[0_0_100px_rgba(213,193,8,0.3)]">
             <div className="p-8 border-b border-white/5 bg-gradient-to-br from-blis-red/10 to-transparent flex justify-between items-center">
               <div className="flex items-center gap-4"><div className="p-4 bg-blis-red/20 rounded-3xl text-blis-red-neon"><Brain size={32} /></div><div><h2 className="text-2xl font-black text-white">{sessionReport.title}</h2><p className="text-[9px] text-blis-red-neon font-black tracking-[0.2em] uppercase mt-1">SISTEMA FINALIZADO</p></div></div>
               <button onClick={() => onSetSessionReport(null)} className="text-gray-500 hover:text-white"><X size={24} /></button>

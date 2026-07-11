@@ -235,7 +235,7 @@ export function EmployeeModal({ advisor, roles, onClose }: EmployeeModalProps) {
                   { id: '1', nombre: 'empleado', label: 'Empleado', color: '#10b981' },
                   { id: '2', nombre: 'editor', label: 'Editor', color: '#8b5cf6' },
                   { id: '3', nombre: 'admin', label: 'Admin', color: '#f59e0b' },
-                  { id: '4', nombre: 'superadmin', label: 'Super Admin', color: '#be0b3c' },
+                  { id: '4', nombre: 'superadmin', label: 'Super Admin', color: '#d5c108' },
                 ]).map(role => {
                   const cfg = ROLE_CONFIG[role.nombre as UserRole]
                   const isSelected = form.rol === role.nombre

@@ -34,7 +34,7 @@ const TOP_PRODUCTS = [
     badge: "Tendencia",
     badgeColor: "text-blis-red border-blis-red/40 bg-blis-red/10",
     rankColor: "text-gray-300",
-    glow: "shadow-[0_0_20px_rgba(190,11,60,0.1)]",
+    glow: "shadow-[0_0_20px_rgba(213,193,8,0.1)]",
   },
   {
     rank: 3,
@@ -196,3 +196,4 @@ export function TopSellers() {
     </section>
   );
 }
+

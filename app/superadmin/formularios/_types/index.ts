@@ -54,7 +54,7 @@ export interface FlowStep {
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 export const defaultAppearance: FormAppearance = {
-  primaryColor: '#be0b3c',
+  primaryColor: '#d5c108',
   buttonTextColor: '#ffffff',
   backgroundColor: '#ffffff',
   backgroundOpacity: 100,
@@ -63,7 +63,7 @@ export const defaultAppearance: FormAppearance = {
   inputBorderColor: '#e5e7eb',
   inputTextColor: '#111111',
   placeholderColor: '#9ca3af',
-  focusColor: '#be0b3c',
+  focusColor: '#d5c108',
   borderRadius: '12',
   paddingTop: '24',
   paddingBottom: '24',

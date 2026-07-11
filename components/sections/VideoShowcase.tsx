@@ -46,7 +46,7 @@ export function VideoShowcase() {
                         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                         className="absolute -inset-[3px] rounded-[1.6rem] md:rounded-[2.1rem] pointer-events-none z-0"
                         style={{
-                            background: "linear-gradient(135deg, rgba(255,30,86,0.25) 0%, transparent 40%, transparent 60%, rgba(255,30,86,0.15) 100%)",
+                            background: "linear-gradient(135deg, rgba(245,225,0,0.25) 0%, transparent 40%, transparent 60%, rgba(245,225,0,0.15) 100%)",
                             filter: "blur(6px)",
                         }}
                     />
@@ -108,7 +108,7 @@ export function VideoShowcase() {
                                 initial={{ width: 0 }}
                                 whileInView={{ width: "75%" }}
                                 transition={{ duration: 1.5, delay: 0.5 }}
-                                className="bg-blis-red h-full shadow-[0_0_15px_rgba(190,11,60,0.6)]"
+                                className="bg-blis-red h-full shadow-[0_0_15px_rgba(213,193,8,0.6)]"
                             />
                         </div>
                     </motion.div>
@@ -117,3 +117,4 @@ export function VideoShowcase() {
         </section>
     );
 }
+

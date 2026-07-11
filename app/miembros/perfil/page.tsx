@@ -537,7 +537,7 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto space-y-12 pb-20 px-4 md:px-8 pt-8 md:pt-8 w-full">
             {/* Header Profile Card */}
             <div className="flex flex-col md:flex-row items-center gap-6 sm:gap-8 bg-zinc-950/50 border border-white/5 p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] relative overflow-hidden shadow-2xl w-full">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(190,11,60,0.1)_0%,transparent_40%)] pointer-events-none" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(213,193,8,0.1)_0%,transparent_40%)] pointer-events-none" />
 
                 <div className="relative group shrink-0">
                     <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-blis-red to-red-900 p-1 shadow-2xl overflow-hidden ring-4 ring-white/5 relative">
@@ -1080,3 +1080,4 @@ export default function ProfilePage() {
         </div>
     );
 }
+

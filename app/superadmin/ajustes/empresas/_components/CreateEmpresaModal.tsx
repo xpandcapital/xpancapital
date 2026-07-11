@@ -44,7 +44,7 @@ export function CreateEmpresaModal({ newEmpresa, setNewEmpresa, onSave, saving, 
             <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Plan</label>
             <SearchableSelect value={newEmpresa.plan} onChange={v => setNewEmpresa(prev => ({ ...prev, plan: v }))} options={PLANES.map(p => ({ value: p.id, label: `${p.nombre} (${p.usuarios} users)` }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 appearance-none" />
           </div>
-          <button onClick={onSave} disabled={saving || !newEmpresa.nombre || !newEmpresa.slug} className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+          <button onClick={onSave} disabled={saving || !newEmpresa.nombre || !newEmpresa.slug} className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
             {saving ? 'Creando...' : 'Crear Empresa'}
           </button>
         </div>

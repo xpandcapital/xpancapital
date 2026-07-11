@@ -68,7 +68,7 @@ export function ScannerTool() {
             <button
               onClick={runScan}
               disabled={scanning}
-              className="px-5 py-2.5 bg-blis-red text-white text-sm font-bold rounded-xl hover:bg-blis-red/80 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_0_20px_rgba(190,11,60,0.3)]"
+              className="px-5 py-2.5 bg-blis-red text-white text-sm font-bold rounded-xl hover:bg-blis-red/80 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_0_20px_rgba(213,193,8,0.3)]"
             >
               {scanning ? (
                 <>
@@ -249,3 +249,4 @@ export function ScannerTool() {
     </div>
   );
 }
+

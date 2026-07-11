@@ -131,7 +131,7 @@ export default async function BlogMagazinePage() {
         </p>
         <a
           href="/miembros"
-          className="inline-flex items-center gap-3 px-10 py-5 bg-blis-red text-white font-black uppercase tracking-widest text-sm rounded-2xl hover:bg-red-700 transition-all shadow-[0_0_30px_rgba(177,13,36,0.4)] active:scale-95"
+          className="inline-flex items-center gap-3 px-10 py-5 bg-blis-red text-white font-black uppercase tracking-widest text-sm rounded-2xl hover:bg-red-700 transition-all shadow-[0_0_30px_rgba(168,154,0,0.4)] active:scale-95"
         >
           Quiero Ser Socio <ArrowRight className="w-5 h-5" />
         </a>
@@ -141,3 +141,4 @@ export default async function BlogMagazinePage() {
     </main>
   );
 }
+

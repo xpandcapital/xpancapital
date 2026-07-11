@@ -6,8 +6,8 @@
 @theme inline {
   --color-background: #181818;
   --color-foreground: #ffffff;
-  --color-blis-red: #be0b3c;
-  --color-blis-red-neon: #ff1e56;
+  --color-blis-red: #d5c108;
+  --color-blis-red-neon: #f5e100;
 
   --font-sans: var(--font-sans);
 
@@ -92,7 +92,7 @@
   *,
   *::before,
   *::after {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='9' fill='rgba(190%2C11%2C60%2C0.15)'/%3E%3Ccircle cx='10' cy='10' r='6' fill='rgba(190%2C11%2C60%2C0.35)'/%3E%3Ccircle cx='10' cy='10' r='4' fill='%23be0b3c'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23ff3060'/%3E%3C/svg%3E") 10 10, none !important;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='9' fill='rgba(213%2C193%2C8%2C0.15)'/%3E%3Ccircle cx='10' cy='10' r='6' fill='rgba(213%2C193%2C8%2C0.35)'/%3E%3Ccircle cx='10' cy='10' r='4' fill='%23d5c108'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23f5e100'/%3E%3C/svg%3E") 10 10, none !important;
   }
 
   /* Larger crosshair-style cursor for interactive elements */
@@ -103,7 +103,7 @@
   select,
   [role="button"],
   label {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ccircle cx='14' cy='14' r='13' fill='none' stroke='%23be0b3c' stroke-width='1.5' stroke-dasharray='3 2' stroke-opacity='0.8'/%3E%3Ccircle cx='14' cy='14' r='5' fill='white'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%23be0b3c' stroke-width='1.5'/%3E%3C/svg%3E") 14 14, pointer !important;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ccircle cx='14' cy='14' r='13' fill='none' stroke='%23d5c108' stroke-width='1.5' stroke-dasharray='3 2' stroke-opacity='0.8'/%3E%3Ccircle cx='14' cy='14' r='5' fill='white'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%23d5c108' stroke-width='1.5'/%3E%3C/svg%3E") 14 14, pointer !important;
   }
 
   html {
@@ -129,19 +129,19 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(190, 11, 60, 0.2);
+    background: rgba(213, 193, 8, 0.2);
     border-radius: 10px;
     transition: background 0.3s ease;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(190, 11, 60, 0.8);
-    box-shadow: 0 0 10px rgba(190, 11, 60, 0.5);
+    background: rgba(213, 193, 8, 0.8);
+    box-shadow: 0 0 10px rgba(213, 193, 8, 0.5);
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(190, 11, 60, 0.4) transparent;
+    scrollbar-color: rgba(213, 193, 8, 0.4) transparent;
     @apply border-border outline-ring/50;
   }
 
@@ -175,7 +175,7 @@
 
   .antigravity:hover {
     @apply -translate-y-2;
-    box-shadow: 0 20px 40px -15px rgba(190, 11, 60, 0.3);
+    box-shadow: 0 20px 40px -15px rgba(213, 193, 8, 0.3);
   }
 
   .text-gradient {
@@ -194,12 +194,12 @@
 
   .neon-text {
     @apply text-blis-red-neon;
-    text-shadow: 0 0 5px rgba(255, 30, 86, 0.5), 0 0 10px rgba(255, 30, 86, 0.4), 0 0 20px rgba(255, 30, 86, 0.2);
+    text-shadow: 0 0 5px rgba(245, 225, 0, 0.5), 0 0 10px rgba(245, 225, 0, 0.4), 0 0 20px rgba(245, 225, 0, 0.2);
   }
 
   .neon-border {
     @apply border-blis-red-neon;
-    box-shadow: 0 0 10px rgba(255, 30, 86, 0.3), inset 0 0 10px rgba(255, 30, 86, 0.2);
+    box-shadow: 0 0 10px rgba(245, 225, 0, 0.3), inset 0 0 10px rgba(245, 225, 0, 0.2);
   }
 
   /* Hide scrollbar but keep scroll functionality */
@@ -231,8 +231,8 @@
   --card-foreground: #ffffff;
   --popover: #0a0a0a;
   --popover-foreground: #ffffff;
-  --primary: #be0b3c;
-  --primary-foreground: #ffffff;
+  --primary: #d5c108;
+  --primary-foreground: #000000;
   --secondary: #1a1a1a;
   --secondary-foreground: #ffffff;
   --muted: #1a1a1a;
@@ -242,8 +242,8 @@
   --destructive: #ef4444;
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.1);
-  --ring: #be0b3c;
-  --chart-1: #be0b3c;
+  --ring: #d5c108;
+  --chart-1: #d5c108;
   --chart-2: #10b981;
   --chart-3: #3b82f6;
   --chart-4: #f59e0b;
@@ -251,10 +251,10 @@
   --radius: 0.625rem;
   --sidebar: #0a0a0a;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #be0b3c;
+  --sidebar-primary: #d5c108;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #1a1a1a;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #be0b3c;
+  --sidebar-ring: #d5c108;
 }

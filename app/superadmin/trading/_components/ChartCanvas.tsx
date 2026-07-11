@@ -3,7 +3,7 @@
 import React from 'react';
 import type { CandleData, Drawing, OpenPosition, AiZone, FVGData, TradeReplayData, TickerState, HoverDataPoint } from '../_types';
 
-const NEON_RED    = '#ff004c';
+const NEON_RED    = '#f2d600';
 const NEON_CYAN   = '#00f2ff';
 const NEON_GREEN  = '#0ecb81';
 const NEON_YELLOW = '#fff200';
@@ -85,7 +85,7 @@ export const ChartCanvas = ({
             const tgtY = getY(zone.target || (zone.type === 'demand' ? zone.high : zone.low));
             if (!Number.isFinite(tgtY)) return;
             const isBuy = zone.type === 'demand';
-            const col = isBuy ? '#0ecb81' : '#ff004c';
+            const col = isBuy ? '#0ecb81' : '#f2d600';
             const t = zone.target || 0;
             const priceStr = t < 1 ? t.toPrecision(4) : t.toFixed(2);
             allLabels.push({ y: tgtY - 22, text: `⚡ OBJETIVO @ ${priceStr}`, col, type: 'zone', lineY: tgtY, opacity: 1 });
@@ -222,7 +222,7 @@ export const ChartCanvas = ({
             const x1 = getXFromContinuousIndex(d.p1.index), y1 = getY(d.p1.price);
             const x2 = getXFromContinuousIndex(d.p2.index), y2 = getY(d.p2.price);
             if (!Number.isFinite(x1) || !Number.isFinite(y1) || !Number.isFinite(x2) || !Number.isFinite(y2)) return null;
-            return <line key={`draw-${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke={d.color || '#ff004c'} strokeWidth={2} />;
+            return <line key={`draw-${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke={d.color || '#f2d600'} strokeWidth={2} />;
           }
           if (d.type === 'fibonacci' && d.p1 && d.p2) {
              const x1 = getXFromContinuousIndex(d.p1.index), y1 = getY(d.p1.price);
@@ -256,7 +256,7 @@ export const ChartCanvas = ({
               return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`;
             }).filter(Boolean).join(' ');
             if (!pathData) return null;
-            return <path key={`draw-${i}`} d={pathData} fill="none" stroke={d.color || '#ff004c'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />;
+            return <path key={`draw-${i}`} d={pathData} fill="none" stroke={d.color || '#f2d600'} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />;
           }
           if (d.type === 'select') {
             const x = Math.min(d.x1, d.x2);
@@ -582,3 +582,4 @@ export const ChartCanvas = ({
     </>
   );
 };
+

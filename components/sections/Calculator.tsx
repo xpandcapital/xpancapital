@@ -71,7 +71,7 @@ export function Calculator() {
                                 </div>
                             </div>
                             {/* Etapa 2 - Popular */}
-                            <div className="bg-zinc-900 rounded-xl p-4 border-t border-blis-red/50 relative -translate-y-2 shadow-[0_15px_30px_rgba(190,11,60,0.25)] flex flex-col justify-center min-h-[110px]">
+                            <div className="bg-zinc-900 rounded-xl p-4 border-t border-blis-red/50 relative -translate-y-2 shadow-[0_15px_30px_rgba(213,193,8,0.25)] flex flex-col justify-center min-h-[110px]">
                                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-blis-red text-white text-[9px] uppercase tracking-widest font-black px-2.5 py-1 rounded-full whitespace-nowrap z-10 shadow-lg">
                                     Popular
                                 </div>
@@ -276,7 +276,7 @@ export function Calculator() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.5 }}
-                                className="px-8 py-4 bg-blis-red text-white font-bold uppercase tracking-widest rounded-xl hover:bg-red-700 transition-all shadow-[0_0_30px_rgba(190,11,60,0.4)] text-center"
+                                className="px-8 py-4 bg-blis-red text-white font-bold uppercase tracking-widest rounded-xl hover:bg-red-700 transition-all shadow-[0_0_30px_rgba(213,193,8,0.4)] text-center"
                             >
                                 {cmsData.calculator.primaryBtnText}
                             </motion.a>
@@ -299,3 +299,4 @@ export function Calculator() {
         </div>
     );
 }
+

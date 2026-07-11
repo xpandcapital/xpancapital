@@ -94,7 +94,7 @@ blis-corp/
 | Tipos | PascalCase (`Product`, `Client`) |
 | Archivos módulo | camelCase |
 | Imports | Agrupados: React → externos → locales |
-| Estilo | Dark mode (#050505) + rojo carmesí (#be0b3c) + neón (#ff1e56) |
+| Estilo | Dark mode (#050505) + rojo carmesí (#d5c108) + neón (#f5e100) |
 | Mobile-first | Tailwind con prefijos `md:`, `lg:`, `xl:` para escalar |
 
 ## 1.5 Módulos Refactorizados vs Sin Refactorizar
@@ -1123,12 +1123,12 @@ BlogPosts (grid/slider), BlogHero (carrusel 5 artículos), BlogPremium, CaptureF
 |-------------|-------|-----|
 | `--background` | `#050505` | Fondo principal (negro profundo) |
 | `--foreground` | `#ffffff` | Texto principal |
-| `--color-blis-red` | `#be0b3c` | Color primario (rojo carmesí) |
-| `--color-blis-red-neon` | `#ff1e56` | Acento neón (brillante) |
+| `--color-blis-red` | `#d5c108` | Color primario (rojo carmesí) |
+| `--color-blis-red-neon` | `#f5e100` | Acento neón (brillante) |
 | `--card` | `#0a0a0a` | Fondos de tarjetas |
 | `--muted` | `#1a1a1a` | Fondos secundarios |
 | `--border` | `rgba(255,255,255,0.1)` | Bordes sutiles |
-| `--ring` | `#be0b3c` | Anillos de focus |
+| `--ring` | `#d5c108` | Anillos de focus |
 
 ## 8.2 Clases Utilitarias Personalizadas
 
@@ -1156,7 +1156,7 @@ BlogPosts (grid/slider), BlogHero (carrusel 5 artículos), BlogPremium, CaptureF
 
 ## 8.5 Scrollbar Personalizada
 - Ancho: 6px
-- Thumb: `rgba(190, 11, 60, 0.4)` con hover glow `rgba(190, 11, 60, 0.8)`
+- Thumb: `rgba(213, 193, 8, 0.4)` con hover glow `rgba(213, 193, 8, 0.8)`
 - Track: transparente
 - Soporte: WebKit + Firefox
 
@@ -1497,3 +1497,4 @@ export function Component({ title, children }: Props) {
 ---
 
 *Documento generado el 29 de Mayo de 2026 para BLIS Corp — Equipo de Desarrollo*
+

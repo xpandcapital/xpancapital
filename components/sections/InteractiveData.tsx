@@ -66,7 +66,7 @@ export function InteractiveData() {
                                 <div 
                                     key={idx} 
                                     className="p-6 rounded-2xl bg-white/[0.03] border-l-4 backdrop-blur-sm"
-                                    style={{ borderLeftColor: idx === 0 ? '#be0b3c' : '#209f89' }}
+                                    style={{ borderLeftColor: idx === 0 ? '#d5c108' : '#209f89' }}
                                 >
                                     <h4 className="text-white font-bold uppercase text-sm mb-2">{insight.title}</h4>
                                     <p className="font-light text-sm italic" style={{ color: idx === 0 ? 'rgb(209 213 219)' : '#209f89' }}>
@@ -144,3 +144,4 @@ export function InteractiveData() {
         </section>
     );
 }
+

@@ -75,7 +75,7 @@ function TiltCard({
   };
 
   const statusInfo = getStatusLabel(project.status);
-  const primaryColor = project.primary_color || "#be0b3c";
+  const primaryColor = project.primary_color || "#d5c108";
 
   return (
     <motion.div
@@ -102,7 +102,7 @@ function TiltCard({
         style={{
           x: glowX,
           y: glowY,
-          background: `radial-gradient(circle at center, rgba(255,30,86,0.18) 0%, transparent 50%)`,
+          background: `radial-gradient(circle at center, rgba(245,225,0,0.18) 0%, transparent 50%)`,
         }}
       />
 
@@ -213,7 +213,7 @@ export function Projects() {
         }
 
         const formattedProjects: ProjectWithComputed[] = data.map((project: any) => {
-          const color = project.primary_color || "#be0b3c";
+          const color = project.primary_color || "#d5c108";
           const startDate = project.start_date ? new Date(project.start_date) : null;
           const endDate = project.end_date ? new Date(project.end_date) : null;
           let duration = "";
@@ -504,3 +504,4 @@ export function Projects() {
     </section>
   );
 }
+

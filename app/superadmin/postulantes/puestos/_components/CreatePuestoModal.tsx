@@ -65,7 +65,7 @@ export function CreatePuestoModal({ open, onClose, onCreated, saving }: CreatePu
           </div>
           <button
             onClick={handleCreate} disabled={saving || !nombre.trim()}
-            className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]"
+            className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
             {saving ? 'Creando...' : 'Crear Puesto'}

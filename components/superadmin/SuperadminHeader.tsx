@@ -27,7 +27,7 @@ export function SuperadminHeader() {
             <div className="flex items-center gap-6">
                 <button className="relative text-gray-400 hover:text-white transition-colors">
                     <Bell className="w-5 h-5" />
-                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blis-red rounded-full shadow-[0_0_8px_rgba(190,11,60,1)] text-[8px] flex items-center justify-center font-bold text-white"></span>
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blis-red rounded-full shadow-[0_0_8px_rgba(213,193,8,1)] text-[8px] flex items-center justify-center font-bold text-white"></span>
                 </button>
                 <div className="flex items-center gap-3 pl-6 border-l border-white/10">
                     <div className="w-10 h-10 rounded-full bg-blis-red/20 border border-blis-red/50 flex items-center justify-center text-blis-red font-bold text-sm">
@@ -42,3 +42,4 @@ export function SuperadminHeader() {
         </header>
     );
 }
+

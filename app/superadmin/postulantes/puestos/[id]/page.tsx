@@ -77,7 +77,7 @@ export default function PuestoDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <p className="text-gray-400">Puesto no encontrado</p>
-        <button onClick={() => router.push('/superadmin/postulantes/puestos')} className="px-6 py-3 bg-blis-red text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+        <button onClick={() => router.push('/superadmin/postulantes/puestos')} className="px-6 py-3 bg-blis-red text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
           <ArrowLeft className="w-4 h-4 inline mr-2" />Volver a Puestos
         </button>
       </div>

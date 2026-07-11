@@ -44,7 +44,7 @@ export function RoleForm({ show, newRole, saving, onClose, onChange, onCreate }:
                   ))}
                 </div>
               </div>
-              <button onClick={onCreate} disabled={saving === 'create' || !newRole.nombre} className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+              <button onClick={onCreate} disabled={saving === 'create' || !newRole.nombre} className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
                 {saving === 'create' ? 'Creando...' : 'Crear Rol'}
               </button>
             </div>
@@ -54,3 +54,4 @@ export function RoleForm({ show, newRole, saving, onClose, onChange, onCreate }:
     </AnimatePresence>
   )
 }
+

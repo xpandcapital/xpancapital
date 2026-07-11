@@ -76,7 +76,7 @@ export function Operations() {
         <section ref={sectionRef} id="operaciones" className="pt-10 md:pt-20 pb-24 bg-black overflow-hidden relative">
             {/* Aura scroll: orbe rojo que baja con el scroll */}
             <motion.div
-                style={{ y: yOrb, background: "radial-gradient(circle, rgba(190,11,60,0.14) 0%, transparent 60%)" }}
+                style={{ y: yOrb, background: "radial-gradient(circle, rgba(213,193,8,0.14) 0%, transparent 60%)" }}
                 className="absolute top-0 left-[15%] w-[700px] h-[700px] rounded-full blur-[120px] pointer-events-none z-0"
             />
             {/* Header — reveal asimétrico desde izquierda */}
@@ -172,7 +172,7 @@ export function Operations() {
                                     <div className={`absolute inset-0 rounded-full transition-all duration-300 ${isActive ? "bg-white/10" : "bg-white/30 group-hover:bg-white/50"}`} />
                                     {isActive && (
                                         <motion.div
-                                            className="absolute inset-0 bg-blis-red rounded-full shadow-[0_0_15px_rgba(190,11,60,0.6)]"
+                                            className="absolute inset-0 bg-blis-red rounded-full shadow-[0_0_15px_rgba(213,193,8,0.6)]"
                                             initial={{ width: "0%" }}
                                             animate={{ width: `${progress}%` }}
                                             transition={{ duration: 0.05, ease: "linear" }}
@@ -217,12 +217,13 @@ function StatCard({ label, value, prefix = "", suffix = "", delay = 0 }: StatCar
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ delay }}
-            className="bg-[#0A0D11] border border-white/5 rounded-2xl flex flex-col items-center justify-center p-4 transition-all hover:border-blis-red/50 hover:shadow-[0_0_30px_rgba(190,11,60,0.15)] group"
+            className="bg-[#0A0D11] border border-white/5 rounded-2xl flex flex-col items-center justify-center p-4 transition-all hover:border-blis-red/50 hover:shadow-[0_0_30px_rgba(213,193,8,0.15)] group"
         >
-            <div className="text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-black text-blis-red drop-shadow-[0_0_15px_rgba(190,11,60,0.8)] flex items-center justify-center transition-all group-hover:scale-110 duration-300">
+            <div className="text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-black text-blis-red drop-shadow-[0_0_15px_rgba(213,193,8,0.8)] flex items-center justify-center transition-all group-hover:scale-110 duration-300">
                 {prefix}{value}{suffix}
             </div>
             <h4 className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-3">{label}</h4>
         </motion.div>
     );
 }
+

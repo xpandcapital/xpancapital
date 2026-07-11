@@ -63,7 +63,7 @@ function useCountdown(initialSeconds: number) {
 function TimeUnit({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="bg-black border border-blis-red/40 rounded-lg w-9 h-9 flex items-center justify-center font-mono font-black text-sm text-white shadow-[0_0_10px_rgba(190,11,60,0.3)]">
+      <div className="bg-black border border-blis-red/40 rounded-lg w-9 h-9 flex items-center justify-center font-mono font-black text-sm text-white shadow-[0_0_10px_rgba(213,193,8,0.3)]">
         {String(value).padStart(2, "0")}
       </div>
       <span className="text-[8px] text-gray-500 uppercase tracking-widest mt-1">{label}</span>
@@ -87,7 +87,7 @@ export function FlashDeals() {
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-blis-red/5">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blis-red flex items-center justify-center shadow-[0_0_15px_rgba(190,11,60,0.6)]">
+          <div className="w-8 h-8 rounded-lg bg-blis-red flex items-center justify-center shadow-[0_0_15px_rgba(213,193,8,0.6)]">
             <Zap className="w-4 h-4 text-white fill-white" />
           </div>
           <div>
@@ -182,3 +182,4 @@ export function FlashDeals() {
     </section>
   );
 }
+

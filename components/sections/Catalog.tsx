@@ -258,12 +258,12 @@ export function Catalog() {
                             href="/tienda"
                             className="md:w-[380px] md:min-w-[320px] w-full rounded-2xl overflow-hidden relative group border-2 border-dashed border-blis-red/20 bg-gradient-to-br from-blis-red/5 via-transparent to-transparent hover:border-blis-red/40 transition-all duration-500 flex flex-col items-center justify-center text-center p-8 md:p-12 min-h-[320px]"
                         >
-                            <div className="w-14 h-14 md:w-24 md:h-24 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center mb-3 md:mb-8 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
+                            <div className="w-14 h-14 md:w-24 md:h-24 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center mb-3 md:mb-8 shadow-[0_0_50px_rgba(213,193,8,0.1)] group-hover:bg-blis-red transition-all duration-500">
                                 <ShoppingCart className="text-blis-red group-hover:text-white w-7 h-7 md:w-10 md:h-10 transition-colors" />
                             </div>
                             <h4 className="text-xl md:text-3xl font-black text-white uppercase mb-1 md:mb-4 tracking-tighter">Explora la Tienda</h4>
                             <p className="text-gray-400 text-xs md:text-base font-medium mb-5 md:mb-10 max-w-[200px]">Accede a más de 50 herramientas exclusivas.</p>
-                            <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-6 md:px-10 py-3.5 md:py-5 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95">
+                            <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-6 md:px-10 py-3.5 md:py-5 rounded-full shadow-[0_10px_30px_rgba(213,193,8,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95">
                                 Tienda Completa <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                             </div>
                         </Link>
@@ -349,7 +349,7 @@ export function Catalog() {
                             className="w-full rounded-2xl overflow-hidden relative group border-2 border-dashed border-blis-red/20 bg-gradient-to-r from-blis-red/5 via-transparent to-blis-red/5 hover:border-blis-red/40 transition-all duration-500 flex flex-col sm:flex-row items-center justify-between text-center sm:text-left p-5 md:p-6 gap-4"
                         >
                             <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center flex-shrink-0 shadow-[0_0_50px_rgba(190,11,60,0.1)] group-hover:bg-blis-red transition-all duration-500">
+                                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-blis-red/10 border border-blis-red/20 flex items-center justify-center flex-shrink-0 shadow-[0_0_50px_rgba(213,193,8,0.1)] group-hover:bg-blis-red transition-all duration-500">
                                     <ShoppingCart className="text-blis-red group-hover:text-white w-5 h-5 md:w-6 md:h-6 transition-colors" />
                                 </div>
                                 <div>
@@ -357,7 +357,7 @@ export function Catalog() {
                                     <p className="text-gray-400 text-[10px] md:text-xs font-medium">Accede a más de 50 herramientas exclusivas.</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-5 md:px-8 py-3 md:py-4 rounded-full shadow-[0_10px_30px_rgba(190,11,60,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95 flex-shrink-0">
+                            <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest bg-blis-red px-5 md:px-8 py-3 md:py-4 rounded-full shadow-[0_10px_30px_rgba(213,193,8,0.3)] group-hover:shadow-blis-red/50 transition-all active:scale-95 flex-shrink-0">
                                 Tienda Completa <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
                             </div>
                         </Link>
@@ -376,7 +376,7 @@ export function Catalog() {
                             <div className={`absolute inset-0 rounded-full transition-all duration-300 ${activeCatIndex === i ? "bg-white/10" : "bg-white/5 group-hover:bg-white/20"}`} />
                             {activeCatIndex === i && (
                                 <motion.div
-                                    className="absolute inset-0 bg-blis-red rounded-full shadow-[0_0_20px_rgba(190,11,60,0.6)]"
+                                    className="absolute inset-0 bg-blis-red rounded-full shadow-[0_0_20px_rgba(213,193,8,0.6)]"
                                     initial={{ width: "0%" }}
                                     animate={{ width: `${progress}%` }}
                                     transition={{ duration: 0.1, ease: "linear" }}
@@ -389,3 +389,4 @@ export function Catalog() {
         </section>
     );
 }
+

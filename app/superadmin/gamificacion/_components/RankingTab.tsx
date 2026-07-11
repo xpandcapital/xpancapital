@@ -44,7 +44,7 @@ export function RankingTab({ empresaId }: Props) {
               key={c}
               onClick={() => setCat(c)}
               className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                cat === c ? 'bg-[#ff1e56] text-white' : 'text-gray-400 hover:text-white'
+                cat === c ? 'bg-[#f5e100] text-white' : 'text-gray-400 hover:text-white'
               }`}
             >
               {catLabels[c]}
@@ -87,7 +87,7 @@ export function RankingTab({ empresaId }: Props) {
                       {entry.nivelNombre || `Nv ${entry.nivel}`}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right text-[#ff1e56] font-semibold text-sm">
+                  <td className="px-4 py-3 text-right text-[#f5e100] font-semibold text-sm">
                     {entry.puntos.toLocaleString()}
                   </td>
                 </tr>
@@ -107,3 +107,4 @@ function RankBadge({ posicion }: { posicion: number }) {
   const colors: Record<number, string> = { 1: 'text-yellow-400', 2: 'text-gray-300', 3: 'text-amber-600' }
   return <span className={`text-sm font-bold ${colors[posicion] || 'text-gray-500'}`}>#{posicion}</span>
 }
+

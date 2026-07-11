@@ -48,7 +48,7 @@ export function CaptureHero({ data = {} }: CaptureHeroProps) {
     subtitle = "Únete a la élite inmobiliaria",
     description = "Regístrate para recibir contenido exclusivo, oportunidades de inversión y asesoría personalizada.",
     backgroundImage,
-    accentColor = "#B10D24",
+    accentColor = "#a89a00",
     showStats = true,
     stats = [
       { value: "+250%", label: "Plusvalía Promedio" },

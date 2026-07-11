@@ -45,27 +45,27 @@ function TimelineStep({ step, index, totalSteps }: { step: any; index: number; t
             <div className="flex flex-col items-center shrink-0 relative self-stretch">
                 <motion.div
                     animate={{
-                        borderColor: isActive ? 'rgba(190,11,60,0.9)' : 'rgba(255,255,255,0.15)',
-                        backgroundColor: isActive ? 'rgba(190,11,60,0.15)' : 'rgba(0,0,0,0.6)',
-                        boxShadow: isActive ? '0 0 18px rgba(190,11,60,0.7)' : 'none',
+                        borderColor: isActive ? 'rgba(213,193,8,0.9)' : 'rgba(255,255,255,0.15)',
+                        backgroundColor: isActive ? 'rgba(213,193,8,0.15)' : 'rgba(0,0,0,0.6)',
+                        boxShadow: isActive ? '0 0 18px rgba(213,193,8,0.7)' : 'none',
                     }}
                     transition={{ duration: 0.4 }}
                     className="relative w-12 h-12 border-2 flex items-center justify-center rounded-xl z-20"
                 >
                     <Icon
                         className="w-5 h-5 transition-colors duration-400"
-                        style={{ color: isActive ? '#be0b3c' : 'rgba(255,255,255,0.6)' }}
+                        style={{ color: isActive ? '#d5c108' : 'rgba(255,255,255,0.6)' }}
                     />
                     <div
                         className="absolute -top-2 -right-2 text-[9px] font-black text-white w-5 h-5 flex items-center justify-center rounded-sm transition-colors duration-400"
-                        style={{ backgroundColor: isActive ? '#be0b3c' : 'rgba(80,80,80,0.8)' }}
+                        style={{ backgroundColor: isActive ? '#d5c108' : 'rgba(80,80,80,0.8)' }}
                     >
                         {index + 1}
                     </div>
                 </motion.div>
                 {index < totalSteps - 1 && (
                     <motion.div
-                        animate={{ backgroundColor: isActive ? 'rgba(190,11,60,0.5)' : 'rgba(255,255,255,0.08)' }}
+                        animate={{ backgroundColor: isActive ? 'rgba(213,193,8,0.5)' : 'rgba(255,255,255,0.08)' }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="absolute top-12 bottom-0 w-[2px] z-0"
                     />
@@ -92,7 +92,7 @@ function TimelineStep({ step, index, totalSteps }: { step: any; index: number; t
                         />
                         <div
                             className="absolute inset-0 transition-colors duration-400"
-                            style={{ backgroundColor: isActive ? 'rgba(190,11,60,0.05)' : 'rgba(0,0,0,0.45)' }}
+                            style={{ backgroundColor: isActive ? 'rgba(213,193,8,0.05)' : 'rgba(0,0,0,0.45)' }}
                         />
                     </div>
                 ) : null}
@@ -149,12 +149,12 @@ export function Process() {
                     >
                         <motion.line
                             x1="50" y1="40" x2="950" y2="40"
-                            stroke="#be0b3c"
+                            stroke="#d5c108"
                             strokeWidth="2"
                             strokeLinecap="round"
                             style={{
                                 pathLength,
-                                filter: "drop-shadow(0 0 6px rgba(190,11,60,0.6))",
+                                filter: "drop-shadow(0 0 6px rgba(213,193,8,0.6))",
                             }}
                         />
                     </svg>
@@ -179,7 +179,7 @@ export function Process() {
                                     transition={{ duration: 0.7, delay: index * 0.15, ease: [0.16, 1, 0.3, 1] }}
                                     className="relative flex flex-col group"
                                 >
-                                    <div className="relative w-20 h-20 bg-black border border-white/20 flex items-center justify-center rounded-xl mb-6 shadow-[0_0_15px_rgba(255,255,255,0.05)] z-10 mx-0 group-hover:border-blis-red/60 group-hover:shadow-[0_0_20px_rgba(190,11,60,0.3)] transition-all">
+                                    <div className="relative w-20 h-20 bg-black border border-white/20 flex items-center justify-center rounded-xl mb-6 shadow-[0_0_15px_rgba(255,255,255,0.05)] z-10 mx-0 group-hover:border-blis-red/60 group-hover:shadow-[0_0_20px_rgba(213,193,8,0.3)] transition-all">
                                         <div className="absolute inset-0 bg-blis-red opacity-0 group-hover:opacity-20 transition-opacity rounded-xl" />
                                         <Icon className="w-8 h-8 text-white group-hover:text-blis-red transition-colors" />
                                         <div className="absolute -top-3 -right-3 text-xs font-black bg-blis-red text-white w-6 h-6 flex flex-col items-center justify-center rounded-sm">
@@ -213,3 +213,4 @@ export function Process() {
         </section>
     );
 }
+

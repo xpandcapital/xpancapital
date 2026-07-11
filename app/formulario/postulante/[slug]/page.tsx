@@ -202,7 +202,7 @@ export default function PostulanteFormPage({ params }: { params: Promise<{ slug:
           </div>
           <h1 className="text-3xl font-black mb-3">Formulario no encontrado</h1>
           <p className="text-gray-400 mb-8">{error || 'El puesto que buscas no existe o no está disponible.'}</p>
-          <a href="/" className="px-8 py-3 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:scale-105 transition-all shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+          <a href="/" className="px-8 py-3 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:scale-105 transition-all shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
             Volver al inicio
           </a>
         </div>
@@ -220,7 +220,7 @@ export default function PostulanteFormPage({ params }: { params: Promise<{ slug:
           <h1 className="text-3xl font-black mb-3">¡Postulación enviada!</h1>
           <p className="text-gray-400 mb-2">Gracias por aplicar a <span className="text-white font-semibold">{puesto.nombre}</span>.</p>
           <p className="text-gray-500 text-sm mb-8">Revisaremos tu información y te contactaremos pronto.</p>
-          <a href="/" className="px-8 py-3 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:scale-105 transition-all shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+          <a href="/" className="px-8 py-3 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:scale-105 transition-all shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
             Volver al inicio
           </a>
         </motion.div>
@@ -251,7 +251,7 @@ export default function PostulanteFormPage({ params }: { params: Promise<{ slug:
                 <span>{progressPct}%</span>
               </div>
               <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #be0b3c, #209f89)' }} initial={{ width: '0%' }} animate={{ width: `${progressPct}%` }} transition={{ duration: 0.3 }} />
+                <motion.div className="h-full rounded-full" style={{ background: 'linear-gradient(90deg, #d5c108, #209f89)' }} initial={{ width: '0%' }} animate={{ width: `${progressPct}%` }} transition={{ duration: 0.3 }} />
               </div>
             </div>
           </motion.div>
@@ -301,7 +301,7 @@ export default function PostulanteFormPage({ params }: { params: Promise<{ slug:
 
             <div className="pt-4 pb-20">
               <button type="submit" disabled={submitting}
-                className="w-full py-4 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(190,11,60,0.4)]">
+                className="w-full py-4 bg-blis-red text-white rounded-xl font-bold text-sm uppercase tracking-wider hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(213,193,8,0.4)]">
                 {submitting ? <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</> : <><Send className="w-5 h-5" /> Enviar Postulación</>}
               </button>
               <p className="text-center text-gray-600 text-xs mt-3">Al enviar, confirmas que la información es verídica.</p>

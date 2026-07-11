@@ -139,7 +139,7 @@ export default function ProjectDetailPage() {
   }
 
   const statusInfo = getStatusInfo(project.status);
-  const primaryColor = project.primary_color || "#B10D24";
+  const primaryColor = project.primary_color || "#a89a00";
   const images = project.gallery_images?.length > 0 
     ? project.gallery_images 
     : project.cover_image 

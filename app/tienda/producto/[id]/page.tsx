@@ -338,7 +338,7 @@ export default function ProductDetailPage() {
                                     <button
                                         key={i}
                                         onClick={() => setActiveImage(i)}
-                                        className={`flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === i ? "border-blis-red shadow-[0_0_15px_rgba(190,11,60,0.4)]" : "border-white/10 opacity-60 hover:opacity-100"}`}
+                                        className={`flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === i ? "border-blis-red shadow-[0_0_15px_rgba(213,193,8,0.4)]" : "border-white/10 opacity-60 hover:opacity-100"}`}
                                     >
                                         <img src={img} alt="" className="w-full h-full object-cover" />
                                     </button>
@@ -444,7 +444,7 @@ export default function ProductDetailPage() {
                                 {/* Section 1: Header Info */}
                                 <div className="space-y-4">
                                     <div className="flex flex-wrap items-center gap-2 text-[8px] font-black uppercase tracking-widest">
-                                        <div className="flex items-center gap-1.5 text-blis-red bg-blis-red/10 px-2.5 py-1.5 rounded-lg border border-blis-red/20 shadow-[0_0_15px_rgba(190,11,60,0.1)]">
+                                        <div className="flex items-center gap-1.5 text-blis-red bg-blis-red/10 px-2.5 py-1.5 rounded-lg border border-blis-red/20 shadow-[0_0_15px_rgba(213,193,8,0.1)]">
                                             <TrendingUp className="w-3 h-3" /> BEST SELLER
                                         </div>
                                         <div className="flex items-center gap-1.5 text-blue-400 bg-blue-400/10 px-2.5 py-1.5 rounded-lg border border-blue-400/20">
@@ -600,7 +600,7 @@ export default function ProductDetailPage() {
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${Math.min(100, (product.stock || 5) * 5)}%` }}
                                                 transition={{ duration: 2 }}
-                                                className="h-full bg-gradient-to-r from-blis-red to-amber-500 shadow-[0_0_15px_rgba(190,11,60,0.5)]"
+                                                className="h-full bg-gradient-to-r from-blis-red to-amber-500 shadow-[0_0_15px_rgba(213,193,8,0.5)]"
                                             />
                                         </div>
                                         <p className="text-center text-[8px] font-bold text-blis-red uppercase tracking-[0.3em] animate-pulse">
@@ -643,8 +643,8 @@ export default function ProductDetailPage() {
                 }
                 .glass-card:hover {
                     background: linear-gradient(160deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-                    border-color: rgba(190, 11, 60, 0.3);
-                    box-shadow: 0 40px 100px -30px rgba(190, 11, 60, 0.2);
+                    border-color: rgba(213, 193, 8, 0.3);
+                    box-shadow: 0 40px 100px -30px rgba(213, 193, 8, 0.2);
                     transform: translateY(-8px) scale(1.01);
                 }
                 @keyframes spin {
@@ -658,3 +658,4 @@ export default function ProductDetailPage() {
         </main >
     );
 }
+

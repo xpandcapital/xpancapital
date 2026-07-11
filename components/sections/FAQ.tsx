@@ -98,7 +98,7 @@ export function FAQ() {
                             transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
                             className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
                                 activeIndex === index
-                                    ? 'border-blis-red bg-blis-red/10 shadow-[0_0_20px_rgba(190,11,60,0.2)]'
+                                    ? 'border-blis-red bg-blis-red/10 shadow-[0_0_20px_rgba(213,193,8,0.2)]'
                                     : 'glass-card border-white/10 hover:border-blis-red/50 hover:bg-blis-red/5'
                             }`}
                         >
@@ -107,7 +107,7 @@ export function FAQ() {
                                 className="w-full text-left p-6 flex items-center justify-between focus:outline-none group"
                             >
                                 <h3 className={`text-sm md:text-base lg:text-lg font-bold uppercase transition-colors pr-8 leading-snug ${
-                                    activeIndex === index ? 'text-white drop-shadow-[0_0_8px_rgba(190,11,60,0.3)]' : 'text-gray-300'
+                                    activeIndex === index ? 'text-white drop-shadow-[0_0_8px_rgba(213,193,8,0.3)]' : 'text-gray-300'
                                 }`}>
                                     {faq.question}
                                 </h3>
@@ -116,7 +116,7 @@ export function FAQ() {
                                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                                     className={`flex-shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${
                                         activeIndex === index
-                                            ? 'border-blis-red bg-blis-red text-white shadow-[0_0_10px_rgba(190,11,60,0.4)]'
+                                            ? 'border-blis-red bg-blis-red text-white shadow-[0_0_10px_rgba(213,193,8,0.4)]'
                                             : 'border-white/20 text-white/50 group-hover:border-blis-red/50 group-hover:text-blis-red'
                                     }`}
                                 >
@@ -166,3 +166,4 @@ export function FAQ() {
         </section>
     );
 }
+

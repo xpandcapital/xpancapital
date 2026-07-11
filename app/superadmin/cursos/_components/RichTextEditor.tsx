@@ -300,7 +300,7 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
               </div>
 
               <div className="grid grid-cols-6 gap-2 mb-4">
-                {['#FFFFFF', '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#BE0B3C', '#F59E0B', '#10B981', '#3B82F6'].map(color => (
+                {['#FFFFFF', '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#d5c108', '#F59E0B', '#10B981', '#3B82F6'].map(color => (
                   <button
                     key={color}
                     type="button"
@@ -536,3 +536,4 @@ export function RichTextEditor({ value, onChange, placeholder }: RichTextEditorP
     </div>
   )
 }
+

@@ -28,7 +28,7 @@ export default function MiGamificacion() {
   }
 
   if (loading) {
-    return <div className="min-h-screen bg-[#050505] flex items-center justify-center"><Loader2 className="w-8 h-8 text-[#ff1e56] animate-spin" /></div>
+    return <div className="min-h-screen bg-[#050505] flex items-center justify-center"><Loader2 className="w-8 h-8 text-[#f5e100] animate-spin" /></div>
   }
 
   if (!stats) {
@@ -45,7 +45,7 @@ export default function MiGamificacion() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <motion.div variants={item} className="bg-gray-900/60 border border-gray-800 rounded-lg p-4">
-            <TrendingUp className="w-5 h-5 text-[#ff1e56] mb-2" />
+            <TrendingUp className="w-5 h-5 text-[#f5e100] mb-2" />
             <p className="text-2xl font-bold text-white">{stats.puntos.toLocaleString()}</p>
             <p className="text-xs text-gray-500">Total</p>
           </motion.div>
@@ -68,7 +68,7 @@ export default function MiGamificacion() {
 
         {/* Breakdown por categoría */}
         <div className="space-y-4">
-          <CategoriaBarra label="Cursos" icon={BookOpen} puntos={stats.puntos_cursos} total={stats.puntos} color="#ff1e56" permanente />
+          <CategoriaBarra label="Cursos" icon={BookOpen} puntos={stats.puntos_cursos} total={stats.puntos} color="#f5e100" permanente />
           <CategoriaBarra label="Comunidad" icon={MessageCircle} puntos={stats.puntos_comunidad} total={stats.puntos} color="#8b5cf6" />
           <CategoriaBarra label="Blog" icon={FileText} puntos={stats.puntos_blog} total={stats.puntos} color="#06b6d4" />
         </div>
@@ -102,8 +102,8 @@ export default function MiGamificacion() {
         {/* Historial */}
         <motion.div variants={item}>
           <div className="flex gap-4 mb-3">
-            <button onClick={() => setShowHistorico(false)} className={`text-sm font-medium ${!showHistorico ? 'text-[#ff1e56]' : 'text-gray-500'}`}>Reciente</button>
-            <button onClick={fetchHistorico} className={`text-sm font-medium flex items-center gap-1 ${showHistorico ? 'text-[#ff1e56]' : 'text-gray-500'}`}><History className="w-4 h-4" />Histórico</button>
+            <button onClick={() => setShowHistorico(false)} className={`text-sm font-medium ${!showHistorico ? 'text-[#f5e100]' : 'text-gray-500'}`}>Reciente</button>
+            <button onClick={fetchHistorico} className={`text-sm font-medium flex items-center gap-1 ${showHistorico ? 'text-[#f5e100]' : 'text-gray-500'}`}><History className="w-4 h-4" />Histórico</button>
           </div>
 
           {showHistorico ? (
@@ -115,7 +115,7 @@ export default function MiGamificacion() {
                     <p className="text-gray-500 text-xs">#{h.ranking_global || '---'} en ranking</p>
                   </div>
                   <div className="text-right text-xs space-y-1">
-                    <p className="text-[#ff1e56]">Cursos: +{h.puntos_cursos}</p>
+                    <p className="text-[#f5e100]">Cursos: +{h.puntos_cursos}</p>
                     <p className="text-purple-400">Comunidad: +{h.puntos_comunidad}</p>
                     <p className="text-cyan-400">Blog: +{h.puntos_blog}</p>
                   </div>
@@ -128,7 +128,7 @@ export default function MiGamificacion() {
               {historial.slice(0, 15).map(p => (
                 <div key={p.id} className="flex justify-between bg-gray-900/40 border border-gray-800/50 rounded-lg px-4 py-2">
                   <span className="text-gray-300 text-sm capitalize">{p.tipo.replace(/_/g, ' ')}</span>
-                  <span className="text-[#ff1e56] text-sm font-medium">+{p.puntos}</span>
+                  <span className="text-[#f5e100] text-sm font-medium">+{p.puntos}</span>
                 </div>
               ))}
             </div>
@@ -136,7 +136,7 @@ export default function MiGamificacion() {
         </motion.div>
 
         <motion.div variants={item} className="text-center">
-          <Link href="/miembros/ranking" className="inline-block px-6 py-3 bg-[#ff1e56] text-white rounded-lg font-medium hover:bg-[#e01a4c] transition-colors">Ver Ranking</Link>
+          <Link href="/miembros/ranking" className="inline-block px-6 py-3 bg-[#f5e100] text-white rounded-lg font-medium hover:bg-[#d4c000] transition-colors">Ver Ranking</Link>
         </motion.div>
       </motion.div>
     </div>
@@ -161,3 +161,4 @@ function CategoriaBarra({ label, icon: Icon, puntos, total, color, permanente }:
     </motion.div>
   )
 }
+

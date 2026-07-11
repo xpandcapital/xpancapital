@@ -421,7 +421,7 @@ export default function AdminProfile() {
                 </div>
                 <button
                     onClick={handleUpdate}
-                    className="w-full sm:w-auto bg-blis-red text-white px-8 py-4 sm:py-5 rounded-3xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)] mt-4 sm:mt-0"
+                    className="w-full sm:w-auto bg-blis-red text-white px-8 py-4 sm:py-5 rounded-3xl font-black uppercase tracking-widest text-xs hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)] mt-4 sm:mt-0"
                 >
                     <Save className="w-5 h-5" /> Guardar Perfil
                 </button>
@@ -616,3 +616,4 @@ export default function AdminProfile() {
         </div>
     );
 }
+

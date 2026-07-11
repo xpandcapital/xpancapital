@@ -43,9 +43,9 @@ export const TradingTerminal: React.FC<TradingTerminalProps> = ({ onScannerLog, 
       {(t.drawMode === 'freehand' || t.drawMode === 'line') && (
         <>
           <div className="hidden md:flex absolute left-16 top-[60%] -translate-y-1/2 z-[3000] p-2.5 bg-[#050505]/98 backdrop-blur-xl border border-white/10 rounded-2xl flex-col gap-3 shadow-[0_10px_50px_rgba(0,0,0,0.9)] animate-fade-in">
-            <div className="w-1 h-3/4 absolute -left-1 top-[12.5%] bg-[#ff004c] rounded-full opacity-60"></div>
+            <div className="w-1 h-3/4 absolute -left-1 top-[12.5%] bg-[#f2d600] rounded-full opacity-60"></div>
             {[
-              {name: 'Rosa Blis', hex: '#ff004c'}, {name: 'Azul', hex: '#5956e9'}, {name: 'Amarillo', hex: '#fbe771'}, {name: 'Naranja', hex: '#f38704'}, {name: 'Blanco', hex: '#ffffff'}
+              {name: 'Rosa Blis', hex: '#f2d600'}, {name: 'Azul', hex: '#5956e9'}, {name: 'Amarillo', hex: '#fbe771'}, {name: 'Naranja', hex: '#f38704'}, {name: 'Blanco', hex: '#ffffff'}
             ].map(c => (
               <button key={c.hex} onClick={() => t.setDrawColor(c.hex)} title={c.name}
                 className={`w-5 h-5 rounded-full border-2 transition-all hover:scale-125 ${t.drawColor === c.hex ? 'border-white scale-110 shadow-[0_0_10px_currentColor]' : 'border-transparent'}`}
@@ -54,7 +54,7 @@ export const TradingTerminal: React.FC<TradingTerminalProps> = ({ onScannerLog, 
           </div>
           <div className="flex md:hidden absolute left-[50%] -translate-x-1/2 top-[5rem] z-[3000] p-2 bg-[#050505]/98 backdrop-blur-xl border border-white/10 rounded-2xl flex-row gap-3 shadow-[0_10px_50px_rgba(0,0,0,0.9)] animate-fade-in">
             {[
-              {name: 'Rosa Blis', hex: '#ff004c'}, {name: 'Azul', hex: '#5956e9'}, {name: 'Amarillo', hex: '#fbe771'}, {name: 'Naranja', hex: '#f38704'}, {name: 'Blanco', hex: '#ffffff'}
+              {name: 'Rosa Blis', hex: '#f2d600'}, {name: 'Azul', hex: '#5956e9'}, {name: 'Amarillo', hex: '#fbe771'}, {name: 'Naranja', hex: '#f38704'}, {name: 'Blanco', hex: '#ffffff'}
             ].map(c => (
               <button key={c.hex} onClick={() => t.setDrawColor(c.hex)} title={c.name}
                 className={`w-4 h-4 rounded-full border-2 transition-all hover:scale-125 ${t.drawColor === c.hex ? 'border-white scale-110 shadow-[0_0_10px_currentColor]' : 'border-transparent'}`}
@@ -65,17 +65,17 @@ export const TradingTerminal: React.FC<TradingTerminalProps> = ({ onScannerLog, 
       )}
 
       <div className="w-full h-16 md:w-14 md:h-auto border-b md:border-b-0 md:border-r border-white/5 bg-[#050505] flex md:flex-col flex-row items-center py-0 md:py-3 px-4 md:px-0 shrink-0 z-[200] relative md:shadow-2xl overflow-x-auto md:overflow-y-auto no-scrollbar">
-        <div className="text-[#ff004c] mr-6 md:mr-0 md:mb-5 shrink-0 scale-90 md:scale-100">
+        <div className="text-[#f2d600] mr-6 md:mr-0 md:mb-5 shrink-0 scale-90 md:scale-100">
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <rect x="6" y="10" width="4" height="12" fill="#ff004c" rx="0.5"/>
-            <line x1="8" y1="6" x2="8" y2="10" stroke="#ff004c" strokeWidth="1.5" strokeLinecap="round"/>
-            <line x1="8" y1="22" x2="8" y2="26" stroke="#ff004c" strokeWidth="1.5" strokeLinecap="round"/>
+            <rect x="6" y="10" width="4" height="12" fill="#f2d600" rx="0.5"/>
+            <line x1="8" y1="6" x2="8" y2="10" stroke="#f2d600" strokeWidth="1.5" strokeLinecap="round"/>
+            <line x1="8" y1="22" x2="8" y2="26" stroke="#f2d600" strokeWidth="1.5" strokeLinecap="round"/>
             <rect x="13" y="7" width="4" height="10" fill="#0ecb81" rx="0.5"/>
             <line x1="15" y1="3" x2="15" y2="7" stroke="#0ecb81" strokeWidth="1.5" strokeLinecap="round"/>
             <line x1="15" y1="17" x2="15" y2="21" stroke="#0ecb81" strokeWidth="1.5" strokeLinecap="round"/>
-            <rect x="20" y="12" width="4" height="9" fill="#ff004c" rx="0.5"/>
-            <line x1="22" y1="8" x2="22" y2="12" stroke="#ff004c" strokeWidth="1.5" strokeLinecap="round"/>
-            <line x1="22" y1="21" x2="22" y2="25" stroke="#ff004c" strokeWidth="1.5" strokeLinecap="round"/>
+            <rect x="20" y="12" width="4" height="9" fill="#f2d600" rx="0.5"/>
+            <line x1="22" y1="8" x2="22" y2="12" stroke="#f2d600" strokeWidth="1.5" strokeLinecap="round"/>
+            <line x1="22" y1="21" x2="22" y2="25" stroke="#f2d600" strokeWidth="1.5" strokeLinecap="round"/>
           </svg>
         </div>
         <div className="flex md:flex-col flex-row md:space-y-4 space-x-3 md:space-x-0 w-auto md:w-full items-center shrink-0">

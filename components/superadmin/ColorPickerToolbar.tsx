@@ -41,7 +41,7 @@ export function ColorPickerToolbar({
             </div>
 
             <div className="grid grid-cols-6 gap-2 mb-4">
-              {['#FFFFFF', '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#BE0B3C', '#F59E0B', '#10B981', '#3B82F6'].map(color => (
+              {['#FFFFFF', '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#d5c108', '#F59E0B', '#10B981', '#3B82F6'].map(color => (
                 <button key={color} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { onColorChange(color); setShowColorPicker(false); }} className="w-full aspect-square rounded-full border border-white/20 shadow-inner hover:scale-125 transition-transform" style={{ backgroundColor: color }} />
               ))}
             </div>
@@ -63,3 +63,4 @@ export function ColorPickerToolbar({
     </div>
   );
 }
+

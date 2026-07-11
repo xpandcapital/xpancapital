@@ -128,7 +128,7 @@ export const ScannerConsole: React.FC<ScannerConsoleProps> = ({
         className={`overflow-y-auto custom-scrollbar ${maxHeight}`}
         style={{
           scrollbarWidth: 'thin',
-          scrollbarColor: '#be0b3c transparent',
+          scrollbarColor: '#d5c108 transparent',
         }}
       >
         {logs.length === 0 ? (
@@ -193,7 +193,7 @@ export const ScannerConsole: React.FC<ScannerConsoleProps> = ({
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #be0b3c;
+          background: #d5c108;
           border-radius: 2px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
@@ -203,3 +203,4 @@ export const ScannerConsole: React.FC<ScannerConsoleProps> = ({
     </div>
   );
 };
+

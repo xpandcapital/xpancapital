@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         ancho: template.ancho || 297,
         alto: template.alto || 210,
         color_fondo: template.color_fondo || '#0a0a0a',
-        color_primario: template.color_primario || '#B10D24',
+        color_primario: template.color_primario || '#a89a00',
         color_secundario: template.color_secundario || '#10B981',
         color_texto: template.color_texto || '#ffffff',
         color_texto_secundario: template.color_texto_secundario || '#9ca3af',

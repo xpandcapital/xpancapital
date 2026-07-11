@@ -26,7 +26,7 @@ export function FunnelBenefits({ data = {} }: FunnelBenefitsProps) {
   const {
     title = "¿Por qué elegirnos?",
     subtitle = "Beneficios Exclusivos",
-    accentColor = "#B10D24",
+    accentColor = "#a89a00",
     benefits = [
       { icon: "TrendingUp", title: "Alta Plusvalía", description: "Propiedades con incremento de valor garantizado" },
       { icon: "Shield", title: "Seguridad Legal", description: "100% documentos en regla y saneamiento completo" },

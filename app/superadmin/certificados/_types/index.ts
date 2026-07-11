@@ -80,7 +80,7 @@ export function dbToLocal(db: DBTemplate): CertificateTemplate {
         x: db.posicion_curso?.x || 50,
         y: db.posicion_curso?.y || 55,
         fontSize: db.tamano_cuerpo ? Math.max(db.tamano_cuerpo, 24) : 32,
-        color: db.color_primario || '#B10D24',
+        color: db.color_primario || '#a89a00',
         fontWeight: '700'
       },
       {
@@ -117,7 +117,7 @@ export function localToDb(local: CertificateTemplate): Partial<DBTemplate> {
     ancho: 297,
     alto: 210,
     color_fondo: '#0a0a0a',
-    color_primario: courseEl?.color || '#B10D24',
+    color_primario: courseEl?.color || '#a89a00',
     color_secundario: '#10B981',
     color_texto: nameEl?.color || '#ffffff',
     color_texto_secundario: dateEl?.color || '#9ca3af',
@@ -140,7 +140,7 @@ export const createNewTemplate = (): CertificateTemplate => ({
   backgroundImage: null,
   elements: [
     { id: 'name', type: 'name', x: 50, y: 40, fontSize: 48, color: '#ffffff', fontWeight: '900' },
-    { id: 'course', type: 'course', x: 50, y: 55, fontSize: 32, color: '#B10D24', fontWeight: '700' },
+    { id: 'course', type: 'course', x: 50, y: 55, fontSize: 32, color: '#a89a00', fontWeight: '700' },
     { id: 'date', type: 'date', x: 30, y: 80, fontSize: 16, color: '#9ca3af', fontWeight: '600' },
     { id: 'qr', type: 'qr', x: 85, y: 90, fontSize: 80, color: '#000000', fontWeight: 'normal' }
   ]

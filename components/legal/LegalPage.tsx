@@ -151,7 +151,7 @@ export function LegalPage({ data, slug }: LegalPageProps) {
               initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
               animate={{ opacity: 1, scale: 1, rotate: 0 }}
               transition={{ type: "spring", bounce: 0.4, duration: 1 }}
-              className="w-32 h-32 mx-auto mb-8 bg-blis-red/5 border border-blis-red/20 rounded-[2.5rem] flex items-center justify-center shadow-[0_0_80px_rgba(190,11,60,0.15)] relative"
+              className="w-32 h-32 mx-auto mb-8 bg-blis-red/5 border border-blis-red/20 rounded-[2.5rem] flex items-center justify-center shadow-[0_0_80px_rgba(213,193,8,0.15)] relative"
             >
               <div className="w-16 h-16 text-blis-red/80">
                 {icon}
@@ -255,7 +255,7 @@ export function LegalPage({ data, slug }: LegalPageProps) {
                     whileHover={{ x: 4, scale: 1.02 }}
                     className={`w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 group ${
                       activeSection === `article-${i}`
-                        ? "bg-blis-red/10 border-blis-red/30 shadow-[0_0_20px_rgba(190,11,60,0.1)]"
+                        ? "bg-blis-red/10 border-blis-red/30 shadow-[0_0_20px_rgba(213,193,8,0.1)]"
                         : "bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.04]"
                     }`}
                   >
@@ -429,7 +429,7 @@ function LegalArticleCard({
       whileHover={{ scale: 1.005 }}
       className={`glass-card rounded-[2.5rem] border overflow-hidden transition-all duration-300 ${
         isActive
-          ? "border-blis-red/30 shadow-[0_0_40px_rgba(190,11,60,0.08)]"
+          ? "border-blis-red/30 shadow-[0_0_40px_rgba(213,193,8,0.08)]"
           : "border-white/5"
       }`}
     >
@@ -440,7 +440,7 @@ function LegalArticleCard({
       >
         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-all ${
           isActive
-            ? "bg-blis-red/20 text-blis-red shadow-[0_0_20px_rgba(190,11,60,0.2)]"
+            ? "bg-blis-red/20 text-blis-red shadow-[0_0_20px_rgba(213,193,8,0.2)]"
             : "bg-white/5 text-gray-500 group-hover:text-gray-300"
         }`}>
           <span className="text-sm font-black">{index + 1}</span>
@@ -486,3 +486,4 @@ function LegalArticleCard({
 }
 
 export type { LegalArticle, LegalPageData }
+

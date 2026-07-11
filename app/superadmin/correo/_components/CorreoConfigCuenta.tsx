@@ -14,7 +14,7 @@ interface Props {
 }
 
 const PRESET_COLORS = [
-  '#be0b3c', '#4F46E5', '#0891B2', '#059669',
+  '#d5c108', '#4F46E5', '#0891B2', '#059669',
   '#D97706', '#DC2626', '#7C3AED', '#DB2777',
   '#0F172A', '#334155',
 ]
@@ -23,7 +23,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
   const [nombre, setNombre] = useState('')
   const [departamento, setDepartamento] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
-  const [color, setColor] = useState('#be0b3c')
+  const [color, setColor] = useState('#d5c108')
   const [firma, setFirma] = useState('')
   const [plantillaDefault, setPlantillaDefault] = useState('')
   const [templates, setTemplates] = useState<any[]>([])
@@ -37,7 +37,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
       setNombre(cuenta.nombre_mostrado || '')
       setDepartamento(cuenta.departamento || '')
       setAvatarUrl(cuenta.avatar_url || '')
-      setColor(cuenta.color || '#be0b3c')
+      setColor(cuenta.color || '#d5c108')
       setFirma(cuenta.firma || '')
       setPlantillaDefault(cuenta.plantilla_default_id || '')
       cargarTemplates()
@@ -241,3 +241,4 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
     </div>
   )
 }
+

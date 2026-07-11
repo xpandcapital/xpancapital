@@ -31,7 +31,7 @@ const STATUS_OPTIONS = [
 ];
 
 const DOT_COLORS = [
-  { name: 'Rojo', value: '#be0b3c' },
+  { name: 'Rojo', value: '#d5c108' },
   { name: 'Verde', value: '#10b981' },
   { name: 'Azul', value: '#3b82f6' },
   { name: 'Amarillo', value: '#fbbf24' },
@@ -79,7 +79,7 @@ export function MapEditor({ backgroundImage, locations, onChange, projects = [] 
       province: '',
       coordinates: { top: `${y.toFixed(1)}%`, left: `${x.toFixed(1)}%` },
       status: 'Preventa',
-      dotColor: '#be0b3c'
+      dotColor: '#d5c108'
     };
     
     const newLocations = [...(localLocations || []), newLocation];
@@ -178,7 +178,7 @@ export function MapEditor({ backgroundImage, locations, onChange, projects = [] 
       province: '',
       coordinates: { top: '50%', left: '50%' },
       status: 'Preventa',
-      dotColor: '#be0b3c'
+      dotColor: '#d5c108'
     };
     const newLocations = [...(localLocations || []), newLocation];
     setLocalLocations(newLocations);
@@ -202,7 +202,7 @@ export function MapEditor({ backgroundImage, locations, onChange, projects = [] 
       province: '',
       coordinates: { top: '50%', left: '50%' },
       status: statusMap[project.status || ''] || 'Preventa',
-      dotColor: project.primary_color || '#be0b3c'
+      dotColor: project.primary_color || '#d5c108'
     };
     const newLocations = [...(localLocations || []), newLocation];
     setLocalLocations(newLocations);
@@ -329,7 +329,7 @@ export function MapEditor({ backgroundImage, locations, onChange, projects = [] 
                   >
                     <div
                       className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: project.primary_color || '#be0b3c' }}
+                      style={{ backgroundColor: project.primary_color || '#d5c108' }}
                     />
                     {project.name}
                   </button>

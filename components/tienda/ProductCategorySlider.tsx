@@ -122,7 +122,7 @@ export function ProductCategorySlider(props: CategorySliderProps) {
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true, margin: "-50px" }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="snap-start flex-shrink-0 w-[280px] md:w-[330px] group relative flex flex-col glass-card rounded-3xl overflow-hidden border border-white/5 hover:border-blis-red/50 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(190,11,60,0.2)]"
+                            className="snap-start flex-shrink-0 w-[280px] md:w-[330px] group relative flex flex-col glass-card rounded-3xl overflow-hidden border border-white/5 hover:border-blis-red/50 transition-all duration-500 hover:shadow-[0_20px_50px_rgba(213,193,8,0.2)]"
                         >
                             <ProductCardInner
                                 product={product}
@@ -171,13 +171,13 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                 )}
 
                 {product.isHot && !isPurchased && (
-                    <div className="absolute top-4 right-4 bg-blis-red text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(190,11,60,0.6)] animate-pulse z-10">
+                    <div className="absolute top-4 right-4 bg-blis-red text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-[0_0_20px_rgba(213,193,8,0.6)] animate-pulse z-10">
                         Top Vendedor
                     </div>
                 )}
 
                 {(product as any).hasTimer && (
-                    <div className="absolute bottom-4 left-4 right-4 bg-gradient-to-r from-blis-red to-amber-600 backdrop-blur-xl text-white border border-white/20 p-2.5 rounded-2xl flex items-center justify-between shadow-[0_10px_30px_rgba(190,11,60,0.4)] z-10">
+                    <div className="absolute bottom-4 left-4 right-4 bg-gradient-to-r from-blis-red to-amber-600 backdrop-blur-xl text-white border border-white/20 p-2.5 rounded-2xl flex items-center justify-between shadow-[0_10px_30px_rgba(213,193,8,0.4)] z-10">
                         <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4 animate-spin-slow" />
                             <span className="text-[10px] uppercase tracking-tighter font-black">Oferta Limitada</span>
@@ -248,7 +248,7 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
                                     }
                                 }}
                                 className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all border ${isLiked
-                                    ? 'bg-blis-red border-blis-red text-white shadow-[0_0_20px_rgba(190,11,60,0.4)]'
+                                    ? 'bg-blis-red border-blis-red text-white shadow-[0_0_20px_rgba(213,193,8,0.4)]'
                                     : 'bg-white/5 border-white/10 text-white hover:bg-white hover:text-black hover:border-white'}`}
                                 title="Favoritos"
                             >
@@ -320,3 +320,4 @@ function ProductCardInner({ product, onTriggerAuth }: { product: ProductDef, onT
         </div>
     );
 }
+

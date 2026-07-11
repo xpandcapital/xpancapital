@@ -131,7 +131,7 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = '
           <div className="inline-flex gap-2 px-4 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full"><div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1" /><span className="text-xs text-emerald-700 font-medium">Pago confirmado</span></div>
         </div>
         <div className="space-y-3">
-          <Link href="/miembros" className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-blis-red to-blis-red/90 text-white font-black uppercase text-sm rounded-2xl transition-all shadow-[0_0_30px_rgba(255,30,86,0.25)] group">Acceder a Mis Productos <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></Link>
+          <Link href="/miembros" className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-blis-red to-blis-red/90 text-white font-black uppercase text-sm rounded-2xl transition-all shadow-[0_0_30px_rgba(245,225,0,0.25)] group">Acceder a Mis Productos <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></Link>
           <br /><Link href="/tienda" className="text-sm text-gray-400 hover:text-gray-600">Continuar comprando</Link>
         </div>
       </motion.div>
@@ -190,3 +190,4 @@ export function CheckoutIzipay({ formToken, publicKey, totalUSD, displayMode = '
     </div>
   )
 }
+

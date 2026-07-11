@@ -103,7 +103,7 @@ export function CompanySwitcher({ compact }: { compact?: boolean }) {
         className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white/5 transition-colors text-left"
       >
         <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: selected?.color_primario || '#be0b3c' }}>
+          style={{ backgroundColor: selected?.color_primario || '#d5c108' }}>
           {selected?.logo_url ? (
             <img src={selected.logo_url} alt="" className="w-4 h-4 rounded object-cover" />
           ) : (

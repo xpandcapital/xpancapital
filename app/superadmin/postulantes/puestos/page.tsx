@@ -71,7 +71,7 @@ export default function PuestosPage() {
           <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter">Puestos de Trabajo</h1>
           <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light">Gestiona los puestos y configura los formularios de postulación.</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+        <button onClick={() => setShowCreate(true)} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
           <Plus className="w-4 h-4" />Nuevo Puesto
         </button>
       </div>
@@ -81,7 +81,7 @@ export default function PuestosPage() {
           <Briefcase className="w-16 h-16 text-gray-700 mx-auto mb-4" />
           <h3 className="text-lg font-bold text-white mb-2">No hay puestos de trabajo</h3>
           <p className="text-gray-500 mb-6 text-sm">Creá el primer puesto para configurar el formulario de postulación.</p>
-          <button onClick={() => setShowCreate(true)} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+          <button onClick={() => setShowCreate(true)} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
             <Plus className="w-4 h-4 inline mr-2" />Crear Puesto
           </button>
         </div>

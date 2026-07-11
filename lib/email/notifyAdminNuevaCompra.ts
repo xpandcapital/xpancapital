@@ -64,11 +64,11 @@ function buildFallbackHTML(
 <body style="margin:0;padding:0;background:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;color:#ffffff;">
   <div style="max-width:560px;margin:0 auto;padding:32px 20px;">
     <div style="text-align:center;margin-bottom:28px;">
-      <div style="display:inline-block;background:#be0b24;padding:10px 20px;border-radius:10px;">
+      <div style="display:inline-block;background:#c9b500;padding:10px 20px;border-radius:10px;">
         <span style="font-size:18px;font-weight:900;letter-spacing:3px;text-transform:uppercase;">BLIS Corp</span>
       </div>
     </div>
-    <div style="background:#1a0a0e;border:1px solid #be0b2433;border-radius:14px;padding:20px 24px;margin-bottom:24px;text-align:center;">
+    <div style="background:#1a0a0e;border:1px solid #c9b50033;border-radius:14px;padding:20px 24px;margin-bottom:24px;text-align:center;">
       <span style="font-size:28px;">&#x1F514;</span>
       <h1 style="font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;margin:8px 0 4px;color:#fff;">Nueva Compra Pendiente</h1>
       <p style="margin:0;color:#9ca3af;font-size:13px;">Requiere tu aprobaci&oacute;n para activarse</p>
@@ -316,3 +316,4 @@ export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise
     console.error('[notifyAdminNuevaCompra] Error:', err)
   }
 }
+

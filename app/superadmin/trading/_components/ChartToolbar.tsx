@@ -3,7 +3,7 @@
 import React from 'react';
 import type { CandleData, FVGData, TickerState } from '../_types';
 
-const NEON_RED    = '#ff004c';
+const NEON_RED    = '#f2d600';
 const NEON_YELLOW = '#fff200';
 
 export const ChartToolbar = ({
@@ -163,3 +163,4 @@ export const ChartToolbar = ({
     </>
   );
 };
+

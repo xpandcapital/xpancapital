@@ -153,7 +153,7 @@ export function Team() {
                                     initial={{ width: 0 }}
                                     whileInView={{ width: "100%" }}
                                     transition={{ duration: 1.5, delay: 0.5 }}
-                                    className="bg-blis-red h-full shadow-[0_0_10px_rgba(190,11,60,0.8)]"
+                                    className="bg-blis-red h-full shadow-[0_0_10px_rgba(213,193,8,0.8)]"
                                 />
                             </div>
                         </motion.div>
@@ -204,3 +204,4 @@ export function Team() {
         </section>
     );
 }
+

@@ -38,7 +38,7 @@ export default function ProjectDetailPage() {
   const [formData, setFormData] = useState({
     name: '', id: '', status: 'EN PLANOS', website: '', location: '', description: '',
     cover_image: '', gallery_images: [] as string[], start_date: new Date().toISOString().split('T')[0],
-    end_date: '', logo_url: '', primary_color: '#be0b3c', secondary_color: '',
+    end_date: '', logo_url: '', primary_color: '#d5c108', secondary_color: '',
   })
 
   const loadProject = useCallback(async () => {
@@ -56,7 +56,7 @@ export default function ProjectDetailPage() {
           website: data.website || '', location: data.location || '', description: data.description || '',
           cover_image: data.cover_image || '', gallery_images: data.gallery_images || [],
           start_date: data.start_date || new Date().toISOString().split('T')[0], end_date: data.end_date || '',
-          logo_url: data.logo_url || '', primary_color: data.primary_color || '#be0b3c', secondary_color: data.secondary_color || '',
+          logo_url: data.logo_url || '', primary_color: data.primary_color || '#d5c108', secondary_color: data.secondary_color || '',
         })
       }
     } catch (err) { console.error('[ProjectDetail] Error:', err) }
@@ -153,7 +153,7 @@ export default function ProjectDetailPage() {
           <button onClick={handleDelete} className="px-4 py-2.5 bg-red-500/5 border border-red-500/10 rounded-xl text-red-500/50 hover:text-red-400 hover:bg-red-500/10 transition-all text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Trash2 className="w-3.5 h-3.5" />Eliminar
           </button>
-          <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+          <button onClick={handleSave} disabled={saving} className="bg-blis-red text-white px-6 py-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {saving ? 'Guardando...' : 'Guardar'}
           </button>
@@ -235,12 +235,12 @@ export default function ProjectDetailPage() {
               <div>
                 <label className="text-[10px] uppercase tracking-widest text-gray-500 font-bold block mb-2">Color Primario</label>
                 <div className="flex items-center gap-3">
-                  <input type="color" value={formData.primary_color || '#be0b3c'} onChange={e => setFormData(prev => ({ ...prev, primary_color: e.target.value }))}
+                  <input type="color" value={formData.primary_color || '#d5c108'} onChange={e => setFormData(prev => ({ ...prev, primary_color: e.target.value }))}
                     className="w-14 h-14 rounded-xl border border-white/5 cursor-pointer bg-transparent" />
                   <div className="flex-1">
                     <input type="text" value={formData.primary_color} onChange={e => setFormData(prev => ({ ...prev, primary_color: e.target.value }))}
                       className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-blis-red/50" />
-                    <div className="mt-1.5 h-6 rounded-lg border border-white/5" style={{ backgroundColor: formData.primary_color || '#be0b3c' }} />
+                    <div className="mt-1.5 h-6 rounded-lg border border-white/5" style={{ backgroundColor: formData.primary_color || '#d5c108' }} />
                   </div>
                 </div>
               </div>

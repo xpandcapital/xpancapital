@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
         nombre,
         slug,
         nombre_legal: nombre_legal || nombre,
-        color_primario: color_primario || '#be0b3c',
+        color_primario: color_primario || '#d5c108',
         color_secundario: '#000000',
         color_acento: '#10b981',
         pais_fiscal: pais_fiscal || 'PE',

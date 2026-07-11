@@ -99,7 +99,7 @@ export function BlogPosts({ data = {} }: BlogPostsProps) {
         <motion.div key={idx} variants={cardVariants}>
           <Link 
             href={`/blog/articulo/${getArticleSlug(art)}`} 
-            className={`group bg-white/5 border border-white/5 rounded-[32px] p-6 transition-all duration-500 shadow-2xl relative block hover:border-blis-red-neon hover:shadow-[0_0_25px_rgba(255,30,86,0.15)] ${art.isPremium ? 'border-amber-500/20 shadow-amber-500/5' : ''}`}
+            className={`group bg-white/5 border border-white/5 rounded-[32px] p-6 transition-all duration-500 shadow-2xl relative block hover:border-blis-red-neon hover:shadow-[0_0_25px_rgba(245,225,0,0.15)] ${art.isPremium ? 'border-amber-500/20 shadow-amber-500/5' : ''}`}
           >
             <div className="aspect-square rounded-2xl overflow-hidden mb-6 relative">
               <img src={art.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={art.title} />
@@ -126,3 +126,4 @@ export function BlogPosts({ data = {} }: BlogPostsProps) {
     </motion.div>
   );
 }
+

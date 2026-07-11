@@ -206,7 +206,7 @@ export function FooterSections() {
                                 <img
                                     src={logoVertical}
                                     alt="Logo"
-                                    className="h-36 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-4"
+                                    className="h-36 w-auto object-contain drop-shadow-[0_0_20px_rgba(213,193,8,0.6)] mb-4"
                                 />
                             ) : (
                                 <span className="text-2xl font-black text-white tracking-wider mb-4">BLIS CORP</span>
@@ -275,7 +275,7 @@ export function FooterSections() {
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
                                     disabled={isVipSubmitting}
-                                    className="px-4 py-3 bg-blis-red text-white uppercase text-xs font-bold tracking-widest rounded-lg hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)] disabled:opacity-60 flex items-center justify-center gap-2"
+                                    className="px-4 py-3 bg-blis-red text-white uppercase text-xs font-bold tracking-widest rounded-lg hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(213,193,8,0.3)] disabled:opacity-60 flex items-center justify-center gap-2"
                                 >
                                     {isVipSubmitting ? (
                                         <>
@@ -296,7 +296,7 @@ export function FooterSections() {
                     <div className="hidden lg:grid lg:grid-cols-12 gap-8 mb-16">
                         <div className="lg:col-span-3 flex flex-col items-start">
                             {logoHorizontal ? (
-                                <img src={logoHorizontal} alt="Logo" className="h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(190,11,60,0.6)] mb-4" />
+                                <img src={logoHorizontal} alt="Logo" className="h-28 w-auto object-contain drop-shadow-[0_0_20px_rgba(213,193,8,0.6)] mb-4" />
                             ) : (
                                 <span className="text-xl font-black text-white tracking-wider mb-4">BLIS CORP</span>
                             )}
@@ -380,7 +380,7 @@ export function FooterSections() {
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
                                     disabled={isVipSubmitting}
-                                    className="px-5 py-2.5 bg-blis-red text-white uppercase text-[10px] font-bold tracking-widest rounded-xl hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(190,11,60,0.3)] whitespace-nowrap disabled:opacity-60 flex items-center gap-2"
+                                    className="px-5 py-2.5 bg-blis-red text-white uppercase text-[10px] font-bold tracking-widest rounded-xl hover:bg-blis-red/80 transition-colors shadow-[0_0_15px_rgba(213,193,8,0.3)] whitespace-nowrap disabled:opacity-60 flex items-center gap-2"
                                 >
                                     {isVipSubmitting ? (
                                         <>
@@ -429,3 +429,4 @@ export function FooterSections() {
         </>
     );
 }
+

@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
         puntos_blog: profile.puntos_blog,
         nivelActual: profile.puntos_nivel,
         nivelNombre: nivelActual?.nombre || 'Sin rango',
-        nivelColor: nivelActual?.color || '#ff1e56',
+        nivelColor: nivelActual?.color || '#f5e100',
         nivelIcono: nivelActual?.icono_svg,
         nivelImagen: nivelActual?.imagen_url,
         progresoNivelPct: nivelPct,
@@ -99,3 +99,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
   }
 }
+

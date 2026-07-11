@@ -186,7 +186,7 @@ class SupabaseStorage {
             status: project.status || 'EN PLANOS',
             start_date: project.start_date || new Date().toISOString().split('T')[0],
             is_active: true,
-            primary_color: '#be0b3c',
+            primary_color: '#d5c108',
           }]);
         } else {
           await supabase.from('projects').update({
@@ -357,3 +357,4 @@ export function createSupabaseStorageProxy(): typeof localStorage {
 
   return new Proxy<typeof localStorage>({} as typeof localStorage, handler);
 }
+

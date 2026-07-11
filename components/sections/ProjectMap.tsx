@@ -153,7 +153,7 @@ export function ProjectMap() {
                                             style={{ backgroundColor: loc.dotColor, opacity: 0.2 }} />
 
                                         {/* Dot */}
-                                        <div className="w-4 h-4 rounded-full relative z-10 border-2 border-black shadow-[0_0_12px_rgba(190,11,60,0.6)]"
+                                        <div className="w-4 h-4 rounded-full relative z-10 border-2 border-black shadow-[0_0_12px_rgba(213,193,8,0.6)]"
                                             style={{ backgroundColor: loc.dotColor }} />
 
                                         {/* Tooltip */}
@@ -191,3 +191,4 @@ export function ProjectMap() {
         </section>
     );
 }
+

@@ -79,7 +79,7 @@ export function FunnelPricing({ data = {} }: FunnelPricingProps) {
         buttonLink: "#"
       }
     ],
-    accentColor = "#B10D24",
+    accentColor = "#a89a00",
     layout = "cards",
     showBadge = true
   } = data;

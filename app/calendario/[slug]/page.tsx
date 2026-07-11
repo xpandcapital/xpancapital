@@ -104,7 +104,7 @@ export default function PublicCalendarPage() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans relative text-gray-800 transition-colors duration-500"
-      style={{ backgroundColor: calendar.color_principal === '#be0b3c' ? '#f8fafc' : '#f8fafc' }}>
+      style={{ backgroundColor: calendar.color_principal === '#d5c108' ? '#f8fafc' : '#f8fafc' }}>
       <a href="/" className="absolute top-6 left-6 bg-white/20 hover:bg-white/30 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 border border-white/30 shadow-lg z-50 backdrop-blur-sm mix-blend-difference">
         <ArrowLeft size={16} /> Volver
       </a>

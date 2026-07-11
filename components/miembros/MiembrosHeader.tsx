@@ -36,12 +36,12 @@ export function MiembrosHeader() {
                 <div className="flex items-center gap-4">
                     <button className="relative text-gray-400 hover:text-white transition-colors p-2">
                         <ShoppingCart className="w-5 h-5" />
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-blis-red rounded-full shadow-[0_0_10px_rgba(190,11,60,1)]"></span>
+                        <span className="absolute top-1 right-1 w-2 h-2 bg-blis-red rounded-full shadow-[0_0_10px_rgba(213,193,8,1)]"></span>
                     </button>
 
                     <button className="relative text-gray-400 hover:text-white transition-colors p-2">
                         <Bell className="w-5 h-5" />
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-blis-red rounded-full shadow-[0_0_10px_rgba(190,11,60,1)]"></span>
+                        <span className="absolute top-1 right-1 w-2 h-2 bg-blis-red rounded-full shadow-[0_0_10px_rgba(213,193,8,1)]"></span>
                     </button>
                 </div>
 
@@ -69,3 +69,4 @@ export function MiembrosHeader() {
         </header>
     );
 }
+

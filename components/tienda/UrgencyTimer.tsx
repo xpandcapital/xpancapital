@@ -96,7 +96,7 @@ export function UrgencyTimer() {
 function TimeUnit({ value, label }: { value: string; label: string }) {
     return (
         <div className="flex flex-col items-center">
-            <div className="bg-black/80 border border-blis-red/40 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg shadow-[0_0_15px_rgba(190,11,60,0.2)]">
+            <div className="bg-black/80 border border-blis-red/40 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-lg shadow-[0_0_15px_rgba(213,193,8,0.2)]">
                 <span className="text-white font-mono text-lg md:text-xl font-bold">{value}</span>
             </div>
             <span className="text-[8px] md:text-[9px] text-gray-500 font-bold uppercase tracking-widest mt-1">
@@ -105,3 +105,4 @@ function TimeUnit({ value, label }: { value: string; label: string }) {
         </div>
     );
 }
+

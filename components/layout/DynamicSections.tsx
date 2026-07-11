@@ -200,7 +200,7 @@ export function DynamicSections({
         style={{ scaleX, transformOrigin: "left" }}
         className="fixed top-0 left-0 right-0 h-[2px] z-[9999] pointer-events-none"
       >
-        <div className="h-full bg-gradient-to-r from-blis-red via-blis-red-neon to-blis-red shadow-[0_0_8px_rgba(255,30,86,0.7)]" />
+        <div className="h-full bg-gradient-to-r from-blis-red via-blis-red-neon to-blis-red shadow-[0_0_8px_rgba(245,225,0,0.7)]" />
       </motion.div>
 
       {sectionOrder.map((sectionKey: string, idx: number) => {

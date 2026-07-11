@@ -123,13 +123,13 @@ export function ShopSidebar() {
                         className="flex items-center gap-2 group w-full"
                     >
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-300 ${activeId === 'shop-hero' || activeId === ''
-                            ? 'bg-blis-red shadow-[0_0_20px_rgba(190,11,60,0.8)]'
-                            : 'bg-blis-red shadow-[0_0_15px_rgba(190,11,60,0.5)] group-hover:shadow-[0_0_20px_rgba(190,11,60,0.8)]'
+                            ? 'bg-blis-red shadow-[0_0_20px_rgba(213,193,8,0.8)]'
+                            : 'bg-blis-red shadow-[0_0_15px_rgba(213,193,8,0.5)] group-hover:shadow-[0_0_20px_rgba(213,193,8,0.8)]'
                             }`}>
                             <ShoppingBag className="w-4 h-4 text-white" />
                         </div>
                         <span className={`font-black tracking-widest uppercase text-sm transition-colors duration-300 ${activeId === 'shop-hero' || activeId === ''
-                            ? 'text-blis-red drop-shadow-[0_0_8px_rgba(190,11,60,0.6)]'
+                            ? 'text-blis-red drop-shadow-[0_0_8px_rgba(213,193,8,0.6)]'
                             : 'text-white group-hover:text-blis-red'
                             }`}>
                             Blis<span className={activeId === 'shop-hero' || activeId === '' ? 'text-white' : 'text-gray-500'}>Tienda</span>
@@ -162,23 +162,23 @@ export function ShopSidebar() {
                                     {isActive && (
                                         <motion.span
                                             layoutId="sidebar-active-bar"
-                                            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blis-red rounded-r-full shadow-[0_0_8px_rgba(190,11,60,0.8)]"
+                                            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-blis-red rounded-r-full shadow-[0_0_8px_rgba(213,193,8,0.8)]"
                                         />
                                     )}
                                     <item.icon
                                         className={`w-4 h-4 transition-all duration-300 ${isActive
-                                            ? "text-blis-red drop-shadow-[0_0_6px_rgba(190,11,60,0.8)]"
+                                            ? "text-blis-red drop-shadow-[0_0_6px_rgba(213,193,8,0.8)]"
                                             : "group-hover:text-blis-red"
                                             }`}
                                     />
                                     <span
-                                        className={`font-medium text-sm transition-all duration-300 ${isActive ? "font-bold drop-shadow-[0_0_4px_rgba(190,11,60,0.5)]" : ""
+                                        className={`font-medium text-sm transition-all duration-300 ${isActive ? "font-bold drop-shadow-[0_0_4px_rgba(213,193,8,0.5)]" : ""
                                             }`}
                                     >
                                         {item.name}
                                     </span>
                                     {isActive && (
-                                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blis-red animate-pulse shadow-[0_0_6px_rgba(190,11,60,0.9)]" />
+                                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blis-red animate-pulse shadow-[0_0_6px_rgba(213,193,8,0.9)]" />
                                     )}
                                 </button>
                             );
@@ -258,3 +258,4 @@ export function ShopSidebar() {
         </aside>
     );
 }
+

@@ -16,7 +16,7 @@ export const globalStyles = `
   }
   .scanner-beam { 
     position: absolute; top: 0; bottom: 0; width: 2px; 
-    background: #be0b3c; box-shadow: 0 0 20px 5px rgba(190, 11, 60, 0.5); 
+    background: #d5c108; box-shadow: 0 0 20px 5px rgba(213, 193, 8, 0.5); 
     animation: scanLine 3s linear infinite; z-index: 5; pointer-events: none; 
   }
   .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -26,7 +26,7 @@ export const globalStyles = `
   .bg-signal-green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.4) 100%); border: 1px solid rgba(16, 185, 129, 0.5); }
   .bg-signal-expired { background: rgba(55, 65, 81, 0.1); border: 1px solid rgba(107, 114, 128, 0.1); opacity: 0.7; }
   svg { display: block; }
-  * { scrollbar-color: #be0b3c transparent; }
+  * { scrollbar-color: #d5c108 transparent; }
 `;
 
 export const safeText = (val: any) => {
@@ -58,7 +58,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
 
 export const SidebarIcon = ({ icon, label, badge, onClick, active }: any) => (
   <button onClick={onClick} data-tooltip={label} className={`relative flex items-center justify-center w-full py-2 cursor-pointer transition-all ${active ? 'text-blis-red-neon' : 'text-gray-500 hover:text-white'}`}>
-    {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blis-red-neon rounded-r-full shadow-[2px_0_10px_rgba(255,30,86,0.5)] pointer-events-none"></div>}
+    {active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blis-red-neon rounded-r-full shadow-[2px_0_10px_rgba(245,225,0,0.5)] pointer-events-none"></div>}
     <div className="pointer-events-none">{icon}</div>
     {badge > 0 && <span className="absolute top-0 right-2 bg-blis-red text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">{badge}</span>}
   </button>
@@ -69,7 +69,8 @@ export const ToolButton = ({ icon, active, onClick, hoverColor = "hover:bg-blis-
     data-tooltip={title}
     onMouseUp={(e) => e.currentTarget.blur()}
     onClick={onClick} 
-    className={`p-2.5 md:p-2 rounded-xl transition-all active:scale-95 border ${active ? 'bg-blis-red/30 text-blis-red-neon border-blis-red-neon/40 shadow-[0_0_15px_rgba(255,30,86,0.2)]' : `border-transparent text-gray-500 ${hoverColor}`}`}>
+    className={`p-2.5 md:p-2 rounded-xl transition-all active:scale-95 border ${active ? 'bg-blis-red/30 text-blis-red-neon border-blis-red-neon/40 shadow-[0_0_15px_rgba(245,225,0,0.2)]' : `border-transparent text-gray-500 ${hoverColor}`}`}>
       <div className="pointer-events-none">{icon}</div>
   </button>
 );
+

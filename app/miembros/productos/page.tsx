@@ -142,7 +142,7 @@ export default function ProductsPage() {
                                     <button
                                         onClick={() => handleAccederCurso(product)}
                                         disabled={downloadingId === product.id}
-                                        className="w-14 h-14 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(190,11,60,0.6)] disabled:opacity-50"
+                                        className="w-14 h-14 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_20px_rgba(213,193,8,0.6)] disabled:opacity-50"
                                     >
                                         {downloadingId === product.id ? (
                                             <Loader2 className="w-5 h-5 text-white animate-spin" />

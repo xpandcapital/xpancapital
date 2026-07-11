@@ -202,7 +202,7 @@ export function useRoles() {
         { id: '2', nombre: 'cliente', label: 'Cliente', permisos: ['ver_productos', 'comprar', 'ver_historial'], color: '#3b82f6' },
         { id: '3', nombre: 'editor', label: 'Editor', permisos: ['ver_productos', 'comprar', 'editar_contenido', 'crear_posts'], color: '#8b5cf6' },
         { id: '4', nombre: 'admin', label: 'Admin', permisos: ['ver_productos', 'comprar', 'editar_contenido', 'gestionar_productos', 'gestionar_usuarios'], color: '#f59e0b' },
-        { id: '5', nombre: 'superadmin', label: 'Super Admin', permisos: ['*'], color: '#be0b3c' },
+        { id: '5', nombre: 'superadmin', label: 'Super Admin', permisos: ['*'], color: '#d5c108' },
       ])
     } finally {
       setLoading(false)
@@ -213,3 +213,4 @@ export function useRoles() {
 
   return { roles, loading, refetch: fetchRoles }
 }
+

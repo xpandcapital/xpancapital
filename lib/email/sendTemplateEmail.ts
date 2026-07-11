@@ -208,7 +208,7 @@ function buildFallbackHTML(vars: Record<string, string>): string {
   return `
   <div style="max-width:600px;margin:0 auto;padding:40px 20px;background:#050505;color:#fff;font-family:Arial,sans-serif;">
     <div style="text-align:center;margin-bottom:24px;">
-      <span style="background:#be0b24;padding:12px 24px;border-radius:12px;font-size:20px;font-weight:900;letter-spacing:2px;">BLIS Corp</span>
+      <span style="background:#c9b500;padding:12px 24px;border-radius:12px;font-size:20px;font-weight:900;letter-spacing:2px;">BLIS Corp</span>
     </div>
     <h1 style="font-size:24px;font-weight:900;text-transform:uppercase;text-align:center;">¡Pago Confirmado!</h1>
     <p style="text-align:center;color:#9ca3af;">Gracias <strong style="color:#fff">${nombre}</strong>, hemos recibido tu pago de <strong style="color:#4ade80">${total}</strong>.</p>
@@ -219,3 +219,4 @@ function buildFallbackHTML(vars: Record<string, string>): string {
     <p style="text-align:center;color:#4b5563;font-size:11px;margin-top:24px;">BLIS Corp · Gracias por tu compra</p>
   </div>`
 }
+

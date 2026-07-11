@@ -435,7 +435,7 @@ export default function Dashboard() {
                     formatter={(value: any) => [formatCurrency(Number(value) || 0), 'Ventas']}
                     labelStyle={{ color: '#a1a1aa', fontWeight: 700, fontSize: 12 }}
                   />
-                  <Bar dataKey="ventas" fill="#be0b3c" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="ventas" fill="#d5c108" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -531,3 +531,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

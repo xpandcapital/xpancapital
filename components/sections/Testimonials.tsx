@@ -13,7 +13,7 @@ const floatingIcons = [
 const NeonStars = () => (
     <div className="flex gap-1 justify-center mb-3">
         {[1, 2, 3, 4, 5].map(i => (
-            <Star key={i} className="w-4 h-4 fill-blis-red text-blis-red drop-shadow-[0_0_6px_rgba(190,11,60,0.9)]" />
+            <Star key={i} className="w-4 h-4 fill-blis-red text-blis-red drop-shadow-[0_0_6px_rgba(213,193,8,0.9)]" />
         ))}
     </div>
 );
@@ -51,7 +51,7 @@ export function Testimonials() {
         <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-gradient-to-br from-zinc-950 via-black to-blis-red/5 relative cyber-texture overflow-hidden">
             {/* Aura ambiental que pulsa con el scroll */}
             <motion.div
-                style={{ opacity: glowIntensity, background: "radial-gradient(ellipse at 50% 60%, rgba(255,30,86,0.12) 0%, transparent 70%)" }}
+                style={{ opacity: glowIntensity, background: "radial-gradient(ellipse at 50% 60%, rgba(245,225,0,0.12) 0%, transparent 70%)" }}
                 className="absolute inset-0 pointer-events-none z-0 blur-[60px]"
             />
             <style>{`
@@ -134,7 +134,7 @@ export function Testimonials() {
                                 onClick={() => { setMobileIndex(i); setIsPaused(false); }}
                                 className="transition-all duration-300"
                             >
-                                <div className={`rounded-full transition-all duration-300 ${i === (mobileIndex % testimonials.length) ? 'w-5 h-2 bg-blis-red shadow-[0_0_6px_rgba(190,11,60,0.8)]' : 'w-2 h-2 bg-white/20'}`} />
+                                <div className={`rounded-full transition-all duration-300 ${i === (mobileIndex % testimonials.length) ? 'w-5 h-2 bg-blis-red shadow-[0_0_6px_rgba(213,193,8,0.8)]' : 'w-2 h-2 bg-white/20'}`} />
                             </button>
                         ))}
                     </div>
@@ -166,7 +166,7 @@ export function Testimonials() {
                                 <Quote className="w-10 h-10 text-white/5 absolute top-6 right-6 group-hover:text-blis-red/20 transition-colors" />
                                 <div className="flex gap-1 mb-3">
                                     {[1, 2, 3, 4, 5].map(i => (
-                                        <Star key={i} className="w-3.5 h-3.5 fill-blis-red text-blis-red drop-shadow-[0_0_4px_rgba(190,11,60,0.7)]" />
+                                        <Star key={i} className="w-3.5 h-3.5 fill-blis-red text-blis-red drop-shadow-[0_0_4px_rgba(213,193,8,0.7)]" />
                                     ))}
                                 </div>
                                 <p className="text-gray-300 font-light italic leading-relaxed mb-8 relative z-10 line-clamp-5">
@@ -195,3 +195,4 @@ export function Testimonials() {
         </section>
     );
 }
+

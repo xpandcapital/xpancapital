@@ -109,7 +109,7 @@ export function CaptureHeroEditor({
         </div>
         <InputField label="Subtítulo" value={sections.captureHero?.subtitle || ''} onChange={(v) => updateSection('captureHero', { subtitle: v })} />
         <TextAreaField label="Descripción" value={sections.captureHero?.description || ''} onChange={(v) => updateSection('captureHero', { description: v })} rows={2} />
-        <ColorPicker label="Color de Acento" value={sections.captureHero?.accentColor || '#B10D24'} onChange={(v) => updateSection('captureHero', { accentColor: v })} />
+        <ColorPicker label="Color de Acento" value={sections.captureHero?.accentColor || '#a89a00'} onChange={(v) => updateSection('captureHero', { accentColor: v })} />
         <ImageUpload value={sections.captureHero?.backgroundImage || ''} onChange={(v) => updateSection('captureHero', { backgroundImage: v })} folder="cms/capture" />
         
         <h4 className="text-xs font-bold text-gray-400 uppercase mt-6 mb-3">Estadísticas del Hero</h4>
@@ -306,3 +306,4 @@ export function CaptureHeroEditor({
     </div>
   );
 }
+

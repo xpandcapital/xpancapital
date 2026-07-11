@@ -29,7 +29,7 @@ export function CertificateList({ templates, onNew, onEdit, onDelete }: Props) {
         </div>
         <button
           onClick={onNew}
-          className="group relative bg-blis-red text-white w-full sm:w-auto px-8 py-4 sm:px-8 sm:py-5 rounded-3xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-[0_10px_40px_rgba(190,11,60,0.3)] mt-4 sm:mt-0"
+          className="group relative bg-blis-red text-white w-full sm:w-auto px-8 py-4 sm:px-8 sm:py-5 rounded-3xl font-black uppercase tracking-widest text-xs hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-[0_10px_40px_rgba(213,193,8,0.3)] mt-4 sm:mt-0"
         >
           <Plus className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
           Nueva Plantilla
@@ -57,3 +57,4 @@ export function CertificateList({ templates, onNew, onEdit, onDelete }: Props) {
     </div>
   );
 }
+

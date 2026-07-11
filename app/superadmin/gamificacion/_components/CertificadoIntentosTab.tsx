@@ -35,11 +35,11 @@ export function CertificadoIntentosTab({ intentos, onFetch, onDesbloquear }: Pro
       <div className="flex gap-3 items-end">
         <div className="flex-1">
           <label className="block text-sm text-gray-400 mb-1">User ID</label>
-          <input value={userId} onChange={e => setUserId(e.target.value)} placeholder="UUID del alumno" className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm focus:border-[#ff1e56] focus:outline-none" />
+          <input value={userId} onChange={e => setUserId(e.target.value)} placeholder="UUID del alumno" className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm focus:border-[#f5e100] focus:outline-none" />
         </div>
         <div className="flex-1">
           <label className="block text-sm text-gray-400 mb-1">Curso ID (opcional)</label>
-          <input value={cursoId} onChange={e => setCursoId(e.target.value)} placeholder="UUID del curso" className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm focus:border-[#ff1e56] focus:outline-none" />
+          <input value={cursoId} onChange={e => setCursoId(e.target.value)} placeholder="UUID del curso" className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm focus:border-[#f5e100] focus:outline-none" />
         </div>
         <button onClick={handleBuscar} disabled={loading} className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm hover:bg-gray-700 transition-colors disabled:opacity-50">
           Buscar
@@ -68,7 +68,7 @@ export function CertificadoIntentosTab({ intentos, onFetch, onDesbloquear }: Pro
                 <tr key={intento.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
                   <td className="px-4 py-3 text-white text-sm">{intento.ciclo}</td>
                   <td className="px-4 py-3 text-white text-sm">{intento.intento_en_ciclo}</td>
-                  <td className="px-4 py-3 text-[#ff1e56] text-sm font-medium">{intento.puntos_otorgados?.toLocaleString() || '-'}</td>
+                  <td className="px-4 py-3 text-[#f5e100] text-sm font-medium">{intento.puntos_otorgados?.toLocaleString() || '-'}</td>
                   <td className="px-4 py-3">
                     {intento.bloqueado ? (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-red-900/30 text-red-400">Bloqueado</span>
@@ -96,3 +96,4 @@ export function CertificadoIntentosTab({ intentos, onFetch, onDesbloquear }: Pro
     </div>
   )
 }
+

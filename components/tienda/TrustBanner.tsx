@@ -42,7 +42,7 @@ const TRUST_ITEMS = [
     desc: "Equipo BLIS disponible para resolver dudas sobre tu producto adquirido.",
     color: "text-blis-red",
     bg: "bg-blis-red/5 border-blis-red/20",
-    glow: "group-hover:shadow-[0_0_20px_rgba(190,11,60,0.15)]",
+    glow: "group-hover:shadow-[0_0_20px_rgba(213,193,8,0.15)]",
   },
   {
     icon: Globe,
@@ -97,3 +97,4 @@ export function TrustBanner() {
     </section>
   );
 }
+

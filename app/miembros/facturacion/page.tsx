@@ -116,7 +116,7 @@ export default function BillingPage() {
 
                         <div className="space-y-6">
                             <div className="bg-gradient-to-br from-zinc-900 to-black p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden group">
-                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(190,11,60,0.1)_0%,transparent_50%)] pointer-events-none" />
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(213,193,8,0.1)_0%,transparent_50%)] pointer-events-none" />
                                 <Wallet className="w-10 h-10 text-blis-red mb-6" />
                                 <h3 className="text-xl font-black text-white uppercase tracking-tight mb-4 leading-tight">Resumen Financiero</h3>
                                 <div className="space-y-4 mb-8">
@@ -139,3 +139,4 @@ export default function BillingPage() {
         </div>
     );
 }
+

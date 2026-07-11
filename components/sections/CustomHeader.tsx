@@ -101,7 +101,7 @@ export function CustomHeader({ config }: CustomHeaderProps) {
                 href={cta.href}
                 className="px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 transition-all hover:scale-105"
                 style={{
-                  backgroundColor: cta.style === 'primary' ? '#B10D24' : 'transparent',
+                  backgroundColor: cta.style === 'primary' ? '#a89a00' : 'transparent',
                   color: cta.style === 'primary' ? '#fff' : textColor,
                   border: cta.style === 'secondary' ? `1px solid ${textColor}30` : 'none'
                 }}

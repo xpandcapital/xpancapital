@@ -105,7 +105,7 @@ export default function PreguntasPage() {
           <h1 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter">Preguntas</h1>
           <p className="text-xs sm:text-sm text-gray-400 mt-2 font-light">Banco de preguntas para formularios de postulantes. {preguntas.length} preguntas configuradas.</p>
         </div>
-        <button onClick={() => setShowCreate(true)} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+        <button onClick={() => setShowCreate(true)} className="bg-blis-red text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all flex items-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
           <Plus className="w-4 h-4" />Nueva Pregunta
         </button>
       </div>
@@ -221,7 +221,7 @@ export default function PreguntasPage() {
                   <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={newPregunta.requerido} onChange={e => setNewPregunta(prev => ({ ...prev, requerido: e.target.checked }))} className="w-4 h-4 rounded" /><span className="text-white text-sm">Requerido</span></label>
                   <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={newPregunta.visible_formulario} onChange={e => setNewPregunta(prev => ({ ...prev, visible_formulario: e.target.checked }))} className="w-4 h-4 rounded" /><span className="text-white text-sm">En formulario</span></label>
                 </div>
-                <button onClick={handleCreate} disabled={saving === 'create' || !newPregunta.label_base} className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 shadow-[0_10px_20px_rgba(190,11,60,0.3)]">
+                <button onClick={handleCreate} disabled={saving === 'create' || !newPregunta.label_base} className="w-full bg-blis-red text-white py-3 rounded-xl font-bold uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 shadow-[0_10px_20px_rgba(213,193,8,0.3)]">
                   {saving === 'create' ? 'Creando...' : 'Crear Pregunta'}
                 </button>
               </div>

@@ -11,7 +11,7 @@ export function useEmpresas() {
   const [searchResults, setSearchResults] = useState<EmpresaUser[]>([])
   const [loadingUsers, setLoadingUsers] = useState(false)
   const [newEmpresa, setNewEmpresa] = useState({
-    nombre: '', slug: '', nombre_legal: '', color_primario: '#be0b3c',
+    nombre: '', slug: '', nombre_legal: '', color_primario: '#d5c108',
     pais_fiscal: 'PE', moneda_base: 'USD', idioma: 'es', zona_horaria: 'America/Lima', plan: 'free',
   })
   const [newUser, setNewUser] = useState({ email: '', nombre: '', apellido: '', rol: 'editor', password: '' })
@@ -63,7 +63,7 @@ export function useEmpresas() {
       const res = await fetch('/api/admin/empresa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newEmpresa) })
       const data = await res.json()
       if (data.success) {
-        setNewEmpresa({ nombre: '', slug: '', nombre_legal: '', color_primario: '#be0b3c', pais_fiscal: 'PE', moneda_base: 'USD', idioma: 'es', zona_horaria: 'America/Lima', plan: 'free' })
+        setNewEmpresa({ nombre: '', slug: '', nombre_legal: '', color_primario: '#d5c108', pais_fiscal: 'PE', moneda_base: 'USD', idioma: 'es', zona_horaria: 'America/Lima', plan: 'free' })
         setShowCreate(false)
         fetchEmpresas()
         return true

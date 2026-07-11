@@ -44,7 +44,7 @@ export function PaginationBar({
         <div className="relative">
           <button
             onClick={() => setIsPagingOpen(!isPagingOpen)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/10 text-[10px] font-black text-white hover:bg-white/10 transition-all ${isPagingOpen ? 'border-blis-red/50 shadow-[0_0_20px_rgba(190,11,60,0.2)] bg-white/[0.08]' : ''}`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.03] border border-white/10 text-[10px] font-black text-white hover:bg-white/10 transition-all ${isPagingOpen ? 'border-blis-red/50 shadow-[0_0_20px_rgba(213,193,8,0.2)] bg-white/[0.08]' : ''}`}
           >
             <span>{itemsPerPage}</span>
             <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform duration-500 ${isPagingOpen ? 'rotate-180' : ''}`} />
@@ -117,7 +117,7 @@ export function PaginationBar({
                 {showEllipsis && <span className="text-gray-700 px-1 text-[9px] font-black">…</span>}
                 <button
                   onClick={() => onPageChange(pageNum)}
-                  className={`w-6 h-8 rounded-lg text-[9px] font-black transition-all border ${currentPage === pageNum ? 'bg-blis-red text-white border-blis-red shadow-[0_0_10px_rgba(190,11,60,0.3)]' : 'bg-transparent text-gray-500 border-transparent hover:border-white/10 hover:text-white hover:bg-white/[0.03]'}`}
+                  className={`w-6 h-8 rounded-lg text-[9px] font-black transition-all border ${currentPage === pageNum ? 'bg-blis-red text-white border-blis-red shadow-[0_0_10px_rgba(213,193,8,0.3)]' : 'bg-transparent text-gray-500 border-transparent hover:border-white/10 hover:text-white hover:bg-white/[0.03]'}`}
                 >
                   {pageNum}
                 </button>

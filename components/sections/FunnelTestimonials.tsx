@@ -51,7 +51,7 @@ export function FunnelTestimonials({ data = {} }: FunnelTestimonialsProps) {
         rating: 5
       }
     ],
-    accentColor = "#B10D24",
+    accentColor = "#a89a00",
     layout = "carousel",
     showRating = true,
     autoPlayInterval = 5000

@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         ancho: ancho || 297,
         alto: alto || 210,
         color_fondo: color_fondo || '#0a0a0a',
-        color_primario: color_primario || '#B10D24',
+        color_primario: color_primario || '#a89a00',
         color_secundario: color_secundario || '#10B981',
         color_texto: color_texto || '#ffffff',
         color_texto_secundario: color_texto_secundario || '#9ca3af',

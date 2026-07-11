@@ -88,7 +88,7 @@ export function CorreoSidebar({
                 <img src={c.avatar_url} alt="" className="w-5 h-5 rounded-md object-cover" />
               ) : (
                 <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold`}
-                  style={c.id === cuentaActiva?.id ? { backgroundColor: (c.color || '#be0b3c') + '30', color: c.color || '#be0b3c' } : { backgroundColor: 'rgba(255,255,255,0.05)', color: '#6b7280' }}>
+                  style={c.id === cuentaActiva?.id ? { backgroundColor: (c.color || '#d5c108') + '30', color: c.color || '#d5c108' } : { backgroundColor: 'rgba(255,255,255,0.05)', color: '#6b7280' }}>
                   {getInitials(c.nombre_mostrado || c.email)}
                 </span>
               )}
@@ -178,3 +178,4 @@ export function CorreoSidebar({
     </div>
   )
 }
+

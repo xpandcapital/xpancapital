@@ -235,7 +235,7 @@ export function TemplateGrid({
           <p className="text-gray-500 text-sm mb-6">Crea tu primer template para comenzar</p>
           <button
             onClick={() => onCreateNew('landing')}
-            className="px-6 py-3 bg-blis-red text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all shadow-[0_10px_20px_rgba(190,11,60,0.3)] flex items-center gap-2 mx-auto"
+            className="px-6 py-3 bg-blis-red text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all shadow-[0_10px_20px_rgba(213,193,8,0.3)] flex items-center gap-2 mx-auto"
           >
             <Plus className="w-4 h-4" />
             Crear Template

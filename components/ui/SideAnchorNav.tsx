@@ -132,13 +132,13 @@ export function SideAnchorNav() {
                     const isActive = activeId === section.id
                     return (
                         <div key={section.id} className="relative flex items-center justify-end w-full">
-                            <span className={`absolute right-10 px-3 py-1.5 bg-[#0A0D11]/90 backdrop-blur-md text-[9px] font-bold tracking-widest uppercase rounded border opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none translate-x-4 group-hover/nav:translate-x-0 duration-300 w-28 text-right ${isActive ? 'text-blis-red border-blis-red shadow-[0_4px_15px_rgba(190,11,60,0.5)]' : 'border-white/10 text-white'}`}>
+                            <span className={`absolute right-10 px-3 py-1.5 bg-[#0A0D11]/90 backdrop-blur-md text-[9px] font-bold tracking-widest uppercase rounded border opacity-0 group-hover/nav:opacity-100 transition-all pointer-events-none translate-x-4 group-hover/nav:translate-x-0 duration-300 w-28 text-right ${isActive ? 'text-blis-red border-blis-red shadow-[0_4px_15px_rgba(213,193,8,0.5)]' : 'border-white/10 text-white'}`}>
                                 {section.label}
                             </span>
                             <div className="w-6 flex justify-center">
                                 <button
                                     onClick={() => handleScroll(section.id)}
-                                    className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${isActive ? 'bg-blis-red border-blis-red scale-[1.3] shadow-[0_0_12px_rgba(190,11,60,0.8)]' : 'bg-transparent border-blis-red/50 hover:border-blis-red hover:bg-blis-red/20'}`}
+                                    className={`w-3 h-3 rounded-full border-2 transition-all duration-300 ${isActive ? 'bg-blis-red border-blis-red scale-[1.3] shadow-[0_0_12px_rgba(213,193,8,0.8)]' : 'bg-transparent border-blis-red/50 hover:border-blis-red hover:bg-blis-red/20'}`}
                                     aria-label={`Ir a ${section.label}`}
                                 />
                             </div>
@@ -193,3 +193,4 @@ export function SideAnchorNav() {
         </>
     )
 }
+

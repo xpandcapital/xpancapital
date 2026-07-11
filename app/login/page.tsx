@@ -273,7 +273,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full mt-4 bg-blis-red text-white py-4 rounded-xl font-black uppercase tracking-widest hover:bg-[#87082a] transition-all flex items-center justify-center gap-3 text-sm shadow-[0_0_20px_rgba(190,11,60,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full mt-4 bg-blis-red text-white py-4 rounded-xl font-black uppercase tracking-widest hover:bg-[#87082a] transition-all flex items-center justify-center gap-3 text-sm shadow-[0_0_20px_rgba(213,193,8,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? (
               <Loader2 className="w-5 h-5 animate-spin" />

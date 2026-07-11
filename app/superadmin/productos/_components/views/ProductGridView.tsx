@@ -60,7 +60,7 @@ export const ProductGridView = React.memo(function ProductGridView({
           <motion.div
             layout
             key={product.id}
-            className={`group relative bg-zinc-950 border rounded-[2.5rem] overflow-hidden transition-all duration-500 flex flex-col h-full ${isSelected ? 'border-blis-red shadow-[0_0_30px_rgba(190,11,60,0.15)] bg-blis-red/[0.02]' : 'border-white/5 hover:border-white/10'}`}
+            className={`group relative bg-zinc-950 border rounded-[2.5rem] overflow-hidden transition-all duration-500 flex flex-col h-full ${isSelected ? 'border-blis-red shadow-[0_0_30px_rgba(213,193,8,0.15)] bg-blis-red/[0.02]' : 'border-white/5 hover:border-white/10'}`}
           >
             <button
               onClick={() => onToggleSelection(product.id)}
@@ -236,3 +236,4 @@ export const ProductGridView = React.memo(function ProductGridView({
     </div>
   )
 })
+

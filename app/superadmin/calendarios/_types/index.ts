@@ -95,7 +95,7 @@ export const defaultCalendar: Omit<Calendario, 'id' | 'creado_en' | 'actualizado
   ubicacion_tipo: 'videoconferencia',
   ubicacion_detalle: '',
   logo: '',
-  color_principal: '#be0b3c',
+  color_principal: '#d5c108',
   texto_boton: 'Programar',
   audiencia_tipo: 'publico',
   audiencia_ids: [],

@@ -10,7 +10,7 @@ const BUNDLES = [
     name: "Starter Agent",
     tag: "Más Popular",
     tagColor: "bg-blis-red text-white",
-    glow: "shadow-[0_0_40px_rgba(190,11,60,0.2)] border-blis-red/30",
+    glow: "shadow-[0_0_40px_rgba(213,193,8,0.2)] border-blis-red/30",
     items: [
       "Kit Legal de Agentes",
       "Ebook: Técnicas de Cierre",
@@ -24,7 +24,7 @@ const BUNDLES = [
     stock: 47,
     totalStock: 100,
     accent: "blis-red",
-    accentHex: "#be0b24",
+    accentHex: "#c9b500",
   },
   {
     id: 2,
@@ -194,3 +194,4 @@ export function BundlesSection() {
     </section>
   );
 }
+

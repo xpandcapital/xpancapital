@@ -52,7 +52,7 @@ function ParticleDot({ mouseX, mouseY, index, seed }: { mouseX: any; mouseY: any
                 x: dx,
                 y: dy,
                 backgroundColor: `rgba(255,${25 + (index % 55)},86,${alpha})`,
-                boxShadow: `0 0 ${glow}px rgba(255,30,86,0.7)`,
+                boxShadow: `0 0 ${glow}px rgba(245,225,0,0.7)`,
             }}
         />
     );
@@ -218,7 +218,7 @@ export function Hero() {
             {/* Ambient glow — neón carmesí (multicapa) */}
             <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center">
                 {/* Orbe principal */}
-                <motion.div style={{ y: yOrb1, background: "radial-gradient(circle, rgba(255,30,86,0.15) 0%, transparent 60%)" }} className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-50" />
+                <motion.div style={{ y: yOrb1, background: "radial-gradient(circle, rgba(245,225,0,0.15) 0%, transparent 60%)" }} className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-50" />
                 {/* Orbe secundario */}
                 <motion.div style={{ y: yOrb2, background: "radial-gradient(circle, rgba(32,159,137,0.1) 0%, transparent 60%)" }} className="absolute w-[400px] h-[400px] rounded-full blur-[80px] opacity-30 top-1/3 right-1/4" />
             </div>
@@ -226,24 +226,24 @@ export function Hero() {
             {/* Neon text animation styles */}
             <style>{`
                 @keyframes neon-trace {
-                    0%   { text-shadow: 2px 0 8px rgba(190,11,60,0), -2px 0 8px rgba(190,11,60,0), 0 0 0 rgba(190,11,60,0); }
-                    15%  { text-shadow: 3px 0 12px rgba(190,11,60,0.9), -1px 0 4px rgba(190,11,60,0.3), 0 0 30px rgba(190,11,60,0.4); }
-                    30%  { text-shadow: -3px 0 12px rgba(190,11,60,0.9),  1px 0 4px rgba(190,11,60,0.3), 0 0 30px rgba(190,11,60,0.4); }
-                    50%  { text-shadow: 0 3px 12px rgba(190,11,60,0.9),   0 -1px 4px rgba(190,11,60,0.3), 0 0 40px rgba(190,11,60,0.6); }
-                    70%  { text-shadow: 0 -3px 12px rgba(190,11,60,0.9),  0  1px 4px rgba(190,11,60,0.3), 0 0 30px rgba(190,11,60,0.4); }
-                    85%  { text-shadow: 3px 0 12px rgba(190,11,60,0.9), -1px 0 4px rgba(190,11,60,0.3), 0 0 30px rgba(190,11,60,0.4); }
-                    100% { text-shadow: 2px 0 8px rgba(190,11,60,0), -2px 0 8px rgba(190,11,60,0), 0 0 0 rgba(190,11,60,0); }
+                    0%   { text-shadow: 2px 0 8px rgba(213,193,8,0), -2px 0 8px rgba(213,193,8,0), 0 0 0 rgba(213,193,8,0); }
+                    15%  { text-shadow: 3px 0 12px rgba(213,193,8,0.9), -1px 0 4px rgba(213,193,8,0.3), 0 0 30px rgba(213,193,8,0.4); }
+                    30%  { text-shadow: -3px 0 12px rgba(213,193,8,0.9),  1px 0 4px rgba(213,193,8,0.3), 0 0 30px rgba(213,193,8,0.4); }
+                    50%  { text-shadow: 0 3px 12px rgba(213,193,8,0.9),   0 -1px 4px rgba(213,193,8,0.3), 0 0 40px rgba(213,193,8,0.6); }
+                    70%  { text-shadow: 0 -3px 12px rgba(213,193,8,0.9),  0  1px 4px rgba(213,193,8,0.3), 0 0 30px rgba(213,193,8,0.4); }
+                    85%  { text-shadow: 3px 0 12px rgba(213,193,8,0.9), -1px 0 4px rgba(213,193,8,0.3), 0 0 30px rgba(213,193,8,0.4); }
+                    100% { text-shadow: 2px 0 8px rgba(213,193,8,0), -2px 0 8px rgba(213,193,8,0), 0 0 0 rgba(213,193,8,0); }
                 }
                 .neon-trace-blis {
                     animation: neon-trace 3s ease-in-out infinite;
                 }
                 @keyframes neon-trace-corp {
-                    0%   { filter: drop-shadow(0 0 0px rgba(190,11,60,0)); }
-                    20%  { filter: drop-shadow(3px 0 8px rgba(190,11,60,0.8)) drop-shadow(-2px 0 4px rgba(190,11,60,0.4)); }
-                    40%  { filter: drop-shadow(0 3px 8px rgba(190,11,60,0.8)) drop-shadow(0 -2px 4px rgba(190,11,60,0.4)); }
-                    60%  { filter: drop-shadow(-3px 0 8px rgba(190,11,60,0.8)) drop-shadow(2px 0 4px rgba(190,11,60,0.4)); }
-                    80%  { filter: drop-shadow(0 -3px 8px rgba(190,11,60,0.8)) drop-shadow(0 2px 4px rgba(190,11,60,0.4)); }
-                    100% { filter: drop-shadow(0 0 0px rgba(190,11,60,0)); }
+                    0%   { filter: drop-shadow(0 0 0px rgba(213,193,8,0)); }
+                    20%  { filter: drop-shadow(3px 0 8px rgba(213,193,8,0.8)) drop-shadow(-2px 0 4px rgba(213,193,8,0.4)); }
+                    40%  { filter: drop-shadow(0 3px 8px rgba(213,193,8,0.8)) drop-shadow(0 -2px 4px rgba(213,193,8,0.4)); }
+                    60%  { filter: drop-shadow(-3px 0 8px rgba(213,193,8,0.8)) drop-shadow(2px 0 4px rgba(213,193,8,0.4)); }
+                    80%  { filter: drop-shadow(0 -3px 8px rgba(213,193,8,0.8)) drop-shadow(0 2px 4px rgba(213,193,8,0.4)); }
+                    100% { filter: drop-shadow(0 0 0px rgba(213,193,8,0)); }
                 }
                 .neon-trace-corp {
                     animation: neon-trace-corp 3s ease-in-out 1.5s infinite;
@@ -326,12 +326,12 @@ export function Hero() {
                 className="absolute bottom-[22%] left-[2%] sm:left-[3%] md:left-[5%] lg:left-[8%] xl:left-[10%] flex flex-col gap-2 sm:gap-2.5 md:gap-3 lg:gap-4 glass-card p-3 sm:p-3.5 md:p-4 lg:p-5 rounded-2xl w-40 sm:w-44 md:w-48 lg:w-56 xl:w-60 z-10 border border-white/5 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-xl bg-black/60 sm:bg-[#0a0a0a] opacity-80 sm:opacity-100"
             >
                 <div className="flex items-center gap-2 sm:gap-2.5 md:gap-3 mb-1">
-                    <Activity className="text-blis-red w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6 animate-pulse drop-shadow-[0_0_8px_rgba(190,11,60,0.8)]" />
+                    <Activity className="text-blis-red w-4 h-4 sm:w-5 sm:h-5 md:w-5 md:h-5 lg:w-6 lg:h-6 animate-pulse drop-shadow-[0_0_8px_rgba(213,193,8,0.8)]" />
                     <span className="text-[10px] sm:text-[10px] md:text-xs font-mono text-gray-300 uppercase tracking-widest font-bold">Rendimiento</span>
                 </div>
                 <div className="space-y-2 sm:space-y-2.5 md:space-y-3 lg:space-y-4">
                     <div className="h-1.5 sm:h-2 md:h-2 lg:h-2.5 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full w-[85%] bg-blis-red shadow-[0_0_12px_rgba(190,11,60,1)] rounded-full" />
+                        <div className="h-full w-[85%] bg-blis-red shadow-[0_0_12px_rgba(213,193,8,1)] rounded-full" />
                     </div>
                     <div className="h-1.5 sm:h-2 md:h-2 lg:h-2.5 w-3/4 bg-white/5 rounded-full overflow-hidden">
                         <div className="h-full w-[60%] bg-[#209f89] shadow-[0_0_12px_rgba(32,159,137,1)] rounded-full" />
@@ -386,7 +386,7 @@ export function Hero() {
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-blis-red font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3 md:mb-4 lg:mb-5 text-[10px] sm:text-xs md:text-xs lg:text-sm bg-black/50 px-3 py-1.5 sm:px-4 sm:py-1.5 md:px-5 md:py-2 rounded-full border border-blis-red/30 backdrop-blur-xl shadow-[0_0_20px_rgba(190,11,60,0.2)]"
+                        className="text-blis-red font-bold tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3 md:mb-4 lg:mb-5 text-[10px] sm:text-xs md:text-xs lg:text-sm bg-black/50 px-3 py-1.5 sm:px-4 sm:py-1.5 md:px-5 md:py-2 rounded-full border border-blis-red/30 backdrop-blur-xl shadow-[0_0_20px_rgba(213,193,8,0.2)]"
                     >
                         {cmsData.hero.subtitle}
                     </motion.span>
@@ -465,7 +465,7 @@ export function Hero() {
                                 }
                                 window.location.href = target;
                             }}
-                            className="group relative flex-1 sm:flex-none flex items-center justify-center px-5 py-3 sm:px-6 sm:py-3.5 md:px-7 md:py-4 lg:px-9 lg:py-5 bg-blis-red text-white font-black tracking-normal sm:tracking-[0.2em] uppercase rounded-xl overflow-hidden transition-all shadow-[0_0_30px_rgba(190,11,60,0.4)] hover:shadow-[0_0_50px_rgba(190,11,60,0.8)] text-[11px] sm:text-xs md:text-sm lg:text-base whitespace-nowrap"
+                            className="group relative flex-1 sm:flex-none flex items-center justify-center px-5 py-3 sm:px-6 sm:py-3.5 md:px-7 md:py-4 lg:px-9 lg:py-5 bg-blis-red text-white font-black tracking-normal sm:tracking-[0.2em] uppercase rounded-xl overflow-hidden transition-all shadow-[0_0_30px_rgba(213,193,8,0.4)] hover:shadow-[0_0_50px_rgba(213,193,8,0.8)] text-[11px] sm:text-xs md:text-sm lg:text-base whitespace-nowrap"
                         >
                             <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
                                 {cmsData.hero.primaryBtnText}
@@ -527,3 +527,4 @@ export function Hero() {
         </section>
     );
 }
+

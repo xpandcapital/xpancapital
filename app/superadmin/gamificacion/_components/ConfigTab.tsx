@@ -82,7 +82,7 @@ export function ConfigTab({ config, onSave }: Props) {
             type="checkbox"
             checked={config.activo}
             onChange={e => handleChange('activo', e.target.checked)}
-            className="w-5 h-5 rounded border-gray-600 bg-gray-800 accent-[#ff1e56]"
+            className="w-5 h-5 rounded border-gray-600 bg-gray-800 accent-[#f5e100]"
           />
           <span className="text-gray-300">Sistema de gamificación activo</span>
           {saving.activo && <Loader2 className="w-4 h-4 animate-spin text-gray-500" />}
@@ -105,8 +105,9 @@ function Field({ label, value, onChange, saving, saved }: { label: string; value
         type="number"
         value={value}
         onChange={e => onChange(parseInt(e.target.value) || 0)}
-        className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm focus:border-[#ff1e56] focus:outline-none"
+        className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-sm focus:border-[#f5e100] focus:outline-none"
       />
     </div>
   )
 }
+

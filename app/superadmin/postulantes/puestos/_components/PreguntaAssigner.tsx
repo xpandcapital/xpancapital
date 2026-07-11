@@ -71,7 +71,7 @@ export function PreguntaAssigner({
         </div>
         <button
           onClick={handleSave} disabled={localSaving || saving}
-          className="bg-blis-red text-white px-5 py-2 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(190,11,60,0.3)]"
+          className="bg-blis-red text-white px-5 py-2 rounded-xl font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all disabled:opacity-50 flex items-center gap-2 shadow-[0_10px_20px_rgba(213,193,8,0.3)]"
         >
           <Save className="w-4 h-4" />{localSaving ? 'Guardando...' : 'Guardar'}
         </button>

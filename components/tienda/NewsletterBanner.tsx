@@ -79,7 +79,7 @@ export function NewsletterBanner() {
                   type="submit"
                   disabled={status === "loading"}
                   whileTap={{ scale: 0.97 }}
-                  className="w-full py-4 bg-blis-red hover:bg-red-700 disabled:opacity-60 text-white font-black uppercase tracking-widest text-sm rounded-2xl flex items-center justify-center gap-2 transition-all shadow-[0_0_30px_rgba(190,11,60,0.3)]"
+                  className="w-full py-4 bg-blis-red hover:bg-red-700 disabled:opacity-60 text-white font-black uppercase tracking-widest text-sm rounded-2xl flex items-center justify-center gap-2 transition-all shadow-[0_0_30px_rgba(213,193,8,0.3)]"
                 >
                   {status === "loading" ? (
                     <span className="flex items-center gap-2">
@@ -105,3 +105,4 @@ export function NewsletterBanner() {
     </section>
   );
 }
+

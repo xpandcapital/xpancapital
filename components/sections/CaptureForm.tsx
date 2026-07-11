@@ -112,7 +112,7 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
     submitText = "Enviar",
     successTitle = "¡Registro Exitoso!",
     successMessage = "Te contactaremos a la brevedad.",
-    accentColor = "#B10D24",
+    accentColor = "#a89a00",
     privacyText = "Al enviar aceptas los términos y condiciones.",
     redirectUrl,
     externalRedirectUrl,
@@ -483,3 +483,4 @@ export function CaptureForm({ data = {} }: CaptureFormProps) {
     </div>
   );
 }
+

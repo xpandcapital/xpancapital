@@ -79,7 +79,7 @@ export default function GamificacionPage() {
               onClick={() => setTab(t.key)}
               className={`px-4 py-2 text-sm rounded-t-lg transition-colors ${
                 tab === t.key
-                  ? 'bg-gray-900 text-[#ff1e56] border-t border-l border-r border-gray-800'
+                  ? 'bg-gray-900 text-[#f5e100] border-t border-l border-r border-gray-800'
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
@@ -120,3 +120,4 @@ function EmptyState({ msg }: { msg: string }) {
     </div>
   )
 }
+

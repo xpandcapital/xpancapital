@@ -46,13 +46,13 @@ export function CustomCursor() {
                 if (hovering) {
                     ring.style.width = "52px";
                     ring.style.height = "52px";
-                    ringInner.style.border = "2px dashed rgba(190,11,60,0.9)";
-                    ringInner.style.background = "rgba(190,11,60,0.06)";
+                    ringInner.style.border = "2px dashed rgba(213,193,8,0.9)";
+                    ringInner.style.background = "rgba(213,193,8,0.06)";
                     spinner.style.display = "block";
                 } else {
                     ring.style.width = "36px";
                     ring.style.height = "36px";
-                    ringInner.style.border = "1.5px solid rgba(190,11,60,0.85)";
+                    ringInner.style.border = "1.5px solid rgba(213,193,8,0.85)";
                     ringInner.style.background = "transparent";
                     spinner.style.display = "none";
                 }
@@ -146,8 +146,8 @@ export function CustomCursor() {
                         position: "absolute",
                         inset: 0,
                         borderRadius: "50%",
-                        border: "1.5px solid rgba(190,11,60,0.85)",
-                        boxShadow: "0 0 10px 2px rgba(190,11,60,0.5)",
+                        border: "1.5px solid rgba(213,193,8,0.85)",
+                        boxShadow: "0 0 10px 2px rgba(213,193,8,0.5)",
                         background: "transparent",
                         transition: "border 0.15s, background 0.15s",
                     }}
@@ -160,8 +160,8 @@ export function CustomCursor() {
                         inset: 0,
                         borderRadius: "50%",
                         border: "2px solid transparent",
-                        borderTopColor: "rgba(190,11,60,1)",
-                        borderRightColor: "rgba(190,11,60,0.4)",
+                        borderTopColor: "rgba(213,193,8,1)",
+                        borderRightColor: "rgba(213,193,8,0.4)",
                         animation: "cursor-spin 0.8s linear infinite",
                     }}
                 />
