@@ -1,18 +1,25 @@
-export const dynamic = 'force-dynamic'
-
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+let _cachedSupabase: ReturnType<typeof createClient> | null = null
+function getSupabase() {
+  if (_cachedSupabase) return _cachedSupabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
+  return _cachedSupabase
+}
 
-function getAdmin() { return createClient(supabaseUrl, supabaseServiceKey) }
+const supabase = new Proxy({} as any, {
+  get(_: any, prop: string) {
+    return getSupabase()[prop]
+  }
+})
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = getAdmin()
     const { searchParams } = new URL(request.url)
     const estado = searchParams.get('estado')
     const asesorId = searchParams.get('asesor_id')
@@ -36,7 +43,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const auth = await getAuthUser(request)
-    const supabase = getAdmin()
     const body = await request.json()
     const {
       nombre, descripcion, asesor_id, tipo_captura,
@@ -66,7 +72,6 @@ export async function PUT(request: NextRequest) {
   try {
     const auth = await getAuthUser(request)
     if (!auth) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    const supabase = getAdmin()
     const body = await request.json()
     const { id, ...updates } = body
     if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
@@ -93,7 +98,6 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
-    const supabase = getAdmin()
     const { error } = await supabase.from('campanas').delete().eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })

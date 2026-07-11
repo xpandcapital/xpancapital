@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { GamificacionConfig } from '@/lib/types/database'
@@ -333,4 +331,3 @@ async function verificarLogros(
     console.error('[verificarLogros] Error:', err)
   }
 }
-

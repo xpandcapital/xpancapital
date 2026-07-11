@@ -1,15 +1,26 @@
-export const dynamic = 'force-dynamic'
-
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser, isAdmin } from '@/lib/supabase/api-auth'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+let _cachedSupabase: ReturnType<typeof createClient> | null = null
+function getSupabase() {
+  if (_cachedSupabase) return _cachedSupabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
+  return _cachedSupabase
+}
+
+const supabase = new Proxy({} as any, {
+  get(_: any, prop: string) {
+    return getSupabase()[prop]
+  }
+})
+
 const PAGE_SIZE = 12
 
 function baseQuery() {
-  return createClient(supabaseUrl, supabaseServiceKey)
+  return getSupabase()
     .from('comunidad_posts')
     .select(`
       id, empresa_id, autor_id, tipo, contenido, origen, origen_id,
@@ -158,7 +169,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const { searchParams } = new URL(request.url)
     const cursor = searchParams.get('cursor')
     const tipo = searchParams.get('tipo')
@@ -205,7 +215,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const body = await request.json()
 
     const { tipo = 'post', contenido, encuesta, evento, media_ids } = body
@@ -310,7 +319,6 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const body = await request.json()
     const { id, ...updates } = body
 
@@ -358,7 +366,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
@@ -389,4 +396,3 @@ export async function DELETE(request: NextRequest) {
     }, { status: 500 })
   }
 }
-

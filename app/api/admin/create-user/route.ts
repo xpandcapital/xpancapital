@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateSecurePassword } from '@/lib/crypto'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
-export const dynamic = 'force-dynamic'
-
 const EMPRESA_ID = DEFAULT_EMPRESA_ID
 
 export async function POST(request: NextRequest) {

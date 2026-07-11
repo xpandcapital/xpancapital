@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
@@ -95,4 +93,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
 }
-

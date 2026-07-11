@@ -1,15 +1,21 @@
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-function getAdminClient() {
-  return createClient(supabaseUrl, supabaseServiceKey)
+let _cachedSupabase: ReturnType<typeof createClient> | null = null
+function getSupabase() {
+  if (_cachedSupabase) return _cachedSupabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
+  return _cachedSupabase
 }
+
+const supabase = new Proxy({} as any, {
+  get(_: any, prop: string) {
+    return getSupabase()[prop]
+  }
+})
 
 const TABLES = [
   { table: 'productos',   key: 'productos' },
@@ -30,12 +36,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, results: {}, query: q || '' })
   }
 
-  if (!supabaseUrl || !supabaseServiceKey) {
-    return NextResponse.json({ success: false, error: 'Configuración del servidor incompleta' }, { status: 500 })
-  }
-
   try {
-    const supabase = getAdminClient()
     const results: Record<string, any[]> = {}
 
     const rpcs = await Promise.allSettled(
@@ -74,4 +75,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 })
   }
 }
-

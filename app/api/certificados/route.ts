@@ -1,13 +1,21 @@
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const baseOrigin = supabaseUrl.replace('/rest/v1', '')
+let _supabaseUrl: string | null = null
+let _supabaseServiceKey: string | null = null
+let _baseOrigin: string | null = null
+
+function getEnv() {
+  if (!_supabaseUrl) {
+    _supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    _supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    _baseOrigin = _supabaseUrl.replace('/rest/v1', '')
+  }
+  return { supabaseUrl: _supabaseUrl, supabaseServiceKey: _supabaseServiceKey, baseOrigin: _baseOrigin! }
+}
 
 function getSupabase() {
+  const { supabaseUrl, supabaseServiceKey } = getEnv()
   return createClient(supabaseUrl, supabaseServiceKey)
 }
 
@@ -195,7 +203,7 @@ async function registrarIntentoYCertificado(
       return
     }
 
-    await fetch(`${baseOrigin}/api/gamificacion/otorgar`, {
+    await fetch(`${getEnv().baseOrigin}/api/gamificacion/otorgar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

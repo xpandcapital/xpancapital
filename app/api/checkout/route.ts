@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
@@ -11,11 +9,20 @@ import { notifyAdminNuevaCompra } from '@/lib/email/notifyAdminNuevaCompra';
 import { generateSecurePassword } from '@/lib/crypto';
 
 // Cliente admin (service role - bypass RLS) - se usa para todas las operaciones de BD
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+let _cachedSupabase: ReturnType<typeof createClient> | null = null
+function getSupabase() {
+  if (_cachedSupabase) return _cachedSupabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey, { auth: { autoRefreshToken: false, persistSession: false } })
+  return _cachedSupabase
+}
+
+const supabase = new Proxy({} as any, {
+  get(_: any, prop: string) {
+    return getSupabase()[prop]
+  }
+})
 
 // Función para crear cliente que lee cookies
 function createServerSupabase(request: NextRequest) {
@@ -695,4 +702,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

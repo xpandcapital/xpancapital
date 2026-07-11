@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getAuthUser } from '@/lib/supabase/api-auth'
@@ -7,10 +5,20 @@ import { cleanPhone, isValidPhone } from '@/lib/phone'
 import { sendWhatsApp } from '@/lib/whatsapp'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+let _cachedSupabase: ReturnType<typeof createClient> | null = null
+function getSupabase() {
+  if (_cachedSupabase) return _cachedSupabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
+  return _cachedSupabase
+}
 
-function getAdmin() { return createClient(supabaseUrl, supabaseServiceKey) }
+const supabase = new Proxy({} as any, {
+  get(_: any, prop: string) {
+    return getSupabase()[prop]
+  }
+})
 
 function resolveVariables(text: string, variables: Record<string, string[]>): string {
   return text.replace(/\{(\w+)\}/g, (_, key) => {
@@ -21,7 +29,6 @@ function resolveVariables(text: string, variables: Record<string, string[]>): st
 }
 
 export async function GET(request: NextRequest) {
-  const supabase = getAdmin()
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
   const action = searchParams.get('action')
@@ -82,7 +89,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const auth = await getAuthUser(request)
   if (!auth) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  const supabase = getAdmin()
   const body = await request.json()
   const { action, ...rest } = body
   const empresaId = auth.empresaId || DEFAULT_EMPRESA_ID
@@ -268,7 +274,6 @@ async function getProductBuyers(supabase: any, productoId: string, empresaId: st
 }
 
 async function processOneBatch(campaignId: string) {
-  const supabase = getAdmin()
   const BATCH_SIZE = 5
 
   const { data: recipients } = await supabase
@@ -329,4 +334,3 @@ async function processOneBatch(campaignId: string) {
   const { count } = await supabase.from('whatsapp_campaign_recipients').select('id', { count: 'exact', head: true }).eq('campaign_id', campaignId).eq('status', 'pending')
   return { remaining: count || 0, sentBatch: recipients.length, done: (count || 0) === 0 }
 }
-

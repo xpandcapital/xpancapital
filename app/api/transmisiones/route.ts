@@ -1,24 +1,28 @@
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-function getAdminClient() {
-  return createClient(supabaseUrl, supabaseServiceKey)
+let _cachedSupabase: ReturnType<typeof createClient> | null = null
+function getSupabase() {
+  if (_cachedSupabase) return _cachedSupabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
+  return _cachedSupabase
 }
+
+const supabaseAdmin = new Proxy({} as any, {
+  get(_: any, prop: string) {
+    return getSupabase()[prop]
+  }
+})
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const empresaId = searchParams.get('empresa_id') || DEFAULT_EMPRESA_ID
     const historial = searchParams.get('historial')
-
-    const supabaseAdmin = getAdminClient()
 
     if (historial === 'true') {
       const { data, error } = await supabaseAdmin
@@ -69,7 +73,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Link y duración requeridos' }, { status: 400 })
     }
 
-    const supabaseAdmin = getAdminClient()
     const inicio = new Date().toISOString()
     const fin = new Date(Date.now() + duracion_minutos * 60 * 1000).toISOString()
 
@@ -127,7 +130,6 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'ID requerido' }, { status: 400 })
     }
 
-    const supabaseAdmin = getAdminClient()
     const ahora = new Date().toISOString()
 
     if (cancelar) {
@@ -193,8 +195,6 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'ID requerido' }, { status: 400 })
     }
 
-    const supabaseAdmin = getAdminClient()
-
     const { error } = await supabaseAdmin
       .from('transmisiones')
       .delete()
@@ -210,4 +210,3 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 })
   }
 }
-

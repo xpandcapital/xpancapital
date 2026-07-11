@@ -1,15 +1,19 @@
-export const dynamic = 'force-dynamic'
-
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+let _cachedSupabase: ReturnType<typeof createClient> | null = null
+function getSupabaseAdmin() {
+  if (_cachedSupabase) return _cachedSupabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
+  return _cachedSupabase
+}
 
 async function getUserIdFromToken(token: string): Promise<string | null> {
   try {
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: { user }, error } = await supabaseAdmin.auth.getUser(token)
     if (error || !user) return null
     return user.id
@@ -34,7 +38,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+    const supabaseAdmin = getSupabaseAdmin()
     const empresaId = auth?.empresaId || searchParams.get('empresa_id')
 
     if (unread === 'true') {
@@ -134,7 +138,7 @@ export async function PUT(request: NextRequest) {
     if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
     const body = await request.json()
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+    const supabaseAdmin = getSupabaseAdmin()
 
     if (body.marcar_todas) {
       await supabaseAdmin
@@ -184,7 +188,7 @@ export async function DELETE(request: NextRequest) {
     const all = searchParams.get('all')
     const auth = await getAuthUser(request)
 
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+    const supabaseAdmin = getSupabaseAdmin()
 
     if (all === 'true') {
       if (!auth) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
@@ -203,4 +207,3 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 })
   }
 }
-
