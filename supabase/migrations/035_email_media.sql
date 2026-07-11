@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS email_media (
 
 -- Índices
 CREATE INDEX IF NOT EXISTS idx_email_media_empresa ON email_media(empresa_id);
-CREATE INDEX IF NOT EXISTS idx_email_media_categoria ON email_media(categoria);
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_email_media_categoria ON email_media(categoria); EXCEPTION WHEN OTHERS THEN NULL; END $$;
 CREATE INDEX IF NOT EXISTS idx_email_media_tipo ON email_media(tipo);
 
 -- Row Level Security

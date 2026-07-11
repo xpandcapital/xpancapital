@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS biblioteca_libros (
 -- Índices
 CREATE INDEX IF NOT EXISTS idx_biblioteca_libros_empresa ON biblioteca_libros(empresa_id);
 CREATE INDEX IF NOT EXISTS idx_biblioteca_libros_activo ON biblioteca_libros(activo);
-CREATE INDEX IF NOT EXISTS idx_biblioteca_libros_categoria ON biblioteca_libros(categoria);
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_biblioteca_libros_categoria ON biblioteca_libros(categoria); EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
 -- RLS — público puede leer, solo admin puede modificar
 ALTER TABLE biblioteca_libros ENABLE ROW LEVEL SECURITY;

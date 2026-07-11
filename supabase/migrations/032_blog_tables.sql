@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS blog_posts (
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_blog_posts_empresa ON blog_posts(empresa_id);
-CREATE INDEX IF NOT EXISTS idx_blog_posts_categoria ON blog_posts(categoria);
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_blog_posts_categoria ON blog_posts(categoria); EXCEPTION WHEN OTHERS THEN NULL; END $$;
 CREATE INDEX IF NOT EXISTS idx_blog_posts_estado ON blog_posts(estado);
 CREATE INDEX IF NOT EXISTS idx_blog_posts_publicado ON blog_posts(publicado_en DESC);
 CREATE INDEX IF NOT EXISTS idx_blog_categorias_empresa ON blog_categorias(empresa_id);
