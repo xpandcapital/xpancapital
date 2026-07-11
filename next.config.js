@@ -6,11 +6,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  api: {
-    bodyParser: {
-      sizeLimit: '100mb',
-    },
-  },
   experimental: {
     serverActions: {
       bodySizeLimit: '50mb',
@@ -19,6 +14,11 @@ const nextConfig = {
   serverExternalPackages: ['potrace', 'jimp', 'sharp'],
   images: {
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'zpseniwasxlvjbffymuq.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
       {
         protocol: 'https',
         hostname: 'srjhrhiesienkofisvnv.supabase.co',
@@ -39,10 +39,6 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'campus.blis-corp.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'srjhrhiesienkofisvnv.supabase.co',
       },
     ],
   },
