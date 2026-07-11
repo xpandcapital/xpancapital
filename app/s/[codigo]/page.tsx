@@ -1,6 +1,8 @@
 import { supabaseAdmin } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 
+export const dynamic = 'force-dynamic'
+
 export default async function ShortLinkPage({ params }: { params: Promise<{ codigo: string }> }) {
   const { codigo } = await params
   const code = codigo.toLowerCase()
