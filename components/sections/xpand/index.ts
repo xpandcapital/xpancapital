@@ -1,4 +1,5 @@
 export { HeroSection } from "./HeroSection"
+export { PromoVideo } from "./PromoVideo"
 export { AuthorityBar } from "./AuthorityBar"
 export { Ecosystem } from "./Ecosystem"
 export { TrackRecord } from "./TrackRecord"

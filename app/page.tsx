@@ -1,6 +1,7 @@
 import { SideAnchorNav } from "@/components/ui/SideAnchorNav"
 import {
   HeroSection,
+  PromoVideo,
   AuthorityBar,
   Ecosystem,
   TrackRecord,
@@ -21,6 +22,7 @@ export default function Home() {
     <main className="bg-[#050505] text-white min-h-screen relative">
       <SideAnchorNav />
       <HeroSection />
+      <PromoVideo />
       <AuthorityBar />
       <Ecosystem />
       <TrackRecord />
