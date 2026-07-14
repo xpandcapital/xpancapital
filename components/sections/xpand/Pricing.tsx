@@ -6,6 +6,7 @@ import Link from "next/link"
 
 const plans = [
   {
+    key: "trimestral",
     name: "Plan Trimestral",
     icon: Zap,
     price: "115",
@@ -17,6 +18,7 @@ const plans = [
     highlight: false,
   },
   {
+    key: "anual",
     name: "Plan Anual",
     icon: Crown,
     price: "300",
@@ -76,7 +78,7 @@ export function Pricing() {
                 ))}
               </ul>
 
-              <Link href="/tienda/checkout"
+              <Link href={`/planes/checkout?plan=${plan.key}`}
                 className={`group flex items-center justify-center gap-2 w-full py-3 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all ${
                   plan.highlight
                     ? "bg-[#d5c108] text-black hover:bg-[#e5d100] hover:shadow-[0_0_30px_rgba(213,193,8,0.4)]"
