@@ -2,14 +2,15 @@
 
 import { motion } from "framer-motion"
 import { Check, Zap, Crown, ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { useShop } from "@/context/ShopContext"
 
 const plans = [
   {
     key: "trimestral",
+    productId: "209a7e5a-0809-456a-b3b0-570c244f795b",
     name: "Plan Trimestral",
     icon: Zap,
-    price: "115",
+    price: 115,
     period: "cada 4 meses",
     total: "$345 al año",
     breakdown: "3 pagos de $115",
@@ -19,9 +20,10 @@ const plans = [
   },
   {
     key: "anual",
+    productId: "aad8f9ab-5910-4e05-834b-6ddeee4ef48f",
     name: "Plan Anual",
     icon: Crown,
-    price: "300",
+    price: 300,
     period: "pago único anual",
     total: "$300 al año",
     breakdown: "1 solo pago",
@@ -32,6 +34,21 @@ const plans = [
 ]
 
 export function Pricing() {
+  const { addToCart } = useShop()
+
+  const handleBuy = (plan: typeof plans[0]) => {
+    addToCart({
+      id: plan.productId,
+      title: plan.name,
+      image: "/images/logo%20expand%20negro%20vertical.png",
+      price: plan.price,
+      category: "Planes",
+      productType: "servicio",
+      slug: `plan-${plan.key}`,
+    })
+    window.location.href = "/tienda/checkout"
+  }
+
   return (
     <section id="pricing" className="relative bg-[#0a0a0a] py-20 md:py-28">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.04)_0%,transparent_70%)]" />
@@ -78,7 +95,7 @@ export function Pricing() {
                 ))}
               </ul>
 
-              <Link href={`/planes/checkout?plan=${plan.key}`}
+              <button onClick={() => handleBuy(plan)}
                 className={`group flex items-center justify-center gap-2 w-full py-3 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all ${
                   plan.highlight
                     ? "bg-[#d5c108] text-black hover:bg-[#e5d100] hover:shadow-[0_0_30px_rgba(213,193,8,0.4)]"
@@ -87,7 +104,7 @@ export function Pricing() {
               >
                 {plan.cta}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
+              </button>
             </motion.div>
           ))}
         </div>
