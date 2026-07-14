@@ -1,8 +1,6 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Play } from "lucide-react"
-import { useEffect, useRef } from "react"
 
 const videos = [
   {
@@ -23,16 +21,6 @@ const videos = [
 ]
 
 export function VideoPreviews() {
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const script = document.createElement("script")
-    script.src = "https://www.tiktok.com/embed.js"
-    script.async = true
-    document.body.appendChild(script)
-    return () => { document.body.removeChild(script) }
-  }, [])
-
   return (
     <section className="relative bg-[#050505] py-20 md:py-28">
       <div className="relative max-w-6xl mx-auto px-4 md:px-6">
@@ -42,26 +30,17 @@ export function VideoPreviews() {
           <p className="text-white/50 text-sm md:text-base max-w-xl mx-auto">Síguenos en TikTok para contenido diario de trading, forex y análisis de mercado.</p>
         </motion.div>
 
-        <div ref={containerRef} className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           {videos.map((v, i) => (
-            <motion.div key={v.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-              className="relative"
-            >
-              <div className="absolute -inset-px rounded-xl bg-gradient-to-br from-[#d5c108]/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-500" />
+            <motion.div key={v.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
               <div className="relative bg-white/[0.03] border border-white/5 rounded-xl overflow-hidden hover:border-[#d5c108]/30 transition-all duration-500">
                 <div className="aspect-[9/16] w-full max-w-[320px] mx-auto">
-                  <blockquote
-                    className="tiktok-embed"
-                    cite={`https://www.tiktok.com/@xpandcapital.oficial/video/${v.id}`}
-                    data-video-id={v.id}
-                    style={{ maxWidth: "100%", minWidth: "100%" }}
-                  >
-                    <section>
-                      <a target="_blank" href={`https://www.tiktok.com/@xpandcapital.oficial?refer=embed`}>
-                        @xpandcapital.oficial
-                      </a>
-                    </section>
-                  </blockquote>
+                  <iframe
+                    src={`https://www.tiktok.com/embed/v2/${v.id}`}
+                    className="w-full h-full"
+                    allow="encrypted-media"
+                    title={v.title}
+                  />
                 </div>
                 <div className="p-3 md:p-4">
                   <h3 className="text-white/80 text-xs md:text-sm font-bold mb-1">{v.title}</h3>
