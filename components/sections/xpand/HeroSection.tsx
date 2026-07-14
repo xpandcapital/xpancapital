@@ -141,7 +141,7 @@ export function HeroSection() {
           <motion.div custom={3} variants={fadeUp}
             className="flex flex-row items-center justify-center gap-2 md:gap-4 w-full px-2 md:px-0"
           >
-            <Link href="/login" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 bg-[#d5c108] text-black font-bold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:bg-[#e5d100] transition-all hover:shadow-[0_0_30px_rgba(213,193,8,0.4)] whitespace-nowrap">
+            <Link href="#pricing" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 bg-[#d5c108] text-black font-bold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:bg-[#e5d100] transition-all hover:shadow-[0_0_30px_rgba(213,193,8,0.4)] whitespace-nowrap">
               Inscríbete Ahora
               <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
             </Link>

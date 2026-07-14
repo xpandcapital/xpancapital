@@ -53,7 +53,7 @@ export function MasterclassCTA() {
                 </ul>
 
                 <Link
-                  href="/login"
+                  href="#pricing"
                   className="group inline-flex items-center gap-3 bg-[#d5c108] text-black font-bold px-10 py-5 rounded-xl text-lg hover:bg-[#e5d100] transition-all hover:shadow-[0_0_40px_rgba(213,193,8,0.4)] hover:scale-[1.02]"
                 >
                   <Zap className="w-5 h-5" />

@@ -31,7 +31,7 @@ const plans = [
 
 export function Pricing() {
   return (
-    <section className="relative bg-[#0a0a0a] py-20 md:py-28">
+    <section id="pricing" className="relative bg-[#0a0a0a] py-20 md:py-28">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.04)_0%,transparent_70%)]" />
 
       <div className="relative max-w-4xl mx-auto px-4 md:px-6">
@@ -76,7 +76,7 @@ export function Pricing() {
                 ))}
               </ul>
 
-              <Link href="/login"
+              <Link href="/tienda/checkout"
                 className={`group flex items-center justify-center gap-2 w-full py-3 md:py-4 rounded-xl font-bold text-sm md:text-base transition-all ${
                   plan.highlight
                     ? "bg-[#d5c108] text-black hover:bg-[#e5d100] hover:shadow-[0_0_30px_rgba(213,193,8,0.4)]"
