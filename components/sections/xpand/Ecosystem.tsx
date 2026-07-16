@@ -73,22 +73,22 @@ function SpotlightCard({
       variants={cardVariants}
       whileTap={{ scale: 0.98 }}
       onMouseMove={handleMouseMove}
-      className={`group relative bg-white/[0.03] backdrop-blur-md border border-white/5 rounded-2xl p-6 md:p-8 hover:border-[#d5c108]/40 hover:shadow-[0_0_25px_rgba(213,193,8,0.12)] transition-all duration-500 ${sizeClasses} flex flex-col justify-between overflow-hidden`}
+      className={`group relative bg-white border border-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-2xl p-6 md:p-8 hover:border-[#d5c108]/70 hover:shadow-[0_12px_35px_rgba(213,193,8,0.18)] transition-all duration-500 ${sizeClasses} flex flex-col justify-between overflow-hidden`}
     >
       <div
         className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 md:group-hover:opacity-100 transition-opacity duration-500"
         style={{
           background:
-            "radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(213,193,8,0.10), transparent 70%)",
+            "radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(213,193,8,0.14), transparent 70%)",
         }}
       />
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#d5c108]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#d5c108]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <div className="relative">
-        <div className="w-12 h-12 rounded-xl bg-[#d5c108]/10 flex items-center justify-center mb-5 group-hover:bg-[#d5c108]/20 group-hover:scale-110 transition-all duration-300">
-          <Icon className="w-6 h-6 text-[#d5c108]" />
+        <div className="w-12 h-12 rounded-xl bg-[#d5c108]/15 flex items-center justify-center mb-5 group-hover:bg-[#d5c108]/30 group-hover:scale-110 transition-all duration-300">
+          <Icon className="w-6 h-6 text-[#8f8200]" />
         </div>
-        <h3 className="text-lg md:text-xl font-bold mb-3">{card.title}</h3>
-        <p className="text-white/50 text-sm leading-relaxed">{card.desc}</p>
+        <h3 className="text-lg md:text-xl font-bold mb-3 text-zinc-900">{card.title}</h3>
+        <p className="text-zinc-600 text-sm leading-relaxed">{card.desc}</p>
       </div>
     </motion.div>
   )
@@ -96,8 +96,9 @@ function SpotlightCard({
 
 export function Ecosystem() {
   return (
-    <section id="ecosistema" className="relative bg-[#050505] py-24 md:py-32">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(213,193,8,0.04)_0%,transparent_60%)]" />
+    <section id="ecosistema" className="relative bg-[#fafaf8] py-24 md:py-32">
+      <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(213,193,8,0.08)_0%,transparent_60%)]" />
 
       <div className="relative max-w-6xl mx-auto px-6">
         <motion.div
@@ -106,10 +107,10 @@ export function Ecosystem() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-[#d5c108] text-sm font-semibold tracking-widest uppercase">
+          <span className="text-[#8f8200] text-sm font-semibold tracking-widest uppercase">
             La Diferencia Xpand
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold mt-3 mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold mt-3 mb-4 text-zinc-900">
             {titleWords.map((word, i) => (
               <motion.span
                 key={`${word}-${i}`}
@@ -118,14 +119,14 @@ export function Ecosystem() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.15 + i * 0.06, duration: 0.5 }}
                 className={`inline-block mr-[0.28em] ${
-                  word === "Xpand" || word === "Capital?" ? "text-[#d5c108]" : ""
+                  word === "Xpand" || word === "Capital?" ? "text-[#a08e00]" : ""
                 }`}
               >
                 {word}
               </motion.span>
             ))}
           </h2>
-          <p className="text-white/50 max-w-xl mx-auto">
+          <p className="text-zinc-600 max-w-xl mx-auto">
             Combinamos educación de excelencia con oportunidades de inversión
             segura para ayudarte a alcanzar tus metas financieras.
           </p>

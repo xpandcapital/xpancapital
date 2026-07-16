@@ -17,26 +17,28 @@ export function FaqSection() {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <section className="relative bg-[#0a0a0a] py-20 md:py-28">
+    <section className="relative bg-[#fafaf8] py-20 md:py-28">
+      <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.06)_0%,transparent_65%)]" />
       <div className="relative max-w-2xl mx-auto px-4 md:px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
-          <span className="text-[#d5c108] text-xs md:text-sm font-semibold tracking-widest uppercase">FAQ</span>
-          <h2 className="text-2xl md:text-5xl font-bold mt-2 md:mt-3 mb-3 md:mb-4">Preguntas Frecuentes</h2>
+          <span className="text-[#8f8200] text-xs md:text-sm font-semibold tracking-widest uppercase">FAQ</span>
+          <h2 className="text-2xl md:text-5xl font-bold mt-2 md:mt-3 mb-3 md:mb-4 text-zinc-900">Preguntas Frecuentes</h2>
         </motion.div>
 
         <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <div key={i} className="bg-white/[0.03] border border-white/5 rounded-xl overflow-hidden">
+            <div key={i} className="bg-white border border-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-xl overflow-hidden hover:border-[#d5c108]/60 transition-colors">
               <button onClick={() => setOpen(open === i ? null : i)} className="w-full flex items-center justify-between gap-4 p-4 md:p-5 text-left">
-                <span className="text-sm md:text-base font-medium pr-4">{faq.q}</span>
+                <span className="text-sm md:text-base font-medium pr-4 text-zinc-900">{faq.q}</span>
                 <motion.div animate={{ rotate: open === i ? 180 : 0 }} transition={{ duration: 0.25 }} className="shrink-0">
-                  <ChevronDown className="w-5 h-5 text-[#d5c108]" />
+                  <ChevronDown className="w-5 h-5 text-[#8f8200]" />
                 </motion.div>
               </button>
               <AnimatePresence>
                 {open === i && (
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
-                    <p className="px-4 md:px-5 pb-4 md:pb-5 text-sm text-white/50 leading-relaxed">{faq.a}</p>
+                    <p className="px-4 md:px-5 pb-4 md:pb-5 text-sm text-zinc-600 leading-relaxed">{faq.a}</p>
                   </motion.div>
                 )}
               </AnimatePresence>
