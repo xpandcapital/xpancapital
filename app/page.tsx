@@ -4,6 +4,8 @@ import {
   PromoVideo,
   AuthorityBar,
   Ecosystem,
+  Services,
+  LearningModel,
   TrackRecord,
   Roadmap,
   InstructorProfile,
@@ -25,6 +27,8 @@ export default function Home() {
       <PromoVideo />
       <AuthorityBar />
       <Ecosystem />
+      <Services />
+      <LearningModel />
       <TrackRecord />
       <Roadmap />
       <InstructorProfile />

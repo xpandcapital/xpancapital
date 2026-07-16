@@ -57,7 +57,7 @@ export function Pricing() {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
           <span className="text-[#d5c108] text-xs md:text-sm font-semibold tracking-widest uppercase">Planes</span>
           <h2 className="text-2xl md:text-5xl font-bold mt-2 md:mt-3 mb-3 md:mb-4">Invierte en tu educación</h2>
-          <p className="text-white/50 text-sm md:text-base max-w-xl mx-auto">Elige el plan que mejor se adapte a tus objetivos.</p>
+          <p className="text-white/50 text-sm md:text-base max-w-xl mx-auto">El conocimiento es el primer paso hacia el éxito financiero. Elige el plan que mejor se adapte a tus objetivos.</p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-6 md:gap-8">

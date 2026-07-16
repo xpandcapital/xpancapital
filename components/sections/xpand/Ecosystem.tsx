@@ -1,42 +1,97 @@
 "use client"
 
+import { useRef } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Shield, Headphones, Users } from "lucide-react"
+import { Award, Cpu, TrendingUp, Users } from "lucide-react"
 
 const cards = [
   {
-    icon: BookOpen,
-    title: "Micro-Learning y Clases en Vivo",
-    desc: "Cursos de 2 horas en píldoras de 10 minutos con interacción en vivo. Aprende a tu ritmo sin perder la conexión humana.",
+    icon: Award,
+    title: "Experiencia Comprobada",
+    desc: "Nuestra trayectoria nos respalda. Durante más de una década hemos ayudado a inversionistas y estudiantes a alcanzar sus metas financieras con estrategias efectivas y probadas.",
     size: "lg",
   },
   {
-    icon: Shield,
-    title: "Tecnología y Rendimientos",
-    desc: "Gestión segura del capital con retornos confiables respaldados por estrategias probadas en el mercado real.",
+    icon: Cpu,
+    title: "Metodología Innovadora",
+    desc: "Integramos tecnología avanzada y técnicas pedagógicas modernas para ofrecerte un sistema educativo único, desde lo básico hasta estrategias de trading avanzadas.",
     size: "md",
   },
   {
-    icon: Headphones,
-    title: "Mentorías 24/7",
-    desc: "Videollamadas en vivo y feedback constante de traders experimentados. Nunca estarás solo en tu camino.",
+    icon: TrendingUp,
+    title: "Rendimientos Garantizados",
+    desc: "Nuestro modelo de inversión combina seguridad y rentabilidad, entregando retornos confiables que protegen y hacen crecer tu capital.",
     size: "md",
   },
   {
     icon: Users,
     title: "Comunidad de Expertos",
-    desc: "Traders activos respaldando cada decisión. Una red de profesionales que comparten análisis, señales y estrategias en tiempo real.",
+    desc: "Formarás parte de una comunidad activa de traders, inversionistas y mentores que te guiarán y respaldarán en cada decisión, ayudándote a avanzar con confianza.",
     size: "wide",
   },
 ]
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 40, filter: "blur(8px)" },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.12, duration: 0.6, ease: "easeOut" },
+    filter: "blur(0px)",
+    transition: { delay: i * 0.12, duration: 0.7, ease: "easeOut" as const },
   }),
+}
+
+const titleWords = "¿Por qué aprender en Xpand Capital?".split(" ")
+
+function SpotlightCard({
+  card,
+  index,
+  sizeClasses,
+}: {
+  card: (typeof cards)[0]
+  index: number
+  sizeClasses: string
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const Icon = card.icon
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    el.style.setProperty("--spot-x", `${e.clientX - rect.left}px`)
+    el.style.setProperty("--spot-y", `${e.clientY - rect.top}px`)
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      custom={index}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-60px" }}
+      variants={cardVariants}
+      whileTap={{ scale: 0.98 }}
+      onMouseMove={handleMouseMove}
+      className={`group relative bg-white/[0.03] backdrop-blur-md border border-white/5 rounded-2xl p-6 md:p-8 hover:border-[#d5c108]/40 hover:shadow-[0_0_25px_rgba(213,193,8,0.12)] transition-all duration-500 ${sizeClasses} flex flex-col justify-between overflow-hidden`}
+    >
+      <div
+        className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 md:group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background:
+            "radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(213,193,8,0.10), transparent 70%)",
+        }}
+      />
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#d5c108]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="relative">
+        <div className="w-12 h-12 rounded-xl bg-[#d5c108]/10 flex items-center justify-center mb-5 group-hover:bg-[#d5c108]/20 group-hover:scale-110 transition-all duration-300">
+          <Icon className="w-6 h-6 text-[#d5c108]" />
+        </div>
+        <h3 className="text-lg md:text-xl font-bold mb-3">{card.title}</h3>
+        <p className="text-white/50 text-sm leading-relaxed">{card.desc}</p>
+      </div>
+    </motion.div>
+  )
 }
 
 export function Ecosystem() {
@@ -52,20 +107,32 @@ export function Ecosystem() {
           className="text-center mb-16"
         >
           <span className="text-[#d5c108] text-sm font-semibold tracking-widest uppercase">
-            Ecosistema Xpand
+            La Diferencia Xpand
           </span>
           <h2 className="text-3xl md:text-5xl font-bold mt-3 mb-4">
-            Todo lo que necesitas en un solo lugar
+            {titleWords.map((word, i) => (
+              <motion.span
+                key={`${word}-${i}`}
+                initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.15 + i * 0.06, duration: 0.5 }}
+                className={`inline-block mr-[0.28em] ${
+                  word === "Xpand" || word === "Capital?" ? "text-[#d5c108]" : ""
+                }`}
+              >
+                {word}
+              </motion.span>
+            ))}
           </h2>
           <p className="text-white/50 max-w-xl mx-auto">
-            Una plataforma integral diseñada para transformar tu comprensión del
-            mercado financiero.
+            Combinamos educación de excelencia con oportunidades de inversión
+            segura para ayudarte a alcanzar tus metas financieras.
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
           {cards.map((card, i) => {
-            const Icon = card.icon
             const sizeClasses =
               card.size === "lg"
                 ? "lg:row-span-2"
@@ -74,24 +141,12 @@ export function Ecosystem() {
                   : ""
 
             return (
-              <motion.div
+              <SpotlightCard
                 key={card.title}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={cardVariants}
-                className={`group relative bg-white/[0.03] backdrop-blur-md border border-white/5 rounded-2xl p-6 md:p-8 hover:border-[#d5c108]/40 hover:shadow-[0_0_20px_rgba(213,193,8,0.1)] transition-all duration-500 ${sizeClasses} flex flex-col justify-between`}
-              >
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#d5c108]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-xl bg-[#d5c108]/10 flex items-center justify-center mb-5 group-hover:bg-[#d5c108]/20 transition-colors">
-                    <Icon className="w-6 h-6 text-[#d5c108]" />
-                  </div>
-                  <h3 className="text-lg md:text-xl font-bold mb-3">{card.title}</h3>
-                  <p className="text-white/50 text-sm leading-relaxed">{card.desc}</p>
-                </div>
-              </motion.div>
+                card={card}
+                index={i}
+                sizeClasses={sizeClasses}
+              />
             )
           })}
         </div>
