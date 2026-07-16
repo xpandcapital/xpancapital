@@ -36,6 +36,14 @@ const PUBLIC_PATHS = [
   '/compras', '/api/compras/aprobar', '/api/compras/rechazar',
 ]
 
+const BLIS_AUTH_HEADERS = ['x-blis-user-id', 'x-blis-empresa-id', 'x-blis-user-rol', 'x-blis-user-email']
+
+function sanitizedNext(request: NextRequest): NextResponse {
+  const headers = new Headers(request.headers)
+  BLIS_AUTH_HEADERS.forEach(h => headers.delete(h))
+  return NextResponse.next({ request: { headers } })
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const method = request.method
@@ -44,7 +52,7 @@ export async function middleware(request: NextRequest) {
 
   // Links mágicos de aprobación/rechazo: siempre públicos, sin auth
   if (pathname.startsWith('/api/compras/aprobar/') || pathname.startsWith('/api/compras/rechazar/') || pathname === '/compras/aprobada') {
-    return NextResponse.next()
+    return sanitizedNext(request)
   }
 
   const isPublic = PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
@@ -53,7 +61,7 @@ export async function middleware(request: NextRequest) {
 
   // Rutas publicas sin cookie de sesion: SIN Supabase, respuesta inmediata
   if (isPublic && !hasSupabaseCookie && !isProtected) {
-    return NextResponse.next()
+    return sanitizedNext(request)
   }
 
   const fallbackSec = { geobloqueo: null, security_headers: null, rate_limiting: null, alerts: null }
@@ -61,7 +69,7 @@ export async function middleware(request: NextRequest) {
   // 3. Auth + Security en PARALELO para rutas protegidas
   const fallbackResponse = isProtected
     ? NextResponse.redirect(new URL(`/login?redirect=${encodeURIComponent(pathname)}`, request.url))
-    : NextResponse.next({ request })
+    : sanitizedNext(request)
 
   let response: NextResponse
   if (isProtected || hasSupabaseCookie || pathname === '/login') {
@@ -100,7 +108,7 @@ export async function middleware(request: NextRequest) {
     }
   } else {
     const secConfig = await timeout(getSecurityConfig(), SUPABASE_TIMEOUT_MS, fallbackSec)
-    response = NextResponse.next({ request })
+    response = sanitizedNext(request)
     if (secConfig.security_headers) {
       try { injectHeaders(response, secConfig.security_headers) } catch {}
     }

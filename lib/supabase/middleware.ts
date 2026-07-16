@@ -59,8 +59,19 @@ function canAccess(rol: string, pathname: string): boolean {
   return true
 }
 
+const BLIS_AUTH_HEADERS = ['x-blis-user-id', 'x-blis-empresa-id', 'x-blis-user-rol', 'x-blis-user-email']
+
+function sanitizedHeaders(request: NextRequest): Headers {
+  const headers = new Headers(request.headers)
+  BLIS_AUTH_HEADERS.forEach(h => headers.delete(h))
+  return headers
+}
+
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  // Sanitizar: eliminar headers de auth falsificables enviados por el cliente
+  let forwardedHeaders = sanitizedHeaders(request)
+
+  let supabaseResponse = NextResponse.next({ request: { headers: forwardedHeaders } })
 
   const { pathname } = request.nextUrl
 
@@ -113,7 +124,7 @@ export async function updateSession(request: NextRequest) {
       c => c.name.startsWith('sb-')
     )
     if (!hasSupabaseCookie) {
-      return NextResponse.next()
+      return NextResponse.next({ request: { headers: forwardedHeaders } })
     }
   }
 
@@ -134,7 +145,8 @@ export async function updateSession(request: NextRequest) {
             cookiesToSet.forEach(({ name, value }) =>
               request.cookies.set(name, value)
             )
-            supabaseResponse = NextResponse.next({ request })
+            forwardedHeaders = sanitizedHeaders(request)
+            supabaseResponse = NextResponse.next({ request: { headers: forwardedHeaders } })
             cookiesToSet.forEach(({ name, value, options }) =>
               supabaseResponse.cookies.set(name, value, options)
             )
@@ -223,14 +235,20 @@ export async function updateSession(request: NextRequest) {
     return redirectResponse
   }
 
-  // 6. Inyectar headers de sesion para que API routes no re-consulten Supabase
+  // 6. Inyectar headers de sesion en el REQUEST para que API routes no re-consulten Supabase
   if (user?.id) {
-    supabaseResponse.headers.set('x-blis-user-id', user.id)
-    if (profileRol) supabaseResponse.headers.set('x-blis-user-rol', profileRol)
-    if (user.email) supabaseResponse.headers.set('x-blis-user-email', user.email)
+    forwardedHeaders.set('x-blis-user-id', user.id)
+    if (profileRol) forwardedHeaders.set('x-blis-user-rol', profileRol)
+    if (user.email) forwardedHeaders.set('x-blis-user-email', user.email)
     // empresa_id desde profile (mas confiable que app_metadata)
     const empresaId = profileEmpresaId || (user.app_metadata as any)?.empresa_id
-    if (empresaId) supabaseResponse.headers.set('x-blis-empresa-id', empresaId)
+    if (empresaId) forwardedHeaders.set('x-blis-empresa-id', empresaId)
+
+    const finalResponse = NextResponse.next({ request: { headers: forwardedHeaders } })
+    supabaseResponse.cookies.getAll().forEach(cookie => {
+      finalResponse.cookies.set(cookie.name, cookie.value, cookie)
+    })
+    return finalResponse
   }
 
   return supabaseResponse
