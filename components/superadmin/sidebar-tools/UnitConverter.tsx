@@ -23,8 +23,8 @@ function UnitConverter() {
     const convert = () => {
         const num = parseFloat(val);
         if (isNaN(num)) return;
-        // @ts-ignore
-        const r = (num * units[mode].rates[from]) / units[mode].rates[to];
+        const rates = units[mode].rates as Record<string, number>;
+        const r = (num * rates[from]) / rates[to];
         setResult(r);
     };
 

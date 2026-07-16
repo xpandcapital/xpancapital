@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { X, Send, FolderOpen, Database, Code, Check, CheckCircle, Server, Star, Pencil, AlertCircle, Loader2, Paperclip, Trash2, Upload, Grid, Mail, Layers, Search, Plus, Users, Save } from 'lucide-react';
+import { X, Send, FolderOpen, Database, Code, Check, CheckCircle, Server, Star, Pencil, AlertCircle, Loader2, Paperclip, Trash2, Upload, Grid, Mail, Layers, Search, Plus, Users, Save, Copy } from 'lucide-react';
 
 export function ExportHtmlModal({ show, onClose, generateHTML, copied, setCopied }) {
   if (!show) return null;

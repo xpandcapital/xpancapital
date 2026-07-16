@@ -11,7 +11,7 @@ function getEnv() {
     _supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
     _baseOrigin = _supabaseUrl.replace('/rest/v1', '')
   }
-  return { supabaseUrl: _supabaseUrl, supabaseServiceKey: _supabaseServiceKey, baseOrigin: _baseOrigin! }
+  return { supabaseUrl: _supabaseUrl, supabaseServiceKey: _supabaseServiceKey!, baseOrigin: _baseOrigin! }
 }
 
 function getSupabase() {
@@ -137,7 +137,7 @@ async function registrarIntentoYCertificado(
   empresaId: string
 ) {
   try {
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const supabase = getSupabase()
 
     const { data: config } = await supabase
       .from('gamificacion_config')

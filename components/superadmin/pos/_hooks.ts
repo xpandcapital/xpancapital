@@ -138,21 +138,7 @@ export function usePOS(): POSReturnValue | POSErrorReturn {
 
     const products = dbProducts || [];
 
-    if (!salesContext) {
-        return { error: 'SalesContext no disponible' };
-    }
-
-    const {
-        cart, addToCart, removeFromCart, updateQuantity, updateItemDiscount,
-        total, subtotal, tax, clearCart,
-        customer, setCustomer, transactionType, setTransactionType,
-        documentType, setDocumentType, history, saveTransaction, loadQuote,
-        globalDiscountAmount, setGlobalDiscountAmount,
-        globalDiscountType, setGlobalDiscountType,
-        couponCode, setCouponCode,
-        shippingCost, setShippingCost,
-        currency, taxName, taxRate, country, setCountry
-    } = salesContext;
+    const country = salesContext?.country ?? 'PE';
 
     const docLabels = useMemo(() => ({
         dni: country === 'PE' ? 'DNI' : (country === 'MX' ? 'CURP' : (country === 'CO' || country === 'EC' ? 'Cédula' : (country === 'CL' ? 'RUT' : 'ID Personal'))),
@@ -187,6 +173,22 @@ export function usePOS(): POSReturnValue | POSErrorReturn {
         ).slice(0, 5),
         [products, searchQuery]
     );
+
+    if (!salesContext) {
+        return { error: 'SalesContext no disponible' };
+    }
+
+    const {
+        cart, addToCart, removeFromCart, updateQuantity, updateItemDiscount,
+        total, subtotal, tax, clearCart,
+        customer, setCustomer, transactionType, setTransactionType,
+        documentType, setDocumentType, history, saveTransaction, loadQuote,
+        globalDiscountAmount, setGlobalDiscountAmount,
+        globalDiscountType, setGlobalDiscountType,
+        couponCode, setCouponCode,
+        shippingCost, setShippingCost,
+        currency, taxName, taxRate, setCountry
+    } = salesContext;
 
     const handleQuickAdd = (p: Producto) => {
         addToCart({

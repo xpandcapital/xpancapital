@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+import { supabase as sharedSupabase } from '@/lib/supabase/server'
 
 function getSupabase() {
-  return createClient(supabaseUrl, supabaseServiceKey)
+  return sharedSupabase
 }
 
 async function recordDownload(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ReturnType<typeof getSupabase>,
   productoId: string,
   archivoId: string,
   userId: string,
   tipoDescarga: string,
   request: NextRequest
 ) {
-  await (supabase as any).from('producto_descargas').insert({
+  await supabase.from('producto_descargas').insert({
     producto_id: productoId,
     archivo_id: archivoId || null,
     user_id: userId,
@@ -32,8 +29,9 @@ function isSupabaseStorageUrl(url: string): boolean {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string; archivoId: string } }
+  { params: paramsPromise }: { params: Promise<{ id: string; archivoId: string }> }
 ) {
+  const params = await paramsPromise
   try {
     const supabase = getSupabase()
     const { searchParams } = new URL(request.url)

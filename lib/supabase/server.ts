@@ -25,10 +25,7 @@ export function createClient() {
 function createSupabaseProxy(): SupabaseClient {
   const handler: ProxyHandler<object> = {
     get(_, prop: string) {
-      return (getClient() as Record<string, unknown>)[prop]
-    },
-    apply(_, thisArg, args) {
-      return Reflect.apply(getClient() as (...args: unknown[]) => unknown, thisArg, args)
+      return (getClient() as unknown as Record<string, unknown>)[prop]
     },
   }
   return new Proxy({}, handler) as unknown as SupabaseClient

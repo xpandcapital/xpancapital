@@ -1,25 +1,10 @@
-// @ts-nocheck
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 import { decrypt } from '@/app/superadmin/correo/_lib/crypto'
 import { connectImap, appendToSent } from '@/app/superadmin/correo/_lib/imapClient'
 
-let _cachedSupabase: ReturnType<typeof createClient> | null = null
-function getSupabase() {
-  if (_cachedSupabase) return _cachedSupabase
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
-  return _cachedSupabase
-}
-
-const supabase = new Proxy({} as any, {
-  get(_: any, prop: string) {
-    return getSupabase()[prop]
-  }
-})
 function generateMessageId(from: string): string {
   const domain = from.split('@')[1] || 'xpancapital.org'
   const timestamp = Date.now()
@@ -140,7 +125,7 @@ export async function POST(
         })
 
         const msg = await client.fetchOne(`${params.uid}`, { envelope: true }, { uid: true })
-        if (msg?.envelope?.messageId) {
+        if (msg && msg.envelope?.messageId) {
           inReplyTo = msg.envelope.messageId
           references = msg.envelope.messageId
           if (msg.envelope.inReplyTo) {

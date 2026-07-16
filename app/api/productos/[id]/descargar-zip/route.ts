@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-// @ts-ignore
+import { supabase as sharedSupabase } from '@/lib/supabase/server'
 import archiver from 'archiver'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 const MAX_TOTAL_SIZE_BYTES = 100 * 1024 * 1024
 
 function getSupabase() {
-  return createClient(supabaseUrl, supabaseServiceKey)
+  return sharedSupabase
 }
 
 function isSupabaseStorageUrl(url: string): boolean {
@@ -27,12 +23,12 @@ async function fetchFileAsBuffer(url: string): Promise<{ buffer: Buffer; name: s
 }
 
 async function recordDownload(
-  supabase: ReturnType<typeof createClient>,
+  supabase: ReturnType<typeof getSupabase>,
   productoId: string,
   userId: string,
   request: NextRequest
 ) {
-  await (supabase as any).from('producto_descargas').insert({
+  await supabase.from('producto_descargas').insert({
     producto_id: productoId,
     user_id: userId,
     tipo_descarga: 'zip',
@@ -43,8 +39,9 @@ async function recordDownload(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params: paramsPromise }: { params: Promise<{ id: string }> }
 ) {
+  const params = await paramsPromise
   try {
     const supabase = getSupabase()
     const { searchParams } = new URL(request.url)

@@ -12,7 +12,7 @@ function getStorageClient(): SupabaseClient {
 
 export const supabase = new Proxy({} as SupabaseClient, {
   get(_, prop: string) {
-    return (getStorageClient() as Record<string, unknown>)[prop]
+    return (getStorageClient() as unknown as Record<string, unknown>)[prop]
   },
 })
 

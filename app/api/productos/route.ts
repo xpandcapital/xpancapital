@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ── Incluir short links asociados ──────────────────────────────────────────
-    let shortLinksMap: Record<string, string> = {}
+    const shortLinksMap: Record<string, string> = {}
     if (data && data.length > 0) {
       const productoUrls = data.map((p: any) => `/tienda/producto/${p.slug}`)
       const { data: shortLinks } = await supabase

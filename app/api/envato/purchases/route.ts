@@ -1,20 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase/server';
 
-let _cachedSupabase: ReturnType<typeof createClient> | null = null
-function getSupabase() {
-  if (_cachedSupabase) return _cachedSupabase
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
-  return _cachedSupabase
-}
-
-const supabase = new Proxy({} as any, {
-  get(_: any, prop: string) {
-    return getSupabase()[prop]
-  }
-})
 async function getToken(): Promise<string> {
   const { data } = await supabase.from('api_keys').select('key_name, key_value');
   const keys: Record<string, string> = {};

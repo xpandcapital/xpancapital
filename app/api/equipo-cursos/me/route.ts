@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'email es requerido' }, { status: 400 })
     }
 
-    let isAdmin = false
+    const isAdmin = false
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         .single()
       const advisorId = advisor?.id || null
 
-      let assignedMap: Record<string, any> = {}
+      const assignedMap: Record<string, any> = {}
 
       if (advisorId) {
         const { data: asignaciones } = await supabase
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
       .eq('advisor_id', advisorId)
       .order('asignado_en', { ascending: false })
 
-    let cursosInfo: Record<string, any> = {}
+    const cursosInfo: Record<string, any> = {}
     if (equipoCursosData && equipoCursosData.length > 0) {
       const cursoIds = [...new Set(equipoCursosData.map(e => e.curso_id).filter(Boolean))]
       if (cursoIds.length > 0) {

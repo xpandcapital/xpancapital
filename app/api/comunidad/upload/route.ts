@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import sharp from 'sharp'
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 
 export const runtime = 'nodejs'
@@ -103,48 +106,53 @@ async function compressImage(buffer: Buffer, mimeType: string): Promise<{ compre
   }
 }
 
-function getVideoThumbnail(buffer: Buffer): Promise<Buffer | null> {
-  return new Promise((resolve) => {
-    try {
-      const ffmpeg = require('fluent-ffmpeg') as any
-      const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
-      ffmpeg.setFfmpegPath(ffmpegPath)
+async function getFfmpeg() {
+  const [{ default: ffmpeg }, { default: installer }] = await Promise.all([
+    import('fluent-ffmpeg'),
+    import('@ffmpeg-installer/ffmpeg'),
+  ])
+  ffmpeg.setFfmpegPath(installer.path)
+  return ffmpeg
+}
 
-      const tempDir = require('os').tmpdir()
-      const inputPath = `${tempDir}/comunidad-input-${Date.now()}.mp4`
-      const outputPath = `${tempDir}/comunidad-thumb-${Date.now()}.png`
+async function getVideoThumbnail(buffer: Buffer): Promise<Buffer | null> {
+  try {
+    const ffmpeg = await getFfmpeg()
 
-      require('fs').writeFileSync(inputPath, buffer)
+    const tempDir = os.tmpdir()
+    const inputPath = `${tempDir}/comunidad-input-${Date.now()}.mp4`
+    const outputPath = `${tempDir}/comunidad-thumb-${Date.now()}.png`
 
+    fs.writeFileSync(inputPath, buffer)
+
+    return await new Promise((resolve) => {
       ffmpeg(inputPath)
-        .screenshots({ timestamps: ['1'], filename: require('path').basename(outputPath), folder: tempDir })
+        .screenshots({ timestamps: ['1'], filename: path.basename(outputPath), folder: tempDir })
         .on('end', () => {
           try {
-            const thumb = require('fs').readFileSync(outputPath)
-            require('fs').unlinkSync(inputPath)
-            require('fs').unlinkSync(outputPath)
+            const thumb = fs.readFileSync(outputPath)
+            fs.unlinkSync(inputPath)
+            fs.unlinkSync(outputPath)
             resolve(thumb)
           } catch { resolve(null) }
         })
         .on('error', () => {
-          try { require('fs').unlinkSync(inputPath) } catch {}
+          try { fs.unlinkSync(inputPath) } catch {}
           resolve(null)
         })
-    } catch { resolve(null) }
-  })
+    })
+  } catch { return null }
 }
 
 async function compressVideo(buffer: Buffer): Promise<{ compressed: Buffer | null; thumbnail: Buffer | null; compressedSize: number }> {
   try {
-    const ffmpeg = require('fluent-ffmpeg') as any
-    const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
-    ffmpeg.setFfmpegPath(ffmpegPath)
+    const ffmpeg = await getFfmpeg()
 
-    const tempDir = require('os').tmpdir()
+    const tempDir = os.tmpdir()
     const inputPath = `${tempDir}/comunidad-video-in-${Date.now()}.mp4`
     const outputPath = `${tempDir}/comunidad-video-out-${Date.now()}.mp4`
 
-    require('fs').writeFileSync(inputPath, buffer)
+    fs.writeFileSync(inputPath, buffer)
 
     return new Promise((resolve) => {
       ffmpeg(inputPath)
@@ -156,18 +164,18 @@ async function compressVideo(buffer: Buffer): Promise<{ compressed: Buffer | nul
         .output(outputPath)
         .on('end', async () => {
           try {
-            const compressed = require('fs').readFileSync(outputPath)
-            const thumb = await getVideoThumbnail(Buffer.from(require('fs').readFileSync(inputPath)))
-            require('fs').unlinkSync(inputPath)
-            require('fs').unlinkSync(outputPath)
+            const compressed = fs.readFileSync(outputPath)
+            await getVideoThumbnail(Buffer.from(fs.readFileSync(inputPath)))
+            fs.unlinkSync(inputPath)
+            fs.unlinkSync(outputPath)
             resolve({ compressed, thumbnail: null, compressedSize: compressed.length })
           } catch {
-            try { require('fs').unlinkSync(inputPath); require('fs').unlinkSync(outputPath) } catch {}
+            try { fs.unlinkSync(inputPath); fs.unlinkSync(outputPath) } catch {}
             resolve({ compressed: null, thumbnail: null, compressedSize: 0 })
           }
         })
         .on('error', () => {
-          try { require('fs').unlinkSync(inputPath) } catch {}
+          try { fs.unlinkSync(inputPath) } catch {}
           resolve({ compressed: null, thumbnail: null, compressedSize: 0 })
         })
         .run()

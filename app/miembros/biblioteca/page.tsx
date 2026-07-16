@@ -230,7 +230,7 @@ const isFuzzyMatch = (target: string, query: string) => {
     // Check for some typos/errors: simple logic, if 70% of chars match in order
     let matchCount = 0;
     let targetIdx = 0;
-    for (let char of q) {
+    for (const char of q) {
         const foundIdx = t.indexOf(char, targetIdx);
         if (foundIdx !== -1) {
             matchCount++;

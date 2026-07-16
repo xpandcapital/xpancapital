@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { supabase } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/supabase/api-auth'
 
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
@@ -15,21 +16,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'originalEmail e instructions requeridos' }, { status: 400 })
     }
 
-    const { createClient } = await import('@supabase/supabase-js')
-    let _cachedSupabase: ReturnType<typeof createClient> | null = null
-function getSupabase() {
-  if (_cachedSupabase) return _cachedSupabase
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
-  return _cachedSupabase
-}
-
-const supabase = new Proxy({} as any, {
-  get(_: any, prop: string) {
-    return getSupabase()[prop]
-  }
-})
     const { data: keys } = await supabase
       .from('api_keys')
       .select('key_value')

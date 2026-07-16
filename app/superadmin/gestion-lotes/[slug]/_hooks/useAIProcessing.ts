@@ -90,7 +90,7 @@ export function useAIProcessing(
 
       if (!result.error) {
         const aiData = JSON.parse(result.text);
-        let updatedLot = { ...lot };
+        const updatedLot = { ...lot };
 
         if (aiData.contratosEncontrados?.[0]) {
           const extracted = aiData.contratosEncontrados[0];

@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/Toast";
 
 export function ReferralPanel() {
     const { user } = useAuth();
-    const { referralInfo, loading, error, useReferralCode } = useReferrals(user?.id || null);
+    const { referralInfo, loading, error, useReferralCode: applyReferralCode } = useReferrals(user?.id || null);
     const { showToast } = useToast();
     const [copied, setCopied] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
@@ -62,7 +62,7 @@ export function ReferralPanel() {
         }
 
         setIsValidating(true);
-        const result = await useReferralCode(referralCode.trim().toUpperCase());
+        const result = await applyReferralCode(referralCode.trim().toUpperCase());
         
         if (result.success) {
             showToast(`¡Código aplicado! Ganaste ${result.reward} XPAND Coins`, 'success');

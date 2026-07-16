@@ -1,20 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { supabase } from '@/lib/supabase/server'
 
-let _cachedSupabase: ReturnType<typeof createClient> | null = null
-function getSupabase() {
-  if (_cachedSupabase) return _cachedSupabase
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
-  return _cachedSupabase
-}
-
-const supabase = new Proxy({} as any, {
-  get(_: any, prop: string) {
-    return getSupabase()[prop]
-  }
-})
 // GET - Obtener progreso de lectura
 export async function GET(request: NextRequest) {
   try {
@@ -148,20 +134,6 @@ export async function POST(request: NextRequest) {
 // (otorga puntos de gamificación)
 async function otorgarPuntosLectura(userId: string) {
   try {
-    let _cachedSupabase: ReturnType<typeof createClient> | null = null
-function getSupabase() {
-  if (_cachedSupabase) return _cachedSupabase
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
-  return _cachedSupabase
-}
-
-const supabase = new Proxy({} as any, {
-  get(_: any, prop: string) {
-    return getSupabase()[prop]
-  }
-})
     const { data: profile } = await supabase
       .from('profiles')
       .select('empresa_id')
@@ -170,7 +142,8 @@ const supabase = new Proxy({} as any, {
 
     if (!profile?.empresa_id) return
 
-    await fetch(`${supabaseUrl.replace('/rest/v1', '')}/api/gamificacion/otorgar`, {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.xpancapital.org'
+    await fetch(`${appUrl}/api/gamificacion/otorgar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

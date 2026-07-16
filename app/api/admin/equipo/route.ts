@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const existingUser = existingUsers?.users?.find(u => u.email === normalizedEmail)
 
     let userId: string | null = null
-    let generatedPassword = password || generateSecurePassword()
+    const generatedPassword = password || generateSecurePassword()
     let isNewUser = false
 
     if (existingUser) {

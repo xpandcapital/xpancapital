@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+import { supabase as sharedSupabase } from '@/lib/supabase/server'
 
 function getSupabase() {
-  return createClient(supabaseUrl, supabaseServiceKey)
+  return sharedSupabase
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string; entregaId: string } }
+  { params: paramsPromise }: { params: Promise<{ id: string; entregaId: string }> }
 ) {
+  const params = await paramsPromise
   try {
     const supabase = getSupabase()
     const { searchParams } = new URL(request.url)
@@ -71,8 +69,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; entregaId: string } }
+  { params: paramsPromise }: { params: Promise<{ id: string; entregaId: string }> }
 ) {
+  const params = await paramsPromise
   try {
     const supabase = getSupabase()
     const { searchParams } = new URL(request.url)

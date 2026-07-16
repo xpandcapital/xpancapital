@@ -72,7 +72,7 @@ export function useEquipoCursos(advisorId: string | null) {
         .order('asignado_en', { ascending: false })
       if (error) throw error
 
-      let cursosInfo: Record<string, CursoInfo> = {}
+      const cursosInfo: Record<string, CursoInfo> = {}
       if (equipoData && equipoData.length > 0) {
         const cursoIds = [...new Set(equipoData.map(e => e.curso_id).filter(Boolean))]
         if (cursoIds.length > 0) {
@@ -136,7 +136,7 @@ export function useEquipoProductos(advisorId: string | null) {
         .eq('advisor_id', advisorId)
         .order('asignado_en', { ascending: false })
 
-      let productosInfo: Record<string, ProductoInfo> = {}
+      const productosInfo: Record<string, ProductoInfo> = {}
       if (equipoProdsData && equipoProdsData.length > 0) {
         const productoIds = [...new Set(equipoProdsData.map(e => e.producto_id).filter(Boolean))]
         if (productoIds.length > 0) {

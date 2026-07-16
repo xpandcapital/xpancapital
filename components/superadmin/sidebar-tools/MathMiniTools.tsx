@@ -64,11 +64,11 @@ function AverageTool() {
 function FractionTool() {
     const [dec, setDec] = useState('');
     const toFraction = (n: number) => {
-        let len = n.toString().includes('.') ? n.toString().split('.')[1].length : 0;
-        let den = Math.pow(10, len);
-        let num = n * den;
+        const len = n.toString().includes('.') ? n.toString().split('.')[1].length : 0;
+        const den = Math.pow(10, len);
+        const num = n * den;
         const gcd = (a: number, b: number): number => b ? gcd(b, a % b) : a;
-        let common = gcd(num, den);
+        const common = gcd(num, den);
         return { num: num / common, den: den / common };
     };
     const f = dec ? toFraction(parseFloat(dec)) : null;
@@ -96,7 +96,7 @@ function NumberGenerator() {
     const [res, setRes] = useState<number[]>([]);
 
     const gen = () => {
-        let r = [];
+        const r = [];
         for (let i = 0; i < parseInt(qty); i++) r.push(Math.floor(Math.random() * (parseInt(max) - parseInt(min) + 1)) + parseInt(min));
         setRes(r);
     };

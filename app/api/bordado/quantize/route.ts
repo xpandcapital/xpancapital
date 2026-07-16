@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
         else colorCounts.set(key, { r: qr, g: qg, b: qb, count: 1 })
       }
 
-      let entries = Array.from(colorCounts.entries()).sort((a, b) => b[1].count - a[1].count)
+      const entries = Array.from(colorCounts.entries()).sort((a, b) => b[1].count - a[1].count)
       const merged: typeof entries = []
       for (const [, val] of entries) {
         if (!merged.find(([, m]) => colorDistance([val.r, val.g, val.b], [m.r, m.g, m.b]) < 120)) {

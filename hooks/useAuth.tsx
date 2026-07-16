@@ -57,7 +57,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
       .eq('id', userId)
       .single()
 
-    let rutaInicio: string | null = null
+    const rutaInicio: string | null = null
 
     if (error) {
       if (error.code === '406' || error.message?.includes('406') || error.message?.includes('Not Acceptable') || error.code === 'PGRST116') {

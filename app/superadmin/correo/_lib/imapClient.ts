@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ImapFlow } from 'imapflow'
 
 export interface ImapConfig {
@@ -38,7 +37,9 @@ export interface MessageHeader {
 export interface ParsedEmail {
   uid: number
   envelope: MessageHeader['envelope']
-  flags: Set<string>
+  flags: string[]
+  isRead: boolean
+  isFlagged: boolean
   subject: string
   from: string
   fromName: string
@@ -108,7 +109,7 @@ export async function fetchMessageHeaders(
   const lock = await client.getMailboxLock(folderPath)
   try {
     const mailbox = client.mailbox
-    const total = mailbox.exists
+    const total = mailbox ? mailbox.exists : 0
 
     const page = options.page || 1
     const limit = options.limit || 20
@@ -119,7 +120,7 @@ export async function fetchMessageHeaders(
 
     const messages: MessageHeader[] = []
 
-    let fetchOptions: any = {
+    const fetchOptions: any = {
       envelope: true,
       flags: true,
       bodyStructure: true,
@@ -241,13 +242,13 @@ export async function fetchFullMessage(
 
     if (!msg) return null
 
+    const envelope = (msg.envelope || {}) as unknown as MessageHeader['envelope']
     if (markRead && msg.flags && !msg.flags.has('\\Seen')) {
       try { await client.messageFlagsAdd(`${uid}`, ['\\Seen'], { uid: true }) } catch {}
     }
 
     const { default: PostalMime } = await import('postal-mime')
-    // @ts-ignore
-    const parsed = await PostalMime.parse(msg.source)
+    const parsed = await PostalMime.parse(msg.source as unknown as ArrayBuffer)
 
     const attachments = (parsed.attachments || []).map((att: any) => ({
       filename: att.filename || '',
@@ -290,7 +291,7 @@ export async function fetchFullMessage(
     }
 
     // Detectar suplantacion: si From visible != Return-Path real
-    const fromAddress = msg.envelope.from?.[0]?.address || ''
+    const fromAddress = envelope.from?.[0]?.address || ''
     const fromDomain = fromAddress.split('@')[1] || ''
     const returnDomain = returnPath.split('@')[1] || ''
     const spoofing = !!returnPath && returnPath !== fromAddress && returnDomain !== fromDomain
@@ -316,20 +317,20 @@ export async function fetchFullMessage(
 
     return {
       uid: msg.uid,
-      envelope: msg.envelope,
+      envelope: envelope,
       flags: msg.flags ? Array.from(msg.flags) : [],
       isRead: msg.flags ? msg.flags.has('\\Seen') : false,
       isFlagged: msg.flags ? msg.flags.has('\\Flagged') : false,
-      subject: parsed.subject || msg.envelope.subject || '',
-      from: msg.envelope.from?.[0]?.address || '',
-      fromName: msg.envelope.from?.[0]?.name || '',
-      to: (msg.envelope.to || []).map((t: any) => t.address).join(', '),
-      cc: (msg.envelope.cc || []).map((c: any) => c.address).join(', '),
-      date: msg.envelope.date?.toISOString() || '',
+      subject: parsed.subject || envelope.subject || '',
+      from: envelope.from?.[0]?.address || '',
+      fromName: envelope.from?.[0]?.name || '',
+      to: (envelope.to || []).map((t: any) => t.address).join(', '),
+      cc: (envelope.cc || []).map((c: any) => c.address).join(', '),
+      date: envelope.date?.toISOString() || '',
       html: html,
       text: parsed.text || '',
-      messageId: msg.envelope.messageId || '',
-      inReplyTo: msg.envelope.inReplyTo || '',
+      messageId: envelope.messageId || '',
+      inReplyTo: envelope.inReplyTo || '',
       references: '',
       size: msg.size || 0,
       attachments,

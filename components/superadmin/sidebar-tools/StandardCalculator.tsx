@@ -11,7 +11,7 @@ const StandardCalculator = ({ className = "" }: { className?: string }) => {
 
     const safeEval = (expr: string) => {
         try {
-            let clean = expr.replace(/[+\-*/]$/, '').replace(/[^0-9. +\-*/()]/g, '');
+            const clean = expr.replace(/[+\-*/]$/, '').replace(/[^0-9. +\-*/()]/g, '');
             if (!clean) return null;
             // eslint-disable-next-line no-eval
             const res = eval(clean);

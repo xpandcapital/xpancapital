@@ -200,7 +200,7 @@ export const SalesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     useEffect(() => {
-        let currentSubtotal = cart.reduce((acc, item) => {
+        const currentSubtotal = cart.reduce((acc, item) => {
             const itemBasePrice = item.price * item.quantity;
             let itemDiscount = 0;
             if (item.discount) {

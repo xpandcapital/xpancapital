@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase/server'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { createNotionPage } from '@/lib/integrations/notion'
 import { logger } from '@/lib/utils/logger'
@@ -8,35 +8,18 @@ import { cleanPhone } from '@/lib/phone'
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.xpancapital.org'
 
-async function notifyAsesorViaWhatsApp(asesorId: string, lead: any) {
+async function notifyAsesorViaWhatsApp(asesorId: string, lead: Record<string, unknown>) {
   try {
-    let _cachedSupabase: ReturnType<typeof createClient> | null = null
-function getSupabase() {
-  if (_cachedSupabase) return _cachedSupabase
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  _cachedSupabase = createClient(supabaseUrl, supabaseServiceKey)
-  return _cachedSupabase
-}
-
-const supabase = new Proxy({} as any, {
-  get(_: any, prop: string) {
-    return getSupabase()[prop]
-  }
-})
     const { data: asesor } = await supabase.from('asesores').select('whatsapp').eq('id', asesorId).maybeSingle()
     if (!asesor?.whatsapp) return
     const { sendWhatsApp } = await import('@/lib/whatsapp')
     const msg = `🔔 *Nuevo Lead*\n\n*${lead.nombre}*\n📧 ${lead.email || 'Sin email'}\n📱 ${lead.telefono || 'Sin teléfono'}\n💰 ${lead.presupuesto || 'No especificado'}\n\n👉 ${appUrl}/superadmin/leads`
-    await sendWhatsApp({ number: asesor.whatsapp, message: msg, empresaId: lead.empresa_id || DEFAULT_EMPRESA_ID })
+    await sendWhatsApp({ number: asesor.whatsapp, message: msg, empresaId: (lead.empresa_id as string) || DEFAULT_EMPRESA_ID })
   } catch {}
 }
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
 function getSupabase() {
-  return createClient(supabaseUrl, supabaseServiceKey)
+  return supabase
 }
 
 // Función para enviar notificaciones

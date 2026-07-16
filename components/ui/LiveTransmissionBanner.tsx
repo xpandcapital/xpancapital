@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Radio, ExternalLink, Users } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { getSupabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
@@ -107,9 +107,7 @@ export function LiveTransmissionBanner() {
   const pathname = usePathname()
 
   // No mostrar en panel admin — solo en páginas públicas
-  if (pathname.startsWith('/superadmin') || pathname.startsWith('/admin')) {
-    return null
-  }
+  const isAdminPage = pathname.startsWith('/superadmin') || pathname.startsWith('/admin')
 
   const { user } = useAuth()
   const { purchasedProducts } = useShop()
@@ -152,6 +150,7 @@ export function LiveTransmissionBanner() {
   }, [pathname, user, purchasedProducts])
 
   useEffect(() => {
+    if (isAdminPage) return
     async function cargarEstado() {
       try {
         const res = await fetch(`/api/transmisiones?empresa_id=${DEFAULT_EMPRESA_ID}`)
@@ -172,6 +171,7 @@ export function LiveTransmissionBanner() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (isAdminPage) return
     const supabase = getSupabase()
     if (!supabase) return
 
@@ -218,13 +218,13 @@ export function LiveTransmissionBanner() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [puedeMostrar, limpiarTimeout, programarAutoOcultar])
+  }, [puedeMostrar, limpiarTimeout, programarAutoOcultar, isAdminPage])
 
   useEffect(() => {
     return () => limpiarTimeout()
   }, [limpiarTimeout])
 
-  if (!transmision || !puedeMostrar(transmision)) {
+  if (isAdminPage || !transmision || !puedeMostrar(transmision)) {
     return null
   }
 

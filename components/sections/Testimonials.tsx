@@ -39,13 +39,13 @@ export function Testimonials() {
         return () => clearInterval(timer);
     }, [testimonials, isPaused]);
 
-    if (!testimonials || testimonials.length === 0) return null;
-
-    const doubled = [...testimonials, ...testimonials];
-
     const handleMobileTap = useCallback(() => {
         setIsPaused(p => !p);
     }, []);
+
+    if (!testimonials || testimonials.length === 0) return null;
+
+    const doubled = [...testimonials, ...testimonials];
 
     return (
         <section ref={sectionRef} className="pt-10 md:pt-20 pb-24 bg-gradient-to-br from-zinc-950 via-black to-blis-red/5 relative cyber-texture overflow-hidden">
