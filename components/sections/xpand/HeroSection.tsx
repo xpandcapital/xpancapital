@@ -107,7 +107,7 @@ export function HeroSection() {
         </motion.div>
       ))}
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-12 md:pt-0">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-4 md:pt-0">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full flex flex-col items-center">
 
           <motion.div custom={0} variants={fadeUp} className="mb-6 md:mb-14">
@@ -124,8 +124,8 @@ export function HeroSection() {
             className="relative text-center mb-6 md:mb-12"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            <span className="relative glitch-text block md:inline text-[clamp(4.4rem,17vw,10rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#d5c108" }}>XPAND</span>
-            <span className="relative glitch-text block md:inline text-[clamp(4.4rem,17vw,10rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
+            <span className="relative glitch-text block md:inline text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#d5c108" }}>XPAND</span>
+            <span className="relative glitch-text block md:inline text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
           </motion.h1>
 
           <motion.p custom={2} variants={fadeUp}
