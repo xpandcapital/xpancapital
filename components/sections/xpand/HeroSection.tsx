@@ -107,7 +107,7 @@ export function HeroSection() {
         </motion.div>
       ))}
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-4 md:pt-0">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pb-16 md:pb-0 md:pt-0">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full flex flex-col items-center">
 
           <motion.div custom={0} variants={fadeUp} className="mb-6 md:mb-14">
@@ -179,7 +179,7 @@ export function HeroSection() {
         </motion.div>
       </div>
 
-      <div className="absolute bottom-10 md:bottom-0 left-0 right-0 z-10 overflow-hidden">
+      <div className="absolute bottom-20 md:bottom-0 left-0 right-0 z-10 overflow-hidden">
         <div className="flex animate-marquee whitespace-nowrap border-t border-white/[0.03] py-2">
           {[...forexPairs, ...forexPairs].map((f, i) => (
             <span key={i} className="inline-flex items-center gap-1.5 px-3 md:px-5 text-xs md:text-sm font-mono whitespace-nowrap">
