@@ -75,19 +75,28 @@ const fadeUp = {
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#050505]">
+    <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#050505]">
       <ParticleGrid />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.05)_0%,transparent_70%)] z-[1]" />
 
       {/* 4 corner widgets */}
-      {cornerWidgets.map((w) => (
+      {cornerWidgets.map((w, idx) => (
         <motion.div key={w.label}
           initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
+          animate={{ opacity: 1, scale: 1, y: [0, -9, 0] }}
+          transition={{
+            opacity: { delay: 0.8, duration: 0.5 },
+            scale: { delay: 0.8, duration: 0.5 },
+            y: { delay: 1.3 + idx * 0.4, duration: 3.5 + idx * 0.6, repeat: Infinity, ease: "easeInOut" },
+          }}
           className={`absolute z-20 hidden sm:flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] backdrop-blur-sm ${w.position}`}
         >
-          <w.icon className="w-5 h-5 text-[#d5c108]/60" />
+          <motion.div
+            animate={{ scale: [1, 1.15, 1] }}
+            transition={{ delay: 1.3 + idx * 0.4, duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <w.icon className="w-5 h-5 text-[#d5c108]/60" />
+          </motion.div>
           <div className="text-left">
             <div className="text-xs text-white/30 uppercase tracking-wider mb-0.5">{w.label}</div>
             <div className="flex items-center gap-2">
@@ -98,7 +107,7 @@ export function HeroSection() {
         </motion.div>
       ))}
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-28 md:pt-0">
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col items-center text-center pt-12 md:pt-0">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full flex flex-col items-center">
 
           <motion.div custom={0} variants={fadeUp} className="mb-6 md:mb-14">
@@ -115,8 +124,8 @@ export function HeroSection() {
             className="relative text-center mb-6 md:mb-12"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            <span className="relative glitch-text block md:inline text-[clamp(6.3rem,18vw,10rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#d5c108" }}>XPAND</span>
-            <span className="relative glitch-text block md:inline text-[clamp(6.3rem,18vw,10rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
+            <span className="relative glitch-text block md:inline text-[clamp(4.4rem,17vw,10rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#d5c108" }}>XPAND</span>
+            <span className="relative glitch-text block md:inline text-[clamp(4.4rem,17vw,10rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
           </motion.h1>
 
           <motion.p custom={2} variants={fadeUp}

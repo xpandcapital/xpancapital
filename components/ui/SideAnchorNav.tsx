@@ -4,26 +4,24 @@ import { useEffect, useState, useRef } from "react"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronUp, ChevronDown } from "lucide-react"
-import { useLandingCMS } from "@/context/LandingCMSContext"
 
-// Map from section key to DOM id and label
-const SECTION_MAP: Record<string, { id: string; label: string }> = {
-    hero: { id: "hero", label: "Inicio" },
-    about: { id: "trayectoria", label: "Trayectoria" },
-    process: { id: "process", label: "Proceso" },
-    operations: { id: "operaciones", label: "Backstage" },
-    market: { id: "insights", label: "Mercado" },
-    calculator: { id: "calculadora", label: "Plusvalía" },
-    map: { id: "mapa", label: "Mapa" },
-    projects: { id: "projects", label: "Portafolio" },
-    video: { id: "vision", label: "Video" },
-    catalog: { id: "catalog", label: "Tienda" },
-    team: { id: "equipo", label: "Alianza/Team" },
-    testimonials: { id: "testimonials", label: "Testimonios" },
-    faq: { id: "faq", label: "FAQ" },
-    blog: { id: "blog", label: "Blog" },
-    footer: { id: "footer", label: "Contacto" },
-}
+const HOME_SECTIONS = [
+    { id: "hero", label: "Inicio" },
+    { id: "video", label: "Presentación" },
+    { id: "ecosistema", label: "¿Por qué Xpand?" },
+    { id: "servicios", label: "Servicios" },
+    { id: "educacion", label: "Educación" },
+    { id: "resultados", label: "Resultados" },
+    { id: "roadmap", label: "Tu Camino" },
+    { id: "instructor", label: "Instructor" },
+    { id: "testimonios", label: "Testimonios" },
+    { id: "pricing", label: "Planes" },
+    { id: "recursos", label: "Recursos" },
+    { id: "contenido", label: "Contenido" },
+    { id: "faq", label: "FAQ" },
+    { id: "unete", label: "Únete" },
+    { id: "footer", label: "Contacto" },
+]
 
 const BLOG_SECTIONS = [
     { id: "blog-hero", label: "Portada" },
@@ -35,25 +33,12 @@ const BLOG_SECTIONS = [
 export function SideAnchorNav() {
     const pathname = usePathname()
     const isBlog = pathname === "/blog"
-    const { cmsData, templateData } = useLandingCMS()
     const [activeId, setActiveId] = useState("")
     const [isVisibleMobile, setIsVisibleMobile] = useState(false)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const lastScrollY = useRef(0)
 
-    // Get sections from CMS/template order for landing page
-    const sections = isBlog ? BLOG_SECTIONS : (() => {
-        const sectionOrder = (templateData as { sectionOrder?: string[] })?.sectionOrder || (cmsData as { sectionOrder?: string[] })?.sectionOrder || [
-            "hero", "about", "video", "process", "operations", "market", 
-            "calculator", "map", "projects", "catalog", "team", "testimonials", "faq", "blog", "footer"
-        ]
-        return sectionOrder
-            .filter((key: string) => SECTION_MAP[key])
-            .map((key: string) => ({ 
-                id: SECTION_MAP[key].id, 
-                label: SECTION_MAP[key].label 
-            }))
-    })()
+    const sections = isBlog ? BLOG_SECTIONS : HOME_SECTIONS
 
     useEffect(() => {
         if (pathname !== "/" && pathname !== "/blog") return
@@ -106,9 +91,13 @@ export function SideAnchorNav() {
 
     const navigateTo = (direction: 'up' | 'down') => {
         const currentIndex = sections.findIndex((s: { id: string }) => s.id === activeId)
-        if (currentIndex === -1) return
 
-        let nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+        let nextIndex: number
+        if (currentIndex === -1) {
+            nextIndex = direction === 'down' ? 1 : 0
+        } else {
+            nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+        }
         if (nextIndex < 0) nextIndex = 0
         if (nextIndex >= sections.length) nextIndex = sections.length - 1
 

@@ -14,7 +14,7 @@ const trades = [
 
 export function TrackRecord() {
   return (
-    <section className="relative bg-[#050505] py-20 md:py-28">
+    <section id="resultados" className="relative bg-[#050505] py-20 md:py-28">
       <div className="absolute inset-0 texture-grid-dark pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(213,193,8,0.04)_0%,transparent_60%)]" />
 

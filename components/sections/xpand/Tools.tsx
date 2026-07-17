@@ -13,7 +13,7 @@ const tools = [
 
 export function Tools() {
   return (
-    <section className="relative bg-[#fafaf8] py-20 md:py-28">
+    <section id="recursos" className="relative bg-[#fafaf8] py-20 md:py-28">
       <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
       <div className="absolute inset-0 texture-grid-light pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(213,193,8,0.07)_0%,transparent_55%)]" />

@@ -33,7 +33,7 @@ const cardVariants = {
 
 export function SocialProof() {
   return (
-    <section className="relative bg-[#fafaf8] py-24 md:py-32">
+    <section id="testimonios" className="relative bg-[#fafaf8] py-24 md:py-32">
       <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
       <div className="absolute inset-0 texture-grain-light pointer-events-none" />
       <div className="absolute inset-0 texture-dots-light pointer-events-none" />

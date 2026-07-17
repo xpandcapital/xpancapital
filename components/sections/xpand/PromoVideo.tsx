@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 
 export function PromoVideo() {
   return (
-    <section className="relative bg-[#050505] py-12 md:py-20 overflow-hidden">
+    <section id="video" className="relative bg-[#050505] py-12 md:py-20 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.04)_0%,transparent_70%)]" />
 
       <div className="relative max-w-4xl mx-auto px-4 md:px-6">

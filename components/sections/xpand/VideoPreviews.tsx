@@ -22,7 +22,7 @@ const videos = [
 
 export function VideoPreviews() {
   return (
-    <section className="relative bg-[#050505] py-20 md:py-28">
+    <section id="contenido" className="relative bg-[#050505] py-20 md:py-28">
       <div className="relative max-w-6xl mx-auto px-4 md:px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
           <span className="text-[#d5c108] text-xs md:text-sm font-semibold tracking-widest uppercase">Contenido Exclusivo</span>

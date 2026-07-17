@@ -29,7 +29,7 @@ const itemVariants = {
 
 export function MasterclassCTA() {
   return (
-    <section className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden">
+    <section id="unete" className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden">
       <div className="absolute inset-0 texture-topo-dark pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.05)_0%,transparent_70%)]" />
 
