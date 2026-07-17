@@ -1,4 +1,4 @@
-export const DEFAULT_EMPRESA_ID = process.env.NEXT_PUBLIC_EMPRESA_ID || '6186f014-c8c7-4027-9f08-8acf2bae3eae'
+export const DEFAULT_EMPRESA_ID = process.env.NEXT_PUBLIC_EMPRESA_ID || 'e8d21d17-e708-49c8-8975-e782b1223b1a'
 export const DEFAULT_EMPRESA_SLUG = process.env.NEXT_PUBLIC_EMPRESA_SLUG || 'xpancapital'
 
 export interface Empresa {

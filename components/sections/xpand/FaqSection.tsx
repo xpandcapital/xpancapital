@@ -19,6 +19,7 @@ export function FaqSection() {
   return (
     <section className="relative bg-[#fafaf8] py-20 md:py-28">
       <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
+      <div className="absolute inset-0 texture-topo-light pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.06)_0%,transparent_65%)]" />
       <div className="relative max-w-2xl mx-auto px-4 md:px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">

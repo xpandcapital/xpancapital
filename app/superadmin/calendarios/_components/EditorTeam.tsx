@@ -13,8 +13,8 @@ export function EditorTeam({ editor }: { editor: Editor }) {
   const [teamMembers, setTeamMembers] = useState<any[]>([])
 
   useEffect(() => {
-    fetch('/api/asesores').then(r => r.json()).then(d => {
-      if (d.success) setTeamMembers(d.data.map((a: any) => ({ id: a.id, nombre: a.nombre, email: a.email, whatsapp: a.whatsapp })))
+    fetch('/api/admin/users?per_page=100').then(r => r.json()).then(d => {
+      if (d.success) setTeamMembers((d.data || []).map((u: any) => ({ id: u.id, nombre: [u.nombre, u.apellido].filter(Boolean).join(' '), email: u.email, whatsapp: u.telefono })))
     })
   }, [])
 

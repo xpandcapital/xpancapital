@@ -41,15 +41,12 @@ export default function LeadsPage() {
   const [estadoFilter, setEstadoFilter] = useState<string>("");
   const [campanaFilter, setCampanaFilter] = useState<string>("");
   const [campanas, setCampanas] = useState<any[]>([]);
-  const [asesorFilter, setAsesorFilter] = useState("");
-  const [asesores, setAsesores] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   useEffect(() => {
     fetchLeads();
     fetchCampanas();
-    fetchAsesores();
   }, []);
 
   const fetchLeads = async () => {
@@ -58,7 +55,6 @@ export default function LeadsPage() {
       const params = new URLSearchParams();
       if (estadoFilter) params.append('estado', estadoFilter);
       if (campanaFilter) params.append('campana_id', campanaFilter);
-      if (asesorFilter) params.append('asesor_id', asesorFilter);
       if (search) params.append('search', search);
 
       const response = await fetch(`/api/leads?${params.toString()}`);
@@ -82,18 +78,6 @@ export default function LeadsPage() {
       const data = await response.json();
       if (data.success) {
         setCampanas(data.data || []);
-      }
-    } catch {
-      // Error silencioso
-    }
-  };
-
-  const fetchAsesores = async () => {
-    try {
-      const response = await fetch('/api/asesores');
-      const data = await response.json();
-      if (data.success) {
-        setAsesores(data.data || []);
       }
     } catch {
       // Error silencioso
@@ -215,15 +199,6 @@ export default function LeadsPage() {
             placeholder="Todas las campañas"
             searchPlaceholder="Buscar campaña..."
             emptyText="Sin campañas"
-          />
-
-          <SearchableSelect
-            options={asesores.map((a: any) => ({ value: a.id, label: a.nombre }))}
-            value={asesorFilter}
-            onChange={setAsesorFilter}
-            placeholder="Todos los asesores"
-            searchPlaceholder="Buscar asesor..."
-            emptyText="Sin asesores"
           />
 
           <button

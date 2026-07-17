@@ -14,8 +14,8 @@ export async function GET() {
       return NextResponse.json({ success: true, data: [
         { id: '1', nombre: 'usuario', label: 'Usuario', permisos: ['miembros:ver', 'productos:ver', 'perfil:ver', 'perfil:editar', 'facturacion:ver'], ruta_inicio: '/miembros' },
         { id: '2', nombre: 'cliente', label: 'Cliente', permisos: ['miembros:ver', 'productos:ver', 'cursos:ver', 'certificados:ver', 'perfil:ver', 'perfil:editar', 'facturacion:ver'], ruta_inicio: '/miembros' },
-        { id: '3', nombre: 'editor', label: 'Editor', permisos: ['dashboard:ver', 'proyectos:ver', 'lotes:ver', 'contratos:ver', 'asesores:ver', 'productos:ver', 'productos:editar', 'clientes:ver', 'cursos:ver', 'cursos:editar', 'leads:ver', 'blog:ver', 'blog:crear', 'equipo:ver', 'perfil:ver', 'perfil:editar', 'capacitaciones:ver'], ruta_inicio: '/superadmin' },
-        { id: '4', nombre: 'empleado', label: 'Empleado', permisos: ['dashboard:ver', 'proyectos:ver', 'lotes:ver', 'asesores:ver', 'productos:ver', 'clientes:ver', 'capacitaciones:ver', 'leads:ver', 'equipo:ver', 'postulantes:ver', 'perfil:ver', 'perfil:editar'], ruta_inicio: '/superadmin/mis-capacitaciones' },
+        { id: '3', nombre: 'editor', label: 'Editor', permisos: ['dashboard:ver', 'productos:ver', 'productos:editar', 'clientes:ver', 'cursos:ver', 'cursos:editar', 'leads:ver', 'blog:ver', 'blog:crear', 'equipo:ver', 'perfil:ver', 'perfil:editar', 'capacitaciones:ver'], ruta_inicio: '/superadmin' },
+        { id: '4', nombre: 'empleado', label: 'Empleado', permisos: ['dashboard:ver', 'productos:ver', 'clientes:ver', 'capacitaciones:ver', 'leads:ver', 'equipo:ver', 'postulantes:ver', 'perfil:ver', 'perfil:editar'], ruta_inicio: '/superadmin/mis-capacitaciones' },
         { id: '5', nombre: 'admin', label: 'Admin', permisos: ['*'], ruta_inicio: '/superadmin' },
         { id: '6', nombre: 'superadmin', label: 'Super Admin', permisos: ['*'], ruta_inicio: '/superadmin' },
       ] })

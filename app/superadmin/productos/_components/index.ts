@@ -3,7 +3,7 @@ export { Header } from './ui/Header'
 export { SearchFilterBar } from './ui/SearchFilterBar'
 export { ViewModeToggle } from './ui/ViewModeToggle'
 export { PaginationBar } from './ui/PaginationBar'
-export { AnalyticsSection } from './ui/AnalyticsSection'
+
 export { BulkEditActions } from './ui/BulkEditActions'
 
 export { DeleteConfirmModal } from './modals/DeleteConfirmModal'

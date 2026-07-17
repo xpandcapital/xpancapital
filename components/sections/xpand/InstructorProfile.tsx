@@ -6,6 +6,7 @@ import { Award, ShieldCheck, TrendingUp } from "lucide-react"
 export function InstructorProfile() {
   return (
     <section className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden">
+      <div className="absolute inset-0 texture-topo-dark pointer-events-none" />
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#d5c108]/5 blur-[120px]" />
 
       <div className="relative max-w-6xl mx-auto px-6">

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { TipoContenido } from "./useTemplates";
+
+export type TipoContenido = 'landing' | 'blog' | 'blog_post' | 'tienda' | 'producto' | 'curso' | 'leccion' | 'proyecto' | 'funnel' | 'captura' | 'checkout' | 'thankyou' | 'legal';
 
 interface TemplateSection {[key: string]: unknown;}
 

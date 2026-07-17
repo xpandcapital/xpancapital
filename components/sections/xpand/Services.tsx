@@ -119,6 +119,7 @@ export function Services() {
 
   return (
     <section ref={sectionRef} id="servicios" className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden">
+      <div className="absolute inset-0 texture-grid-dark pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(213,193,8,0.04)_0%,transparent_55%)]" />
       <div className="hidden md:block absolute -left-32 top-1/3 w-[400px] h-[400px] rounded-full bg-[#d5c108]/[0.03] blur-[120px]" />
 

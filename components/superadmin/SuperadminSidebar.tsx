@@ -44,16 +44,6 @@ const ALL_SECTIONS: Section[] = [
         title: "Principal",
         items: [
             { icon: LayoutDashboard, label: "Dashboard", href: "/superadmin", permission: "dashboard:ver" },
-            {
-                icon: Building2,
-                label: "Proyectos",
-                subItems: [
-                    { icon: Building2, label: "Todos los Proyectos", href: "/superadmin/proyectos", permission: "proyectos:ver" },
-                    { icon: FolderOpen, label: "Gestión de Lotes", href: "/superadmin/gestion-lotes/_none_", permission: "lotes:ver" },
-                    { icon: FileSignature, label: "Contratos", href: "/superadmin/contratos", permission: "contratos:ver" },
-                    { icon: UsersRound, label: "Asesores", href: "/superadmin/asesores", permission: "asesores:ver" },
-                ]
-            },
         ]
     },
     {
@@ -93,13 +83,6 @@ const ALL_SECTIONS: Section[] = [
     {
         title: "Contenido",
         items: [
-            {
-                icon: Layout,
-                label: "Páginas",
-                subItems: [
-                    { icon: Layout, label: "Todas las Páginas", href: "/superadmin/templates", permission: "templates:ver" },
-                ]
-            },
             {
                 icon: Mail,
                 label: "Comunicación",

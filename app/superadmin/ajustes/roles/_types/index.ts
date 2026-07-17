@@ -55,15 +55,6 @@ export const PERMISSION_TREE: PermGroup[] = [
     title: 'Principal',
     items: [
       { key: 'dashboard', label: 'Dashboard', actions: [V] },
-      {
-        key: 'proyectos', label: 'Proyectos', actions: VCED,
-        subItems: [
-          { key: 'proyectos', label: 'Todos los Proyectos', actions: VCED },
-          { key: 'lotes', label: 'Gestión de Lotes', actions: VE },
-          { key: 'contratos', label: 'Contratos', actions: VCE },
-          { key: 'asesores', label: 'Asesores', actions: VCE },
-        ]
-      },
     ]
   },
   {
@@ -96,12 +87,6 @@ export const PERMISSION_TREE: PermGroup[] = [
   {
     title: 'Contenido',
     items: [
-      {
-        key: 'templates', label: 'Páginas', actions: VCED,
-        subItems: [
-          { key: 'templates', label: 'Todas las Páginas', actions: VCED },
-        ]
-      },
       {
         key: 'mails', label: 'Comunicación', actions: VCED,
         subItems: [

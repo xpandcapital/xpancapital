@@ -23,7 +23,6 @@ export default function CampanasPage() {
     whatsapp_notificacion: [] as string[],
     notion_database_id: "", notion_sync: false
   });
-  const [asesores, setAsesores] = useState<any[]>([])
   const [formularios, setFormularios] = useState<any[]>([])
   const [calendarios, setCalendarios] = useState<any[]>([])
   const [productos, setProductos] = useState<any[]>([])
@@ -50,7 +49,6 @@ export default function CampanasPage() {
   useEffect(() => { loadWaCampaigns() }, [])
 
   useEffect(() => {
-    fetch('/api/asesores').then(r=>r.json()).then(d=>{ if(d.success) setAsesores(d.data||[]) })
     fetch('/api/formularios?all=true').then(r=>r.json()).then(d=>{ if(d.success) setFormularios(d.data||[]) })
     fetch('/api/calendarios').then(r=>r.json()).then(d=>{ if(d.success) setCalendarios(d.data||d.calendarios||[]) })
     fetch('/api/productos?all=true&limit=500').then(r=>r.json()).then(d=>{ if(d.success) setProductos(d.data||d.productos||[]) })
@@ -263,13 +261,6 @@ export default function CampanasPage() {
                 )}
 
                 <div className="space-y-2 text-sm">
-                  {campana.asesor && (
-                    <div className="flex items-center gap-2 text-gray-400">
-                      <Users className="w-4 h-4" />
-                      <span>Asesor: {campana.asesor.nombre}</span>
-                    </div>
-                  )}
-                  
                   <div className="flex flex-wrap gap-2">
                     {campana.notificar_email && (
                       <span className="flex items-center gap-1 text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">
@@ -366,19 +357,6 @@ export default function CampanasPage() {
                     { value: "pausada", label: "Pausada" },
                     { value: "finalizada", label: "Finalizada" },
                   ]}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
-                />
-              </div>
-
-              {/* Asesor */}
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-2">
-                  Asesor
-                </label>
-                <SearchableSelect
-                  value={formData.asesor_id}
-                  onChange={(value) => setFormData({ ...formData, asesor_id: value })}
-                  options={asesores.map(a => ({ value: a.id, label: a.nombre }))}
                   className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
                 />
               </div>

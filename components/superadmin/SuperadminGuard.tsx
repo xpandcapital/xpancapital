@@ -6,10 +6,6 @@ import { PermissionGuard } from '@/components/ui/PermissionGuard'
 const PATH_TO_SECTION: Record<string, string> = {
   '/superadmin': 'dashboard:ver',
   '/superadmin/dashboard': 'dashboard:ver',
-  '/superadmin/proyectos': 'proyectos:ver',
-  '/superadmin/gestion-lotes': 'lotes:ver',
-  '/superadmin/contratos': 'contratos:ver',
-  '/superadmin/asesores': 'asesores:ver',
   '/superadmin/pos': 'pos:ver',
   '/superadmin/ventas': 'ventas:ver',
   '/superadmin/formasdepago': 'formasdepago:ver',
@@ -20,7 +16,6 @@ const PATH_TO_SECTION: Record<string, string> = {
   '/superadmin/certificados': 'certificados:ver',
   '/superadmin/mis-capacitaciones': 'capacitaciones:ver',
   '/superadmin/trading': 'trading:ver',
-  '/superadmin/templates': 'templates:ver',
   '/superadmin/mails': 'mails:ver',
   '/superadmin/calendarios': 'calendarios:ver',
   '/superadmin/formularios': 'formularios:ver',

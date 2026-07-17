@@ -8,8 +8,7 @@ import { useProducts } from "./_hooks/useProducts"
 import { useProductFilters } from "./_hooks/useProductFilters"
 import { useProductSelection } from "./_hooks/useProductSelection"
 import { usePagination } from "./_hooks/usePagination"
-import { useProductAnalytics } from "./_hooks/useProductAnalytics"
-import { Header, SearchFilterBar, ViewModeToggle, PaginationBar, AnalyticsSection, BulkEditActions } from "./_components"
+import { Header, SearchFilterBar, ViewModeToggle, PaginationBar, BulkEditActions } from "./_components"
 import { DeleteConfirmModal, MassEditModal, ProductFormModal, QRBarcodeModal } from "./_components/modals"
 import { ProductListView, ProductGridView, CompactTableView } from "./_components/views"
 import { CategoryProvider, useCategories } from "@/context/CategoryContext"
@@ -36,11 +35,9 @@ function AdminProductsContent() {
   const { filters, setFilters, searchTerm, setSearchTerm, categoryFilters, setCategoryFilters, sortConfig, handleSort, filteredProducts, sortedProducts } = useProductFilters(products)
   const { selectedProducts, toggleProductSelection, toggleAllSelection, handleSelectAllGlobal, clearSelection } = useProductSelection()
   const { currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, totalPages, paginatedItems } = usePagination(sortedProducts.length)
-  const { analytics } = useProductAnalytics(filteredProducts, contextCategories.map(c => c.name))
 
   const [viewMode, setViewMode] = useState<ViewMode>("list")
   const [isBulkEditing, setIsBulkEditing] = useState(false)
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(true)
   const [showTools, setShowTools] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{ isOpen: boolean; productId: string | 'bulk' }>({ isOpen: false, productId: '' })
   const [isMassEditing, setIsMassEditing] = useState(false)
@@ -332,15 +329,6 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
                 )}
               </div>
             </div>
-
-            <AnalyticsSection
-              isAnalyticsOpen={isAnalyticsOpen}
-              onToggle={() => setIsAnalyticsOpen(!isAnalyticsOpen)}
-              analytics={analytics}
-              selectedCurrencySymbol={selectedCurrency.symbol}
-              totalProducts={products.length}
-              enablePerishables={settings?.enablePerishables ?? false}
-            />
           </div>
         </div>
       </div>

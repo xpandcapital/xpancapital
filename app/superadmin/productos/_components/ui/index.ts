@@ -3,5 +3,5 @@ export { Header } from './Header'
 export { SearchFilterBar } from './SearchFilterBar'
 export { ViewModeToggle } from './ViewModeToggle'
 export { PaginationBar } from './PaginationBar'
-export { AnalyticsSection } from './AnalyticsSection'
+
 export { BulkEditActions } from './BulkEditActions'

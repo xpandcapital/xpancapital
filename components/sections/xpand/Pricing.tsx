@@ -50,7 +50,8 @@ export function Pricing() {
   }
 
   return (
-    <section id="pricing" className="relative bg-[#0a0a0a] py-20 md:py-28">
+    <section id="pricing" className="relative bg-[#0a0a0a] py-20 md:py-28 overflow-hidden">
+      <div className="absolute inset-0 texture-diagonal-dark pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.04)_0%,transparent_70%)]" />
 
       <div className="relative max-w-4xl mx-auto px-4 md:px-6">

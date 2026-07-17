@@ -14,10 +14,6 @@ interface PermissionSelectorProps {
 
 const PERMISSION_CATEGORIES: Record<string, Permission[]> = {
   'Dashboard': ['dashboard:ver'],
-  'Proyectos': ['proyectos:ver', 'proyectos:crear', 'proyectos:editar', 'proyectos:eliminar'],
-  'Lotes': ['lotes:ver', 'lotes:editar'],
-  'Contratos': ['contratos:ver', 'contratos:crear', 'contratos:editar'],
-  'Asesores': ['asesores:ver', 'asesores:crear', 'asesores:editar'],
   'POS': ['pos:ver'],
   'Ventas': ['ventas:ver', 'ventas:crear', 'ventas:editar', 'ventas:eliminar'],
   'Formas de Pago': ['formasdepago:ver', 'formasdepago:editar'],
@@ -27,7 +23,6 @@ const PERMISSION_CATEGORIES: Record<string, Permission[]> = {
   'Biblioteca': ['biblioteca:ver', 'biblioteca:crear', 'biblioteca:editar', 'biblioteca:eliminar'],
   'Certificados': ['certificados:ver', 'certificados:crear'],
   'Trading': ['trading:ver'],
-  'Páginas': ['templates:ver', 'templates:editar'],
   'Correos': ['mails:ver', 'mails:editar'],
   'Calendarios': ['calendarios:ver', 'calendarios:editar'],
   'Formularios': ['formularios:ver', 'formularios:crear'],

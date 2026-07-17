@@ -145,6 +145,7 @@ export function LearningModel() {
   return (
     <section ref={sectionRef} id="educacion" className="relative bg-[#fafaf8] py-24 md:py-32 overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
+      <div className="absolute inset-0 texture-topo-light pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(213,193,8,0.09)_0%,transparent_55%)]" />
       <motion.div
         style={{ y: orbY }}

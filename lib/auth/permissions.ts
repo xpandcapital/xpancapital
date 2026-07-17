@@ -7,19 +7,6 @@ export type UserRole = 'superadmin' | 'admin' | 'editor' | 'empleado' | 'cliente
 export const PERMISSIONS = {
   // Dashboard
   'dashboard:ver': 'Ver Dashboard',
-  // Principal
-  'proyectos:ver': 'Ver Proyectos',
-  'proyectos:crear': 'Crear Proyectos',
-  'proyectos:editar': 'Editar Proyectos',
-  'proyectos:eliminar': 'Eliminar Proyectos',
-  'lotes:ver': 'Ver Gestión de Lotes',
-  'lotes:editar': 'Editar Lotes',
-  'contratos:ver': 'Ver Contratos',
-  'contratos:crear': 'Crear Contratos',
-  'contratos:editar': 'Editar Contratos',
-  'asesores:ver': 'Ver Asesores',
-  'asesores:crear': 'Crear Asesores',
-  'asesores:editar': 'Editar Asesores',
   // Ventas
   'pos:ver': 'Ver Terminal POS',
   'pos:crear': 'Crear en Terminal POS',
@@ -63,15 +50,11 @@ export const PERMISSIONS = {
   'chat:ver': 'Ver Chat',
   'chat:configurar': 'Configurar Chat',
   // Contenido
-  'templates:ver': 'Ver Páginas',
   'correo:ver': 'Ver Correo IMAP',
   'correo:crear': 'Crear Correo IMAP',
   'correo:editar': 'Editar Correo IMAP',
   'correo:eliminar': 'Eliminar Correo IMAP',
 
-  'templates:crear': 'Crear Páginas',
-  'templates:editar': 'Editar Páginas',
-  'templates:eliminar': 'Eliminar Páginas',
   'mails:ver': 'Ver Correos',
   'mails:crear': 'Crear Correos',
   'mails:editar': 'Editar Correos',
@@ -153,10 +136,6 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
   admin: ['*'] as unknown as Permission[],
   editor: [
     'dashboard:ver',
-    'proyectos:ver', 'proyectos:crear', 'proyectos:editar',
-    'lotes:ver', 'lotes:editar',
-    'contratos:ver', 'contratos:crear', 'contratos:editar',
-    'asesores:ver', 'asesores:crear', 'asesores:editar',
     'pos:ver', 'pos:crear', 'pos:editar',
     'productos:ver', 'productos:crear', 'productos:editar',
     'clientes:ver', 'clientes:crear', 'clientes:editar',
@@ -170,7 +149,6 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
     'biblioteca:ver', 'biblioteca:crear', 'biblioteca:editar',
     'correo:ver', 'correo:crear', 'correo:editar',
     'chat:ver', 'chat:configurar',
-    'templates:ver', 'templates:crear', 'templates:editar',
     'mails:ver', 'mails:crear', 'mails:editar',
     'calendarios:ver', 'calendarios:crear', 'calendarios:editar',
     'formularios:ver', 'formularios:crear', 'formularios:editar',
@@ -187,9 +165,6 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
   ],
   empleado: [
     'dashboard:ver',
-    'proyectos:ver',
-    'lotes:ver',
-    'asesores:ver',
     'pos:ver',
     'ventas:ver',
     'formasdepago:ver',
@@ -201,7 +176,6 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
     'capacitaciones:ver',
     'certificados:ver',
     'chat:ver',
-    'templates:ver',
     'mails:ver',
     'correo:ver',
     'leads:ver',
@@ -227,10 +201,6 @@ export const ROLE_DEFAULTS: Record<UserRole, Permission[]> = {
 export const SECTION_PERMISSIONS: Record<string, Permission> = {
   '': 'dashboard:ver',
   'dashboard': 'dashboard:ver',
-  'proyectos': 'proyectos:ver',
-  'gestion-lotes': 'lotes:ver',
-  'contratos': 'contratos:ver',
-  'asesores': 'asesores:ver',
   'pos': 'pos:ver',
   'ventas': 'ventas:ver',
   'formasdepago': 'formasdepago:ver',
@@ -243,7 +213,6 @@ export const SECTION_PERMISSIONS: Record<string, Permission> = {
   'certificados': 'certificados:ver',
   'trading': 'trading:ver',
   'chat': 'chat:ver',
-  'templates': 'templates:ver',
   'mails': 'mails:ver',
   'correo': 'correo:ver',
   'calendarios': 'calendarios:ver',
@@ -273,26 +242,6 @@ export const PERMISSION_ACTIONS: Record<string, { action: string; label: string;
   'chat': [
     { action: 'ver', label: 'Ver', icon: 'eye' },
     { action: 'configurar', label: 'Configurar', icon: 'settings' },
-  ],
-  'proyectos': [
-    { action: 'ver', label: 'Ver', icon: 'eye' },
-    { action: 'crear', label: 'Crear', icon: 'plus' },
-    { action: 'editar', label: 'Editar', icon: 'pencil' },
-    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
-  ],
-  'lotes': [
-    { action: 'ver', label: 'Ver', icon: 'eye' },
-    { action: 'editar', label: 'Editar', icon: 'pencil' },
-  ],
-  'contratos': [
-    { action: 'ver', label: 'Ver', icon: 'eye' },
-    { action: 'crear', label: 'Crear', icon: 'plus' },
-    { action: 'editar', label: 'Editar', icon: 'pencil' },
-  ],
-  'asesores': [
-    { action: 'ver', label: 'Ver', icon: 'eye' },
-    { action: 'crear', label: 'Crear', icon: 'plus' },
-    { action: 'editar', label: 'Editar', icon: 'pencil' },
   ],
   'pos': [
     { action: 'ver', label: 'Ver', icon: 'eye' },
@@ -353,12 +302,6 @@ export const PERMISSION_ACTIONS: Record<string, { action: string; label: string;
     { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
   ],
   'correo': [
-    { action: 'ver', label: 'Ver', icon: 'eye' },
-    { action: 'crear', label: 'Crear', icon: 'plus' },
-    { action: 'editar', label: 'Editar', icon: 'pencil' },
-    { action: 'eliminar', label: 'Eliminar', icon: 'trash' },
-  ],
-  'templates': [
     { action: 'ver', label: 'Ver', icon: 'eye' },
     { action: 'crear', label: 'Crear', icon: 'plus' },
     { action: 'editar', label: 'Editar', icon: 'pencil' },
@@ -523,19 +466,16 @@ export function canAccessSection(
 
 export const AVAILABLE_ROUTES: { path: string; label: string; section: string }[] = [
   { path: '/superadmin', label: 'Dashboard', section: 'dashboard' },
-  { path: '/superadmin/proyectos', label: 'Proyectos', section: 'proyectos' },
   { path: '/superadmin/mis-capacitaciones', label: 'Mis Capacitaciones', section: 'capacitaciones' },
   { path: '/superadmin/productos', label: 'Productos', section: 'productos' },
   { path: '/superadmin/clientes', label: 'Clientes', section: 'clientes' },
   { path: '/superadmin/cursos', label: 'Cursos', section: 'cursos' },
   { path: '/superadmin/leads', label: 'Leads', section: 'leads' },
-  { path: '/superadmin/asesores', label: 'Asesores', section: 'asesores' },
   { path: '/superadmin/postulantes', label: 'Postulantes', section: 'postulantes' },
   { path: '/superadmin/campanas', label: 'Campañas', section: 'campanas' },
   { path: '/superadmin/notificaciones', label: 'Notificaciones', section: 'notificaciones' },
   { path: '/superadmin/blog', label: 'Blog', section: 'blog' },
   { path: '/superadmin/certificados', label: 'Certificados', section: 'certificados' },
-  { path: '/superadmin/templates', label: 'Páginas', section: 'templates' },
   { path: '/superadmin/utilidades', label: 'Utilidades', section: 'utilidades' },
   { path: '/superadmin/api-nube', label: 'APIs y Nube', section: 'api-nube' },
   { path: '/superadmin/analiticas', label: 'Analíticas', section: 'analiticas' },

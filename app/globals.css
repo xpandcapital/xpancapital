@@ -214,6 +214,69 @@
     display: none;
     /* Chrome, Safari, Opera */
   }
+
+  /* ─── TEXTURAS DE FONDO ELABORADAS ─── */
+
+  /* Grid técnico fino para secciones oscuras (estilo terminal de trading) */
+  .texture-grid-dark {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  /* Líneas diagonales premium para secciones oscuras */
+  .texture-diagonal-dark {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(213, 193, 8, 0.04) 0px,
+      rgba(213, 193, 8, 0.04) 1px,
+      transparent 1px,
+      transparent 14px
+    );
+    mask-image: radial-gradient(ellipse at top, black 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at top, black 20%, transparent 75%);
+  }
+
+  /* Curvas de contorno topográfico (SVG inline) para fondos oscuros */
+  .texture-topo-dark {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%23d5c108' stroke-opacity='0.05' stroke-width='1.2'%3E%3Cpath d='M0 120 Q150 60 300 120 T600 120'/%3E%3Cpath d='M0 180 Q150 120 300 180 T600 180'/%3E%3Cpath d='M0 240 Q150 180 300 240 T600 240'/%3E%3Cpath d='M0 300 Q150 240 300 300 T600 300'/%3E%3Cpath d='M0 360 Q150 300 300 360 T600 360'/%3E%3Cpath d='M0 420 Q150 360 300 420 T600 420'/%3E%3Cpath d='M0 480 Q150 420 300 480 T600 480'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 600px 600px;
+    background-repeat: repeat;
+  }
+
+  /* Puntos finos para secciones claras */
+  .texture-dots-light {
+    background-image: radial-gradient(circle, rgba(24, 24, 27, 0.09) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+  }
+
+  /* Cuadrícula tipo papel milimetrado para secciones claras */
+  .texture-grid-light {
+    background-image:
+      linear-gradient(rgba(24, 24, 27, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(24, 24, 27, 0.045) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 90%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 90%);
+  }
+
+  /* Contornos topográficos dorados para secciones claras */
+  .texture-topo-light {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%238f8200' stroke-opacity='0.08' stroke-width='1.2'%3E%3Cpath d='M0 120 Q150 60 300 120 T600 120'/%3E%3Cpath d='M0 180 Q150 120 300 180 T600 180'/%3E%3Cpath d='M0 240 Q150 180 300 240 T600 240'/%3E%3Cpath d='M0 300 Q150 240 300 300 T600 300'/%3E%3Cpath d='M0 360 Q150 300 300 360 T600 360'/%3E%3Cpath d='M0 420 Q150 360 300 420 T600 420'/%3E%3Cpath d='M0 480 Q150 420 300 480 T600 480'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 600px 600px;
+    background-repeat: repeat;
+  }
+
+  /* Grano de papel sutil para secciones claras */
+  .texture-grain-light {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grainFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grainFilter)' opacity='0.04'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+  }
 }
 
 /* ─── MARQUEE ANIMATIONS ─── */

@@ -15,6 +15,7 @@ export function Roadmap() {
   return (
     <section className="relative bg-[#fafaf8] py-20 md:py-28 overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
+      <div className="absolute inset-0 texture-grid-light pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(213,193,8,0.07)_0%,transparent_60%)]" />
 
       <div className="relative max-w-5xl mx-auto px-4 md:px-6">
@@ -32,11 +33,11 @@ export function Roadmap() {
               whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.5 }}
               className={`relative flex items-start gap-4 md:gap-8 mb-10 md:mb-14 ${i % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}`}
             >
-              <div className="relative z-10 flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border-2 border-[#d5c108] shadow-[0_0_12px_rgba(213,193,8,0.25)] flex items-center justify-center">
+              <div className="relative z-10 flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border-2 border-[#d5c108] shadow-[0_0_12px_rgba(213,193,8,0.25)] flex items-center justify-center md:absolute md:left-1/2 md:top-0 md:-translate-x-1/2">
                 <s.icon className="w-4 h-4 md:w-5 md:h-5 text-[#8f8200]" />
               </div>
 
-              <div className={`flex-1 md:w-1/2 ${i % 2 === 0 ? "md:text-right md:pr-12" : "md:text-left md:pl-12"}`}>
+              <div className={`flex-1 md:flex-none md:w-1/2 ${i % 2 === 0 ? "md:text-right md:pr-12" : "md:text-left md:pl-12"}`}>
                 <div className="bg-white border border-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-xl p-4 md:p-6 hover:border-[#d5c108]/70 hover:shadow-[0_8px_25px_rgba(213,193,8,0.15)] transition-all">
                   <span className="text-[#8f8200] text-xs font-mono">Etapa {i + 1}</span>
                   <h3 className="text-lg md:text-xl font-bold mt-1 mb-2 text-zinc-900">{s.title}</h3>

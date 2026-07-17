@@ -35,6 +35,8 @@ export function SocialProof() {
   return (
     <section className="relative bg-[#fafaf8] py-24 md:py-32">
       <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
+      <div className="absolute inset-0 texture-grain-light pointer-events-none" />
+      <div className="absolute inset-0 texture-dots-light pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(213,193,8,0.07)_0%,transparent_60%)]" />
 
       <div className="relative max-w-6xl mx-auto px-6">

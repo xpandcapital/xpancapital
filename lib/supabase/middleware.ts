@@ -5,10 +5,6 @@ import type { UserRole } from '@/lib/auth/permissions'
 
 const SECTION_ROUTES: Record<string, string[]> = {
   'dashboard:ver': ['/superadmin'],
-  'proyectos:ver': ['/superadmin/proyectos'],
-  'lotes:ver': ['/superadmin/gestion-lotes'],
-  'contratos:ver': ['/superadmin/contratos'],
-  'asesores:ver': ['/superadmin/asesores'],
   'pos:ver': ['/superadmin/pos'],
   'ventas:ver': ['/superadmin/ventas'],
   'formasdepago:ver': ['/superadmin/formasdepago'],
@@ -18,7 +14,6 @@ const SECTION_ROUTES: Record<string, string[]> = {
   'biblioteca:ver': ['/superadmin/biblioteca'],
   'certificados:ver': ['/superadmin/certificados'],
   'trading:ver': ['/superadmin/trading'],
-  'templates:ver': ['/superadmin/templates'],
   'mails:ver': ['/superadmin/mails'],
   'calendarios:ver': ['/superadmin/calendarios'],
   'formularios:ver': ['/superadmin/formularios'],
@@ -76,7 +71,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const publicPaths = [
-    '/', '/blog', '/tienda', '/cursos', '/proyectos',
+    '/', '/blog', '/tienda', '/cursos',
     '/verificar', '/gracias', '/f', '/formulario', '/embudo',
     '/calendario', '/certificado', '/login', '/embed',
   ]
@@ -95,7 +90,6 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/api/context') ||
     pathname.startsWith('/api/blog') ||
     pathname.startsWith('/api/cursos') ||
-    pathname.startsWith('/api/asesores') ||
     pathname.startsWith('/api/campanas') ||
     pathname.startsWith('/api/verificar') ||
     pathname.startsWith('/api/upload') ||
