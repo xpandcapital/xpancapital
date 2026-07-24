@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Check, Zap, Crown, ArrowRight } from "lucide-react"
 import { useShop } from "@/context/ShopContext"
-import { createClient } from "@/lib/supabaseClient"
+import { supabase } from "@/lib/supabaseClient"
 
 interface PlanData {
   key: string
@@ -57,7 +57,6 @@ export function Pricing() {
   useEffect(() => {
     const fetchPrices = async () => {
       try {
-        const supabase = createClient()
         const ids = plansTemplate.map(p => p.productId)
         const { data: productos } = await supabase
           .from('productos')
@@ -65,7 +64,7 @@ export function Pricing() {
           .in('id', ids)
 
         if (productos) {
-          const priceMap = new Map(productos.map(p => [p.id, p]))
+          const priceMap = new Map(productos.map((p: any) => [p.id, p]))
           setPlans(plansTemplate.map(template => {
             const db = priceMap.get(template.productId)
             const dbPrice = Number(db?.precio_usd || 0)
