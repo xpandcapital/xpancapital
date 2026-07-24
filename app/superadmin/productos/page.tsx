@@ -159,6 +159,10 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
     try {
       if (editingProduct?.id) {
         await updateProduct(editingProduct.id, data)
+        await fetchProducts()
+        setToastType("success")
+        setShowToast(true)
+        setTimeout(() => setShowToast(false), 3000)
         return {}
       } else {
         const res = await fetch('/api/productos', {
@@ -195,8 +199,8 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
         activeMultiCurrencies={currencies.filter(c => activeCurrencyCodes.includes(c.code))}
         isBlisCoinsEnabled={isBlisCoinsEnabled}
         settings={{
-          enablePerishables: settings?.enablePerishables ?? false,
-          enableSerialization: settings?.enableSerialization ?? false
+          enablePerishables: false,
+          enableSerialization: false
         }}
         onClose={handleCloseModal}
         onSave={handleSaveProduct}

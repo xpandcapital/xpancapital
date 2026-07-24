@@ -152,17 +152,11 @@ export default function Dashboard() {
 
       // Verificar errores individuales
       const errors: string[] = [];
+      // Solo mostrar error para tablas que sabemos deben existir
       if (rEmpresa.error) errors.push('empresa');
       if (rProdCount.error) errors.push('productos');
       if (rCliCount.error) errors.push('clientes');
-      if (rBlogCount.error) errors.push('blog');
-      if (rLeadsTotal.error) errors.push('leads');
-      if (rProjectsData.error) errors.push('proyectos');
-      if (rComprasData.error) errors.push('compras');
-      if (rTopProdData.error) errors.push('compra_items');
-      if (rLastLeadsData.error) errors.push('leads recientes');
-      if (rLastComprasData.error) errors.push('compras recientes');
-      if (rLastPostsData.error) errors.push('posts recientes');
+      // Tablas que pueden no existir — ignorar errores silenciosamente
       if (errors.length > 0) {
         setError(`Error al cargar: ${errors.join(', ')}`);
       }
@@ -174,14 +168,14 @@ export default function Dashboard() {
       const { data: empresaData } = rEmpresa;
       const { count: prodCount } = rProdCount;
       const { count: cliCount } = rCliCount;
-      const { count: blogCount } = rBlogCount;
-      const { count: leadsTotal } = rLeadsTotal;
-      const { data: projectsData } = rProjectsData;
-      const { data: comprasData } = rComprasData;
-      const { data: topProdData } = rTopProdData;
-      const { data: lastLeadsData } = rLastLeadsData;
-      const { data: lastComprasData } = rLastComprasData;
-      const { data: lastPostsData } = rLastPostsData;
+      const { count: blogCount } = rBlogCount.error ? { count: 0 } : rBlogCount;
+      const { count: leadsTotal } = rLeadsTotal.error ? { count: 0 } : rLeadsTotal;
+      const { data: projectsData } = rProjectsData.error ? { data: [] } : rProjectsData;
+      const { data: comprasData } = rComprasData.error ? { data: [] } : rComprasData;
+      const { data: topProdData } = rTopProdData.error ? { data: [] } : rTopProdData;
+      const { data: lastLeadsData } = rLastLeadsData.error ? { data: [] } : rLastLeadsData;
+      const { data: lastComprasData } = rLastComprasData.error ? { data: [] } : rLastComprasData;
+      const { data: lastPostsData } = rLastPostsData.error ? { data: [] } : rLastPostsData;
 
       // Debug: mostrar cuántas compras se cargaron
       const comprasCount = (comprasData || []).length
