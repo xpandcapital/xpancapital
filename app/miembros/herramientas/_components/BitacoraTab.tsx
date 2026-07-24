@@ -183,6 +183,7 @@ export function BitacoraTab() {
                   <Edit2 className="w-3.5 h-3.5" />
                 </button>
               </div>
+              <span className="text-[9px] text-gray-600">Saldo Actual = Saldo Inicial + Suma de todos los Resultados Netos</span>
             </div>
 
             {/* 2-col layout: Stats Left + Chart Right */}
@@ -271,7 +272,31 @@ export function BitacoraTab() {
           </div>
         )}
 
-        {/* Empty state shown when entries exist but analytics is still loading */}
+        {/* Empty state / Onboarding */}
+        {!loading && !analytics && (
+          <div className="bg-zinc-950 border border-white/5 rounded-2xl p-8 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-[#e8c600]/10 border border-[#e8c600]/20 flex items-center justify-center mx-auto mb-4">
+              <BarChart3 className="w-8 h-8 text-[#e8c600]" />
+            </div>
+            <h3 className="text-white font-black text-sm mb-2">Configura tu Bitácora</h3>
+            <p className="text-gray-400 text-xs max-w-md mx-auto mb-6 leading-relaxed">
+              Para ver estadísticas y gráficos necesitas:<br />
+              1. Definir tu <b className="text-white">Saldo Inicial</b> (capital de partida)<br />
+              2. Registrar operaciones con su <b className="text-white">Resultado Neto en USD</b><br />
+              <span className="text-gray-600">(+ para ganancias, - para pérdidas)</span>
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              <button onClick={() => { setEditSaldo(saldoInicial); setShowSaldoModal(true) }}
+                className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-xs font-bold hover:bg-white/10 transition-colors">
+                💰 Definir Saldo Inicial
+              </button>
+              <button onClick={openNew}
+                className="px-4 py-2.5 bg-blis-red text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-blis-red/80 transition-colors shadow-lg shadow-blis-red/20">
+                + Primer Registro
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Table */}
         <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
@@ -619,14 +644,19 @@ export function BitacoraTab() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                      Resultados USD <FieldTooltip text="Ganancia o pérdida final monetaria en dólares." />
+                      Resultado Neto USD <FieldTooltip text="POSITIVO = ganancia (ej: +150). NEGATIVO = pérdida (ej: -75). Este valor se suma a tu Saldo Inicial para calcular todas las métricas." />
                     </label>
-                    <input
-                      type="number" step="any" value={editing.resultado_usd ?? ''}
-                      onChange={e => setEditing({ ...editing, resultado_usd: e.target.value ? parseFloat(e.target.value) : null })}
-                      placeholder="+150.00"
-                      className={INPUT_CLASSES}
-                    />
+                    <div className="relative">
+                      <input
+                        type="number" step="any" value={editing.resultado_usd ?? ''}
+                        onChange={e => setEditing({ ...editing, resultado_usd: e.target.value ? parseFloat(e.target.value) : null })}
+                        placeholder="+150.00 (ganancia) o -75.00 (pérdida)"
+                        className={`${INPUT_CLASSES} pr-16 ${(editing.resultado_usd ?? 0) > 0 ? 'border-emerald-500/50' : (editing.resultado_usd ?? 0) < 0 ? 'border-red-500/50' : ''}`}
+                      />
+                      {(editing.resultado_usd ?? 0) > 0 && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-emerald-400">GANANCIA</span>}
+                      {(editing.resultado_usd ?? 0) < 0 && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-red-400">PÉRDIDA</span>}
+                    </div>
+                    <p className="text-[9px] text-gray-600">Este es el campo más importante: determina si tu saldo sube o baja.</p>
                   </div>
                 </div>
 
