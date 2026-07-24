@@ -8,8 +8,6 @@ import { UnitManager } from "@/components/superadmin/UnitManager"
 import { CurrencyManager } from "@/components/superadmin/CurrencyManager"
 import { LabelManager } from "@/components/superadmin/LabelManager"
 import { ViewManager } from "@/components/superadmin/ViewManager"
-import { BusinessEngineManager } from "@/components/superadmin/BusinessEngineManager"
-import { ShippingManager } from "@/components/superadmin/ShippingManager"
 
 interface ToolsMenuProps {
   show: boolean
@@ -32,8 +30,6 @@ export function ToolsMenu({ show, onClose }: ToolsMenuProps) {
             <SkuManager />
             <UnitManager />
             <CurrencyManager />
-            <ShippingManager />
-            <BusinessEngineManager />
             <LabelManager />
             <ViewManager />
           </div>
