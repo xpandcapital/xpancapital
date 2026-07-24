@@ -447,7 +447,7 @@ function CoherenciaCardiaca({ onDone }: { onDone: (score: Record<string, number>
 
 // ============ COMPONENTE PRINCIPAL ============
 export function GymMentalTab() {
-  const { registrar } = useGymMental()
+  const { registrar, hoy, historial } = useGymMental()
   const [game, setGame] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
 
@@ -517,21 +517,63 @@ export function GymMentalTab() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {GAMES.map(g => (
-          <button
-            key={g.id}
-            onClick={() => setGame(g.id)}
-            className="bg-zinc-950 border border-white/5 rounded-2xl p-5 text-left hover:border-white/10 hover:bg-white/[0.02] transition-all group"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <span className="text-3xl">{g.icon}</span>
-              <span className="text-[10px] text-gray-600 font-mono bg-white/5 px-2 py-0.5 rounded-md">⏱ {g.time}</span>
-            </div>
-            <h3 className="text-white font-bold text-sm mb-1">{g.title}</h3>
-            <p className="text-gray-500 text-xs">{g.desc}</p>
-          </button>
-        ))}
+        {GAMES.map(g => {
+          const hechoHoy = hoy.some(h => h.tipo === g.id)
+          return (
+            <button
+              key={g.id}
+              onClick={() => setGame(g.id)}
+              className={`bg-zinc-950 border rounded-2xl p-5 text-left hover:border-white/10 hover:bg-white/[0.02] transition-all group relative overflow-hidden ${
+                hechoHoy ? 'border-emerald-500/30' : 'border-white/5'
+              }`}
+            >
+              {hechoHoy && (
+                <div className="absolute top-2 right-2 bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded-md border border-emerald-500/30">
+                  ✓ Hoy
+                </div>
+              )}
+              <div className="flex items-start justify-between mb-3">
+                <span className="text-3xl">{g.icon}</span>
+                <span className="text-[10px] text-gray-600 font-mono bg-white/5 px-2 py-0.5 rounded-md">⏱ {g.time}</span>
+              </div>
+              <h3 className="text-white font-bold text-sm mb-1">{g.title}</h3>
+              <p className="text-gray-500 text-xs">{g.desc}</p>
+            </button>
+          )
+        })}
       </div>
+
+      {/* Historial reciente */}
+      {historial.length > 0 && (
+        <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+            <h3 className="text-white font-black uppercase tracking-wider text-[11px]">Últimas Sesiones</h3>
+          </div>
+          <div className="divide-y divide-white/[0.02] max-h-[200px] overflow-y-auto">
+            {historial.slice(0, 15).map((log, i) => {
+              const gameInfo = GAMES.find(g => g.id === log.tipo)
+              return (
+                <div key={log.id || i} className="px-4 py-2.5 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-lg shrink-0">{gameInfo?.icon || '🎮'}</span>
+                    <div className="min-w-0">
+                      <p className="text-gray-300 truncate">{gameInfo?.title || log.tipo}</p>
+                      <p className="text-[10px] text-gray-600">
+                        {new Date(log.completado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                  {log.score && Object.keys(log.score).length > 0 && (
+                    <span className="text-[10px] text-gray-500 font-mono shrink-0 ml-2">
+                      {Object.entries(log.score).slice(0, 2).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+                    </span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

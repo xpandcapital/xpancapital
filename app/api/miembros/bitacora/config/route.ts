@@ -13,16 +13,10 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('user_id')
     if (!userId) return NextResponse.json({ error: 'user_id requerido' }, { status: 400 })
 
-    const today = new Date().toISOString().split('T')[0]
-
-    const { data: hoy, error: errHoy } = await supabase
-      .from('gym_mental_log').select('*').eq('user_id', userId).eq('fecha', today).order('completado_en', { ascending: false })
-
-    const { data: historial, error: errHist } = await supabase
-      .from('gym_mental_log').select('*').eq('user_id', userId).order('completado_en', { ascending: false }).limit(50)
-
-    if (errHoy || errHist) return NextResponse.json({ error: 'Error al cargar' }, { status: 500 })
-    return NextResponse.json({ success: true, hoy: hoy || [], historial: historial || [] })
+    const { data, error } = await supabase
+      .from('bitacora_config').select('*').eq('user_id', userId).maybeSingle()
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true, data: data || { user_id: userId, saldo_inicial: 10000.00 } })
   } catch {
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
@@ -31,15 +25,12 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabase()
-    const { user_id, tipo, score } = await request.json()
-    if (!user_id || !tipo) return NextResponse.json({ error: 'user_id y tipo requeridos' }, { status: 400 })
-
-    const d = new Date()
-    const fecha = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const { user_id, saldo_inicial } = await request.json()
+    if (!user_id || saldo_inicial === undefined) return NextResponse.json({ error: 'user_id y saldo_inicial requeridos' }, { status: 400 })
 
     const { data, error } = await supabase
-      .from('gym_mental_log')
-      .insert({ user_id, fecha, tipo, score: score || {} })
+      .from('bitacora_config')
+      .upsert({ user_id, saldo_inicial, actualizado_en: new Date().toISOString() }, { onConflict: 'user_id' })
       .select().single()
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })

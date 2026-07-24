@@ -4,10 +4,14 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Plus, Trash2, Loader2, X, ScrollText,
-  ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, Info
+  ChevronLeft, ChevronRight, CheckCircle2, AlertCircle, Info,
+  TrendingUp, TrendingDown, DollarSign, BarChart3, Edit2, Settings,
 } from 'lucide-react'
+import {
+  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
+} from 'recharts'
 import { useAuth } from '@/hooks/useAuth'
-import { useBitacora, type BitacoraEntry } from '../_hooks/useBitacora'
+import { useBitacora, type BitacoraEntry, type BitacoraAnalytics } from '../_hooks/useBitacora'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 const INPUT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors placeholder:text-gray-600 [color-scheme:dark]"
@@ -74,7 +78,12 @@ const emptyEntry = (userId: string): Partial<BitacoraEntry> & { user_id: string 
 
 export function BitacoraTab() {
   const { user } = useAuth()
-  const { entries, loading, saving, lastSave, lastError, clearSaveStatus, saveEntry, deleteEntry } = useBitacora()
+  const { entries, loading, saving, lastSave, lastError, clearSaveStatus, saveEntry, deleteEntry,
+    saldoInicial, saldoLoading, actualizarSaldo, analytics } = useBitacora()
+  const [showSaldoModal, setShowSaldoModal] = useState(false)
+  const [editSaldo, setEditSaldo] = useState(saldoInicial)
+
+  // Analytics (ya calculado en el hook)
 
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(0)
@@ -160,6 +169,118 @@ export function BitacoraTab() {
             </button>
           </div>
         </div>
+
+        {/* ===== ANALYTICS DASHBOARD ===== */}
+        {!loading && analytics && (
+          <div className="space-y-4">
+            {/* Saldo config bar */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-white/5 rounded-xl">
+                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Saldo Inicial:</span>
+                <span className="text-sm font-black text-white">${saldoInicial.toLocaleString()}</span>
+                <button onClick={() => { setEditSaldo(saldoInicial); setShowSaldoModal(true) }}
+                  className="p-1 hover:bg-white/5 rounded text-gray-500 hover:text-white transition-colors">
+                  <Edit2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* KPI Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: 'Saldo Actual', value: `$${analytics.saldoActual.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/5' },
+                { label: 'P&L Total', value: `${analytics.pnlTotal >= 0 ? '+' : ''}$${analytics.pnlTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, sub: `${analytics.pnlPct >= 0 ? '+' : ''}${analytics.pnlPct}%`, icon: analytics.pnlTotal >= 0 ? TrendingUp : TrendingDown, color: analytics.pnlTotal >= 0 ? 'text-emerald-400' : 'text-red-400', bg: analytics.pnlTotal >= 0 ? 'bg-emerald-500/5' : 'bg-red-500/5' },
+                { label: 'Win Rate', value: `${analytics.winRate}%`, sub: `${analytics.totalTrades} trades`, icon: BarChart3, color: 'text-blue-400', bg: 'bg-blue-500/5' },
+                { label: 'Drawdown', value: `-$${analytics.drawdown.toLocaleString()}`, sub: `-${analytics.drawdownPct}%`, icon: TrendingDown, color: 'text-amber-400', bg: 'bg-amber-500/5' },
+              ].map((kpi, i) => (
+                <div key={i} className="bg-zinc-950 border border-white/5 rounded-2xl p-4 relative overflow-hidden">
+                  <div className={`absolute top-0 right-0 w-20 h-20 ${kpi.bg} blur-3xl rounded-full -translate-y-1/2 translate-x-1/2`} />
+                  <kpi.icon className={`${kpi.color} mb-2 relative z-10`} size={18} />
+                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider relative z-10">{kpi.label}</p>
+                  <p className={`text-lg font-black ${kpi.color} mt-0.5 relative z-10`}>{kpi.value}</p>
+                  {kpi.sub && <p className="text-[10px] text-gray-500 mt-0.5 relative z-10">{kpi.sub}</p>}
+                </div>
+              ))}
+            </div>
+
+            {/* Equity Curve */}
+            <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02] flex items-center gap-2.5">
+                <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
+                <h3 className="text-white font-black uppercase tracking-wider text-[11px]">Curva de Equity</h3>
+              </div>
+              <div className="p-3">
+                <div className="h-[220px] md:h-[260px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={analytics.equityCurve} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
+                          <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff06" />
+                      <XAxis dataKey="fecha" stroke="#52525b" tick={{ fontSize: 10 }} />
+                      <YAxis stroke="#52525b" tick={{ fontSize: 10 }} domain={['auto', 'auto']} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                      <RechartsTooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0.75rem', fontSize: '12px' }} labelStyle={{ color: '#a1a1aa', fontWeight: 700, fontSize: 11 }} formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Saldo']} />
+                      <Area type="monotone" dataKey="saldo" stroke="#10b981" strokeWidth={2} fill="url(#equityGrad)" dot={{ r: 1 }} activeDot={{ r: 3 }} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            {/* Charts row: Pares + P&L */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Pares más operados */}
+              <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                  <h3 className="text-white font-black uppercase tracking-wider text-[11px]">Pares Más Operados</h3>
+                </div>
+                <div className="p-3">
+                  <div className="h-[180px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={analytics.paresOperados.slice(0, 8)} layout="vertical" margin={{ top: 0, right: 20, left: 40, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff06" />
+                        <XAxis type="number" stroke="#52525b" tick={{ fontSize: 10 }} />
+                        <YAxis type="category" dataKey="par" stroke="#52525b" tick={{ fontSize: 10 }} width={40} />
+                        <RechartsTooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0.75rem', fontSize: '12px' }} />
+                        <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={16} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+
+              {/* P&L por Par */}
+              <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                  <h3 className="text-white font-black uppercase tracking-wider text-[11px]">P&L por Par</h3>
+                </div>
+                <div className="p-3">
+                  <div className="h-[180px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={analytics.pnlPorPar.slice(0, 8)} layout="vertical" margin={{ top: 0, right: 20, left: 40, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff06" />
+                        <XAxis type="number" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={(v) => `$${v}`} />
+                        <YAxis type="category" dataKey="par" stroke="#52525b" tick={{ fontSize: 10 }} width={40} />
+                        <RechartsTooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0.75rem', fontSize: '12px' }} formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'P&L']} />
+                        <Bar dataKey="pnl" radius={[0, 4, 4, 0]} barSize={16}
+                          fill="#10b981"
+                          shape={(props: any) => {
+                            const { x, y, width, height, fill: _f, payload } = props
+                            const isPositive = (payload?.pnl || 0) >= 0
+                            return <rect x={x} y={y} width={width} height={height} fill={isPositive ? '#10b981' : '#ef4444'} rx={0} ry={0} />
+                          }}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Table */}
         <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
@@ -593,6 +714,39 @@ export function BitacoraTab() {
                     {modalSaved ? 'Guardado' : editing?.id ? 'Actualizar' : 'Guardar'}
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de Saldo Inicial */}
+      <AnimatePresence>
+        {showSaldoModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowSaldoModal(false)} />
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              className="relative bg-zinc-950 border border-white/10 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+              <h3 className="text-white font-black text-sm mb-4 flex items-center gap-2">
+                <Settings className="w-4 h-4 text-blis-red" /> Saldo Inicial
+              </h3>
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mb-3">Define el capital de partida (Día 0)</p>
+              <input type="number" step="any" min="0" value={editSaldo}
+                onChange={e => setEditSaldo(Number(e.target.value))}
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold focus:outline-none focus:border-blis-red/50 transition-colors mb-4" />
+              <div className="flex gap-2">
+                <button onClick={() => setShowSaldoModal(false)}
+                  className="flex-1 py-2.5 bg-white/5 border border-white/10 rounded-xl text-gray-400 text-xs font-bold hover:text-white transition-colors">
+                  Cancelar
+                </button>
+                <button onClick={async () => {
+                  await actualizarSaldo(editSaldo)
+                  setShowSaldoModal(false)
+                }}
+                  className="flex-1 py-2.5 bg-blis-red/15 border border-blis-red/30 text-blis-red rounded-xl font-bold text-xs hover:bg-blis-red/25 transition-colors">
+                  Guardar
+                </button>
               </div>
             </motion.div>
           </motion.div>
