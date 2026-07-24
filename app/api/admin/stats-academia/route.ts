@@ -26,7 +26,6 @@ export async function GET(request: NextRequest) {
       { count: totalCursos },
       { data: cursos },
       { data: progresos },
-      { data: equipoCursos },
       { count: certificadosEmitidos },
       { data: rankingData },
     ] = await Promise.all([
@@ -39,8 +38,6 @@ export async function GET(request: NextRequest) {
         .eq('empresa_id', empresa_id).eq('activo', true),
       supabase.from('curso_progreso').select('user_id, progreso, lecciones_completadas, examen_estado, nota_final, intentos, curso_id')
         .eq('empresa_id', empresa_id),
-      supabase.from('equipo_cursos').select('user_id, progreso, estado, curso_id')
-        .eq('empresa_id', empresa_id),
       supabase.from('certificados').select('*', { count: 'exact', head: true }),
       supabase.from('profiles').select('id, nombre, apellido, email, puntos_cursos, puntos_nivel')
         .eq('empresa_id', empresa_id)
@@ -48,6 +45,14 @@ export async function GET(request: NextRequest) {
         .order('puntos_cursos', { ascending: false })
         .limit(20),
     ])
+
+    // equipo_cursos puede no existir — se maneja con gracia
+    let equipoCursos: any[] = []
+    try {
+      const { data: eq } = await supabase.from('equipo_cursos').select('user_id, progreso, estado, curso_id')
+        .eq('empresa_id', empresa_id)
+      equipoCursos = eq || []
+    } catch { /* tabla no existe */ }
 
     // Totales de lecciones y módulos
     let totalLecciones = 0
