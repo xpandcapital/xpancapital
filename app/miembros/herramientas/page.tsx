@@ -12,6 +12,7 @@ import { PsicologiaTab } from './_components/PsicologiaTab'
 import { HabitosTab } from './_components/HabitosTab'
 import { PanicModal } from './_components/PanicModal'
 import { ChecklistTab } from './_components/ChecklistTab'
+import { GymMentalTab } from './_components/GymMentalTab'
 
 const INPUT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors placeholder:text-gray-600"
 const SELECT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors appearance-none cursor-pointer"
@@ -44,9 +45,10 @@ export default function HerramientasPage() {
   const tabs = [
     { id: 'riesgo', label: 'Gestión de Riesgo', icon: Shield },
     { id: 'bitacora', label: 'Bitácora', icon: ScrollText },
-    { id: 'psicologia', label: 'Pronóstico y Psicología', icon: Brain },
+    { id: 'psicologia', label: 'Psicología', icon: Brain },
     { id: 'habitos', label: 'Hábitos', icon: CheckSquare },
     { id: 'checklist', label: 'Lista de Procesos', icon: ClipboardCheck },
+    { id: 'gym', label: 'Gym Mental', icon: Brain },
   ]
 
   return (
@@ -346,6 +348,8 @@ export default function HerramientasPage() {
       {tab === 'habitos' && <HabitosTab />}
 
       {tab === 'checklist' && <ChecklistTab />}
+
+      {tab === 'gym' && <GymMentalTab />}
 
       <PanicModal open={panicOpen} onClose={() => setPanicOpen(false)} />
     </div>
