@@ -16,7 +16,11 @@ export function Header({ onOpenModal, showTools, onToggleTools }: HeaderProps) {
   useEffect(() => {
     if (!showTools) return
     const handleClick = (e: MouseEvent) => {
-      if (toolsRef.current && !toolsRef.current.contains(e.target as Node)) {
+      const target = e.target as HTMLElement
+      // Verificar si el clic está dentro del toolsRef o dentro de algún portal (fixed position overlay)
+      const isInsideTools = toolsRef.current?.contains(target)
+      const isInsidePortal = target.closest('[data-superadmin-tool]') || target.closest('[role="dialog"]') || target.closest('.fixed')
+      if (!isInsideTools && !isInsidePortal) {
         onToggleTools()
       }
     }
