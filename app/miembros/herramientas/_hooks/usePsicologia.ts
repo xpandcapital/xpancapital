@@ -75,7 +75,8 @@ export function usePsicologia() {
   const [lastError, setLastError] = useState('')
   const abortRef = useRef<AbortController | null>(null)
 
-  const hoy = new Date().toISOString().split('T')[0]
+  const d = new Date()
+  const hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
   const fetchHoy = useCallback(async () => {
     if (!user?.id) return
