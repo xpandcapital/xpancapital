@@ -6,7 +6,7 @@ import {
   AlertTriangle, FileText, Target, Calendar,
 } from 'lucide-react'
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import { usePsicologia, calcularPuntaje } from '../_hooks/usePsicologia'
 
@@ -448,19 +448,23 @@ export function PsicologiaTab() {
               ) : (
                 <div className="h-[300px] md:h-[350px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                    <ComposedChart data={chartData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" />
                       <XAxis dataKey="fecha" stroke="#52525b" tick={{ fontSize: 10, fontWeight: 700 }} />
-                      <YAxis yAxisId="left" stroke="#06b6d4" tick={{ fontSize: 10 }} domain={[0, 10]} />
-                      <YAxis yAxisId="right" orientation="right" stroke="#ef4444" tick={{ fontSize: 10 }} domain={[0, 1]} tickFormatter={(v) => v === 1 ? 'Sí' : ''} />
+                      <YAxis yAxisId="left" stroke="#06b6d4" tick={{ fontSize: 10 }} domain={[0, 10]} label={{ value: 'Flujo', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#06b6d4' } }} />
+                      <YAxis yAxisId="right" orientation="right" stroke="#ef4444" tick={{ fontSize: 10 }} domain={[0, 'auto']} tickFormatter={(v) => v === 1 ? 'Sí' : ''} />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0.75rem', fontSize: '12px' }}
                         labelStyle={{ color: '#a1a1aa', fontWeight: 700, fontSize: 11 }}
+                        formatter={(value: any, name: string) => [
+                          name === 'falencias' ? (value === 1 ? 'Sí — Error' : 'No') : value,
+                          name === 'falencias' ? 'Error Operativo' : 'Zona de Flujo'
+                        ]}
                       />
                       <Legend wrapperStyle={{ fontSize: '11px' }} />
-                      <Line yAxisId="left" type="monotone" dataKey="puntaje" name="Puntaje Flujo" stroke="#06b6d4" strokeWidth={2} dot={{ r: 2, fill: '#06b6d4' }} activeDot={{ r: 4 }} />
-                      <Line yAxisId="right" type="monotone" dataKey="falencias" name="Falencias" stroke="#ef4444" strokeWidth={2} dot={{ r: 2, fill: '#ef4444' }} activeDot={{ r: 4 }} />
-                    </LineChart>
+                      <Bar yAxisId="right" dataKey="falencias" name="Error Operativo" fill="#ef4444" fillOpacity={0.35} radius={[4, 4, 0, 0]} barSize={20} />
+                      <Line yAxisId="left" type="monotone" dataKey="puntaje" name="Zona de Flujo" stroke="#06b6d4" strokeWidth={2.5} dot={{ r: 3, fill: '#06b6d4', strokeWidth: 0 }} activeDot={{ r: 5 }} />
+                    </ComposedChart>
                   </ResponsiveContainer>
                 </div>
               )}
