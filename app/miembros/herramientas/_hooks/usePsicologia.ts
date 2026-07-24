@@ -38,6 +38,32 @@ function detectarFalencia(texto: string | null): boolean {
   return FALENCIA_KEYWORDS.some(k => lower.includes(k))
 }
 
+// ============ PESOS PARA CÁLCULO AUTOMÁTICO DE ZONA DE FLUJO ============
+export const EMOCIONES_PESOS: Record<string, number> = {
+  ansioso: -2, confiado: 2, cansado: -1, motivado: 2, estresado: -2,
+  tranquilo: 1, frustrado: -2, enfocado: 2, neutral: 0,
+}
+
+export const PRESIONES_PESOS: Record<string, number> = {
+  familia: -2, financiero: -3, salud: -2, sueno: -2, trabajo: -1,
+  distracciones: -1, ninguna: 0,
+}
+
+export const EVENTOS_PESOS: Record<string, number> = {
+  mala_noticia: -2, discusion: -2, emergencia: -3, interrupcion: -1,
+  imprevisto: -1, ninguno: 0,
+}
+
+export function calcularPuntaje(
+  estadoTags: string[], presionesTags: string[], eventosTags: string[]
+): number {
+  let score = 5
+  for (const tag of estadoTags) score += EMOCIONES_PESOS[tag] || 0
+  for (const tag of presionesTags) score += PRESIONES_PESOS[tag] || 0
+  for (const tag of eventosTags) score += EVENTOS_PESOS[tag] || 0
+  return Math.max(1, Math.min(10, score))
+}
+
 export function usePsicologia() {
   const { user } = useAuth()
   const [evaluacionHoy, setEvaluacionHoy] = useState<EvaluacionPsicologica | null>(null)

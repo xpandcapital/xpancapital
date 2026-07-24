@@ -1,14 +1,14 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   Brain, TrendingUp, BarChart3, Save, Loader2, CheckCircle2, AlertCircle,
-  AlertTriangle, ThumbsUp, FileText, Target, Calendar,
+  AlertTriangle, FileText, Target, Calendar,
 } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
-import { usePsicologia } from '../_hooks/usePsicologia'
+import { usePsicologia, calcularPuntaje } from '../_hooks/usePsicologia'
 
 // ============ CONFIGURACIÓN DE PILLS ============
 const EMOCIONES = [
@@ -100,7 +100,10 @@ function PillGroup({ options, selected, onToggle }: {
   )
 }
 
-function PuntajeSlider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+function PuntajeSlider({ value, onChange, modoAuto, onManualOverride }: {
+  value: number; onChange: (v: number) => void;
+  modoAuto: boolean; onManualOverride: () => void;
+}) {
   const colorClass = value <= 3 ? 'bg-red-500/20 text-red-400 border-red-500/30'
     : value <= 6 ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
     : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
@@ -109,12 +112,22 @@ function PuntajeSlider({ value, onChange }: { value: number; onChange: (v: numbe
     <div className="flex items-center gap-2">
       <input
         type="range" min="1" max="10" value={value}
-        onChange={e => onChange(Number(e.target.value))}
+        onChange={e => {
+          onChange(Number(e.target.value))
+          if (modoAuto) onManualOverride()
+        }}
         className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-blis-red"
       />
-      <span className={`min-w-[36px] h-9 rounded-lg flex items-center justify-center text-sm font-black border ${colorClass}`}>
-        {value}
-      </span>
+      <div className="flex flex-col items-center gap-0.5">
+        <span className={`min-w-[36px] h-9 rounded-lg flex items-center justify-center text-sm font-black border ${colorClass}`}>
+          {value}
+        </span>
+        <span className={`text-[8px] font-black uppercase tracking-wider ${
+          modoAuto ? 'text-cyan-400' : 'text-amber-400'
+        }`}>
+          {modoAuto ? 'AUTO' : 'MANUAL'}
+        </span>
+      </div>
     </div>
   )
 }
@@ -156,6 +169,24 @@ export function PsicologiaTab() {
   const [presionesNota, setPresionesNota] = useState(evaluacionHoy?.presiones_externas || '')
   const [eventosNota, setEventosNota] = useState(evaluacionHoy?.eventos_manana || '')
   const [puntajeFlujo, setPuntajeFlujo] = useState(evaluacionHoy?.puntaje_flujo || 5)
+  const [modoAuto, setModoAuto] = useState(true)
+
+  // Cálculo automático del puntaje según tags seleccionados
+  const puntajeCalculado = useMemo(() =>
+    calcularPuntaje(estadoTags, presionesTags, eventosTags),
+    [estadoTags, presionesTags, eventosTags]
+  )
+
+  // Auto-ajustar slider cuando está en modo AUTO
+  useEffect(() => {
+    if (modoAuto) setPuntajeFlujo(puntajeCalculado)
+  }, [puntajeCalculado, modoAuto])
+
+  // Reactivar AUTO al togglear cualquier píldora
+  const toggleTagConAuto = (setter: React.Dispatch<React.SetStateAction<string[]>>) => (id: string) => {
+    setter(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id])
+    setModoAuto(true)
+  }
 
   // Post-sesión
   const [perspDiario, setPerspDiario] = useState(evaluacionHoy?.perspectiva_diario || '')
@@ -168,10 +199,6 @@ export function PsicologiaTab() {
   const [opsRegistradas, setOpsRegistradas] = useState(evaluacionHoy?.operaciones_registradas || '')
   const [erroresCometidos, setErroresCometidos] = useState(evaluacionHoy?.errores_cometidos || '')
   const [rendimiento, setRendimiento] = useState(evaluacionHoy?.rendimiento_general || '')
-
-  const toggleTag = (setter: React.Dispatch<React.SetStateAction<string[]>>) => (id: string) => {
-    setter(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id])
-  }
 
   const handleGuardarPre = async () => {
     await guardarPreSesion({
@@ -276,7 +303,7 @@ export function PsicologiaTab() {
               <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
                 Zona de flujo (1-10)
               </label>
-              <PuntajeSlider value={puntajeFlujo} onChange={setPuntajeFlujo} />
+              <PuntajeSlider value={puntajeFlujo} onChange={setPuntajeFlujo} modoAuto={modoAuto} onManualOverride={() => setModoAuto(false)} />
               {puntajeFlujo <= 3 && (
                 <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 rounded-lg">
                   <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0" />
@@ -288,21 +315,21 @@ export function PsicologiaTab() {
             {/* Emociones pills */}
             <div className="space-y-1.5">
               <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">¿Cómo me siento hoy?</label>
-              <PillGroup options={EMOCIONES} selected={estadoTags} onToggle={toggleTag(setEstadoTags)} />
+              <PillGroup options={EMOCIONES} selected={estadoTags} onToggle={toggleTagConAuto(setEstadoTags)} />
               <TextareaLabel label="Nota adicional" value={estadoNota} onChange={setEstadoNota} placeholder="Describe tu estado..." />
             </div>
 
             {/* Presiones pills */}
             <div className="space-y-1.5">
               <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">¿Presiones externas?</label>
-              <PillGroup options={PRESIONES} selected={presionesTags} onToggle={toggleTag(setPresionesTags)} />
+              <PillGroup options={PRESIONES} selected={presionesTags} onToggle={toggleTagConAuto(setPresionesTags)} />
               <TextareaLabel label="Nota adicional" value={presionesNota} onChange={setPresionesNota} placeholder="Detalles..." />
             </div>
 
             {/* Eventos pills */}
             <div className="space-y-1.5">
               <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">¿Algo esta mañana que afecte?</label>
-              <PillGroup options={EVENTOS} selected={eventosTags} onToggle={toggleTag(setEventosTags)} />
+              <PillGroup options={EVENTOS} selected={eventosTags} onToggle={toggleTagConAuto(setEventosTags)} />
               <TextareaLabel label="Nota adicional" value={eventosNota} onChange={setEventosNota} placeholder="Describe lo sucedido..." />
             </div>
 
