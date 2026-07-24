@@ -56,18 +56,29 @@ export async function POST(request: NextRequest) {
       const atencionLabel = atencion === 'psicologo' ? 'Psicólogo' : atencion === 'ambos' ? 'Profesor y Psicólogo' : 'Profesor'
 
       try {
-        await fetch(`${supabaseUrl.replace('/rest/v1', '')}/api/notificaciones/enviar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        // Obtener admins y superadmins de la empresa para notificar
+        const { data: admins } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('empresa_id', profile?.empresa_id || '')
+          .in('rol', ['admin', 'superadmin'])
+
+        if (admins && admins.length > 0) {
+          // Insertar notificaciones directamente con service role (sin pasar por API auth)
+          const notificaciones = admins.map(a => ({
+            user_id: a.id,
+            empresa_id: profile?.empresa_id || null,
+            tipo: 'alerta',
             titulo: '🚨 Alerta de Pánico',
             mensaje: `${nombreEstudiante} ha solicitado ayuda.\n\nMotivo: "${motivo}"\nRequiere atención de: ${atencionLabel}`,
             link: `/superadmin/usuarios/${user_id}`,
-            destinatario_tipo: 'por_rol',
-            destinatario_roles: ['admin', 'superadmin'],
-          }),
-        })
-      } catch { /* silencioso — la notificación in-app igual se registró */ }
+            destinatario_tipo: 'miembro',
+            leida: false,
+          }))
+
+          await supabase.from('notificaciones').insert(notificaciones)
+        }
+      } catch { /* silencioso */ }
     }
 
     return NextResponse.json({ success: true })
