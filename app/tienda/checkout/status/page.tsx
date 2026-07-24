@@ -49,12 +49,13 @@ function CheckoutStatusContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
   const izipaySuccess = searchParams.get("izipay_success");
+  const wompiSuccess = searchParams.get("wompi_success");
   const totalIzipay = searchParams.get("total");
-  const [state, setState] = useState<PaymentState>(izipaySuccess === "1" ? "paid" : "loading");
+  const [state, setState] = useState<PaymentState>(izipaySuccess === "1" || wompiSuccess === "1" ? "paid" : "loading");
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (izipaySuccess === "1") return;
+    if (izipaySuccess === "1" || wompiSuccess === "1") return;
 
     if (!orderId) {
       setState("failed");

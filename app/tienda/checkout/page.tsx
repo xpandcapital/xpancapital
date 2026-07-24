@@ -19,8 +19,9 @@ import { useShop } from "@/context/ShopContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/Toast";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
+import { CheckoutWompi } from "@/components/tienda/CheckoutWompi";
 
-type PaymentMethod = 'coins' | 'izipay' | 'paypal' | 'transfer' | 'crypto_manual' | 'whatsapp';
+type PaymentMethod = 'coins' | 'izipay' | 'wompi' | 'paypal' | 'transfer' | 'crypto_manual' | 'whatsapp';
 
 interface CheckoutForm {
     nombre: string;
@@ -68,7 +69,7 @@ function CheckoutContent() {
     const searchParams = useSearchParams();
     const isRedeemFlow = searchParams.get('redeem') === '1';
 
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('izipay');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('wompi');
     const [isProcessing, setIsProcessing] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
     const [orderEmail, setOrderEmail] = useState("");
@@ -82,6 +83,9 @@ function CheckoutContent() {
     const [izipayOrderId, setIzipayOrderId] = useState('');
     const [izipayTotal, setIzipayTotal] = useState(0);
     const [izipayScriptLoaded, setIzipayScriptLoaded] = useState(false);
+    const [isWompiModal, setIsWompiModal] = useState(false);
+    const [wompiData, setWompiData] = useState<{ publicKey: string; reference: string; amountInCents: number; currency: string; ordenId: string; redirectUrl: string } | null>(null);
+    const [wompiTotal, setWompiTotal] = useState(0);
     const [krKey, setKrKey] = useState(0);
     const [selectedAsesor, setSelectedAsesor] = useState<string | null>(null);
   const [codigoPais, setCodigoPais] = useState('+51');
@@ -414,6 +418,47 @@ function CheckoutContent() {
                     notas: form.notas,
                 } : null,
             };
+
+            // Flujo Wompi
+            if (paymentMethod === 'wompi') {
+                const controller = new AbortController()
+                const timeout = setTimeout(() => controller.abort(), 15000)
+                let res: Response
+                try {
+                    res = await fetch('/api/get-wompi-token', {
+                        method: 'POST',
+                        headers,
+                        body: JSON.stringify({
+                            ...commonPayload,
+                            total_usd: grandTotal,
+                            pais: form.pais,
+                        }),
+                        signal: controller.signal,
+                    })
+                } catch (fetchErr: any) {
+                    clearTimeout(timeout)
+                    if (fetchErr.name === 'AbortError') throw new Error('El servicio de pago está tardando demasiado.')
+                    throw new Error('No se pudo conectar con la pasarela de pago.')
+                }
+                clearTimeout(timeout)
+                const data = await res.json()
+                if (!data.success) throw new Error(data.error || 'Error al conectar con Wompi')
+
+                isRedirectingRef.current = true
+                setWompiData({
+                    publicKey: data.public_key,
+                    reference: data.reference,
+                    amountInCents: data.amount_in_cents,
+                    currency: data.currency,
+                    ordenId: data.orden_id,
+                    redirectUrl: data.redirect_url || '',
+                })
+                setWompiTotal(grandTotal)
+                setKrKey(k => k + 1)
+                setIsWompiModal(true)
+                setIsProcessing(false)
+                return
+            }
 
             // Flujo Izipay
             if (paymentMethod === 'izipay') {
@@ -1272,6 +1317,41 @@ function CheckoutContent() {
                         }}
                       />
                     )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Wompi */}
+            {isWompiModal && wompiData && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col overflow-hidden">
+                  <motion.div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-emerald-50 via-emerald-100/50 to-emerald-50 border-b border-emerald-200" style={{ backgroundSize: '200% 100%' }}>
+                    <div className="flex items-center gap-5">
+                      <div className="flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-600" /><span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">SSL</span></div>
+                      <div className="flex items-center gap-1.5"><Shield className="w-3 h-3 text-emerald-600" /><span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">PCI-DSS</span></div>
+                    </div>
+                    <button onClick={() => { setIsWompiModal(false); setIsProcessing(false) }} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors">&times;</button>
+                  </motion.div>
+                  <div className="p-6 overflow-y-auto flex-1">
+                    <CheckoutWompi
+                      publicKey={wompiData.publicKey}
+                      reference={wompiData.reference}
+                      amountInCents={wompiData.amountInCents}
+                      currency={wompiData.currency}
+                      ordenId={wompiData.ordenId}
+                      redirectUrl={wompiData.redirectUrl}
+                      onSuccess={() => {
+                        clearCart()
+                        setIsWompiModal(false)
+                        window.location.href = `/tienda/checkout/status?wompi_success=1&order_id=${wompiData.ordenId}&total=${wompiTotal.toFixed(2)}`
+                      }}
+                      onError={(msg) => {
+                        setIsWompiModal(false)
+                        setIsProcessing(false)
+                        showToast(msg, 'error')
+                      }}
+                    />
                   </div>
                 </div>
               </div>
