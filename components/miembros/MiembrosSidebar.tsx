@@ -42,8 +42,7 @@ export function MiembrosSidebar() {
             title: "Tus Adquisiciones",
             items: [
                 { icon: LayoutDashboard, label: "Mi Resumen", href: "/miembros" },
-                // { icon: ShoppingBag, label: "Mis Productos", href: "/miembros/productos" },
-                // { icon: Video, label: "Mis Cursos", href: "/miembros/academia" },
+                { icon: ShoppingBag, label: "Tienda", href: "/tienda" },
                 { icon: FileText, label: "Mis Contratos", href: "/miembros/contratos" },
                 { icon: Award, label: "Mis Certificados", href: "/miembros/certificados" },
             ]
