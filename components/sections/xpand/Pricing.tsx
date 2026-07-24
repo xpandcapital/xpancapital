@@ -1,16 +1,33 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Check, Zap, Crown, ArrowRight } from "lucide-react"
 import { useShop } from "@/context/ShopContext"
+import { createClient } from "@/lib/supabaseClient"
 
-const plans = [
+interface PlanData {
+  key: string
+  productId: string
+  name: string
+  icon: typeof Zap
+  price: number
+  comparePrice: number | null
+  discountPercent: number | null
+  period: string
+  total: string
+  breakdown: string
+  features: string[]
+  cta: string
+  highlight: boolean
+}
+
+const plansTemplate = [
   {
     key: "trimestral",
     productId: "209a7e5a-0809-456a-b3b0-570c244f795b",
     name: "Plan Trimestral",
     icon: Zap,
-    price: 115,
     period: "cada 4 meses",
     total: "$345 al año",
     breakdown: "3 pagos de $115",
@@ -23,11 +40,10 @@ const plans = [
     productId: "aad8f9ab-5910-4e05-834b-6ddeee4ef48f",
     name: "Plan Anual",
     icon: Crown,
-    price: 300,
     period: "pago único anual",
     total: "$300 al año",
     breakdown: "1 solo pago",
-    features: ["Todo lo del Plan Trimestral", "2 Mentorías 1:1 con Hebed", "Acceso anticipado a nuevos cursos", "Señales en tiempo real优先", "Análisis personalizado de cartera", "Certificado de finalización"],
+    features: ["Todo lo del Plan Trimestral", "2 Mentorías 1:1 con Hebed", "Acceso anticipado a nuevos cursos", "Señales en tiempo real", "Análisis personalizado de cartera", "Certificado de finalización"],
     cta: "Elegir Anual",
     highlight: true,
   },
@@ -35,8 +51,45 @@ const plans = [
 
 export function Pricing() {
   const { addToCart } = useShop()
+  const [plans, setPlans] = useState<PlanData[]>(plansTemplate.map(p => ({ ...p, price: 0, comparePrice: null, discountPercent: null })))
+  const [loading, setLoading] = useState(true)
 
-  const handleBuy = (plan: typeof plans[0]) => {
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const supabase = createClient()
+        const ids = plansTemplate.map(p => p.productId)
+        const { data: productos } = await supabase
+          .from('productos')
+          .select('id, precio_usd, precio_comparacion, descuento_porcentaje')
+          .in('id', ids)
+
+        if (productos) {
+          const priceMap = new Map(productos.map(p => [p.id, p]))
+          setPlans(plansTemplate.map(template => {
+            const db = priceMap.get(template.productId)
+            const dbPrice = Number(db?.precio_usd || 0)
+            const comparePrice = db?.precio_comparacion ? Number(db.precio_comparacion) : null
+            const discountPercent = db?.descuento_porcentaje ? Number(db.descuento_porcentaje) : null
+            // Si hay precio de comparación y es mayor que el precio real, calcular descuento
+            const effectiveDiscount = comparePrice && comparePrice > dbPrice
+              ? Math.round(((comparePrice - dbPrice) / comparePrice) * 100)
+              : discountPercent
+
+            return {
+              ...template,
+              price: dbPrice || template.key === 'trimestral' ? 115 : 300,
+              comparePrice: comparePrice && comparePrice > dbPrice ? comparePrice : null,
+              discountPercent: effectiveDiscount,
+            }
+          }))
+        }
+      } catch {} finally { setLoading(false) }
+    }
+    fetchPrices()
+  }, [])
+
+  const handleBuy = (plan: PlanData) => {
     addToCart({
       id: plan.productId,
       title: plan.name,
@@ -71,6 +124,11 @@ export function Pricing() {
               {plan.highlight && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#e8c600] text-black text-xs font-bold rounded-full">MEJOR VALOR</div>
               )}
+              {plan.discountPercent && plan.discountPercent >= 50 && (
+                <div className="absolute -top-3 right-4 px-3 py-1 bg-red-500/90 text-white text-[10px] font-black rounded-full animate-pulse">
+                  -{plan.discountPercent}%
+                </div>
+              )}
 
               <div className="flex items-center gap-3 mb-6">
                 <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center ${plan.highlight ? "bg-[#e8c600]/15" : "bg-white/5"}`}>
@@ -80,11 +138,18 @@ export function Pricing() {
               </div>
 
               <div className="mb-6">
-                <div className="flex items-baseline gap-1">
+                <div className="flex items-baseline gap-2">
                   <span className="text-4xl md:text-5xl font-black text-[#e8c600]">${plan.price}</span>
                   <span className="text-white/30 text-sm">/{plan.period}</span>
                 </div>
-                <p className="text-white/20 text-xs mt-1">{plan.total} — {plan.breakdown}</p>
+                {plan.comparePrice ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-white/30 text-sm line-through">${plan.comparePrice}</span>
+                    <span className="text-emerald-400 text-xs font-bold">Ahorras ${plan.comparePrice - plan.price}</span>
+                  </div>
+                ) : (
+                  <p className="text-white/20 text-xs mt-1">{plan.total} — {plan.breakdown}</p>
+                )}
               </div>
 
               <ul className="space-y-3 mb-8 flex-1">
