@@ -77,7 +77,7 @@ export function Pricing() {
 
             return {
               ...template,
-              price: dbPrice || template.key === 'trimestral' ? 115 : 300,
+              price: dbPrice || (template.key === 'trimestral' ? 115 : 300),
               comparePrice: comparePrice && comparePrice > dbPrice ? comparePrice : null,
               discountPercent: effectiveDiscount,
             }
