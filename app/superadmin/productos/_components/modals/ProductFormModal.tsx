@@ -232,7 +232,9 @@ export function ProductFormModal({
           <div className="flex items-center gap-6 px-8 py-3 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
             <div className="flex flex-col items-center">
               <span className="text-[8px] font-black text-gray-600 uppercase">Multimoneda</span>
-              <span className="text-[10px] font-black uppercase text-emerald-500">Activo</span>
+              <span className={`text-[10px] font-black uppercase ${isMultiCurrencyEnabled ? 'text-emerald-500' : 'text-gray-600'}`}>
+                {isMultiCurrencyEnabled ? 'Activo' : 'Inactivo'}
+              </span>
             </div>
             <div className="w-px h-8 bg-white/5" />
             <div className="flex flex-col items-center">

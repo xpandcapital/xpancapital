@@ -446,13 +446,14 @@ function CheckoutContent() {
                     throw new Error(data?.error || 'Error al conectar con Wompi')
                 }
 
+                const sigParam = data.signature ? `&signature:integrity=${encodeURIComponent(data.signature)}` : ''
                 setWompiData({
                     publicKey: data.public_key,
                     reference: data.reference,
                     amountInCents: data.amount_in_cents,
                     currency: data.currency,
                     ordenId: data.orden_id,
-                    redirectUrl: `https://checkout.wompi.co/p/?public-key=${encodeURIComponent(data.public_key)}&amount-in-cents=${data.amount_in_cents}&currency=${data.currency}&reference=${encodeURIComponent(data.reference)}&redirect-url=${encodeURIComponent(data.redirect_url)}`,
+                    redirectUrl: `https://checkout.wompi.co/p/?public-key=${encodeURIComponent(data.public_key)}&amount-in-cents=${data.amount_in_cents}&currency=${data.currency}&reference=${encodeURIComponent(data.reference)}&redirect-url=${encodeURIComponent(data.redirect_url)}${sigParam}`,
                 })
                 setWompiTotal(grandTotal)
                 setIsWompiModal(true)

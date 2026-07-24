@@ -20,14 +20,17 @@ export async function POST(request: NextRequest) {
 
     const { data: keys } = await supabase
       .from('api_keys').select('key_name, key_value')
-      .eq('key_name', 'wompi_public_key').eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .or(`user_id.is.null,is_global.eq.true`).maybeSingle()
+      .in('key_name', ['wompi_public_key', 'wompi_integrity_key'])
+      .eq('empresa_id', DEFAULT_EMPRESA_ID)
+      .or(`user_id.is.null,is_global.eq.true`)
 
-    if (!keys?.key_value) {
+    const getKey = (name: string) => keys?.find((k: any) => k.key_name === name)?.key_value || ''
+    const publicKey = decryptApiKey(getKey('wompi_public_key'))
+    const integrityKey = decryptApiKey(getKey('wompi_integrity_key'))
+
+    if (!publicKey) {
       return NextResponse.json({ error: 'Wompi Public Key no configurada' }, { status: 400 })
     }
-
-    const publicKey = decryptApiKey(keys.key_value)
     const tasaCambio = parseFloat(process.env.WOMPI_USD_COP_RATE || '4000')
     const totalCopCents = Math.round(total_usd * tasaCambio) * 100
 
@@ -52,6 +55,15 @@ export async function POST(request: NextRequest) {
     const reference = compra.id.slice(0, 12)
     const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://xpancapital.vercel.app'}/tienda/checkout/status?wompi_success=1&order_id=${compra.id}&total=${total_usd}`
 
+    // Generar firma de integridad Wompi
+    let signature = ''
+    if (integrityKey) {
+      const enc = new TextEncoder()
+      const sigData = `${reference}${totalCopCents}COP${integrityKey}`
+      const hash = await crypto.subtle.digest('SHA-256', enc.encode(sigData))
+      signature = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('')
+    }
+
     return NextResponse.json({
       success: true,
       public_key: publicKey,
@@ -60,6 +72,7 @@ export async function POST(request: NextRequest) {
       currency: 'COP',
       orden_id: compra.id,
       redirect_url: redirectUrl,
+      signature,
     })
   } catch (error: any) {
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 })
