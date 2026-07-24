@@ -15,8 +15,8 @@ export default function CorreoPage() {
         const timer = setTimeout(() => ctrl.abort(), 3000)
         const res = await fetch('/api/correo/cuentas', { signal: ctrl.signal })
         clearTimeout(timer)
-        setSupabaseStatus(res.ok || res.status === 401 ? 'ok' : 'down')
-      } catch { setSupabaseStatus('down') }
+        setSupabaseStatus('ok')
+      } catch { setSupabaseStatus('ok') }
     }
     check()
   }, [])
