@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const privateKey = decryptApiKey(getKey('wompi_private_key'))
     const integrityKey = decryptApiKey(getKey('wompi_integrity_key'))
 
-    const environment = process.env.WOMPI_ENV || 'sandbox'
+    const environment = process.env.WOMPI_ENV === 'production' ? 'production' : 'sandbox'
 
     // Crear orden en compras
     const totalCents = Math.round(total_usd * 100)
