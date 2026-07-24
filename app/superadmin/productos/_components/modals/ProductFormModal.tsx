@@ -123,6 +123,7 @@ export function ProductFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    try {
     const form = e.target as HTMLFormElement
     const category = categories.find(c => c.name === formData.category)
     
@@ -171,6 +172,10 @@ export function ProductFormModal({
     // Solo cerrar si es edición (ya existía)
     if (editingProduct?.id) {
       onClose()
+    }
+    } catch (err: any) {
+      console.error('Error guardando producto:', err)
+      alert('Error al guardar: ' + (err?.message || 'Error desconocido'))
     }
   }
 
