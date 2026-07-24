@@ -51,7 +51,7 @@ const plansTemplate = [
 
 export function Pricing() {
   const { addToCart } = useShop()
-  const [plans, setPlans] = useState<PlanData[]>(plansTemplate.map(p => ({ ...p, price: p.key === 'trimestral' ? 115 : 300, comparePrice: null, discountPercent: null })))
+  const [plans, setPlans] = useState<PlanData[]>(plansTemplate.map(p => ({ ...p, price: -1, comparePrice: null, discountPercent: null })))
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -138,7 +138,7 @@ export function Pricing() {
 
               <div className="mb-6">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl md:text-5xl font-black text-[#e8c600]">${plan.price}</span>
+                  <span className="text-4xl md:text-5xl font-black text-[#e8c600]">{plan.price < 0 ? '$' : `$${plan.price}`}</span>
                   <span className="text-white/30 text-sm">/{plan.period}</span>
                 </div>
                 {plan.comparePrice ? (
