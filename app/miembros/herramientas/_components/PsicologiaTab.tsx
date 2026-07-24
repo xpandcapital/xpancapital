@@ -383,18 +383,16 @@ export function PsicologiaTab() {
               <Calendar className="w-4 h-4 text-emerald-400 shrink-0" />
               <h2 className="text-white font-black uppercase tracking-wider text-[11px]">Redondeo Fin del Día</h2>
             </div>
-            <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-2.5">
+            <div className="p-3 space-y-2.5">
               <TextareaLabel label="¿Era correcta mi perspectiva?" value={perspCorrecta} onChange={setPerspCorrecta} placeholder="Compara expectativa vs realidad..." />
               <TextareaLabel label="¿Registré todas mis operaciones?" value={opsRegistradas} onChange={setOpsRegistradas} placeholder="Lista las operaciones..." />
-              <div className="md:col-span-2">
-                <TextareaLabel
-                  label="¿Errores fuera del plan? ¿Por qué?"
-                  value={erroresCometidos}
-                  onChange={setErroresCometidos}
-                  placeholder="Sé honesto... esto alimenta tus estadísticas"
-                  accent
-                />
-              </div>
+              <TextareaLabel
+                label="¿Errores fuera del plan? ¿Por qué?"
+                value={erroresCometidos}
+                onChange={setErroresCometidos}
+                placeholder="Sé honesto... esto alimenta tus estadísticas"
+                accent
+              />
               <TextareaLabel label="Rendimiento general y mejora" value={rendimiento} onChange={setRendimiento} placeholder="Autocrítica constructiva..." />
             </div>
           </div>

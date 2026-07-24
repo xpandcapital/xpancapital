@@ -3,11 +3,12 @@
 import { useState } from 'react'
 import {
   Wrench, Shield, DollarSign, Activity, Trash2, Loader2,
-  Save, History, ChevronDown, Calculator, CheckCircle2, AlertCircle, ScrollText, Brain,
+  Save, History, ChevronDown, Calculator, CheckCircle2, AlertCircle, ScrollText, Brain, CheckSquare,
 } from 'lucide-react'
 import { useRiskCalculator } from './_hooks/useRiskCalculator'
 import { BitacoraTab } from './_components/BitacoraTab'
 import { PsicologiaTab } from './_components/PsicologiaTab'
+import { HabitosTab } from './_components/HabitosTab'
 
 const INPUT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors placeholder:text-gray-600"
 const SELECT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors appearance-none cursor-pointer"
@@ -40,6 +41,7 @@ export default function HerramientasPage() {
     { id: 'riesgo', label: 'Gestión de Riesgo', icon: Shield },
     { id: 'bitacora', label: 'Bitácora', icon: ScrollText },
     { id: 'psicologia', label: 'Pronóstico y Psicología', icon: Brain },
+    { id: 'habitos', label: 'Hábitos', icon: CheckSquare },
   ]
 
   return (
@@ -326,6 +328,8 @@ export default function HerramientasPage() {
       {tab === 'bitacora' && <BitacoraTab />}
 
       {tab === 'psicologia' && <PsicologiaTab />}
+
+      {tab === 'habitos' && <HabitosTab />}
     </div>
   )
 }
