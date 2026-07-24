@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { decryptApiKey } from '@/lib/api-crypto'
-import { getMerchant, createTransaction, generateSignature } from '@/lib/wompi/client'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -82,45 +81,18 @@ export async function POST(request: NextRequest) {
 
     await supabase.from('compra_items').insert(items)
 
-    // Obtener acceptance_token del merchant
-    const merchant = await getMerchant(publicKey, environment)
-    const acceptanceToken = merchant.data.presigned_acceptance?.acceptance_token || ''
-
-    // Generar referencia única
     const reference = compra.id.slice(0, 12)
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://xpancapital.vercel.app'}/tienda/checkout/status?wompi_success=1&order_id=${compra.id}&total=${total_usd}`
 
-    // Generar firma (en COP)
-    const signature = await generateSignature(reference, totalCopCents, 'COP', integrityKey)
-
-    // Crear transacción en Wompi
-    const wompiRes = await createTransaction({
-      acceptance_token: acceptanceToken,
-      amount_in_cents: totalCopCents,
-      currency: 'COP',
-      signature,
-      customer_email: email,
-      reference,
-      redirect_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://xpancapital.vercel.app'}/tienda/checkout/status?wompi_success=1&order_id=${compra.id}&total=${total_usd}`,
-      customer_data: {
-        full_name: [nombre, apellido].filter(Boolean).join(' ') || email,
-        phone_number: String(telefono || '573000000000').replace(/\D/g, '').slice(0, 15),
-      },
-    }, privateKey, environment)
-
-    // Guardar transaction_id en metadata
-    await supabase
-      .from('compras')
-      .update({ metadata: { ...compra.metadata, wompi_transaction_id: wompiRes.data.id } })
-      .eq('id', compra.id)
-
+    // El widget de Wompi crea la transacción — solo devolvemos los datos que necesita
     return NextResponse.json({
       success: true,
-      wompi_transaction_id: wompiRes.data.id,
       public_key: publicKey,
       reference,
-      amount_in_cents: totalCents,
-      currency: 'USD',
+      amount_in_cents: totalCopCents,
+      currency: 'COP',
       orden_id: compra.id,
+      redirect_url: redirectUrl,
       environment,
     })
   } catch (error: any) {
