@@ -444,14 +444,6 @@ function CheckoutContent() {
                 const data = await res.json()
                 if (!data.success) throw new Error(data.error || 'Error al conectar con Wompi')
 
-                // Redirigir al link de pago de Wompi
-                if (data.payment_url) {
-                    clearCart()
-                    window.location.href = data.payment_url
-                    return
-                }
-
-                // Fallback al modal (legacy)
                 isRedirectingRef.current = true
                 setWompiData({
                     publicKey: data.public_key,
