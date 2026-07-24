@@ -174,21 +174,24 @@ export function BitacoraTab() {
           </div>
         </div>
 
+        {/* Saldo config bar - always visible */}
+        {!loading && !saldoLoading && (
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-white/5 rounded-xl">
+              <span className="text-[10px] text-gray-500 uppercase tracking-wider">Saldo Inicial:</span>
+              <span className="text-sm font-black text-white">${saldoInicial.toLocaleString()}</span>
+              <button onClick={() => { setEditSaldo(saldoInicial); setShowSaldoModal(true) }}
+                className="p-1 hover:bg-white/5 rounded text-gray-500 hover:text-white transition-colors">
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <span className="text-[9px] text-gray-600">Saldo Actual = Saldo Inicial + Suma de todos los Resultados Netos</span>
+          </div>
+        )}
+
         {/* ===== ANALYTICS DASHBOARD ===== */}
         {!loading && analytics && (
           <div className="space-y-4">
-            {/* Saldo config bar */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900 border border-white/5 rounded-xl">
-                <span className="text-[10px] text-gray-500 uppercase tracking-wider">Saldo Inicial:</span>
-                <span className="text-sm font-black text-white">${saldoInicial.toLocaleString()}</span>
-                <button onClick={() => { setEditSaldo(saldoInicial); setShowSaldoModal(true) }}
-                  className="p-1 hover:bg-white/5 rounded text-gray-500 hover:text-white transition-colors">
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <span className="text-[9px] text-gray-600">Saldo Actual = Saldo Inicial + Suma de todos los Resultados Netos</span>
-            </div>
 
             {/* 2-col layout: Stats Left + Chart Right */}
             <div className="grid grid-cols-1 lg:grid-cols-[28%_1fr] gap-4">
