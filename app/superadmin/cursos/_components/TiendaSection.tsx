@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Store, DollarSign, Coins, Tag, ImageIcon, ChevronDown, ChevronUp, Link2, Unlink2, RefreshCw, Percent } from "lucide-react"
 import type { Course } from "../_types"
 
@@ -17,10 +17,6 @@ export function TiendaSection({ course, onUpdate }: Props) {
   const [productosDisponibles, setProductosDisponibles] = useState<Array<{ id: string; nombre: string }>>([])
 
   useEffect(() => {
-    setExpanded(course.venderEnTienda)
-  }, [course.venderEnTienda])
-
-  useEffect(() => {
     fetch('/api/productos?all=true&limit=500')
       .then(r => r.json())
       .then(d => {
@@ -31,9 +27,9 @@ export function TiendaSection({ course, onUpdate }: Props) {
       .catch(() => {})
   }, [])
 
-  const toggle = (v: boolean) => {
-    setExpanded(v)
+  const toggleVender = (v: boolean) => {
     onUpdate({ ...course, venderEnTienda: v, linkProductoId: v ? course.linkProductoId : null })
+    if (v) setExpanded(true)
   }
 
   const vincularProductoExistente = (productoId: string) => {
@@ -62,7 +58,7 @@ export function TiendaSection({ course, onUpdate }: Props) {
     <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/[0.02]">
       {/* Header */}
       <button
-        onClick={() => toggle(!course.venderEnTienda)}
+        onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between p-5 md:p-6 hover:bg-white/[0.04] transition-colors"
       >
         <div className="flex items-center gap-3">
@@ -84,9 +80,9 @@ export function TiendaSection({ course, onUpdate }: Props) {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={(e) => { e.stopPropagation(); toggle(!course.venderEnTienda) }}
+            onClick={(e) => { e.stopPropagation(); toggleVender(!course.venderEnTienda) }}
             className={`relative w-10 h-5 rounded-full transition-colors ${
-              course.venderEnTienda ? 'bg-emerald-500' : 'bg-white/20'
+              course.venderEnTienda ? 'bg-emerald-500' : 'bg-red-500/60'
             }`}
           >
             <motion.div
@@ -95,7 +91,12 @@ export function TiendaSection({ course, onUpdate }: Props) {
               transition={{ type: "spring", stiffness: 500, damping: 30 }}
             />
           </button>
-          {course.venderEnTienda
+          <span className={`text-[8px] font-black uppercase tracking-widest ${
+            course.venderEnTienda ? 'text-emerald-400' : 'text-red-400'
+          }`}>
+            {course.venderEnTienda ? 'On' : 'Off'}
+          </span>
+          {expanded
             ? <ChevronUp className="w-4 h-4 text-gray-400" />
             : <ChevronDown className="w-4 h-4 text-gray-400" />
           }
@@ -103,179 +104,190 @@ export function TiendaSection({ course, onUpdate }: Props) {
       </button>
 
       {/* Expandable fields */}
-      {course.venderEnTienda && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          className="border-t border-white/10 px-5 md:px-6 py-5 space-y-4"
-        >
-          <p className="text-[10px] font-bold uppercase text-gray-500 tracking-widest">
-            Información del producto en tienda
-          </p>
-
-          {/* Producto vinculado actual */}
-          {course.productoId && course.productoNombre && (
-            <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
-              <div className="flex items-center gap-2 min-w-0">
-                <Link2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <span className="text-sm text-emerald-300 truncate">
-                  {course.productoNombre}
-                </span>
-              </div>
-              <button
-                onClick={desvincularProducto}
-                className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
-                title="Desvincular producto"
-              >
-                <Unlink2 className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
-          {/* Selector de producto existente */}
-          {productosDisponibles.length > 0 && (
-            <div>
-              {!mostrarSelector ? (
-                <button
-                  onClick={() => setMostrarSelector(true)}
-                  className="w-full flex items-center gap-2 p-3 rounded-xl bg-white/[0.03] border border-dashed border-white/10 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all text-xs text-gray-400 hover:text-purple-400"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  {course.productoId
-                    ? 'Vincular a otro producto existente...'
-                    : 'Vincular a un producto existente en lugar de crear uno nuevo...'}
-                </button>
-              ) : (
-                <div className="space-y-2 p-3 rounded-xl bg-purple-500/5 border border-purple-500/10">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase text-purple-400 tracking-wider">
-                      Seleccionar producto existente
-                    </span>
-                    <button
-                      onClick={() => { setMostrarSelector(false); setBusquedaProducto("") }}
-                      className="text-[10px] text-gray-500 hover:text-white"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    value={busquedaProducto}
-                    onChange={(e) => setBusquedaProducto(e.target.value)}
-                    placeholder="Buscar producto..."
-                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 transition-colors"
-                    autoFocus
-                  />
-                  <div className="max-h-40 overflow-y-auto space-y-0.5">
-                    {productosDisponibles
-                      .filter(p =>
-                        p.id !== course.productoId &&
-                        (!busquedaProducto || p.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()))
-                      )
-                      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
-                      .map(p => (
-                        <button
-                          key={p.id}
-                          onClick={() => vincularProductoExistente(p.id)}
-                          className="w-full text-left px-3 py-2 rounded-lg text-sm text-white hover:bg-purple-500/20 hover:text-purple-300 transition-colors truncate"
-                        >
-                          {p.nombre}
-                        </button>
-                      ))}
-                    {productosDisponibles.filter(p =>
-                      p.id !== course.productoId &&
-                      (!busquedaProducto || p.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()))
-                    ).length === 0 && (
-                      <p className="text-[10px] text-gray-500 px-3 py-2 text-center">
-                        {busquedaProducto ? 'No se encontraron productos' : 'No hay productos disponibles'}
-                      </p>
-                    )}
-                  </div>
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="border-t border-white/10"
+          >
+            <div className="px-5 md:px-6 py-5 space-y-4">
+              {!course.venderEnTienda && (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/5 border border-red-500/10">
+                  <span className="text-[10px] text-red-400/70 uppercase tracking-wider">La venta en tienda está desactivada. Activa el toggle para habilitar.</span>
                 </div>
               )}
-            </div>
-          )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
-                <DollarSign className="w-3 h-3 inline mr-1" />
-                Precio USD
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={course.price || ''}
-                onChange={(e) => onUpdate({ ...course, price: parseFloat(e.target.value) || 0 })}
-                placeholder="0.00"
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
-                <Coins className="w-3 h-3 inline mr-1" />
-                XPANDCOINS
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={course.bliscoins || ''}
-                onChange={(e) => onUpdate({ ...course, bliscoins: parseInt(e.target.value) || 0 })}
-                placeholder="0"
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
-                <Tag className="w-3 h-3 inline mr-1" />
-                Precio Real (tachado)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={course.precioComparacion || ''}
-                onChange={(e) => onUpdate({ ...course, precioComparacion: parseFloat(e.target.value) || 0 })}
-                placeholder="Precio original sin descuento"
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50 transition-colors"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
-                <Percent className="w-3 h-3 inline mr-1" />
-                Descuento %
-              </label>
-              <input
-                type="number"
-                step="1"
-                min="0"
-                max="100"
-                value={course.descuentoPorcentaje || ''}
-                onChange={(e) => onUpdate({ ...course, descuentoPorcentaje: Math.min(100, parseInt(e.target.value) || 0) })}
-                placeholder="0"
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50 transition-colors"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
-            <ImageIcon className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-xs text-gray-400">
-                La imagen de portada del curso se usará automáticamente en la tienda.
+              <p className="text-[10px] font-bold uppercase text-gray-500 tracking-widest">
+                Información del producto en tienda
               </p>
-              <p className="text-[10px] text-gray-600 mt-0.5">
-                Podrás editarla después desde la sección de Productos.
-              </p>
+
+              {/* Producto vinculado actual */}
+              {course.productoId && course.productoNombre && (
+                <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Link2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <span className="text-sm text-emerald-300 truncate">
+                      {course.productoNombre}
+                    </span>
+                  </div>
+                  <button
+                    onClick={desvincularProducto}
+                    className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
+                    title="Desvincular producto"
+                  >
+                    <Unlink2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Selector de producto existente */}
+              {productosDisponibles.length > 0 && (
+                <div>
+                  {!mostrarSelector ? (
+                    <button
+                      onClick={() => setMostrarSelector(true)}
+                      className="w-full flex items-center gap-2 p-3 rounded-xl bg-white/[0.03] border border-dashed border-white/10 hover:border-purple-500/30 hover:bg-purple-500/5 transition-all text-xs text-gray-400 hover:text-purple-400"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      {course.productoId
+                        ? 'Vincular a otro producto existente...'
+                        : 'Vincular a un producto existente en lugar de crear uno nuevo...'}
+                    </button>
+                  ) : (
+                    <div className="space-y-2 p-3 rounded-xl bg-purple-500/5 border border-purple-500/10">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase text-purple-400 tracking-wider">
+                          Seleccionar producto existente
+                        </span>
+                        <button
+                          onClick={() => { setMostrarSelector(false); setBusquedaProducto("") }}
+                          className="text-[10px] text-gray-500 hover:text-white"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        value={busquedaProducto}
+                        onChange={(e) => setBusquedaProducto(e.target.value)}
+                        placeholder="Buscar producto..."
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 transition-colors"
+                        autoFocus
+                      />
+                      <div className="max-h-40 overflow-y-auto space-y-0.5">
+                        {productosDisponibles
+                          .filter(p =>
+                            p.id !== course.productoId &&
+                            (!busquedaProducto || p.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()))
+                          )
+                          .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+                          .map(p => (
+                            <button
+                              key={p.id}
+                              onClick={() => vincularProductoExistente(p.id)}
+                              className="w-full text-left px-3 py-2 rounded-lg text-sm text-white hover:bg-purple-500/20 hover:text-purple-300 transition-colors truncate"
+                            >
+                              {p.nombre}
+                            </button>
+                          ))}
+                        {productosDisponibles.filter(p =>
+                          p.id !== course.productoId &&
+                          (!busquedaProducto || p.nombre.toLowerCase().includes(busquedaProducto.toLowerCase()))
+                        ).length === 0 && (
+                          <p className="text-[10px] text-gray-500 px-3 py-2 text-center">
+                            {busquedaProducto ? 'No se encontraron productos' : 'No hay productos disponibles'}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
+                    <DollarSign className="w-3 h-3 inline mr-1" />
+                    Precio USD
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={course.price || ''}
+                    onChange={(e) => onUpdate({ ...course, price: parseFloat(e.target.value) || 0 })}
+                    placeholder="0.00"
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
+                    <Coins className="w-3 h-3 inline mr-1" />
+                    XPANDCOINS
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={course.bliscoins || ''}
+                    onChange={(e) => onUpdate({ ...course, bliscoins: parseInt(e.target.value) || 0 })}
+                    placeholder="0"
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
+                    <Tag className="w-3 h-3 inline mr-1" />
+                    Precio Real (tachado)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={course.precioComparacion || ''}
+                    onChange={(e) => onUpdate({ ...course, precioComparacion: parseFloat(e.target.value) || 0 })}
+                    placeholder="Precio original sin descuento"
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50 transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold uppercase text-gray-500 tracking-wider">
+                    <Percent className="w-3 h-3 inline mr-1" />
+                    Descuento %
+                  </label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="0"
+                    max="100"
+                    value={course.descuentoPorcentaje || ''}
+                    onChange={(e) => onUpdate({ ...course, descuentoPorcentaje: Math.min(100, parseInt(e.target.value) || 0) })}
+                    placeholder="0"
+                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-amber-500/50 transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <ImageIcon className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs text-gray-400">
+                    La imagen de portada del curso se usará automáticamente en la tienda.
+                  </p>
+                  <p className="text-[10px] text-gray-600 mt-0.5">
+                    Podrás editarla después desde la sección de Productos.
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
-
