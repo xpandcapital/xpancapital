@@ -126,7 +126,7 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
-    const { id, rol, ...updates } = body
+    const { id, rol, permisos_adicionales, ...updates } = body
 
     if (!id) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
@@ -156,10 +156,10 @@ export async function PUT(request: NextRequest) {
     }
 
     // Sync permisos_adicionales if provided
-    if (body.permisos_adicionales !== undefined && advisor?.auth_user_id) {
+    if (permisos_adicionales !== undefined && advisor?.auth_user_id) {
       await supabase
         .from('profiles')
-        .update({ permisos_adicionales: body.permisos_adicionales })
+        .update({ permisos_adicionales })
         .eq('id', advisor.auth_user_id)
     }
 
