@@ -142,7 +142,7 @@ function Content() {
                     )}
                     {bank.cci && (
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 text-xs">CCI</span>
+                        <span className="text-gray-500 text-xs">Llave Interbancaria</span>
                         <div className="flex items-center gap-2">
                           <span className="text-white font-mono text-xs">{bank.cci}</span>
                           <button

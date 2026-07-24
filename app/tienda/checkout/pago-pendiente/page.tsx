@@ -273,7 +273,7 @@ function PagoPendienteContent() {
                                     <p className="text-white font-bold">{b.name}</p>
                                     <p className="text-gray-400">Cuenta: <span className="text-white font-mono">{b.account_number}</span></p>
                                     <p className="text-gray-400">Titular: <span className="text-white">{b.account_holder}</span></p>
-                                    {b.cci && <p className="text-gray-400">CCI: <span className="text-white font-mono">{b.cci}</span></p>}
+                                    {b.cci && <p className="text-gray-400">Llave Interbancaria: <span className="text-white font-mono">{b.cci}</span></p>}
                                   </div>
                                 ))}
                               </div>
