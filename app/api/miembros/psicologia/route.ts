@@ -72,7 +72,8 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const body = await request.json()
-    const { user_id, fecha, estado_emocional, presiones_externas, eventos_manana, puntaje_flujo } = body
+    const { user_id, fecha, estado_emocional, presiones_externas, eventos_manana, puntaje_flujo,
+      estado_emocional_tags, presiones_externas_tags, eventos_manana_tags } = body
 
     if (!user_id || !fecha) {
       return NextResponse.json({ error: 'user_id y fecha son requeridos' }, { status: 400 })
@@ -87,6 +88,9 @@ export async function POST(request: NextRequest) {
         presiones_externas: presiones_externas || null,
         eventos_manana: eventos_manana || null,
         puntaje_flujo: puntaje_flujo || null,
+        estado_emocional_tags: estado_emocional_tags || null,
+        presiones_externas_tags: presiones_externas_tags || null,
+        eventos_manana_tags: eventos_manana_tags || null,
       }, { onConflict: 'user_id,fecha' })
       .select()
       .single()
@@ -109,6 +113,7 @@ export async function PUT(request: NextRequest) {
     const updateData: Record<string, unknown> = {}
     const cols = [
       'estado_emocional', 'presiones_externas', 'eventos_manana', 'puntaje_flujo',
+      'estado_emocional_tags', 'presiones_externas_tags', 'eventos_manana_tags',
       'perspectiva_diario', 'perspectiva_4h', 'perspectiva_15m',
       'resultado_diario', 'resultado_4h', 'resultado_15m',
       'perspectiva_correcta', 'operaciones_registradas', 'errores_cometidos',

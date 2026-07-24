@@ -12,6 +12,9 @@ export interface EvaluacionPsicologica {
   presiones_externas: string | null
   eventos_manana: string | null
   puntaje_flujo: number | null
+  estado_emocional_tags: string[] | null
+  presiones_externas_tags: string[] | null
+  eventos_manana_tags: string[] | null
   perspectiva_diario: string | null
   perspectiva_4h: string | null
   perspectiva_15m: string | null
@@ -92,6 +95,9 @@ export function usePsicologia() {
   const guardarPreSesion = useCallback(async (fields: {
     estado_emocional: string; presiones_externas: string;
     eventos_manana: string; puntaje_flujo: number;
+    estado_emocional_tags?: string[];
+    presiones_externas_tags?: string[];
+    eventos_manana_tags?: string[];
   }): Promise<boolean> => {
     if (!user?.id) return false
     setSaving(true)
