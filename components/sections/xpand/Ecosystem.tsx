@@ -73,19 +73,19 @@ function SpotlightCard({
       variants={cardVariants}
       whileTap={{ scale: 0.98 }}
       onMouseMove={handleMouseMove}
-      className={`group relative bg-white border border-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-2xl p-6 md:p-8 hover:border-[#d5c108]/70 hover:shadow-[0_12px_35px_rgba(213,193,8,0.18)] transition-all duration-500 ${sizeClasses} flex flex-col justify-between overflow-hidden`}
+      className={`group relative bg-white border border-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-2xl p-6 md:p-8 hover:border-[#e8c600]/70 hover:shadow-[0_12px_35px_rgba(232,198,0,0.18)] transition-all duration-500 ${sizeClasses} flex flex-col justify-between overflow-hidden`}
     >
       <div
         className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 md:group-hover:opacity-100 transition-opacity duration-500"
         style={{
           background:
-            "radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(213,193,8,0.14), transparent 70%)",
+            "radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), rgba(232,198,0,0.14), transparent 70%)",
         }}
       />
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#d5c108]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#e8c600]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <div className="relative">
-        <div className="w-12 h-12 rounded-xl bg-[#d5c108]/15 flex items-center justify-center mb-5 group-hover:bg-[#d5c108]/30 group-hover:scale-110 transition-all duration-300">
-          <Icon className="w-6 h-6 text-[#8f8200]" />
+        <div className="w-12 h-12 rounded-xl bg-[#e8c600]/15 flex items-center justify-center mb-5 group-hover:bg-[#e8c600]/30 group-hover:scale-110 transition-all duration-300">
+          <Icon className="w-6 h-6 text-[#c4a500]" />
         </div>
         <h3 className="text-lg md:text-xl font-bold mb-3 text-zinc-900">{card.title}</h3>
         <p className="text-zinc-600 text-sm leading-relaxed">{card.desc}</p>
@@ -98,9 +98,10 @@ export function Ecosystem() {
   return (
     <section id="ecosistema" className="relative bg-[#fafaf8] py-24 md:py-32">
       <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
+      <div className="absolute inset-0 texture-topo-light pointer-events-none" />
       <div className="absolute inset-0 texture-dots-light pointer-events-none" />
       <div className="absolute inset-0 texture-grain-light pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(213,193,8,0.08)_0%,transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(232,198,0,0.09)_0%,transparent_55%)]" />
 
       <div className="relative max-w-6xl mx-auto px-6">
         <motion.div
@@ -109,7 +110,7 @@ export function Ecosystem() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="text-[#8f8200] text-sm font-semibold tracking-widest uppercase">
+          <span className="text-[#c4a500] text-sm font-semibold tracking-widest uppercase">
             La Diferencia Xpand
           </span>
           <h2 className="text-3xl md:text-5xl font-bold mt-3 mb-4 text-zinc-900">
@@ -121,7 +122,7 @@ export function Ecosystem() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.15 + i * 0.06, duration: 0.5 }}
                 className={`inline-block mr-[0.28em] ${
-                  word === "Xpand" || word === "Capital?" ? "text-[#a08e00]" : ""
+                  word === "Xpand" || word === "Capital?" ? "text-[#b09600]" : ""
                 }`}
               >
                 {word}

@@ -5,12 +5,12 @@ import { motion } from "framer-motion"
 export function PromoVideo() {
   return (
     <section id="video" className="relative bg-[#050505] py-12 md:py-20 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.04)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,198,0,0.04)_0%,transparent_70%)]" />
 
       <div className="relative max-w-4xl mx-auto px-4 md:px-6">
         <div className="relative">
-          <div className="absolute -inset-px rounded-2xl md:rounded-3xl bg-gradient-to-br from-[#d5c108]/40 via-[#d5c108]/10 to-transparent blur-sm" />
-          <div className="relative bg-[#0a0a0a] border border-[#d5c108]/20 rounded-2xl md:rounded-3xl overflow-hidden">
+          <div className="absolute -inset-px rounded-2xl md:rounded-3xl bg-gradient-to-br from-[#e8c600]/40 via-[#e8c600]/10 to-transparent blur-sm" />
+          <div className="relative bg-[#0a0a0a] border border-[#e8c600]/20 rounded-2xl md:rounded-3xl overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.04] bg-[#050505]">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />

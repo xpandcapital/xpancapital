@@ -35,7 +35,7 @@ function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: str
   }, [target])
 
   return (
-    <span ref={ref} className="text-[#d5c108] font-bold text-3xl md:text-4xl tabular-nums">
+    <span ref={ref} className="text-[#e8c600] font-bold text-3xl md:text-4xl tabular-nums">
       {count.toLocaleString()}{suffix}
     </span>
   )
@@ -51,7 +51,7 @@ const stats = [
 export function AuthorityBar() {
   return (
     <section className="relative bg-[#0a0a0a] border-y border-white/5">
-      <div className="absolute inset-0 bg-[#d5c108]/[0.02]" />
+      <div className="absolute inset-0 bg-[#e8c600]/[0.02]" />
       <div className="relative max-w-6xl mx-auto px-6 py-10 md:py-14">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {stats.map((stat, i) => (

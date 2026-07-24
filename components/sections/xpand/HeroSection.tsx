@@ -46,7 +46,7 @@ function ParticleGrid() {
     let anim: number
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.fillStyle = "rgba(213,193,8,0.15)"
+      ctx.fillStyle = "rgba(232,198,0,0.15)"
       for (const p of particles) {
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill()
         p.x += p.vx; p.y += p.vy
@@ -57,7 +57,7 @@ function ParticleGrid() {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x; const dy = particles[i].y - particles[j].y
           const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < 120) { ctx.strokeStyle = `rgba(213,193,8,${0.06 * (1 - dist / 120)})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke() }
+          if (dist < 120) { ctx.strokeStyle = `rgba(232,198,0,${0.06 * (1 - dist / 120)})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke() }
         }
       }
       anim = requestAnimationFrame(draw)
@@ -77,7 +77,7 @@ export function HeroSection() {
   return (
     <section id="hero" className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#050505]">
       <ParticleGrid />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(213,193,8,0.05)_0%,transparent_70%)] z-[1]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,198,0,0.05)_0%,transparent_70%)] z-[1]" />
 
       {/* 4 corner widgets */}
       {cornerWidgets.map((w, idx) => (
@@ -95,7 +95,7 @@ export function HeroSection() {
             animate={{ scale: [1, 1.15, 1] }}
             transition={{ delay: 1.3 + idx * 0.4, duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <w.icon className="w-5 h-5 text-[#d5c108]/60" />
+            <w.icon className="w-5 h-5 text-[#e8c600]/60" />
           </motion.div>
           <div className="text-left">
             <div className="text-xs text-white/30 uppercase tracking-wider mb-0.5">{w.label}</div>
@@ -111,7 +111,7 @@ export function HeroSection() {
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="w-full flex flex-col items-center">
 
           <motion.div custom={0} variants={fadeUp} className="mb-6 md:mb-14">
-            <span className="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-[#d5c108]/30 bg-[#d5c108]/5 text-[#d5c108] text-xs md:text-sm font-medium">
+            <span className="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full border border-[#e8c600]/30 bg-[#e8c600]/5 text-[#e8c600] text-xs md:text-sm font-medium">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -124,7 +124,7 @@ export function HeroSection() {
             className="relative text-center mb-6 md:mb-12"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            <span className="relative glitch-text block md:inline text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#d5c108" }}>XPAND</span>
+            <span className="relative glitch-text block md:inline text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#e8c600" }}>XPAND</span>
             <span className="relative glitch-text block md:inline text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
           </motion.h1>
 
@@ -140,7 +140,7 @@ export function HeroSection() {
             <div className="flex animate-marquee-slow whitespace-nowrap">
               {[...signals, ...signals].map((s, i) => (
                 <span key={i} className="inline-flex items-center gap-2 px-4 text-xs md:text-sm text-white/20 font-mono whitespace-nowrap">
-                  <span className="w-1 h-1 rounded-full bg-[#d5c108]/40" />
+                  <span className="w-1 h-1 rounded-full bg-[#e8c600]/40" />
                   {s}
                 </span>
               ))}
@@ -150,11 +150,11 @@ export function HeroSection() {
           <motion.div custom={3} variants={fadeUp}
             className="flex flex-row items-center justify-center gap-2 md:gap-4 w-full px-2 md:px-0"
           >
-            <Link href="#pricing" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 bg-[#d5c108] text-black font-bold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:bg-[#e5d100] transition-all hover:shadow-[0_0_30px_rgba(213,193,8,0.4)] whitespace-nowrap">
+            <Link href="#pricing" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 bg-[#e8c600] text-black font-bold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:bg-[#e5d100] transition-all hover:shadow-[0_0_30px_rgba(232,198,0,0.4)] whitespace-nowrap">
               Inscríbete Ahora
               <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="#ecosistema" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 border border-white/20 text-white font-semibold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:border-[#d5c108]/60 hover:text-[#d5c108] hover:shadow-[0_0_15px_rgba(213,193,8,0.2)] transition-all whitespace-nowrap">
+            <Link href="#ecosistema" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 border border-white/20 text-white font-semibold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:border-[#e8c600]/60 hover:text-[#e8c600] hover:shadow-[0_0_15px_rgba(232,198,0,0.2)] transition-all whitespace-nowrap">
               <Play className="w-4 h-4 md:w-5 md:h-5" />
               Ver Campus
             </Link>
@@ -168,9 +168,9 @@ export function HeroSection() {
               { icon: Users, value: "2,340", label: "Traders" },
               { icon: Zap, value: "1,245", label: "Pips este mes" },
             ].map((m) => (
-              <div key={m.label} className="flex flex-col items-center gap-1 p-3 md:p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-[#d5c108]/30 transition-colors">
-                <m.icon className="w-4 h-4 md:w-5 md:h-5 text-[#d5c108]/70" />
-                <span className="text-lg md:text-xl font-bold text-[#d5c108] tabular-nums">{m.value}</span>
+              <div key={m.label} className="flex flex-col items-center gap-1 p-3 md:p-4 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-[#e8c600]/30 transition-colors">
+                <m.icon className="w-4 h-4 md:w-5 md:h-5 text-[#e8c600]/70" />
+                <span className="text-lg md:text-xl font-bold text-[#e8c600] tabular-nums">{m.value}</span>
                 <span className="text-[10px] md:text-xs text-white/30 uppercase tracking-wider text-center">{m.label}</span>
               </div>
             ))}

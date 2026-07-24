@@ -25,7 +25,7 @@ export function VideoPreviews() {
     <section id="contenido" className="relative bg-[#050505] py-20 md:py-28">
       <div className="relative max-w-6xl mx-auto px-4 md:px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 md:mb-16">
-          <span className="text-[#d5c108] text-xs md:text-sm font-semibold tracking-widest uppercase">Contenido Exclusivo</span>
+          <span className="text-[#e8c600] text-xs md:text-sm font-semibold tracking-widest uppercase">Contenido Exclusivo</span>
           <h2 className="text-2xl md:text-5xl font-bold mt-2 md:mt-3 mb-3 md:mb-4">Aprende con Xpand Capital</h2>
           <p className="text-white/50 text-sm md:text-base max-w-xl mx-auto">Síguenos en TikTok para contenido diario de trading, forex y análisis de mercado.</p>
         </motion.div>
@@ -33,7 +33,7 @@ export function VideoPreviews() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           {videos.map((v, i) => (
             <motion.div key={v.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-              <div className="relative bg-white/[0.03] border border-white/5 rounded-xl overflow-hidden hover:border-[#d5c108]/30 transition-all duration-500">
+              <div className="relative bg-white/[0.03] border border-white/5 rounded-xl overflow-hidden hover:border-[#e8c600]/30 transition-all duration-500">
                 <div className="aspect-[9/16] w-full max-w-[320px] mx-auto">
                   <iframe
                     src={`https://www.tiktok.com/embed/v2/${v.id}`}

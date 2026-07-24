@@ -88,9 +88,9 @@ function TiltCard({ mode, index }: { mode: (typeof modes)[0]; index: number }) {
         onMouseLeave={handleMouseLeave}
         whileTap={{ scale: 0.97 }}
         style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-        className="group relative h-full bg-white border border-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-2xl p-6 md:p-8 hover:border-[#d5c108]/70 hover:shadow-[0_12px_35px_rgba(213,193,8,0.18)] transition-[border-color,box-shadow] duration-500"
+        className="group relative h-full bg-white border border-zinc-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] rounded-2xl p-6 md:p-8 hover:border-[#e8c600]/70 hover:shadow-[0_12px_35px_rgba(232,198,0,0.18)] transition-[border-color,box-shadow] duration-500"
       >
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#d5c108]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#e8c600]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         <div className="relative" style={{ transform: "translateZ(30px)" }}>
           <div className="flex items-center gap-4 mb-5">
@@ -99,13 +99,13 @@ function TiltCard({ mode, index }: { mode: (typeof modes)[0]; index: number }) {
               whileInView={{ scale: 1, rotate: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.25 + index * 0.12, type: "spring", bounce: 0.5 }}
-              className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[#d5c108]/15 border border-[#d5c108]/40 flex items-center justify-center shrink-0"
+              className="w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[#e8c600]/15 border border-[#e8c600]/40 flex items-center justify-center shrink-0"
             >
-              <Icon className="w-6 h-6 md:w-7 md:h-7 text-[#8f8200]" />
+              <Icon className="w-6 h-6 md:w-7 md:h-7 text-[#c4a500]" />
             </motion.div>
             <div>
               <h3 className="text-lg md:text-xl font-bold leading-tight text-zinc-900">{mode.title}</h3>
-              <span className="text-[#8f8200] text-xs md:text-sm font-mono uppercase tracking-wider">
+              <span className="text-[#c4a500] text-xs md:text-sm font-mono uppercase tracking-wider">
                 {mode.subtitle}
               </span>
             </div>
@@ -123,7 +123,7 @@ function TiltCard({ mode, index }: { mode: (typeof modes)[0]; index: number }) {
                 transition={{ delay: 0.4 + index * 0.12 + i * 0.08 }}
                 className="flex items-start gap-2.5 text-zinc-700 text-sm"
               >
-                <Check className="w-4 h-4 text-[#8f8200] shrink-0 mt-0.5" />
+                <Check className="w-4 h-4 text-[#c4a500] shrink-0 mt-0.5" />
                 {b}
               </motion.li>
             ))}
@@ -146,10 +146,10 @@ export function LearningModel() {
     <section ref={sectionRef} id="educacion" className="relative bg-[#fafaf8] py-24 md:py-32 overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
       <div className="absolute inset-0 texture-topo-light pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(213,193,8,0.09)_0%,transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(232,198,0,0.09)_0%,transparent_55%)]" />
       <motion.div
         style={{ y: orbY }}
-        className="hidden md:block absolute -right-40 top-1/4 w-[450px] h-[450px] rounded-full bg-[#d5c108]/[0.10] blur-[130px]"
+        className="hidden md:block absolute -right-40 top-1/4 w-[450px] h-[450px] rounded-full bg-[#e8c600]/[0.10] blur-[130px]"
       />
 
       <div className="relative max-w-6xl mx-auto px-6">
@@ -162,22 +162,22 @@ export function LearningModel() {
           <motion.span
             animate={{
               boxShadow: [
-                "0 0 0px rgba(213,193,8,0.0)",
-                "0 0 18px rgba(213,193,8,0.45)",
-                "0 0 0px rgba(213,193,8,0.0)",
+                "0 0 0px rgba(232,198,0,0.0)",
+                "0 0 18px rgba(232,198,0,0.45)",
+                "0 0 0px rgba(232,198,0,0.0)",
               ],
             }}
             transition={{ duration: 2.2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#d5c108]/60 bg-[#d5c108]/15 text-[#8f8200] text-xs md:text-sm font-bold tracking-widest uppercase"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#e8c600]/60 bg-[#e8c600]/15 text-[#c4a500] text-xs md:text-sm font-bold tracking-widest uppercase"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#b8a600] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#b8a600]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c4a500] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#c4a500]" />
             </span>
             ¡Oferta por tiempo limitado!
           </motion.span>
           <h2 className="text-3xl md:text-5xl font-bold mt-5 mb-4 text-zinc-900">
-            Así aprenderás en <span className="text-[#a08e00]">la Academia</span>
+            Así aprenderás en <span className="text-[#b09600]">la Academia</span>
           </h2>
           <p className="text-zinc-600 text-sm md:text-base max-w-xl mx-auto">
             Un sistema educativo diseñado para que aprendas a tu ritmo, con

@@ -7,7 +7,7 @@ export function InstructorProfile() {
   return (
     <section id="instructor" className="relative bg-[#0a0a0a] py-24 md:py-32 overflow-hidden">
       <div className="absolute inset-0 texture-topo-dark pointer-events-none" />
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#d5c108]/5 blur-[120px]" />
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-[#e8c600]/5 blur-[120px]" />
 
       <div className="relative max-w-6xl mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
@@ -17,7 +17,7 @@ export function InstructorProfile() {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
-            <span className="text-[#d5c108] text-sm font-semibold tracking-widest uppercase">
+            <span className="text-[#e8c600] text-sm font-semibold tracking-widest uppercase">
               Conoce a tu Instructor
             </span>
             <h2 className="text-3xl md:text-5xl font-bold mt-3 mb-6 leading-tight">
@@ -30,13 +30,13 @@ export function InstructorProfile() {
             <div className="space-y-4 text-white/60 text-base leading-relaxed mb-8">
               <p>
                 Director de Xpand Capital, con más de{" "}
-                <span className="text-[#d5c108] font-semibold">13 años</span> de
+                <span className="text-[#e8c600] font-semibold">13 años</span> de
                 experiencia en los mercados financieros y{" "}
-                <span className="text-[#d5c108] font-semibold">8 años</span> de
+                <span className="text-[#e8c600] font-semibold">8 años</span> de
                 especialización en el mercado Forex, consolidando una trayectoria
                 enfocada en análisis estratégico y gestión eficiente del capital.
               </p>
-              <p className="text-white/40 italic border-l-2 border-[#d5c108]/50 pl-4">
+              <p className="text-white/40 italic border-l-2 border-[#e8c600]/50 pl-4">
                 &ldquo;Mi enfoque se fundamenta en una gestión de riesgo sólida, el
                 entendimiento profundo de la psicología del trading y la lectura
                 institucional del precio.&rdquo;
@@ -60,9 +60,9 @@ export function InstructorProfile() {
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.3 + i * 0.12, type: "spring", bounce: 0.4 }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/5 text-sm text-white/70 hover:border-[#d5c108]/40 hover:text-white transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/5 text-sm text-white/70 hover:border-[#e8c600]/40 hover:text-white transition-colors"
                 >
-                  <item.icon className="w-4 h-4 text-[#d5c108]" />
+                  <item.icon className="w-4 h-4 text-[#e8c600]" />
                   {item.label}
                 </motion.div>
               ))}
@@ -76,7 +76,7 @@ export function InstructorProfile() {
             transition={{ duration: 0.7 }}
             className="relative"
           >
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-[#d5c108]/30 to-transparent blur-sm opacity-50" />
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-[#e8c600]/30 to-transparent blur-sm opacity-50" />
             <div className="relative aspect-[3/4] rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden">
               <img
                 src="/images/hebed%20perfil%20p.png"
