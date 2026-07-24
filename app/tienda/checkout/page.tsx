@@ -447,10 +447,18 @@ function CheckoutContent() {
                     throw new Error(data?.error || 'Error al conectar con Wompi')
                 }
 
-                // Redirigir al checkout de Wompi
-                const wompiUrl = `https://checkout.wompi.co/p/?public-key=${encodeURIComponent(data.public_key)}&amount-in-cents=${data.amount_in_cents}&currency=${data.currency}&reference=${encodeURIComponent(data.reference)}&redirect-url=${encodeURIComponent(data.redirect_url)}`
-                clearCart()
-                window.open(wompiUrl, '_self')
+                // Abrir modal con widget de Wompi
+                setWompiData({
+                    publicKey: data.public_key,
+                    reference: data.reference,
+                    amountInCents: data.amount_in_cents,
+                    currency: data.currency,
+                    ordenId: data.orden_id,
+                    redirectUrl: data.redirect_url || '',
+                })
+                setWompiTotal(grandTotal)
+                setIsWompiModal(true)
+                setIsProcessing(false)
                 return
             }
 
@@ -1342,7 +1350,7 @@ function CheckoutContent() {
                       onSuccess={() => {
                         clearCart()
                         setIsWompiModal(false)
-                        window.location.href = `/tienda/checkout/status?wompi_success=1&order_id=${wompiData.ordenId}&total=${wompiTotal.toFixed(2)}`
+                        window.location.href = `/tienda/checkout/status?wompi_success=1&order_id=${wompiData?.ordenId}&total=${wompiTotal.toFixed(2)}`
                       }}
                       onError={(msg) => {
                         setIsWompiModal(false)
