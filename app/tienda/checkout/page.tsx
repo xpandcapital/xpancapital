@@ -444,8 +444,8 @@ function CheckoutContent() {
                 const data = await res.json()
                 if (!data.success) throw new Error(data.error || 'Error al conectar con Wompi')
 
-                // Redirigir directamente al checkout de Wompi
-                const wompiUrl = `https://checkout.wompi.co/p/${encodeURIComponent(data.public_key)}?amount_in_cents=${data.amount_in_cents}&reference=${encodeURIComponent(data.reference)}&currency=${data.currency}&redirect_url=${encodeURIComponent(data.redirect_url)}`
+                // Redirigir directamente al checkout de Wompi (usa kebab-case params)
+                const wompiUrl = `https://checkout.wompi.co/p/?public-key=${encodeURIComponent(data.public_key)}&amount-in-cents=${data.amount_in_cents}&currency=${data.currency}&reference=${encodeURIComponent(data.reference)}&redirect-url=${encodeURIComponent(data.redirect_url)}`
                 clearCart()
                 window.location.href = wompiUrl
                 return
