@@ -1331,7 +1331,7 @@ function CheckoutContent() {
             {/* Modal Wompi — iframe embebido */}
             {isWompiModal && wompiData && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-                <div className="bg-zinc-950 rounded-3xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" style={{ height: '85vh' }}>
+                <div className="bg-zinc-950 rounded-3xl shadow-2xl w-full max-w-lg mx-4 flex flex-col" style={{ height: '85vh' }}>
                   <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-emerald-500/10 border-b border-emerald-500/20 shrink-0">
                     <div className="flex items-center gap-5">
                       <div className="flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-400" /><span className="text-[10px] font-bold text-emerald-300 uppercase tracking-widest">SSL</span></div>
@@ -1339,10 +1339,10 @@ function CheckoutContent() {
                     </div>
                     <button onClick={() => { setIsWompiModal(false); setIsProcessing(false) }} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">&times;</button>
                   </div>
-                  <div className="flex-1 relative bg-white">
+                  <div className="flex-1 min-h-0 relative bg-white">
                     <iframe
                       src={wompiData.redirectUrl}
-                      className="w-full h-full border-0"
+                      className="absolute inset-0 w-full h-full border-0"
                       title="Pago Wompi"
                       sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
                     />
