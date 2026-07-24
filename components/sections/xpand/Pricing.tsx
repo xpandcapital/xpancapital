@@ -51,7 +51,7 @@ const plansTemplate = [
 
 export function Pricing() {
   const { addToCart } = useShop()
-  const [plans, setPlans] = useState<PlanData[]>(plansTemplate.map(p => ({ ...p, price: 0, comparePrice: null, discountPercent: null })))
+  const [plans, setPlans] = useState<PlanData[]>(plansTemplate.map(p => ({ ...p, price: p.key === 'trimestral' ? 115 : 300, comparePrice: null, discountPercent: null })))
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
