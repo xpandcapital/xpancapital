@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import {
   Wrench, Shield, DollarSign, Activity, Trash2, Loader2,
-  Save, History, ChevronDown, Calculator, CheckCircle2, AlertCircle, ScrollText, Brain, CheckSquare,
+  Save, History, ChevronDown, Calculator, CheckCircle2, AlertCircle,
+  ScrollText, Brain, CheckSquare, AlertTriangle,
 } from 'lucide-react'
 import { useRiskCalculator } from './_hooks/useRiskCalculator'
 import { BitacoraTab } from './_components/BitacoraTab'
 import { PsicologiaTab } from './_components/PsicologiaTab'
 import { HabitosTab } from './_components/HabitosTab'
+import { PanicModal } from './_components/PanicModal'
 
 const INPUT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors placeholder:text-gray-600"
 const SELECT_CLASSES = "w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 transition-colors appearance-none cursor-pointer"
@@ -31,6 +33,7 @@ export default function HerramientasPage() {
   const [tab, setTab] = useState('riesgo')
   const [showHistory, setShowHistory] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [panicOpen, setPanicOpen] = useState(false)
 
   const handleSave = async () => {
     const ok = await saveCalculation()
@@ -47,14 +50,23 @@ export default function HerramientasPage() {
   return (
     <div className="space-y-6 px-4 md:px-8 pt-8 pb-20 w-full mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-blis-red/10 text-blis-red border border-blis-red/20 flex items-center justify-center">
-          <Wrench className="w-6 h-6" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-blis-red/10 text-blis-red border border-blis-red/20 flex items-center justify-center">
+            <Wrench className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-white">Herramientas</h1>
+            <p className="text-gray-500 text-sm">Calculadoras y utilidades para traders</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-black text-white">Herramientas</h1>
-          <p className="text-gray-500 text-sm">Calculadoras y utilidades para traders</p>
-        </div>
+        <button
+          onClick={() => setPanicOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+        >
+          <AlertTriangle className="w-4 h-4" />
+          <span className="text-[11px] font-bold uppercase tracking-wider">Pánico</span>
+        </button>
       </div>
 
       {/* Tabs */}
@@ -330,6 +342,8 @@ export default function HerramientasPage() {
       {tab === 'psicologia' && <PsicologiaTab />}
 
       {tab === 'habitos' && <HabitosTab />}
+
+      <PanicModal open={panicOpen} onClose={() => setPanicOpen(false)} />
     </div>
   )
 }
