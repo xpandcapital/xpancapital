@@ -15,10 +15,15 @@ export interface BitacoraEntry {
 }
 
 export interface BitacoraAnalytics {
-  saldoActual: number; pnlTotal: number; pnlPct: number
+  gain: number; gainPct: number; absGain: number; absGainPct: number
+  daily: number; monthly: number
   drawdown: number; drawdownPct: number
+  balance: number; equity: number
+  highest: number; profit: number
+  deposits: number; withdrawals: number
   totalTrades: number; winRate: number
   equityCurve: { fecha: string; saldo: number }[]
+  dailyPnl: { fecha: string; pnl: number }[]
   paresOperados: { par: string; count: number }[]
   pnlPorPar: { par: string; pnl: number }[]
 }
@@ -41,40 +46,37 @@ export function useBitacora() {
       const res = await fetch(`/api/miembros/bitacora/config?user_id=${user.id}`)
       const data = await res.json()
       if (data.success && data.data) setSaldoInicial(Number(data.data.saldo_inicial) || 10000)
-    } catch { /* usar default */ }
+    } catch {}
     finally { setSaldoLoading(false) }
   }, [user?.id])
 
   const fetchEntries = useCallback(async () => {
     if (!user?.id) return
-    abortRef.current?.abort()
-    const controller = new AbortController()
-    abortRef.current = controller
+    abortRef.current?.abort(); const controller = new AbortController(); abortRef.current = controller
     const timeout = setTimeout(() => controller.abort(), 8000)
     setLoading(true)
     try {
       const res = await fetch(`/api/miembros/bitacora?user_id=${user.id}`, { signal: controller.signal })
       const data = await res.json()
       if (data.success) setEntries(data.data || [])
-    } catch (e: any) { if (e.name !== 'AbortError') setLastError('Error al cargar') }
+    } catch {}
     finally { clearTimeout(timeout); setLoading(false) }
   }, [user?.id])
 
-  useEffect(() => { if (user?.id) { fetchEntries(); fetchSaldo() } return () => { abortRef.current?.abort() } }, [user?.id, fetchEntries, fetchSaldo])
+  useEffect(() => { if (user?.id) { fetchEntries(); fetchSaldo() } return () => abortRef.current?.abort() }, [user?.id, fetchEntries, fetchSaldo])
 
   const saveEntry = useCallback(async (entry: Partial<BitacoraEntry> & { user_id: string }): Promise<boolean> => {
     setSaving(true); setLastSave(null); setLastError('')
     try {
       const isUpdate = !!entry.id
       const res = await fetch('/api/miembros/bitacora', {
-        method: isUpdate ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: isUpdate ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(isUpdate ? { ...entry, id: entry.id } : entry),
       })
       const data = await res.json()
       if (data.success) { setLastSave('success'); await fetchEntries(); return true }
-      setLastSave('error'); setLastError(data.error || 'Error al guardar'); return false
-    } catch (e: any) { setLastSave('error'); setLastError(e.message || 'Error de conexión'); return false }
+      setLastSave('error'); setLastError(data.error || 'Error'); return false
+    } catch { setLastSave('error'); return false }
     finally { setSaving(false) }
   }, [fetchEntries])
 
@@ -90,42 +92,50 @@ export function useBitacora() {
   const actualizarSaldo = useCallback(async (nuevoSaldo: number) => {
     if (!user?.id) return false
     try {
-      const res = await fetch('/api/miembros/bitacora/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id, saldo_inicial: nuevoSaldo }),
-      })
+      const res = await fetch('/api/miembros/bitacora/config', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id, saldo_inicial: nuevoSaldo }) })
       const data = await res.json()
       if (data.success) { setSaldoInicial(nuevoSaldo); return true }
       return false
     } catch { return false }
   }, [user?.id])
 
-  // ===== ANALYTICS (todo calculado en frontend) =====
   const analytics = useMemo((): BitacoraAnalytics | null => {
-    if (entries.length === 0) return null
+    if (entries.length === 0 || saldoLoading) return null
 
     const sorted = [...entries].sort((a, b) => new Date(a.fecha_inicio).getTime() - new Date(b.fecha_inicio).getTime())
     let saldo = saldoInicial
     let peak = saldoInicial
     let maxDD = 0
     const equityCurve: { fecha: string; saldo: number }[] = [{ fecha: 'Inicio', saldo: saldoInicial }]
+    const dailyPnl: { fecha: string; pnl: number }[] = []
+    const dailyMap = new Map<string, number>()
 
     for (const e of sorted) {
-      saldo += (e.resultado_usd || 0)
+      const pnl = e.resultado_usd || 0
+      saldo += pnl
       equityCurve.push({ fecha: e.fecha_inicio, saldo: Math.round(saldo * 100) / 100 })
       if (saldo > peak) peak = saldo
-      const dd = peak - saldo
-      if (dd > maxDD) maxDD = dd
+      const dd = peak - saldo; if (dd > maxDD) maxDD = dd
+      const day = e.fecha_inicio
+      dailyMap.set(day, (dailyMap.get(day) || 0) + pnl)
     }
+    for (const [fecha, pnl] of dailyMap) dailyPnl.push({ fecha, pnl: Math.round(pnl * 100) / 100 })
+    dailyPnl.sort((a, b) => a.fecha.localeCompare(b.fecha))
 
-    const saldoActual = Math.round(saldo * 100) / 100
-    const pnlTotal = Math.round((saldoActual - saldoInicial) * 100) / 100
-    const pnlPct = Math.round((pnlTotal / saldoInicial) * 10000) / 100
+    const balance = Math.round(saldo * 100) / 100
+    const profit = Math.round((balance - saldoInicial) * 100) / 100
+    const gainPct = saldoInicial > 0 ? Math.round((profit / saldoInicial) * 10000) / 100 : 0
+    const absGainPct = gainPct
+    const drawdownPct = peak > 0 ? Math.round((maxDD / peak) * 10000) / 100 : 0
     const wins = entries.filter(e => (e.resultado_usd || 0) > 0).length
     const winRate = Math.round((wins / entries.length) * 100)
 
-    // Pares operados
+    // Daily/Monthly averages
+    const diasUnicos = new Set(entries.map(e => e.fecha_inicio)).size || 1
+    const mesesUnicos = new Set(entries.map(e => e.fecha_inicio.slice(0, 7))).size || 1
+    const daily = Math.round((profit / diasUnicos) * 100) / 100
+    const monthly = Math.round((profit / mesesUnicos) * 100) / 100
+
     const paresMap = new Map<string, number>()
     const pnlMap = new Map<string, number>()
     for (const e of entries) {
@@ -137,13 +147,17 @@ export function useBitacora() {
     const pnlPorPar = [...pnlMap.entries()].map(([par, pnl]) => ({ par, pnl })).sort((a, b) => b.pnl - a.pnl)
 
     return {
-      saldoActual, pnlTotal, pnlPct,
-      drawdown: Math.round(maxDD * 100) / 100,
-      drawdownPct: peak > 0 ? Math.round((maxDD / peak) * 10000) / 100 : 0,
+      gain: profit, gainPct, absGain: profit, absGainPct,
+      daily, monthly,
+      drawdown: Math.round(maxDD * 100) / 100, drawdownPct,
+      balance, equity: balance,
+      highest: Math.round(peak * 100) / 100, profit,
+      deposits: saldoInicial, withdrawals: 0,
       totalTrades: entries.length, winRate,
-      equityCurve, paresOperados, pnlPorPar,
+      equityCurve, dailyPnl,
+      paresOperados, pnlPorPar,
     }
-  }, [entries, saldoInicial])
+  }, [entries, saldoInicial, saldoLoading])
 
   return {
     entries, loading, saving, lastSave, lastError,

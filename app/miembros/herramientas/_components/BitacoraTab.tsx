@@ -8,7 +8,7 @@ import {
   TrendingUp, TrendingDown, DollarSign, BarChart3, Edit2, Settings,
 } from 'lucide-react'
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
+  AreaChart, Area, ComposedChart, Bar as RechartsBar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from 'recharts'
 import { useAuth } from '@/hooks/useAuth'
 import { useBitacora, type BitacoraEntry, type BitacoraAnalytics } from '../_hooks/useBitacora'
@@ -185,102 +185,93 @@ export function BitacoraTab() {
               </div>
             </div>
 
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { label: 'Saldo Actual', value: `$${analytics.saldoActual.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/5' },
-                { label: 'P&L Total', value: `${analytics.pnlTotal >= 0 ? '+' : ''}$${analytics.pnlTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, sub: `${analytics.pnlPct >= 0 ? '+' : ''}${analytics.pnlPct}%`, icon: analytics.pnlTotal >= 0 ? TrendingUp : TrendingDown, color: analytics.pnlTotal >= 0 ? 'text-emerald-400' : 'text-red-400', bg: analytics.pnlTotal >= 0 ? 'bg-emerald-500/5' : 'bg-red-500/5' },
-                { label: 'Win Rate', value: `${analytics.winRate}%`, sub: `${analytics.totalTrades} trades`, icon: BarChart3, color: 'text-blue-400', bg: 'bg-blue-500/5' },
-                { label: 'Drawdown', value: `-$${analytics.drawdown.toLocaleString()}`, sub: `-${analytics.drawdownPct}%`, icon: TrendingDown, color: 'text-amber-400', bg: 'bg-amber-500/5' },
-              ].map((kpi, i) => (
-                <div key={i} className="bg-zinc-950 border border-white/5 rounded-2xl p-4 relative overflow-hidden">
-                  <div className={`absolute top-0 right-0 w-20 h-20 ${kpi.bg} blur-3xl rounded-full -translate-y-1/2 translate-x-1/2`} />
-                  <kpi.icon className={`${kpi.color} mb-2 relative z-10`} size={18} />
-                  <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider relative z-10">{kpi.label}</p>
-                  <p className={`text-lg font-black ${kpi.color} mt-0.5 relative z-10`}>{kpi.value}</p>
-                  {kpi.sub && <p className="text-[10px] text-gray-500 mt-0.5 relative z-10">{kpi.sub}</p>}
-                </div>
-              ))}
-            </div>
-
-            {/* Equity Curve */}
-            <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
-              <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02] flex items-center gap-2.5">
-                <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
-                <h3 className="text-white font-black uppercase tracking-wider text-[11px]">Curva de Equity</h3>
-              </div>
-              <div className="p-3">
-                <div className="h-[220px] md:h-[260px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={analytics.equityCurve} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
-                          <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff06" />
-                      <XAxis dataKey="fecha" stroke="#52525b" tick={{ fontSize: 10 }} />
-                      <YAxis stroke="#52525b" tick={{ fontSize: 10 }} domain={['auto', 'auto']} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
-                      <RechartsTooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0.75rem', fontSize: '12px' }} labelStyle={{ color: '#a1a1aa', fontWeight: 700, fontSize: 11 }} formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Saldo']} />
-                      <Area type="monotone" dataKey="saldo" stroke="#10b981" strokeWidth={2} fill="url(#equityGrad)" dot={{ r: 1 }} activeDot={{ r: 3 }} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
-            {/* Charts row: Pares + P&L */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Pares más operados */}
+            {/* 2-col layout: Stats Left + Chart Right */}
+            <div className="grid grid-cols-1 lg:grid-cols-[28%_1fr] gap-4">
+              {/* ===== PANEL IZQUIERDO: ESTADÍSTICAS ===== */}
               <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
                 <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
-                  <h3 className="text-white font-black uppercase tracking-wider text-[11px]">Pares Más Operados</h3>
+                  <h3 className="text-white font-black uppercase tracking-wider text-[11px]">Estadísticas</h3>
+                </div>
+                <div className="p-3 space-y-0.5">
+                  {[
+                    { label: 'Gain', value: `${analytics.gain >= 0 ? '+' : ''}$${analytics.gain.toLocaleString()}`, color: analytics.gain >= 0 ? 'text-emerald-400' : 'text-red-400' },
+                    { label: 'Abs. Gain', value: `${analytics.absGainPct >= 0 ? '+' : ''}${analytics.absGainPct}%`, color: analytics.absGainPct >= 0 ? 'text-emerald-400' : 'text-red-400' },
+                    { label: 'Daily', value: `${analytics.daily >= 0 ? '+' : ''}$${analytics.daily.toLocaleString()}`, color: 'text-white/60' },
+                    { label: 'Monthly', value: `${analytics.monthly >= 0 ? '+' : ''}$${analytics.monthly.toLocaleString()}`, color: 'text-white/60' },
+                    { label: 'Drawdown', value: `-${analytics.drawdownPct}%`, color: 'text-amber-400' },
+                    { label: 'Balance', value: `$${analytics.balance.toLocaleString()}`, color: 'text-white/70' },
+                    { label: 'Equity', value: `$${analytics.equity.toLocaleString()}`, color: 'text-white/70' },
+                    { label: 'Highest', value: `$${analytics.highest.toLocaleString()}`, color: 'text-emerald-400' },
+                    { label: 'Profit', value: `$${analytics.profit.toLocaleString()}`, color: analytics.profit >= 0 ? 'text-emerald-400' : 'text-red-400' },
+                    { label: 'Deposits', value: `$${analytics.deposits.toLocaleString()}`, color: 'text-blue-400' },
+                    { label: 'Withdrawals', value: '$0', color: 'text-white/30' },
+                  ].map((s, i) => (
+                    <div key={i} className="flex justify-between items-center py-1.5 px-2 rounded-lg hover:bg-white/[0.02]">
+                      <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{s.label}</span>
+                      <span className={`text-xs font-black tabular-nums ${s.color}`}>{s.value}</span>
+                    </div>
+                  ))}
+                  <div className="pt-2 mt-2 border-t border-white/5 flex justify-between px-2">
+                    <span className="text-[10px] text-gray-500">Win Rate</span>
+                    <span className="text-xs font-black text-blue-400">{analytics.winRate}% ({analytics.totalTrades}T)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ===== PANEL DERECHO: GRÁFICO DE CRECIMIENTO ===== */}
+              <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02] flex items-center gap-2.5">
+                  <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <h3 className="text-white font-black uppercase tracking-wider text-[11px]">Curva de Equity + Daily P&L</h3>
                 </div>
                 <div className="p-3">
-                  <div className="h-[180px]">
+                  <div className="h-[260px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={analytics.paresOperados.slice(0, 8)} layout="vertical" margin={{ top: 0, right: 20, left: 40, bottom: 0 }}>
+                      <ComposedChart data={analytics.equityCurve} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="equityGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.25} />
+                            <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff06" />
-                        <XAxis type="number" stroke="#52525b" tick={{ fontSize: 10 }} />
-                        <YAxis type="category" dataKey="par" stroke="#52525b" tick={{ fontSize: 10 }} width={40} />
+                        <XAxis dataKey="fecha" stroke="#52525b" tick={{ fontSize: 10 }} />
+                        <YAxis stroke="#52525b" tick={{ fontSize: 10 }} domain={['auto', 'auto']} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                        <RechartsTooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0.75rem', fontSize: '12px' }} formatter={(v: any) => [`$${Number(v).toLocaleString()}`, 'Balance']} />
+                        <Area type="monotone" dataKey="saldo" stroke="#10b981" strokeWidth={2} fill="url(#equityGrad)" dot={false} activeDot={{ r: 3 }} />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pare Operados Pie Chart */}
+            {analytics.paresOperados.length > 0 && (
+              <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
+                  <h3 className="text-white font-black uppercase tracking-wider text-[11px]">Divisas Más Usadas</h3>
+                </div>
+                <div className="p-3 flex items-center justify-center">
+                  <div className="h-[220px] w-full max-w-md">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={analytics.paresOperados.slice(0, 6)} dataKey="count" nameKey="par" cx="50%" cy="50%" outerRadius={80} label={({ par, count }: any) => `${par} (${count})`}>
+                          {analytics.paresOperados.slice(0, 6).map((_, i) => (
+                            <Cell key={i} fill={['#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#06b6d4'][i % 6]} />
+                          ))}
+                        </Pie>
                         <RechartsTooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0.75rem', fontSize: '12px' }} />
-                        <Bar dataKey="count" fill="#3b82f6" radius={[0, 4, 4, 0]} barSize={16} />
-                      </BarChart>
+                      </PieChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
               </div>
-
-              {/* P&L por Par */}
-              <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
-                <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]">
-                  <h3 className="text-white font-black uppercase tracking-wider text-[11px]">P&L por Par</h3>
-                </div>
-                <div className="p-3">
-                  <div className="h-[180px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={analytics.pnlPorPar.slice(0, 8)} layout="vertical" margin={{ top: 0, right: 20, left: 40, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff06" />
-                        <XAxis type="number" stroke="#52525b" tick={{ fontSize: 10 }} tickFormatter={(v) => `$${v}`} />
-                        <YAxis type="category" dataKey="par" stroke="#52525b" tick={{ fontSize: 10 }} width={40} />
-                        <RechartsTooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0.75rem', fontSize: '12px' }} formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'P&L']} />
-                        <Bar dataKey="pnl" radius={[0, 4, 4, 0]} barSize={16}
-                          fill="#10b981"
-                          shape={(props: any) => {
-                            const { x, y, width, height, fill: _f, payload } = props
-                            const isPositive = (payload?.pnl || 0) >= 0
-                            return <rect x={x} y={y} width={width} height={height} fill={isPositive ? '#10b981' : '#ef4444'} rx={0} ry={0} />
-                          }}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         )}
+
+        {/* Empty state shown when entries exist but analytics is still loading */}
 
         {/* Table */}
         <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">

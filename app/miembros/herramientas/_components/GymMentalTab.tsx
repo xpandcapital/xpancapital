@@ -477,7 +477,7 @@ export function GymMentalTab() {
           <div className="w-16" />
         </div>
 
-        <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5">
+        <div className="bg-zinc-950 border border-white/5 rounded-2xl p-5" key={game}>
           {!completed && (
             <>
               {game === 'schulte_grid' && <SchulteGrid onDone={s => handleDone('schulte_grid', s)} />}

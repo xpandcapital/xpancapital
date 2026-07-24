@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 export function WhatsAppFAB() {
   return (
     <motion.a
-      href="https://wa.me/573132173636?text=Hola%20Xpand%20Capital%20%F0%9F%91%8B%2C%20vengo%20de%20su%20p%C3%A1gina%20web%20y%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20la%20academia%20de%20trading%20y%20sus%20planes%20de%20suscripci%C3%B3n."
+      href="https://wa.me/573223501170?text=Hola%20Xpand%20Capital%20%F0%9F%91%8B%2C%20vengo%20de%20su%20p%C3%A1gina%20web%20y%20quiero%20m%C3%A1s%20informaci%C3%B3n%20sobre%20la%20academia%20de%20trading%20y%20sus%20planes%20de%20suscripci%C3%B3n."
       target="_blank"
       rel="noopener noreferrer"
       initial={{ scale: 0, opacity: 0 }}
