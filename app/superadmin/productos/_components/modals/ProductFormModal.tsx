@@ -55,7 +55,7 @@ export function ProductFormModal({
 }: ProductFormModalProps) {
   const [isPerishable, setIsPerishable] = useState(editingProduct?.isPerishable ?? settings.enablePerishables ?? false)
   const [perishableHandling, setPerishableHandling] = useState<PerishableHandling>(editingProduct?.perishableHandling ?? 'discard')
-  const [isUnlimitedStock, setIsUnlimitedStock] = useState(editingProduct?.stock === -1)
+  const [isUnlimitedStock, setIsUnlimitedStock] = useState(editingProduct ? editingProduct.stock === -1 : true)
   const [isGeneratingAI, setIsGeneratingAI] = useState(false)
   const [isAutoSlug, setIsAutoSlug] = useState(editingProduct ? !editingProduct.slug : true)
   const [shortSlug, setShortSlug] = useState(editingProduct?.shortSlug || '')
