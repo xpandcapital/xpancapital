@@ -59,23 +59,21 @@ export function TiendaSection({ course, onUpdate }: Props) {
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-5 md:p-6 hover:bg-white/[0.04] transition-colors"
+        className="w-full flex items-center justify-between py-3 px-4 md:px-5 hover:bg-white/[0.04] transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+        <div className="flex items-center gap-2.5">
+          <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
             course.venderEnTienda ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-white/5 border border-white/10'
           }`}>
-            <Store className={`w-5 h-5 ${course.venderEnTienda ? 'text-emerald-400' : 'text-gray-500'}`} />
+            <Store className={`w-3.5 h-3.5 ${course.venderEnTienda ? 'text-emerald-400' : 'text-gray-500'}`} />
           </div>
-          <div className="text-left">
+          <div className="flex items-center gap-3">
             <p className="text-sm font-bold text-white">Vender en Tienda</p>
-            <p className="text-[11px] text-gray-500">
-              {course.productoNombre
-                ? `Vinculado a: "${course.productoNombre}"`
-                : course.venderEnTienda
-                  ? 'Se creará un producto automáticamente al guardar'
-                  : 'Activar para crear un producto vinculado a este curso'}
-            </p>
+            {!expanded && (
+              <span className={`text-[10px] font-medium ${course.venderEnTienda ? 'text-emerald-400/70' : 'text-gray-600'}`}>
+                {course.venderEnTienda ? 'Activado' : 'Desactivado'}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -28,23 +28,18 @@ export function CourseDetailsForm({
       {/* Header colapsable */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-5 md:p-6 hover:bg-white/[0.04] transition-colors"
+        className="w-full flex items-center justify-between py-3 px-4 md:px-5 hover:bg-white/[0.04] transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 border border-white/10">
-            <span className="text-gray-400 text-lg font-black">i</span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/5 border border-white/10">
+            <span className="text-gray-400 text-xs font-black">i</span>
           </div>
-          <div className="text-left">
-            <h2 className="text-xl font-black text-white uppercase tracking-tighter">Información del Curso</h2>
-            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Detalles principales de la tienda</p>
-          </div>
+          <h2 className="text-sm font-black text-white uppercase tracking-tighter">Información del Curso</h2>
         </div>
-        <div className="flex items-center gap-2">
-          {expanded
-            ? <ChevronUp className="w-4 h-4 text-gray-400" />
-            : <ChevronDown className="w-4 h-4 text-gray-400" />
-          }
-        </div>
+        {expanded
+          ? <ChevronUp className="w-3.5 h-3.5 text-gray-400" />
+          : <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+        }
       </button>
 
       <AnimatePresence initial={false}>

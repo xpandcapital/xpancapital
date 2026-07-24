@@ -160,7 +160,7 @@ export function CourseEditor({
           canEdit={canEdit}
         />
 
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-3">
           <CourseDetailsForm
             course={course}
             certificateTemplates={certificateTemplates}
