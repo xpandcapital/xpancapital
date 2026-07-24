@@ -82,6 +82,7 @@ export function BitacoraTab() {
     saldoInicial, saldoLoading, actualizarSaldo, analytics } = useBitacora()
   const [showSaldoModal, setShowSaldoModal] = useState(false)
   const [editSaldo, setEditSaldo] = useState(saldoInicial)
+  const [saldoSaving, setSaldoSaving] = useState(false)
 
   // Analytics (ya calculado en el hook)
 
@@ -133,6 +134,9 @@ export function BitacoraTab() {
     if (ok) {
       setModalSaved(true)
       setTimeout(() => closeModal(), 500)
+    } else {
+      // Mostrar error en el modal sin cerrarlo
+      setModalSaved(false)
     }
   }
 
@@ -715,6 +719,11 @@ export function BitacoraTab() {
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                     <span className="text-emerald-400 text-xs font-bold">¡Guardado!</span>
                   </div>
+                ) : lastSave === 'error' ? (
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-400" />
+                    <span className="text-red-400 text-xs font-bold">{lastError || 'Error al guardar'}</span>
+                  </div>
                 ) : (
                   <div />
                 )}
@@ -762,11 +771,14 @@ export function BitacoraTab() {
                   Cancelar
                 </button>
                 <button onClick={async () => {
+                  setSaldoSaving(true)
                   await actualizarSaldo(editSaldo)
+                  setSaldoSaving(false)
                   setShowSaldoModal(false)
                 }}
-                  className="flex-1 py-2.5 bg-blis-red/15 border border-blis-red/30 text-blis-red rounded-xl font-bold text-xs hover:bg-blis-red/25 transition-colors">
-                  Guardar
+                  disabled={saldoSaving}
+                  className="flex-1 py-2.5 bg-blis-red/15 border border-blis-red/30 text-blis-red rounded-xl font-bold text-xs hover:bg-blis-red/25 transition-colors disabled:opacity-50">
+                  {saldoSaving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Guardar'}
                 </button>
               </div>
             </motion.div>
