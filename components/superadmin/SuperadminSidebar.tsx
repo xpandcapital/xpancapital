@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/useAuth"
 import {
     LayoutDashboard, Users, FileText, Image as ImageIcon,
     Settings, LogOut, Activity, UserCircle, ShoppingBag,
@@ -16,7 +17,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion"
 import { LucideProps } from "lucide-react"
 import { usePermissions } from "@/hooks/usePermissions"
-import { useAuth } from "@/hooks/useAuth"
 import { SECTION_PERMISSIONS, hasPermission, type Permission } from "@/lib/auth/permissions"
 
 type SubItem = {
@@ -155,8 +155,9 @@ export function SuperadminSidebar() {
     const [isHoverExpanded, setIsHoverExpanded] = useState(false)
     const [sidebarWidth, setSidebarWidth] = useState(64)
     const pathname = usePathname()
+    const router = useRouter()
     const { effectivePermissions, loading: permLoading, isAdmin } = usePermissions()
-    const { user } = useAuth()
+    const { user, logout } = useAuth()
     const roleLabel = user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Usuario'
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
     const isExpanded = !isCollapsed || isHoverExpanded
@@ -404,6 +405,17 @@ export function SuperadminSidebar() {
                         ))
                     )}
                 </nav>
+                {/* Botón Cerrar Sesión */}
+                <div className="px-3 pb-4">
+                    <button
+                        onClick={async () => { await logout(); router.push('/') }}
+                        className={`flex items-center gap-4 px-3 py-2.5 rounded-xl transition-all group font-medium w-full text-red-400 hover:bg-red-500/10 hover:text-red-300 ${!isExpanded ? 'justify-center px-0' : ''}`}
+                        title={!isExpanded ? "Cerrar Sesión" : ""}
+                    >
+                        <LogOut className="w-5 h-5 flex-shrink-0" />
+                        {isExpanded && <span className="tracking-wide text-[13px] whitespace-nowrap">Cerrar Sesión</span>}
+                    </button>
+                </div>
             </motion.aside>
         </>
     )
