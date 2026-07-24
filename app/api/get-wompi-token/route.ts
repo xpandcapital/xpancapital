@@ -12,7 +12,7 @@ function getSupabase() { return createClient(supabaseUrl, supabaseServiceKey) }
 export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabase()
-    const { productos, total_usd, email, nombre, apellido, pais, tiene_fisicos, direccion_envio, user_id } = await request.json()
+    const { productos, total_usd, email, nombre, apellido, pais, tiene_fisicos, direccion_envio, user_id, telefono } = await request.json()
 
     if (!productos?.length || !total_usd || !email) {
       return NextResponse.json({ error: 'productos, total_usd y email requeridos' }, { status: 400 })
@@ -36,6 +36,11 @@ export async function POST(request: NextRequest) {
     const integrityKey = decryptApiKey(getKey('wompi_integrity_key'))
 
     const environment = process.env.WOMPI_ENV === 'production' ? 'production' : 'sandbox'
+
+    // Wompi Colombia acepta COP — convertir USD a COP
+    const tasaCambio = parseFloat(process.env.WOMPI_USD_COP_RATE || '4000')
+    const totalCop = Math.round(total_usd * tasaCambio)
+    const totalCopCents = totalCop * 100
 
     // Crear orden en compras
     const totalCents = Math.round(total_usd * 100)
@@ -84,21 +89,21 @@ export async function POST(request: NextRequest) {
     // Generar referencia única
     const reference = compra.id.slice(0, 12)
 
-    // Generar firma
-    const signature = await generateSignature(reference, totalCents, 'USD', integrityKey)
+    // Generar firma (en COP)
+    const signature = await generateSignature(reference, totalCopCents, 'COP', integrityKey)
 
     // Crear transacción en Wompi
     const wompiRes = await createTransaction({
       acceptance_token: acceptanceToken,
-      amount_in_cents: totalCents,
-      currency: 'USD',
+      amount_in_cents: totalCopCents,
+      currency: 'COP',
       signature,
       customer_email: email,
       reference,
       redirect_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://xpancapital.vercel.app'}/tienda/checkout/status?wompi_success=1&order_id=${compra.id}&total=${total_usd}`,
       customer_data: {
         full_name: [nombre, apellido].filter(Boolean).join(' ') || email,
-        phone_number: '',
+        phone_number: String(telefono || '573000000000').replace(/\D/g, '').slice(0, 15),
       },
     }, privateKey, environment)
 
