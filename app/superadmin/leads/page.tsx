@@ -179,7 +179,7 @@ export default function LeadsPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre, email o teléfono..."
-                className="w-full bg-zinc-900/50 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-blis-red outline-none"
+                className="w-full" buttonClassName="bg-zinc-900/50 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-blis-red outline-none"
                 onKeyDown={(e) => e.key === 'Enter' && fetchLeads()}
               />
             </div>

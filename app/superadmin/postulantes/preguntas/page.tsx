@@ -135,11 +135,11 @@ export default function PreguntasPage() {
                         </div>
                         <div>
                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 block">Tipo</label>
-                          <SearchableSelect value={editData.tipo || 'text'} onChange={v => setEditData((prev: Partial<Pregunta>) => ({ ...prev, tipo: v as Pregunta['tipo'] }))} options={Object.entries(TIPO_PREGUNTA_LABELS).map(([k, v]) => ({ value: k, label: v }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" />
+                          <SearchableSelect value={editData.tipo || 'text'} onChange={v => setEditData((prev: Partial<Pregunta>) => ({ ...prev, tipo: v as Pregunta['tipo'] }))} options={Object.entries(TIPO_PREGUNTA_LABELS).map(([k, v]) => ({ value: k, label: v }))} className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" />
                         </div>
                         <div>
                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 block">Grupo</label>
-                          <SearchableSelect value={editData.grupo || ''} onChange={v => setEditData(prev => ({ ...prev, grupo: v }))} options={GRUPOS_PREGUNTAS.map(g => ({ value: g, label: g }))} className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" />
+                          <SearchableSelect value={editData.grupo || ''} onChange={v => setEditData(prev => ({ ...prev, grupo: v }))} options={GRUPOS_PREGUNTAS.map(g => ({ value: g, label: g }))} className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" />
                         </div>
                         <div className="md:col-span-2">
                           <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1 block">Texto de apoyo (se muestra debajo de la pregunta en el formulario)</label>
@@ -206,11 +206,11 @@ export default function PreguntasPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Tipo</label>
-                    <SearchableSelect value={newPregunta.tipo} onChange={v => setNewPregunta(prev => ({ ...prev, tipo: v }))} options={Object.entries(TIPO_PREGUNTA_LABELS).map(([k, v]) => ({ value: k, label: v }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50" />
+                    <SearchableSelect value={newPregunta.tipo} onChange={v => setNewPregunta(prev => ({ ...prev, tipo: v }))} options={Object.entries(TIPO_PREGUNTA_LABELS).map(([k, v]) => ({ value: k, label: v }))} className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50" />
                   </div>
                   <div>
                     <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 block">Grupo</label>
-                    <SearchableSelect value={newPregunta.grupo} onChange={v => setNewPregunta(prev => ({ ...prev, grupo: v }))} options={GRUPOS_PREGUNTAS.map(g => ({ value: g, label: g }))} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50" />
+                    <SearchableSelect value={newPregunta.grupo} onChange={v => setNewPregunta(prev => ({ ...prev, grupo: v }))} options={GRUPOS_PREGUNTAS.map(g => ({ value: g, label: g }))} className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50" />
                   </div>
                 </div>
                 <div>

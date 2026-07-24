@@ -31,7 +31,7 @@ export function EditorRules({ editor }: { editor: Editor }) {
           </label>
           <input type="number" value={formData.duracion}
             onChange={e => updateField('duracion', parseInt(e.target.value) || 30)}
-            className={inputClass} />
+            className="w-full" buttonClassName={inputClass} />
         </div>
         <div>
           <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">
@@ -39,7 +39,7 @@ export function EditorRules({ editor }: { editor: Editor }) {
           </label>
           <input type="number" value={formData.intervalo}
             onChange={e => updateField('intervalo', parseInt(e.target.value) || 30)}
-            className={inputClass} />
+            className="w-full" buttonClassName={inputClass} />
           <p className="text-[11px] text-white/30 mt-2">
             Ej. Opciones cada {formData.intervalo} min.
           </p>
@@ -68,7 +68,7 @@ export function EditorRules({ editor }: { editor: Editor }) {
               </label>
               <input type="number" value={formData.buffer_antes}
                 onChange={e => updateField('buffer_antes', parseInt(e.target.value) || 0)}
-                className={inputClass} />
+                className="w-full" buttonClassName={inputClass} />
             </div>
             <div>
               <label className="block text-[10px] font-bold text-white/40 mb-2">
@@ -76,7 +76,7 @@ export function EditorRules({ editor }: { editor: Editor }) {
               </label>
               <input type="number" value={formData.buffer_despues}
                 onChange={e => updateField('buffer_despues', parseInt(e.target.value) || 0)}
-                className={inputClass} />
+                className="w-full" buttonClassName={inputClass} />
             </div>
           </div>
 
@@ -95,7 +95,7 @@ export function EditorRules({ editor }: { editor: Editor }) {
                   { value: 'equipo', label: 'Equipo interno' },
                   { value: 'especifico', label: 'Específico' },
                 ]}
-                className={inputClass}
+                className="w-full" buttonClassName={inputClass}
               />
             </div>
             <div className="w-full">
@@ -109,7 +109,7 @@ export function EditorRules({ editor }: { editor: Editor }) {
                 placeholder="Sin campaña"
                 searchPlaceholder="Buscar campaña..."
                 emptyText="Sin campañas"
-                className={inputClass}
+                className="w-full" buttonClassName={inputClass}
               />
             </div>
             <div>
@@ -118,7 +118,7 @@ export function EditorRules({ editor }: { editor: Editor }) {
               </label>
               <input type="text" value={formData.texto_boton}
                 onChange={e => updateField('texto_boton', e.target.value)}
-                className={inputClass} />
+                className="w-full" buttonClassName={inputClass} />
             </div>
           </div>
         </div>

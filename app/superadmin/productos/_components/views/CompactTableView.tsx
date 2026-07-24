@@ -71,7 +71,7 @@ export function CompactTableView({
   )
 
   return (
-    <table className="w-full text-left border-collapse min-w-[700px] lg:min-w-[1000px]">
+    <table className="w-full" buttonClassName="text-left border-collapse min-w-[700px] lg:min-w-[1000px]">
       <thead>
         <tr className="text-xs font-black text-gray-500 uppercase tracking-widest border-b border-white/5 bg-white/[0.01]">
           <th className="px-4 py-3 w-10 text-center">

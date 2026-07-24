@@ -176,7 +176,7 @@ export default function AdminPostulantes() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input type="text" placeholder="Buscar por nombre, correo o puesto..."
-            className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blis-red"
+            className="w-full" buttonClassName="bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blis-red"
             value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
         <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
@@ -203,7 +203,7 @@ export default function AdminPostulantes() {
       ) : (
         <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-400">
+            <table className="w-full" buttonClassName="text-left text-sm text-gray-400">
               <thead className="bg-white/[0.02] text-gray-300 uppercase font-semibold text-[10px] tracking-widest border-b border-white/5">
                 <tr>
                   <th className="px-6 py-5">Nombre</th>

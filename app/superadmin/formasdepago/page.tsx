@@ -315,7 +315,7 @@ export default function FormasPagoAdminPage() {
                                                         { value: 'auto', label: 'Auto — Si solo hay 1, se autoasigna' },
                                                         { value: 'round_robin', label: 'Round Robin — Distribución equitativa' },
                                                     ]}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white"
+                                                    className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg p-2 text-xs text-white"
                                                 />
                                                             </div>
                                                             <div>

@@ -50,7 +50,7 @@ export function AddressesTab({ client, onUpdate }: AddressesTabProps) {
                                 placeholder="Ej: Casa, Oficina..."
                                 value={newAddress.label}
                                 onChange={e => setNewAddress({ ...newAddress, label: e.target.value })}
-                                className="w-full bg-black/40 border p-4 rounded-xl text-xs"
+                                className="w-full" buttonClassName="bg-black/40 border p-4 rounded-xl text-xs"
                             />
                         </div>
                         <div className="space-y-2">
@@ -63,7 +63,7 @@ export function AddressesTab({ client, onUpdate }: AddressesTabProps) {
                                     { value: 'Facturacion', label: 'Facturación' },
                                     { value: 'Oficina', label: 'Oficina' },
                                 ]}
-                                className="w-full bg-black/40 border p-4 rounded-xl text-xs"
+                                className="w-full" buttonClassName="bg-black/40 border p-4 rounded-xl text-xs"
                             />
                         </div>
                     </div>
@@ -73,7 +73,7 @@ export function AddressesTab({ client, onUpdate }: AddressesTabProps) {
                             placeholder="Dirección completa..."
                             value={newAddress.address}
                             onChange={e => setNewAddress({ ...newAddress, address: e.target.value })}
-                            className="w-full bg-black/40 border p-4 rounded-xl text-xs"
+                            className="w-full" buttonClassName="bg-black/40 border p-4 rounded-xl text-xs"
                         />
                     </div>
                     <div className="space-y-2">
@@ -82,12 +82,12 @@ export function AddressesTab({ client, onUpdate }: AddressesTabProps) {
                             placeholder="Ciudad..."
                             value={newAddress.city}
                             onChange={e => setNewAddress({ ...newAddress, city: e.target.value })}
-                            className="w-full bg-black/40 border p-4 rounded-xl text-xs"
+                            className="w-full" buttonClassName="bg-black/40 border p-4 rounded-xl text-xs"
                         />
                     </div>
                     <button
                         onClick={handleAddAddress}
-                        className="w-full py-4 bg-blis-red text-white rounded-xl font-black uppercase text-[10px]"
+                        className="w-full" buttonClassName="py-4 bg-blis-red text-white rounded-xl font-black uppercase text-[10px]"
                     >
                         Guardar Dirección
                     </button>

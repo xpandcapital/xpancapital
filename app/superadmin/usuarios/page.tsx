@@ -144,7 +144,7 @@ export default function AdminUsers() {
                     <input
                         type="text"
                         placeholder="Buscar por nombre o email..."
-                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blis-red transition-all"
+                        className="w-full" buttonClassName="bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blis-red transition-all"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -190,7 +190,7 @@ export default function AdminUsers() {
             ) : (
                 <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-gray-400">
+                        <table className="w-full" buttonClassName="text-left text-sm text-gray-400">
                             <thead className="bg-white/[0.02] text-gray-300 uppercase font-semibold text-[10px] tracking-widest border-b border-white/5">
                                 <tr>
                                     <th className="px-6 py-5">Usuario</th>
@@ -298,7 +298,7 @@ export default function AdminUsers() {
                                     </div>
                                     <button
                                         onClick={() => { setIsModalOpen(false); setCreatedPassword(null); }}
-                                        className="w-full py-3 bg-blis-red rounded-xl text-white font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
+                                        className="w-full" buttonClassName="py-3 bg-blis-red rounded-xl text-white font-bold hover:scale-[1.02] active:scale-[0.98] transition-all"
                                     >
                                         Cerrar
                                     </button>
@@ -312,7 +312,7 @@ export default function AdminUsers() {
                                             type="text"
                                             value={newUserName}
                                             onChange={(e) => setNewUserName(e.target.value)}
-                                            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
+                                            className="w-full" buttonClassName="bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
                                             placeholder="Nombre del usuario"
                                         />
                                     </div>
@@ -322,7 +322,7 @@ export default function AdminUsers() {
                                             type="email"
                                             value={newUserEmail}
                                             onChange={(e) => setNewUserEmail(e.target.value)}
-                                            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
+                                            className="w-full" buttonClassName="bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
                                             placeholder="correo@ejemplo.com"
                                         />
                                     </div>
@@ -333,7 +333,7 @@ export default function AdminUsers() {
                                                 type={showPassword ? 'text' : 'password'}
                                                 value={newUserPassword}
                                                 onChange={(e) => setNewUserPassword(e.target.value)}
-                                                className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 pr-12 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
+                                                className="w-full" buttonClassName="bg-black border border-white/10 rounded-xl px-4 py-3 pr-12 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
                                                 placeholder="Dejar vacío para generar automáticamente"
                                             />
                                             <button
@@ -352,7 +352,7 @@ export default function AdminUsers() {
                                             value={newUserRole}
                                             onChange={(value) => setNewUserRole(value)}
                                             options={ROLE_OPTIONS}
-                                            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
+                                            className="w-full" buttonClassName="bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm"
                                         />
                                     </div>
                                     <div className="flex gap-3 pt-2">

@@ -76,7 +76,7 @@ return (
               <img
                 src={product.image?.startsWith('http') ? product.image : `/images/${product.image}`}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full" buttonClassName="h-full object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = 'https://placehold.co/100x100/111111/FFFFFF?text=' + product.name.charAt(0)
                 }}
@@ -162,7 +162,7 @@ return (
                   type="number"
                   value={product.price}
                   onChange={(e) => onUpdateBulk(product.id, 'price', parseFloat(e.target.value))}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm font-black text-white outline-none focus:border-emerald-500/50 transition-all"
+                  className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm font-black text-white outline-none focus:border-emerald-500/50 transition-all"
                   placeholder="0.00"
                 />
                 {isMultiCurrencyEnabled && (

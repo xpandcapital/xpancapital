@@ -182,7 +182,7 @@ export default function PostulanteEditPage() {
               <div><label className={label}>Proyecto interesado</label><input type="text" value={form.proyecto_interesado || ''} onChange={e => upd('proyecto_interesado', e.target.value)} className={input} /></div>
               <div>
                 <label className={label}>Tipo de entrevista</label>
-                <SearchableSelect value={form.entrevista_tipo || ''} onChange={v => upd('entrevista_tipo', v)} options={[{ value: 'presencial', label: 'Presencial' }, { value: 'videoconferencia', label: 'Videoconferencia' }, { value: 'telefonica', label: 'Telefónica' }]} placeholder="Sin definir" className={selectCls} />
+                <SearchableSelect value={form.entrevista_tipo || ''} onChange={v => upd('entrevista_tipo', v)} options={[{ value: 'presencial', label: 'Presencial' }, { value: 'videoconferencia', label: 'Videoconferencia' }, { value: 'telefonica', label: 'Telefónica' }]} placeholder="Sin definir" className="w-full" buttonClassName={selectCls} />
               </div>
             </div>
 
@@ -321,7 +321,7 @@ export default function PostulanteEditPage() {
                   return (
                     <div key={key}>
                       <label className={label}>{lbl}</label>
-                      <SearchableSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'soltero/a', label: 'Soltero/a' }, { value: 'casado/a', label: 'Casado/a' }, { value: 'divorciado/a', label: 'Divorciado/a' }, { value: 'viudo/a', label: 'Viudo/a' }, { value: 'union_libre', label: 'Unión libre' }]} placeholder="Seleccionar" className={selectCls} />
+                      <SearchableSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'soltero/a', label: 'Soltero/a' }, { value: 'casado/a', label: 'Casado/a' }, { value: 'divorciado/a', label: 'Divorciado/a' }, { value: 'viudo/a', label: 'Viudo/a' }, { value: 'union_libre', label: 'Unión libre' }]} placeholder="Seleccionar" className="w-full" buttonClassName={selectCls} />
                     </div>
                   )
                 }
@@ -330,7 +330,7 @@ export default function PostulanteEditPage() {
                   return (
                     <div key={key}>
                       <label className={label}>{lbl}</label>
-                      <SearchableSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'si', label: 'Sí' }, { value: 'no', label: 'No' }, { value: 'condicionado', label: 'Condicionado' }]} placeholder="Seleccionar" className={selectCls} />
+                      <SearchableSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'si', label: 'Sí' }, { value: 'no', label: 'No' }, { value: 'condicionado', label: 'Condicionado' }]} placeholder="Seleccionar" className="w-full" buttonClassName={selectCls} />
                     </div>
                   )
                 }
@@ -339,7 +339,7 @@ export default function PostulanteEditPage() {
                   return (
                     <div key={key}>
                       <label className={label}>{lbl}</label>
-                      <SearchableSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'solo', label: 'Solo' }, { value: 'en_equipo', label: 'En equipo' }, { value: 'indiferente', label: 'Indiferente' }]} placeholder="Seleccionar" className={selectCls} />
+                      <SearchableSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'solo', label: 'Solo' }, { value: 'en_equipo', label: 'En equipo' }, { value: 'indiferente', label: 'Indiferente' }]} placeholder="Seleccionar" className="w-full" buttonClassName={selectCls} />
                     </div>
                   )
                 }
@@ -348,7 +348,7 @@ export default function PostulanteEditPage() {
                   return (
                     <div key={key}>
                       <label className={label}>{lbl}</label>
-                      <SearchableSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'primaria', label: 'Primaria' }, { value: 'secundaria', label: 'Secundaria' }, { value: 'tecnico', label: 'Técnico' }, { value: 'universitario', label: 'Universitario' }, { value: 'postgrado', label: 'Postgrado' }, { value: 'maestria', label: 'Maestría' }, { value: 'doctorado', label: 'Doctorado' }]} placeholder="Seleccionar" className={selectCls} />
+                      <SearchableSelect value={value || ''} onChange={v => upd(key, v)} options={[{ value: 'primaria', label: 'Primaria' }, { value: 'secundaria', label: 'Secundaria' }, { value: 'tecnico', label: 'Técnico' }, { value: 'universitario', label: 'Universitario' }, { value: 'postgrado', label: 'Postgrado' }, { value: 'maestria', label: 'Maestría' }, { value: 'doctorado', label: 'Doctorado' }]} placeholder="Seleccionar" className="w-full" buttonClassName={selectCls} />
                     </div>
                   )
                 }

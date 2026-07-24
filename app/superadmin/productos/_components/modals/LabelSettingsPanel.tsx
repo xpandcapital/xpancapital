@@ -159,7 +159,7 @@ export function LabelSettingsPanel({
               { value: 'A4', label: 'A4' },
               { value: 'A5', label: 'A5' },
             ]}
-            className="w-full bg-white/5 border border-white/5 rounded-xl px-0 cursor-pointer py-3 text-[10px] font-black uppercase text-white outline-none focus:border-white/20 transition-all appearance-none text-center backdrop-blur-md"
+            className="w-full" buttonClassName="bg-white/5 border border-white/5 rounded-xl px-0 cursor-pointer py-3 text-[10px] font-black uppercase text-white outline-none focus:border-white/20 transition-all appearance-none text-center backdrop-blur-md"
           />
         </div>
         <div className="flex-1 space-y-2">
@@ -182,7 +182,7 @@ export function LabelSettingsPanel({
           step="0.5"
           value={labelHeightCm}
           onChange={(e) => onLabelHeightChange(parseFloat(e.target.value))}
-          className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-blis-red"
+          className="w-full" buttonClassName="h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-blis-red"
         />
       </div>
     </div>

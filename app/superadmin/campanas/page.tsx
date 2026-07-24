@@ -327,7 +327,7 @@ export default function CampanasPage() {
                   type="text"
                   value={formData.nombre}
                   onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                  className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
                   required
                 />
               </div>
@@ -339,7 +339,7 @@ export default function CampanasPage() {
                 <textarea
                   value={formData.descripcion}
                   onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none resize-none"
+                  className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none resize-none"
                   rows={2}
                 />
               </div>
@@ -357,7 +357,7 @@ export default function CampanasPage() {
                     { value: "pausada", label: "Pausada" },
                     { value: "finalizada", label: "Finalizada" },
                   ]}
-                  className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                  className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
                 />
               </div>
 
@@ -398,7 +398,7 @@ export default function CampanasPage() {
                     value={formData.formulario_id}
                     onChange={(value) => setFormData({ ...formData, formulario_id: value })}
                     options={formularios.map(f => ({ value: f.id, label: f.nombre }))}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                    className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
                   />
                 </div>
               )}
@@ -413,7 +413,7 @@ export default function CampanasPage() {
                     value={formData.calendario_id}
                     onChange={(value) => setFormData({ ...formData, calendario_id: value })}
                     options={calendarios.map(c => ({ value: c.id, label: c.nombre }))}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                    className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
                   />
                 </div>
               )}
@@ -428,7 +428,7 @@ export default function CampanasPage() {
                     value={formData.producto_id}
                     onChange={(value) => setFormData({ ...formData, producto_id: value })}
                     options={productos.map(p => ({ value: p.id, label: p.nombre, image: p.imagen_principal }))}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                    className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
                   />
                 </div>
               )}
@@ -552,7 +552,7 @@ export default function CampanasPage() {
                       value={formData.notion_database_id}
                       onChange={(e) => setFormData({ ...formData, notion_database_id: e.target.value })}
                       placeholder="1234567890abcdef1234567890abcdef"
-                      className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
+                      className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-blis-red outline-none"
                     />
           </div>
         )}
@@ -664,7 +664,7 @@ export default function CampanasPage() {
 
             <div>
               <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Nombre *</label>
-              <input value={waForm.nombre} onChange={e => setWaForm(p => ({...p, nombre: e.target.value}))} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" placeholder="Remarketing Julio 2026" />
+              <input value={waForm.nombre} onChange={e => setWaForm(p => ({...p, nombre: e.target.value}))} className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" placeholder="Remarketing Julio 2026" />
             </div>
 
             <div>
@@ -675,7 +675,7 @@ export default function CampanasPage() {
                 value={waForm.mensajes.join('\n')}
                 onChange={e => setWaForm(p => ({...p, mensajes: e.target.value.split('\n').filter(l => l.trim())}))}
                 rows={4}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1 resize-none"
+                className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1 resize-none"
                 placeholder={`{saludo} oferta inmobiliaria 🏠\n{cierre} ¿te interesa?\nHey, vi que te gustó nuestro proyecto 👀`}
               />
               <p className="text-[9px] text-gray-600 mt-1">Usa {'{saludo}'}, {'{cierre}'}, etc. — se reemplazan con opciones aleatorias de abajo</p>
@@ -687,7 +687,7 @@ export default function CampanasPage() {
                 value={waForm.variablesTexto}
                 onChange={e => setWaForm(p => ({...p, variablesTexto: e.target.value}))}
                 rows={3}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1 resize-none font-mono"
+                className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1 resize-none font-mono"
                 placeholder='{"saludo": ["Hola, ¿qué tal? 👋","¡Hey! ¿Cómo te va? 😊"], "cierre": ["¿Te interesa? 👍","Avísame 📩"]}'
               />
             </div>
@@ -695,17 +695,17 @@ export default function CampanasPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Delay mínimo (seg)</label>
-                <input type="number" value={waForm.min_delay_seconds} onChange={e => setWaForm(p => ({...p, min_delay_seconds: parseInt(e.target.value)||30}))} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" />
+                <input type="number" value={waForm.min_delay_seconds} onChange={e => setWaForm(p => ({...p, min_delay_seconds: parseInt(e.target.value)||30}))} className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" />
               </div>
               <div>
                 <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Delay máximo (seg)</label>
-                <input type="number" value={waForm.max_delay_seconds} onChange={e => setWaForm(p => ({...p, max_delay_seconds: parseInt(e.target.value)||120}))} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" />
+                <input type="number" value={waForm.max_delay_seconds} onChange={e => setWaForm(p => ({...p, max_delay_seconds: parseInt(e.target.value)||120}))} className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" />
               </div>
             </div>
 
             <div>
               <label className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Media URL <span className="text-gray-600 normal-case">(imagen, video, PDF)</span></label>
-              <input value={waForm.media_url} onChange={e => setWaForm(p => ({...p, media_url: e.target.value}))} className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" placeholder="https://..." />
+              <input value={waForm.media_url} onChange={e => setWaForm(p => ({...p, media_url: e.target.value}))} className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white mt-1" placeholder="https://..." />
             </div>
 
             <div>
@@ -764,7 +764,7 @@ export default function CampanasPage() {
                 setWaLoading(false)
               }}
               disabled={waLoading}
-              className="w-full py-3 bg-emerald-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-500 transition-colors disabled:opacity-50"
+              className="w-full" buttonClassName="py-3 bg-emerald-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-500 transition-colors disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
               {waLoading ? 'Creando...' : 'Crear Campaña'}
