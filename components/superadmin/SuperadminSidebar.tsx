@@ -8,7 +8,8 @@ import {
     LayoutDashboard, Users, FileText, Image as ImageIcon,
     Settings, LogOut, Activity, UserCircle, ShoppingBag,
     Coins, ChevronLeft, GraduationCap, Award, Cloud,
-    ShoppingCart, Boxes, CandlestickChart, Scale, BarChart3,
+    ShoppingCart, Boxes, CandlestickChart, Scale, BarChart3, Store,
+    Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     Building2, UsersRound, FolderOpen, ChevronRight, Wrench,
     FileSignature, TrendingUp, Layout, Shield, Mail, UserPlus, Briefcase,
     CalendarDays, Megaphone, ClipboardList, BookOpenCheck, Package, Bell,
@@ -53,6 +54,7 @@ const ALL_SECTIONS: Section[] = [
                 icon: ShoppingCart,
                 label: "Punto de Venta",
                 subItems: [
+                    { icon: Store, label: "Tienda", href: "/tienda" },
                     { icon: ShoppingCart, label: "Historial de Ventas", href: "/superadmin/ventas", permission: "ventas:ver" },
                     { icon: Settings, label: "Formas de Pago", href: "/superadmin/formasdepago", permission: "formasdepago:ver" },
                     { icon: ShoppingBag, label: "Productos", href: "/superadmin/productos", permission: "productos:ver" },
