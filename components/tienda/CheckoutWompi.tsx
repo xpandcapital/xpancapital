@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
 import { Loader2, CheckCircle2, AlertCircle, Shield, Lock } from "lucide-react"
 
-declare global { interface Window { WompiCheckout: any } }
+declare global { interface Window { WidgetCheckout: any } }
 
 interface CheckoutWompiProps {
   publicKey: string
@@ -47,7 +47,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
         setFormState('ready')
 
         // Renderizar widget
-        const checkout = new window.WompiCheckout({
+        const checkout = new window.WidgetCheckout({
           currency,
           amountInCents,
           reference,
