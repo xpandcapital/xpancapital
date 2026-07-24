@@ -33,7 +33,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
 
       const script = document.createElement('script')
       script.src = 'https://checkout.wompi.co/widget.js'
-      script.setAttribute('data-render', 'BUTTON')
+      script.setAttribute('data-render', '#' + containerRef.current?.id)
       script.setAttribute('data-public-key', publicKey)
       script.setAttribute('data-currency', currency)
       script.setAttribute('data-amount-in-cents', String(amountInCents))
@@ -43,8 +43,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
       script.onload = () => setFormState('ready')
       script.onerror = () => { setFormState('error'); setErrorMsg('No se pudo cargar la pasarela') }
 
-      containerRef.current.innerHTML = ''
-      containerRef.current.appendChild(script)
+      document.head.appendChild(script)
 
       // Escuchar evento de aprobación de Wompi (vía postMessage)
       const handler = async (e: MessageEvent) => {
