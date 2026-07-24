@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import { supabase } from '@/lib/supabaseClient';
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
+import { useAkademiaStats, AkademiaStats, AkademiaRanking } from './_components/dashboard';
 
 const formatCurrency = (val: number) =>
   new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'USD' }).format(val);
@@ -109,6 +110,7 @@ export default function Dashboard() {
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [chartMonths, setChartMonths] = useState(6);
+  const { stats: academiaStats, loading: academiaLoading } = useAkademiaStats();
   const empresaIdRef = useRef(DEFAULT_EMPRESA_ID);
 
   const fetchData = useCallback(async (empresaIdOverride?: string) => {
@@ -362,6 +364,26 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+
+        {/* Academia Section */}
+        {academiaLoading ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-[#0a0a0a] border border-white/5 p-5 rounded-3xl shadow-2xl animate-pulse">
+                  <div className="w-8 h-8 bg-white/5 rounded-xl mb-3" />
+                  <div className="h-2.5 w-20 bg-white/5 rounded mb-3" />
+                  <div className="h-7 w-14 bg-white/5 rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : academiaStats ? (
+          <div className="space-y-8">
+            <AkademiaStats stats={academiaStats} />
+            <AkademiaRanking ranking={academiaStats.ranking} />
+          </div>
+        ) : null}
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
