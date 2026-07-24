@@ -25,6 +25,7 @@ interface User {
   empresa_id?: string
   permisos_adicionales?: PermisosAdicionales | null
   ruta_inicio?: string | null
+  zona_horaria?: string
 }
 
 interface AuthContextType {
@@ -34,7 +35,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, nombre?: string, apellido?: string) => Promise<{ success: boolean; error?: string }>
   resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
-  updateProfile: (data: { name?: string; profilePic?: string | null; email?: string; phone?: string; nombre?: string; apellido?: string }) => void
+  updateProfile: (data: { name?: string; profilePic?: string | null; email?: string; phone?: string; nombre?: string; apellido?: string; zona_horaria?: string }) => void
   refreshUser: () => Promise<void>
 }
 
@@ -53,7 +54,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, nombre, apellido, avatar_url, blis_coins, rol, empresa_id, telefono')
+      .select('id, email, nombre, apellido, avatar_url, blis_coins, rol, empresa_id, telefono, zona_horaria')
       .eq('id', userId)
       .single()
 

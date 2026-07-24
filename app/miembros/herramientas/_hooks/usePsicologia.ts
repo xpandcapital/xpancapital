@@ -64,6 +64,17 @@ export function calcularPuntaje(
   return Math.max(1, Math.min(10, score))
 }
 
+function getHoyLocal(zona?: string): string {
+  try {
+    const d = new Date()
+    const str = d.toLocaleDateString('en-CA', { timeZone: zona || 'America/Bogota' })
+    return str // formato YYYY-MM-DD
+  } catch { 
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+}
+
 export function usePsicologia() {
   const { user } = useAuth()
   const [evaluacionHoy, setEvaluacionHoy] = useState<EvaluacionPsicologica | null>(null)
@@ -75,8 +86,7 @@ export function usePsicologia() {
   const [lastError, setLastError] = useState('')
   const abortRef = useRef<AbortController | null>(null)
 
-  const d = new Date()
-  const hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const hoy = getHoyLocal((user as any)?.zona_horaria || user?.zona_horaria)
 
   const fetchHoy = useCallback(async () => {
     if (!user?.id) return

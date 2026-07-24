@@ -12,6 +12,16 @@ export interface ChecklistData {
   creado_en: string
 }
 
+function getHoyLocal(zona?: string): string {
+  try {
+    const d = new Date()
+    return d.toLocaleDateString('en-CA', { timeZone: zona || 'America/Bogota' })
+  } catch {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+}
+
 export function useChecklist() {
   const { user } = useAuth()
   const [checklistHoy, setChecklistHoy] = useState<ChecklistData | null>(null)
@@ -19,8 +29,7 @@ export function useChecklist() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
-  const d = new Date()
-  const hoy = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const hoy = getHoyLocal((user as any)?.zona_horaria || user?.zona_horaria)
 
   const fetchHoy = useCallback(async () => {
     if (!user?.id) return

@@ -350,8 +350,8 @@ function PushNotificationToggle() {
           <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
             {subscribed ? 'Activadas' : granted ? 'Desactivadas' : 'No configuradas'}
           </span>
-        </div>
-      </div>
+                            </div>
+                        </div>
       <span className={`text-[10px] font-bold uppercase tracking-widest ${subscribed ? 'text-emerald-400' : 'text-gray-600'}`}>
         {loading ? '...' : subscribed ? 'Activado' : 'Activar'}
       </span>
