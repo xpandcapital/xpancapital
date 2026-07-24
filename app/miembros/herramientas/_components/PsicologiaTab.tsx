@@ -456,10 +456,6 @@ export function PsicologiaTab() {
                       <Tooltip
                         contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '0.75rem', fontSize: '12px' }}
                         labelStyle={{ color: '#a1a1aa', fontWeight: 700, fontSize: 11 }}
-                        formatter={(value: any, name: string) => [
-                          name === 'falencias' ? (value === 1 ? 'Sí — Error' : 'No') : value,
-                          name === 'falencias' ? 'Error Operativo' : 'Zona de Flujo'
-                        ]}
                       />
                       <Legend wrapperStyle={{ fontSize: '11px' }} />
                       <Bar yAxisId="right" dataKey="falencias" name="Error Operativo" fill="#ef4444" fillOpacity={0.35} radius={[4, 4, 0, 0]} barSize={20} />
