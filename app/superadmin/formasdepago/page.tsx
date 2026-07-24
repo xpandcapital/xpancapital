@@ -224,16 +224,22 @@ export default function FormasPagoAdminPage() {
                                                                                                     </div>
                                                                                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                                                                                         {['name','account_number','account_holder','cci'].map(field => {
-                                                                                                            const labels: Record<string,string> = { name:'Banco', account_number:'N° Cuenta', account_holder:'Titular', cci:'CCI' };
+                                                                                                            const labels: Record<string,string> = { name:'Banco', account_number:'N° Cuenta', account_holder:'Titular', cci:'Llave Interbancaria' };
                                                                                                             return <div key={field}><label className="text-[9px] text-gray-600 block mb-0.5">{labels[field]}</label><Input value={(bank as any)[field]} onChange={e => updateBankField(forma.id, key, idx, field, e.target.value)} className="bg-white/5 border-white/10 text-white text-[10px] h-7 font-mono" /></div>;
                                                                                                         })}
                                                                                                         <div>
                                                                                                             <label className="text-[9px] text-gray-600 block mb-0.5">Tipo</label>
-                                            <SearchableSelect value={bank.account_type} onChange={v => updateBankField(forma.id, key, idx, 'account_type', v)} options={[{ value: 'ahorros', label: 'Ahorros' }, { value: 'corriente', label: 'Corriente' }]} className="w-full bg-white/5 border border-white/10 rounded-lg p-1 text-[10px] text-white h-7" />
+                                            <select value={bank.account_type} onChange={e => updateBankField(forma.id, key, idx, 'account_type', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white h-7">
+                                              <option value="ahorros">Ahorros</option>
+                                              <option value="corriente">Corriente</option>
+                                            </select>
                                                                                                         </div>
                                                                                                         <div>
                                                                                                             <label className="text-[9px] text-gray-600 block mb-0.5">Moneda</label>
-                                            <SearchableSelect value={bank.currency} onChange={v => updateBankField(forma.id, key, idx, 'currency', v)} options={[{ value: 'PEN', label: 'S/' }, { value: 'USD', label: '$' }]} className="w-full bg-white/5 border border-white/10 rounded-lg p-1 text-[10px] text-white h-7" />
+                                            <select value={bank.currency} onChange={e => updateBankField(forma.id, key, idx, 'currency', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white h-7">
+                                              <option value="PEN">S/</option>
+                                              <option value="USD">$</option>
+                                            </select>
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </div>
