@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { motion } from "framer-motion"
-import { Loader2, CheckCircle2, AlertCircle, Shield, Lock } from "lucide-react"
+import { Loader2, AlertCircle, Shield, Lock, CheckCircle2 } from "lucide-react"
 
 declare global { interface Window { WidgetCheckout: any } }
 
@@ -24,7 +24,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
   const [errorMsg, setErrorMsg] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const initializedRef = useRef(false)
-  const amountFormatted = (amountInCents / 100).toLocaleString('es-CO', { style: 'currency', currency })
+  const amountFormatted = (amountInCents / 100).toLocaleString('es-CO', { style: 'currency', currency: 'COP' })
 
   useEffect(() => {
     if (initializedRef.current || typeof window === 'undefined') return
@@ -32,21 +32,19 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
 
     const loadWidget = async () => {
       try {
-        // Cargar script del widget
+        // Cargar script del widget si no existe
         if (!document.querySelector('script[src*="checkout.wompi.co/widget.js"]')) {
           await new Promise<void>((resolve, reject) => {
             const script = document.createElement('script')
             script.src = 'https://checkout.wompi.co/widget.js'
             script.setAttribute('data-render', '#' + containerRef.current?.id)
             script.onload = () => resolve()
-            script.onerror = () => reject(new Error('No se pudo cargar la pasarela de pago'))
+            script.onerror = () => reject(new Error('No se pudo cargar el widget'))
             document.head.appendChild(script)
           })
         }
 
-        setFormState('ready')
-
-        // Renderizar widget (se auto-monta donde está el script data-render)
+        // Crear widget — se auto-renderiza en el container
         new window.WidgetCheckout({
           currency,
           amountInCents,
@@ -66,28 +64,28 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
                 onSuccess?.()
               } else {
                 setFormState('error')
-                setErrorMsg(data.error || 'Error al confirmar el pago')
-                onError?.(data.error || 'Error al confirmar el pago')
+                setErrorMsg(data.error || 'Error al confirmar')
+                onError?.(data.error || 'Error al confirmar')
               }
             }).catch(() => {
               setFormState('error')
-              setErrorMsg('Error de conexión al confirmar el pago')
+              setErrorMsg('Error de conexión')
             })
           },
-          onLoad: () => setFormState('ready'),
           onError: (err: any) => {
             setFormState('error')
             setErrorMsg(err?.message || 'Error en el pago')
             onError?.(err?.message || 'Error en el pago')
           },
           onClose: () => {
-            if (formState !== 'success') {
+            if (formState !== 'success' && formState !== 'processing') {
               setFormState('ready')
             }
           },
         })
 
-        // El widget se auto-renderiza donde está el container con data-render
+        // Widget creado — el botón de pago ya se renderizó en el container
+        setFormState('ready')
       } catch (err: any) {
         setFormState('error')
         setErrorMsg(err.message || 'Error al cargar la pasarela')
@@ -100,7 +98,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
   return (
     <div className="space-y-4">
       {/* Trust bar */}
-      <div className="flex items-center justify-center gap-4 md:gap-8 py-3 px-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
+      <div className="flex items-center justify-center gap-4 py-3 px-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl">
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
           <Lock className="w-3 h-3" /> SSL Seguro
         </div>
@@ -116,57 +114,50 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
       <div className="text-center py-2">
         <p className="text-gray-500 text-xs uppercase tracking-wider">Total a pagar</p>
         <p className="text-white font-black text-2xl md:text-3xl">{amountFormatted}</p>
-        <p className="text-gray-600 text-[10px] mt-1">Referencia: {reference}</p>
+        <p className="text-gray-600 text-[10px] mt-1">Ref: {reference}</p>
       </div>
 
       {/* Widget container */}
       <div className="space-y-3">
-        <div ref={containerRef} id={`wompi-widget-${reference}`} className="min-h-[350px] flex items-center justify-center bg-zinc-900/50 border border-white/5 rounded-2xl">
-          {(formState === 'loading' || formState === 'ready') && (
-            <div className="text-center py-8">
-              <motion.div
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-16 h-16 rounded-2xl bg-[#e8c600]/10 border border-[#e8c600]/20 flex items-center justify-center mx-auto mb-4"
-              >
-                <Loader2 className="w-8 h-8 text-[#e8c600] animate-spin" />
-              </motion.div>
-              <p className="text-white font-bold text-sm mb-1">Cargando pasarela de pago</p>
-              <p className="text-gray-500 text-xs">Serás redirigido al formulario seguro de pago</p>
+        <div
+          ref={containerRef}
+          id={`wompi-widget-${reference}`}
+          className="min-h-[120px] flex items-center justify-center bg-zinc-800/30 border border-white/5 rounded-2xl"
+        >
+          {formState === 'loading' && (
+            <div className="text-center py-6">
+              <Loader2 className="w-6 h-6 text-emerald-400 animate-spin mx-auto mb-2" />
+              <p className="text-gray-500 text-xs">Cargando pasarela...</p>
             </div>
           )}
 
           {formState === 'error' && (
-            <div className="text-center py-8 px-4">
-              <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-                <AlertCircle className="w-6 h-6 text-red-400" />
+            <div className="text-center py-6 px-4">
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-2">
+                <AlertCircle className="w-5 h-5 text-red-400" />
               </div>
-              <p className="text-red-400 font-bold text-sm mb-2">Error al procesar el pago</p>
+              <p className="text-red-400 font-bold text-sm mb-1">Error</p>
               <p className="text-gray-400 text-xs max-w-xs mx-auto">{errorMsg}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/15 text-white rounded-xl text-xs font-bold transition-colors"
-              >
-                Intentar de nuevo
+              <button onClick={() => window.location.reload()} className="mt-3 px-4 py-2 bg-white/10 hover:bg-white/15 text-white rounded-xl text-xs font-bold transition-colors">
+                Reintentar
               </button>
             </div>
           )}
-        </div>
 
-        {/* Payment methods badge */}
-        <div className="flex items-center justify-center gap-3 text-[10px] text-gray-600">
-          <span>💳 Tarjetas</span>
-          <span>·</span>
-          <span>🏦 PSE</span>
-          <span>·</span>
-          <span>📱 Nequi</span>
-          <span>·</span>
-          <span>🏛️ Bancolombia</span>
-        </div>
+          {formState === 'processing' && (
+            <div className="text-center py-6">
+              <Loader2 className="w-6 h-6 text-emerald-400 animate-spin mx-auto mb-2" />
+              <p className="text-gray-300 text-xs">Confirmando pago...</p>
+            </div>
+          )}
 
-        <p className="text-[9px] text-gray-700 text-center">
-          Al continuar, aceptas los términos y condiciones. Tus datos están protegidos.
-        </p>
+          {formState === 'success' && (
+            <div className="text-center py-6">
+              <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+              <p className="text-emerald-400 font-bold">¡Pago exitoso!</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
