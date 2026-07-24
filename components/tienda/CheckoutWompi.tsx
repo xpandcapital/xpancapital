@@ -39,7 +39,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
             script.src = 'https://checkout.wompi.co/widget.js'
             script.setAttribute('data-render', '#' + containerRef.current?.id)
             script.onload = () => resolve()
-            script.onerror = () => reject(new Error('No se pudo cargar el widget de Wompi'))
+            script.onerror = () => reject(new Error('No se pudo cargar la pasarela de pago'))
             document.head.appendChild(script)
           })
         }
@@ -111,7 +111,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
           <Shield className="w-3 h-3" /> PCI-DSS
         </div>
         <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-bold uppercase tracking-wider">
-          <CheckCircle2 className="w-3 h-3" /> Wompi Protegido
+          <CheckCircle2 className="w-3 h-3" /> Pago Seguro
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
                 <Loader2 className="w-8 h-8 text-[#e8c600] animate-spin" />
               </motion.div>
               <p className="text-white font-bold text-sm mb-1">Cargando pasarela de pago</p>
-              <p className="text-gray-500 text-xs">Serás redirigido al formulario seguro de Wompi</p>
+              <p className="text-gray-500 text-xs">Serás redirigido al formulario seguro de pago</p>
             </div>
           )}
 
@@ -168,7 +168,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
         </div>
 
         <p className="text-[9px] text-gray-700 text-center">
-          Al continuar, aceptas los términos y condiciones de Wompi. Tus datos están protegidos.
+          Al continuar, aceptas los términos y condiciones. Tus datos están protegidos.
         </p>
       </div>
     </div>
