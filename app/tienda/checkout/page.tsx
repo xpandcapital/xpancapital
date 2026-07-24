@@ -352,6 +352,21 @@ function CheckoutContent() {
         }
     }, [isRedeemFlow, blisCoins, totalCoins, showToast, router]);
 
+    // Escuchar postMessage del iframe de Wompi cuando el pago se completa
+    useEffect(() => {
+        if (!isWompiModal) return
+        const handler = (e: MessageEvent) => {
+            if (e.origin !== window.location.origin) return
+            if (e.data?.type === 'WOMPI_PAYMENT_DONE') {
+                clearCart()
+                setIsWompiModal(false)
+                window.location.href = '/miembros'
+            }
+        }
+        window.addEventListener('message', handler)
+        return () => window.removeEventListener('message', handler)
+    }, [isWompiModal])
+
     const handleInput = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
@@ -447,9 +462,17 @@ function CheckoutContent() {
                 }
 
                 const sigParam = data.signature ? `&signature:integrity=${encodeURIComponent(data.signature)}` : ''
-                const wompiUrl = `https://checkout.wompi.co/p/?public-key=${encodeURIComponent(data.public_key)}&amount-in-cents=${data.amount_in_cents}&currency=${data.currency}&reference=${encodeURIComponent(data.reference)}&redirect-url=${encodeURIComponent(data.redirect_url)}${sigParam}`
-                clearCart()
-                window.location.href = wompiUrl
+                setWompiData({
+                    publicKey: data.public_key,
+                    reference: data.reference,
+                    amountInCents: data.amount_in_cents,
+                    currency: data.currency,
+                    ordenId: data.orden_id,
+                    redirectUrl: `https://checkout.wompi.co/p/?public-key=${encodeURIComponent(data.public_key)}&amount-in-cents=${data.amount_in_cents}&currency=${data.currency}&reference=${encodeURIComponent(data.reference)}&redirect-url=${encodeURIComponent(data.redirect_url)}${sigParam}`,
+                })
+                setWompiTotal(grandTotal)
+                setIsWompiModal(true)
+                setIsProcessing(false)
                 return
             }
 
@@ -1335,7 +1358,7 @@ function CheckoutContent() {
                       src={wompiData.redirectUrl}
                       className="absolute inset-0 w-full h-full border-0"
                       title="Pago Wompi"
-                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+                      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation allow-top-navigation-by-user-activation"
                     />
                   </div>
                   <div className="px-4 py-2 bg-zinc-900 border-t border-white/5 shrink-0">

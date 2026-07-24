@@ -54,6 +54,15 @@ function CheckoutStatusContent() {
   const [state, setState] = useState<PaymentState>(izipaySuccess === "1" || wompiSuccess === "1" ? "paid" : "loading");
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Si estamos dentro de un iframe (Wompi), enviar postMessage al padre y NO mostrar UI
+  useEffect(() => {
+    if (window !== window.parent && wompiSuccess === "1") {
+      parent.postMessage({ type: 'WOMPI_PAYMENT_DONE', order_id: orderId }, window.location.origin)
+    }
+  }, [wompiSuccess, orderId])
+
+  const isIframe = typeof window !== 'undefined' && window !== window.parent && wompiSuccess === "1"
+
   useEffect(() => {
     if (izipaySuccess === "1" || wompiSuccess === "1") return;
 
@@ -111,6 +120,21 @@ function CheckoutStatusContent() {
 
     checkStatus();
   }, [orderId]);
+
+  // Si está en iframe y pago exitoso, mostrar mensaje breve mientras se redirige
+  if (isIframe) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-20 h-20 mx-auto bg-emerald-500/10 border border-emerald-500/30 rounded-3xl flex items-center justify-center mb-4">
+            <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+          </div>
+          <p className="text-white font-black text-lg">¡Pago Exitoso!</p>
+          <p className="text-gray-500 text-sm mt-2">Redirigiendo...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-40 pb-20 text-center">
