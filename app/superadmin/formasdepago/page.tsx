@@ -229,17 +229,11 @@ export default function FormasPagoAdminPage() {
                                                                                                         })}
                                                                                                         <div>
                                                                                                             <label className="text-[9px] text-gray-600 block mb-0.5">Tipo</label>
-                                            <select value={bank.account_type} onChange={e => updateBankField(forma.id, key, idx, 'account_type', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white h-7">
-                                              <option value="ahorros">Ahorros</option>
-                                              <option value="corriente">Corriente</option>
-                                            </select>
+                                            <SearchableSelect value={bank.account_type} onChange={v => updateBankField(forma.id, key, idx, 'account_type', v)} options={[{ value: 'ahorros', label: 'Ahorros' }, { value: 'corriente', label: 'Corriente' }]} className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white h-7 w-full" />
                                                                                                         </div>
                                                                                                         <div>
                                                                                                             <label className="text-[9px] text-gray-600 block mb-0.5">Moneda</label>
-                                            <select value={bank.currency} onChange={e => updateBankField(forma.id, key, idx, 'currency', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white h-7">
-                                              <option value="PEN">S/</option>
-                                              <option value="USD">$</option>
-                                            </select>
+                                            <SearchableSelect value={bank.currency} onChange={v => updateBankField(forma.id, key, idx, 'currency', v)} options={[{ value: 'PEN', label: 'S/' }, { value: 'USD', label: '$' }]} className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white h-7 w-full" />
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </div>
