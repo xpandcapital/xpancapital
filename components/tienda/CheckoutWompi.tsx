@@ -46,8 +46,8 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
 
         setFormState('ready')
 
-        // Renderizar widget
-        const checkout = new window.WidgetCheckout({
+        // Renderizar widget (se auto-monta donde está el script data-render)
+        new window.WidgetCheckout({
           currency,
           amountInCents,
           reference,
@@ -87,10 +87,7 @@ export function CheckoutWompi({ publicKey, reference, amountInCents, currency, o
           },
         })
 
-        // Montar en el contenedor
-        if (containerRef.current) {
-          checkout.mount('#' + containerRef.current.id)
-        }
+        // El widget se auto-renderiza donde está el container con data-render
       } catch (err: any) {
         setFormState('error')
         setErrorMsg(err.message || 'Error al cargar la pasarela')

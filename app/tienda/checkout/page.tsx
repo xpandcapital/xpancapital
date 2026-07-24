@@ -1329,13 +1329,13 @@ function CheckoutContent() {
             {/* Modal Wompi */}
             {isWompiModal && wompiData && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-                <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col overflow-hidden">
-                  <motion.div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-emerald-50 via-emerald-100/50 to-emerald-50 border-b border-emerald-200" style={{ backgroundSize: '200% 100%' }}>
+                <div className="bg-zinc-950 rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col overflow-hidden">
+                  <motion.div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-emerald-500/10 border-b border-emerald-500/20">
                     <div className="flex items-center gap-5">
-                      <div className="flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-600" /><span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">SSL</span></div>
-                      <div className="flex items-center gap-1.5"><Shield className="w-3 h-3 text-emerald-600" /><span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">PCI-DSS</span></div>
+                      <div className="flex items-center gap-1.5"><Lock className="w-3 h-3 text-emerald-400" /><span className="text-[10px] font-bold text-emerald-300 uppercase tracking-widest">SSL</span></div>
+                      <div className="flex items-center gap-1.5"><Shield className="w-3 h-3 text-emerald-400" /><span className="text-[10px] font-bold text-emerald-300 uppercase tracking-widest">PCI-DSS</span></div>
                     </div>
-                    <button onClick={() => { setIsWompiModal(false); setIsProcessing(false) }} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors">&times;</button>
+                    <button onClick={() => { setIsWompiModal(false); setIsProcessing(false) }} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors">&times;</button>
                   </motion.div>
                   <div className="p-6 overflow-y-auto flex-1">
                     <CheckoutWompi
