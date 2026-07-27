@@ -7,7 +7,7 @@ import { Zap, Clock, ShoppingCart, TrendingUp } from "lucide-react";
 const DEALS = [
   {
     id: 1,
-    title: "Plan Anual - Academia de Trading",
+    title: "Plan Anual",
     category: "Cursos",
     originalPrice: 899,
     salePrice: 599,
@@ -20,7 +20,7 @@ const DEALS = [
   },
   {
     id: 2,
-    title: "Plan Trimestral - Academia de Trading",
+    title: "Plan Trimestral",
     category: "Cursos",
     originalPrice: 299,
     salePrice: 199,

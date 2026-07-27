@@ -19,7 +19,7 @@ interface Product {
 const DUMMY_PRODUCTS: Product[] = [
     {
         id: "1",
-        title: "Plan Anual - Academia de Trading",
+        title: "Plan Anual",
         category: "Cursos",
         price: 599.00,
         originalPrice: 899.00,
@@ -30,7 +30,7 @@ const DUMMY_PRODUCTS: Product[] = [
     },
     {
         id: "2",
-        title: "Plan Trimestral - Academia de Trading",
+        title: "Plan Trimestral",
         category: "Cursos",
         price: 199.00,
         originalPrice: 299.00,

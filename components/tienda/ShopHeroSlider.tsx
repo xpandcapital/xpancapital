@@ -26,11 +26,11 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
         }
         return [
             {
-                id: 1, title: "Academia de Trading Profesional", subtitle: "Formación de élite en Forex, análisis técnico y gestión de riesgo.",
+                id: 1, title: "Plan Anual", subtitle: "Acceso completo a todos los cursos, herramientas y mentorías por un año.",
                 price: "$599/año", bgImage: "/images/arkadia-1.webp", tag: "PLAN ANUAL", accent: "blis-red"
             },
             {
-                id: 2, title: "Plan Trimestral de Trading", subtitle: "3 meses de acceso completo a todos los cursos, herramientas y mentorías.",
+                id: 2, title: "Plan Trimestral", subtitle: "3 meses de acceso completo a cursos, herramientas y comunidad.",
                 price: "$199/trimestre", bgImage: "/images/Cumbres-1.webp", tag: "PLAN TRIMESTRAL", accent: "blis-red"
             }
         ];

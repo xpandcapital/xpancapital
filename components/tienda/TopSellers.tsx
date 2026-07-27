@@ -8,7 +8,7 @@ import Link from "next/link";
 const TOP_PRODUCTS = [
   {
     rank: 1,
-    title: "Plan Anual - Academia de Trading",
+    title: "Plan Anual",
     category: "Cursos",
     price: 599,
     originalPrice: 899,
@@ -23,7 +23,7 @@ const TOP_PRODUCTS = [
   },
   {
     rank: 2,
-    title: "Plan Trimestral - Academia de Trading",
+    title: "Plan Trimestral",
     category: "Cursos",
     price: 199,
     originalPrice: 299,

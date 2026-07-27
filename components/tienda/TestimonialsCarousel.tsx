@@ -11,7 +11,7 @@ const TESTIMONIALS = [
     avatar: "CM",
     rating: 5,
     text: "El Plan Anual de Xpand Capital cambió mi vida financiera. Pasé de no saber nada de trading a operar con confianza en 3 meses.",
-    product: "Plan Anual - Academia Xpand",
+    product: "Plan Anual",
     color: "from-amber-500/10",
   },
   {
@@ -19,8 +19,8 @@ const TESTIMONIALS = [
     role: "Trader · México",
     avatar: "AP",
     rating: 5,
-    text: "La Academia de Trading me dio herramientas que no encontré en ningún otro lado. Empecé el plan trimestral y al mes ya vi resultados reales.",
-    product: "Plan Trimestral - Academia Xpand",
+    text: "Empecé con el plan trimestral y al mes ya vi resultados reales. Las herramientas y la comunidad son excelentes.",
+    product: "Plan Trimestral",
     color: "from-blis-red/10",
   },
   {

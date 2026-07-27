@@ -28,8 +28,8 @@ interface LiveBuyerNotificationProps {
 export function LiveBuyerNotification({ products }: LiveBuyerNotificationProps) {
     const [notification, setNotification] = useState<{ name: string; flagCode: string; product: string; time: number } | null>(null);
     const productNames = products && products.length > 0 ? products : [
-        "Plan Anual Xpand Capital",
-        "Plan Trimestral Xpand Capital",
+        "Plan Anual",
+        "Plan Trimestral",
     ];
 
     useEffect(() => {
