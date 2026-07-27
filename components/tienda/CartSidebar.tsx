@@ -142,15 +142,6 @@ export function CartSidebar() {
                                         <span className="text-gray-400">Subtotal</span>
                                         <span className="text-white font-bold">${totalUSD.toFixed(2)}</span>
                                     </div>
-                                    {coinsEnabled && user && (
-                                        <div className="flex items-center justify-between text-sm">
-                                            <span className="text-gray-400 flex items-center gap-1">
-                                                <Coins className="w-3.5 h-3.5 text-amber-500" />
-                                                Tu saldo
-                                            </span>
-                                            <span className="text-amber-500 font-bold">{blisCoins.toLocaleString()} COINS</span>
-                                        </div>
-                                    )}
                                     <div className="h-px bg-white/5" />
                                     <div className="flex items-center justify-between">
                                         <span className="text-gray-400 font-bold">Total</span>

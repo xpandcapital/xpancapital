@@ -12,7 +12,7 @@ interface ProductSearchProps {
   products: ProductDef[];
 }
 
-const CATEGORIES = ["Todos", "Cursos", "Ebooks", "Contratos", "Kits", "Mentoría", "Desarrolladores"];
+const CATEGORIES = ["Todos", "Cursos"];
 const SORT_OPTIONS = [
   { label: "Relevancia", value: "relevance" },
   { label: "Precio: menor a mayor", value: "price_asc" },
@@ -111,7 +111,7 @@ export function ProductSearch({ products }: ProductSearchProps) {
                   ref={inputRef}
                   value={query}
                   onChange={e => setQuery(e.target.value)}
-                  placeholder="Buscar cursos, ebooks, contratos..."
+                  placeholder="Buscar cursos de trading..."
                   className="flex-1 bg-transparent text-white placeholder-gray-500 text-base outline-none"
                 />
                 <div className="flex items-center gap-2">

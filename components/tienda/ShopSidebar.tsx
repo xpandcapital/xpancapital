@@ -22,17 +22,10 @@ import {
 import { useShop } from "@/context/ShopContext";
 
 const categories = [
-    { name: "Cursos Campus Blis", id: "cursos", icon: GraduationCap },
-    { name: "Contratos Legales", id: "contratos", icon: FileText },
-    { name: "Kits Desarrolladores", id: "desarrolladores", icon: Briefcase },
-    { name: "Kits de Agentes", id: "kits", icon: Users },
-    { name: "Ebooks Prácticos", id: "ebooks", icon: BookOpen },
-    { name: "Mentoría Elite", id: "mentoria", icon: Star },
+    { name: "Cursos Xpand", id: "cursos", icon: GraduationCap },
 ];
 
 const bottomNav = [
-    { name: "Mi Billetera", href: "#", icon: Wallet },
-    { name: "Soporte", href: "#", icon: HelpCircle },
     { name: "Ajustes", href: "#", icon: Settings },
 ];
 
@@ -132,7 +125,7 @@ export function ShopSidebar() {
                             ? 'text-blis-red drop-shadow-[0_0_8px_rgba(213,193,8,0.6)]'
                             : 'text-white group-hover:text-blis-red'
                             }`}>
-                            Blis<span className={activeId === 'shop-hero' || activeId === '' ? 'text-white' : 'text-gray-500'}>Tienda</span>
+                            Xpand<span className={activeId === 'shop-hero' || activeId === '' ? 'text-white' : 'text-gray-500'}>Capital</span>
                         </span>
                         {/* Línea neon degradada - igual al h1 de la página */}
                         <div className="min-w-[24px] flex-1 h-[2px] ml-3 rounded-full bg-gradient-to-r from-blis-red to-transparent opacity-80" />

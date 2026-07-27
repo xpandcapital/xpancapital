@@ -70,13 +70,9 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
         { title: "Catálogo de Inversiones", href: "/#catalog", type: "web" },
         { title: "Preguntas Frecuentes", href: "/#faq", type: "web" },
         { title: "Nuestro Equipo Lider", href: "/#team", type: "web" },
-        { title: "Contratos Legales Definitivos", href: "/tienda#contratos", type: "shop" },
-        { title: "Kits para Desarrolladores", href: "/tienda#desarrolladores", type: "shop" },
-        { title: "Arsenal para Agentes VIP", href: "/tienda#kits", type: "shop" },
-        { title: "Ebooks para Propietarios", href: "/tienda#ebooks", type: "shop" },
-        { title: "Mentoría Premium 1 a 1", href: "/tienda#mentoria", type: "shop" },
-        { title: "El nuevo CBD de Quito: Inversión", href: "/blog", type: "blog" },
-        { title: "¿Por qué invertir en plano?", href: "/blog", type: "blog" }
+        { title: "Cursos de Trading", href: "/tienda#cursos", type: "shop" },
+        { title: "Academia de Trading", href: "/blog", type: "blog" },
+        { title: "Estrategias de Inversión", href: "/blog", type: "blog" }
     ];
 
     const resultsWeb = allContent.filter(c => c.type === 'web' && c.title.toLowerCase().includes(searchQuery.toLowerCase()));

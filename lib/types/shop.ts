@@ -5,7 +5,7 @@ export interface ProductDef {
   slug?: string;
   title: string;
   category: string;
-  productType: 'curso' | 'pack' | 'mentoría' | 'ebook' | 'contratos' | 'kit';
+  productType: 'curso' | 'pack' | 'ebook' | 'kit';
   price: number;
   originalPrice?: number;
   rating: number;
@@ -27,9 +27,9 @@ export function mapTipoToProductType(tipo: string): ProductDef['productType'] {
     'digital': 'ebook',
     'fisico': 'pack',
     'servicio': 'curso',
-    'suscripcion': 'mentoría'
+    'suscripcion': 'curso',
   };
-  return map[tipo] || 'ebook';
+  return map[tipo] || 'curso';
 }
 
 export function mapProductoToProductDef(producto: Producto): ProductDef {
@@ -37,30 +37,17 @@ export function mapProductoToProductDef(producto: Producto): ProductDef {
     'digital': 'ebook',
     'fisico': 'kit',
     'servicio': 'curso',
-    'suscripcion': 'mentoría'
+    'suscripcion': 'curso'
   };
   
-  const productType = tipoMapping[producto.tipo] || 'ebook';
+  const productType = tipoMapping[producto.tipo] || 'curso';
   
   const categoryMapping: Record<string, string> = {
     'cursos': 'Cursos',
     'curso': 'Cursos',
-    'ebooks': 'Ebooks',
-    'ebook': 'Ebooks',
-    'libros': 'Ebooks',
-    'contratos': 'Contratos',
-    'contrato': 'Contratos',
-    'legal': 'Contratos',
-    'kits': 'Kits',
-    'kit': 'Kits',
-    'plantillas': 'Kits',
-    'pack': 'Packs',
-    'paquete': 'Packs',
-    'desarrolladores': 'Desarrolladores',
-    'mentoría': 'Mentoría',
-    'mentoria': 'Mentoría',
-    'membresias': 'Mentoría',
-    'membresía': 'Mentoría'
+    'academia': 'Cursos',
+    'trading': 'Cursos',
+    'forex': 'Cursos',
   };
   
   const rawCategory = producto.categoria?.nombre?.toLowerCase() || '';

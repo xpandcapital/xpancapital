@@ -14,11 +14,6 @@ import { ProductDef } from "@/lib/types/shop";
 
 const TYPE_STYLES: Record<string, { label: string; color: string }> = {
     cursos: { label: "Curso", color: "bg-sky-500/20 text-sky-400 border-sky-500/30" },
-    ebook: { label: "Ebook", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
-    contratos: { label: "Contrato", color: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
-    kits: { label: "Kit", color: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
-    packs: { label: "Pack", color: "bg-purple-500/20 text-purple-400 border-purple-500/30" },
-    mentoría: { label: "Mentoría", color: "bg-blis-red/20 text-blis-red border-blis-red/30" },
     general: { label: "Producto", color: "bg-gray-500/20 text-gray-400 border-gray-500/30" },
 };
 

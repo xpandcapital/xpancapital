@@ -133,7 +133,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                             <Star className="w-3 h-3 fill-current mr-1" />
                             {product.rating}
                         </div>
-                        <span className="text-gray-500 text-xs">Exclusivo Blis</span>
+                        <span className="text-gray-500 text-xs">Exclusivo Xpand</span>
                     </div>
 
                     {/* Price and Action Line — botón deslizante */}
