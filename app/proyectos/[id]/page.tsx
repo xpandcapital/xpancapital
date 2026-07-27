@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { Header } from "@/components/sections/Header";
-import { FooterSections } from "@/components/sections/Footer";
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter";
 import { ConstructionLoader } from "@/components/ui/ConstructionLoader";
 import logger from "@/lib/utils/logger";
 
@@ -133,7 +133,7 @@ export default function ProjectDetailPage() {
             Ver Proyectos
           </Link>
         </div>
-        <FooterSections />
+        <XpandFooter />
       </main>
     );
   }
@@ -412,7 +412,7 @@ export default function ProjectDetailPage() {
         </div>
       </section>
       
-      <FooterSections />
+      <XpandFooter />
     </main>
   );
 }

@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from "react";
-import { FooterSections } from "@/components/sections/Footer";
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter";
 import { ShopHeroSlider } from "@/components/tienda/ShopHeroSlider";
 import { ProductCategorySlider } from "@/components/tienda/ProductCategorySlider";
 import { ShopSidebar } from "@/components/tienda/ShopSidebar";
@@ -138,7 +138,7 @@ export default function ShopPage() {
       </div>
 
       <LiveBuyerNotification products={allProducts.map(p => p.title).filter(Boolean)} />
-      <FooterSections />
+      <XpandFooter />
     </main>
   );
 }

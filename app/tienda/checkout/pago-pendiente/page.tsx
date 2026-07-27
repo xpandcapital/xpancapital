@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import { CheckCircle2, Loader2, Clock, ArrowLeft, Package, ShoppingBag, Building2, Wallet, Phone, Copy } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/sections/Header";
-import { FooterSections } from "@/components/sections/Footer";
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter";
 import { getSupabase } from "@/lib/supabase";
 
 type PageState = "loading" | "pendiente" | "completado" | "error";
@@ -28,7 +28,7 @@ function PendienteLoading() {
       <div className="max-w-2xl mx-auto px-4 pt-40 pb-20 text-center">
         <Loader2 className="w-10 h-10 animate-spin text-blis-red mx-auto" />
       </div>
-      <FooterSections />
+      <XpandFooter />
     </main>
   );
 }
@@ -349,7 +349,7 @@ function PagoPendienteContent() {
           </div>
         )}
       </div>
-      <FooterSections />
+      <XpandFooter />
     </main>
   );
 }

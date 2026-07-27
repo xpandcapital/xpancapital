@@ -6,7 +6,7 @@ import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import { Header } from "@/components/sections/Header"
-import { FooterSections } from "@/components/sections/Footer"
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter"
 import { Building2, Copy, Phone, ArrowLeft, CheckCircle2, Clock, Zap } from "lucide-react"
 import Link from "next/link"
 
@@ -29,7 +29,7 @@ function Loading() {
           <div className="h-4 w-64 bg-white/5 rounded mx-auto" />
         </div>
       </div>
-      <FooterSections />
+      <XpandFooter />
     </main>
   )
 }
@@ -213,7 +213,7 @@ function Content() {
         </motion.div>
       </div>
 
-      <FooterSections />
+      <XpandFooter />
     </main>
   )
 }

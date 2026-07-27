@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 import { Header } from "@/components/sections/Header";
-import { FooterSections } from "@/components/sections/Footer";
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter";
 import { BlogHero } from "@/components/sections/BlogHero";
 import { BlogPremium } from "@/components/sections/BlogPremium";
 import { AutoSlider } from "@/components/ui/AutoSlider";
@@ -137,7 +137,7 @@ export default async function BlogMagazinePage() {
         </a>
       </section>
 
-      <FooterSections />
+      <XpandFooter />
     </main>
   );
 }

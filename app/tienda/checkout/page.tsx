@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import { Header } from "@/components/sections/Header";
-import { FooterSections } from "@/components/sections/Footer";
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter";
 import { useShop } from "@/context/ShopContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/Toast";
@@ -55,7 +55,7 @@ function CheckoutLoading() {
                     </div>
                 </div>
             </div>
-            <FooterSections />
+            <XpandFooter />
         </main>
     );
 }
@@ -782,7 +782,7 @@ function CheckoutContent() {
                         <span className="ml-3 text-sm text-gray-500">Más de 4,800 clientes satisfechos</span>
                     </motion.div>
                 </div>
-                <FooterSections />
+                <XpandFooter />
             </main>
         );
     }
@@ -1370,7 +1370,7 @@ function CheckoutContent() {
               </div>
             )}
 
-            <FooterSections />
+            <XpandFooter />
         </main>
     );
 }

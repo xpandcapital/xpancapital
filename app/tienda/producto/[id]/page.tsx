@@ -11,7 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Header } from "@/components/sections/Header";
-import { FooterSections } from "@/components/sections/Footer";
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter";
 import { CustomCursor } from "@/components/ui/CustomCursor";
 import { useShop } from "@/context/ShopContext";
 import { useToast } from "@/components/ui/Toast";
@@ -630,7 +630,7 @@ export default function ProductDetailPage() {
                 </div>
             </div >
 
-            <FooterSections />
+            <XpandFooter />
 
             <style jsx global>{`
                 .glass-card {

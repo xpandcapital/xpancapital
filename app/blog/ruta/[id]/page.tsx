@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Route, X, Library, Sparkles, Clock, ArrowLeft, ChevronRight } from "lucide-react";
 import { Header } from "@/components/sections/Header";
-import { FooterSections as Footer } from "@/components/sections/Footer";
+import { XpandFooter as Footer } from "@/components/sections/xpand/XpandFooter";
 import { usePublicBlog } from "@/lib/hooks/usePublicBlog";
 
 const convertToSlug = (text: string) => {

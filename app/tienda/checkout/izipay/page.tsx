@@ -8,7 +8,7 @@ import { motion } from "framer-motion"
 import { Shield, ArrowLeft, Lock, CreditCard, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { Header } from "@/components/sections/Header"
-import { FooterSections } from "@/components/sections/Footer"
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter"
 import { CheckoutIzipay } from "@/components/tienda/CheckoutIzipay"
 import { useToast } from "@/components/ui/Toast"
 
@@ -40,7 +40,7 @@ function IzipayLoading() {
           </div>
         </div>
       </div>
-      <FooterSections />
+      <XpandFooter />
     </main>
   )
 }
@@ -76,7 +76,7 @@ function IzipayContent() {
             </Link>
           </motion.div>
         </div>
-        <FooterSections />
+        <XpandFooter />
       </main>
     )
   }
@@ -183,7 +183,7 @@ function IzipayContent() {
         </motion.div>
       </div>
 
-      <FooterSections />
+      <XpandFooter />
     </main>
   )
 }

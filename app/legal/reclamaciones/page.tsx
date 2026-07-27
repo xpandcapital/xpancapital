@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Header } from "@/components/sections/Header"
-import { FooterSections } from "@/components/sections/Footer"
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter"
 import { MessageSquare, Send, CheckCircle2, Loader2, Shield, AlertTriangle, FileText, Star } from "lucide-react"
 
 type ReclamoTipo = "reclamo" | "queja" | "sugerencia"
@@ -210,7 +210,7 @@ export default function ReclamacionesPage() {
         )}
       </div>
 
-      <FooterSections />
+      <XpandFooter />
     </main>
   )
 }

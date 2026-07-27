@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 import { Header } from "@/components/sections/Header";
-import { FooterSections as Footer } from "@/components/sections/Footer";
+import { XpandFooter as Footer } from "@/components/sections/xpand/XpandFooter";
 import { usePublicBlog } from "@/lib/hooks/usePublicBlog";
 import { useAuth } from "@/hooks/useAuth";
 import { useComments } from "@/lib/hooks/useComments";

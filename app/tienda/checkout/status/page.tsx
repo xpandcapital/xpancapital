@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/sections/Header";
-import { FooterSections } from "@/components/sections/Footer";
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter";
 import { getSupabase } from "@/lib/supabase";
 
 type PaymentState = "loading" | "paid" | "pending" | "failed";
@@ -40,7 +40,7 @@ function CheckoutStatusLoading() {
           </div>
         </div>
       </div>
-      <FooterSections />
+      <XpandFooter />
     </main>
   );
 }

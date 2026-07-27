@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { Header } from "@/components/sections/Header"
-import { FooterSections } from "@/components/sections/Footer"
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter"
 import { Scale, Shield, BookOpen, Cookie, FileText, AlertTriangle, MessageSquare, ArrowRight } from "lucide-react"
 
 const pages = [
@@ -147,7 +147,7 @@ export default function LegalHubPage() {
         </motion.div>
       </div>
 
-      <FooterSections />
+      <XpandFooter />
     </main>
   )
 }

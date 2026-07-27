@@ -4,7 +4,7 @@ import { use } from "react";
 import { useTemplateBySlug } from "@/lib/hooks/useTemplate";
 import { DynamicSections } from "@/components/layout/DynamicSections";
 import { Header } from "@/components/sections/Header";
-import { FooterSections } from "@/components/sections/Footer";
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter";
 import { CustomHeader } from "@/components/sections/CustomHeader";
 import { CustomFooter } from "@/components/sections/CustomFooter";
 import { ConstructionLoader } from "@/components/ui/ConstructionLoader";
@@ -35,7 +35,7 @@ export default function EmbudoPage({ params }: { params: Promise<{ slug: string 
             </a>
           </div>
         </div>
-        <FooterSections />
+        <XpandFooter />
       </main>
     );
   }
@@ -73,7 +73,7 @@ export default function EmbudoPage({ params }: { params: Promise<{ slug: string 
         <CustomFooter config={config.customFooter} />
       )}
       {showFooter && !useCustomFooter && (
-        <FooterSections />
+        <XpandFooter />
       )}
     </main>
   );
