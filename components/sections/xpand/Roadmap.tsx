@@ -16,7 +16,6 @@ export function Roadmap() {
     <section id="roadmap" className="relative bg-[#fafaf8] py-20 md:py-28 overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-black/15 to-transparent" />
       <div className="absolute inset-0 texture-topo-light pointer-events-none" />
-      <div className="absolute inset-0 texture-grid-light pointer-events-none" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(232,198,0,0.09)_0%,transparent_55%)]" />
 
       <div className="relative max-w-5xl mx-auto px-4 md:px-6">
