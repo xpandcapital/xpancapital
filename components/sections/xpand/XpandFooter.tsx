@@ -97,7 +97,7 @@ export function XpandFooter() {
                   className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#e8c600] hover:border-[#e8c600]/50 hover:bg-[#e8c600]/10 transition-all"
                   aria-label={link.label}
                 >
-                  <img src={socialBrandIcons[link.label]} alt={link.label} className="w-4 h-4 invert opacity-50 group-hover:opacity-100" style={{ filter: "invert(1) opacity(0.5)" }} />
+                  <img src={socialBrandIcons[link.label]} alt={link.label} className="w-4 h-4 brightness-0 invert" />
                 </a>
               ))}
             </div>
