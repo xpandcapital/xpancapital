@@ -365,7 +365,7 @@ export function PsicologiaTab() {
                 onChange={e => setPostDivisa(e.target.value.toUpperCase())}
                 placeholder="EUR/USD"
                 maxLength={12}
-                className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
+                className="max-w-[200px] bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
               />
               <datalist id="psicologia-divisas">
                 {['EUR/USD','GBP/USD','USD/JPY','XAU/USD','BTC/USD','AUD/USD','USD/CAD','NZD/USD','EUR/JPY','GBP/JPY'].map(d => <option key={d} value={d} />)}

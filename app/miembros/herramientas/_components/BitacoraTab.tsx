@@ -552,9 +552,9 @@ export function BitacoraTab() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                      Divisa <FieldTooltip text="Activos que componen el par operado." />
+                      Divisa <FieldTooltip text="Activos que componen el par operado. Escribe o selecciona de tu historial." />
                     </label>
-                    <div className="flex items-stretch bg-black/50 border border-white/10 rounded-xl overflow-hidden focus-within:border-blis-red/50 transition-colors">
+                    <div className="flex items-stretch bg-black/50 border border-white/10 rounded-xl overflow-hidden focus-within:border-blis-red/50 transition-colors max-w-[200px]">
                       <input
                         type="text"
                         list="divisas-list-1"
@@ -562,10 +562,11 @@ export function BitacoraTab() {
                         onChange={e => setEditing({ ...editing, divisa_1: e.target.value.toUpperCase() || null })}
                         placeholder="USD"
                         maxLength={8}
-                        className="flex-1 bg-transparent px-3 py-3 text-white text-sm focus:outline-none placeholder:text-gray-600"
+                        className="flex-1 bg-transparent px-3 py-3 text-white text-sm focus:outline-none placeholder:text-gray-600 min-w-0"
                       />
                       <datalist id="divisas-list-1">
                         {DIVISAS.map(d => <option key={d} value={d} />)}
+                        {(entries.map(e => e.divisa_1).filter((d): d is string => !!d && !DIVISAS.includes(d)).filter((v, i, a) => a.indexOf(v) === i)).map(d => <option key={`h1-${d}`} value={d} />)}
                       </datalist>
                       <span className="flex items-center text-gray-600 text-sm font-bold px-1 bg-black/30">/</span>
                       <input
@@ -575,10 +576,11 @@ export function BitacoraTab() {
                         onChange={e => setEditing({ ...editing, divisa_2: e.target.value.toUpperCase() || null })}
                         placeholder="EUR"
                         maxLength={8}
-                        className="flex-1 bg-transparent px-3 py-3 text-white text-sm focus:outline-none placeholder:text-gray-600"
+                        className="flex-1 bg-transparent px-3 py-3 text-white text-sm focus:outline-none placeholder:text-gray-600 min-w-0"
                       />
                       <datalist id="divisas-list-2">
                         {DIVISAS.map(d => <option key={d} value={d} />)}
+                        {(entries.map(e => e.divisa_2).filter((d): d is string => !!d && !DIVISAS.includes(d)).filter((v, i, a) => a.indexOf(v) === i)).map(d => <option key={`h2-${d}`} value={d} />)}
                       </datalist>
                     </div>
                   </div>
