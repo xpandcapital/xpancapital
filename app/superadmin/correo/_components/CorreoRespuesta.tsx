@@ -198,7 +198,7 @@ export function CorreoRespuesta({
                   value={to}
                   onChange={(e) => setTo(e.target.value)}
                   placeholder="correo@dominio.com"
-                  className="w-full" buttonClassName="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900
                     placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all"
                 />
               </div>
@@ -216,9 +216,9 @@ export function CorreoRespuesta({
                       value={cc}
                       onChange={(e) => setCc(e.target.value)}
                       placeholder="cc@dominio.com"
-                      className="w-full" buttonClassName="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900
-                        placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all"
-                    />
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900
+                    placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all"
+                />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -236,7 +236,7 @@ export function CorreoRespuesta({
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full" buttonClassName="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900
+                  className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-900
                     placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all"
                 />
               </div>
@@ -270,7 +270,7 @@ export function CorreoRespuesta({
                     { value: 'none', label: 'Sin plantilla (texto plano)' },
                     ...templates.map((t: any) => ({ value: t.id, label: t.nombre })),
                   ]}
-                  className="w-full" buttonClassName="bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blis-red/30 transition-all appearance-none cursor-pointer"
+                  className="w-full"
                 />
                 {templateId !== 'none' && (
                   <p className="text-[10px] text-gray-600 mt-1">
@@ -377,7 +377,7 @@ export function CorreoRespuesta({
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   placeholder="Escribe tu respuesta aquí..."
-                  className="w-full" buttonClassName="bg-white border border-gray-200 border-t-0 rounded-b-xl p-3 text-sm text-gray-900
+                  className="bg-white border border-gray-200 border-t-0 rounded-b-xl p-3 text-sm text-gray-900
                     placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all
                     resize-none min-h-[200px]"
                 />

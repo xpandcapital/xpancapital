@@ -79,7 +79,7 @@ export function InstructorProfile() {
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-[#e8c600]/30 to-transparent blur-sm opacity-50" />
             <div className="relative aspect-[3/4] rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden">
               <img
-                src="/images/hebed%20perfil%20p.png"
+                src="/images/hebed%20perfil.png"
                 alt="Hebed Berrio — Director & Trader Profesional"
                 className="w-full h-full object-cover object-top"
               />

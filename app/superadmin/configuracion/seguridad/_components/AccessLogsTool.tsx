@@ -202,7 +202,7 @@ export function AccessLogsTool() {
 
         {/* Tabla */}
         <div className="overflow-x-auto">
-          <table className="w-full" buttonClassName="text-[10px]">
+          <table className="w-full">
             <thead>
               <tr className="border-b border-white/5">
                 <th className="text-left py-1.5 px-2 text-gray-500 font-medium w-14">Hora</th>

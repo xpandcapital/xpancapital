@@ -305,9 +305,10 @@
 }
 @keyframes glitch-clip {
   0%, 100% { clip-path: none; opacity: 0; }
-  25%  { clip-path: polygon(0 10%, 100% 20%, 100% 30%, 0 40%); opacity: 0.3; }
-  55%  { clip-path: polygon(0 60%, 100% 50%, 100% 70%, 0 80%); opacity: 0.4; }
-  85%  { clip-path: polygon(0 5%, 100% 15%, 100% 25%, 0 35%); opacity: 0.2; }
+  20%  { clip-path: polygon(0 5%, 100% 15%, 100% 35%, 0 25%); opacity: 0.25; }
+  40%  { clip-path: polygon(0 35%, 100% 45%, 100% 65%, 0 55%); opacity: 0.35; }
+  60%  { clip-path: polygon(0 60%, 100% 70%, 100% 90%, 0 80%); opacity: 0.3; }
+  80%  { clip-path: polygon(0 15%, 100% 25%, 100% 75%, 0 65%); opacity: 0.2; }
 }
 .glitch-text {
   animation: glitch 0.3s steps(2) infinite;

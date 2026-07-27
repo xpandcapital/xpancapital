@@ -78,7 +78,7 @@ export function MassEditModal({
                   ...statuses.map(s => ({ value: s, label: s }))
                 ]}
                 placeholder="Mantener actual"
-                className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-blis-red"
+                className="w-full"
               />
             </div>
           </div>

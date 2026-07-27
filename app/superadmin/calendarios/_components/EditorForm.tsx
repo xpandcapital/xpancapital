@@ -90,7 +90,7 @@ export function EditorForm({ editor }: { editor: Editor }) {
                 <SearchableSelect value={newField.type}
                   onChange={v => setNewField(prev => ({ ...prev, type: v }))}
                   options={fieldTypes.map(ft => ({ value: ft.value, label: ft.label }))}
-                  className="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blis-red" />
+                  className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blis-red" />
                 <label className="flex items-center justify-center gap-2 text-sm text-white bg-white/5 border border-white/10 rounded-lg px-4 py-2.5 cursor-pointer hover:bg-white/10">
                   <input type="checkbox" checked={newField.required}
                     onChange={e => setNewField(prev => ({ ...prev, required: e.target.checked }))}

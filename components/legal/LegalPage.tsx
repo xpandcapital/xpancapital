@@ -4,7 +4,7 @@ import { useRef, useEffect, useState, useCallback } from "react"
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { Scale, Shield, BookOpen, Cookie, FileText, AlertTriangle, ChevronRight, Clock, Calendar, FileCheck, Search, Download, Share2, Printer, X, ArrowUp } from "lucide-react"
 import { Header } from "@/components/sections/Header"
-import { FooterSections } from "@/components/sections/Footer"
+import { XpandFooter } from "@/components/sections/xpand/XpandFooter"
 
 interface LegalArticle {
   title: string
@@ -323,38 +323,6 @@ export function LegalPage({ data, slug }: LegalPageProps) {
           </div>
         </div>
 
-        {/* Compliance Badges */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          className="mt-24 pt-12 border-t border-white/5"
-        >
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-8">
-            {[
-              { label: "SSL Secured", icon: <Shield className="w-3.5 h-3.5" /> },
-              { label: "GDPR Ready", icon: <FileCheck className="w-3.5 h-3.5" /> },
-              { label: "Verified Business", icon: <Scale className="w-3.5 h-3.5" /> },
-              { label: "PCI Compliant", icon: <Shield className="w-3.5 h-3.5" /> },
-            ].map((badge, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.02] border border-white/5"
-              >
-                <motion.div
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="text-emerald-400"
-                >
-                  {badge.icon}
-                </motion.div>
-                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{badge.label}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
       </div>
 
       {/* Floating Widgets */}
@@ -407,7 +375,7 @@ export function LegalPage({ data, slug }: LegalPageProps) {
         </motion.button>
       </div>
 
-      <FooterSections />
+      <XpandFooter />
     </main>
   )
 }

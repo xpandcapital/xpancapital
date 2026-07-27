@@ -47,7 +47,7 @@ export function FormFlowPanel({ editor }: { editor: Editor }) {
             placeholder="Sin campaña"
             searchPlaceholder="Buscar campaña..."
             emptyText="Sin campañas"
-            className="w-full" buttonClassName="bg-white/5 border border-white/10 text-white rounded px-3 py-2 outline-none focus:border-blis-red text-sm"
+            className="w-full"
           />
         </div>
         <div className="h-8 w-px bg-blue-500/30 border-l-2 border-dashed border-blue-500/50" />
@@ -99,7 +99,7 @@ export function FormFlowPanel({ editor }: { editor: Editor }) {
                     <label className="text-[10px] text-white/30 font-bold uppercase block">Destinatario</label>
                     <input type="text" value={step.url} onChange={e => updateFlowStep(step.id, e.target.value)}
                       placeholder="admin@empresa.com"
-                      className="w-full" buttonClassName="bg-white/5 border border-white/10 text-white rounded px-3 py-2 outline-none focus:border-amber-500 text-sm" />
+                      className="w-full" />
                   </>
                 ) : step.type === 'redirect' ? (
                   <>
@@ -107,14 +107,14 @@ export function FormFlowPanel({ editor }: { editor: Editor }) {
                     <textarea value={step.url} onChange={e => updateFlowStep(step.id, e.target.value)}
                       placeholder="https://wa.me/593..."
                       rows={2}
-                      className="w-full" buttonClassName="bg-white/5 border border-white/10 text-white rounded px-3 py-2 outline-none focus:border-emerald-500 text-sm resize-none" />
+                      className="w-full" />
                   </>
                 ) : (
                   <>
                     <label className="text-[10px] text-white/30 font-bold uppercase block">Endpoint URL</label>
                     <input type="text" value={step.url} onChange={e => updateFlowStep(step.id, e.target.value)}
                       placeholder="https://hook.make.com/..."
-                      className="w-full" buttonClassName="bg-white/5 border border-white/10 text-white rounded px-3 py-2 outline-none focus:border-purple-500 text-sm" />
+                      className="w-full" />
                   </>
                 )}
               </div>

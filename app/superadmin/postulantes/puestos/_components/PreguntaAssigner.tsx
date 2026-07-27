@@ -61,7 +61,7 @@ export function PreguntaAssigner({
             onChange={setCopyFrom}
             options={puestos.filter(p => p.id !== puestoId).map(p => ({ value: p.id, label: p.nombre }))}
             placeholder="Copiar preguntas de..."
-            className="bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-gray-300 text-xs focus:outline-none focus:border-blis-red/50"
+            className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-gray-300 text-xs focus:outline-none focus:border-blis-red/50"
           />
           {copyFrom && (
             <button onClick={handleCopy} className="px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-[10px] font-bold hover:bg-blue-500/20 transition-colors flex items-center gap-1">

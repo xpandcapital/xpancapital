@@ -107,7 +107,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full" buttonClassName="max-w-lg max-h-[85vh] bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden flex flex-col shadow-2xl"
+        className="w-full"
       >
         <div className="flex items-center justify-between p-4 border-b border-white/5 shrink-0">
           <h3 className="text-sm font-bold text-white">Configurar cuenta</h3>
@@ -123,7 +123,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
             <input
               type="text" value={nombre} onChange={e => setNombre(e.target.value)}
               placeholder="Central Xpand Capital"
-              className="w-full" buttonClassName="bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all"
+              className="w-full"
             />
           </div>
 
@@ -133,7 +133,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
             <input
               type="text" value={departamento} onChange={e => setDepartamento(e.target.value)}
               placeholder="Atención al Cliente"
-              className="w-full" buttonClassName="bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all"
+              className="w-full"
             />
           </div>
 
@@ -163,7 +163,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
             </div>
             {avatarUrl && (
               <div className="mt-2 w-12 h-12 rounded-xl overflow-hidden border border-white/10">
-                <img src={avatarUrl} alt="Avatar" className="w-full" buttonClassName="h-full object-cover" />
+                <img src={avatarUrl} alt="Avatar" className="w-full" />
               </div>
             )}
           </div>
@@ -198,7 +198,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
             <textarea
               value={firma} onChange={e => setFirma(e.target.value)}
               placeholder='&lt;p&gt;Saludos,&lt;br&gt;&lt;b&gt;Central Xpand Capital&lt;/b&gt;&lt;/p&gt;'
-              className="w-full" buttonClassName="bg-white/[0.03] border border-white/10 rounded-xl p-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blis-red/30 transition-all resize-none h-20 font-mono"
+              className="w-full"
             />
           </div>
 
@@ -212,7 +212,7 @@ export function CorreoConfigCuenta({ open, cuenta, onClose, onGuardado }: Props)
                 { value: '', label: 'Ninguna (texto plano)' },
                 ...templates.map((t: any) => ({ value: t.id, label: t.nombre })),
               ]}
-              className="w-full" buttonClassName="bg-white/[0.02] border border-white/5 rounded-xl px-3 py-2 text-sm text-gray-300 focus:outline-none focus:border-blis-red/30 transition-all appearance-none cursor-pointer"
+              className="w-full"
             />
           </div>
 

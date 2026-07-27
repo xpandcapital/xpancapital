@@ -207,7 +207,7 @@ export function ProductFormModal({
   }
 
   return (
-    <div className="w-full" buttonClassName="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-500 px-4 md:px-8 pt-8">
+    <div className="w-full">
       <div className="sticky top-[-1px] bg-black/80 backdrop-blur-2xl z-[50] py-4 border-b border-white/5 flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <button onClick={onClose} className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 transition-all">←</button>
@@ -267,7 +267,7 @@ export function ProductFormModal({
                 }}
                 type="text"
                 placeholder="Ej. Whey Protein Isolate"
-                className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-gray-800 focus:outline-none focus:border-blis-red transition-all"
+                className="w-full"
               />
             </div>
 
@@ -410,7 +410,7 @@ export function ProductFormModal({
                 rows={2}
                 maxLength={200}
                 placeholder="Texto corto que aparece al compartir el enlace en WhatsApp, Facebook, etc. Si lo dejas vacío, se usa la imagen del producto."
-                className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm placeholder:text-gray-800 focus:outline-none focus:border-blue-500 transition-all resize-none"
+                className="w-full"
               />
             </div>
 
@@ -501,7 +501,7 @@ export function ProductFormModal({
                   options={categories.map(c => ({ value: c.skuPrefix, label: c.skuPrefix }))}
                   placeholder="SKU"
                   className="w-[120px]"
-                  buttonClassName="py-4 rounded-2xl"
+
                 />
                 <input
                   value={formData.sku}
@@ -607,7 +607,7 @@ function CursoSelector({ cursos, onSelect }: { cursos: Array<{ id: string; nombr
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
         placeholder="Buscar curso..."
-        className="w-full" buttonClassName="bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 transition-colors"
+        className="w-full"
         autoFocus
       />
       <div className="max-h-40 overflow-y-auto space-y-0.5">
@@ -616,7 +616,7 @@ function CursoSelector({ cursos, onSelect }: { cursos: Array<{ id: string; nombr
             key={c.id}
             type="button"
             onClick={() => { onSelect(c.id); setAbierto(false); setBusqueda("") }}
-            className="w-full" buttonClassName="text-left px-3 py-2 rounded-lg text-sm text-white hover:bg-purple-500/20 hover:text-purple-300 transition-colors truncate flex items-center gap-2"
+            className="w-full"
           >
             <GraduationCap className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
             {c.nombre}

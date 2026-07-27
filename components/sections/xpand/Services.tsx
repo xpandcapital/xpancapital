@@ -57,14 +57,6 @@ function ServicePanel({ service, index }: { service: (typeof services)[0]; index
       transition={{ duration: 0.8, type: "spring", bounce: 0.2 }}
       className="group relative overflow-hidden rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-md p-7 md:p-12 hover:border-[#e8c600]/30 hover:shadow-[0_0_35px_rgba(232,198,0,0.08)] transition-all duration-500"
     >
-      <motion.span
-        style={{ y: numberY }}
-        aria-hidden
-        className="pointer-events-none absolute -top-4 right-2 md:-top-8 md:right-6 text-[110px] md:text-[200px] font-black leading-none text-white/[0.03] group-hover:text-[#e8c600]/[0.06] transition-colors duration-700 select-none"
-      >
-        {service.number}
-      </motion.span>
-
       <div className="relative">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#e8c600]/10 border border-[#e8c600]/20 flex items-center justify-center group-hover:bg-[#e8c600]/20 group-hover:scale-110 transition-all duration-300">

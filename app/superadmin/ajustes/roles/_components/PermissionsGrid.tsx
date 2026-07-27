@@ -75,7 +75,7 @@ export function PermissionsGrid({
             ...getAvailableRoutesForRole(role).map(route => ({ value: route.path, label: `${route.label} (${route.path})` })),
           ]}
           placeholder="Default del rol"
-          className="w-full" buttonClassName="bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blis-red/50 appearance-none cursor-pointer"
+          className="w-full"
         />
         <p className="text-[9px] text-gray-600 mt-1.5">Al iniciar sesión, este rol será redirigido a esta página.</p>
       </div>

@@ -44,7 +44,7 @@ export function CommsTab({ client, onUpdate }: CommsTabProps) {
                                 { value: 'offer', label: 'Promoción de Temporada' },
                                 { value: 'alert', label: 'Alerta de Seguridad' },
                             ]}
-                            className="w-full" buttonClassName="bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-xs outline-none focus:border-blis-red transition-all"
+                            className="w-full"
                         />
                     </div>
                     <div className="space-y-2">
@@ -53,7 +53,7 @@ export function CommsTab({ client, onUpdate }: CommsTabProps) {
                             placeholder="Asunto del mensaje..."
                             value={noticeContent.title}
                             onChange={e => setNoticeContent({ ...noticeContent, title: e.target.value })}
-                            className="w-full" buttonClassName="bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-xs outline-none focus:border-blis-red transition-all"
+                            className="w-full"
                         />
                     </div>
                 </div>
@@ -64,7 +64,7 @@ export function CommsTab({ client, onUpdate }: CommsTabProps) {
                         placeholder="Escribe el contenido aquí..."
                         value={noticeContent.message}
                         onChange={e => setNoticeContent({ ...noticeContent, message: e.target.value })}
-                        className="w-full" buttonClassName="bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-xs min-h-[140px] outline-none focus:border-blis-red transition-all"
+                        className="w-full"
                     />
                 </div>
 

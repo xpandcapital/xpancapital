@@ -315,7 +315,7 @@ export default function VentasAdminPage() {
                         {/* Desktop: tabla */}
                         <div className="hidden lg:block bg-zinc-900/50 border border-white/10 rounded-2xl overflow-hidden">
                             <div className="overflow-x-auto">
-                                <table className="w-full" buttonClassName="text-left text-sm">
+                                <table className="w-full">
                                     <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-widest text-[10px]">
                                         <tr>
                                             <th className="p-4">Cliente</th>
@@ -479,7 +479,7 @@ export default function VentasAdminPage() {
                             </div>
                         )}
                         <Button onClick={registrarVentaOffline} disabled={guardando || !formNueva.user_email || !formNueva.producto_id}
-                            className="w-full" buttonClassName="bg-emerald-600 hover:bg-emerald-600/90 text-white font-bold">
+                            className="w-full">
                             {guardando ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null} Registrar Venta
                         </Button>
                     </div>
@@ -520,11 +520,11 @@ export default function VentasAdminPage() {
                             <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Nota de verificación</label>
                             <textarea value={notasVerificacion} onChange={e => setNotasVerificacion(e.target.value)}
                                 placeholder="Ej: Transferencia recibida, comprobante #1234" rows={3}
-                                className="w-full" buttonClassName="bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-white resize-none" />
+                                className="w-full" />
                         </div>
                         <Button onClick={() => actualizarEstado(modalVerificar!.id, "completado", notasVerificacion, subTipoPago)}
                             disabled={guardando}
-                            className="w-full" buttonClassName="bg-emerald-600 hover:bg-emerald-600/90 text-white font-bold disabled:opacity-50">
+                            className="w-full">
                             {guardando ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : <ShieldCheck className="w-4 h-4 mr-2 inline" />}
                             {guardando ? 'Procesando...' : 'Confirmar Pago y Dar Acceso'}
                         </Button>

@@ -330,7 +330,7 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
                         value={newRuta}
                         onChange={e => setNewRuta(e.target.value)}
                         placeholder="/api/leads"
-                        className="w-full" buttonClassName="bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5 focus:border-blis-red/30"
+                        className="w-full"
                         onKeyDown={e => { if (e.key === 'Enter') addRule() }}
                         autoFocus
                       />
@@ -341,7 +341,7 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
                         value={newMetodo}
                         onChange={setNewMetodo}
                         options={METODOS.map(m => ({ value: m, label: m }))}
-                        className="w-full" buttonClassName="bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5"
+                        className="w-full"
                       />
                     </div>
                     <div>
@@ -351,7 +351,7 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
                         min={1}
                         value={newLimite}
                         onChange={e => setNewLimite(parseInt(e.target.value) || 10)}
-                        className="w-full" buttonClassName="bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5 focus:border-blis-red/30"
+                        className="w-full"
                       />
                     </div>
                     <div>
@@ -361,7 +361,7 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
                         min={1}
                         value={newVentana}
                         onChange={e => setNewVentana(parseInt(e.target.value) || 60)}
-                        className="w-full" buttonClassName="bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5 focus:border-blis-red/30"
+                        className="w-full"
                       />
                     </div>
                     <div className="col-span-2">
@@ -371,7 +371,7 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
                         value={newDescripcion}
                         onChange={e => setNewDescripcion(e.target.value)}
                         placeholder="Ej: Formularios de captación de leads"
-                        className="w-full" buttonClassName="bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5 focus:border-blis-red/30"
+                        className="w-full"
                       />
                     </div>
                     <div className="col-span-2">
@@ -381,7 +381,7 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
                         value={newProtege}
                         onChange={e => setNewProtege(e.target.value)}
                         placeholder="Ej: Spam masivo de leads falsos"
-                        className="w-full" buttonClassName="bg-zinc-800 rounded-lg px-3 py-2 text-xs text-white outline-none border border-white/5 focus:border-blis-red/30"
+                        className="w-full"
                       />
                     </div>
                   </div>
@@ -435,7 +435,7 @@ export function RateLimitingTool({ config, saving, onSave, onUpdate }: Props) {
               type="text"
               value={rl.mensaje_limite}
               onChange={(e) => onUpdate?.({ mensaje_limite: e.target.value })}
-              className="w-full" buttonClassName="bg-zinc-900 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-500 outline-none border border-white/5 focus:border-blue-500/30"
+              className="w-full"
             />
           </div>
 

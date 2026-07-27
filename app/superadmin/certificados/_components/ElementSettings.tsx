@@ -189,7 +189,7 @@ export function ElementSettings({
                       type="color"
                       value={activeElement.color}
                       onChange={e => onUpdate(activeElement.id, { color: e.target.value })}
-                      className="w-full" buttonClassName="h-12 bg-black/40 border border-white/5 rounded-xl cursor-pointer p-1"
+                      className="w-full"
                     />
                     <SearchableSelect
                       value={activeElement.fontWeight}
@@ -200,7 +200,7 @@ export function ElementSettings({
                         { value: "700", label: "Bold" },
                         { value: "900", label: "Black Version" },
                       ]}
-                      className="w-full" buttonClassName="bg-black/40 border border-white/5 rounded-xl px-2 text-[10px] font-black uppercase text-white outline-none focus:border-blis-red"
+                      className="w-full"
                     />
                   </div>
                 </div>
@@ -209,7 +209,7 @@ export function ElementSettings({
 
             <button
               onClick={onDeselect}
-              className="w-full" buttonClassName="py-4 border border-zinc-800 hover:border-zinc-700 rounded-xl text-[9px] font-black text-zinc-500 hover:text-white uppercase tracking-widest transition-all"
+              className="w-full"
             >
               Deseleccionar Elemento
             </button>

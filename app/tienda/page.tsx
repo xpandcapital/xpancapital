@@ -3,14 +3,13 @@
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from "react";
-import { Header } from "@/components/sections/Header";
 import { FooterSections } from "@/components/sections/Footer";
 import { ShopHeroSlider } from "@/components/tienda/ShopHeroSlider";
 import { ProductCategorySlider } from "@/components/tienda/ProductCategorySlider";
 import { ShopSidebar } from "@/components/tienda/ShopSidebar";
 import { LiveBuyerNotification } from "@/components/tienda/LiveBuyerNotification";
 import { CartSidebar } from "@/components/tienda/CartSidebar";
-import { CustomCursor } from "@/components/ui/CustomCursor";
+
 import { mapProductoToProductDef, ProductDef } from "@/lib/types/shop";
 import { ProductSearch } from "@/components/tienda/ProductSearch";
 import type { ProductoCategoria } from "@/lib/hooks/useProducts";
@@ -69,8 +68,6 @@ export default function ShopPage() {
 
   return (
     <main className="min-h-screen text-white bg-black">
-      <CustomCursor />
-      <Header />
       <CartSidebar />
 
       <div className="relative flex">

@@ -64,7 +64,7 @@ const data: LegalPageData = {
     {
       title: "8. Ley Aplicable y Jurisdicción",
       icon: "scale",
-      content: `<p>Estos Términos y Condiciones se rigen por las leyes de la República del Perú. Cualquier disputa relacionada con estos términos será sometida a la jurisdicción exclusiva de los tribunales de Arequipa, Perú.</p>
+      content: `<p>Estos Términos y Condiciones se rigen por las leyes de la República de Colombia. Cualquier disputa relacionada con estos términos será sometida a la jurisdicción exclusiva de los tribunales de Colombia.</p>
 <p>Para usuarios residentes en Ecuador, se aplicarán las disposiciones de protección al consumidor establecidas en la legislación ecuatoriana que resulten aplicables.</p>`,
     },
     {
@@ -72,9 +72,9 @@ const data: LegalPageData = {
       icon: "file",
       content: `<p>Para cualquier consulta relacionada con estos Términos y Condiciones, puede contactarnos a través de:</p>
 <ul>
-  <li><strong>Email:</strong> legal@xpancapital.org</li>
-  <li><strong>Dirección:</strong> Arequipa, Perú</li>
-  <li><strong>Teléfono:</strong> Disponible en nuestra página de contacto</li>
+  <li><strong>Email:</strong> info@xpancapital.org</li>
+  <li><strong>WhatsApp:</strong> +57 322 350 1170</li>
+  <li><strong>Dirección:</strong> Colombia · Latam</li>
 </ul>`,
     },
   ],

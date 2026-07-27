@@ -192,7 +192,7 @@ export const ProductGridView = React.memo(function ProductGridView({
                       value={product.status}
                       onChange={(value) => onUpdateBulk(product.id, 'status', value)}
                       options={statuses.map(s => ({ value: s.name, label: s.name }))}
-                      className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black text-white w-full max-w-[90px] outline-none"
+                      className="w-full max-w-[90px]" buttonClassName="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[10px] font-black text-white outline-none"
                     />
                   </div>
                 ) : (

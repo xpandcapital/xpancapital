@@ -1,7 +1,8 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
-import { TrendingUp, MapPin, Mail, Phone, Send, ChevronRight, Star, ArrowUpRight } from "lucide-react"
+import { TrendingUp, MapPin, Mail, Phone, Send, ChevronRight, Star, ArrowUpRight, Loader2, Check } from "lucide-react"
 import Link from "next/link"
 
 const quickLinks = [
@@ -22,14 +23,44 @@ const stats = [
   { value: "1,320+", label: "Certificados" },
 ]
 
+const socialBrandIcons: Record<string, string> = {
+  "Facebook": "/icons/brands/facebook.svg",
+  "Instagram": "/icons/brands/instagram.svg",
+  "Threads": "/icons/brands/threads.svg",
+  "TikTok": "/icons/brands/tiktok.svg",
+  "YouTube": "/icons/brands/youtube.svg",
+}
+
 const socialLinks = [
-  { label: "Facebook", href: "#", icon: "FB" },
-  { label: "Instagram", href: "#", icon: "IG" },
-  { label: "TikTok", href: "#", icon: "TK" },
-  { label: "YouTube", href: "#", icon: "YT" },
+  { label: "Instagram", href: "https://www.instagram.com/expandcapital.redes/" },
+  { label: "Threads", href: "https://www.threads.net/@expandcapital.redes" },
+  { label: "TikTok", href: "https://www.tiktok.com/@xpandcapital1" },
+  { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61569463964413" },
+  { label: "YouTube", href: "https://www.youtube.com/@XpandCapital" },
 ]
 
 export function XpandFooter() {
+  const [email, setEmail] = useState("")
+  const [subState, setSubState] = useState<"idle" | "loading" | "success" | "error">("idle")
+
+  const handleSubscribe = async () => {
+    if (!email || !email.includes("@")) return
+    setSubState("loading")
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+      const data = await res.json()
+      setSubState(data.success ? "success" : "error")
+      if (data.success) setEmail("")
+    } catch {
+      setSubState("error")
+    }
+    setTimeout(() => setSubState("idle"), 4000)
+  }
+
   return (
     <footer id="footer" className="relative bg-[#020202] border-t border-[#e8c600]/20 overflow-hidden">
       <div className="absolute inset-0 texture-grid-dark pointer-events-none opacity-50" />
@@ -58,14 +89,16 @@ export function XpandFooter() {
             </p>
             <div className="flex items-center gap-3">
               {socialLinks.map((link) => (
-                <Link
+                <a
                   key={link.label}
                   href={link.href}
-                  className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#e8c600] hover:border-[#e8c600]/50 hover:bg-[#e8c600]/10 transition-all text-[10px] font-bold"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-[#e8c600] hover:border-[#e8c600]/50 hover:bg-[#e8c600]/10 transition-all"
                   aria-label={link.label}
                 >
-                  {link.icon}
-                </Link>
+                  <img src={socialBrandIcons[link.label]} alt={link.label} className="w-4 h-4 invert opacity-50 group-hover:opacity-100" style={{ filter: "invert(1) opacity(0.5)" }} />
+                </a>
               ))}
             </div>
           </motion.div>
@@ -85,14 +118,33 @@ export function XpandFooter() {
             <div className="flex gap-2">
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSubscribe()}
                 placeholder="Tu mejor email"
-                className="flex-1 bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-[#e8c600]/60 focus:outline-none transition-colors"
+                disabled={subState === "loading"}
+                className="flex-1 bg-white/[0.04] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:border-[#e8c600]/60 focus:outline-none transition-colors disabled:opacity-50"
               />
-              <button className="px-5 py-3 bg-[#e8c600] text-black font-bold text-sm rounded-xl hover:bg-[#f0d400] transition-all flex items-center gap-2 hover:shadow-[0_0_20px_rgba(232,198,0,0.3)]">
-                <Send className="w-4 h-4" />
-                <span className="hidden sm:inline">Suscribirse</span>
+              <button
+                onClick={handleSubscribe}
+                disabled={subState === "loading" || subState === "success"}
+                className="px-5 py-3 bg-[#e8c600] text-black font-bold text-sm rounded-xl hover:bg-[#f0d400] transition-all flex items-center gap-2 hover:shadow-[0_0_20px_rgba(232,198,0,0.3)] disabled:opacity-60"
+              >
+                {subState === "loading" ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : subState === "success" ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                <span className="hidden sm:inline">
+                  {subState === "loading" ? "Enviando..." : subState === "success" ? "Suscrito" : "Suscribirse"}
+                </span>
               </button>
             </div>
+            {subState === "error" && (
+              <p className="text-red-400 text-xs mt-2">Error al suscribir. Intenta de nuevo.</p>
+            )}
           </motion.div>
         </div>
 
@@ -200,10 +252,10 @@ export function XpandFooter() {
             &copy; {new Date().getFullYear()} Xpand Capital Academy. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="text-white/15 text-xs hover:text-[#e8c600] transition-colors">
+            <Link href="/legal/terminos" className="text-white/15 text-xs hover:text-[#e8c600] transition-colors">
               Términos y Condiciones
             </Link>
-            <Link href="#" className="text-white/15 text-xs hover:text-[#e8c600] transition-colors">
+            <Link href="/legal/privacidad" className="text-white/15 text-xs hover:text-[#e8c600] transition-colors">
               Política de Privacidad
             </Link>
           </div>

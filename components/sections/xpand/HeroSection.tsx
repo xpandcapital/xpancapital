@@ -124,8 +124,8 @@ export function HeroSection() {
             className="relative text-center mb-6 md:mb-12"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            <span className="relative glitch-text block md:inline text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#e8c600" }}>XPAND</span>
-            <span className="relative glitch-text block md:inline text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
+            <span className="relative glitch-text block md:inline text-[clamp(3.2rem,10vw,12rem)] md:text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#e8c600" }}>XPAND</span>
+            <span className="relative glitch-text block md:inline text-[clamp(3.2rem,10vw,12rem)] md:text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
           </motion.h1>
 
           <motion.p custom={2} variants={fadeUp}
@@ -154,7 +154,7 @@ export function HeroSection() {
               Inscríbete Ahora
               <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="#ecosistema" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 border border-white/20 text-white font-semibold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:border-[#e8c600]/60 hover:text-[#e8c600] hover:shadow-[0_0_15px_rgba(232,198,0,0.2)] transition-all whitespace-nowrap">
+            <Link href="/login" className="group inline-flex items-center justify-center gap-1.5 md:gap-2 border border-white/20 text-white font-semibold px-4 py-3 md:px-8 md:py-4 rounded-xl text-sm md:text-base flex-1 md:flex-none hover:border-[#e8c600]/60 hover:text-[#e8c600] hover:shadow-[0_0_15px_rgba(232,198,0,0.2)] transition-all whitespace-nowrap">
               <Play className="w-4 h-4 md:w-5 md:h-5" />
               Ver Campus
             </Link>
