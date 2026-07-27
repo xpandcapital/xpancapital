@@ -6,15 +6,18 @@ import { ShoppingBag, X } from "lucide-react";
 import Image from "next/image";
 
 const BUYERS = [
-    { name: "Carlos M.", flagCode: "mx" },
-    { name: "Ana S.", flagCode: "co" },
-    { name: "Felipe R.", flagCode: "pe" },
-    { name: "Mariana L.", flagCode: "cl" },
-    { name: "Roberto T.", flagCode: "us" },
+    { name: "Carlos M.", flagCode: "co" },
+    { name: "Ana S.", flagCode: "mx" },
+    { name: "Felipe R.", flagCode: "co" },
+    { name: "Mariana L.", flagCode: "pe" },
+    { name: "Roberto T.", flagCode: "ec" },
     { name: "Elena C.", flagCode: "ar" },
-    { name: "Andrea P.", flagCode: "es" },
-    { name: "Diego J.", flagCode: "ec" },
-    { name: "Mauricio G.", flagCode: "ve" }
+    { name: "Andrea P.", flagCode: "cl" },
+    { name: "Diego J.", flagCode: "co" },
+    { name: "Mauricio G.", flagCode: "ve" },
+    { name: "Sofia M.", flagCode: "co" },
+    { name: "Javier L.", flagCode: "mx" },
+    { name: "Camila R.", flagCode: "pe" },
 ];
 
 interface LiveBuyerNotificationProps {
@@ -25,18 +28,16 @@ interface LiveBuyerNotificationProps {
 export function LiveBuyerNotification({ products }: LiveBuyerNotificationProps) {
     const [notification, setNotification] = useState<{ name: string; flagCode: string; product: string; time: number } | null>(null);
     const productNames = products && products.length > 0 ? products : [
-        "Capacitación Inmobiliaria",
-        "Kit de Contratos",
-        "Guía de Ventas",
-        "Mentoría Personalizada"
+        "Plan Anual Xpand Capital",
+        "Plan Trimestral Xpand Capital",
     ];
 
     useEffect(() => {
-        // Random intervals between 12 and 45 seconds to spawn a new notification
         const showRandomNotification = () => {
             const randomBuyer = BUYERS[Math.floor(Math.random() * BUYERS.length)];
-            const randomProduct = productNames[Math.floor(Math.random() * productNames.length)];
-            const randomTime = Math.floor(Math.random() * 59) + 1; // 1 to 59 mins ago
+            // 80% Anual, 20% Trimestral
+            const randomProduct = Math.random() < 0.8 ? productNames[0] : productNames[1];
+            const randomTime = Math.floor(Math.random() * 59) + 1;
 
             setNotification({
                 name: randomBuyer.name,

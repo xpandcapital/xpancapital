@@ -26,12 +26,12 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
         }
         return [
             {
-                id: 1, title: "Capacitaciones Profesionales", subtitle: "Formación de alto nivel para impulsar tu carrera en el sector inmobiliario.",
-                price: "", bgImage: "/images/arkadia-1.webp", tag: "CURSOS PREMIUM", accent: "blis-red"
+                id: 1, title: "Academia de Trading Profesional", subtitle: "Formación de élite en Forex, análisis técnico y gestión de riesgo.",
+                price: "$599/año", bgImage: "/images/arkadia-1.webp", tag: "PLAN ANUAL", accent: "blis-red"
             },
             {
-                id: 2, title: "Kits Legales y Contratos", subtitle: "Documentación profesional lista para usar con respaldo legal completo.",
-                price: "", bgImage: "/images/Cumbres-1.webp", tag: "PROTECCIÓN LEGAL", accent: "blis-red"
+                id: 2, title: "Plan Trimestral de Trading", subtitle: "3 meses de acceso completo a todos los cursos, herramientas y mentorías.",
+                price: "$199/trimestre", bgImage: "/images/Cumbres-1.webp", tag: "PLAN TRIMESTRAL", accent: "blis-red"
             }
         ];
     }, [products]);

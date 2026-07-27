@@ -13,10 +13,10 @@ interface StatItem {
 }
 
 const STATS: StatItem[] = [
-  { icon: Users,       label: "Clientes Activos",    value: 4820,  suffix: "+",  color: "text-emerald-400" },
-  { icon: ShoppingBag, label: "Productos Vendidos",   value: 12400, suffix: "+",  color: "text-blis-red"    },
+  { icon: Users,       label: "Alumnos Activos",     value: 2840,  suffix: "+",  color: "text-emerald-400" },
+  { icon: ShoppingBag, label: "Planes Vendidos",      value: 7320,  suffix: "+",  color: "text-blis-red"    },
   { icon: Star,        label: "Calificación Promedio",value: 4.9,   suffix: "/5", color: "text-amber-400"   },
-  { icon: TrendingUp,  label: "Crecimiento Mensual",  value: 38,    suffix: "%",  color: "text-sky-400"     },
+  { icon: TrendingUp,  label: "Crecimiento Mensual",  value: 28,    suffix: "%",  color: "text-sky-400"     },
 ];
 
 function useCountUp(target: number, duration = 1800, start = false) {
