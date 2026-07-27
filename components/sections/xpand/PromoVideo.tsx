@@ -1,7 +1,5 @@
 "use client"
 
-import { motion } from "framer-motion"
-
 export function PromoVideo() {
   return (
     <section id="video" className="relative bg-[#050505] py-12 md:py-20 overflow-hidden">

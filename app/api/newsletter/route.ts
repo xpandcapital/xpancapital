@@ -9,6 +9,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Email inválido' }, { status: 400 })
     }
 
+    const { data: existing } = await supabase.from('leads').select('id').eq('email', email).maybeSingle()
+    if (existing) {
+      return NextResponse.json({ success: true, message: 'Ya estás suscrito' })
+    }
+
     const { error } = await supabase.from('leads').insert({
       empresa_id: DEFAULT_EMPRESA_ID,
       nombre: email.split('@')[0],

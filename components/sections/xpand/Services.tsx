@@ -1,13 +1,12 @@
 "use client"
 
 import { useRef } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion, useScroll } from "framer-motion"
 import { GraduationCap, Landmark, Check, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 const services = [
   {
-    number: "01",
     icon: GraduationCap,
     tag: "Aprende",
     title: "Educación Financiera",
@@ -22,7 +21,6 @@ const services = [
     href: "#pricing",
   },
   {
-    number: "02",
     icon: Landmark,
     tag: "Invierte",
     title: "Inversión Financiera",
@@ -40,11 +38,6 @@ const services = [
 
 function ServicePanel({ service, index }: { service: (typeof services)[0]; index: number }) {
   const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  })
-  const numberY = useTransform(scrollYProgress, [0, 1], [40, -40])
   const Icon = service.icon
   const fromLeft = index % 2 === 0
 

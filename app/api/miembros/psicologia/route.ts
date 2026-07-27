@@ -117,7 +117,7 @@ export async function PUT(request: NextRequest) {
       'perspectiva_diario', 'perspectiva_4h', 'perspectiva_15m',
       'resultado_diario', 'resultado_4h', 'resultado_15m',
       'perspectiva_correcta', 'operaciones_registradas', 'errores_cometidos',
-      'es_falencia', 'rendimiento_general',
+      'es_falencia', 'rendimiento_general', 'divisa', 'fecha_analisis', 'hora_analisis',
     ]
     for (const col of cols) {
       if (col in fields) updateData[col] = fields[col]
