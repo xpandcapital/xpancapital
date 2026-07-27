@@ -528,7 +528,7 @@ export function BitacoraTab() {
                     </label>
                     <input
                       type="time" value={editing.hora || ''}
-                      onChange={e => setEditing({ ...editing, hora: e.target.value || null })}
+                      onChange={e => { setEditing({ ...editing, hora: e.target.value || null }); (e.target as HTMLInputElement).blur() }}
                       className={INPUT_CLASSES}
                     />
                   </div>
@@ -555,27 +555,31 @@ export function BitacoraTab() {
                       Divisa <FieldTooltip text="Activos que componen el par operado." />
                     </label>
                     <div className="flex items-stretch bg-black/50 border border-white/10 rounded-xl overflow-hidden focus-within:border-blis-red/50 transition-colors">
-                      <select
+                      <input
+                        type="text"
+                        list="divisas-list-1"
                         value={editing.divisa_1 || ''}
-                        onChange={e => setEditing({ ...editing, divisa_1: e.target.value || null })}
-                        className="flex-1 bg-transparent px-3 py-3 text-white text-sm focus:outline-none appearance-none cursor-pointer"
-                      >
-                        <option value="" className="bg-zinc-900">—</option>
-                        {DIVISAS.map(d => (
-                          <option key={d} value={d} className="bg-zinc-900">{d}</option>
-                        ))}
-                      </select>
+                        onChange={e => setEditing({ ...editing, divisa_1: e.target.value.toUpperCase() || null })}
+                        placeholder="USD"
+                        maxLength={8}
+                        className="flex-1 bg-transparent px-3 py-3 text-white text-sm focus:outline-none placeholder:text-gray-600"
+                      />
+                      <datalist id="divisas-list-1">
+                        {DIVISAS.map(d => <option key={d} value={d} />)}
+                      </datalist>
                       <span className="flex items-center text-gray-600 text-sm font-bold px-1 bg-black/30">/</span>
-                      <select
+                      <input
+                        type="text"
+                        list="divisas-list-2"
                         value={editing.divisa_2 || ''}
-                        onChange={e => setEditing({ ...editing, divisa_2: e.target.value || null })}
-                        className="flex-1 bg-transparent px-3 py-3 text-white text-sm focus:outline-none appearance-none cursor-pointer"
-                      >
-                        <option value="" className="bg-zinc-900">—</option>
-                        {DIVISAS.map(d => (
-                          <option key={d} value={d} className="bg-zinc-900">{d}</option>
-                        ))}
-                      </select>
+                        onChange={e => setEditing({ ...editing, divisa_2: e.target.value.toUpperCase() || null })}
+                        placeholder="EUR"
+                        maxLength={8}
+                        className="flex-1 bg-transparent px-3 py-3 text-white text-sm focus:outline-none placeholder:text-gray-600"
+                      />
+                      <datalist id="divisas-list-2">
+                        {DIVISAS.map(d => <option key={d} value={d} />)}
+                      </datalist>
                     </div>
                   </div>
                 </div>

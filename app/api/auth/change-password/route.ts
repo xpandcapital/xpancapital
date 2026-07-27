@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getAuthUser } from '@/lib/supabase/api-auth'
+import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -59,6 +60,29 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       return NextResponse.json({ error: updateError.message }, { status: 500 })
+    }
+
+    // Enviar email de confirmación
+    const { data: fullProfile } = await supabase
+      .from('profiles')
+      .select('nombre, email')
+      .eq('id', auth.userId)
+      .single()
+
+    if (fullProfile?.email) {
+      sendTemplateEmail({
+        evento: 'cuenta_password_cambiada',
+        to: fullProfile.email,
+        variables: {
+          nombre: fullProfile.nombre || 'Usuario',
+          email: fullProfile.email,
+          fecha_solicitud: new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+          dispositivo: 'Plataforma Xpand Capital',
+          ubicacion: 'Colombia',
+          navegador: request.headers.get('user-agent') || 'Desconocido',
+          enlace_acceso: `${process.env.NEXT_PUBLIC_APP_URL || 'https://xpandcapital.org'}/login`,
+        },
+      }).catch(() => {}) // No bloquear la respuesta si el email falla
     }
 
     return NextResponse.json({ success: true })

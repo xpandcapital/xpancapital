@@ -26,6 +26,9 @@ export interface EvaluacionPsicologica {
   errores_cometidos: string | null
   es_falencia: boolean
   rendimiento_general: string | null
+  divisa: string | null
+  fecha_analisis: string | null
+  hora_analisis: string | null
   creado_en: string
   actualizado_en: string
 }
@@ -171,6 +174,7 @@ export function usePsicologia() {
   }, [user?.id, hoy])
 
   const guardarPostSesion = useCallback(async (fields: {
+    divisa?: string; fecha_analisis?: string; hora_analisis?: string;
     perspectiva_diario: string; perspectiva_4h: string; perspectiva_15m: string;
     resultado_diario: string; resultado_4h: string; resultado_15m: string;
     perspectiva_correcta: string; operaciones_registradas: string;

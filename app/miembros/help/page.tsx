@@ -27,7 +27,8 @@ const HELPCATEGORIES = [
     icon: MessageCircle,
     title: "Soporte Directo",
     description: "Contacta con nuestro equipo de soporte",
-    href: "/miembros/contacto"
+    href: "https://wa.me/573223501170",
+    external: true
   }
 ];
 
@@ -60,6 +61,8 @@ export default function HelpPage() {
           >
             <Link
               href={category.href}
+              target={category.external ? "_blank" : undefined}
+              rel={category.external ? "noopener noreferrer" : undefined}
               className="group bg-zinc-950 border border-white/5 rounded-[2rem] p-8 block hover:border-blis-red/30 transition-all"
             >
               <div className="flex items-start gap-6">
@@ -90,7 +93,7 @@ export default function HelpPage() {
             Enviar Email
           </a>
           <a
-            href="https://wa.me/51999999999"
+            href="https://wa.me/573223501170"
             target="_blank"
             rel="noopener noreferrer"
             className="px-6 py-3 bg-blis-red text-white font-bold rounded-xl hover:bg-blis-red/80 transition-colors"

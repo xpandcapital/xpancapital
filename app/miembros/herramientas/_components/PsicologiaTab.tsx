@@ -189,6 +189,9 @@ export function PsicologiaTab() {
   }
 
   // Post-sesión
+  const [postDivisa, setPostDivisa] = useState(evaluacionHoy?.divisa || '')
+  const [postFecha, setPostFecha] = useState(evaluacionHoy?.fecha_analisis || new Date().toISOString().split('T')[0])
+  const [postHora, setPostHora] = useState(evaluacionHoy?.hora_analisis || '')
   const [perspDiario, setPerspDiario] = useState(evaluacionHoy?.perspectiva_diario || '')
   const [persp4h, setPersp4h] = useState(evaluacionHoy?.perspectiva_4h || '')
   const [persp15m, setPersp15m] = useState(evaluacionHoy?.perspectiva_15m || '')
@@ -214,6 +217,9 @@ export function PsicologiaTab() {
 
   const handleGuardarPost = async () => {
     await guardarPostSesion({
+      divisa: postDivisa,
+      fecha_analisis: postFecha,
+      hora_analisis: postHora,
       perspectiva_diario: perspDiario,
       perspectiva_4h: persp4h,
       perspectiva_15m: persp15m,
@@ -248,7 +254,7 @@ export function PsicologiaTab() {
 
   const subTabs = [
     { id: 'pre' as const, label: 'Registro Mental', icon: Brain },
-    { id: 'post' as const, label: 'Análisis y Redondeo', icon: FileText },
+    { id: 'post' as const, label: 'Análisis y Perspectiva', icon: FileText },
     { id: 'stats' as const, label: 'Progreso y Falencias', icon: BarChart3 },
   ]
 
@@ -345,9 +351,46 @@ export function PsicologiaTab() {
         </div>
       )}
 
-      {/* ===== MÓDULO B: ANÁLISIS Y REDONDEO ===== */}
+      {/* ===== MÓDULO B: ANÁLISIS Y PERSPECTIVA ===== */}
       {subTab === 'post' && (
         <div className="space-y-4">
+          {/* Selectores: Divisa, Fecha, Hora */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Divisa</label>
+              <input
+                type="text"
+                list="psicologia-divisas"
+                value={postDivisa}
+                onChange={e => setPostDivisa(e.target.value.toUpperCase())}
+                placeholder="EUR/USD"
+                maxLength={12}
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
+              />
+              <datalist id="psicologia-divisas">
+                {['EUR/USD','GBP/USD','USD/JPY','XAU/USD','BTC/USD','AUD/USD','USD/CAD','NZD/USD','EUR/JPY','GBP/JPY'].map(d => <option key={d} value={d} />)}
+              </datalist>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Fecha</label>
+              <input
+                type="date"
+                value={postFecha}
+                onChange={e => setPostFecha(e.target.value)}
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Hora</label>
+              <input
+                type="time"
+                value={postHora}
+                onChange={e => { setPostHora(e.target.value); (e.target as HTMLInputElement).blur() }}
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blis-red/50 transition-all"
+              />
+            </div>
+          </div>
+
           {/* Grid 2 columnas: Perspectiva + Resultado */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Perspectiva Mañana */}
