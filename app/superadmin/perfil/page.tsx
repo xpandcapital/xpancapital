@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
-import { Camera, Lock, Mail, Phone, Save, ShieldCheck, User as UserIcon, X, RotateCw, FlipHorizontal, Check, Search, ChevronDown, Trash2, Bell, ShoppingCart, GraduationCap, FileText, UserPlus, Settings } from "lucide-react";
+import { Camera, Lock, Mail, Phone, Save, ShieldCheck, User as UserIcon, X, RotateCw, FlipHorizontal, Check, Search, ChevronDown, Trash2, Bell, ShoppingCart, GraduationCap, FileText, UserPlus, Settings, Loader2, Send } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isAdminRole, ROLE_CONFIG } from "@/lib/auth/permissions";
@@ -303,6 +303,29 @@ export default function AdminProfile() {
         sistema: true,
     });
     const [tiposCargados, setTiposCargados] = useState(false);
+    const [resetSending, setResetSending] = useState(false);
+    const [resetDone, setResetDone] = useState(false);
+
+    const handleSolicitarEnlace = async () => {
+        if (!email) return
+        setResetSending(true)
+        try {
+            const res = await fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            })
+            const data = await res.json()
+            if (data.success) {
+                setResetDone(true)
+            } else {
+                showToast(data.error || 'Error al enviar el enlace', 'error')
+            }
+        } catch {
+            showToast('Error de conexión', 'error')
+        }
+        setResetSending(false)
+    }
 
     useEffect(() => {
         if (!user?.id || tiposCargados) return;
@@ -606,8 +629,26 @@ export default function AdminProfile() {
 
                             <div className="p-6 bg-blis-red/5 border border-blis-red/20 rounded-[2rem] space-y-4">
                                 <h3 className="text-xs font-black text-white uppercase tracking-tight">Cambio de Contraseña</h3>
-                                <p className="text-[10px] text-gray-500 font-medium leading-relaxed uppercase tracking-widest">Por seguridad, recibirás un enlace en tu correo para restablecer tu clave.</p>
-                                <button className="text-[10px] text-blis-red font-black uppercase tracking-[0.2em] border-b-2 border-blis-red/30 pb-1 hover:border-blis-red transition-all">Solicitar Enlace</button>
+                                {resetDone ? (
+                                    <p className="text-sm text-emerald-400 font-bold flex items-center gap-2">
+                                        <Check className="w-4 h-4" /> Enlace enviado a {email}
+                                    </p>
+                                ) : (
+                                    <>
+                                        <p className="text-[10px] text-gray-500 font-medium leading-relaxed uppercase tracking-widest">Por seguridad, recibirás un enlace en tu correo para restablecer tu clave.</p>
+                                        <button
+                                            onClick={handleSolicitarEnlace}
+                                            disabled={resetSending}
+                                            className="w-full py-3.5 bg-blis-red text-white font-black uppercase tracking-widest text-xs rounded-xl hover:bg-blis-red/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-blis-red/20"
+                                        >
+                                            {resetSending ? (
+                                                <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
+                                            ) : (
+                                                <><Send className="w-4 h-4" /> Solicitar Enlace</>
+                                            )}
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
