@@ -33,7 +33,7 @@ export function useChecklist() {
   }, [user?.id])
 
   const fetchHoy = useCallback(async () => {
-    if (!user?.id) return
+    if (!user?.id) { setLoading(false); return }
     abortRef.current?.abort()
     const controller = new AbortController(); abortRef.current = controller
     const timeout = setTimeout(() => controller.abort(), 8000)
@@ -42,7 +42,7 @@ export function useChecklist() {
       const data = await res.json()
       if (data.success) setChecklistHoy(data.data)
     } catch {}
-    finally { clearTimeout(timeout) }
+    finally { clearTimeout(timeout); setLoading(false) }
   }, [user?.id, hoy])
 
   const fetchHistorial = useCallback(async (periodo: string) => {

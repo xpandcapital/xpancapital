@@ -34,7 +34,7 @@ export function useHabitos() {
   }, [user?.id])
 
   const fetchHoy = useCallback(async () => {
-    if (!user?.id) return
+    if (!user?.id) { setLoading(false); return }
     abortRef.current?.abort()
     const controller = new AbortController(); abortRef.current = controller
     const timeout = setTimeout(() => controller.abort(), 8000)
@@ -43,7 +43,7 @@ export function useHabitos() {
       const data = await res.json()
       if (data.success) setHabitosHoy(data.data)
     } catch {}
-    finally { clearTimeout(timeout) }
+    finally { clearTimeout(timeout); setLoading(false) }
   }, [user?.id, hoy])
 
   const fetchHistorial = useCallback(async () => {
