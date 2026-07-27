@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useActionGuard } from '@/hooks/useActionGuard';
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 
 interface BlogPost {
     id: string;
@@ -65,26 +66,21 @@ export default function AdminBlog() {
             setLoading(true);
             setError(null);
 
-            const empresaRes = await fetch('/api/empresas?slug=xpancapital');
-            const empresaData = await empresaRes.json();
+            const empresaId = DEFAULT_EMPRESA_ID;
             
-            if (empresaData.success && empresaData.data?.id) {
-                // Load categories
-                const catRes = await fetch(`/api/blog/categorias?empresa_id=${empresaData.data.id}`);
-                const catData = await catRes.json();
-                if (catData.success && catData.data) {
-                    setCategories(catData.data);
-                }
+            // Load categories
+            const catRes = await fetch(`/api/blog/categorias?empresa_id=${empresaId}`);
+            const catData = await catRes.json();
+            if (catData.success && catData.data) {
+                setCategories(catData.data);
+            }
 
-                // Load posts
-                const postsRes = await fetch(`/api/blog?empresa_id=${empresaData.data.id}`);
-                const postsData = await postsRes.json();
+            // Load posts
+            const postsRes = await fetch(`/api/blog?empresa_id=${empresaId}`);
+            const postsData = await postsRes.json();
 
-                if (postsData.success && postsData.data) {
-                    setBlogs(postsData.data);
-                } else {
-                    setBlogs([]);
-                }
+            if (postsData.success && postsData.data) {
+                setBlogs(postsData.data);
             } else {
                 setBlogs([]);
             }

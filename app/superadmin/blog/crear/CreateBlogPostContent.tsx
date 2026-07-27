@@ -10,6 +10,7 @@ import {
 import RichTextEditor from '@/components/superadmin/RichTextEditor';
 import { CoverImagePanel, SeoPanel, AccessPanel, ShortLinkPanel, ConfigPanel, TagsPanel } from './_components';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa';
 
 interface Category {
   id: string;
@@ -85,15 +86,12 @@ export default function CreateBlogPostContent() {
   useEffect(() => {
     const loadInitial = async () => {
       try {
-        const empresaRes = await fetch('/api/empresas?slug=xpancapital');
-        const empresaData = await empresaRes.json();
-        if (empresaData.success && empresaData.data?.id) {
-          const eid = empresaData.data.id;
-          setEmpresaId(eid);
+        const eid = DEFAULT_EMPRESA_ID;
+        setEmpresaId(eid);
 
-          const catRes = await fetch(`/api/blog/categorias?empresa_id=${eid}`);
-          const catData = await catRes.json();
-          if (catData.success && catData.data) {
+        const catRes = await fetch(`/api/blog/categorias?empresa_id=${eid}`);
+        const catData = await catRes.json();
+        if (catData.success && catData.data) {
             setCategories(catData.data);
           }
 
@@ -122,9 +120,8 @@ export default function CreateBlogPostContent() {
                 tags: p.tags?.map((t: any) => t.nombre) || [],
               });
             }
-          }
-        }
-      } catch (err) {
+            }
+        } catch (err) {
         console.error('Error loading initial data:', err);
       } finally {
         setLoading(false);
