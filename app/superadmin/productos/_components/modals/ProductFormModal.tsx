@@ -469,6 +469,11 @@ export function ProductFormModal({
                         {cursos.find(c => c.id === formData.cursoId)?.nombre || 'Curso vinculado'}
                       </span>
             </div>
+            </div>
+
+                ) : (
+                  <CursoSelector cursos={cursos} onSelect={(id) => setFormData(prev => ({ ...prev, cursoId: id }))} />
+                )}
 
             <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 flex items-center justify-between">
               <div>
@@ -497,18 +502,6 @@ export function ProductFormModal({
                 <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${formData.visible_en_tienda !== false ? 'left-7' : 'left-1'}`} />
               </button>
             </div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, cursoId: null }))}
-                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
-                      title="Desvincular curso"
-                    >
-                      <Unlink2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <CursoSelector cursos={cursos} onSelect={(id) => setFormData(prev => ({ ...prev, cursoId: id }))} />
-                )}
 
                 {formData.cursoId && (
                   <p className="text-[10px] text-purple-400/70 flex items-center gap-1">
