@@ -150,7 +150,6 @@ export default function VentasAdminPage() {
                 alert("Venta registrada correctamente")
             }
             await cargar();
-        } else {
             const err = await res.json().catch(() => ({}));
             alert(err.error || "Error al registrar la venta");
         }
