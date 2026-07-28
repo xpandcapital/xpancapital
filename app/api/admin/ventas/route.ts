@@ -272,7 +272,9 @@ export async function POST(request: NextRequest) {
           }).catch(() => {});
         } catch {}
       } else {
-        return NextResponse.json({ error: "No se pudo crear el usuario" }, { status: 500 });
+        const msg = authError?.message || (newUser?.user ? '' : 'Usuario no retornado')
+        console.error('[Ventas POST] Error crear usuario:', msg, email)
+        return NextResponse.json({ error: `No se pudo crear el usuario: ${msg}` }, { status: 500 });
       }
     }
 
