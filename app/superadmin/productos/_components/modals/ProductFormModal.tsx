@@ -100,7 +100,7 @@ export function ProductFormModal({
       slug: '',
       metaDescripcion: '',
       description: '',
-      category: categories.find(c => c.name === 'Cursos')?.name || categories[0]?.name ?? '',
+      category: (categories.find(c => c.name === 'Cursos') || categories[0])?.name ?? '',
       price: 0,
       originalPrice: 0,
       bliscoins: 0,
