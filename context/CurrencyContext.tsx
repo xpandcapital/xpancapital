@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext } from "react";
-import { useShop } from "@/context/ShopContext";
 
 export interface Currency {
     code: string;
@@ -70,7 +69,6 @@ const noopCodes = (_: string[]) => {};
 const identity = (v: number) => v;
 
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { coinsEnabled } = useShop();
     
     const value: CurrencyContextType = {
         currencies: INITIAL_CURRENCIES,
@@ -79,7 +77,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         fiscalCurrency: USD_CURRENCY,
         activeCurrencyCodes: ["USD"],
         isMultiCurrencyEnabled: false,
-        isBlisCoinsEnabled: coinsEnabled,
+        isBlisCoinsEnabled: true,
         exchangeRates: {},
         safetyMarkup: 0,
         lastUpdated: null,

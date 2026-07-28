@@ -26,11 +26,11 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
         }
         return [
             {
-                id: 1, title: "Plan Anual", subtitle: "Acceso completo a todos los cursos, herramientas y mentorías por un año.",
+                id: 1, title: "Plan Anual", subtitle: "Formación completa en trading y mercado de divisas",
                 price: "$599/año", bgImage: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80", tag: "PLAN ANUAL", accent: "blis-red"
             },
             {
-                id: 2, title: "Plan Trimestral", subtitle: "3 meses de acceso completo a cursos, herramientas y comunidad.",
+                id: 2, title: "Plan Trimestral", subtitle: "3 meses de acceso a todos los cursos y herramientas",
                 price: "$199/trimestre", bgImage: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f44f?w=800&q=80", tag: "PLAN TRIMESTRAL", accent: "blis-red"
             }
         ];
