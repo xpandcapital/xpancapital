@@ -90,7 +90,7 @@ export function ProductFormModal({
         expirationDate: editingProduct.expirationDate || '',
         image: editingProduct.image || null,
         cursoId: editingProduct.curso_id || null,
-        multiPrices: editingProduct.precios_multimoneda || {},
+        multiPrices: editingProduct.precios_multimoneda || {} as Record<string, number>,
         duracion_dias: editingProduct.duracion_dias || null,
         multiOriginalPrices: {},
       }
@@ -114,6 +114,7 @@ export function ProductFormModal({
       image: null,
       cursoId: null,
       multiPrices: {} as Record<string, number>,
+      duracion_dias: null,
       multiOriginalPrices: {} as Record<string, number>,
     }
   })
