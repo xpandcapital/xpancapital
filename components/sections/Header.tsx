@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, Search as SearchIcon, Instagram, Youtube, Facebook, Music2, ShoppingCart, Bell, Heart, LogOut, LayoutDashboard, User, ShieldCheck, ChevronDown } from "lucide-react"
+import { X, Search as SearchIcon, Instagram, Youtube, Facebook, Music2, ShoppingCart, Heart, LogOut, LayoutDashboard, User, ShieldCheck } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"

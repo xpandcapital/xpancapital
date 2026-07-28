@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-    Users, Search, Filter, Download,
+    Users, Search, Filter,
     Coins, TrendingUp, Brain, Trophy,
     ShoppingCart, LayoutGrid, LayoutList, Shield,
     Edit3, Smartphone, ChevronRight, Loader2,
-    ArrowRightLeft as ArrowRightLeftIcon, Trash2
+    Trash2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";

@@ -304,6 +304,33 @@ export async function POST(request: NextRequest) {
 
     if (error) throw error;
 
+    // Crear compra_item vinculado
+    await supabase.from("compra_items").insert({
+      compra_id: data.id,
+      producto_id,
+      cantidad: 1,
+      precio_unitario: monto_usd || 0,
+    });
+
+    // Asignar cursos si el producto tiene curso vinculado
+    const { data: productoInfo } = await supabase
+      .from("productos")
+      .select("id, nombre, curso_id")
+      .eq("id", producto_id)
+      .single();
+
+    if (productoInfo?.curso_id) {
+      try {
+        await assignCoursesToUser(
+          supabase as any,
+          [{ id: producto_id, curso_id: productoInfo.curso_id, nombre: productoInfo.nombre }],
+          email,
+          userId!,
+          nombre || email.split("@")[0]
+        );
+      } catch {}
+    }
+
     return NextResponse.json({ success: true, venta: data });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

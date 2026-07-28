@@ -12,7 +12,6 @@ import { useToast } from "@/components/ui/Toast"
 import { useActionGuard } from '@/hooks/useActionGuard'
 import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import { Postulante, EMPRESA_ID, ESTADOS, ESTADO_LABELS, ESTADO_COLORS, diccionarioPreguntas } from "./_types"
-import { PostulanteDetailModal } from "./_components/PostulanteDetailModal"
 import { PostulanteFormModal } from "./_components/PostulanteFormModal"
 
 const EMPRESA_ID_CONST = EMPRESA_ID
@@ -36,9 +35,8 @@ export default function AdminPostulantes() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("Todos")
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [detailPostulante, setDetailPostulante] = useState<Postulante | null>(null)
-  const [editingPostulante, setEditingPostulante] = useState<Postulante | null>(null)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [editingPostulante, setEditingPostulante] = useState<Postulante | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<FormField>(emptyForm)
@@ -256,12 +254,6 @@ export default function AdminPostulantes() {
         {isModalOpen && (
           <PostulanteFormModal form={form} setForm={setForm} editingPostulante={editingPostulante}
             saving={saving} onSave={handleSave} onClose={() => setIsModalOpen(false)} />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {detailPostulante && (
-          <PostulanteDetailModal postulante={detailPostulante} onClose={() => setDetailPostulante(null)} />
         )}
       </AnimatePresence>
 
