@@ -102,7 +102,7 @@ export function ShopSidebar() {
 
     return (
         <aside
-            className="fixed left-0 top-28 w-64 bg-black/90 backdrop-blur-2xl border-r border-white/5 flex flex-col z-[40] hidden md:flex"
+            className="fixed left-0 top-28 w-64 bg-black/90 backdrop-blur-2xl border-r border-white/5 flex flex-col z-30 hidden md:flex"
             style={{ bottom: sidebarBottom }}
         >
             <div className="flex-1 overflow-y-auto py-6 px-4 scrollbar-hide space-y-8">
