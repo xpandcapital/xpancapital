@@ -95,19 +95,24 @@ export async function GET(request: NextRequest) {
     const { data: profiles, error, count } = await query
     
     if (error) {
+      console.error('[Admin Clientes] Error DB:', error.message)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
     
     const clientsWithAddresses = await Promise.all(
       (profiles || []).map(async (profile) => {
-        const { data: addresses } = await supabase
-          .from('direcciones')
-          .select('*')
-          .eq('user_id', profile.id)
-        
-        return {
-          ...profile,
-          addresses: addresses || []
+        try {
+          const { data: addresses } = await supabase
+            .from('direcciones')
+            .select('*')
+            .eq('user_id', profile.id)
+          
+          return {
+            ...profile,
+            addresses: addresses || []
+          }
+        } catch {
+          return { ...profile, addresses: [] }
         }
       })
     )
@@ -120,8 +125,8 @@ export async function GET(request: NextRequest) {
       perPage
     })
   } catch (error) {
-    console.error('Admin clientes error:', error)
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+    console.error('[Admin Clientes] Error general:', error instanceof Error ? error.message : error)
+    return NextResponse.json({ error: 'Error del servidor: ' + (error instanceof Error ? error.message : 'desconocido') }, { status: 500 })
   }
 }
 
