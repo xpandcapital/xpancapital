@@ -274,7 +274,7 @@ export function ProductFormModal({
                   setFormData(prev => ({ ...prev, name, slug: isAutoSlug ? generateSlug(name) : prev.slug }))
                 }}
                 type="text"
-                placeholder="Ej. Plan Anual"
+                placeholder="Ej. Whey Protein Isolate"
                 className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 text-white font-bold text-sm placeholder:text-gray-600 focus:outline-none focus:border-white/30 transition-all"
               />
             </div>
@@ -467,9 +467,7 @@ export function ProductFormModal({
                         {cursos.find(c => c.id === formData.cursoId)?.nombre || 'Curso vinculado'}
                       </span>
             </div>
-              </div>
 
-            <div className="md:col-span-2">
             <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 flex items-center justify-between">
               <div>
                 <p className="text-[10px] text-white font-bold">Visible en Tienda</p>
@@ -482,7 +480,6 @@ export function ProductFormModal({
               >
                 <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${formData.visible_en_tienda !== false ? 'left-7' : 'left-1'}`} />
               </button>
-            </div>
             </div>
                     <button
                       type="button"
@@ -551,7 +548,6 @@ export function ProductFormModal({
             />
             </div>
 
-            <div className="md:col-span-2">
             <ProductStockSection
               stock={formData.stock}
               lowStockThreshold={formData.lowStockThreshold}
@@ -560,9 +556,7 @@ export function ProductFormModal({
               onThresholdChange={(lowStockThreshold) => setFormData(prev => ({ ...prev, lowStockThreshold }))}
               onUnlimitedChange={setIsUnlimitedStock}
             />
-            </div>
 
-            <div className="md:col-span-2">
             <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-3">
               <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Duración del Acceso</p>
               <div className="flex items-center gap-4">
