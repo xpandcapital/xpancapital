@@ -50,6 +50,7 @@ export interface Product {
   curso?: { id: string; nombre: string } | null
   duracion_dias?: number | null
   visible_en_tienda?: boolean
+  activo?: boolean
 }
 
 export interface ProductFilters {

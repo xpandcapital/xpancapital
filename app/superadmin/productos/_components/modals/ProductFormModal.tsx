@@ -69,7 +69,7 @@ export function ProductFormModal({
     stock: number; lowStockThreshold: number; sku: string; skuPrefix: string;
     isAutoSku: boolean; purchaseDate: string; expirationDate: string;
     image: string | null; cursoId: string | null;
-    duracion_dias: number | null; visible_en_tienda: boolean;
+    duracion_dias: number | null; visible_en_tienda: boolean; activo: boolean;
   }>(() => {
     if (editingProduct) {
       return {
@@ -92,6 +92,7 @@ export function ProductFormModal({
         cursoId: editingProduct.curso_id || null,
         duracion_dias: editingProduct.duracion_dias || null,
         visible_en_tienda: editingProduct.visible_en_tienda ?? true,
+        activo: editingProduct.activo ?? true,
       }
     }
     return {
@@ -114,6 +115,7 @@ export function ProductFormModal({
       cursoId: null,
       duracion_dias: null,
       visible_en_tienda: true,
+      activo: true,
     }
   })
 
@@ -156,7 +158,7 @@ export function ProductFormModal({
       descuento_porcentaje: 0,
       descuento_hasta: null,
       stock_bajo_nivel: formData.lowStockThreshold,
-      activo: true,
+      activo: formData.activo !== false,
       visible_en_tienda: formData.visible_en_tienda ?? true,
       duracion_dias: formData.duracion_dias || null,
       destacado: false,
@@ -466,6 +468,20 @@ export function ProductFormModal({
                       <span className="text-sm text-purple-300 truncate">
                         {cursos.find(c => c.id === formData.cursoId)?.nombre || 'Curso vinculado'}
                       </span>
+            </div>
+
+            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] text-white font-bold">Producto Activo</p>
+                <p className="text-[9px] text-gray-500">Desactivar para ocultarlo de todas las vistas (admin y tienda)</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, activo: !(prev.activo ?? true) }))}
+                className={`w-12 h-6 rounded-full transition-all relative ${formData.activo !== false ? 'bg-emerald-500' : 'bg-zinc-800'}`}
+              >
+                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${formData.activo !== false ? 'left-7' : 'left-1'}`} />
+              </button>
             </div>
 
             <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 flex items-center justify-between">
