@@ -246,6 +246,7 @@ export async function POST(request: NextRequest) {
 
       if (!authError && newUser.user?.id) {
         userId = newUser.user.id;
+        console.log('[Ventas POST] Usuario creado:', userId, email);
         await supabase.from("profiles").upsert({
           id: userId,
           email: email.toLowerCase(),
@@ -303,7 +304,11 @@ export async function POST(request: NextRequest) {
       .select("*")
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('[Ventas POST] Error insertando compra:', error);
+      throw error;
+    }
+    console.log('[Ventas POST] Compra creada:', data.id, 'userId:', userId);
 
     // Crear compra_item vinculado
     await supabase.from("compra_items").insert({
@@ -335,6 +340,7 @@ export async function POST(request: NextRequest) {
     // Marcar perfil como cliente con compras
     await supabase.from("profiles").update({ ha_comprado: true }).eq("id", userId)
 
+    console.log('[Ventas POST] Venta completada:', { ventaId: data.id, userId, email, tempPassword: !!tempPassword });
     return NextResponse.json({ success: true, venta: data, tempPassword, esNuevo: !existingProfile });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
