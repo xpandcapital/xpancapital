@@ -171,7 +171,7 @@ export default function EditarUsuarioPage() {
             const res = await fetch('/api/admin/users', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: userId, nombre, apellido, email, rol, recibir_notificaciones_compras: recibirNotificaciones }),
+                body: JSON.stringify({ id: userId, nombre, apellido, email, rol }),
             });
             const data = await res.json();
             if (data.success) {

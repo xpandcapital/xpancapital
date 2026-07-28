@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     if (id) {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en, avatar_url, recibir_notificaciones_compras, puntos, puntos_nivel, puntos_cursos, puntos_comunidad, puntos_blog')
+        .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en, avatar_url, puntos_cursos, puntos_comunidad, puntos_blog')
         .eq('id', id)
         .single()
 
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('profiles')
-      .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en, avatar_url, recibir_notificaciones_compras, puntos, puntos_nivel, puntos_cursos, puntos_comunidad, puntos_blog', { count: 'exact' })
+      .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en, avatar_url, puntos_cursos, puntos_comunidad, puntos_blog', { count: 'exact' })
       .eq('empresa_id', empresaId)
       .order('creado_en', { ascending: false })
       .range((page - 1) * perPage, page * perPage - 1)
