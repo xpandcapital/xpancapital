@@ -234,7 +234,7 @@ export function useClientDetail(clientId: string) {
             const res = await fetch('/api/equipo-cursos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: clientId, curso_id: cursoId }),
+                body: JSON.stringify({ user_id: clientId, curso_id: cursoId, email: client?.email }),
             })
             const data = await res.json()
             if (data.success) {
@@ -245,7 +245,7 @@ export function useClientDetail(clientId: string) {
             showToast(data.error || 'Error al asignar curso', 'error')
         } catch { showToast('Error al asignar curso', 'error') }
         return false
-    }, [clientId, fetchAcademia, showToast])
+    }, [clientId, client?.email, fetchAcademia, showToast])
 
     return {
         client,

@@ -18,7 +18,7 @@ export function ProductStockSection({
   onUnlimitedChange
 }: ProductStockSectionProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-white/5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-white/5">
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Stock</label>
