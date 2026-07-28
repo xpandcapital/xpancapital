@@ -179,10 +179,6 @@ export default function Dashboard() {
 
       // Debug: mostrar cuántas compras se cargaron
       const comprasCount = (comprasData || []).length
-      console.log(`[Dashboard] Compras cargadas: ${comprasCount}, Empresa: ${empresaId}`)
-      if (comprasCount === 0 && !rComprasData.error) {
-        setError(prev => prev || `0 compras (sin filtro empresa). RLS bloqueando?`)
-      }
 
       setProductsCount(prodCount || 0);
       setClientsCount(cliCount || 0);

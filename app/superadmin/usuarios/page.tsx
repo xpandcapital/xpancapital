@@ -160,7 +160,8 @@ export default function AdminUsers() {
                                 { value: "Todos", label: "Todos los roles" },
                                 ...ROLE_OPTIONS,
                             ]}
-                            className="bg-white/5 text-sm text-white focus:outline-none appearance-none pr-6 rounded-lg cursor-pointer"
+                            className="min-w-[160px]"
+                            buttonClassName="bg-transparent text-sm text-white border-none focus:outline-none"
                         />
                     </div>
                     <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-xl px-4 py-2">
@@ -344,7 +345,7 @@ export default function AdminUsers() {
                                                 type={showPassword ? 'text' : 'password'}
                                                 value={newUserPassword}
                                                 onChange={(e) => setNewUserPassword(e.target.value)}
-                                                className="w-full"
+                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-gray-500 focus:outline-none focus:border-blis-red/50 transition-all"
                                                 placeholder="Dejar vacío para generar automáticamente"
                                             />
                                             <button

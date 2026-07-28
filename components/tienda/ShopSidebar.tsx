@@ -25,9 +25,7 @@ const categories = [
     { name: "Cursos Xpand", id: "cursos", icon: GraduationCap },
 ];
 
-const bottomNav = [
-    { name: "Ajustes", href: "#", icon: Settings },
-];
+const bottomNav: { name: string; href: string; icon: any }[] = [];
 
 export function ShopSidebar() {
     const { user } = useAuth();
