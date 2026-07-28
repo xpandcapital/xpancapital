@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
       const { data, error, count } = await query
       if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
 
-      return NextResponse.json({ success: true, data, total: count || 0 })
+      return NextResponse.json({ success: true, notifications: data, unreadCount: (data || []).filter((n: any) => !n.leida).length })
     }
 
     if (userId) {

@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
 
     courseData.empresa_id = DEFAULT_EMPRESA_ID
     courseData.creado_en = new Date().toISOString()
-    courseData.actualizado_en = new Date().toISOString()
 
     const { data, error } = await supabase.from('cursos').insert(courseData).select('*').single()
 
@@ -76,7 +75,6 @@ export async function PUT(request: NextRequest) {
 
     if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
-    updates.actualizado_en = new Date().toISOString()
     if (precio_comparacion !== undefined) updates.precio_comparacion = precio_comparacion
     if (descuento_porcentaje !== undefined) updates.descuento_porcentaje = descuento_porcentaje
 
