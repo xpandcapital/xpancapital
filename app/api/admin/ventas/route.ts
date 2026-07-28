@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
         try {
           const { sendTemplateEmail } = await import("@/lib/email/sendTemplateEmail");
           sendTemplateEmail({
-            evento: "cuenta_creada",
+            evento: "cuenta_bienvenida",
             to: email,
             variables: {
               nombre: nombre || email.split("@")[0],
@@ -330,6 +330,9 @@ export async function POST(request: NextRequest) {
         );
       } catch {}
     }
+
+    // Marcar perfil como cliente con compras
+    await supabase.from("profiles").update({ ha_comprado: true }).eq("id", userId)
 
     return NextResponse.json({ success: true, venta: data });
   } catch (error: any) {
