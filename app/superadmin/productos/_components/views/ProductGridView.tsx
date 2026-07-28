@@ -149,7 +149,7 @@ export const ProductGridView = React.memo(function ProductGridView({
                     />
                   </div>
                   <div className="space-y-1">
-                    <span className="text-[10px] text-gray-500 uppercase font-black">BlisCoins</span>
+                    <span className="text-[10px] text-gray-500 uppercase font-black">Xpand Coins</span>
                     <input
                       type="number"
                       value={product.bliscoins}

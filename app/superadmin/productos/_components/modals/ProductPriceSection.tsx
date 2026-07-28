@@ -127,7 +127,7 @@ export function ProductPriceSection({
 
       {isBlisCoinsEnabled && (
         <div className="space-y-2">
-          <label className="text-[10px] font-black text-amber-400 uppercase tracking-widest">BlisCoins</label>
+          <label className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Xpand Coins</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 font-black">B</span>
             <input

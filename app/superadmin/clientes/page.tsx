@@ -330,7 +330,7 @@ export default function AdminClientes() {
                 <div className="space-y-2">
                     <div className="flex items-center gap-2 text-blis-red font-black text-[10px] uppercase tracking-[0.4em] mb-1 animate-pulse"><Shield className="w-3.5 h-3.5" /> COMUNIDAD XPAND CORP PRO</div>
                     <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">Administracion de Socios</h1>
-                    <p className="text-gray-500 text-sm font-medium max-w-2xl">Gestiona el ecosistema de socios y monitorea el flujo de BlisCoins.</p>
+                    <p className="text-gray-500 text-sm font-medium max-w-2xl">Gestiona el ecosistema de socios y monitorea el flujo de Xpand Coins.</p>
                 </div>
                 <div className="flex items-center gap-4">
                     <button onClick={() => setIsRankingView(!isRankingView)} className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase transition-all flex items-center gap-2 ${isRankingView ? 'bg-amber-500 text-black' : 'bg-white/5 text-gray-400'}`}><Trophy className="w-4 h-4" /> Ranking</button>

@@ -209,7 +209,7 @@ export function CurrencyManager() {
 
                                         <div className="flex items-center justify-between">
                                             <div className="flex flex-col gap-1">
-                                                <span className="text-[10px] font-black text-amber-500 uppercase tracking-wider">BlisCoins</span>
+                                                <span className="text-[10px] font-black text-amber-500 uppercase tracking-wider">Xpand Coins</span>
                                                 <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Moneda de Recompensa</span>
                                             </div>
                                             <button

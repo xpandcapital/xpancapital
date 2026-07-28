@@ -90,7 +90,7 @@ export function CheckoutModal({
                                 {[
                                     { id: 'cash', icon: Banknote, label: 'Efectivo', desc: country === 'EC' ? 'Saldo físico / caja' : 'Pago físico', color: 'emerald' },
                                     { id: 'card', icon: CreditCard, label: 'Tarjeta', desc: country === 'EC' ? 'Datafast / Medianet' : 'IziPay', color: 'blue' },
-                                    { id: 'bliscoins', icon: Coins, label: 'BlisCoins', desc: 'Canje de Puntos', color: 'amber' },
+                                    { id: 'bliscoins', icon: Coins, label: 'Xpand Coins', desc: 'Canje de Puntos', color: 'amber' },
                                     { id: 'transfer', icon: ArrowRightLeft, label: country === 'EC' ? 'Deuna / Pichincha' : 'Transferencia', desc: country === 'EC' ? 'Interbancario' : 'Yape / Plin', color: 'purple' }
                                 ].map(method => (
                                     <button

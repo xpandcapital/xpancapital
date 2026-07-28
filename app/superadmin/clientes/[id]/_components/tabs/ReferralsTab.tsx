@@ -106,7 +106,7 @@ export function ReferralsTab({ referrals }: ReferralsTabProps) {
                                                     onClick={(e) => { e.stopPropagation(); showToast(`Pago de ${ref.commissionBC} BC procesado`, 'success'); }}
                                                     className="p-5 bg-amber-500/10 border border-amber-500/20 rounded-[1.8rem] flex flex-col items-center gap-2 hover:bg-amber-500 transition-all shadow-xl"
                                                 >
-                                                    <span className="text-[9px] font-black uppercase text-amber-500">Pagar en BlisCoins</span>
+                                                    <span className="text-[9px] font-black uppercase text-amber-500">Pagar en Xpand Coins</span>
                                                     <span className="text-xl font-black text-white">{ref.commissionBC} BC</span>
                                                 </button>
                                             )}

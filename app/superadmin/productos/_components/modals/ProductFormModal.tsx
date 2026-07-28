@@ -238,7 +238,7 @@ export function ProductFormModal({
             </div>
             <div className="w-px h-8 bg-white/5" />
             <div className="flex flex-col items-center">
-              <span className="text-[8px] font-black text-gray-600 uppercase">BlisCoins</span>
+              <span className="text-[8px] font-black text-gray-600 uppercase">Xpand Coins</span>
               <span className={`text-[10px] font-black uppercase ${isBlisCoinsEnabled ? 'text-amber-500' : 'text-gray-600'}`}>
                 {isBlisCoinsEnabled ? 'Activo' : 'Inactivo'}
               </span>

@@ -61,7 +61,7 @@ export function ProductTableHeader({
         {isBlisCoinsEnabled && (
         <th className="px-4 py-4 w-[100px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('bliscoins')}>
           <div className="flex items-center justify-center gap-2">
-            BlisCoins
+            Xpand Coins
             <SortIndicator column="bliscoins" />
           </div>
         </th>
