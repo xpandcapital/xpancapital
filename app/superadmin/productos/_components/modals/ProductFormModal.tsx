@@ -63,7 +63,14 @@ export function ProductFormModal({
   const [shortSlugValue, setShortSlugValue] = useState('')
   const [shortSlugSaving, setShortSlugSaving] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
-  const [formData, setFormData] = useState(() => {
+  const [formData, setFormData] = useState<{
+    name: string; slug: string; metaDescripcion: string; description: string;
+    category: string; price: number; originalPrice: number; bliscoins: number;
+    stock: number; lowStockThreshold: number; sku: string; skuPrefix: string;
+    isAutoSku: boolean; purchaseDate: string; expirationDate: string;
+    image: string | null; cursoId: string | null; multiPrices: Record<string, number>;
+    duracion_dias: number | null; multiOriginalPrices: Record<string, number>;
+  }>(() => {
     if (editingProduct) {
       return {
         name: editingProduct.name,
