@@ -1,7 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { useMonedas } from "@/lib/hooks/useMonedas";
+import React, { createContext, useContext } from "react";
 import { useShop } from "@/context/ShopContext";
 
 export interface Currency {
@@ -16,9 +15,9 @@ export interface ExchangeRates {
 
 interface CurrencyContextType {
     currencies: Currency[];
-    selectedCurrency: Currency; // Moneda para visualización
-    taxCurrency: Currency; // Moneda fiscal para impuestos
-    fiscalCurrency: Currency; // Moneda en la que se cobra (siempre PEN para Perú)
+    selectedCurrency: Currency;
+    taxCurrency: Currency;
+    fiscalCurrency: Currency;
     activeCurrencyCodes: string[];
     isMultiCurrencyEnabled: boolean;
     isBlisCoinsEnabled: boolean;
@@ -34,9 +33,9 @@ interface CurrencyContextType {
     setIsBlisCoinsEnabled: (enabled: boolean) => void;
     setSafetyMarkup: (markup: number) => void;
     convertAmount: (amount: number, from: string, to: string) => number;
-    convertToFiscal: (amount: number, fromCurrency: string) => number; // Convertir a moneda fiscal
-    convertFromFiscal: (amount: number, toCurrency: string) => number; // Convertir desde moneda fiscal
-    refreshRates: () => Promise<void>;
+    convertToFiscal: (amount: number, fromCurrency: string) => number;
+    convertFromFiscal: (amount: number, toCurrency: string) => number;
+    refreshRates: () => Promise<{ success: boolean }>;
     loading: boolean;
 }
 
@@ -64,144 +63,43 @@ const INITIAL_CURRENCIES: Currency[] = [
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
 
+const USD_CURRENCY = INITIAL_CURRENCIES.find(c => c.code === "USD") || INITIAL_CURRENCIES[0];
+
+const noop = () => {};
+const noopCodes = (_: string[]) => {};
+const identity = (v: number) => v;
+
 export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { config, tasas, loading, updateConfig, refreshRatesFromAPI } = useMonedas();
     const { coinsEnabled } = useShop();
     
-    const [selectedCurrency, setCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "USD") || INITIAL_CURRENCIES[0]);
-    const [taxCurrency, setTaxCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "COP") || INITIAL_CURRENCIES[0]);
-    const [fiscalCurrency, setFiscalCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "COP") || INITIAL_CURRENCIES[0]);
-    const [isMultiCurrencyEnabled, setIsMultiCurrencyEnabledState] = useState<boolean>(false);
-    const isBlisCoinsEnabled = coinsEnabled;
-    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-
-    const activeCurrencyCodes = config?.monedas_activas || ["USD", "COP", "MXN", "EUR"];
-    const exchangeRates = tasas;
-    const safetyMarkup = config?.margen_seguridad || 0.02;
-
-    // Actualizar estados cuando config cambie (para mantener configuración guardada)
-    useEffect(() => {
-        if (config?.ultima_actualizacion) {
-            setLastUpdated(new Date(config.ultima_actualizacion));
-        }
-        
-        if (config?.moneda_base) {
-            const found = INITIAL_CURRENCIES.find(c => c.code === config.moneda_base);
-            if (found) {
-                setCurrencyState(found);
-                setFiscalCurrencyState(found);
-            }
-        }
-        if (config?.multi_moneda_habilitado !== undefined) {
-            setIsMultiCurrencyEnabledState(config.multi_moneda_habilitado);
-        }
-        if (config?.moneda_impuestos) {
-            const found = INITIAL_CURRENCIES.find(c => c.code === config.moneda_impuestos);
-            if (found) setTaxCurrencyState(found);
-        }
-    }, [config]);
-
-    const refreshRates = useCallback(async () => {
-        const result = await refreshRatesFromAPI();
-        if (result.success) {
-            setLastUpdated(new Date());
-        }
-    }, [refreshRatesFromAPI]);
-
-    const convertAmount = useCallback((amount: number, from: string, to: string) => {
-        if (from === to) return amount;
-
-        const rateFrom = exchangeRates[from] || 1;
-        const rateTo = exchangeRates[to] || 1;
-
-        const amountInUSD = amount / rateFrom;
-        let converted = amountInUSD * rateTo;
-
-        if (from !== to) {
-            converted = converted * (1 + safetyMarkup);
-        }
-
-        return Number(converted.toFixed(2));
-    }, [exchangeRates, safetyMarkup]);
-
-    const setSelectedCurrency = useCallback((code: string) => {
-        const found = INITIAL_CURRENCIES.find(c => c.code === code);
-        if (found) setCurrencyState(found);
-    }, []);
-
-    const setIsMultiCurrencyEnabled = useCallback((enabled: boolean) => {
-        setIsMultiCurrencyEnabledState(enabled);
-        updateConfig({ multi_moneda_habilitado: enabled } as any);
-    }, [updateConfig]);
-
-    const setTaxCurrency = useCallback((code: string) => {
-        const found = INITIAL_CURRENCIES.find(c => c.code === code);
-        if (found) {
-            setTaxCurrencyState(found);
-            updateConfig({ moneda_impuestos: code } as any);
-        }
-    }, [updateConfig]);
-
-    const setIsBlisCoinsEnabled = useCallback((_v: boolean) => {}, []);
-
-    const setFiscalCurrency = useCallback((code: string) => {
-        const found = INITIAL_CURRENCIES.find(c => c.code === code);
-        if (found) setFiscalCurrencyState(found);
-    }, []);
-
-    // Convertir cualquier moneda a moneda fiscal (para checkout/pagos)
-    const convertToFiscal = useCallback((amount: number, fromCurrency: string) => {
-        return convertAmount(amount, fromCurrency, fiscalCurrency.code);
-    }, [convertAmount, fiscalCurrency]);
-
-    // Convertir desde moneda fiscal a moneda de visualización
-    const convertFromFiscal = useCallback((amount: number, toCurrency: string) => {
-        return convertAmount(amount, fiscalCurrency.code, toCurrency);
-    }, [convertAmount, fiscalCurrency]);
-
-    const toggleActiveCurrency = useCallback((code: string) => {
-        const newCodes = activeCurrencyCodes.includes(code)
-            ? activeCurrencyCodes.filter(c => c !== code)
-            : [...activeCurrencyCodes, code];
-        updateConfig({ monedas_activas: newCodes });
-    }, [activeCurrencyCodes, updateConfig]);
-
-    const handleSetActiveCurrencyCodes = useCallback((codes: string[]) => {
-        updateConfig({ monedas_activas: codes });
-    }, [updateConfig]);
-
-    const handleSetSafetyMarkup = useCallback((markup: number) => {
-        updateConfig({ margen_seguridad: markup });
-    }, [updateConfig]);
+    const value: CurrencyContextType = {
+        currencies: INITIAL_CURRENCIES,
+        selectedCurrency: USD_CURRENCY,
+        taxCurrency: USD_CURRENCY,
+        fiscalCurrency: USD_CURRENCY,
+        activeCurrencyCodes: ["USD"],
+        isMultiCurrencyEnabled: false,
+        isBlisCoinsEnabled: coinsEnabled,
+        exchangeRates: {},
+        safetyMarkup: 0,
+        lastUpdated: null,
+        setSelectedCurrency: noop,
+        setTaxCurrency: noop,
+        setFiscalCurrency: noop,
+        toggleActiveCurrency: noop,
+        setActiveCurrencyCodes: noopCodes,
+        setIsMultiCurrencyEnabled: noop,
+        setIsBlisCoinsEnabled: noop,
+        setSafetyMarkup: noop,
+        convertAmount: identity,
+        convertToFiscal: identity,
+        convertFromFiscal: identity,
+        refreshRates: async () => ({ success: true }),
+        loading: false,
+    };
 
     return (
-        <CurrencyContext.Provider
-            value={{
-                currencies: INITIAL_CURRENCIES,
-                selectedCurrency,
-                taxCurrency,
-                fiscalCurrency,
-                activeCurrencyCodes,
-                isMultiCurrencyEnabled,
-                isBlisCoinsEnabled,
-                exchangeRates,
-                safetyMarkup,
-                lastUpdated,
-                setSelectedCurrency,
-                setTaxCurrency,
-                setFiscalCurrency,
-                toggleActiveCurrency,
-                setActiveCurrencyCodes: handleSetActiveCurrencyCodes,
-                setIsMultiCurrencyEnabled,
-                setIsBlisCoinsEnabled,
-                setSafetyMarkup: handleSetSafetyMarkup,
-                convertAmount,
-                convertToFiscal,
-                convertFromFiscal,
-                refreshRates,
-                loading,
-            }}
-        >
+        <CurrencyContext.Provider value={value}>
             {children}
         </CurrencyContext.Provider>
     );
