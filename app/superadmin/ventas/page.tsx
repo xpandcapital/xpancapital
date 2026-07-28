@@ -137,8 +137,14 @@ export default function VentasAdminPage() {
             }),
         });
         if (res.ok) {
+            const data = await res.json();
             setModalNueva(false);
             setFormNueva({ nombre: "", apellido: "", user_email: "", telefono: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0, fecha_compra: new Date().toISOString().split('T')[0] });
+            if (data.tempPassword) {
+                alert(`✅ Venta registrada\n\n📧 Email: ${formNueva.user_email}\n🔑 Contraseña: ${data.tempPassword}\n\nGuarda esta contraseña. El cliente también la recibirá por correo.`)
+            } else {
+                alert("Venta registrada correctamente")
+            }
             await cargar();
         }
         setGuardando(false);

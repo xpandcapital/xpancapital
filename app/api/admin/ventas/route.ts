@@ -225,6 +225,7 @@ export async function POST(request: NextRequest) {
 
     // Buscar o crear usuario
     let userId: string | null = null;
+    let tempPassword: string | null = null;
     const { data: existingProfile } = await supabase
       .from("profiles")
       .select("id")
@@ -235,7 +236,7 @@ export async function POST(request: NextRequest) {
       userId = existingProfile.id;
     } else {
       // Crear usuario en Auth
-      const tempPassword = Math.random().toString(36).slice(-10) + "Aa1!";
+      tempPassword = Math.random().toString(36).slice(-10) + "Aa1!";
       const { data: newUser, error: authError } = await supabase.auth.admin.createUser({
         email: email.toLowerCase(),
         password: tempPassword,
@@ -334,7 +335,7 @@ export async function POST(request: NextRequest) {
     // Marcar perfil como cliente con compras
     await supabase.from("profiles").update({ ha_comprado: true }).eq("id", userId)
 
-    return NextResponse.json({ success: true, venta: data });
+    return NextResponse.json({ success: true, venta: data, tempPassword, esNuevo: !existingProfile });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
