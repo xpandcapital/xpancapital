@@ -141,6 +141,81 @@ export function HabitosTab() {
         </div>
       )}
 
+      {/* ===== VISTA CALENDARIO ===== */}
+      {vista === 'calendario' && (
+        <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]"><h3 className="text-white font-black uppercase tracking-wider text-[11px]">Calendario</h3></div>
+          <div className="p-4">
+            {historialLoading ? (
+              <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-gray-500" /></div>
+            ) : !historial.length ? (
+              <div className="text-center py-12 text-gray-500 text-xs">Sin registros de hábitos aún</div>
+            ) : (
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                {historial.filter(h => h.habitos?.length > 0).slice(0, 30).map(h => {
+                  const fecha = new Date(h.fecha + 'T12:00:00')
+                  const completados = habitosActivos.filter(ha => h.habitos?.includes(ha.label)).length
+                  const pct = habitosActivos.length ? Math.round((completados / habitosActivos.length) * 100) : 0
+                  return (
+                    <div key={h.fecha} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/[0.02]">
+                      <span className="text-[10px] text-gray-500 w-16 shrink-0">{fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                      <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all ${pct >= 80 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-[10px] text-gray-400 w-8 text-right">{pct}%</span>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ===== VISTA WEEKLY ===== */}
+      {vista === 'weekly' && (
+        <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02]"><h3 className="text-white font-black uppercase tracking-wider text-[11px]">Resumen Semanal</h3></div>
+          <div className="p-4">
+            {historialLoading ? (
+              <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-gray-500" /></div>
+            ) : !historial.length ? (
+              <div className="text-center py-12 text-gray-500 text-xs">Sin registros de hábitos aún</div>
+            ) : (
+              <div className="space-y-3">
+                {(() => {
+                  const weeks: Record<string, HabitosDiarios[]> = {}
+                  for (const h of historial) {
+                    const d = new Date(h.fecha + 'T12:00:00')
+                    const weekStart = new Date(d)
+                    weekStart.setDate(d.getDate() - d.getDay())
+                    const key = weekStart.toISOString().split('T')[0]
+                    if (!weeks[key]) weeks[key] = []
+                    weeks[key].push(h)
+                  }
+                  return Object.entries(weeks).slice(0, 12).map(([weekStart, days]) => {
+                    const avgPct = Math.round(days.reduce((sum, d) => {
+                      const c = habitosActivos.filter(ha => d.habitos?.includes(ha.label)).length
+                      return sum + (habitosActivos.length ? (c / habitosActivos.length) * 100 : 0)
+                    }, 0) / days.length)
+                    return (
+                      <div key={weekStart} className="flex items-center gap-3 p-3 rounded-lg bg-white/[0.02]">
+                        <span className="text-[10px] text-gray-400 w-28 shrink-0">Sem. {new Date(weekStart + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                        <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full transition-all ${avgPct >= 80 ? 'bg-emerald-500' : avgPct >= 40 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${avgPct}%` }} />
+                        </div>
+                        <span className="text-[10px] text-gray-400 w-8 text-right">{avgPct}%</span>
+                        <span className="text-[10px] text-gray-600">{days.length}d</span>
+                      </div>
+                    )
+                  })
+                })()}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ===== MODAL PERSONALIZACIÓN ===== */}
       {showConfig && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
