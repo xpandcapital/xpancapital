@@ -165,6 +165,8 @@ export interface Client {
     lastLoginDate: string;
     isAccountMerged?: boolean;
     mergedWithId?: string;
+    plan?: string;
+    diasRestantes?: number | null;
 }
 
 export interface AcademicCourse {

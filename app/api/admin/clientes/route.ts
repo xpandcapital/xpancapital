@@ -102,17 +102,32 @@ export async function GET(request: NextRequest) {
     const clientsWithAddresses = await Promise.all(
       (profiles || []).map(async (profile) => {
         try {
-          const { data: addresses } = await supabase
-            .from('direcciones')
-            .select('*')
-            .eq('user_id', profile.id)
+          const [addrRes, compraRes] = await Promise.all([
+            supabase.from('direcciones').select('*').eq('user_id', profile.id),
+            supabase.from('compras').select('id, creado_en, fecha_vencimiento_acceso, producto:productos(nombre, duracion_dias)').eq('user_id', profile.id).eq('estado', 'completado').order('creado_en', { ascending: false }).limit(1).maybeSingle()
+          ]);
+          
+          const compra = compraRes.data as any;
+          let plan = null;
+          let diasRestantes: number | null = null;
+          
+          if (compra?.producto?.nombre) {
+            plan = compra.producto.nombre;
+          }
+          if (compra?.fecha_vencimiento_acceso) {
+            const venc = new Date(compra.fecha_vencimiento_acceso).getTime();
+            const ahora = Date.now();
+            diasRestantes = Math.max(0, Math.ceil((venc - ahora) / 86400000));
+          }
           
           return {
             ...profile,
-            addresses: addresses || []
+            addresses: addrRes.data || [],
+            plan,
+            diasRestantes,
           }
         } catch {
-          return { ...profile, addresses: [] }
+          return { ...profile, addresses: [], plan: null, diasRestantes: null }
         }
       })
     )

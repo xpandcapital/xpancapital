@@ -569,12 +569,34 @@ export default function VentasAdminPage() {
                                 placeholder="Ej: Transferencia recibida, comprobante #1234" rows={3}
                                 className="w-full" />
                         </div>
-                        <Button onClick={() => actualizarEstado(modalVerificar!.id, "completado", notasVerificacion, subTipoPago)}
-                            disabled={guardando}
-                            className="w-full">
-                            {guardando ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : <ShieldCheck className="w-4 h-4 mr-2 inline" />}
-                            {guardando ? 'Procesando...' : 'Confirmar Pago y Dar Acceso'}
-                        </Button>
+                        <div className="flex gap-3">
+                            <Button onClick={() => actualizarEstado(modalVerificar!.id, "completado", notasVerificacion, subTipoPago)}
+                                disabled={guardando}
+                                className="flex-1">
+                                {guardando ? <Loader2 className="w-4 h-4 animate-spin mr-2 inline" /> : <ShieldCheck className="w-4 h-4 mr-2 inline" />}
+                                {guardando ? 'Procesando...' : 'Confirmar Pago'}
+                            </Button>
+                            <Button onClick={async () => {
+                                if (notasVerificacion || subTipoPago) {
+                                    const res = await fetch('/api/admin/ventas', {
+                                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ id: modalVerificar!.id, notas: notasVerificacion, sub_tipo_pago: subTipoPago }),
+                                    });
+                                    const d = await res.json();
+                                    if (d.success) {
+                                        setModalVerificar(null);
+                                        setNotasVerificacion('');
+                                        setSubTipoPago('');
+                                        await cargar();
+                                    }
+                                } else {
+                                    setModalVerificar(null);
+                                }
+                            }}
+                                className="flex-1 bg-white/5 border border-white/10 text-white/70 hover:text-white">
+                                Guardar Notas
+                            </Button>
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>

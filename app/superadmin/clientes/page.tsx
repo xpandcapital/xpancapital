@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
     Users, Search, Filter,
-    Coins, TrendingUp, Brain, Trophy,
+    Coins, TrendingUp, Brain, Trophy, GraduationCap,
     ShoppingCart, LayoutGrid, LayoutList, Shield,
     Edit3, Smartphone, ChevronRight, Loader2,
     Trash2
@@ -166,6 +166,8 @@ interface Client {
     lastLoginDate: string;
     isAccountMerged?: boolean;
     mergedWithId?: string;
+    plan?: string;
+    diasRestantes?: number | null;
 }
 
 interface AuditLog { id: string; date: string; action: string; user: string; details: string; }
@@ -227,6 +229,8 @@ function mapDbToClient(profile: DbProfile): Client {
         isCompany: profile.tipo_cuenta === 'empresa',
         companyName: profile.empresa_nombre || '',
         legalRep: profile.empresa_rep_legal || '',
+        plan: (profile as any).plan || '—',
+        diasRestantes: (profile as any).diasRestantes,
         addresses: (profile.addresses || []).map(addr => ({
             id: addr.id,
             type: addr.tipo === 'envio' ? 'Envio' : addr.tipo === 'facturacion' ? 'Facturacion' : 'Oficina',
@@ -385,19 +389,46 @@ export default function AdminClientes() {
                 </div>
 
                 {isRankingView && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="px-8 pb-8 flex flex-wrap gap-4 border-b border-white/5">
-                        <div className="flex-1 min-w-[200px] p-6 bg-amber-500/10 border border-amber-500/20 rounded-[2rem] flex items-center gap-4">
-                            <div className="text-2xl font-black text-amber-500">#1</div>
-                            <div className="flex flex-col"><span className="text-[10px] font-black uppercase text-amber-500/60">Top Compras</span><span className="text-sm font-black">Carlos Perez</span></div>
-                        </div>
-                        <div className="flex-1 min-w-[200px] p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-[2rem] flex items-center gap-4">
-                            <div className="text-2xl font-black text-indigo-500">#1</div>
-                            <div className="flex flex-col"><span className="text-[10px] font-black uppercase text-indigo-500/60">Top Academia</span><span className="text-sm font-black">Ana Garcia</span></div>
-                        </div>
-                        <div className="flex-1 min-w-[200px] p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] flex items-center gap-4">
-                            <div className="text-2xl font-black text-emerald-500">#1</div>
-                            <div className="flex flex-col"><span className="text-[10px] font-black uppercase text-emerald-500/60">Top Referidos</span><span className="text-sm font-black">Luis Torres</span></div>
-                        </div>
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="px-4 md:px-8 pb-8 grid grid-cols-1 md:grid-cols-3 gap-4 border-b border-white/5">
+                        {(() => {
+                            const topCompras = [...clients].sort((a, b) => b.purchases - a.purchases).slice(0, 3);
+                            const topAcademia = [...clients].sort((a, b) => (b.puntosCursos || 0) - (a.puntosCursos || 0)).slice(0, 3);
+                            const topReferidos = [...clients].sort((a, b) => (b.blisCoins || 0) - (a.blisCoins || 0)).slice(0, 3);
+                            return (
+                                <>
+                                    <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-[2rem] space-y-3">
+                                        <div className="flex items-center gap-2 text-amber-500"><Trophy className="w-4 h-4" /><span className="text-[10px] font-black uppercase">Top Compras</span></div>
+                                        {topCompras.map((c, i) => (
+                                            <div key={c.id} className="flex items-center gap-3">
+                                                <span className="text-lg font-black text-amber-500 w-6">#{i + 1}</span>
+                                                <span className="text-sm font-bold truncate">{c.firstName} {c.lastName}</span>
+                                                <span className="text-[10px] text-gray-500 ml-auto">{c.purchases} compras</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-[2rem] space-y-3">
+                                        <div className="flex items-center gap-2 text-indigo-400"><GraduationCap className="w-4 h-4" /><span className="text-[10px] font-black uppercase">Top Academia</span></div>
+                                        {topAcademia.map((c, i) => (
+                                            <div key={c.id} className="flex items-center gap-3">
+                                                <span className="text-lg font-black text-indigo-400 w-6">#{i + 1}</span>
+                                                <span className="text-sm font-bold truncate">{c.firstName} {c.lastName}</span>
+                                                <span className="text-[10px] text-gray-500 ml-auto">{c.puntosCursos || 0} pts</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="p-6 bg-emerald-500/10 border border-emerald-500/20 rounded-[2rem] space-y-3">
+                                        <div className="flex items-center gap-2 text-emerald-400"><Users className="w-4 h-4" /><span className="text-[10px] font-black uppercase">Top Coins</span></div>
+                                        {topReferidos.map((c, i) => (
+                                            <div key={c.id} className="flex items-center gap-3">
+                                                <span className="text-lg font-black text-emerald-400 w-6">#{i + 1}</span>
+                                                <span className="text-sm font-bold truncate">{c.firstName} {c.lastName}</span>
+                                                <span className="text-[10px] text-gray-500 ml-auto">{c.blisCoins} BC</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </motion.div>
                 )}
 
@@ -420,6 +451,7 @@ export default function AdminClientes() {
                                         <th className="px-4 md:px-8 py-4 md:py-6">Socio & Perfil</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Nivel / Tier</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Estado Ops</th>
+                                        <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Plan</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Boveda (BC)</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Pts (Nivel)</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Total Compra</th>
@@ -457,6 +489,17 @@ export default function AdminClientes() {
                                                 }`}>{c.status}</span>
                                             </td>
                                             <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell font-black text-amber-500 text-xs tracking-widest">{formatCurrency(c.blisCoins)} BC</td>
+                                            <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">
+                                                <span className="text-xs font-black text-white">{c.plan || '—'}</span>
+                                                {c.diasRestantes != null && c.diasRestantes > 0 && (
+                                                    <span className={`text-[9px] block font-bold ${c.diasRestantes <= 30 ? 'text-red-400' : 'text-emerald-400'}`}>
+                                                        {c.diasRestantes} días
+                                                    </span>
+                                                )}
+                                                {c.diasRestantes === 0 && c.plan && c.plan !== '—' && (
+                                                    <span className="text-[9px] block font-bold text-red-400">Vencido</span>
+                                                )}
+                                            </td>
                                             <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">
                                               <span className="font-black text-white text-xs">{c.puntos.toLocaleString()}</span>
                                               <span className="text-[9px] text-gray-500 block">Nv.{c.puntosNivel} · C:{c.puntosCursos} Co:{c.puntosComunidad} B:{c.puntosBlog}</span>
