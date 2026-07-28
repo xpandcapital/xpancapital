@@ -275,6 +275,13 @@ export function useCourseManagement() {
   const handleDeleteCourse = useCallback(async (courseId: string) => {
     if (!confirm('¿Estás seguro de eliminar este curso?')) return
 
+    // Si el curso aún no se ha guardado (ID temporal), solo remover del estado local
+    if (courseId.startsWith('new-')) {
+      setCourses(prev => prev.filter(c => c.id !== courseId))
+      if (currentCourse?.id === courseId) setCurrentCourse(null)
+      return
+    }
+
     try {
       const response = await fetch(`/api/admin/cursos?id=${courseId}`, {
         method: 'DELETE'
