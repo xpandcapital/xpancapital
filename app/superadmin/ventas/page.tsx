@@ -54,7 +54,7 @@ export default function VentasAdminPage() {
     const [subTipoPago, setSubTipoPago] = useState("");
     const [guardando, setGuardando] = useState(false);
     
-    const [formNueva, setFormNueva] = useState({ user_email: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0 });
+    const [formNueva, setFormNueva] = useState({ nombre: "", apellido: "", user_email: "", telefono: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0, fecha_compra: new Date().toISOString().split('T')[0] });
     const [clientes, setClientes] = useState<any[]>([]);
     const [productos, setProductos] = useState<any[]>([]);
 
@@ -122,20 +122,23 @@ export default function VentasAdminPage() {
     const registrarVentaOffline = async () => {
         if (!formNueva.user_email || !formNueva.producto_id) return;
         setGuardando(true);
-        const cliente = clientes.find(c => c.email?.toLowerCase() === formNueva.user_email.toLowerCase());
         const res = await fetch("/api/admin/ventas", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                user_id: cliente?.id,
+                nombre: formNueva.nombre,
+                apellido: formNueva.apellido,
+                email: formNueva.user_email,
+                telefono: formNueva.telefono,
                 producto_id: formNueva.producto_id,
                 metodo_pago: formNueva.metodo_pago,
-                monto_usd: formNueva.metodo_pago === "bliscoins" ? 0 : (formNueva.monto_usd || 0),
+                monto_usd: formNueva.metodo_pago === "bliscoins" || formNueva.metodo_pago === "regalo" ? 0 : (formNueva.monto_usd || 0),
                 monto_coins: formNueva.metodo_pago === "bliscoins" ? (formNueva.monto_coins || 0) : 0,
+                fecha_compra: formNueva.fecha_compra,
             }),
         });
         if (res.ok) {
             setModalNueva(false);
-            setFormNueva({ user_email: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0 });
+            setFormNueva({ nombre: "", apellido: "", user_email: "", telefono: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0, fecha_compra: new Date().toISOString().split('T')[0] });
             await cargar();
         }
         setGuardando(false);
@@ -423,16 +426,33 @@ export default function VentasAdminPage() {
 
             {/* Modal Nueva Venta */}
             <Dialog open={modalNueva} onOpenChange={setModalNueva}>
-                <DialogContent className="bg-[#111] border-white/10 text-white max-w-md">
+                <DialogContent className="bg-[#111] border-white/10 text-white max-w-md max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-sm font-black uppercase tracking-wider">Registrar Venta</DialogTitle>
-                        <p className="text-xs text-gray-500 mt-1">Para pagos por transferencia, efectivo, XPANDCOINS u otros.</p>
+                        <p className="text-xs text-gray-500 mt-1">Registra una venta manual, transferencia o regalo.</p>
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Nombre</label>
+                                <Input value={formNueva.nombre} onChange={e => setFormNueva({ ...formNueva, nombre: e.target.value })}
+                                    placeholder="Juan" className="bg-white/5 border-white/10 text-white" />
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Apellido</label>
+                                <Input value={formNueva.apellido} onChange={e => setFormNueva({ ...formNueva, apellido: e.target.value })}
+                                    placeholder="Pérez" className="bg-white/5 border-white/10 text-white" />
+                            </div>
+                        </div>
                         <div>
                             <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Email del Cliente *</label>
                             <Input value={formNueva.user_email} onChange={e => setFormNueva({ ...formNueva, user_email: e.target.value })}
                                 placeholder="cliente@email.com" className="bg-white/5 border-white/10 text-white" />
+                        </div>
+                        <div>
+                            <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Teléfono</label>
+                            <Input value={formNueva.telefono} onChange={e => setFormNueva({ ...formNueva, telefono: e.target.value })}
+                                placeholder="+57 300 000 0000" className="bg-white/5 border-white/10 text-white" />
                         </div>
                         <div>
                             <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Producto *</label>
@@ -461,23 +481,31 @@ export default function VentasAdminPage() {
                                     { value: 'tarjeta', label: 'Tarjeta' },
                                     ...(coinsEnabled ? [{ value: 'bliscoins', label: 'XPANDCOINS' }] : []),
                                     { value: 'otro', label: 'Otro' },
+                                    { value: 'regalo', label: '🎁 Regalo' },
                                 ]}
                                 className="w-full"
                             />
                         </div>
-                        {formNueva.metodo_pago === "bliscoins" && coinsEnabled ? (
-                            <div>
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Monto XPANDCOINS</label>
-                                <Input type="number" value={formNueva.monto_coins || ""} onChange={e => setFormNueva({ ...formNueva, monto_coins: parseInt(e.target.value) || 0 })}
-                                    placeholder="0" className="bg-white/5 border-white/10 text-white" />
-                            </div>
-                        ) : (
-                            <div>
-                                <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Monto USD</label>
-                                <Input type="number" value={formNueva.monto_usd || ""} onChange={e => setFormNueva({ ...formNueva, monto_usd: parseFloat(e.target.value) || 0 })}
-                                    placeholder="0" className="bg-white/5 border-white/10 text-white" />
-                            </div>
-                        )}
+                        <div>
+                            <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Fecha de Compra</label>
+                            <Input type="date" value={formNueva.fecha_compra} onChange={e => setFormNueva({ ...formNueva, fecha_compra: e.target.value })}
+                                className="bg-white/5 border-white/10 text-white" />
+                        </div>
+                        {formNueva.metodo_pago !== "regalo" && (<>
+                            {formNueva.metodo_pago === "bliscoins" && coinsEnabled ? (
+                                <div>
+                                    <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Monto XPANDCOINS</label>
+                                    <Input type="number" value={formNueva.monto_coins || ""} onChange={e => setFormNueva({ ...formNueva, monto_coins: parseInt(e.target.value) || 0 })}
+                                        placeholder="0" className="bg-white/5 border-white/10 text-white" />
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Monto USD</label>
+                                    <Input type="number" value={formNueva.monto_usd || ""} onChange={e => setFormNueva({ ...formNueva, monto_usd: parseFloat(e.target.value) || 0 })}
+                                        placeholder="0" className="bg-white/5 border-white/10 text-white" />
+                                </div>
+                            )}
+                        </>)}
                         <Button onClick={registrarVentaOffline} disabled={guardando || !formNueva.user_email || !formNueva.producto_id}
                             className="w-full">
                             {guardando ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null} Registrar Venta

@@ -215,23 +215,74 @@ export async function POST(request: NextRequest) {
     if (!auth) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const body = await request.json();
-    const { user_id, producto_id, metodo_pago, monto_usd } = body;
+    const { email, producto_id, metodo_pago, monto_usd, monto_coins, fecha_compra, nombre, apellido, telefono } = body;
 
-    if (!user_id || !producto_id) {
-      return NextResponse.json({ error: "user_id y producto_id requeridos" }, { status: 400 });
+    if (!email || !producto_id) {
+      return NextResponse.json({ error: "email y producto_id requeridos" }, { status: 400 });
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Buscar o crear usuario
+    let userId: string | null = null;
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", email.toLowerCase())
+      .maybeSingle();
+
+    if (existingProfile) {
+      userId = existingProfile.id;
+    } else {
+      // Crear usuario en Auth
+      const tempPassword = Math.random().toString(36).slice(-10) + "Aa1!";
+      const { data: newUser, error: authError } = await supabase.auth.admin.createUser({
+        email: email.toLowerCase(),
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: { nombre: `${nombre || ""} ${apellido || ""}`.trim() || email.split("@")[0] },
+      });
+
+      if (!authError && newUser.user?.id) {
+        userId = newUser.user.id;
+        await supabase.from("profiles").upsert({
+          id: userId,
+          email: email.toLowerCase(),
+          nombre: `${nombre || ""} ${apellido || ""}`.trim() || email.split("@")[0],
+          empresa_id: auth.empresaId,
+          rol: "cliente",
+          telefono: telefono || null,
+        }, { onConflict: "id" });
+
+        // Enviar email con contraseña temporal
+        try {
+          const { sendTemplateEmail } = await import("@/lib/email/sendTemplateEmail");
+          sendTemplateEmail({
+            evento: "cuenta_creada",
+            to: email,
+            variables: {
+              nombre: nombre || email.split("@")[0],
+              email: email,
+              contrasena: tempPassword,
+              enlace_acceso: `${process.env.NEXT_PUBLIC_APP_URL || "https://xpandcapital.org"}/login`,
+            },
+          }).catch(() => {});
+        } catch {}
+      } else {
+        return NextResponse.json({ error: "No se pudo crear el usuario" }, { status: 500 });
+      }
+    }
+
     const { data, error } = await supabase
       .from("compras")
       .insert({
-        user_id,
+        user_id: userId,
         producto_id,
         metodo_pago: metodo_pago || "transferencia",
         monto_usd: monto_usd || 0,
-        monto_coins: 0,
+        monto_coins: monto_coins || 0,
         estado: "completado",
+        creado_en: fecha_compra ? new Date(fecha_compra).toISOString() : new Date().toISOString(),
       })
       .select("*")
       .single();

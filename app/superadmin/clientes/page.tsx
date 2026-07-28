@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
     Users, Search, Filter, Download,
     Coins, TrendingUp, Brain, Trophy,
-    Plus, LayoutGrid, LayoutList, Shield,
+    ShoppingCart, LayoutGrid, LayoutList, Shield,
     Edit3, Smartphone, ChevronRight, Loader2,
     ArrowRightLeft as ArrowRightLeftIcon, Trash2
 } from "lucide-react";
@@ -334,7 +335,9 @@ export default function AdminClientes() {
                 </div>
                 <div className="flex items-center gap-4">
                     <button onClick={() => setIsRankingView(!isRankingView)} className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase transition-all flex items-center gap-2 ${isRankingView ? 'bg-amber-500 text-black' : 'bg-white/5 text-gray-400'}`}><Trophy className="w-4 h-4" /> Ranking</button>
-                    <button className="px-8 py-4 bg-blis-red text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-2xl"><Plus className="w-5 h-5" /></button>
+                    <Link href="/superadmin/ventas" className="px-8 py-4 bg-blis-red text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-2xl flex items-center gap-2 hover:bg-blis-red/90 transition-all">
+                        <ShoppingCart className="w-5 h-5" /> Ir a Ventas
+                    </Link>
                 </div>
             </div>
 
