@@ -78,7 +78,7 @@ export default function NotificacionesPage() {
       const response = await fetch("/api/notificaciones?admin=true&limit=100");
       const data = await response.json();
       if (data.success) {
-        setHistorial(data.data || []);
+        setHistorial(data.notifications || data.data || []);
       } else {
         showToast("Error al cargar historial", "error");
       }
