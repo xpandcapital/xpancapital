@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       .order('creado_en', { ascending: false })
 
     if (all !== 'true') {
-      query = query.eq('activo', true)
+      query = query.eq('activo', true).eq('visible_en_tienda', true)
     }
 
     if (slug) {

@@ -38,7 +38,7 @@ export default function ShopPage() {
         if (isMounted) {
           if (productsData.success && productsData.data) {
             const mapped = productsData.data
-              .filter((p: any) => p.activo !== false)
+              .filter((p: any) => p.activo !== false && p.visible_en_tienda !== false)
               .map((p: any) => mapProductoToProductDef(p));
             setAllProducts(mapped);
           }
