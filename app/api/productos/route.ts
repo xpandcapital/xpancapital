@@ -141,6 +141,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Build insert object - SIEMPRE inicia como borrador
+    // Default a Cursos si no se especifica categoria
+    let catId = categoria_id
+    if (!catId) {
+      const { data: catCursos } = await supabase
+        .from('producto_categorias')
+        .select('id')
+        .eq('slug', 'cursos')
+        .eq('empresa_id', DEFAULT_EMPRESA_ID)
+        .maybeSingle()
+      catId = catCursos?.id || null
+    }
+
     const insertData: any = {
       empresa_id: DEFAULT_EMPRESA_ID,
       nombre,
@@ -151,7 +163,7 @@ export async function POST(request: NextRequest) {
       precio_coins: precio_coins || 0,
       precio_usd: precio_usd || 0,
       tipo: tipo || 'digital',
-      categoria_id,
+      categoria_id: catId,
       imagen_principal,
       galeria,
       stock: stock || 0,
