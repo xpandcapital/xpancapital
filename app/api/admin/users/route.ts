@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
       .from('profiles')
       .select('id, nombre, apellido, email, telefono, rol, blis_coins, total_referidos, creado_en, avatar_url, puntos_cursos, puntos_comunidad, puntos_blog', { count: 'exact' })
       .eq('empresa_id', empresaId)
+      .neq('rol', 'cliente').neq('rol', 'usuario')
       .order('creado_en', { ascending: false })
       .range((page - 1) * perPage, page * perPage - 1)
 

@@ -69,13 +69,13 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const { coinsEnabled } = useShop();
     
     const [selectedCurrency, setCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "USD") || INITIAL_CURRENCIES[0]);
-    const [taxCurrency, setTaxCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "PEN") || INITIAL_CURRENCIES[0]);
-    const [fiscalCurrency, setFiscalCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "PEN") || INITIAL_CURRENCIES[0]);
+    const [taxCurrency, setTaxCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "COP") || INITIAL_CURRENCIES[0]);
+    const [fiscalCurrency, setFiscalCurrencyState] = useState<Currency>(INITIAL_CURRENCIES.find(c => c.code === "COP") || INITIAL_CURRENCIES[0]);
     const [isMultiCurrencyEnabled, setIsMultiCurrencyEnabledState] = useState<boolean>(false);
     const isBlisCoinsEnabled = coinsEnabled;
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-    const activeCurrencyCodes = config?.monedas_activas || ["USD", "PEN", "MXN", "EUR"];
+    const activeCurrencyCodes = config?.monedas_activas || ["USD", "COP", "MXN", "EUR"];
     const exchangeRates = tasas;
     const safetyMarkup = config?.margen_seguridad || 0.02;
 
