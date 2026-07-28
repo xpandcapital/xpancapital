@@ -188,6 +188,7 @@ export function CommsTab({ client, onUpdate }: CommsTabProps) {
                 <h4 className="text-[10px] font-black uppercase text-gray-500">Notificaciones Enviadas</h4>
                 <NotificationHistory clientId={client.id} />
             </div>
+        </div>
     );
 }
 
