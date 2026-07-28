@@ -69,7 +69,7 @@ export function ProductFormModal({
     stock: number; lowStockThreshold: number; sku: string; skuPrefix: string;
     isAutoSku: boolean; purchaseDate: string; expirationDate: string;
     image: string | null; cursoId: string | null; multiPrices: Record<string, number>;
-    duracion_dias: number | null; multiOriginalPrices: Record<string, number>;
+    duracion_dias: number | null; visible_en_tienda: boolean; multiOriginalPrices: Record<string, number>;
   }>(() => {
     if (editingProduct) {
       return {
