@@ -15,8 +15,6 @@ export default function ClientDetailPage() {
         transactions,
         history,
         events,
-        insights,
-        automations,
         referrals,
         academicData,
         updateClient,
@@ -63,8 +61,6 @@ export default function ClientDetailPage() {
                 transactions={transactions}
                 history={history}
                 events={events}
-                insights={insights}
-                automations={automations}
                 referrals={referrals}
                 academicData={academicData}
                 onUpdate={updateClient}

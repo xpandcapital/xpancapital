@@ -21,13 +21,10 @@ const tabs = [
     { id: 'profile', label: 'Perfil', icon: User },
     { id: 'economy', label: 'Bóveda', icon: DollarSign },
     { id: 'sales', label: 'Ventas', icon: ShoppingBag },
-    { id: 'addresses', label: 'Direcciones', icon: MapPin },
     { id: 'academia', label: 'Academia', icon: GraduationCap },
     { id: 'gamificacion', label: 'Gamificación', icon: TrendingUp },
     { id: 'referrals', label: 'Referidos', icon: Users },
     { id: 'comms', label: 'Comunicaciones', icon: MessageCircle },
-    { id: 'ai', label: 'Insights IA', icon: Sparkles },
-    { id: 'automations', label: 'Automatizaciones', icon: Zap },
     { id: 'history', label: 'Historial', icon: Clock },
 ];
 

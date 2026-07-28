@@ -14,8 +14,6 @@ export function useClientDetail(clientId: string) {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [history, setHistory] = useState<AuditLog[]>([]);
     const [events, setEvents] = useState<PrivateEvent[]>([]);
-    const [insights, setInsights] = useState<any[]>([]);
-    const [automations, setAutomations] = useState<any[]>([]);
     const [referrals, setReferrals] = useState<Referral[]>([]);
     const [academicData, setAcademicData] = useState<{ progress: AcademicCourse[], certificates: Certificate[] }>({ progress: [], certificates: [] });
     const { showToast } = useToast();
@@ -85,30 +83,6 @@ export function useClientDetail(clientId: string) {
         }
     }, [clientId]);
 
-    const fetchInsights = useCallback(async () => {
-        try {
-            const res = await fetch(`/api/admin/clientes/${clientId}/insights`);
-            const data = await res.json();
-            if (data.success) {
-                setInsights(data.data || []);
-            }
-        } catch (err) {
-            console.error('Error fetching insights:', err);
-        }
-    }, [clientId]);
-
-    const fetchAutomations = useCallback(async () => {
-        try {
-            const res = await fetch(`/api/admin/clientes/${clientId}/automations`);
-            const data = await res.json();
-            if (data.success) {
-                setAutomations(data.data || []);
-            }
-        } catch (err) {
-            console.error('Error fetching automations:', err);
-        }
-    }, [clientId]);
-
     const fetchReferrals = useCallback(async () => {
         try {
             const res = await fetch(`/api/admin/clientes/${clientId}/referrals`);
@@ -139,11 +113,9 @@ export function useClientDetail(clientId: string) {
         fetchTransactions();
         fetchHistory();
         fetchEvents();
-        fetchInsights();
-        fetchAutomations();
         fetchReferrals();
         fetchAcademia();
-    }, [fetchClient, fetchOrders, fetchTransactions, fetchHistory, fetchEvents, fetchInsights, fetchAutomations, fetchReferrals, fetchAcademia]);
+    }, [fetchClient, fetchOrders, fetchTransactions, fetchHistory, fetchEvents, fetchReferrals, fetchAcademia]);
 
     const updateClient = useCallback(async (fields: Partial<Client>, silent = true) => {
         if (!guard('clientes', 'editar')) return;
@@ -265,8 +237,6 @@ export function useClientDetail(clientId: string) {
         transactions,
         history,
         events,
-        insights,
-        automations,
         referrals,
         academicData,
         fetchClient,
@@ -274,8 +244,6 @@ export function useClientDetail(clientId: string) {
         fetchTransactions,
         fetchHistory,
         fetchEvents,
-        fetchInsights,
-        fetchAutomations,
         fetchReferrals,
         fetchAcademia,
         updateClient,

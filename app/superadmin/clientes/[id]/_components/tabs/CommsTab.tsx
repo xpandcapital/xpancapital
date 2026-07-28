@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import {
-    MessageCircle, Send, Bell, Newspaper, Gift
+    MessageCircle, Send, Bell, Newspaper, Gift, Loader2
 } from 'lucide-react';
 import type { Client } from '../../../_types';
 import { useToast } from '@/components/ui/Toast';
@@ -16,6 +16,36 @@ interface CommsTabProps {
 export function CommsTab({ client, onUpdate }: CommsTabProps) {
     const { showToast } = useToast();
     const [noticeContent, setNoticeContent] = useState({ title: '', message: '', template: 'custom' });
+    const [sending, setSending] = useState(false);
+
+    const handleSend = async () => {
+        if (!noticeContent.title || !noticeContent.message) {
+            showToast('Completa el asunto y mensaje', 'error')
+            return
+        }
+        setSending(true)
+        try {
+            const res = await fetch('/api/notificaciones', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: client.id,
+                    titulo: noticeContent.title,
+                    mensaje: noticeContent.message,
+                }),
+            })
+            const data = await res.json()
+            if (data.success) {
+                showToast('Notificación enviada correctamente', 'success')
+                setNoticeContent({ template: 'custom', title: '', message: '' })
+            } else {
+                showToast(data.error || 'Error al enviar', 'error')
+            }
+        } catch {
+            showToast('Error de conexión', 'error')
+        }
+        setSending(false)
+    }
 
     return (
         <div className="space-y-6">
@@ -70,19 +100,12 @@ export function CommsTab({ client, onUpdate }: CommsTabProps) {
 
                 <div className="flex gap-4">
                     <button
-                        onClick={() => {
-                            showToast('Mensaje enviado', 'success');
-                            setNoticeContent({ template: 'custom', title: '', message: '' });
-                        }}
-                        className="flex-1 py-4 bg-blis-red text-white rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl"
+                        onClick={handleSend}
+                        disabled={sending}
+                        className="flex-1 py-4 bg-blis-red text-white rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-xl disabled:opacity-50"
                     >
-                        <Send className="w-4 h-4" /> Despachar Notificación
-                    </button>
-                    <button
-                        onClick={() => showToast('Test enviado', 'info')}
-                        className="px-8 py-4 bg-white/5 border border-white/10 text-white rounded-2xl font-black uppercase text-[10px] hover:bg-white/10 transition-all"
-                    >
-                        Prueba
+                        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        {sending ? 'Enviando...' : 'Despachar Notificación'}
                     </button>
                 </div>
             </div>

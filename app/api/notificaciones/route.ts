@@ -124,6 +124,38 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function POST(request: NextRequest) {
+  try {
+    const auth = await getAuthUser(request)
+    if (!auth) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+    const body = await request.json()
+    const { user_id, titulo, mensaje } = body
+
+    if (!user_id || !titulo) {
+      return NextResponse.json({ error: 'user_id y titulo requeridos' }, { status: 400 })
+    }
+
+    const supabaseAdmin = getSupabaseAdmin()
+    const { data, error } = await supabaseAdmin
+      .from('notificaciones')
+      .insert({
+        user_id,
+        empresa_id: auth.empresaId,
+        titulo,
+        mensaje,
+        leida: false,
+      })
+      .select()
+      .single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true, data })
+  } catch (err) {
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+  }
+}
+
 export async function PUT(request: NextRequest) {
   try {
     const auth = await getAuthUser(request)

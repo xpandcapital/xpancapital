@@ -6,12 +6,9 @@ import { ClientSidebar } from './ClientSidebar';
 import { ProfileTab } from './tabs/ProfileTab';
 import { EconomyTab } from './tabs/EconomyTab';
 import { SalesTab } from './tabs/SalesTab';
-import { AddressesTab } from './tabs/AddressesTab';
 import { AcademiaTab } from './tabs/AcademiaTab';
 import { ReferralsTab } from './tabs/ReferralsTab';
 import { CommsTab } from './tabs/CommsTab';
-import { AiInsightsTab } from './tabs/AiInsightsTab';
-import { AutomationsTab } from './tabs/AutomationsTab';
 import { HistoryTab } from './tabs/HistoryTab';
 import { GamificacionTab } from './tabs/GamificacionTab';
 
@@ -21,8 +18,6 @@ interface ClientDetailProps {
     transactions: Transaction[];
     history: AuditLog[];
     events: PrivateEvent[];
-    insights: any[];
-    automations: any[];
     referrals: Referral[];
     academicData: { progress: AcademicCourse[]; certificates: Certificate[] };
     onUpdate: (fields: Partial<Client>, showToast?: boolean) => void;
@@ -38,8 +33,6 @@ export function ClientDetail({
     transactions,
     history,
     events,
-    insights,
-    automations,
     referrals,
     academicData,
     onUpdate,
@@ -56,12 +49,9 @@ export function ClientDetail({
             case 'profile': return <ProfileTab {...baseProps} />;
             case 'economy': return <EconomyTab {...baseProps} transactions={transactions} />;
             case 'sales': return <SalesTab {...baseProps} orders={orders} />;
-            case 'addresses': return <AddressesTab {...baseProps} />;
             case 'academia': return <AcademiaTab academicData={academicData} clientId={client.id} onDesbloquear={onDesbloquear} onDeleteCertificate={onDeleteCertificate} />;
             case 'referrals': return <ReferralsTab {...baseProps} referrals={referrals} />;
             case 'comms': return <CommsTab client={client} onUpdate={onUpdate} />;
-            case 'ai': return <AiInsightsTab {...baseProps} insights={insights} />;
-            case 'automations': return <AutomationsTab {...baseProps} automations={automations} />;
             case 'history': return <HistoryTab {...baseProps} history={history} />;
             case 'gamificacion': return <GamificacionTab client={client} />;
             default: return <ProfileTab {...baseProps} />;
