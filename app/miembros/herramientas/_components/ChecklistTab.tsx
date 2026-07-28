@@ -129,7 +129,7 @@ export function ChecklistTab() {
       <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden">
         <div className="px-4 py-3 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
           <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-emerald-400" /><h3 className="text-white font-black uppercase tracking-wider text-[11px]">Cumplimiento</h3></div>
-          <div className="flex gap-1">{PERIODS.map(p => <button key={p.id} onClick={() => fetchHistorial(p.id)} className={`px-2.5 py-1 rounded-md font-bold text-[10px] uppercase tracking-wider ${periodo === p.id ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/[0.03] text-gray-500 border border-white/5 hover:text-gray-300'}`}>{p.label}</button>)}</div>
+          <div className="flex gap-1">{PERIODS.map(p => <button key={p.id} onClick={() => { setPeriodo(p.id); fetchHistorial(p.id) }} className={`px-2.5 py-1 rounded-md font-bold text-[10px] uppercase tracking-wider ${periodo === p.id ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/[0.03] text-gray-500 border border-white/5 hover:text-gray-300'}`}>{p.label}</button>)}</div>
         </div>
         <div className="p-3">
           {chartData.length === 0 ? <div className="text-center py-16"><TrendingUp className="w-8 h-8 text-gray-700 mx-auto mb-2" /><p className="text-gray-500 text-xs">Completa tareas para ver tu progreso</p></div> : (
