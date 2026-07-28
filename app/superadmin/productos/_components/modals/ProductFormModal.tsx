@@ -68,8 +68,8 @@ export function ProductFormModal({
     category: string; price: number; originalPrice: number; bliscoins: number;
     stock: number; lowStockThreshold: number; sku: string; skuPrefix: string;
     isAutoSku: boolean; purchaseDate: string; expirationDate: string;
-    image: string | null; cursoId: string | null; multiPrices: Record<string, number>;
-    duracion_dias: number | null; visible_en_tienda: boolean; multiOriginalPrices: Record<string, number>;
+    image: string | null; cursoId: string | null;
+    duracion_dias: number | null; visible_en_tienda: boolean;
   }>(() => {
     if (editingProduct) {
       return {
@@ -90,10 +90,8 @@ export function ProductFormModal({
         expirationDate: editingProduct.expirationDate || '',
         image: editingProduct.image || null,
         cursoId: editingProduct.curso_id || null,
-        multiPrices: editingProduct.precios_multimoneda || {} as Record<string, number>,
         duracion_dias: editingProduct.duracion_dias || null,
         visible_en_tienda: editingProduct.visible_en_tienda ?? true,
-        multiOriginalPrices: {},
       }
     }
     return {
@@ -114,10 +112,8 @@ export function ProductFormModal({
       expirationDate: '',
       image: null,
       cursoId: null,
-      multiPrices: {} as Record<string, number>,
       duracion_dias: null,
       visible_en_tienda: true,
-      multiOriginalPrices: {} as Record<string, number>,
     }
   })
 
@@ -171,7 +167,6 @@ export function ProductFormModal({
       meta_descripcion: formData.metaDescripcion || null,
       meta_titulo: null,
       curso_id: formData.cursoId || null,
-      precios_multimoneda: isMultiCurrencyEnabled ? formData.multiPrices : {},
     }
 
     const result = await onSave(data)
@@ -546,15 +541,9 @@ export function ProductFormModal({
               bliscoins={formData.bliscoins}
               currencySymbol={selectedCurrency.symbol}
               isBlisCoinsEnabled={isBlisCoinsEnabled}
-              isMultiCurrencyEnabled={isMultiCurrencyEnabled}
-              activeCurrencies={activeMultiCurrencies}
-              multiPrices={formData.multiPrices}
-              multiOriginalPrices={formData.multiOriginalPrices}
               onPriceChange={(price) => setFormData(prev => ({ ...prev, price }))}
               onOriginalPriceChange={(originalPrice) => setFormData(prev => ({ ...prev, originalPrice }))}
               onBlisCoinsChange={(bliscoins) => setFormData(prev => ({ ...prev, bliscoins }))}
-              onMultiPriceChange={(code, price) => setFormData(prev => ({ ...prev, multiPrices: { ...prev.multiPrices, [code]: price } }))}
-              onMultiOriginalPriceChange={(code, price) => setFormData(prev => ({ ...prev, multiOriginalPrices: { ...prev.multiOriginalPrices, [code]: price } }))}
             />
 
             <ProductStockSection

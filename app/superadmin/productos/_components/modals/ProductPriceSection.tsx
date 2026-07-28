@@ -1,23 +1,14 @@
 "use client"
 
-import { Currency } from '@/context/CurrencyContext'
-
 interface ProductPriceSectionProps {
   price: number
   originalPrice: number
   bliscoins: number
   currencySymbol: string
   isBlisCoinsEnabled: boolean
-  isMultiCurrencyEnabled: boolean
-  activeCurrencies: Currency[]
-  multiPrices: Record<string, number>
-  multiOriginalPrices: Record<string, number>
   onPriceChange: (price: number) => void
   onOriginalPriceChange: (price: number) => void
   onBlisCoinsChange: (coins: number) => void
-  onMultiPriceChange: (code: string, price: number) => void
-  onMultiOriginalPriceChange: (code: string, price: number) => void
-  isEditing?: boolean
 }
 
 export function ProductPriceSection({
@@ -26,33 +17,22 @@ export function ProductPriceSection({
   bliscoins,
   currencySymbol,
   isBlisCoinsEnabled,
-  isMultiCurrencyEnabled,
-  activeCurrencies,
-  multiPrices,
-  multiOriginalPrices,
   onPriceChange,
   onOriginalPriceChange,
   onBlisCoinsChange,
-  onMultiPriceChange,
-  onMultiOriginalPriceChange,
 }: ProductPriceSectionProps) {
-  const monedasMulti = isMultiCurrencyEnabled
-    ? activeCurrencies.filter(c => c.code !== 'USD')
-    : []
-
   return (
-    <div className="md:col-span-2 bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 md:p-8 space-y-6">
+    <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 md:p-8 space-y-6">
       <div className="flex items-center gap-3 pb-4 border-b border-white/5">
         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
           <span className="text-emerald-500 font-black text-lg">{currencySymbol}</span>
         </div>
         <div>
-          <h4 className="text-sm font-black text-white uppercase tracking-widest">Precios y Stock</h4>
-          <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Configuración de precios y disponibilidad</p>
+          <h4 className="text-sm font-black text-white uppercase tracking-widest">Precios</h4>
+          <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Precio final y de comparación en USD</p>
         </div>
       </div>
 
-      {/* Precio en USD (siempre visible) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Precio Final (USD)</label>
@@ -69,7 +49,7 @@ export function ProductPriceSection({
         </div>
 
         <div className="space-y-2">
-          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Precio Original (Comparación)</label>
+          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Precio de Comparación (USD)</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">$</span>
             <input
@@ -82,48 +62,6 @@ export function ProductPriceSection({
           </div>
         </div>
       </div>
-
-      {/* Precios multimoneda (visibles solo si está activado) */}
-      {isMultiCurrencyEnabled && monedasMulti.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="h-px flex-1 bg-white/5" />
-            <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest">Precios por moneda</span>
-            <div className="h-px flex-1 bg-white/5" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {monedasMulti.map((curr) => (
-              <div key={curr.code} className="space-y-2">
-                <label className="text-[10px] font-black text-blue-400 uppercase tracking-widest">
-                  {curr.code} — {curr.name}
-                </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 font-black text-xs">{curr.symbol}</span>
-                    <input
-                      type="number"
-                      value={multiPrices[curr.code] || ''}
-                      onChange={(e) => onMultiPriceChange(curr.code, parseFloat(e.target.value) || 0)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-3 py-3 text-white text-sm placeholder:text-gray-800 focus:outline-none focus:border-blue-500/50 transition-all"
-                      placeholder="Precio"
-                    />
-                  </div>
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-[10px]">{curr.symbol}</span>
-                    <input
-                      type="number"
-                      value={multiOriginalPrices[curr.code] || ''}
-                      onChange={(e) => onMultiOriginalPriceChange(curr.code, parseFloat(e.target.value) || 0)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-8 pr-3 py-3 text-white text-sm placeholder:text-gray-800 focus:outline-none focus:border-white/30 transition-all"
-                      placeholder="Comparación"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {isBlisCoinsEnabled && (
         <div className="space-y-2">
