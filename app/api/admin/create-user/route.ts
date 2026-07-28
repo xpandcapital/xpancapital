@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const supabase = createClient()
     const body = await request.json()
 
-    const { nombre, email, password, rol } = body
+    const { nombre, apellido, email, password, rol } = body
 
     if (!nombre || !email) {
       return NextResponse.json({ error: 'Nombre y email son requeridos' }, { status: 400 })
@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
           id: userId,
           email: normalizedEmail,
           nombre,
+          apellido: apellido || null,
           empresa_id: EMPRESA_ID,
           rol: rol || 'usuario',
           creado_en: new Date().toISOString(),

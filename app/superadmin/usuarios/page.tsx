@@ -43,6 +43,7 @@ export default function AdminUsers() {
     const { guard } = useActionGuard();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newUserName, setNewUserName] = useState('');
+    const [newUserApellido, setNewUserApellido] = useState('');
     const [newUserEmail, setNewUserEmail] = useState('');
     const [newUserPassword, setNewUserPassword] = useState('');
     const [newUserRole, setNewUserRole] = useState('empleado');
@@ -307,13 +308,23 @@ export default function AdminUsers() {
                                 <div className="space-y-4">
                                     <h2 className="text-xl font-bold text-white mb-4">Nuevo Usuario</h2>
                                     <div className="space-y-2">
-                                        <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Nombre Completo *</label>
+                                        <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Nombre *</label>
                                         <input
                                             type="text"
                                             value={newUserName}
                                             onChange={(e) => setNewUserName(e.target.value)}
                                             className="w-full"
-                                            placeholder="Nombre del usuario"
+                                            placeholder="Kevin"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs text-gray-400 font-bold uppercase tracking-widest">Apellido</label>
+                                        <input
+                                            type="text"
+                                            value={newUserApellido}
+                                            onChange={(e) => setNewUserApellido(e.target.value)}
+                                            className="w-full"
+                                            placeholder="Pérez"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -375,6 +386,7 @@ export default function AdminUsers() {
                                                         headers: { 'Content-Type': 'application/json' },
                                                         body: JSON.stringify({
                                                             nombre: newUserName,
+                                                            apellido: newUserApellido,
                                                             email: newUserEmail,
                                                             password: newUserPassword || undefined,
                                                             rol: newUserRole,
