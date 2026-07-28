@@ -352,6 +352,21 @@ export async function POST(request: NextRequest) {
     // Marcar perfil como cliente con compras
     await supabase.from("profiles").update({ ha_comprado: true }).eq("id", userId)
 
+    // Crear notificación para todos los admins
+    try {
+      const productoNombre = productoInfo?.nombre || 'Producto'
+      await supabase.from("notificaciones").insert({
+        empresa_id: auth.empresaId,
+        tipo: 'venta',
+        titulo: 'Nueva venta registrada',
+        mensaje: `${nombre || email.split('@')[0]} compró ${productoNombre}${metodo_pago === 'regalo' ? ' (Regalo)' : ''}`,
+        destinatario_tipo: 'por_rol',
+        destinatario_ids: ['admin', 'superadmin'],
+        leida: false,
+        creado_en: new Date().toISOString(),
+      })
+    } catch {}
+
     console.log('[Ventas POST] Venta completada:', { ventaId: data.id, userId, email, tempPassword: !!tempPassword });
     return NextResponse.json({ success: true, venta: data, tempPassword, esNuevo: !existingProfile });
   } catch (error: any) {
