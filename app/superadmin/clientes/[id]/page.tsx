@@ -20,7 +20,8 @@ export default function ClientDetailPage() {
         updateClient,
         adjustCoins,
         desbloquearCurso,
-        deleteCertificate
+        deleteCertificate,
+        assignCourse,
     } = useClientDetail(params.id as string);
 
     if (loading) {
@@ -67,6 +68,7 @@ export default function ClientDetailPage() {
                 onAdjustCoins={adjustCoins}
                 onDesbloquear={desbloquearCurso}
                 onDeleteCertificate={deleteCertificate}
+                onAssignCourse={assignCourse}
                 onClose={() => router.push('/superadmin/clientes')}
             />
         </div>

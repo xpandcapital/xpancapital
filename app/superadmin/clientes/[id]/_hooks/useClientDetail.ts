@@ -229,6 +229,24 @@ export function useClientDetail(clientId: string) {
       }
     }, [fetchAcademia, showToast])
 
+    const assignCourse = useCallback(async (cursoId: string) => {
+        try {
+            const res = await fetch('/api/equipo-cursos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: clientId, curso_id: cursoId }),
+            })
+            const data = await res.json()
+            if (data.success) {
+                showToast('Curso asignado correctamente', 'success')
+                fetchAcademia()
+                return true
+            }
+            showToast(data.error || 'Error al asignar curso', 'error')
+        } catch { showToast('Error al asignar curso', 'error') }
+        return false
+    }, [clientId, fetchAcademia, showToast])
+
     return {
         client,
         loading,
@@ -249,6 +267,7 @@ export function useClientDetail(clientId: string) {
         updateClient,
         adjustCoins,
         desbloquearCurso,
-        deleteCertificate
+        deleteCertificate,
+        assignCourse,
     };
 }

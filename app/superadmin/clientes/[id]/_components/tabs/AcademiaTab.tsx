@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
   GraduationCap, Award, Download, Trash2, Unlock,
   BookOpen, Clock, CheckCircle2, Circle, ChevronDown, ChevronRight,
-  BarChart3, Loader2
+  BarChart3, Loader2, Plus
 } from 'lucide-react';
 import type { AcademicCourse, Certificate } from '../../../_types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,12 +15,23 @@ interface AcademiaTabProps {
   clientId: string;
   onDesbloquear: (userId: string, cursoId: string) => Promise<void>;
   onDeleteCertificate: (certId: string) => Promise<void>;
+  onAssignCourse: (cursoId: string) => Promise<boolean>;
 }
 
-export function AcademiaTab({ academicData, clientId, onDesbloquear, onDeleteCertificate }: AcademiaTabProps) {
+export function AcademiaTab({ academicData, clientId, onDesbloquear, onDeleteCertificate, onAssignCourse }: AcademiaTabProps) {
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
   const [desbloqueando, setDesbloqueando] = useState<string | null>(null);
   const [deletingCert, setDeletingCert] = useState<string | null>(null);
+  const [showAssign, setShowAssign] = useState(false);
+  const [cursos, setCursos] = useState<Array<{ id: string; nombre: string }>>([]);
+  const [selectedCurso, setSelectedCurso] = useState('');
+  const [assigning, setAssigning] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/cursos?all=true').then(r => r.json()).then(d => {
+      if (d.success) setCursos(d.data || [])
+    }).catch(() => {})
+  }, [])
 
   const handleDesbloquear = async (cursoId: string) => {
     setDesbloqueando(cursoId);
@@ -54,8 +65,49 @@ export function AcademiaTab({ academicData, clientId, onDesbloquear, onDeleteCer
     return d.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
   };
 
+  const handleAssign = async () => {
+    if (!selectedCurso) return;
+    setAssigning(true);
+    const ok = await onAssignCourse(selectedCurso);
+    if (ok) { setSelectedCurso(''); setShowAssign(false); }
+    setAssigning(false);
+  };
+
   return (
     <div className="space-y-8">
+      {/* Header con botón Asignar */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-white font-black uppercase tracking-wider text-sm">Academia</h2>
+        <button onClick={() => setShowAssign(true)} className="flex items-center gap-2 px-4 py-2 bg-blis-red text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-blis-red/90 transition-colors">
+          <Plus className="w-4 h-4" /> Asignar Curso
+        </button>
+      </div>
+
+      {/* Modal Asignar Curso */}
+      <AnimatePresence>
+        {showAssign && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowAssign(false)} />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative bg-zinc-950 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl p-6">
+              <h3 className="text-white font-black uppercase tracking-wider text-sm mb-4">Asignar Curso</h3>
+              <p className="text-gray-500 text-xs mb-4">Selecciona el curso que quieres asignar a este cliente.</p>
+              <select value={selectedCurso} onChange={e => setSelectedCurso(e.target.value)}
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red/50 mb-4">
+                <option value="">Seleccionar curso...</option>
+                {cursos.filter(c => !academicData.progress.some(p => p.courseId === c.id)).map(c => (
+                  <option key={c.id} value={c.id}>{c.nombre}</option>
+                ))}
+              </select>
+              <div className="flex gap-3">
+                <button onClick={() => setShowAssign(false)} className="flex-1 py-3 bg-white/5 border border-white/10 rounded-xl text-gray-400 font-bold text-xs">Cancelar</button>
+                <button onClick={handleAssign} disabled={!selectedCurso || assigning} className="flex-1 py-3 bg-blis-red text-white rounded-xl font-bold text-xs disabled:opacity-50">
+                  {assigning ? 'Asignando...' : 'Asignar'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       {/* Stats Header */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

@@ -1,371 +1,134 @@
+import { supabase } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-function getSupabase() {
-  return createClient(supabaseUrl, supabaseServiceKey)
-}
-
-const MISSING_COLS_PATTERNS = ['certificado_template_id', 'imagen_principal', 'schema cache']
-
-function stripMissingCols(data: Record<string, any>): Record<string, any> {
-  const clean = { ...data }
-  delete clean.certificado_template_id
-  delete clean.imagen_principal
-  return clean
-}
-
-function isMissingColError(error: { message?: string }): boolean {
-  return MISSING_COLS_PATTERNS.some(p => error.message?.includes(p))
-}
-
-async function autoAsignarCurso(supabase: ReturnType<typeof getSupabase>, request: NextRequest, curso: { id: string }) {
-  try {
-    const creatorUserId = request.headers.get('x-blis-user-id')
-    if (!creatorUserId) return
-
-    const { data: creatorProfile } = await supabase
-      .from('profiles')
-      .select('email, rol')
-      .eq('id', creatorUserId)
-      .single()
-
-    if (!creatorProfile?.email) return
-    if (!['superadmin', 'admin', 'editor', 'empleado'].includes(creatorProfile.rol)) return
-
-    let { data: creatorAdvisor } = await supabase
-      .from('advisors')
-      .select('id')
-      .eq('email', creatorProfile.email)
-      .single()
-
-    if (!creatorAdvisor) {
-      const { data: newAdvisor } = await supabase
-        .from('advisors')
-        .insert({
-          email: creatorProfile.email,
-          nombre: creatorProfile.email.split('@')[0],
-          empresa_id: DEFAULT_EMPRESA_ID,
-        })
-        .select('id')
-        .single()
-      creatorAdvisor = newAdvisor
-    }
-
-    if (creatorAdvisor) {
-      const { data: existing } = await supabase
-        .from('equipo_cursos')
-        .select('id')
-        .eq('advisor_id', creatorAdvisor.id)
-        .eq('curso_id', curso.id)
-        .maybeSingle()
-
-      if (!existing) {
-        await supabase.from('equipo_cursos').insert({
-          advisor_id: creatorAdvisor.id,
-          curso_id: curso.id,
-          user_id: creatorUserId,
-          estado: 'asignado',
-          lecciones_completadas: [],
-        })
-      }
-    }
-  } catch {
-    // Silently fail — no interrumpir la creación del curso
-  }
-}
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = getSupabase()
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+    const all = searchParams.get('all')
+    const limit = parseInt(searchParams.get('limit') || '100')
+
+    let query = supabase.from('cursos').select('*').eq('empresa_id', DEFAULT_EMPRESA_ID).order('creado_en', { ascending: false })
 
     if (id) {
-      const { data, error } = await supabase
-        .from('cursos')
-        .select('*')
-        .eq('id', id)
-        .single()
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
-      }
-
+      const { data, error } = await supabase.from('cursos').select('*').eq('id', id).eq('empresa_id', DEFAULT_EMPRESA_ID).single()
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
       return NextResponse.json({ success: true, data })
     }
 
-    const { data, error } = await supabase
-      .from('cursos')
-      .select('*')
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .order('creado_en', { ascending: false })
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    // Buscar productos vinculados (curso_id → producto.id + nombre)
-    const linkedProductos = await supabase
-      .from('productos')
-      .select('id, curso_id, nombre, precio_comparacion, descuento_porcentaje')
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .not('curso_id', 'is', null)
-
-    const productMap = new Map()
-    linkedProductos?.data?.forEach((p: any) => productMap.set(p.curso_id, {
-      id: p.id,
-      nombre: p.nombre,
-      precio_comparacion: p.precio_comparacion,
-      descuento_porcentaje: p.descuento_porcentaje,
-    }))
-
-    const dataWithLinks = data.map(c => {
-      const linked = productMap.get(c.id)
-      return {
-        ...c,
-        linked_product_id: linked?.id || null,
-        linked_product_name: linked?.nombre || null,
-        linked_product_precio_comparacion: linked?.precio_comparacion || null,
-        linked_product_descuento: linked?.descuento_porcentaje || null,
-      }
-    })
-
-    return NextResponse.json({ success: true, data: dataWithLinks })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+    if (all !== 'true') query = query.limit(limit)
+    const { data, error } = await query
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true, data })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = getSupabase()
     const body = await request.json()
+    const { id: _id, ...courseData } = body
 
-    const {
-      nombre, descripcion, modulos, precio_coins, precio_usd,
-      max_intentos, nota_aprobacion, certificado_template_id, imagen_principal,
-      para_equipo, activo = true, puntos_completado, puntos_por_leccion, puntos_certificado
-    } = body
-    let { slug } = body
+    courseData.empresa_id = DEFAULT_EMPRESA_ID
+    courseData.creado_en = new Date().toISOString()
+    courseData.actualizado_en = new Date().toISOString()
 
-    if (!nombre || !slug) {
-      return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 })
-    }
-
-    const { data: existingSlug } = await supabase
-      .from('cursos')
-      .select('id')
-      .eq('slug', slug)
-      .single()
-
-    if (existingSlug) {
-      slug = `${slug}-${Date.now().toString(36)}`
-    }
-
-    const insertData: Record<string, any> = {
-      empresa_id: DEFAULT_EMPRESA_ID,
-      nombre, slug, descripcion,
-      modulos: modulos || [],
-      precio_coins: precio_coins || 0,
-      precio_usd: precio_usd || 0,
-      max_intentos: max_intentos || 3,
-      nota_aprobacion: nota_aprobacion || 70,
-      para_equipo, activo
-    }
-
-    if (puntos_completado !== undefined) insertData.puntos_completado = puntos_completado
-    if (puntos_por_leccion !== undefined) insertData.puntos_por_leccion = puntos_por_leccion
-    if (puntos_certificado !== undefined) insertData.puntos_certificado = puntos_certificado
-    if (certificado_template_id) insertData.certificado_template_id = certificado_template_id
-    if (imagen_principal) insertData.imagen_principal = imagen_principal
-
-    const { data, error } = await supabase
-      .from('cursos')
-      .insert(insertData)
-      .select()
-      .single()
+    const { data, error } = await supabase.from('cursos').insert(courseData).select('*').single()
 
     if (error) {
-      if (isMissingColError(error)) {
-        const cleanData = stripMissingCols(insertData)
-        const { data: retryData, error: retryError } = await supabase
-          .from('cursos')
-          .insert(cleanData)
-          .select()
-          .single()
-
-        if (retryError) {
-          return NextResponse.json({ error: retryError.message }, { status: 500 })
-        }
-        await autoAsignarCurso(supabase, request, retryData)
-        return NextResponse.json({ success: true, data: retryData })
+      if (error.code === '23505') {
+        const { data: existing } = await supabase.from('cursos').select('*').eq('slug', courseData.slug).eq('empresa_id', DEFAULT_EMPRESA_ID).single()
+        return NextResponse.json({ success: true, data: existing || null, producto_id: null })
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    await autoAsignarCurso(supabase, request, data)
-    return NextResponse.json({ success: true, data })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Error del servidor' }, { status: 500 })
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    const supabase = getSupabase()
-    const body = await request.json()
-    const { id, vender_en_tienda, producto_id: _pid, link_producto_id, precio_comparacion, descuento_porcentaje, ...updates } = body
-
-    if (!id) {
-      return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
-    }
-
-    if (updates.slug) {
-      const { data: existing } = await supabase
-        .from('cursos')
-        .select('id')
-        .eq('slug', updates.slug)
-        .neq('id', id)
-        .single()
-
-      if (existing) {
-        updates.slug = `${updates.slug}-${Date.now().toString(36)}`
-      }
-    }
-
-    const { data, error } = await supabase
-      .from('cursos')
-      .update(updates)
-      .eq('id', id)
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .select()
-      .single()
-
-    if (error) {
-      if (isMissingColError(error)) {
-        const cleanUpdates = stripMissingCols(updates)
-        const { data: retryData, error: retryError } = await supabase
-          .from('cursos')
-          .update(cleanUpdates)
-          .eq('id', id)
-          .eq('empresa_id', DEFAULT_EMPRESA_ID)
-          .select()
-          .single()
-
-        if (retryError) {
-          return NextResponse.json({ error: retryError.message }, { status: 500 })
-        }
-        return NextResponse.json({ success: true, data: retryData, producto_id: null })
-      }
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    // Gestionar producto en tienda según toggle
+    // Gestionar producto en tienda si se vinculó explícitamente
     let producto_id = null
-    const categoriaCursos = await supabase
-      .from('producto_categorias')
-      .select('id')
-      .eq('slug', 'cursos')
-      .maybeSingle()
-
+    const categoriaCursos = await supabase.from('producto_categorias').select('id').eq('slug', 'cursos').maybeSingle()
     const categoriaId = categoriaCursos?.data?.id || null
 
-    if (vender_en_tienda && data) {
-      if (link_producto_id) {
-        // Vincular curso a un producto existente elegido por el admin
-        await supabase
-          .from('productos')
-          .update({ curso_id: data.id, tipo: 'servicio', categoria_id: categoriaId || undefined })
-          .eq('id', link_producto_id)
-
-        // Quitar curso_id de cualquier otro producto que apuntara a este curso
-        await supabase
-          .from('productos')
-          .update({ curso_id: null })
-          .eq('curso_id', data.id)
-          .neq('id', link_producto_id)
-
-        producto_id = link_producto_id
-      } else {
-        // UPSERT producto vinculado al curso (auto-crear)
-        const productData = {
-          empresa_id: DEFAULT_EMPRESA_ID,
-          curso_id: data.id,
-          nombre: data.nombre || 'Curso',
-          precio_usd: data.precio_usd || 0,
-          precio_coins: data.precio_coins || 0,
-          precio_comparacion: data.precio_comparacion || null,
-          descuento_porcentaje: data.descuento_porcentaje || null,
-          imagen_principal: data.imagen_principal || null,
-          tipo: 'servicio',
-          activo: data.activo || false,
-          categoria_id: categoriaId,
-        }
-
-        // Buscar si ya existe un producto vinculado
-        const { data: existingProduct } = await supabase
-          .from('productos')
-          .select('id')
-          .eq('curso_id', data.id)
-          .maybeSingle()
-
-        if (existingProduct) {
-          await supabase.from('productos').update(productData).eq('id', existingProduct.id)
-          producto_id = existingProduct.id
-        } else {
-          const slug = data.slug || data.nombre?.toLowerCase().replace(/[^a-z0-9]+/g, '-')
-          const { data: newProduct } = await supabase
-            .from('productos')
-            .insert({ ...productData, slug })
-            .select('id')
-            .single()
-          if (newProduct) producto_id = newProduct.id
-        }
-      }
-    } else if (vender_en_tienda === false) {
-      // Desactivar y desvincular producto si existe
-      const { data: existingProduct } = await supabase
-        .from('productos')
-        .select('id')
-        .eq('curso_id', data.id)
-        .maybeSingle()
-      if (existingProduct) {
+    if (courseData.vender_en_tienda && data && courseData.link_producto_id) {
+      // Vincular curso a un producto existente elegido por el admin (manual)
+      await supabase.from('productos').update({ curso_id: data.id, tipo: 'servicio', categoria_id: categoriaId || undefined }).eq('id', courseData.link_producto_id)
+      await supabase.from('productos').update({ curso_id: null }).eq('curso_id', data.id).neq('id', courseData.link_producto_id)
+      producto_id = courseData.link_producto_id
+    } else if (courseData.vender_en_tienda === false && data) {
+      // Desvincular producto si existe
+      const { data: existingProduct } = await supabase.from('productos').select('id').eq('curso_id', data.id).maybeSingle()
+      if (existingProduct?.id) {
         await supabase.from('productos').update({ activo: false, curso_id: null }).eq('id', existingProduct.id)
       }
     }
 
     return NextResponse.json({ success: true, data, producto_id })
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Error del servidor' }, { status: 500 })
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { id, vender_en_tienda, producto_id: _pid, link_producto_id, precio_comparacion, descuento_porcentaje, ...updates } = body
+
+    if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
+
+    updates.actualizado_en = new Date().toISOString()
+    if (precio_comparacion !== undefined) updates.precio_comparacion = precio_comparacion
+    if (descuento_porcentaje !== undefined) updates.descuento_porcentaje = descuento_porcentaje
+
+    let { data, error } = await supabase.from('cursos').update(updates).eq('id', id).select('*').single()
+
+    if (error) {
+      // Si el update falla por slug duplicado, reintentar sin slug
+      if (error.code === '23505' && updates.slug) {
+        const { slug, ...rest } = updates
+        rest.slug = `${slug}-${Date.now().toString(36)}`
+        const retry = await supabase.from('cursos').update(rest).eq('id', id).select('*').single()
+        if (retry.error) return NextResponse.json({ error: retry.error.message }, { status: 500 })
+        data = retry.data
+      } else {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+    }
+
+    if (!data) return NextResponse.json({ success: true, data: null, producto_id: null })
+
+    // Gestionar producto en tienda solo si se vinculó explícitamente (sin auto-crear)
+    let producto_id = null
+    const categoriaCursos = await supabase.from('producto_categorias').select('id').eq('slug', 'cursos').maybeSingle()
+    const categoriaId = categoriaCursos?.data?.id || null
+
+    if (vender_en_tienda && data && link_producto_id) {
+      await supabase.from('productos').update({ curso_id: data.id, tipo: 'servicio', categoria_id: categoriaId || undefined }).eq('id', link_producto_id)
+      await supabase.from('productos').update({ curso_id: null }).eq('curso_id', data.id).neq('id', link_producto_id)
+      producto_id = link_producto_id
+    } else if (vender_en_tienda === false && data) {
+      const { data: existingProduct } = await supabase.from('productos').select('id').eq('curso_id', data.id).maybeSingle()
+      if (existingProduct?.id) {
+        await supabase.from('productos').update({ activo: false, curso_id: null }).eq('id', existingProduct.id)
+      }
+    }
+
+    return NextResponse.json({ success: true, data, producto_id })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = getSupabase()
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
-    if (!id) {
-      return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
-    }
-
-    const { error } = await supabase
-      .from('cursos')
-      .delete()
-      .eq('id', id)
-      .eq('empresa_id', DEFAULT_EMPRESA_ID)
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
+    const { error } = await supabase.from('cursos').delete().eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })
-  } catch {
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
