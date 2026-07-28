@@ -142,6 +142,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id,
         empresa_id: auth.empresaId,
+        tipo: 'manual',
         titulo,
         mensaje,
         leida: false,

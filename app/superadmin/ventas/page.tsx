@@ -53,6 +53,8 @@ export default function VentasAdminPage() {
     const [notasVerificacion, setNotasVerificacion] = useState("");
     const [subTipoPago, setSubTipoPago] = useState("");
     const [guardando, setGuardando] = useState(false);
+    const [successData, setSuccessData] = useState<{email: string, password: string} | null>(null);
+    const [ventaError, setVentaError] = useState<string | null>(null);
     
     const [formNueva, setFormNueva] = useState({ nombre: "", apellido: "", user_email: "", telefono: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0, fecha_compra: new Date().toISOString().split('T')[0] });
     const [clientes, setClientes] = useState<any[]>([]);
@@ -146,19 +148,17 @@ export default function VentasAdminPage() {
             setModalNueva(false);
             setFormNueva({ nombre: "", apellido: "", user_email: "", telefono: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0, fecha_compra: new Date().toISOString().split('T')[0] });
             if (data.tempPassword) {
-                alert(`✅ Venta registrada\n\n📧 Email: ${formNueva.user_email}\n🔑 Contraseña: ${data.tempPassword}\n\nGuarda esta contraseña. El cliente también la recibirá por correo.`)
-            } else {
-                alert("Venta registrada correctamente")
+                setSuccessData({ email: formNueva.user_email, password: data.tempPassword });
             }
             setRefreshKey(k => k + 1);
-            // Forzar recarga con cache-bust
             setTimeout(async () => {
                 const r = await fetch(`/api/admin/ventas?page=1&limit=50&_t=${Date.now()}`)
                 const d = await r.json()
                 if (d.success) setVentas(d.ventas || [])
             }, 300);
+        } else {
             const err = await res.json().catch(() => ({}));
-            alert(err.error || "Error al registrar la venta");
+            setVentaError(err.error || "Error al registrar la venta");
         }
         setGuardando(false);
     };
@@ -616,6 +616,42 @@ export default function VentasAdminPage() {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {successData && (
+                <Dialog open={true} onOpenChange={() => setSuccessData(null)}>
+                    <DialogContent className="bg-[#111] border-white/10 text-white max-w-md">
+                        <DialogHeader>
+                            <DialogTitle className="text-sm font-black uppercase tracking-wider text-emerald-400">✅ Venta Registrada</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-3 mt-3">
+                            <div className="bg-white/5 rounded-xl p-4 space-y-2 font-mono">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-400">Email:</span>
+                                    <input readOnly value={successData.email} className="bg-transparent text-white text-sm text-right w-48 outline-none" onClick={e => (e.target as HTMLInputElement).select()} />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-400">Contraseña:</span>
+                                    <input readOnly value={successData.password} className="bg-transparent text-white text-sm text-right w-48 outline-none" onClick={e => (e.target as HTMLInputElement).select()} />
+                                </div>
+                            </div>
+                            <p className="text-[10px] text-gray-500 text-center">Haz clic en cada campo para copiarlo. El cliente también recibirá sus credenciales por correo.</p>
+                            <Button onClick={() => setSuccessData(null)} className="w-full">Entendido</Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
+
+            {ventaError && (
+                <Dialog open={true} onOpenChange={() => setVentaError(null)}>
+                    <DialogContent className="bg-[#111] border-white/10 text-white max-w-md">
+                        <DialogHeader>
+                            <DialogTitle className="text-sm font-black uppercase tracking-wider text-red-400">Error</DialogTitle>
+                        </DialogHeader>
+                        <p className="text-sm mt-3">{ventaError}</p>
+                        <Button onClick={() => setVentaError(null)} className="w-full mt-4">Cerrar</Button>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 }
