@@ -137,16 +137,16 @@ export default function Dashboard() {
         rLastComprasData,
         rLastPostsData,
       ] = await Promise.all([
-        supabase.from('empresas').select('id, nombre').eq('id', empresaId).single(),
-        supabase.from('productos').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('activo', true),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).neq('rol', 'superadmin').neq('rol', 'admin'),
-        supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId),
+        supabase.from('empresas').select('id, nombre').eq('id', empresaId).single().then(r => r, () => ({ data: null } as any)),
+        supabase.from('productos').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('activo', true).then(r => r, () => ({ count: 0 } as any)),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).neq('rol', 'superadmin').neq('rol', 'admin').then(r => r, () => ({ count: 0 } as any)),
+        supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).then(r => r, () => ({ count: 0 } as any)),
         supabase.from('leads').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).then(r => r, () => ({ count: 0 } as any)),
         supabase.from('projects').select('id').eq('empresa_id', empresaId).eq('is_active', true).then(r => r, () => ({ data: [] } as any)),
-        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id, empresa_id').eq('empresa_id', empresaId).eq('estado', 'completado').order('creado_en', { ascending: false }).limit(100).then(r => r, () => ({ data: [] } as any)),
-        supabase.from('compra_items').select('cantidad, compra_id, producto:productos!inner(nombre), compras!inner(empresa_id)').eq('compras.empresa_id', empresaId).order('compra_id').limit(500).then(r => r, () => ({ data: [] } as any)),
+        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('estado', 'completado').order('creado_en', { ascending: false }).limit(100).then(r => r, () => ({ data: [] } as any)),
+        supabase.from('compra_items').select('cantidad, compra_id, producto:productos!inner(nombre)').order('compra_id').limit(500).then(r => r, () => ({ data: [] } as any)),
         supabase.from('leads').select('id, nombre, email, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5).then(r => r, () => ({ data: [] } as any)),
-        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id, empresa_id').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5).then(r => r, () => ({ data: [] } as any)),
+        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').order('creado_en', { ascending: false }).limit(5).then(r => r, () => ({ data: [] } as any)),
         supabase.from('blog_posts').select('id, titulo, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5).then(r => r, () => ({ data: [] } as any)),
       ]);
 
