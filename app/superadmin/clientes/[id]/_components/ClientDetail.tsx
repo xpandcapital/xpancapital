@@ -25,6 +25,7 @@ interface ClientDetailProps {
     onDesbloquear: (userId: string, cursoId: string) => Promise<void>;
     onDeleteCertificate: (certId: string) => Promise<void>;
     onAssignCourse: (cursoId: string) => Promise<boolean>;
+    onRemoveCourse: (equipoCursoId: string) => Promise<void>;
     onClose?: () => void;
 }
 
@@ -41,6 +42,7 @@ export function ClientDetail({
     onDesbloquear,
     onDeleteCertificate,
     onAssignCourse,
+    onRemoveCourse,
     onClose
 }: ClientDetailProps) {
     const [activeTab, setActiveTab] = useState('profile');
@@ -51,7 +53,7 @@ export function ClientDetail({
             case 'profile': return <ProfileTab {...baseProps} />;
             case 'economy': return <EconomyTab {...baseProps} transactions={transactions} />;
             case 'sales': return <SalesTab {...baseProps} orders={orders} />;
-            case 'academia': return <AcademiaTab academicData={academicData} clientId={client.id} onDesbloquear={onDesbloquear} onDeleteCertificate={onDeleteCertificate} onAssignCourse={onAssignCourse} />;
+            case 'academia': return <AcademiaTab academicData={academicData} clientId={client.id} onDesbloquear={onDesbloquear} onDeleteCertificate={onDeleteCertificate} onAssignCourse={onAssignCourse} onRemoveCourse={onRemoveCourse} />;
             case 'referrals': return <ReferralsTab {...baseProps} referrals={referrals} />;
             case 'comms': return <CommsTab client={client} onUpdate={onUpdate} />;
             case 'history': return <HistoryTab {...baseProps} history={history} />;

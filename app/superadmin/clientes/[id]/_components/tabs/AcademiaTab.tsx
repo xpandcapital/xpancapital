@@ -16,9 +16,10 @@ interface AcademiaTabProps {
   onDesbloquear: (userId: string, cursoId: string) => Promise<void>;
   onDeleteCertificate: (certId: string) => Promise<void>;
   onAssignCourse: (cursoId: string) => Promise<boolean>;
+  onRemoveCourse: (equipoCursoId: string) => Promise<void>;
 }
 
-export function AcademiaTab({ academicData, clientId, onDesbloquear, onDeleteCertificate, onAssignCourse }: AcademiaTabProps) {
+export function AcademiaTab({ academicData, clientId, onDesbloquear, onDeleteCertificate, onAssignCourse, onRemoveCourse }: AcademiaTabProps) {
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
   const [desbloqueando, setDesbloqueando] = useState<string | null>(null);
   const [deletingCert, setDeletingCert] = useState<string | null>(null);
@@ -177,6 +178,13 @@ export function AcademiaTab({ academicData, clientId, onDesbloquear, onDeleteCer
                         </div>
 
                         <div className="flex items-center gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => onRemoveCourse(course.id)}
+                            className="p-1.5 hover:bg-red-500/10 rounded-lg transition-colors text-gray-500 hover:text-red-400"
+                            title="Desasignar curso"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                           {course.examStatus === 'failed_blocked' && (
                             <button
                               onClick={() => handleDesbloquear(course.courseId)}
