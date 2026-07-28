@@ -247,6 +247,21 @@ export function useClientDetail(clientId: string) {
         return false
     }, [clientId, client?.email, fetchAcademia, showToast])
 
+    const removeCourse = useCallback(async (equipoCursoId: string) => {
+        try {
+            const res = await fetch(`/api/equipo-cursos?id=${equipoCursoId}`, { method: 'DELETE' })
+            const data = await res.json()
+            if (data.success) {
+                showToast('Curso removido', 'success')
+                fetchAcademia()
+            } else {
+                showToast(data.error || 'Error al remover', 'error')
+            }
+        } catch {
+            showToast('Error al remover curso', 'error')
+        }
+    }, [fetchAcademia, showToast])
+
     return {
         client,
         loading,
@@ -269,5 +284,6 @@ export function useClientDetail(clientId: string) {
         desbloquearCurso,
         deleteCertificate,
         assignCourse,
+        removeCourse,
     };
 }
