@@ -250,7 +250,8 @@ export async function POST(request: NextRequest) {
         await supabase.from("profiles").upsert({
           id: userId,
           email: email.toLowerCase(),
-          nombre: `${nombre || ""} ${apellido || ""}`.trim() || email.split("@")[0],
+          nombre: nombre || email.split("@")[0],
+          apellido: apellido || null,
           empresa_id: auth.empresaId,
           rol: "cliente",
           telefono: telefono || null,
