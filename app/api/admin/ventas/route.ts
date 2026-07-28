@@ -246,18 +246,31 @@ export async function POST(request: NextRequest) {
 
       if (!authError && newUser.user?.id) {
         userId = newUser.user.id;
-        console.log('[Ventas POST] Usuario creado:', userId, email);
-        await supabase.from("profiles").upsert({
-          id: userId,
-          email: email.toLowerCase(),
-          nombre: nombre || email.split("@")[0],
-          apellido: apellido || null,
-          empresa_id: auth.empresaId,
-          rol: "cliente",
-          telefono: telefono || null,
-        }, { onConflict: "id" });
+      } else {
+        // Intentar recuperar usuario existente en Auth si createUser falló (email duplicado)
+        const { data: existingUsers } = await supabase.auth.admin.listUsers()
+        const found = existingUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase())
+        if (found?.id) {
+          userId = found.id
+        } else {
+          const msg = authError?.message || 'Usuario no retornado'
+          return NextResponse.json({ error: `No se pudo crear el usuario: ${msg}` }, { status: 500 });
+        }
+      }
 
-        // Enviar email con contraseña temporal
+      // Crear/actualizar perfil
+      await supabase.from("profiles").upsert({
+        id: userId,
+        email: email.toLowerCase(),
+        nombre: nombre || email.split("@")[0],
+        apellido: apellido || null,
+        empresa_id: auth.empresaId,
+        rol: "cliente",
+        telefono: telefono || null,
+      }, { onConflict: "id" });
+
+      // Enviar email con contraseña temporal (solo para usuarios nuevos)
+      if (tempPassword) {
         try {
           const { sendTemplateEmail } = await import("@/lib/email/sendTemplateEmail");
           sendTemplateEmail({
@@ -271,10 +284,6 @@ export async function POST(request: NextRequest) {
             },
           }).catch(() => {});
         } catch {}
-      } else {
-        const msg = authError?.message || (newUser?.user ? '' : 'Usuario no retornado')
-        console.error('[Ventas POST] Error crear usuario:', msg, email)
-        return NextResponse.json({ error: `No se pudo crear el usuario: ${msg}` }, { status: 500 });
       }
     }
 
