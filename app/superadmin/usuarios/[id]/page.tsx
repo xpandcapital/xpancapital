@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Shield, CheckCircle2, X, Loader2, Pencil, Mail, User,
-    ToggleLeft, Save, KeyRound, Send, Eye, EyeOff, GraduationCap,
+    ToggleLeft, Save, KeyRound, Eye, EyeOff, GraduationCap,
     Plus, Trash2, Copy, Bell, CheckSquare, Square
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
@@ -89,7 +89,6 @@ export default function EditarUsuarioPage() {
     const [newPassword, setNewPassword] = useState('');
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [resettingPassword, setResettingPassword] = useState(false);
-    const [sendingResetEmail, setSendingResetEmail] = useState(false);
     const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
 
     const [assignedCourses, setAssignedCourses] = useState<AssignedCourse[]>([]);
@@ -203,24 +202,6 @@ export default function EditarUsuarioPage() {
             }
         } catch { showToast('Error al cambiar contraseña', 'error'); }
         finally { setResettingPassword(false); }
-    };
-
-    const handleSendResetEmail = async () => {
-        setSendingResetEmail(true);
-        try {
-            const res = await fetch('/api/admin/users/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, sendEmail: true }),
-            });
-            const data = await res.json();
-            if (data.success) {
-                showToast('Email de restablecimiento enviado');
-            } else {
-                showToast(data.error || 'Error al enviar email', 'error');
-            }
-        } catch { showToast('Error al enviar email', 'error'); }
-        finally { setSendingResetEmail(false); }
     };
 
     const handleAssignCourse = async (courseId: string) => {
@@ -433,28 +414,13 @@ export default function EditarUsuarioPage() {
                                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center"><KeyRound className="w-5 h-5" /></div>
                                 <div className="text-left">
                                     <h3 className="text-white font-black uppercase tracking-wider text-sm">Seguridad</h3>
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Cambiar o restablecer contraseña</p>
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Cambiar contraseña manualmente</p>
                                 </div>
                             </div>
                             <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showPasswordSection ? 'rotate-180' : ''}`} />
                         </button>
                         {showPasswordSection && (
                             <div className="px-6 pb-6 space-y-4 border-t border-white/5 pt-5">
-                                <button onClick={handleSendResetEmail} disabled={sendingResetEmail} className="w-full flex items-center gap-3 p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl hover:bg-blue-500/10 transition-colors disabled:opacity-50">
-                                    <Send className="w-5 h-5 text-blue-400" />
-                                    <div className="text-left flex-1">
-                                        <p className="text-white text-sm font-bold">Enviar email de restablecimiento</p>
-                                        <p className="text-[10px] text-gray-500">Se enviará un email a {email} con un enlace para cambiar su contraseña</p>
-                                    </div>
-                                    {sendingResetEmail && <Loader2 className="w-4 h-4 animate-spin text-blue-400" />}
-                                </button>
-
-                                <div className="flex items-center gap-4">
-                                    <div className="flex-1 h-px bg-white/5" />
-                                    <span className="text-[10px] text-gray-600 uppercase tracking-widest font-bold">o cambiar manualmente</span>
-                                    <div className="flex-1 h-px bg-white/5" />
-                                </div>
-
                                 <div className="space-y-3">
                                     <div className="relative">
                                         <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nueva contraseña" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 pr-12 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm" />
