@@ -165,7 +165,7 @@ export function NotificationBell() {
     }
 
     try {
-      const res = await fetch("/api/notificaciones");
+      const res = await fetch("/api/notificaciones" + (isAdmin ? "?admin=true" : ""));
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
@@ -274,7 +274,7 @@ export function NotificationBell() {
     <div className="relative">
       <button
         ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => { setIsOpen(!isOpen); if (!isOpen) fetchNotifications(); }}
         className="relative p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"
       >
         <Bell className="w-5 h-5" />
