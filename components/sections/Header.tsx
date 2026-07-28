@@ -414,7 +414,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                         </button>
                                                     )}
                                                     <div className="h-px bg-white/5 my-1 mx-4"></div>
-                                                    <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors">
+                                                    <button onClick={async () => { try { await logout() } catch { router.push('/') } }} className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-bold text-red-500 hover:bg-red-500/10 transition-colors">
                                                         <LogOut className="w-4 h-4" /> CERRAR SESIÓN
                                                     </button>
                                                 </div>
