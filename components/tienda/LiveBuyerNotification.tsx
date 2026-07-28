@@ -38,7 +38,7 @@ export function LiveBuyerNotification({ products }: LiveBuyerNotificationProps) 
         const showRandomNotification = () => {
             if (!active) return
             const randomBuyer = BUYERS[Math.floor(Math.random() * BUYERS.length)];
-            const randomProduct = Math.random() < 0.8 ? productNames[0] : productNames[1];
+            const randomProduct = Math.random() < 0.8 ? productNames[0] : (productNames[1] || productNames[0]);
             const randomTime = Math.floor(Math.random() * 59) + 1;
 
             if (!active) return

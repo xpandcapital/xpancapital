@@ -109,7 +109,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                 window.scrollTo({ top: offsetTop, behavior: "smooth" })
                 return
             }
-            router.push('/' + href)
+            router.push(href.startsWith('/') ? href : '/' + href)
         }
     }
 

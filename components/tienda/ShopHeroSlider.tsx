@@ -46,8 +46,8 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
 
     const prev = useCallback(() => {
         setDirection(-1);
-        setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
-    }, []);
+        setCurrentIndex((prev) => (prev - 1 + (banners.length || 1)) % (banners.length || 1));
+    }, [banners.length]);
 
     useEffect(() => {
         const timer = setInterval(next, 5000);
