@@ -79,7 +79,6 @@ export async function GET(request: NextRequest) {
         puntos,puntos_nivel,puntos_cursos,puntos_comunidad,puntos_blog
       `, { count: 'exact' })
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .or('ha_comprado.eq.true,rol.eq.empleado')
       .order('creado_en', { ascending: false })
       .range((page - 1) * perPage, page * perPage - 1)
     

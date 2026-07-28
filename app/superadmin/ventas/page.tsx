@@ -121,6 +121,10 @@ export default function VentasAdminPage() {
 
     const registrarVentaOffline = async () => {
         if (!formNueva.user_email || !formNueva.producto_id) return;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formNueva.user_email)) {
+            alert("El email ingresado no es válido. Corrígelo e intenta de nuevo.");
+            return;
+        }
         setGuardando(true);
         const res = await fetch("/api/admin/ventas", {
             method: "POST", headers: { "Content-Type": "application/json" },
