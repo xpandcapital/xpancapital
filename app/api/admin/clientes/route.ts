@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
           cumpleanos_auto_regalo,recordatorio_inactividad,
           cuenta_congelada,cuenta_fusionada_con,
           ultimo_login,
-          puntos,puntos_cursos,puntos_comunidad,puntos_blog
+          puntos_cursos,puntos_comunidad,puntos_blog
         `)
         .eq('id', id)
         .single()
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
         cumpleanos_auto_regalo,recordatorio_inactividad,
         cuenta_congelada,cuenta_fusionada_con,
         ultimo_login,
-        puntos,puntos_cursos,puntos_comunidad,puntos_blog
+        puntos_cursos,puntos_comunidad,puntos_blog
       `, { count: 'exact' })
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .order('creado_en', { ascending: false })
