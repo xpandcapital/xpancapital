@@ -57,17 +57,18 @@ export default function VentasAdminPage() {
     const [formNueva, setFormNueva] = useState({ nombre: "", apellido: "", user_email: "", telefono: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0, fecha_compra: new Date().toISOString().split('T')[0] });
     const [clientes, setClientes] = useState<any[]>([]);
     const [productos, setProductos] = useState<any[]>([]);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const cargar = useCallback(async () => {
         setLoading(true);
         const params = new URLSearchParams({ page: page.toString(), limit: "50" });
         if (filtroEstado) params.set("estado", filtroEstado);
         if (search) params.set("search", search);
-        const res = await fetch(`/api/admin/ventas?${params}`);
+        const res = await fetch(`/api/admin/ventas?${params}&_t=${refreshKey}`);
         const d = await res.json();
         if (d.success) { setVentas(d.ventas || []); setTotal(d.total || 0); }
         setLoading(false);
-    }, [page, filtroEstado, search]);
+    }, [page, filtroEstado, search, refreshKey]);
 
     useEffect(() => { cargar(); }, [cargar]);
 
@@ -149,7 +150,13 @@ export default function VentasAdminPage() {
             } else {
                 alert("Venta registrada correctamente")
             }
-            await cargar();
+            setRefreshKey(k => k + 1);
+            // Forzar recarga con cache-bust
+            setTimeout(async () => {
+                const r = await fetch(`/api/admin/ventas?page=1&limit=50&_t=${Date.now()}`)
+                const d = await r.json()
+                if (d.success) setVentas(d.ventas || [])
+            }, 300);
             const err = await res.json().catch(() => ({}));
             alert(err.error || "Error al registrar la venta");
         }
