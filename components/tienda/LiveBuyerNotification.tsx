@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, X } from "lucide-react";
 import Image from "next/image";
@@ -27,18 +27,21 @@ interface LiveBuyerNotificationProps {
 
 export function LiveBuyerNotification({ products }: LiveBuyerNotificationProps) {
     const [notification, setNotification] = useState<{ name: string; flagCode: string; product: string; time: number } | null>(null);
+    const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
     const productNames = products && products.length > 0 ? products : [
         "Plan Anual",
         "Plan Trimestral",
     ];
 
     useEffect(() => {
+        let active = true
         const showRandomNotification = () => {
+            if (!active) return
             const randomBuyer = BUYERS[Math.floor(Math.random() * BUYERS.length)];
-            // 80% Anual, 20% Trimestral
             const randomProduct = Math.random() < 0.8 ? productNames[0] : productNames[1];
             const randomTime = Math.floor(Math.random() * 59) + 1;
 
+            if (!active) return
             setNotification({
                 name: randomBuyer.name,
                 flagCode: randomBuyer.flagCode,
@@ -46,19 +49,20 @@ export function LiveBuyerNotification({ products }: LiveBuyerNotificationProps) 
                 time: randomTime
             });
 
-            // Hide after 8.5 seconds para ser mas legible como solicitó el usuario
-            setTimeout(() => {
-                setNotification(null);
-            }, 8500);
+            const hideTimer = setTimeout(() => { if (active) setNotification(null) }, 8500);
+            timersRef.current.push(hideTimer);
 
-            // Schedule next one
             const nextInterval = Math.floor(Math.random() * (30000 - 10000 + 1) + 10000);
-            setTimeout(showRandomNotification, nextInterval);
+            const nextTimer = setTimeout(showRandomNotification, nextInterval);
+            timersRef.current.push(nextTimer);
         };
 
-        // First notification logic
-        const initialDelay = setTimeout(showRandomNotification, 2000);
-        return () => clearTimeout(initialDelay);
+        const initialTimer = setTimeout(showRandomNotification, 2000);
+        timersRef.current.push(initialTimer);
+        return () => {
+            active = false
+            timersRef.current.forEach(clearTimeout)
+        }
     }, []);
 
     return (

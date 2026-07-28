@@ -94,9 +94,7 @@ export default function AdminPostulantes() {
   const handleDelete = async (id: string) => {
     if (!guard('postulantes', 'eliminar')) return
     try {
-      const res = await fetch("/api/postulantes", {
-        method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }),
-      })
+      const res = await fetch(`/api/postulantes?id=${id}`, { method: "DELETE" })
       const data = await res.json()
       if (data.success) { showToast("Postulante eliminado", "success"); fetchPostulantes() }
       else { showToast(data.error || "Error al eliminar", "error") }

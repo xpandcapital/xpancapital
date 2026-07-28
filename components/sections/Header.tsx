@@ -100,22 +100,16 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
 
     const handleLinkClick = (e: React.MouseEvent, href: string) => {
         setMobileMenuOpen(false)
-        if (href.startsWith('#') && pathname === '/') {
-            e.preventDefault()
-            const id = href.substring(1)
+        if (href.startsWith('#') || href.startsWith('/#')) {
+            const id = href.startsWith('/#') ? href.substring(2) : href.substring(1)
             const element = document.getElementById(id) || document.querySelector(`#${id}`)
             if (element) {
+                e.preventDefault()
                 const offsetTop = element.getBoundingClientRect().top + window.scrollY - 80
                 window.scrollTo({ top: offsetTop, behavior: "smooth" })
+                return
             }
-        } else if (href.startsWith('/#') && pathname === '/') {
-            e.preventDefault()
-            const id = href.substring(2)
-            const element = document.getElementById(id) || document.querySelector(`#${id}`)
-            if (element) {
-                const offsetTop = element.getBoundingClientRect().top + window.scrollY - 80
-                window.scrollTo({ top: offsetTop, behavior: "smooth" })
-            }
+            router.push('/' + href)
         }
     }
 

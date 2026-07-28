@@ -19,7 +19,7 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
                 title: p.title,
                 subtitle: p.description || p.category || "",
                 price: p.price ? `$${p.price.toLocaleString()}` : "",
-                bgImage: p.image || "/images/arkadia-1.webp",
+                bgImage: p.image || "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
                 tag: p.category || "Producto",
                 accent: "blis-red"
             }));
@@ -27,11 +27,11 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
         return [
             {
                 id: 1, title: "Plan Anual", subtitle: "Acceso completo a todos los cursos, herramientas y mentorías por un año.",
-                price: "$599/año", bgImage: "/images/arkadia-1.webp", tag: "PLAN ANUAL", accent: "blis-red"
+                price: "$599/año", bgImage: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80", tag: "PLAN ANUAL", accent: "blis-red"
             },
             {
                 id: 2, title: "Plan Trimestral", subtitle: "3 meses de acceso completo a cursos, herramientas y comunidad.",
-                price: "$199/trimestre", bgImage: "/images/Cumbres-1.webp", tag: "PLAN TRIMESTRAL", accent: "blis-red"
+                price: "$199/trimestre", bgImage: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f44f?w=800&q=80", tag: "PLAN TRIMESTRAL", accent: "blis-red"
             }
         ];
     }, [products]);
@@ -41,8 +41,8 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
 
     const next = useCallback(() => {
         setDirection(1);
-        setCurrentIndex((prev) => (prev + 1) % banners.length);
-    }, []);
+        setCurrentIndex((prev) => (prev + 1) % (banners.length || 1));
+    }, [banners.length]);
 
     const prev = useCallback(() => {
         setDirection(-1);

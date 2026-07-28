@@ -54,8 +54,8 @@ export default function PostulanteEditPage() {
         setPostulante(data.data)
         setForm(data.data)
       } else {
-        showToast('Postulante no encontrado', 'error')
-        router.push('/superadmin/postulantes')
+        showToast(data.error || 'Postulante no encontrado', 'error')
+        if (!data.success || data.error) router.push('/superadmin/postulantes')
       }
     } catch { showToast('Error al cargar', 'error') }
     finally { setLoading(false) }

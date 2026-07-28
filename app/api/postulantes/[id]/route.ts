@@ -9,14 +9,26 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params
     const supabase = createClient()
 
-    const { data, error } = await supabase
+    const { data: postulante, error } = await supabase
       .from('postulantes')
-      .select('*, puesto:puestos_trabajo(id, nombre, slug)')
+      .select('*')
       .eq('id', id)
+      .eq('empresa_id', EMPRESA_ID)
       .single()
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json({ success: true, data })
+    if (error) return NextResponse.json({ error: 'Postulante no encontrado' }, { status: 404 })
+
+    let puesto = null
+    if (postulante.puesto_trabajo_id) {
+      const { data: pData } = await supabase
+        .from('puestos_trabajo')
+        .select('id, nombre, slug')
+        .eq('id', postulante.puesto_trabajo_id)
+        .single()
+      puesto = pData
+    }
+
+    return NextResponse.json({ success: true, data: { ...postulante, puesto } })
   } catch { return NextResponse.json({ error: 'Error interno' }, { status: 500 }) }
 }
 
