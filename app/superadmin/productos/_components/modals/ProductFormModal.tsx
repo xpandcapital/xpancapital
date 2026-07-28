@@ -84,6 +84,7 @@ export function ProductFormModal({
         image: editingProduct.image || null,
         cursoId: editingProduct.curso_id || null,
         multiPrices: editingProduct.precios_multimoneda || {},
+        duracion_dias: editingProduct.duracion_dias || null,
         multiOriginalPrices: {},
       }
     }
@@ -150,6 +151,7 @@ export function ProductFormModal({
       descuento_hasta: null,
       stock_bajo_nivel: formData.lowStockThreshold,
       activo: true,
+      duracion_dias: formData.duracion_dias || null,
       destacado: false,
       es_perecedero: isPerishable,
       fecha_compra: formData.purchaseDate || undefined,
@@ -538,6 +540,19 @@ export function ProductFormModal({
               onThresholdChange={(lowStockThreshold) => setFormData(prev => ({ ...prev, lowStockThreshold }))}
               onUnlimitedChange={setIsUnlimitedStock}
             />
+
+            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-3">
+              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Duración del Acceso</p>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <label className="text-xs text-gray-400 uppercase font-bold">Duración (días)</label>
+                  <input type="number" value={formData.duracion_dias || ''} onChange={e => setFormData(prev => ({ ...prev, duracion_dias: parseInt(e.target.value) || null }))}
+                    placeholder="Vitalicio" min={0}
+                    className="w-32 bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-blis-red/50" />
+                </div>
+                <span className="text-[10px] text-gray-500">0 = acceso vitalicio · 90 = 3 meses · 365 = 1 año</span>
+              </div>
+            </div>
 
             {settings.enablePerishables && (
               <PerishableSection

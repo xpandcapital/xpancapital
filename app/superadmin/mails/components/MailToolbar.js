@@ -9,7 +9,7 @@ export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMo
         <div className="w-8 h-8 bg-[#e11d48] rounded-lg flex items-center justify-center shadow-md">
           <Mail className="text-white w-5 h-5" />
         </div>
-        <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">BlisMail <span className="text-[#e11d48] font-black">CMS</span></h1>
+        <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">XpandMail <span className="text-[#e11d48] font-black">CMS</span></h1>
       </div>
       <div className="hidden md:flex bg-gray-100 dark:bg-[#161616] p-1 rounded-lg border border-gray-200 dark:border-[#262626]">
         <button onClick={() => setPreviewMode('desktop')} title="Escritorio" className={`p-2 rounded-md flex items-center justify-center transition-all ${previewMode === 'desktop' ? 'bg-white dark:bg-[#222222] shadow-sm text-[#e11d48]' : 'text-gray-500'}`}>

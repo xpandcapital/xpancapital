@@ -273,6 +273,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Calcular fecha de vencimiento si el producto tiene duración
+    let fechaVencimiento = null;
+    if (producto_id) {
+      const { data: prod } = await supabase
+        .from("productos")
+        .select("duracion_dias")
+        .eq("id", producto_id)
+        .single();
+      if (prod?.duracion_dias) {
+        const inicio = fecha_compra ? new Date(fecha_compra) : new Date();
+        fechaVencimiento = new Date(inicio.getTime() + prod.duracion_dias * 86400000).toISOString();
+      }
+    }
+
     const { data, error } = await supabase
       .from("compras")
       .insert({
@@ -283,6 +297,7 @@ export async function POST(request: NextRequest) {
         monto_coins: monto_coins || 0,
         estado: "completado",
         creado_en: fecha_compra ? new Date(fecha_compra).toISOString() : new Date().toISOString(),
+        fecha_vencimiento_acceso: fechaVencimiento,
       })
       .select("*")
       .single();
