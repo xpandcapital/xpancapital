@@ -111,93 +111,37 @@ export default function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [chartMonths, setChartMonths] = useState(6);
   const { stats: academiaStats, loading: academiaLoading } = useAkademiaStats();
-  const empresaIdRef = useRef(DEFAULT_EMPRESA_ID);
-
-  const fetchData = useCallback(async (empresaIdOverride?: string) => {
-    const empresaId = DEFAULT_EMPRESA_ID;
-    empresaIdRef.current = empresaId;
+  const fetchData = useCallback(async () => {
     setError('');
     setLoading(true);
 
-    const safetyTimer = setTimeout(() => {
-      setLoading(false);
-    }, 8000);
+    const safetyTimer = setTimeout(() => setLoading(false), 8000);
 
     try {
-      const [
-        rEmpresa,
-        rProdCount,
-        rCliCount,
-        rBlogCount,
-        rLeadsTotal,
-        rProjectsData,
-        rComprasData,
-        rTopProdData,
-        rLastLeadsData,
-        rLastComprasData,
-        rLastPostsData,
-      ] = await Promise.all([
-        supabase.from('empresas').select('id, nombre').eq('id', empresaId).single().then(r => r, () => ({ data: null } as any)),
-        supabase.from('productos').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).eq('activo', true).then(r => r, () => ({ count: 0 } as any)),
-        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).neq('rol', 'superadmin').neq('rol', 'admin').then(r => r, () => ({ count: 0 } as any)),
-        supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).then(r => r, () => ({ count: 0 } as any)),
-        supabase.from('leads').select('id', { count: 'exact', head: true }).eq('empresa_id', empresaId).then(r => r, () => ({ count: 0 } as any)),
-        supabase.from('projects').select('id').eq('empresa_id', empresaId).eq('is_active', true).then(r => r, () => ({ data: [] } as any)),
-        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').eq('estado', 'completado').order('creado_en', { ascending: false }).limit(100).then(r => r, () => ({ data: [] } as any)),
-        supabase.from('compra_items').select('cantidad, compra_id, producto:productos!inner(nombre)').order('compra_id').limit(500).then(r => r, () => ({ data: [] } as any)),
-        supabase.from('leads').select('id, nombre, email, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5).then(r => r, () => ({ data: [] } as any)),
-        supabase.from('compras').select('id, monto_usd, estado, creado_en, user_id').order('creado_en', { ascending: false }).limit(5).then(r => r, () => ({ data: [] } as any)),
-        supabase.from('blog_posts').select('id, titulo, creado_en, estado').eq('empresa_id', empresaId).order('creado_en', { ascending: false }).limit(5).then(r => r, () => ({ data: [] } as any)),
-      ]);
+      const res = await fetch('/api/admin/dashboard');
+      const d = await res.json();
 
-      // Verificar errores individuales
-      const errors: string[] = [];
-      // Solo mostrar error para tablas que sabemos deben existir
-      if (rEmpresa.error) errors.push('empresa');
-      if (rProdCount.error) errors.push('productos');
-      if (rCliCount.error) errors.push('clientes');
-      // Tablas que pueden no existir — ignorar errores silenciosamente
-      if (errors.length > 0) {
-        setError(`Error al cargar: ${errors.join(', ')}`);
+      if (!d.success) {
+        setError(d.error || 'Error al cargar datos');
+        return;
       }
 
-      if (rComprasData.error) {
-        console.error('[Dashboard] compras query error:', rComprasData.error)
-      }
+      setProductsCount(d.prodCount || 0);
+      setClientsCount(d.cliCount || 0);
+      setBlogViews(d.blogCount || 0);
+      setLeadsCount(d.leadsCount || 0);
+      setProjectsCount(d.projectsCount || 0);
+      setCompras(d.compras || []);
+      setLastLeads(d.lastLeads || []);
+      setLastCompras(d.lastCompras || []);
+      setLastPosts(d.lastPosts || []);
 
-      const { data: empresaData } = rEmpresa;
-      const { count: prodCount } = rProdCount;
-      const { count: cliCount } = rCliCount;
-      const { count: blogCount } = rBlogCount.error ? { count: 0 } : rBlogCount;
-      const { count: leadsTotal } = rLeadsTotal.error ? { count: 0 } : rLeadsTotal;
-      const { data: projectsData } = rProjectsData.error ? { data: [] } : rProjectsData;
-      const { data: comprasData } = rComprasData.error ? { data: [] } : rComprasData;
-      const { data: topProdData } = rTopProdData.error ? { data: [] } : rTopProdData;
-      const { data: lastLeadsData } = rLastLeadsData.error ? { data: [] } : rLastLeadsData;
-      const { data: lastComprasData } = rLastComprasData.error ? { data: [] } : rLastComprasData;
-      const { data: lastPostsData } = rLastPostsData.error ? { data: [] } : rLastPostsData;
-
-      // Debug: mostrar cuántas compras se cargaron
-      const comprasCount = (comprasData || []).length
-
-      setProductsCount(prodCount || 0);
-      setClientsCount(cliCount || 0);
-      setBlogViews(blogCount || 0);
-      setLeadsCount(leadsTotal || 0);
-      setProjectsCount((projectsData || []).length);
-      setCompras(comprasData || []);
-      setLastLeads(lastLeadsData || []);
-      setLastCompras(lastComprasData || []);
-      setLastPosts(lastPostsData || []);
-
-      if (comprasData && topProdData) {
-        const completedIds = new Set(comprasData.map((c: any) => c.id));
-        const filtered = (topProdData || []).filter((item: any) => completedIds.has(item.compra_id));
+      // Top products from compras
+      if (d.compras?.length) {
         const productMap = new Map<string, number>();
-        for (const item of filtered) {
-          const prod = Array.isArray(item.producto) ? item.producto[0] : item.producto;
-          const name = prod?.nombre || 'Sin nombre';
-          productMap.set(name, (productMap.get(name) || 0) + (item.cantidad || 1));
+        for (const c of d.compras) {
+          const name = c.producto?.nombre || 'Producto';
+          productMap.set(name, (productMap.get(name) || 0) + 1);
         }
         const sorted = [...productMap.entries()]
           .sort((a, b) => b[1] - a[1])
@@ -221,7 +165,7 @@ export default function Dashboard() {
   useEffect(() => {
     const comprasChannel = supabase
       .channel('dashboard-compras')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'compras', filter: `empresa_id=eq.${empresaIdRef.current}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'compras' }, (payload) => {
         const monto = (payload.new as any)?.monto_usd || 0
         setCompras(prev => [payload.new as any, ...prev].slice(0, 50))
         setLastCompras(prev => [payload.new as any, ...prev].slice(0, 5))
@@ -230,7 +174,7 @@ export default function Dashboard() {
 
     const leadsChannel = supabase
       .channel('dashboard-leads')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads', filter: `empresa_id=eq.${empresaIdRef.current}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads', filter: `empresa_id=eq.${DEFAULT_EMPRESA_ID}` }, (payload) => {
         setLeadsCount(prev => prev + 1)
         setLastLeads(prev => [payload.new as any, ...prev].slice(0, 5))
       })
@@ -238,12 +182,12 @@ export default function Dashboard() {
 
     const blogChannel = supabase
       .channel('dashboard-blog')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${DEFAULT_EMPRESA_ID}` }, () => {
         setBlogViews(prev => prev + 1)
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${empresaIdRef.current}` }, () => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_posts', filter: `empresa_id=eq.${DEFAULT_EMPRESA_ID}` }, () => {
         // Solo refrescar posts recientes (ligero)
-        supabase.from('blog_posts').select('id, titulo, creado_en, estado').eq('empresa_id', empresaIdRef.current).order('creado_en', { ascending: false }).limit(5).then(({ data }) => {
+        supabase.from('blog_posts').select('id, titulo, creado_en, estado').eq('empresa_id', DEFAULT_EMPRESA_ID).order('creado_en', { ascending: false }).limit(5).then(({ data }) => {
           if (data) setLastPosts(data)
         })
       })
