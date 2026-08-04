@@ -562,8 +562,9 @@ function AcademyContent() {
                                                                          <span className="text-[9px] font-mono text-gray-600 block mt-0.5">{locked ? 'Bloqueado' : TYPE_CONFIG[lesson.type]?.label || lesson.type}</span>
                                                                      </div>
                                                                  </button>
-                                                                 )})}
+                                                                  )})}
                                                         </div>
+                                                        </>
                                                     )}
                                                 </div>
                                             ))}
