@@ -170,8 +170,14 @@ export default function CursoDetallePage() {
                                     {isOpen ? <ChevronDown className="w-3.5 h-3.5 text-gray-600 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-600 shrink-0" />}
                                 </button>
 
-                                {isOpen && moduleLessons.length > 0 && (
-                                    <div className="pb-2">
+                                {isOpen && (
+                                    <>
+                                        {mod.description && (
+                                            <div className="px-5 py-3 text-xs text-gray-400 prose prose-invert prose-sm max-w-none border-t border-white/[0.03]"
+                                                 dangerouslySetInnerHTML={{ __html: mod.description }} />
+                                        )}
+                                        {moduleLessons.length > 0 && (
+                                            <div className="pb-2">
                                         {moduleLessons.map((lesson) => {
                                             const isActive = activeLesson?.id === lesson.id
                                             const isCompleted = completedLessons.includes(lesson.id)
@@ -200,6 +206,8 @@ export default function CursoDetallePage() {
                                             )
                                         })}
                                     </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )
@@ -312,11 +320,19 @@ export default function CursoDetallePage() {
                             </div>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center h-full">
-                            <div className="text-center">
-                                <BookOpen className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-                                <p className="text-gray-400 font-bold">Selecciona una leccion</p>
-                                <p className="text-gray-600 text-sm mt-1">Elige una leccion del menu lateral</p>
+                        <div className="max-w-4xl mx-auto w-full p-8 md:p-12">
+                            {curso.descripcion ? (
+                                <div className="prose prose-invert max-w-none">
+                                    <h2 className="text-xl font-black text-white mb-6">Sobre este curso</h2>
+                                    <div className="text-gray-300 leading-relaxed space-y-4" dangerouslySetInnerHTML={{ __html: curso.descripcion }} />
+                                </div>
+                            ) : null}
+                            <div className="flex items-center justify-center py-12">
+                                <div className="text-center">
+                                    <BookOpen className="w-16 h-16 text-gray-700 mx-auto mb-4" />
+                                    <p className="text-gray-400 font-bold">Selecciona una lección</p>
+                                    <p className="text-gray-600 text-sm mt-1">Elige una lección del menú lateral para comenzar</p>
+                                </div>
                             </div>
                         </div>
                     )}

@@ -97,7 +97,7 @@ export default function EventSelector({ savedTemplates, currentTemplateId, curre
                   return (
                     <div key={event.value} className="flex items-center justify-between">
                       <div
-                        className={`flex-1 flex items-center justify-between p-2 rounded cursor-pointer transition-colors text-xs ${isCurrent ? 'bg-[#e11d48]/10 border border-[#e11d48]/30' : isOurs ? 'bg-blue-500/10 border border-blue-500/30' : assigned ? 'bg-gray-500/5 border border-gray-500/10 opacity-60' : 'hover:bg-gray-500/5'}`}
+                        className={`flex-1 flex items-center justify-between p-2 rounded cursor-pointer transition-colors text-xs ${isCurrent ? 'bg-[#f5e100]/10 border border-[#f5e100]/30' : isOurs ? 'bg-blue-500/10 border border-blue-500/30' : assigned ? 'bg-gray-500/5 border border-gray-500/10 opacity-60' : 'hover:bg-gray-500/5'}`}
                         onClick={() => handleEventClick(event.value)}
                       >
                         <div className="flex items-center gap-2 min-w-0">

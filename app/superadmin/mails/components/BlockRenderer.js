@@ -40,7 +40,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
 
   const getStyle = (block) => {
     const base = {
-      outline: isSelected ? '2px solid #e11d48' : 'none',
+      outline: isSelected ? '2px solid #f5e100' : 'none',
       outlineOffset: '-2px',
       cursor: 'pointer'
     };
@@ -188,7 +188,7 @@ const BlockRenderer = memo(function BlockRenderer({ block, settings, isSelected,
           style={{
             display: 'inline-block',
             padding: `${content.paddingY ?? 15}px ${content.paddingX ?? 0}px`,
-            backgroundColor: content.buttonBgColor || '#e11d48',
+            backgroundColor: content.buttonBgColor || '#f5e100',
             color: content.textColor || '#fff',
             fontFamily: fontFamily,
             fontSize: `${content.fontSize ?? 16}px`,

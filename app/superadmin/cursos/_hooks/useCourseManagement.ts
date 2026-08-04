@@ -57,6 +57,7 @@ export function useCourseManagement() {
           id: c.id,
           title: c.nombre,
           category: 'Capacitaciones',
+          descripcion: c.descripcion || '',
           price: c.precio_usd || 0,
           status: c.activo ? 'Publicado' : 'Borrador',
           modules: c.modulos || [],
@@ -128,7 +129,8 @@ export function useCourseManagement() {
       currentCourse?.paraEquipo, currentCourse?.puntosCompletado,
       currentCourse?.puntosPorLeccion, currentCourse?.puntosCertificado,
       currentCourse?.bliscoins, currentCourse?.sequentialProgress,
-      currentCourse?.requireCompletion, currentCourse?.category])
+      currentCourse?.requireCompletion, currentCourse?.category,
+      currentCourse?.descripcion])
 
   const saveBorrador = useCallback(async (statusOverride?: 'Borrador' | 'Publicado') => {
     if (!currentCourse) return
@@ -151,7 +153,7 @@ export function useCourseManagement() {
       const courseData: Record<string, any> = {
         nombre: currentCourse.title || 'Sin título',
         slug: isNew ? baseSlug : undefined,
-        descripcion: currentCourse.category,
+        descripcion: currentCourse.descripcion || '',
         modulos: currentCourse.modules,
         precio_coins: currentCourse.bliscoins || 0,
         precio_usd: currentCourse.price || 0,
@@ -244,6 +246,7 @@ export function useCourseManagement() {
       id: `new-${Date.now()}`,
       title: '',
       category: 'Capacitaciones',
+      descripcion: '',
       price: 0,
       status: 'Borrador',
       modules: [

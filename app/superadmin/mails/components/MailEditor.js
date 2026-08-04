@@ -17,11 +17,11 @@ function AIGenerator({ blockId, currentText, onGenerate }) {
     } catch (e) { console.error(e); }
     setLoading(false);
   };
-  return <button onClick={handleAI} disabled={loading} className="w-full mb-3 bg-red-50 dark:bg-[#2a0e16] border border-[#e11d48]/30 text-[#e11d48] text-[10px] font-bold py-1.5 rounded flex items-center justify-center gap-2"><Sparkles size={12}/> {loading ? 'Generando...' : 'Optimizar con IA'}</button>;
+  return <button onClick={handleAI} disabled={loading} className="w-full mb-3 bg-yellow-50 dark:bg-[#2a1f0a] border border-[#f5e100]/30 text-[#f5e100] text-[10px] font-bold py-1.5 rounded flex items-center justify-center gap-2"><Sparkles size={12}/> {loading ? 'Generando...' : 'Optimizar con IA'}</button>;
 }
 
 function ColToolBtn({ icon: Icon, label, onClick }) {
-  return <button onClick={onClick} className="flex flex-col items-center p-2 hover:bg-white dark:hover:bg-[#222] rounded transition-colors border border-transparent hover:border-[#e11d48]/30"><Icon size={14} className="mb-1 text-gray-500" /><span className="text-[8px] font-bold text-gray-600 dark:text-gray-400">{label}</span></button>;
+  return <button onClick={onClick} className="flex flex-col items-center p-2 hover:bg-white dark:hover:bg-[#222] rounded transition-colors border border-transparent hover:border-[#f5e100]/30"><Icon size={14} className="mb-1 text-gray-500" /><span className="text-[8px] font-bold text-gray-600 dark:text-gray-400">{label}</span></button>;
 }
 
 export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId, selectedBlock, selectedBlockId, moveBlock, duplicateBlock, removeBlock, applyPalette, senders, addNetwork, settings, updateSetting, currentPalettes, handleUpdateContent, showMediaModal, setShowMediaModal, mediaCallbackRef, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, addBlockToSpecificColumn, demoData, applyDemoData, previewWithDemo, setPreviewWithDemo, generateHTML, theme, savedTemplates, currentTemplateId, onLoadTemplateFromEvent, templatesLoading }) {
@@ -31,10 +31,10 @@ export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId
   return (
     <aside className="w-80 bg-white dark:bg-[#111111] border-l border-gray-200 dark:border-[#222222] flex flex-col flex-shrink-0 z-10">
       <div className="flex border-b border-gray-200 dark:border-[#222222] bg-gray-50 dark:bg-[#161616]">
-        <button onClick={() => setActiveTab('blocks')} className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 border-b-2 transition-colors ${activeTab === 'blocks' ? 'border-[#e11d48] text-[#e11d48] bg-white dark:bg-[#111111]' : 'border-transparent text-gray-500'}`}>
+        <button onClick={() => setActiveTab('blocks')} className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 border-b-2 transition-colors ${activeTab === 'blocks' ? 'border-[#f5e100] text-[#f5e100] bg-white dark:bg-[#111111]' : 'border-transparent text-gray-500'}`}>
           <MousePointerClick size={16} /> Edición
         </button>
-        <button onClick={() => { setActiveTab('global'); setSelectedBlockId(null); }} className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 border-b-2 transition-colors ${activeTab === 'global' ? 'border-[#e11d48] text-[#e11d48] bg-white dark:bg-[#111111]' : 'border-transparent text-gray-500'}`}>
+        <button onClick={() => { setActiveTab('global'); setSelectedBlockId(null); }} className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 border-b-2 transition-colors ${activeTab === 'global' ? 'border-[#f5e100] text-[#f5e100] bg-white dark:bg-[#111111]' : 'border-transparent text-gray-500'}`}>
           <Settings size={16} /> Global
         </button>
         <button onClick={() => { setActiveTab('variables'); setSelectedBlockId(null); }} className={`flex-1 py-3 text-sm font-semibold flex items-center justify-center gap-2 border-b-2 transition-colors ${activeTab === 'variables' ? 'border-[#f59e0b] text-[#f59e0b] bg-white dark:bg-[#111111]' : 'border-transparent text-gray-500'}`}>
@@ -51,12 +51,12 @@ export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId
         {activeTab === 'blocks' && selectedBlockId && selectedBlock && (
           <div className="animate-fadeIn">
             <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-[#262626] mb-4">
-              <span className="text-xs font-bold text-[#e11d48] uppercase tracking-wider bg-red-50 dark:bg-[#2a0e16] px-2 py-1 rounded">Sección: {selectedBlock.type}</span>
+              <span className="text-xs font-bold text-[#f5e100] uppercase tracking-wider bg-yellow-50 dark:bg-[#2a1f0a] px-2 py-1 rounded">Sección: {selectedBlock.type}</span>
               <div className="flex items-center gap-1">
-                <button onClick={(e) => { e.stopPropagation(); moveBlock(selectedBlockId, 'up'); }} className="p-1.5 text-gray-400 hover:text-[#e11d48] hover:bg-gray-100 dark:hover:bg-[#222] rounded" title="Subir"><ArrowUp size={14} /></button>
-                <button onClick={(e) => { e.stopPropagation(); moveBlock(selectedBlockId, 'down'); }} className="p-1.5 text-gray-400 hover:text-[#e11d48] hover:bg-gray-100 dark:hover:bg-[#222] rounded" title="Bajar"><ArrowDown size={14} /></button>
+                <button onClick={(e) => { e.stopPropagation(); moveBlock(selectedBlockId, 'up'); }} className="p-1.5 text-gray-400 hover:text-[#f5e100] hover:bg-gray-100 dark:hover:bg-[#222] rounded" title="Subir"><ArrowUp size={14} /></button>
+                <button onClick={(e) => { e.stopPropagation(); moveBlock(selectedBlockId, 'down'); }} className="p-1.5 text-gray-400 hover:text-[#f5e100] hover:bg-gray-100 dark:hover:bg-[#222] rounded" title="Bajar"><ArrowDown size={14} /></button>
                 <button onClick={(e) => { e.stopPropagation(); duplicateBlock(selectedBlockId, e); }} className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-[#1e2a3a] rounded" title="Duplicar"><Copy size={14} /></button>
-                <button onClick={(e) => { e.stopPropagation(); removeBlock(selectedBlockId, e); }} className="p-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded" title="Eliminar"><Trash2 size={14} /></button>
+                <button onClick={(e) => { e.stopPropagation(); removeBlock(selectedBlockId, e); }} className="p-1.5 bg-yellow-50 text-yellow-500 hover:bg-yellow-100 rounded" title="Eliminar"><Trash2 size={14} /></button>
               </div>
             </div>
             {selectedBlock.type === 'header' && <HeaderEditor selectedBlock={selectedBlock} handleUpdateContent={handleUpdateContent} handleOpenMedia={handleOpenMedia} />}
@@ -153,7 +153,7 @@ function ColumnsEditor({ selectedBlock, handleUpdateContent, handleOpenMedia, ad
                   <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Columna {colIdx + 1}</span>
                   <span className="text-[9px] text-gray-600">{colBlocks.length} bloque{colBlocks.length !== 1 ? 's' : ''}</span>
                 </div>
-                {colBlocks.length > 0 && (<div className="divide-y divide-gray-100 dark:divide-[#222]">{colBlocks.map((childBlock, blockIdx) => { const IconComp = BLOCK_ICONS[childBlock.type] || Code; const preview = childBlock.content?.text?.substring(0, 30) || childBlock.content?.imageUrl?.split('/').pop()?.substring(0, 20) || childBlock.content?.url?.substring(0, 20) || childBlock.type; return (<div key={childBlock.id || blockIdx} className="group flex items-center"><button onClick={() => setSelectedBlockId(childBlock.id)} className={`flex-1 flex items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-blue-50 dark:hover:bg-[#1e2a3a]`}><IconComp size={12} className="text-[#e11d48] flex-shrink-0" /><span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 capitalize flex-1 truncate">{childBlock.type}</span><span className="text-[10px] text-gray-400 truncate max-w-[80px]">{preview}</span></button><button onClick={(e) => { e.stopPropagation(); removeBlock(childBlock.id, e); }} className="p-1.5 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12} /></button></div>); })}</div>)}
+                {colBlocks.length > 0 && (<div className="divide-y divide-gray-100 dark:divide-[#222]">{colBlocks.map((childBlock, blockIdx) => { const IconComp = BLOCK_ICONS[childBlock.type] || Code; const preview = childBlock.content?.text?.substring(0, 30) || childBlock.content?.imageUrl?.split('/').pop()?.substring(0, 20) || childBlock.content?.url?.substring(0, 20) || childBlock.type; return (<div key={childBlock.id || blockIdx} className="group flex items-center"><button onClick={() => setSelectedBlockId(childBlock.id)} className={`flex-1 flex items-center gap-2 px-3 py-2.5 text-left transition-colors hover:bg-blue-50 dark:hover:bg-[#1e2a3a]`}><IconComp size={12} className="text-[#f5e100] flex-shrink-0" /><span className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 capitalize flex-1 truncate">{childBlock.type}</span><span className="text-[10px] text-gray-400 truncate max-w-[80px]">{preview}</span></button><button onClick={(e) => { e.stopPropagation(); removeBlock(childBlock.id, e); }} className="p-1.5 text-gray-400 hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={12} /></button></div>); })}</div>)}
                 <div className="p-2 bg-gray-50 dark:bg-[#0a0a0a]"><p className="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-1.5">Agregar</p><div className="grid grid-cols-4 gap-1"><ColToolBtn icon={Type} label="Texto" onClick={() => addBlockToSpecificColumn(selectedBlock.id, colIdx, 'text')} /><ColToolBtn icon={ImageIcon} label="Imagen" onClick={() => addBlockToSpecificColumn(selectedBlock.id, colIdx, 'image')} /><ColToolBtn icon={ClickIcon} label="Botón" onClick={() => addBlockToSpecificColumn(selectedBlock.id, colIdx, 'button')} /><ColToolBtn icon={Video} label="Video" onClick={() => addBlockToSpecificColumn(selectedBlock.id, colIdx, 'video')} /></div></div>
               </div>
             );
@@ -228,7 +228,7 @@ function SocialEditor({ selectedBlock, handleUpdateContent, handleOpenMedia, add
               <select value={net.network} onChange={(e) => { const newNet = e.target.value; handleUpdateContent('networks', selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, network: newNet, bgColor: SOCIAL_CONFIG[newNet].defaultBg } : n)); }} className="text-[11px] font-bold uppercase bg-transparent outline-none cursor-pointer">
                 {Object.keys(SOCIAL_CONFIG).map(k => (<option key={k} value={k}>{SOCIAL_CONFIG[k].label}</option>))}
               </select>
-              <button onClick={() => handleUpdateContent('networks', selectedBlock.content.networks.filter(n => n.id !== net.id))} className="text-red-500 hover:bg-red-50 rounded p-0.5"><Trash2 size={12}/></button>
+              <button onClick={() => handleUpdateContent('networks', selectedBlock.content.networks.filter(n => n.id !== net.id))} className="text-yellow-500 hover:bg-yellow-50 rounded p-0.5"><Trash2 size={12}/></button>
             </div>
             <input type="text" value={net.url} onChange={(e) => { const newNets = selectedBlock.content.networks.map(n => n.id === net.id ? { ...n, url: e.target.value } : n); handleUpdateContent('networks', newNets); }} placeholder="https://..." className="w-full text-xs p-1.5 border rounded dark:bg-[#161616] mb-2" />
 <div className="flex flex-col gap-2">
@@ -279,13 +279,13 @@ function GlobalSettings({ settings, updateSetting, currentPalettes, isEditingPal
       <PropertyGroup title="Todas las Paletas">
         <div className="grid grid-cols-2 gap-2 mb-3">
           {currentPalettes.map((p, index) => (
-            <div key={p.id} className={`relative flex flex-col rounded border-2 overflow-hidden ${settings.activePaletteId === p.id ? 'border-[#e11d48] bg-[#e11d48]/10 text-[#e11d48]' : 'border-gray-200 dark:border-[#333] text-gray-500'}`}>
+            <div key={p.id} className={`relative flex flex-col rounded border-2 overflow-hidden ${settings.activePaletteId === p.id ? 'border-[#f5e100] bg-[#f5e100]/10 text-[#f5e100]' : 'border-gray-200 dark:border-[#333] text-gray-500'}`}>
               <button onClick={() => applyPalette(p.id)} className="w-full text-xs font-bold pt-2 pb-6 px-1"><div className="flex justify-center gap-1 mb-1"><span className="w-3 h-3 rounded-full border" style={{background: p.bodyBg}}></span><span className="w-3 h-3 rounded-full border" style={{background: p.containerBg}}></span><span className="w-3 h-3 rounded-full" style={{background: p.primary}}></span></div>{p.name}</button>
               <div className="absolute bottom-0 left-0 right-0 bg-black/5 p-1 flex justify-center items-center border-t border-gray-200 dark:border-[#333]">
                 <button onClick={(e) => movePalette(index, 'up', e)} disabled={index === 0} className="px-1 text-gray-400 hover:text-gray-600"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m18 15-6-6-6 6"/></svg></button>
                 <button onClick={(e) => movePalette(index, 'down', e)} disabled={index === currentPalettes.length - 1} className="px-1 text-gray-400 hover:text-gray-600"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg></button>
                 <button onClick={(e) => startEditPalette(p, e)} className="px-1 text-gray-400 hover:text-blue-500"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
-                <button onClick={(e) => deletePalette(p.id, e)} className="px-1 text-gray-400 hover:text-red-500"><Trash2 size={12}/></button>
+                <button onClick={(e) => deletePalette(p.id, e)} className="px-1 text-gray-400 hover:text-yellow-500"><Trash2 size={12}/></button>
               </div>
             </div>
           ))}

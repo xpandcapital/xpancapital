@@ -81,7 +81,7 @@ export default function VariablePanel({ currentEvent }) {
           placeholder="Buscar variable..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-7 pr-3 py-1.5 text-xs border rounded dark:bg-[#0a0a0a] dark:border-[#333] text-gray-300 focus:outline-none focus:border-[#e11d48]"
+          className="w-full pl-7 pr-3 py-1.5 text-xs border rounded dark:bg-[#0a0a0a] dark:border-[#333] text-gray-300 focus:outline-none focus:border-[#f5e100]"
         />
       </div>
 

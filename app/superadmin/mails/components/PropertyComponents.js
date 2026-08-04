@@ -20,7 +20,7 @@ export function PropertyInput({ label, value, onChange, type = 'text', placehold
         value={value ?? ''}
         onChange={(e) => onChange(type === 'number' ? (e.target.value ? Number(e.target.value) : '') : e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-[#333] bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-200 rounded text-sm focus:outline-none focus:border-[#e11d48]"
+        className="w-full px-3 py-2 border border-gray-300 dark:border-[#333] bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-200 rounded text-sm focus:outline-none focus:border-[#f5e100]"
       />
     </div>
   );
@@ -34,7 +34,7 @@ export function PropertyTextarea({ label, value, onChange, rows = 4 }) {
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value)}
         rows={rows}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-[#333] bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-200 rounded text-sm focus:outline-none focus:border-[#e11d48] resize-none"
+        className="w-full px-3 py-2 border border-gray-300 dark:border-[#333] bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-200 rounded text-sm focus:outline-none focus:border-[#f5e100] resize-none"
       />
     </div>
   );
@@ -47,7 +47,7 @@ export function PropertySelect({ label, value, onChange, options }) {
       <select
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-[#333] bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-200 rounded text-sm focus:outline-none focus:border-[#e11d48]"
+        className="w-full px-3 py-2 border border-gray-300 dark:border-[#333] bg-white dark:bg-[#0a0a0a] text-gray-900 dark:text-gray-200 rounded text-sm focus:outline-none focus:border-[#f5e100]"
       >
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -87,19 +87,19 @@ export function PropertyAlignment({ value, onChange }) {
       <div className="flex bg-gray-100 dark:bg-[#0a0a0a] p-1 rounded border border-gray-200 dark:border-[#333]">
         <button
           onClick={() => onChange('left')}
-          className={`flex-1 flex justify-center py-1.5 rounded ${value === 'left' ? 'bg-white dark:bg-[#222] text-[#e11d48] shadow-sm' : 'text-gray-500'}`}
+          className={`flex-1 flex justify-center py-1.5 rounded ${value === 'left' ? 'bg-white dark:bg-[#222] text-[#f5e100] shadow-sm' : 'text-gray-500'}`}
         >
           ←
         </button>
         <button
           onClick={() => onChange('center')}
-          className={`flex-1 flex justify-center py-1.5 rounded ${value === 'center' ? 'bg-white dark:bg-[#222] text-[#e11d48] shadow-sm' : 'text-gray-500'}`}
+          className={`flex-1 flex justify-center py-1.5 rounded ${value === 'center' ? 'bg-white dark:bg-[#222] text-[#f5e100] shadow-sm' : 'text-gray-500'}`}
         >
           ↔
         </button>
         <button
           onClick={() => onChange('right')}
-          className={`flex-1 flex justify-center py-1.5 rounded ${value === 'right' ? 'bg-white dark:bg-[#222] text-[#e11d48] shadow-sm' : 'text-gray-500'}`}
+          className={`flex-1 flex justify-center py-1.5 rounded ${value === 'right' ? 'bg-white dark:bg-[#222] text-[#f5e100] shadow-sm' : 'text-gray-500'}`}
         >
           →
         </button>
@@ -132,7 +132,7 @@ export function PropertyFileOrUrl({ label, value, onChange, onOpenGallery }) {
           <button
             type="button"
             onClick={() => onChange('')}
-            className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded"
+            className="p-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded"
             title="Quitar"
           >
             <X size={14} />
@@ -175,7 +175,7 @@ export function PropertyBackgroundImage({ bgImageUrl, bgSize, bgPosition, onChan
         {bgImageUrl && (
           <button
             onClick={() => onChange('bgImageUrl', '')}
-            className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded"
+            className="p-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded"
             title="Quitar"
           >
             <X size={14} />
@@ -230,21 +230,21 @@ export function BlockActions({ selectedBlockId, moveBlock, removeBlock }) {
     <div className="flex items-center gap-1">
       <button
         onClick={(e) => { e.stopPropagation(); moveBlock(selectedBlockId, 'up', e); }}
-        className="p-1.5 text-gray-400 hover:text-[#e11d48] hover:bg-gray-100 dark:hover:bg-[#222] rounded"
+        className="p-1.5 text-gray-400 hover:text-[#f5e100] hover:bg-gray-100 dark:hover:bg-[#222] rounded"
         title="Subir"
       >
         <ArrowUp size={14} />
       </button>
       <button
         onClick={(e) => { e.stopPropagation(); moveBlock(selectedBlockId, 'down', e); }}
-        className="p-1.5 text-gray-400 hover:text-[#e11d48] hover:bg-gray-100 dark:hover:bg-[#222] rounded"
+        className="p-1.5 text-gray-400 hover:text-[#f5e100] hover:bg-gray-100 dark:hover:bg-[#222] rounded"
         title="Bajar"
       >
         <ArrowDown size={14} />
       </button>
       <button
         onClick={(e) => { e.stopPropagation(); removeBlock(selectedBlockId, e); }}
-        className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+        className="p-1.5 text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded"
         title="Eliminar"
       >
         <Trash2 size={14} />

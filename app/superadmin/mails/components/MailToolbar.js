@@ -6,16 +6,16 @@ export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMo
   return (
     <header className="flex items-center justify-between px-4 py-3 bg-white dark:bg-[#111111] border-b border-gray-200 dark:border-[#222222] shadow-sm z-20 flex-shrink-0">
       <div className="flex items-center space-x-3">
-        <div className="w-8 h-8 bg-[#e11d48] rounded-lg flex items-center justify-center shadow-md">
+        <div className="w-8 h-8 bg-[#f5e100] rounded-lg flex items-center justify-center shadow-md">
           <Mail className="text-white w-5 h-5" />
         </div>
-        <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">XpandMail <span className="text-[#e11d48] font-black">CMS</span></h1>
+        <h1 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">XpandMail <span className="text-[#f5e100] font-black">CMS</span></h1>
       </div>
       <div className="hidden md:flex bg-gray-100 dark:bg-[#161616] p-1 rounded-lg border border-gray-200 dark:border-[#262626]">
-        <button onClick={() => setPreviewMode('desktop')} title="Escritorio" className={`p-2 rounded-md flex items-center justify-center transition-all ${previewMode === 'desktop' ? 'bg-white dark:bg-[#222222] shadow-sm text-[#e11d48]' : 'text-gray-500'}`}>
+        <button onClick={() => setPreviewMode('desktop')} title="Escritorio" className={`p-2 rounded-md flex items-center justify-center transition-all ${previewMode === 'desktop' ? 'bg-white dark:bg-[#222222] shadow-sm text-[#f5e100]' : 'text-gray-500'}`}>
           <Monitor size={18} />
         </button>
-        <button onClick={() => setPreviewMode('mobile')} title="Móvil" className={`p-2 rounded-md flex items-center justify-center transition-all ${previewMode === 'mobile' ? 'bg-white dark:bg-[#222222] shadow-sm text-[#e11d48]' : 'text-gray-500'}`}>
+        <button onClick={() => setPreviewMode('mobile')} title="Móvil" className={`p-2 rounded-md flex items-center justify-center transition-all ${previewMode === 'mobile' ? 'bg-white dark:bg-[#222222] shadow-sm text-[#f5e100]' : 'text-gray-500'}`}>
           <Smartphone size={18} />
         </button>
       </div>
@@ -42,7 +42,7 @@ export default function MailToolbar({ theme, setTheme, previewMode, setPreviewMo
         <button onClick={onSaveAsNew} title="Guardar como Nueva Plantilla" className="p-2 flex items-center justify-center bg-emerald-500/80 hover:bg-emerald-500 text-white rounded-md text-[10px] font-bold gap-1">
           <Plus size={14} /> Nuevo
         </button>
-        <button onClick={() => setShowExportHtml(true)} title="Exportar HTML" className="p-2 flex items-center justify-center bg-[#e11d48] hover:bg-[#be123c] text-white rounded-md transition-colors">
+        <button onClick={() => setShowExportHtml(true)} title="Exportar HTML" className="p-2 flex items-center justify-center bg-[#f5e100] hover:bg-[#d4c000] text-white rounded-md transition-colors">
           <Code size={18} />
         </button>
         <button onClick={onOpenSend} title="Enviar Campaña" className="p-2 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">

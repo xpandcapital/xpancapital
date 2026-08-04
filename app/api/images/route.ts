@@ -574,6 +574,28 @@ async function generateReplicate(prompt: string, apiKey: string, size: string = 
 
 // ============ SUBIR IMAGEN ============
 
+async function ensureBucket() {
+  const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+  if (listError) {
+    logger.warn('Error listing buckets:', listError.message);
+    return;
+  }
+  const exists = buckets?.some((b: any) => b.name === 'cms');
+  if (!exists) {
+    logger.debug('Bucket "cms" no existe, creando...');
+    const { error: createError } = await supabase.storage.createBucket('cms', {
+      public: true,
+      fileSizeLimit: 10485760,
+      allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
+    });
+    if (createError) {
+      logger.error('Error creating bucket:', createError.message);
+    } else {
+      logger.debug('Bucket "cms" creado exitosamente');
+    }
+  }
+}
+
 async function downloadAndUpload(imageUrl: string, filename: string) {
   try {
     const response = await fetch(imageUrl);
@@ -713,40 +735,93 @@ export async function POST(request: NextRequest) {
     const empresaId = formData.get('empresa_id') as string;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
+    }
+
+    // Validar tipo de archivo
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'];
+    const detectedType = file.type || '';
+    if (detectedType && !allowedTypes.includes(detectedType)) {
+      logger.warn('Tipo de archivo no permitido:', detectedType);
+      // No bloqueamos por tipo, solo advertimos (SVG puede venir como application/octet-stream)
+    }
+
+    // Validar tamaño (10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      return NextResponse.json({
+        success: false,
+        error: 'La imagen excede el límite de 10MB'
+      }, { status: 413 });
     }
 
     const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const fileName = `email-media/${empresaId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    const safeEmpresaId = empresaId || 'default';
+    const fileName = `email-media/${safeEmpresaId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const { data, error } = await supabase.storage
+    const contentType = detectedType || 'image/jpeg';
+
+    // Intentar subir al bucket cms
+    let { data, error } = await supabase.storage
       .from('cms')
       .upload(fileName, buffer, {
-        contentType: file.type || 'image/jpeg',
+        contentType,
         upsert: true
       });
 
+    // Si falla, intentar crear el bucket y reintentar
+    if (error) {
+      logger.warn('Primer intento de upload falló, intentando crear bucket:', error.message);
+      await ensureBucket();
+
+      const retry = await supabase.storage
+        .from('cms')
+        .upload(fileName, buffer, {
+          contentType,
+          upsert: true
+        });
+
+      if (retry.error) {
+        logger.error('Upload error (retry):', retry.error);
+        return NextResponse.json({
+          success: false,
+          error: retry.error.message || 'Error al subir la imagen'
+        }, { status: 500 });
+      }
+
+      data = retry.data;
+      error = null;
+    }
+
     if (error) {
       logger.error('Upload error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({
+        success: false,
+        error: error.message || 'Error al subir la imagen'
+      }, { status: 500 });
     }
 
     const { data: publicUrl } = supabase.storage
       .from('cms')
       .getPublicUrl(fileName);
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       url: publicUrl.publicUrl,
       path: data?.path
     });
   } catch (error) {
     logger.error('POST error:', error);
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Upload failed' 
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Error al subir la imagen'
     }, { status: 500 });
   }
 }
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;

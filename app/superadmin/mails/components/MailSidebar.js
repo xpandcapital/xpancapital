@@ -7,7 +7,7 @@ export default function MailSidebar({ leftPanelTab, setLeftPanelTab, addBlock, z
   return (
     <aside className="w-64 bg-white dark:bg-[#111111] border-r border-gray-200 dark:border-[#222222] flex flex-col flex-shrink-0 z-10">
       <div className="flex border-b border-gray-200 dark:border-[#222222] bg-gray-50 dark:bg-[#161616]">
-        <button onClick={() => setLeftPanelTab('blocks')} className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors ${leftPanelTab === 'blocks' ? 'border-[#e11d48] text-[#e11d48] bg-white dark:bg-[#111111]' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
+        <button onClick={() => setLeftPanelTab('blocks')} className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors ${leftPanelTab === 'blocks' ? 'border-[#f5e100] text-[#f5e100] bg-white dark:bg-[#111111]' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
           <Layers size={13} /> Bloques
         </button>
         <button onClick={() => { setLeftPanelTab('envato'); if (!envatoStatus) checkEnvatoAndSearch?.(); else if (envatoResults.length === 0) searchEnvato(envatoQuery); }} className={`flex-1 py-3 text-xs font-bold flex items-center justify-center gap-1.5 border-b-2 transition-colors ${leftPanelTab === 'envato' ? 'border-[#82b440] text-[#82b440] bg-white dark:bg-[#111111]' : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
@@ -19,8 +19,8 @@ export default function MailSidebar({ leftPanelTab, setLeftPanelTab, addBlock, z
           {AVAILABLE_BLOCKS.map(block => {
             const IconComp = block.Icon;
             return (
-              <button key={block.type} onClick={() => addBlock(block.type)} title={block.label} className="flex flex-col items-center justify-center h-full bg-gray-50 dark:bg-[#161616] border border-gray-200 dark:border-[#262626] hover:border-[#e11d48] hover:bg-red-50 dark:hover:bg-[#1a0a0a] text-gray-500 dark:text-gray-400 hover:text-[#e11d48] rounded-lg transition-all group">
-                <IconComp size={14} className="mb-0.5 group-hover:text-[#e11d48]" />
+              <button key={block.type} onClick={() => addBlock(block.type)} title={block.label} className="flex flex-col items-center justify-center h-full bg-gray-50 dark:bg-[#161616] border border-gray-200 dark:border-[#262626] hover:border-[#f5e100] hover:bg-yellow-50 dark:hover:bg-[#1a1a0a] text-gray-500 dark:text-gray-400 hover:text-[#f5e100] rounded-lg transition-all group">
+                <IconComp size={14} className="mb-0.5 group-hover:text-[#f5e100]" />
                 <span className="text-[9px] font-bold leading-none">{block.label}</span>
               </button>
             );

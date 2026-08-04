@@ -20,8 +20,8 @@ export const SOCIAL_CONFIG = {
 };
 
 export const DEFAULT_PALETTES = [
-  { id: 'xpancapital-dark', name: 'XpandCapital Dark', bodyBg: '#181818', containerBg: '#181818', text: '#e5e7eb', primary: '#e11d48' },
-  { id: 'xpancapital-light', name: 'XpandCapital Light', bodyBg: '#F3F4F6', containerBg: '#FFFFFF', text: '#333333', primary: '#e11d48' }
+  { id: 'xpancapital-dark', name: 'XpandCapital Dark', bodyBg: '#181818', containerBg: '#181818', text: '#e5e7eb', primary: '#f5e100' },
+  { id: 'xpancapital-light', name: 'XpandCapital Light', bodyBg: '#F3F4F6', containerBg: '#FFFFFF', text: '#333333', primary: '#f5e100' }
 ];
 
 export const FONTS = [
@@ -113,9 +113,9 @@ export const INITIAL_BLOCKS = [
   { id: getUniqueId('html'), type: 'html', content: { ...getDefaultContent('html', activePal), code: '<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d4477.301976500339!2d-78.64392665094853!3d-1.2807081613055047!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1ses!2sec!4v1773959115276!5m2!1ses!2sec" width="100%" height="250" style="border:0; border-radius: 8px;" allowfullscreen="" loading="lazy"></iframe>', padding: 0 } },
   { id: getUniqueId('social'), type: 'social', content: { ...getDefaultContent('social', activePal), iconSize: 28, padding: 0, align: 'center', bgColor: '#FFFFFF', borderRadius: 8, networks: [
     { id: getUniqueId('net'), network: 'facebook', url: 'https://www.facebook.com/XpandCapital', iconColor: '#ffffff', bgColor: '#181818' },
-    { id: getUniqueId('net'), network: 'instagram', url: 'https://www.instagram.com/kevinvaldezdelacruz/', iconColor: '#ffffff', bgColor: '#e11d48' },
+    { id: getUniqueId('net'), network: 'instagram', url: 'https://www.instagram.com/kevinvaldezdelacruz/', iconColor: '#ffffff', bgColor: '#f5e100' },
     { id: getUniqueId('net'), network: 'twitter', url: 'https://x.com/kevinVdlc/', iconColor: '#ffffff', bgColor: '#000000' },
-    { id: getUniqueId('net'), network: 'whatsapp', url: 'https://wa.me/51934111007', iconColor: '#ffffff', bgColor: '#e11d48' },
+    { id: getUniqueId('net'), network: 'whatsapp', url: 'https://wa.me/51934111007', iconColor: '#ffffff', bgColor: '#f5e100' },
     { id: getUniqueId('net'), network: 'youtube', url: 'https://www.youtube.com/c/XpandCapital', iconColor: '#ffffff', bgColor: '#181818' }
   ] } },
   { id: getUniqueId('footer'), type: 'footer', content: { ...getDefaultContent('footer', activePal), text: '© 2026 XpandCapital. Todos los derechos reservados.\nDesarrollo inmobiliario de alta precisión y rentabilidad.', padding: 0, textColor: '#9ca3af', fontSize: 12, align: 'center' } },

@@ -29,6 +29,7 @@ export interface Course {
   id: string
   title: string
   category: string
+  descripcion: string
   price: number
   status: 'Borrador' | 'Publicado'
   modules: Module[]

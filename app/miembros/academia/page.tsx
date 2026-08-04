@@ -357,8 +357,9 @@ function AcademyContent() {
                                                 ) : (
                                                     <div className="absolute inset-0 flex items-center justify-center">
                                                         <BookOpen className="w-16 h-16 text-gray-700" />
-                                                    </div>
-                                                )}
+                                                        </div>
+                                                        </>
+                                                    )}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
                                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(213,193,8,0.6)]">
@@ -531,7 +532,12 @@ function AcademyContent() {
                                                     </button>
 
                                                     {openModules.has(module.id) && (
-                                                        <div className="space-y-1 pl-2">
+                                                        <>
+                                                            {module.description && (
+                                                                <div className="px-3 py-2.5 text-[11px] text-gray-400 leading-relaxed max-w-none border-t border-white/[0.03]"
+                                                                     dangerouslySetInnerHTML={{ __html: module.description }} />
+                                                            )}
+                                                            <div className="space-y-1 pl-2">
                                                              {(module.lessons || []).map((lesson, lessonIdx) => {
                                                                      const globalIdx = allLessons.findIndex(a => a.lesson.id === lesson.id);
                                                                      const locked = isLessonLocked(lesson.id, globalIdx);

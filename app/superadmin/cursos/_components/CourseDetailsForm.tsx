@@ -59,6 +59,10 @@ export function CourseDetailsForm({
                         <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Título Principal</label>
                         <input type="text" value={course.title} onChange={(e) => onUpdate({ ...course, title: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red transition-all text-sm font-bold" placeholder="Ej. Fotografía Inmobiliaria Masterclass" />
                       </div>
+                      <div className="lg:col-span-2 space-y-2">
+                        <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Descripción del Curso</label>
+                        <textarea value={course.descripcion || ''} onChange={(e) => onUpdate({ ...course, descripcion: e.target.value })} rows={5} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blis-red transition-all text-xs resize-none" placeholder="Describe el contenido del curso, incluye resumen de los módulos, lo que aprenderán, etc. Puedes usar HTML para imágenes." />
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
