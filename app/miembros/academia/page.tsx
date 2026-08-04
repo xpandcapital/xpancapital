@@ -357,9 +357,8 @@ function AcademyContent() {
                                                 ) : (
                                                     <div className="absolute inset-0 flex items-center justify-center">
                                                         <BookOpen className="w-16 h-16 text-gray-700" />
-                                                        </div>
-                                                        </>
-                                                    )}
+                                                    </div>
+                                                )}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
                                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <div className="w-16 h-16 rounded-full bg-blis-red flex items-center justify-center shadow-[0_0_30px_rgba(213,193,8,0.6)]">
