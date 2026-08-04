@@ -173,7 +173,7 @@ export default function CursoDetallePage() {
                                 {isOpen && (
                                     <>
                                         {mod.description && (
-                                            <div className="px-5 py-3 text-xs text-gray-400 prose prose-invert prose-sm max-w-none border-t border-white/[0.03]"
+                                            <div className="px-5 py-3 border-t border-white/[0.03] text-gray-300 prose prose-invert prose-a:text-yellow-400 prose-img:rounded-lg prose-img:max-w-full max-w-none"
                                                  dangerouslySetInnerHTML={{ __html: mod.description }} />
                                         )}
                                         {moduleLessons.length > 0 && (

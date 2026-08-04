@@ -534,7 +534,7 @@ function AcademyContent() {
                                                     {openModules.has(module.id) && (
                                                         <>
                                                             {module.description && (
-                                                                <div className="px-3 py-2.5 text-[11px] text-gray-400 leading-relaxed max-w-none border-t border-white/[0.03]"
+                                                                <div className="px-4 py-3 border-t border-white/[0.03] text-gray-300 prose prose-invert prose-a:text-yellow-400 prose-img:rounded-lg prose-img:max-w-full max-w-none"
                                                                      dangerouslySetInnerHTML={{ __html: module.description }} />
                                                             )}
                                                             <div className="space-y-1 pl-2">
