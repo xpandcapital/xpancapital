@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Zap, ArrowRight } from "lucide-react";
 import type { ProductDef } from "@/lib/types/shop";
+import { stripHtml } from "@/lib/strip-html";
 
 interface ShopHeroSliderProps {
     products?: ProductDef[];
@@ -16,8 +17,8 @@ export function ShopHeroSlider({ products }: ShopHeroSliderProps) {
         if (products && products.length > 0) {
             return products.slice(0, 5).filter(p => p.title).map((p, i) => ({
                 id: i,
-                title: p.title,
-                subtitle: p.description || p.category || "",
+                title: stripHtml(p.title),
+                subtitle: stripHtml(p.description) || p.category || "",
                 price: p.price ? `$${p.price.toLocaleString()}` : "",
                 bgImage: p.image || "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
                 tag: p.category || "Producto",
