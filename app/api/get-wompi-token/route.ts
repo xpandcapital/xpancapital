@@ -8,6 +8,38 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 function getSupabase() { return createClient(supabaseUrl, supabaseServiceKey) }
 
+async function getUSDCopRate(): Promise<number> {
+  const override = process.env.WOMPI_USD_COP_RATE
+  if (override) return parseFloat(override)
+
+  try {
+    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD', {
+      cache: 'no-store',
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    const rate = data?.rates?.COP
+    if (rate && typeof rate === 'number' && rate > 0) return rate
+    console.warn('[Wompi] exchangerate-api.com no devolvió COP, usando fallback')
+  } catch (e) {
+    console.error('[Wompi] Error obteniendo tasa USD→COP:', e)
+  }
+
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD', {
+      cache: 'no-store',
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = await res.json()
+    const rate = data?.rates?.COP
+    if (rate && typeof rate === 'number' && rate > 0) return rate
+  } catch (e) {
+    console.error('[Wompi] Error en fallback open.er-api.com:', e)
+  }
+
+  return 4000
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabase()
@@ -31,7 +63,7 @@ export async function POST(request: NextRequest) {
     if (!publicKey) {
       return NextResponse.json({ error: 'Wompi Public Key no configurada' }, { status: 400 })
     }
-    const tasaCambio = parseFloat(process.env.WOMPI_USD_COP_RATE || '4000')
+    const tasaCambio = await getUSDCopRate()
     const totalCopCents = Math.round(total_usd * tasaCambio) * 100
 
     const productoPrincipal = productos[0]
@@ -42,6 +74,7 @@ export async function POST(request: NextRequest) {
         user_id: user_id || null,
         producto_id: productoPrincipal?.id || null,
         metodo_pago: 'wompi', monto_usd: total_usd, moneda: 'USD', estado: 'pendiente',
+        tipo_cambio: tasaCambio,
         metadata: { productos, email_cliente: email, nombre_cliente: [nombre, apellido].filter(Boolean).join(' '), tiene_fisicos: !!tiene_fisicos, direccion_envio: direccion_envio || null },
       }).select('id').single()
 

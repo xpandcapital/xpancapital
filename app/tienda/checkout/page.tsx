@@ -88,6 +88,7 @@ function CheckoutContent() {
     const [krKey, setKrKey] = useState(0);
     const [selectedAsesor, setSelectedAsesor] = useState<string | null>(null);
   const [codigoPais, setCodigoPais] = useState('+51');
+    const [wompiCopRate, setWompiCopRate] = useState(4000);
 
     const [form, setForm] = useState<CheckoutForm>({
         nombre: user?.name?.split(" ")[0] || '',
@@ -162,6 +163,14 @@ function CheckoutContent() {
     useEffect(() => {
         fetch("/api/admin/formas-pago?public=1")
             .then(r => r.json()).then(d => { if (d.success) setFormasPago(d.formas || []); }).catch(() => {});
+    }, []);
+
+    // Obtener tasa USD->COP para Wompi
+    useEffect(() => {
+        fetch("/api/public/tipo-cambio?country=CO")
+            .then(r => r.json())
+            .then(d => { if (d.success && d.rate) setWompiCopRate(d.rate); })
+            .catch(() => {});
     }, []);
 
     // Precargar tema classic de Izipay (para que esté listo antes del SDK)
@@ -1078,7 +1087,7 @@ function CheckoutContent() {
                                     const brandIcon = fp.slug === 'paypal' ? <img src="/icons/brands/paypal.svg" alt="PayPal" className="w-5 h-5" /> : <Ic className={`w-5 h-5 ${tmap[fp.slug] || 'text-gray-400'}`} />;
                                     // Mostrar equivalente en COP para Wompi
                                     const wompiSub = fp.slug === 'wompi'
-                                      ? `~$${(getMethodTotal(fp.slug) * 4000).toLocaleString()} COP · ${fp.descripcion || ''}`
+                                      ? `~$${(getMethodTotal(fp.slug) * wompiCopRate).toLocaleString()} COP · ${fp.descripcion || ''}`
                                       : (fp.descripcion || '')
                                     return <PayOption key={fp.id} selected={paymentMethod === fp.slug} onClick={() => setPaymentMethod(fp.slug as PaymentMethod)}
                                         icon={brandIcon} bg={cmap[fp.slug] || "bg-gray-500/10 border-gray-500/40"}
