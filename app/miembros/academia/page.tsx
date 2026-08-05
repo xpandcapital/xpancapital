@@ -275,8 +275,9 @@ function AcademyContent() {
                                     placeholder="Buscar en mis cursos..."
                                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-3 sm:py-4 text-[10px] sm:text-xs font-black uppercase tracking-widest text-white focus:outline-none focus:border-blis-red focus:bg-white/10 transition-all"
                                 />
-                            </div>
-                        </div>
+                                            </div>
+                                            )}
+                                        </div>
 
                         {allAcademyCourses.length === 0 ? (
                             <div className="bg-black/40 border border-white/5 rounded-[2rem] p-12 text-center">
@@ -415,7 +416,25 @@ function AcademyContent() {
                             <div className="flex flex-col xl:flex-row gap-8">
                                 <div className="flex-1 space-y-6">
                                     <div className="bg-zinc-900 rounded-[2.5rem] overflow-hidden border border-white/5 relative group shadow-2xl">
-                                        {activeLesson?.type === 'video' && activeLesson.videoUrl ? (
+                                        {activeModule && !activeLesson ? (
+                                            <div className="w-full p-8 md:p-12">
+                                                {(() => {
+                                                    const activeMod = modules.find(m => m.id === activeModule)
+                                                    return activeMod?.description ? (
+                                                        <div className="prose prose-invert prose-a:text-yellow-400 prose-img:rounded-lg prose-img:max-w-full max-w-none text-gray-300 leading-relaxed space-y-4"
+                                                             dangerouslySetInnerHTML={{ __html: activeMod.description }} />
+                                                    ) : (
+                                                        <div className="flex items-center justify-center py-12">
+                                                            <div className="text-center">
+                                                                <BookOpen className="w-12 h-12 text-gray-700 mx-auto mb-3" />
+                                                                <p className="text-gray-500 text-sm font-bold">Sin descripción</p>
+                                                                <p className="text-gray-600 text-xs mt-1">Este módulo no tiene contenido introductorio</p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })()}
+                                            </div>
+                                        ) : activeLesson?.type === 'video' && activeLesson.videoUrl ? (
                                             <div className="aspect-video bg-black w-full">
                                                 {activeLesson.videoUrl.includes('<iframe') || activeLesson.videoUrl.includes('<script') ? (
                                                     <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: activeLesson.videoUrl.replace(/width=".*?"/g, 'width="100%"').replace(/height=".*?"/g, 'height="100%"') }} />
@@ -443,18 +462,31 @@ function AcademyContent() {
                                     <div className="bg-black/40 border border-white/5 p-8 rounded-[2rem] backdrop-blur-md">
                                         <div className="flex justify-between items-start mb-6">
                                             <div>
-                                                <span className="text-blis-red font-black uppercase tracking-[0.2em] text-[10px] mb-2 block">Viendo Ahora</span>
-                                                <h1 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4">{activeLesson?.title || 'Selecciona una lección'}</h1>
-                                                <div className="flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
-                                                    <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {activeLesson?.duration || activeLesson?.type || 'N/A'}</span>
-                                                    {activeLesson && (
-                                                        <span className={`flex items-center gap-1.5 ${TYPE_CONFIG[activeLesson.type]?.color || 'text-gray-500'}`}>
-                                                            {(() => { const Icon = TYPE_CONFIG[activeLesson.type]?.icon || FileText; return <Icon className="w-4 h-4" />; })()}
-                                                            {TYPE_CONFIG[activeLesson.type]?.label || 'Lección'}
-                                                        </span>
-                                                    )}
-                                                </div>
+                                                {activeModule && !activeLesson ? (
+                                                    <>
+                                                        <span className="text-blis-red font-black uppercase tracking-[0.2em] text-[10px] mb-2 block">Módulo</span>
+                                                        <h1 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4">{modules.find(m => m.id === activeModule)?.title || 'Módulo'}</h1>
+                                                        <p className="text-xs text-gray-500 uppercase tracking-widest font-bold">
+                                                            {(modules.find(m => m.id === activeModule)?.lessons?.length || 0)} lecciones en este módulo
+                                                        </p>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <span className="text-blis-red font-black uppercase tracking-[0.2em] text-[10px] mb-2 block">Viendo Ahora</span>
+                                                        <h1 className="text-3xl font-black text-white uppercase tracking-tighter leading-none mb-4">{activeLesson?.title || 'Selecciona una lección'}</h1>
+                                                        <div className="flex items-center gap-4 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                                                            <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {activeLesson?.duration || activeLesson?.type || 'N/A'}</span>
+                                                            {activeLesson && (
+                                                                <span className={`flex items-center gap-1.5 ${TYPE_CONFIG[activeLesson.type]?.color || 'text-gray-500'}`}>
+                                                                    {(() => { const Icon = TYPE_CONFIG[activeLesson.type]?.icon || FileText; return <Icon className="w-4 h-4" />; })()}
+                                                                    {TYPE_CONFIG[activeLesson.type]?.label || 'Lección'}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
+                                            {activeLesson && (
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => { if (hasPrev) { const prev = allLessons[currentIndex - 1]; setActiveLesson(prev.lesson); setActiveModule(prev.moduleId); setOpenModules(new Set([prev.moduleId])); } }}
@@ -471,6 +503,7 @@ function AcademyContent() {
                                                     Siguiente
                                                 </button>
                                             </div>
+                                            )}
                                         </div>
 
                                         {activeLesson?.content && (
@@ -519,8 +552,10 @@ function AcademyContent() {
                                                             if (newSet.has(module.id)) newSet.delete(module.id);
                                                             else newSet.add(module.id);
                                                             setOpenModules(newSet);
+                                                            setActiveModule(module.id);
+                                                            setActiveLesson(null);
                                                         }}
-                                                        className="w-full flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.04] transition-colors"
+                                                        className={`w-full flex items-center justify-between p-4 bg-white/[0.02] border rounded-2xl hover:bg-white/[0.04] transition-colors ${activeModule === module.id && !activeLesson ? 'border-blis-red/30 bg-blis-red/5' : 'border-white/5'}`}
                                                     >
                                                         <span className="text-[11px] font-black uppercase tracking-tight text-white">{module.title}</span>
                                                         {openModules.has(module.id) ? (
@@ -532,10 +567,6 @@ function AcademyContent() {
 
                                                     {openModules.has(module.id) && (
                                                         <>
-                                                            {module.description && (
-                                                                <div className="px-4 py-3 border-t border-white/[0.03] text-gray-300 prose prose-invert prose-a:text-yellow-400 prose-img:rounded-lg prose-img:max-w-full max-w-none"
-                                                                     dangerouslySetInnerHTML={{ __html: module.description }} />
-                                                            )}
                                                             <div className="space-y-1 pl-2">
                                                              {(module.lessons || []).map((lesson, lessonIdx) => {
                                                                      const globalIdx = allLessons.findIndex(a => a.lesson.id === lesson.id);
