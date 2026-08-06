@@ -325,8 +325,10 @@ export function useCourseManagement() {
 export function useModuleActions(currentCourse: Course | null, setCurrentCourse: (course: Course | null) => void) {
   const addModule = useCallback(() => {
     if (!currentCourse) return
+    // Cerrar todos los módulos existentes antes de agregar el nuevo
+    const updatedModules = currentCourse.modules.map(m => ({ ...m, isOpen: false }))
     const newModule: Module = { id: `M${Date.now()}`, title: 'Nuevo Módulo', lessons: [], questions: [], isOpen: true }
-    setCurrentCourse({ ...currentCourse, modules: [...currentCourse.modules, newModule] })
+    setCurrentCourse({ ...currentCourse, modules: [...updatedModules, newModule] })
     return newModule.id
   }, [currentCourse, setCurrentCourse])
 
