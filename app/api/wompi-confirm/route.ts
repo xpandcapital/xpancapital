@@ -34,9 +34,6 @@ export async function POST(request: NextRequest) {
     }
 
     const wompiTxId = compra.metadata?.wompi_transaction_id
-    if (!wompiTxId) {
-      return NextResponse.json({ error: 'Sin ID de transacción Wompi' }, { status: 400 })
-    }
 
     // Obtener keys para verificar estado en Wompi
     const { data: keys } = await supabase
@@ -49,7 +46,37 @@ export async function POST(request: NextRequest) {
     const privateKey = decryptApiKey(keys?.find((k: any) => k.key_name === 'wompi_private_key')?.key_value || '')
     const environment = process.env.WOMPI_ENV || 'sandbox'
 
-    const wompiRes = await getTransaction(wompiTxId, privateKey, environment)
+    let wompiRes: any = null
+
+    if (wompiTxId) {
+      // Ya tenemos el ID de transacción, consultar directamente
+      wompiRes = await getTransaction(wompiTxId, privateKey, environment)
+    } else {
+      // El webhook no ha llegado aún — buscar transacciones por reference
+      const reference = compra.metadata?.wompi_reference
+      if (reference) {
+        try {
+          const baseUrl = environment === 'production'
+            ? 'https://api.wompi.co/v1'
+            : 'https://sandbox.wompi.co/v1'
+          const searchRes = await fetch(
+            `${baseUrl}/transactions?reference=${reference}`,
+            { headers: { Authorization: `Bearer ${privateKey}` } }
+          )
+          const searchData = await searchRes.json()
+          const txData = searchData?.data?.[0]
+          if (txData?.id) {
+            wompiRes = { data: txData }
+          }
+        } catch (e) {
+          console.error('[wompi-confirm] Error buscando por reference:', e)
+        }
+      }
+    }
+
+    if (!wompiRes) {
+      return NextResponse.json({ success: false, status: 'not_found', message: 'Transacción no encontrada en Wompi' })
+    }
 
     if (wompiRes.data.status === 'APPROVED') {
       // Actualizar compra a completada

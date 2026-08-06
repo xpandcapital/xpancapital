@@ -70,7 +70,7 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
       try {
         await supabase.from('profiles').upsert({
           id: userId, email, nombre: params.nombre, apellido: params.apellido || '',
-          telefono: params.telefono || '', empresa_id,
+          telefono: params.telefono || '', empresa_id, ha_comprado: true,
           creado_en: new Date().toISOString(),
         }, { onConflict: 'id' })
       } catch (e) {
@@ -97,7 +97,7 @@ export async function createUserAndNotify(params: CreateUserParams): Promise<Cre
 
         await supabase.from('profiles').upsert({
           id: userId, email, nombre: params.nombre, apellido: params.apellido || '',
-          telefono: params.telefono || '', empresa_id,
+          telefono: params.telefono || '', empresa_id, ha_comprado: true,
           creado_en: new Date().toISOString(),
         }, { onConflict: 'id' })
       } else if (createError) {

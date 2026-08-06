@@ -23,11 +23,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true, skipped: transaction.status })
     }
 
-    // Buscar compra por wompi_transaction_id en metadata
+    // Buscar compra por wompi_reference (enviado a Wompi como "reference" y devuelto en el webhook)
     const { data: compras, error } = await supabase
       .from('compras')
       .select('*')
-      .eq('metadata->>wompi_transaction_id', transaction.id)
+      .filter('metadata->>wompi_reference', 'eq', transaction.reference)
       .eq('estado', 'pendiente')
       .limit(1)
 
@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
       .update({
         estado: 'completado',
         transaction_id: transaction.id,
-        metadata: { ...(compra.metadata || {}), wompi_status: 'APPROVED', wompi_webhook: true },
+        tipo_cambio: transaction.amount_in_cents ? (transaction.amount_in_cents / 100 / compra.monto_usd).toFixed(2) : null,
+        metadata: { ...(compra.metadata || {}), wompi_status: 'APPROVED', wompi_webhook: true, wompi_transaction_id: transaction.id },
       })
       .eq('id', compra.id)
 

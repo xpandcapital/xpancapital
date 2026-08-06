@@ -54,10 +54,28 @@ function CheckoutStatusContent() {
   const [state, setState] = useState<PaymentState>(izipaySuccess === "1" || wompiSuccess === "1" ? "paid" : "loading");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Si estamos dentro de un iframe (Wompi), enviar postMessage al padre y NO mostrar UI
+  // Si es Wompi, verificar el pago con Wompi antes de mostrar "éxito"
   useEffect(() => {
-    if (window !== window.parent && wompiSuccess === "1") {
-      parent.postMessage({ type: 'WOMPI_PAYMENT_DONE', order_id: orderId }, window.location.origin)
+    if (wompiSuccess === "1" && orderId) {
+      setState("loading")
+      fetch('/api/wompi-confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ordenId: orderId }),
+      })
+        .then(r => r.json())
+        .then(d => {
+          if (d.success) {
+            setState("paid")
+          } else {
+            setState("pending")
+            setErrorMsg(d.message || "Verificando pago...")
+          }
+        })
+        .catch(() => {
+          setState("pending")
+          setErrorMsg("Error al verificar el pago. Contacta a soporte.")
+        })
     }
   }, [wompiSuccess, orderId])
 

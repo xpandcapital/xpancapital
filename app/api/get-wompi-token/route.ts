@@ -86,6 +86,11 @@ export async function POST(request: NextRequest) {
     await supabase.from('compra_items').insert(items)
 
     const reference = compra.id.slice(0, 12)
+    // Guardar wompi_reference en metadata para que el webhook pueda encontrar la compra
+    await supabase.from('compras').update({
+      metadata: { productos, email_cliente: email, nombre_cliente: [nombre, apellido].filter(Boolean).join(' '), tiene_fisicos: !!tiene_fisicos, direccion_envio: direccion_envio || null, wompi_reference: reference }
+    }).eq('id', compra.id)
+
     const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://xpancapital.vercel.app'}/tienda/checkout/status?wompi_success=1&order_id=${compra.id}&total=${total_usd}`
 
     // Generar firma de integridad Wompi
