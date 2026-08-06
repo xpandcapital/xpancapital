@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Shield, CheckCircle2, X, Loader2, Pencil, Mail, User,
     ToggleLeft, Save, KeyRound, Eye, EyeOff, GraduationCap,
-    Plus, Trash2, Copy, Bell, CheckSquare, Square
+    Plus, Trash2, Copy, Bell, CheckSquare, Square, MessageCircle
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard';
@@ -203,6 +203,40 @@ export default function EditarUsuarioPage() {
         } catch { showToast('Error al cambiar contraseña', 'error'); }
         finally { setResettingPassword(false); }
     };
+
+    const handleGeneratePassword = () => {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$';
+        let pass = ''
+        for (let i = 0; i < 16; i++) pass += chars[Math.floor(Math.random() * chars.length)]
+        setNewPassword(pass)
+        setGeneratedPassword(pass)
+    }
+
+    const handleCopyPassword = () => {
+        const pass = generatedPassword || newPassword
+        if (!pass) return
+        navigator.clipboard.writeText(pass)
+        showToast('Contraseña copiada al portapapeles')
+    }
+
+    const [sendingWhatsApp, setSendingWhatsApp] = useState(false)
+    const handleSendWhatsApp = async () => {
+        const phone = user?.telefono?.replace(/\D/g, '')
+        if (!phone) { showToast('El usuario no tiene teléfono registrado', 'error'); return }
+        const pass = generatedPassword || newPassword
+        if (!pass) { showToast('Primero genera una contraseña', 'error'); return }
+        setSendingWhatsApp(true)
+        try {
+            const res = await fetch('/api/whatsapp/credenciales', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, password: pass, email: user?.email, nombre: user?.nombre }),
+            })
+            if (res.ok) showToast('Contraseña enviada por WhatsApp')
+            else showToast('Error al enviar WhatsApp', 'error')
+        } catch { showToast('Error al enviar WhatsApp', 'error') }
+        finally { setSendingWhatsApp(false) }
+    }
 
     const handleAssignCourse = async (courseId: string) => {
         setAssigning(courseId);
@@ -413,26 +447,65 @@ export default function EditarUsuarioPage() {
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center"><KeyRound className="w-5 h-5" /></div>
                                 <div className="text-left">
-                                    <h3 className="text-white font-black uppercase tracking-wider text-sm">Seguridad</h3>
-                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Cambiar contraseña manualmente</p>
+                                    <h3 className="text-white font-black uppercase tracking-wider text-sm">Credenciales</h3>
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Generar, copiar o enviar contraseña</p>
                                 </div>
                             </div>
                             <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${showPasswordSection ? 'rotate-180' : ''}`} />
                         </button>
                         {showPasswordSection && (
                             <div className="px-6 pb-6 space-y-4 border-t border-white/5 pt-5">
-                                <div className="space-y-3">
-                                    <div className="relative">
-                                        <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nueva contraseña" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 pr-12 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm" />
-                                        <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-white transition-colors">
-                                            {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                {/* Generar */}
+                                <button onClick={handleGeneratePassword} className="w-full py-3 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-amber-500/20 transition-colors flex items-center justify-center gap-2">
+                                    <KeyRound className="w-4 h-4" /> Generar Contraseña Aleatoria
+                                </button>
+                                {/* Mostrar contraseña generada */}
+                                {(generatedPassword || newPassword) && (
+                                    <div className="space-y-3">
+                                        <div className="relative">
+                                            <input type={showNewPassword ? 'text' : 'password'} value={generatedPassword || newPassword} readOnly className="w-full bg-black/50 border border-amber-500/30 rounded-xl px-4 py-3 pr-24 text-amber-400 font-mono focus:outline-none text-sm" />
+                                            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                                                <button onClick={() => setShowNewPassword(!showNewPassword)} className="p-1.5 text-gray-500 hover:text-white transition-colors" title={showNewPassword ? 'Ocultar' : 'Mostrar'}>
+                                                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                </button>
+                                                <button onClick={handleCopyPassword} className="p-1.5 text-gray-500 hover:text-amber-400 transition-colors" title="Copiar">
+                                                    <Copy className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button onClick={async () => {
+                                                if (!newPassword.trim()) { showToast('Genera o ingresa una contraseña primero', 'error'); return }
+                                                await handleChangePassword()
+                                            }} disabled={resettingPassword || !newPassword.trim()} className="flex-1 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors disabled:opacity-30 flex items-center justify-center gap-1.5">
+                                                {resettingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                                                Guardar Contraseña
+                                            </button>
+                                            {user?.telefono && (
+                                                <button onClick={handleSendWhatsApp} disabled={sendingWhatsApp} className="flex-1 py-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-500/20 transition-colors disabled:opacity-30 flex items-center justify-center gap-1.5">
+                                                    {sendingWhatsApp ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MessageCircle className="w-4 h-4" />}
+                                                    WhatsApp
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                                {/* Manual */}
+                                {!generatedPassword && (
+                                    <div className="space-y-3 pt-2 border-t border-white/5">
+                                        <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold">O ingresa manualmente</p>
+                                        <div className="relative">
+                                            <input type={showNewPassword ? 'text' : 'password'} value={newPassword} onChange={(e) => { setNewPassword(e.target.value); setGeneratedPassword(null) }} placeholder="Nueva contraseña" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 pr-12 text-white focus:outline-none focus:border-blis-red/50 transition-colors text-sm" />
+                                            <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-white transition-colors">
+                                                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        <button onClick={handleChangePassword} disabled={resettingPassword || !newPassword.trim()} className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors disabled:opacity-30 flex items-center justify-center gap-2">
+                                            {resettingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
+                                            Cambiar Contraseña
                                         </button>
                                     </div>
-                                    <button onClick={handleChangePassword} disabled={resettingPassword || !newPassword.trim()} className="w-full py-3 bg-white/5 border border-white/10 rounded-xl text-white font-bold text-[10px] uppercase tracking-widest hover:bg-white/10 transition-colors disabled:opacity-30 flex items-center justify-center gap-2">
-                                        {resettingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
-                                        Cambiar Contraseña
-                                    </button>
-                                </div>
+                                )}
                             </div>
                         )}
                     </div>

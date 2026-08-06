@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus, Shield, Download, Search, Filter, User, CheckCircle2, X, Loader2, Eye, EyeOff, Copy, KeyRound, Pencil } from "lucide-react";
+import { UserPlus, Shield, Download, Search, Filter, User, CheckCircle2, X, Loader2, Eye, EyeOff, Copy, KeyRound, Pencil, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard';
@@ -55,6 +55,26 @@ export default function AdminUsers() {
     const [statusFilter, setStatusFilter] = useState("Todos");
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
+    const [quickPassUser, setQuickPassUser] = useState<UserProfile | null>(null)
+    const [quickPassPassword, setQuickPassPassword] = useState('')
+    const [quickPassLoading, setQuickPassLoading] = useState(false)
+
+    const handleQuickPassword = async (user: UserProfile) => {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'
+        let pass = ''
+        for (let i = 0; i < 16; i++) pass += chars[Math.floor(Math.random() * chars.length)]
+        setQuickPassPassword(pass)
+        setQuickPassUser(user)
+        setQuickPassLoading(true)
+        try {
+            await fetch('/api/admin/users/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id, password: pass }),
+            })
+        } catch { showToast('Error al cambiar contraseña', 'error') }
+        finally { setQuickPassLoading(false) }
+    }
 
     useEffect(() => {
         fetchUsers();
@@ -234,6 +254,7 @@ export default function AdminUsers() {
                                             {new Date(user.creado_en).toLocaleDateString()}
                                         </td>
                                         <td className="px-6 py-5">
+                                            <div className="flex items-center gap-1">
                                             <button
                                                 onClick={() => { if (!guard('equipo', 'editar')) return; router.push(`/superadmin/usuarios/${user.id}`) }}
                                                 className="p-2 hover:bg-white/5 rounded-lg text-gray-400 hover:text-white transition-all"
@@ -241,6 +262,14 @@ export default function AdminUsers() {
                                             >
                                                 <Pencil className="w-4 h-4" />
                                             </button>
+                                            <button
+                                                onClick={() => handleQuickPassword(user)}
+                                                className="p-2 hover:bg-amber-500/10 rounded-lg text-gray-400 hover:text-amber-400 transition-all"
+                                                title="Generar contraseña"
+                                            >
+                                                <KeyRound className="w-4 h-4" />
+                                            </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -425,6 +454,60 @@ export default function AdminUsers() {
                                     </div>
                                 </div>
                             )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Quick Password Modal */}
+            <AnimatePresence>
+                {quickPassUser && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => { setQuickPassUser(null); setQuickPassPassword('') }}>
+                        <div className="absolute inset-0 bg-black/80" />
+                        <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} onClick={(e) => e.stopPropagation()} className="relative bg-zinc-950 border border-white/10 rounded-2xl p-6 w-full max-w-md">
+                            <button onClick={() => { setQuickPassUser(null); setQuickPassPassword('') }} className="absolute top-4 right-4 p-2 hover:bg-white/5 rounded-lg"><X className="w-5 h-5 text-gray-400" /></button>
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center"><KeyRound className="w-5 h-5 text-amber-400" /></div>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-white">Credenciales</h2>
+                                        <p className="text-xs text-gray-400">{quickPassUser.nombre} {quickPassUser.apellido}</p>
+                                    </div>
+                                </div>
+                                {quickPassLoading ? (
+                                    <div className="flex items-center justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-amber-400" /></div>
+                                ) : (
+                                    <>
+                                        <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-2">
+                                            <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2">
+                                                <span className="text-[10px] text-gray-500 uppercase font-bold w-12">Email</span>
+                                                <code className="flex-1 text-amber-300 font-mono text-xs">{quickPassUser.email}</code>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-black/50 border border-white/10 rounded-lg p-2">
+                                                <span className="text-[10px] text-gray-500 uppercase font-bold w-12">Clave</span>
+                                                <code className="flex-1 text-amber-300 font-mono text-xs break-all">{quickPassPassword}</code>
+                                                <button onClick={() => { navigator.clipboard.writeText(quickPassPassword); showToast('Contraseña copiada') }} className="p-1 hover:bg-white/5 rounded"><Copy className="w-3.5 h-3.5 text-gray-400" /></button>
+                                            </div>
+                                        </div>
+                                        {quickPassUser.telefono && (
+                                            <button onClick={async () => {
+                                                try {
+                                                    const res = await fetch('/api/whatsapp/credenciales', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ phone: quickPassUser.telefono?.replace(/\D/g, ''), password: quickPassPassword, email: quickPassUser.email, nombre: quickPassUser.nombre }),
+                                                    })
+                                                    if (res.ok) showToast('Enviado por WhatsApp')
+                                                    else showToast('Error al enviar', 'error')
+                                                } catch { showToast('Error al enviar', 'error') }
+                                            }} className="w-full py-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-500/20 transition-colors flex items-center justify-center gap-2">
+                                                <MessageCircle className="w-4 h-4" /> Enviar por WhatsApp
+                                            </button>
+                                        )}
+                                        <button onClick={() => { setQuickPassUser(null); setQuickPassPassword('') }} className="w-full py-2.5 bg-white/5 border border-white/10 rounded-xl text-white font-bold text-xs hover:bg-white/10 transition-colors">Cerrar</button>
+                                    </>
+                                )}
+                            </div>
                         </motion.div>
                     </motion.div>
                 )}

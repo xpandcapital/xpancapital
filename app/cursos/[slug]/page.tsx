@@ -153,10 +153,8 @@ export default function CursoDetallePage() {
                                             else next.add(mod.id)
                                             return next
                                         })
-                                        setActiveModule(mod.id)
-                                        setActiveLesson(null)
                                     }}
-                                    className={`w-full flex items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors ${activeModule === mod.id && !activeLesson ? 'bg-blis-red/10 border-l-2 border-l-blis-red' : ''}`}
+                                    className="w-full flex items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors"
                                 >
                                     <div className={`w-6 h-6 rounded-md text-[10px] font-black flex items-center justify-center shrink-0 ${
                                         completedInModule === moduleLessons.length && moduleLessons.length > 0
@@ -172,10 +170,8 @@ export default function CursoDetallePage() {
                                     {isOpen ? <ChevronDown className="w-3.5 h-3.5 text-gray-600 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-gray-600 shrink-0" />}
                                 </button>
 
-                                {isOpen && (
-                                    <>
-                                        {moduleLessons.length > 0 && (
-                                            <div className="pb-2">
+                                {isOpen && moduleLessons.length > 0 && (
+                                    <div className="pb-2">
                                         {moduleLessons.map((lesson) => {
                                             const isActive = activeLesson?.id === lesson.id
                                             const isCompleted = completedLessons.includes(lesson.id)
@@ -204,8 +200,6 @@ export default function CursoDetallePage() {
                                             )
                                         })}
                                     </div>
-                                        )}
-                                    </>
                                 )}
                             </div>
                         )
@@ -242,38 +236,7 @@ export default function CursoDetallePage() {
                                 <div className="aspect-video bg-black w-full">
                                     {activeLesson.videoUrl.includes('<iframe') || activeLesson.videoUrl.includes('<script') ? (
                                         <div className="w-full h-full" dangerouslySetInnerHTML={{ __html: activeLesson.videoUrl.replace(/width=".*?"/g, 'width="100%"').replace(/height=".*?"/g, 'height="100%"') }} />
-                    ) : activeModule ? (
-                        <div className="max-w-4xl mx-auto w-full p-8 md:p-12">
-                            {(() => {
-                                const activeMod = modules.find(m => m.id === activeModule)
-                                return (
-                                    <>
-                                        <div className="flex items-center gap-3 mb-8">
-                                            <div className="w-12 h-12 rounded-2xl bg-blis-red/10 border border-blis-red/20 flex items-center justify-center">
-                                                <BookOpen className="w-6 h-6 text-blis-red" />
-                                            </div>
-                                            <div>
-                                                <h1 className="text-2xl md:text-3xl font-black text-white">{activeMod?.title || 'Módulo'}</h1>
-                                                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mt-1">Vista general del módulo</p>
-                                            </div>
-                                        </div>
-                                        {activeMod?.description ? (
-                                            <div className="prose prose-invert prose-a:text-yellow-400 prose-img:rounded-lg prose-img:max-w-full max-w-none text-gray-300 leading-relaxed space-y-4"
-                                                 dangerouslySetInnerHTML={{ __html: activeMod.description }} />
-                                        ) : (
-                                            <div className="flex items-center justify-center py-20">
-                                                <div className="text-center">
-                                                    <BookOpen className="w-16 h-16 text-gray-700 mx-auto mb-4" />
-                                                    <p className="text-gray-400 font-bold">Sin descripción</p>
-                                                    <p className="text-gray-600 text-sm mt-1">Este módulo no tiene contenido introductorio</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </>
-                                )
-                            })()}
-                        </div>
-                    ) : (
+                                    ) : (
                                         <iframe src={activeLesson.videoUrl} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                                     )}
                                 </div>
@@ -351,7 +314,7 @@ export default function CursoDetallePage() {
                     ) : (
                         <div className="max-w-4xl mx-auto w-full p-8 md:p-12">
                             {curso.descripcion ? (
-                                <div className="prose prose-invert max-w-none">
+                                <div className="prose prose-invert max-w-none mb-10">
                                     <h2 className="text-xl font-black text-white mb-6">Sobre este curso</h2>
                                     <div className="text-gray-300 leading-relaxed space-y-4" dangerouslySetInnerHTML={{ __html: curso.descripcion }} />
                                 </div>
