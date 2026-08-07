@@ -109,7 +109,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 400 })
     }
 
-    fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL!.replace('/rest/v1', '')}/api/gamificacion/otorgar`, {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://xpancapital.vercel.app'
+    fetch(`${appUrl}/api/gamificacion/otorgar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

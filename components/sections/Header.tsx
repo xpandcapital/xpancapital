@@ -34,19 +34,19 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     const [searchQuery, setSearchQuery] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
 
-    // Realtime: refrescar coins cuando cambien en la BD
+    // Refrescar coins al volver a la pestaña o enfocar la página (sin polling constante)
     useEffect(() => {
         if (!user?.id) return
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        const channel = new WebSocket(
-            `${supabaseUrl.replace('https', 'wss')}/realtime/v1/websocket?apikey=${supabaseKey}&vsn=1.0.0`
-        )
-        // Polling simple cada 30s — alternativa al websocket que puede ser complejo de configurar
-        const interval = setInterval(() => {
-            refreshUser()
-        }, 30000)
-        return () => clearInterval(interval)
+        const handleVisibility = () => {
+            if (document.visibilityState === 'visible') refreshUser()
+        }
+        const handleFocus = () => refreshUser()
+        document.addEventListener('visibilitychange', handleVisibility)
+        window.addEventListener('focus', handleFocus)
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibility)
+            window.removeEventListener('focus', handleFocus)
+        }
     }, [user?.id, refreshUser])
 
     useEffect(() => {
@@ -380,7 +380,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                 <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_5px_white]" />
                                             </motion.div>
                                         </div>
-                                        <span className="text-[11px] font-black uppercase tracking-wider">{xpandCoins.toLocaleString()} XPANDCOINS</span>
+                                        <span className="text-[11px] font-black uppercase tracking-wider">{(user?.xpand_coins ?? xpandCoins).toLocaleString()} XPANDCOINS</span>
                                     </div>
                                     )}
 

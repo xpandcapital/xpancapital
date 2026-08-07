@@ -198,7 +198,7 @@ function ArticleDetailPage() {
     const params = useParams();
     const router = useRouter();
     const slug = params.slug as string;
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading: authLoading, refreshUser } = useAuth();
     const { coinsEnabled } = useShop();
 
     const [article, setArticle] = useState<Article | null>(null);
@@ -526,7 +526,7 @@ function ArticleDetailPage() {
                                     article={{ id: article.id, rewardSeconds: article.rewardSeconds, rewardAmount: article.rewardAmount, title: article.title }}
                                     user={user}
                                     userCoins={userCoins}
-                                    onCoinsChange={(added) => { setUserCoins(prev => prev + added); setClaimed(true); }}
+                                    onCoinsChange={(added) => { setUserCoins(prev => prev + added); setClaimed(true); refreshUser(); }}
                                     onClose={() => setClaimed(true)}
                                 />
                             )}
