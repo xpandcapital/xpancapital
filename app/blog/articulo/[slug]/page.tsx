@@ -8,7 +8,7 @@ import {
     Calendar as CalendarIcon, Coins, ArrowLeft, Clock, Sparkles, User, Bot,
     Share2, Facebook, Twitter, Linkedin, Link2, MessageSquare, Send,
     ChevronRight, ShoppingBag, TrendingUp, Bookmark, Lock as LockIcon, ArrowRight,
-    Megaphone, Globe, Layout, CheckCircle2, AlertCircle, Loader2, Trash2, Edit2, X, Check
+    Megaphone, Globe, Layout, CheckCircle2, AlertCircle, Loader2, Trash2, Edit2, X, Check, Zap
 } from "lucide-react";
 import { DEFAULT_EMPRESA_ID } from "@/lib/empresa";
 import { Header } from "@/components/sections/Header";
@@ -155,15 +155,40 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
 
 const AdUnit = ({ type = "internal", position = "sidebar" }: { type: "adwords" | "internal", position: "mid" | "sidebar" }) => {
     return (
-        <div className={`bg-gradient-to-br from-emerald-800 to-emerald-950 p-8 text-white relative overflow-hidden group shadow-2xl ${position === 'mid' ? 'my-16 rounded-[40px]' : 'rounded-3xl'}`}>
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-                <Megaphone className="w-32 h-32" />
-            </div>
-            <div className="relative z-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 block text-emerald-200">Proyecto Destacado</span>
-                <h3 className="text-2xl font-black uppercase mb-3 leading-tight">Montebello</h3>
-                <p className="text-emerald-100/80 text-sm mb-6 max-w-md">Residencia de lujo con vista panorámica. Terrenos exclusivos con financiamiento directo y entrega inmediata.</p>
-                <a href="/proyectos/montebello" className="inline-block bg-white text-emerald-900 px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-xl">Más Información</a>
+        <div className={`relative overflow-hidden group ${position === 'mid' ? 'my-16 rounded-[40px]' : 'rounded-3xl'}`}>
+            {/* Glow externo */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#f5e100] via-[#e8c600] to-[#f5e100] rounded-[42px] opacity-40 blur-md group-hover:opacity-60 transition-opacity" />
+            <div className="absolute -inset-2 bg-[#f5e100]/10 rounded-[44px] blur-xl animate-pulse" />
+
+            {/* Borde trazado neón */}
+            <div className="absolute inset-0 rounded-3xl border border-[#f5e100]/30 group-hover:border-[#f5e100]/60 transition-colors z-10 pointer-events-none" />
+
+            {/* Fondo principal */}
+            <div className={`relative bg-gradient-to-br from-black via-[#1a1800] to-zinc-950 p-8 text-white ${position === 'mid' ? 'rounded-[40px]' : 'rounded-3xl'} z-10`}>
+                {/* Partículas flotantes */}
+                <div className="absolute top-0 right-0 p-6 opacity-20 group-hover:opacity-30 transition-opacity">
+                    <TrendingUp className="w-24 h-24 text-[#f5e100]" />
+                </div>
+                <div className="absolute bottom-0 left-0 w-40 h-40 bg-[#f5e100]/5 rounded-full blur-3xl" />
+                <div className="absolute top-1/2 right-0 w-20 h-20 bg-[#f5e100]/5 rounded-full blur-2xl" />
+
+                {/* Contenido */}
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Zap className="w-4 h-4 text-[#f5e100]" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f5e100]">Curso Destacado</span>
+                    </div>
+                    <h3 className="text-2xl font-black uppercase mb-2 leading-tight">
+                        <span className="bg-gradient-to-r from-[#f5e100] to-[#e8c600] bg-clip-text text-transparent">Trading Master</span>
+                    </h3>
+                    <p className="text-gray-400/90 text-sm mb-6 max-w-md leading-relaxed">
+                        Aprende a dominar el mercado de divisas. Curso completo de trading con estrategias probadas, análisis técnico y gestión de capital.
+                    </p>
+                    <a href="/" className="relative inline-flex items-center gap-2 bg-[#f5e100] text-black px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl shadow-[#f5e100]/30 group/btn">
+                        <span>Comienza Ahora</span>
+                        <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    </a>
+                </div>
             </div>
         </div>
     );
