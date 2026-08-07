@@ -8,6 +8,7 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserCursos } from "@/lib/hooks/useCursos";
+import { ExamViewer } from "@/components/ExamViewer";
 
 interface Lesson {
     id: string;
@@ -25,6 +26,8 @@ interface Module {
     title: string;
     description?: string;
     lessons: Lesson[];
+    questions?: { id: string; text: string; options: { id: string; text: string; isCorrect: boolean }[] }[];
+    isQuizEnabled?: boolean;
 }
 
 interface CursoData {
@@ -61,6 +64,7 @@ function AcademyContent() {
     const [purchasedCourses, setPurchasedCourses] = useState<any[]>([]);
     const [loadingPurchased, setLoadingPurchased] = useState(false);
     const [autoStarted, setAutoStarted] = useState(false);
+    const [activeExam, setActiveExam] = useState<{ moduleId: string } | null>(null);
 
     const fetchCursoCompleto = useCallback(async (slugOrId: string, useId: boolean = false) => {
         setLoadingCurso(true);
@@ -538,7 +542,7 @@ function AcademyContent() {
                                                                      return (
                                                                  <button
                                                                      key={lesson.id}
-                                                                     onClick={() => { if (!locked) { setActiveLesson(lesson); setActiveModule(module.id); } }}
+                                                                      onClick={() => { if (!locked) { setActiveLesson(lesson); setActiveModule(module.id); setActiveExam(null) } }}
                                                                      disabled={locked}
                                                                      className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeLesson?.id === lesson.id ? 'bg-blis-red/20 border border-blis-red/30' : locked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/5 border border-transparent'}`}
                                                                  >

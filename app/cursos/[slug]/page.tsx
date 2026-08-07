@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCurso } from "@/lib/hooks/useCursos";
 import { useAuth } from "@/hooks/useAuth";
+import { ExamViewer } from "@/components/ExamViewer";
 
 interface Lesson {
     id: string;
@@ -26,6 +27,8 @@ interface Module {
     title: string;
     description?: string;
     lessons: Lesson[];
+    questions?: { id: string; text: string; options: { id: string; text: string; isCorrect: boolean }[] }[];
+    isQuizEnabled?: boolean;
 }
 
 const TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
@@ -44,6 +47,7 @@ export default function CursoDetallePage() {
     const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
     const [completedLessons, setCompletedLessons] = useState<string[]>([]);
     const [openModules, setOpenModules] = useState<Set<string>>(new Set());
+    const [activeExam, setActiveExam] = useState<{ moduleId: string } | null>(null);
 
     useEffect(() => {
         document.title = curso?.nombre ? `${curso.nombre} | Xpand Capital` : "Cargando curso...";
@@ -181,7 +185,7 @@ export default function CursoDetallePage() {
                                             return (
                                                 <button
                                                     key={lesson.id}
-                                                    onClick={() => { setActiveLesson(lesson); setActiveModule(mod.id) }}
+                                                    onClick={() => { setActiveLesson(lesson); setActiveModule(mod.id); setActiveExam(null) }}
                                                     className={`w-full flex items-center gap-3 px-5 py-2.5 transition-all text-left group ${
                                                         isActive ? 'bg-blis-red/5 border-l-2 border-l-blis-red' : 'hover:bg-white/[0.02] border-l-2 border-l-transparent'
                                                     }`}
@@ -199,6 +203,21 @@ export default function CursoDetallePage() {
                                                 </button>
                                             )
                                         })}
+                                    </div>
+                                )}
+                                {/* Examen del Módulo */}
+                                {isOpen && mod.isQuizEnabled && mod.questions && mod.questions.length > 0 && (
+                                    <div className="pb-2">
+                                        <button
+                                            onClick={() => { setActiveExam({ moduleId: mod.id }); setActiveLesson(null); setActiveModule(mod.id) }}
+                                            className={`w-full flex items-center gap-3 px-5 py-2.5 transition-all text-left group ${activeExam?.moduleId === mod.id ? 'bg-amber-500/10 border-l-2 border-l-amber-500' : 'hover:bg-white/[0.02] border-l-2 border-l-transparent'}`}
+                                        >
+                                            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500"><ListChecks className="w-3.5 h-3.5" /></div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className={`text-xs truncate ${activeExam?.moduleId === mod.id ? 'text-amber-400 font-bold' : 'text-gray-400 group-hover:text-white'}`}>Examen del Módulo</p>
+                                                <p className="text-[9px] text-amber-500/60">{mod.questions.length} preguntas</p>
+                                            </div>
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -230,7 +249,22 @@ export default function CursoDetallePage() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
-                    {activeLesson ? (
+                    {activeExam ? (
+                        <div className="p-6">
+                            <button onClick={() => setActiveExam(null)} className="flex items-center gap-2 text-gray-400 hover:text-white text-sm mb-6 transition-colors">
+                                <ArrowLeft className="w-4 h-4" /> Volver al curso
+                            </button>
+                            {(() => {
+                                const examMod = modules.find(m => m.id === activeExam.moduleId)
+                                const preguntas = examMod?.questions || []
+                                return <ExamViewer preguntas={preguntas} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) setActiveExam(null) }} />
+                            })()}
+                        </div>
+                    ) : activeLesson?.type === 'quiz' && activeLesson.questions && activeLesson.questions.length > 0 ? (
+                        <div className="p-6">
+                            <ExamViewer preguntas={activeLesson.questions} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) handleLessonComplete(activeLesson.id) }} />
+                        </div>
+                    ) : activeLesson ? (
                         <div className="max-w-4xl mx-auto w-full">
                             {activeLesson.type === 'video' && activeLesson.videoUrl ? (
                                 <div className="aspect-video bg-black w-full">
@@ -269,25 +303,6 @@ export default function CursoDetallePage() {
                                 {activeLesson.content && (
                                     <div className="prose prose-invert max-w-none">
                                         <div className="text-gray-300 leading-relaxed space-y-4" dangerouslySetInnerHTML={{ __html: activeLesson.content }} />
-                                    </div>
-                                )}
-
-                                {activeLesson.type === 'quiz' && activeLesson.questions && activeLesson.questions.length > 0 && (
-                                    <div className="space-y-4">
-                                        <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-white/10 pb-3">Preguntas del Quiz</h3>
-                                        {activeLesson.questions.map((q, qi) => (
-                                            <div key={q.id} className="bg-white/[0.02] border border-white/5 rounded-xl p-5">
-                                                <p className="text-white font-bold text-sm mb-3">{qi + 1}. {q.text}</p>
-                                                <div className="space-y-2">
-                                                    {q.options.map((opt) => (
-                                                        <div key={opt.id} className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-white/[0.02] border border-white/5 text-sm text-gray-300">
-                                                            <div className="w-4 h-4 rounded-full border-2 border-gray-600 shrink-0" />
-                                                            {opt.text}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
                                     </div>
                                 )}
 
