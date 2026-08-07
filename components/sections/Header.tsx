@@ -26,13 +26,28 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     const [isScrolled, setIsScrolled] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
-    const { user, logout, loading } = useAuth()
+    const { user, logout, loading, refreshUser } = useAuth()
     const { cart, favorites, blisCoins, openCart, coinsEnabled } = useShop()
     const { templateData, siteConfig } = useLandingCMS()
     const isDashboard = pathname?.startsWith('/superadmin') || pathname?.startsWith('/miembros')
 
     const [searchQuery, setSearchQuery] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
+
+    // Realtime: refrescar coins cuando cambien en la BD
+    useEffect(() => {
+        if (!user?.id) return
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        const channel = new WebSocket(
+            `${supabaseUrl.replace('https', 'wss')}/realtime/v1/websocket?apikey=${supabaseKey}&vsn=1.0.0`
+        )
+        // Polling simple cada 30s — alternativa al websocket que puede ser complejo de configurar
+        const interval = setInterval(() => {
+            refreshUser()
+        }, 30000)
+        return () => clearInterval(interval)
+    }, [user?.id, refreshUser])
 
     useEffect(() => {
         const handleScroll = () => {

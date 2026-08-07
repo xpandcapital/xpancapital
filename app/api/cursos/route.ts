@@ -333,7 +333,7 @@ async function otorgarPuntos(userId: string, cursoId: string, lessonId?: string,
     // Leer perfil actual
     const { data: profile } = await supabase
       .from('profiles')
-      .select('puntos, puntos_cursos, puntos_nivel')
+      .select('puntos, puntos_cursos, puntos_nivel, blis_coins')
       .eq('id', userId)
       .single()
 
@@ -367,6 +367,7 @@ async function otorgarPuntos(userId: string, cursoId: string, lessonId?: string,
         puntos: nuevosPuntos,
         puntos_cursos: nuevosPuntosCurso,
         puntos_nivel: nuevoNivel,
+        blis_coins: (profile.blis_coins || 0) + puntosOtorgados,
         ultima_actividad: hoy,
         actualizado_en: new Date().toISOString(),
       })
