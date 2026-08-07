@@ -477,13 +477,15 @@ function AcademyContent() {
                                             </div>
                                         </div>
 
-                                        {activeLesson?.content && (
+                                        {activeLesson?.type === 'quiz' && activeLesson.questions && activeLesson.questions.length > 0 ? (
+                                            <ExamViewer preguntas={activeLesson.questions} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) handleLessonComplete(activeLesson.id) }} />
+                                        ) : activeLesson?.content && (
                                             <div className="prose prose-invert max-w-none">
                                                 <div className="text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: activeLesson.content }} />
                                             </div>
                                         )}
 
-                                        {activeLesson && (
+{activeLesson && (
                                             <button
                                                 onClick={() => handleLessonComplete(activeLesson.id)}
                                                 className={`mt-6 flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-widest transition-all ${
@@ -563,9 +565,24 @@ function AcademyContent() {
                                                                  )})}
                                                         </div>
                                                     )}
-                                                </div>
-                                            ))}
-                                        </div>
+                                                {/* Examen del Módulo */}
+                                                {module.isQuizEnabled && module.questions && module.questions.length > 0 && (
+                                                    <div className="pl-2 mb-2">
+                                                        <button onClick={() => { setActiveExam({ moduleId: module.id }); setActiveLesson(null); setActiveModule(module.id) }}
+                                                            className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 border border-amber-500/30' : 'hover:bg-white/5 border border-transparent'}`}>
+                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 text-amber-500' : 'bg-black/40 text-amber-500/60'}`}>
+                                                                <ListChecks className="w-4 h-4" />
+                                                            </div>
+                                                            <div className="min-w-0 flex-1 text-left">
+                                                                <h4 className={`text-xs font-bold truncate ${activeExam?.moduleId === module.id ? 'text-amber-400' : 'text-amber-500/70 group-hover:text-amber-400'}`}>Examen del Módulo</h4>
+                                                                <span className="text-[9px] font-mono text-amber-600/60 block mt-0.5">{module.questions.length} preguntas</span>
+                                                            </div>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
                                     </div>
                                 </div>
                             </div>
