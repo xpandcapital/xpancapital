@@ -24,7 +24,7 @@ interface DbProfile {
     avatar_url: string | null;
     telefono: string | null;
     rol: string;
-    blis_coins: number;
+    xpand_coins: number;
     total_compras: number;
     total_gastado_usd: number;
     total_referidos: number;
@@ -91,7 +91,7 @@ interface Client {
     email: string;
     avatar: string;
     role: 'Cliente' | 'Admin' | 'Moderador' | 'Staff';
-    blisCoins: number;
+    xpandCoins: number;
     purchases: number;
     income: number;
     puntos: number;
@@ -202,7 +202,7 @@ function mapDbToClient(profile: DbProfile): Client {
         email: profile.email,
         avatar: (profile.nombre?.charAt(0) || profile.email.charAt(0)).toUpperCase(),
         role: roleMap[profile.rol] || 'Cliente',
-        blisCoins: profile.blis_coins || 0,
+        xpandCoins: profile.xpand_coins || 0,
         purchases: profile.total_compras || 0,
         income: Number(profile.total_gastado_usd) || 0,
         puntos: profile.puntos || 0,
@@ -348,7 +348,7 @@ export default function AdminClientes() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {[
                     { label: 'Total Socios', val: clients.length, icon: Users, color: 'text-white' },
-                    { label: 'Boveda Global', val: clients.reduce((acc, c) => acc + c.blisCoins, 0), icon: Coins, color: 'text-amber-500', unit: 'BC' },
+                    { label: 'Boveda Global', val: clients.reduce((acc, c) => acc + c.xpandCoins, 0), icon: Coins, color: 'text-amber-500', unit: 'BC' },
                     { label: 'Recaudacion Mes', val: clients.reduce((acc, c) => acc + c.income, 0), icon: TrendingUp, color: 'text-emerald-500', unit: '$' },
                     { label: 'Churn Risk Avg', val: 'Low', icon: Brain, color: 'text-indigo-500' }
                 ].map((kpi, i) => (
@@ -393,7 +393,7 @@ export default function AdminClientes() {
                         {(() => {
                             const topCompras = [...clients].sort((a, b) => b.purchases - a.purchases).slice(0, 3);
                             const topAcademia = [...clients].sort((a, b) => (b.puntosCursos || 0) - (a.puntosCursos || 0)).slice(0, 3);
-                            const topReferidos = [...clients].sort((a, b) => (b.blisCoins || 0) - (a.blisCoins || 0)).slice(0, 3);
+                            const topReferidos = [...clients].sort((a, b) => (b.xpandCoins || 0) - (a.xpandCoins || 0)).slice(0, 3);
                             return (
                                 <>
                                     <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-[2rem] space-y-3">
@@ -422,7 +422,7 @@ export default function AdminClientes() {
                                             <div key={c.id} className="flex items-center gap-3">
                                                 <span className="text-lg font-black text-emerald-400 w-6">#{i + 1}</span>
                                                 <span className="text-sm font-bold truncate">{c.firstName} {c.lastName}</span>
-                                                <span className="text-[10px] text-gray-500 ml-auto">{c.blisCoins} BC</span>
+                                                <span className="text-[10px] text-gray-500 ml-auto">{c.xpandCoins} BC</span>
                                             </div>
                                         ))}
                                     </div>
@@ -488,7 +488,7 @@ export default function AdminClientes() {
                                                     'bg-white/5 border-white/10 text-gray-500'
                                                 }`}>{c.status}</span>
                                             </td>
-                                            <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell font-black text-amber-500 text-xs tracking-widest">{formatCurrency(c.blisCoins)} BC</td>
+                                            <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell font-black text-amber-500 text-xs tracking-widest">{formatCurrency(c.xpandCoins)} BC</td>
                                             <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">
                                                 <span className="text-xs font-black text-white">{c.plan || '—'}</span>
                                                 {c.diasRestantes != null && c.diasRestantes > 0 && (
@@ -551,7 +551,7 @@ export default function AdminClientes() {
                                         <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">{c.email}</p>
                                     </div>
                                     <div className="flex flex-col gap-2 pt-2 w-full">
-                                        <div className="text-emerald-500 font-black text-lg">{formatCurrency(c.blisCoins)} <span className="text-[10px]">BC</span></div>
+                                        <div className="text-emerald-500 font-black text-lg">{formatCurrency(c.xpandCoins)} <span className="text-[10px]">BC</span></div>
                                         <div className="text-white font-bold text-sm">{c.puntos.toLocaleString()} <span className="text-[10px] text-gray-500">pts Nv.{c.puntosNivel}</span></div>
                                         <span className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border self-center ${
                                             c.status === 'Verificado' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Get user's referral code and stats
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('id, codigo_referido, total_referidos, blis_coins')
+      .select('id, codigo_referido, total_referidos, xpand_coins')
       .eq('id', user_id)
       .single()
 
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
     // Give coins to referrer
     await supabase
       .from('profiles')
-      .update({ blis_coins: supabase.rpc('increment', { row: referrer.id, column: 'blis_coins', amount: referralReward }) })
+      .update({ xpand_coins: supabase.rpc('increment', { row: referrer.id, column: 'xpand_coins', amount: referralReward }) })
       .eq('id', referrer.id)
 
     // Create transaction for referrer

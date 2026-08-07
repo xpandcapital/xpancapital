@@ -245,7 +245,7 @@ CREATE TABLE IF NOT EXISTS historial_ventas_pos (
     impuesto DECIMAL(12, 2) DEFAULT 0,
     descuento DECIMAL(12, 2) DEFAULT 0,
     total DECIMAL(12, 2) NOT NULL,
-    metodo_pago VARCHAR(20) DEFAULT 'cash' CHECK (metodo_pago IN ('cash', 'card', 'bliscoins', 'transfer')),
+    metodo_pago VARCHAR(20) DEFAULT 'cash' CHECK (metodo_pago IN ('cash', 'card', 'xpandCoins', 'transfer')),
     estado VARCHAR(20) DEFAULT 'completada' CHECK (estado IN ('pendiente', 'completada', 'cancelada')),
     notas TEXT,
     creado_en TIMESTAMPTZ DEFAULT NOW()

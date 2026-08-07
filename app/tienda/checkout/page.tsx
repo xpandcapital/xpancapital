@@ -61,7 +61,7 @@ function CheckoutLoading() {
 }
 
 function CheckoutContent() {
-    const { cart, blisCoins, clearCart, getCartTotal, removeFromCart } = useShop();
+    const { cart, xpandCoins, clearCart, getCartTotal, removeFromCart } = useShop();
     const { user } = useAuth();
     const { showToast } = useToast();
     const router = useRouter();
@@ -116,7 +116,7 @@ function CheckoutContent() {
     const totalUSD = getCartTotal();
     const totalCoins = cart.reduce((sum, item) =>
         sum + (item.precio_coins || Math.round((item.price || 0) * 10)), 0);
-    const canPayWithCoins = blisCoins >= totalCoins && totalCoins > 0;
+    const canPayWithCoins = xpandCoins >= totalCoins && totalCoins > 0;
 
     // Costo de procesamiento por método (independiente de la selección)
     function getMethodFee(slug: string) {
@@ -353,13 +353,13 @@ function CheckoutContent() {
 
     // Si viene de canje XPANDCOINS, seleccionar ese método y validar saldo
     useEffect(() => {
-        if (isRedeemFlow && blisCoins < totalCoins) {
+        if (isRedeemFlow && xpandCoins < totalCoins) {
             showToast('Saldo de XPAND Coins insuficiente para completar el canje.', 'error');
             router.push('/tienda');
         } else if (isRedeemFlow) {
             setPaymentMethod('coins');
         }
-    }, [isRedeemFlow, blisCoins, totalCoins, showToast, router]);
+    }, [isRedeemFlow, xpandCoins, totalCoins, showToast, router]);
 
     // Escuchar postMessage del iframe de Wompi cuando el pago se completa
     useEffect(() => {
@@ -953,7 +953,7 @@ function CheckoutContent() {
                                                 selected={paymentMethod === 'coins'}
                                                 onClick={() => {
                                                     if (disabled) {
-                                                        showToast(totalCoins <= 0 ? "Tu carrito no tiene costo en XPANDCOINS" : `Te faltan ${(totalCoins - blisCoins).toLocaleString()} XPANDCOINS`, "info");
+                                                        showToast(totalCoins <= 0 ? "Tu carrito no tiene costo en XPANDCOINS" : `Te faltan ${(totalCoins - xpandCoins).toLocaleString()} XPANDCOINS`, "info");
                                                         return;
                                                     }
                                                     setPaymentMethod('coins');
@@ -962,7 +962,7 @@ function CheckoutContent() {
                                                 icon={<Coins className="w-5 h-5 text-amber-400" />}
                                                 bg={disabled ? "bg-amber-500/5 border-amber-500/10 opacity-60" : "bg-amber-500/10 border-amber-500/40"}
                                                 label="Pagar con XPAND Coins"
-                                                sublabel={disabled ? (totalCoins <= 0 ? "Este carrito no aplica para XPANDCOINS" : `Te faltan ${(totalCoins - blisCoins).toLocaleString()} XPANDCOINS`) : `Saldo: ${blisCoins.toLocaleString()} XPAND`}
+                                                sublabel={disabled ? (totalCoins <= 0 ? "Este carrito no aplica para XPANDCOINS" : `Te faltan ${(totalCoins - xpandCoins).toLocaleString()} XPANDCOINS`) : `Saldo: ${xpandCoins.toLocaleString()} XPAND`}
                                                 amount={`${totalCoins.toLocaleString()} COINS`} />
                                         );
                                     }

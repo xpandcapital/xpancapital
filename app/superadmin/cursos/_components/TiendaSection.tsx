@@ -230,8 +230,8 @@ export function TiendaSection({ course, onUpdate }: Props) {
                   <input
                     type="number"
                     min="0"
-                    value={course.bliscoins || ''}
-                    onChange={(e) => onUpdate({ ...course, bliscoins: parseInt(e.target.value) || 0 })}
+                    value={course.xpandCoins || ''}
+                    onChange={(e) => onUpdate({ ...course, xpandCoins: parseInt(e.target.value) || 0 })}
                     placeholder="0"
                     className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 transition-colors"
                   />

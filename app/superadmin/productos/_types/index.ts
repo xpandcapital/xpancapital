@@ -27,8 +27,8 @@ export interface Product {
   originalPrice: number
   discountPercentage: number
   discountUntil: string
-  bliscoins: number
-  isBlisCoinsOnly: boolean
+  xpandCoins: number
+  isxpandCoinsOnly: boolean
   stock: number
   lowStockThreshold: number
   status: ProductStatus

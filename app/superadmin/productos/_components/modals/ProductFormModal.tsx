@@ -27,7 +27,7 @@ interface ProductFormModalProps {
   selectedCurrency: Currency
   taxCurrency: Currency
   isMultiCurrencyEnabled: boolean
-  isBlisCoinsEnabled: boolean
+  isxpandCoinsEnabled: boolean
   activeMultiCurrencies?: CurrencyObj[]
   settings: {
     enablePerishables: boolean
@@ -46,7 +46,7 @@ export function ProductFormModal({
   selectedCurrency,
   taxCurrency,
   isMultiCurrencyEnabled,
-  isBlisCoinsEnabled,
+  isxpandCoinsEnabled,
   activeMultiCurrencies = [],
   settings,
   cursos = [],
@@ -65,7 +65,7 @@ export function ProductFormModal({
   const [linkCopied, setLinkCopied] = useState(false)
   const [formData, setFormData] = useState<{
     name: string; slug: string; metaDescripcion: string; description: string;
-    category: string; price: number; originalPrice: number; bliscoins: number;
+    category: string; price: number; originalPrice: number; xpandCoins: number;
     stock: number; lowStockThreshold: number; sku: string; skuPrefix: string;
     isAutoSku: boolean; purchaseDate: string; expirationDate: string;
     image: string | null; cursoId: string | null;
@@ -80,7 +80,7 @@ export function ProductFormModal({
         category: editingProduct.category,
         price: editingProduct.price,
         originalPrice: editingProduct.originalPrice || 0,
-        bliscoins: editingProduct.bliscoins || 0,
+        xpandCoins: editingProduct.xpandCoins || 0,
         stock: editingProduct.stock === -1 ? 0 : editingProduct.stock,
         lowStockThreshold: editingProduct.lowStockThreshold || 15,
         sku: editingProduct.sku,
@@ -103,7 +103,7 @@ export function ProductFormModal({
       category: (categories.find(c => c.name === 'Cursos') || categories[0])?.name ?? '',
       price: 0,
       originalPrice: 0,
-      bliscoins: 0,
+      xpandCoins: 0,
       stock: 0,
       lowStockThreshold: 15,
       sku: '',
@@ -145,7 +145,7 @@ export function ProductFormModal({
       contenido: formData.description,
       metodo_pago: 'ambos' as const,
       precio_usd: formData.price,
-      precio_coins: formData.bliscoins,
+      precio_coins: formData.xpandCoins,
       tipo: 'digital' as const,
       categoria_id: category?.id ?? null,
       imagen_principal: formData.image,
@@ -249,8 +249,8 @@ export function ProductFormModal({
             <div className="w-px h-8 bg-white/5" />
             <div className="flex flex-col items-center">
               <span className="text-[8px] font-black text-gray-600 uppercase">Xpand Coins</span>
-              <span className={`text-[10px] font-black uppercase ${isBlisCoinsEnabled ? 'text-amber-500' : 'text-gray-600'}`}>
-                {isBlisCoinsEnabled ? 'Activo' : 'Inactivo'}
+              <span className={`text-[10px] font-black uppercase ${isxpandCoinsEnabled ? 'text-amber-500' : 'text-gray-600'}`}>
+                {isxpandCoinsEnabled ? 'Activo' : 'Inactivo'}
               </span>
             </div>
           </div>
@@ -548,12 +548,12 @@ export function ProductFormModal({
             <ProductPriceSection
               price={formData.price}
               originalPrice={formData.originalPrice}
-              bliscoins={formData.bliscoins}
+              xpandCoins={formData.xpandCoins}
               currencySymbol={selectedCurrency.symbol}
-              isBlisCoinsEnabled={isBlisCoinsEnabled}
+              isxpandCoinsEnabled={isxpandCoinsEnabled}
               onPriceChange={(price) => setFormData(prev => ({ ...prev, price }))}
               onOriginalPriceChange={(originalPrice) => setFormData(prev => ({ ...prev, originalPrice }))}
-              onBlisCoinsChange={(bliscoins) => setFormData(prev => ({ ...prev, bliscoins }))}
+              onxpandCoinsChange={(xpandCoins) => setFormData(prev => ({ ...prev, xpandCoins }))}
             />
             </div>
 

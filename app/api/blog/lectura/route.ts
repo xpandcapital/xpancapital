@@ -90,15 +90,15 @@ export async function POST(request: NextRequest) {
     
     const { data: profile } = await supabase
       .from('profiles')
-      .select('blis_coins')
+      .select('xpand_coins')
       .eq('id', user_id)
       .single()
 
-    const currentCoins = profile?.blis_coins || 0
+    const currentCoins = profile?.xpand_coins || 0
 
     await supabase
       .from('profiles')
-      .update({ blis_coins: currentCoins + cantidad })
+      .update({ xpand_coins: currentCoins + cantidad })
       .eq('id', user_id)
 
     // Registrar transacción

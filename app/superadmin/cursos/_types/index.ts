@@ -36,7 +36,7 @@ export interface Course {
   lastSaved?: string
   hasCertificate: boolean
   allowComments: boolean
-  bliscoins: number
+  xpandCoins: number
   image: string | null
   certificateTemplateId: string | null
   paraEquipo: boolean

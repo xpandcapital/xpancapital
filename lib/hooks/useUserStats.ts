@@ -12,7 +12,7 @@ export interface UserStats {
   cursosCompletados: number
   cursosInscritos: number
   cursoActivo: CursoActivo | null
-  blisCoins: number
+  xpandCoins: number
   totalInvertido: number
   plusvaliaEstimada: number
 }
@@ -71,7 +71,7 @@ export function useUserStats() {
         imagen_principal: cursoEnProgreso.imagen_principal
       } : null
 
-      const blisCoins = profileData?.data?.blis_coins || 0
+      const xpandCoins = profileData?.data?.xpand_coins || 0
       const plusvaliaEstimada = totalInvertido * 10
 
       const userStats: UserStats = {
@@ -79,7 +79,7 @@ export function useUserStats() {
         cursosCompletados: cursosCompletados.length,
         cursosInscritos: cursosInscritos.length,
         cursoActivo,
-        blisCoins,
+        xpandCoins,
         totalInvertido,
         plusvaliaEstimada
       }

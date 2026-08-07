@@ -74,7 +74,7 @@ export function Catalog() {
         name: p.nombre,
         price: `$${p.precio_usd || 0}`,
         image: p.imagen_principal || '',
-        bliscoins: p.precio_coins || 0,
+        xpandCoins: p.precio_coins || 0,
         rating: ((p.id.charCodeAt(0) % 10) / 20 + 4.3).toFixed(1),
         reviews: (p.id.charCodeAt(1) % 200) + 50,
     }));
@@ -242,8 +242,8 @@ export function Catalog() {
                                     <div>
                                         <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">Desde</span>
                                         <div className="flex items-baseline gap-1.5 mb-0.5">
-                                            {coinsEnabled && <><span className="text-base font-black text-emerald-400">⚡{filteredProducts[0].bliscoins}</span>
-                                            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">BlisCoins</span></>}
+                                            {coinsEnabled && <><span className="text-base font-black text-emerald-400">⚡{filteredProducts[0].xpandCoins}</span>
+                                            <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">xpandCoins</span></>}
                                         </div>
                                         <span className="text-lg font-black text-white">{filteredProducts[0].price}</span>
                                     </div>
@@ -319,8 +319,8 @@ export function Catalog() {
                                                 <div>
                                                     <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">Desde</span>
                                                     <div className="flex items-baseline gap-1.5">
-                                                        {coinsEnabled && <><span className="text-base md:text-lg font-black text-emerald-400">⚡{item.bliscoins || 0}</span>
-                                                        <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">BlisCoins</span></>}
+                                                        {coinsEnabled && <><span className="text-base md:text-lg font-black text-emerald-400">⚡{item.xpandCoins || 0}</span>
+                                                        <span className="text-[10px] text-gray-600 font-bold uppercase tracking-wider">xpandCoins</span></>}
                                                     </div>
                                                     <span className="text-lg md:text-xl font-black text-white">{item.price}</span>
                                                 </div>

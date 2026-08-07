@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
         // Get referrer's current coins
         const { data: referrerProfile } = await supabase
           .from('profiles')
-          .select('blis_coins')
+          .select('xpand_coins')
           .eq('id', userProfile.referido_por)
           .single()
 
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('profiles')
           .update({ 
-            blis_coins: (referrerProfile?.blis_coins || 0) + commissionAmount
+            xpand_coins: (referrerProfile?.xpand_coins || 0) + commissionAmount
           })
           .eq('id', userProfile.referido_por)
 

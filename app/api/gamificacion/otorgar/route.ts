@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     const { data: profile, error: profileErr } = await supabase
       .from('profiles')
-      .select('puntos, puntos_nivel, puntos_cursos, puntos_comunidad, puntos_blog, racha_dias, ultima_actividad, blis_coins')
+      .select('puntos, puntos_nivel, puntos_cursos, puntos_comunidad, puntos_blog, racha_dias, ultima_actividad, xpand_coins')
       .eq('id', user_id)
       .single()
 
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
     const updateData: Record<string, any> = {
       puntos: nuevosPuntos,
       puntos_nivel: nuevoPuntosNivel,
-      blis_coins: (profile.blis_coins || 0) + puntosOtorgados,
+      xpand_coins: (profile.xpand_coins || 0) + puntosOtorgados,
       racha_dias: nuevaRacha,
       ultima_actividad: hoy,
       actualizado_en: new Date().toISOString(),
@@ -302,20 +302,20 @@ async function verificarLogros(
         if (logro.puntos_bonus > 0) {
           const { data: profile } = await supabase
             .from('profiles')
-            .select('puntos, puntos_cursos, blis_coins')
+            .select('puntos, puntos_cursos, xpand_coins')
             .eq('id', userId)
             .single()
 
           const nuevosPts = (profile?.puntos || 0) + logro.puntos_bonus
           const nuevosCurso = (profile?.puntos_cursos || 0) + logro.puntos_bonus
-          const nuevosCoins = (profile?.blis_coins || 0) + logro.puntos_bonus
+          const nuevosCoins = (profile?.xpand_coins || 0) + logro.puntos_bonus
 
           await supabase
             .from('profiles')
             .update({
               puntos: nuevosPts,
               puntos_cursos: nuevosCurso,
-              blis_coins: nuevosCoins,
+              xpand_coins: nuevosCoins,
               actualizado_en: new Date().toISOString(),
             })
             .eq('id', userId)

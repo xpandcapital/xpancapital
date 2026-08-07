@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('profiles')
-      .select('blis_coins')
+      .select('xpand_coins')
       .eq('id', userId)
       .single()
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      data: { balance: data?.blis_coins || 0 } 
+      data: { balance: data?.xpand_coins || 0 } 
     })
   } catch (error) {
     return NextResponse.json({ 

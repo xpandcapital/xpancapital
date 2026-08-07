@@ -41,7 +41,7 @@ export function mapDbToClient(profile: DbProfile): Client {
         email: profile.email,
         avatar: (profile.nombre?.charAt(0) || profile.email.charAt(0)).toUpperCase(),
         role: roleMap[profile.rol] || 'Cliente',
-        blisCoins: profile.blis_coins || 0,
+        xpandCoins: profile.xpand_coins || 0,
         purchases: profile.total_compras || 0,
         income: Number(profile.total_gastado_usd) || 0,
         lastActive: profile.ultimo_login ? `Hace ${Math.floor((Date.now() - new Date(profile.ultimo_login).getTime()) / 3600000)} horas` : 'Nunca',

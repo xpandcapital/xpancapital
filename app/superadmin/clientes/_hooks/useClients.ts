@@ -48,7 +48,7 @@ export function mapDbToClient(profile: DbProfile): Client {
     email: profile.email,
     avatar: (profile.nombre?.charAt(0) || profile.email.charAt(0)).toUpperCase(),
     role: roleMap[profile.rol] || 'Cliente',
-    blisCoins: profile.blis_coins || 0,
+    xpandCoins: profile.xpand_coins || 0,
     purchases: profile.total_compras || 0,
     income: Number(profile.total_gastado_usd) || 0,
     lastActive: profile.ultimo_login ? `Hace ${Math.floor((Date.now() - new Date(profile.ultimo_login).getTime()) / 3600000)} horas` : 'Nunca',
@@ -171,7 +171,7 @@ export function useClients() {
       if (fields.isNewsletterSubscribed !== undefined) dbUpdate.recibir_newsletter = fields.isNewsletterSubscribed
       if (fields.isPushEnabled !== undefined) dbUpdate.recibir_push = fields.isPushEnabled
       if (fields.isAccountFrozen !== undefined) dbUpdate.cuenta_congelada = fields.isAccountFrozen
-      if (fields.blisCoins !== undefined) dbUpdate.blis_coins = fields.blisCoins
+      if (fields.xpandCoins !== undefined) dbUpdate.xpand_coins = fields.xpandCoins
       
       if (Object.keys(dbUpdate).length > 0) {
         await fetch('/api/admin/clientes', {

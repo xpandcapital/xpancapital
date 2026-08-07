@@ -216,12 +216,12 @@ export async function getProductos(empresaId: string, options?: {
 export async function getUserBalance(userId: string): Promise<Result<number>> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('blis_coins')
+    .select('xpand_coins')
     .eq('id', userId)
     .single()
   
   if (error) return createError(error)
-  return createResult((data as { blis_coins: number })?.blis_coins || 0)
+  return createResult((data as { xpand_coins: number })?.xpand_coins || 0)
 }
 
 export async function getCoinsTransactions(

@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         puntos: nuevosPuntos,
         puntos_cursos: nuevosPuntosCurso,
         puntos_nivel: nuevoNivel,
-        blis_coins: nuevosPuntosCurso,
+        xpand_coins: nuevosPuntosCurso,
         ultima_actividad: new Date().toISOString().slice(0, 10),
         actualizado_en: new Date().toISOString(),
       }).eq('id', cp.user_id)

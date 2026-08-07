@@ -19,7 +19,7 @@ interface CurrencyContextType {
     fiscalCurrency: Currency;
     activeCurrencyCodes: string[];
     isMultiCurrencyEnabled: boolean;
-    isBlisCoinsEnabled: boolean;
+    isxpandCoinsEnabled: boolean;
     exchangeRates: ExchangeRates;
     safetyMarkup: number;
     lastUpdated: Date | null;
@@ -29,7 +29,7 @@ interface CurrencyContextType {
     toggleActiveCurrency: (code: string) => void;
     setActiveCurrencyCodes: (codes: string[]) => void;
     setIsMultiCurrencyEnabled: (enabled: boolean) => void;
-    setIsBlisCoinsEnabled: (enabled: boolean) => void;
+    setIsxpandCoinsEnabled: (enabled: boolean) => void;
     setSafetyMarkup: (markup: number) => void;
     convertAmount: (amount: number, from: string, to: string) => number;
     convertToFiscal: (amount: number, fromCurrency: string) => number;
@@ -77,7 +77,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         fiscalCurrency: USD_CURRENCY,
         activeCurrencyCodes: ["USD"],
         isMultiCurrencyEnabled: false,
-        isBlisCoinsEnabled: true,
+        isxpandCoinsEnabled: true,
         exchangeRates: {},
         safetyMarkup: 0,
         lastUpdated: null,
@@ -87,7 +87,7 @@ export const CurrencyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         toggleActiveCurrency: noop,
         setActiveCurrencyCodes: noopCodes,
         setIsMultiCurrencyEnabled: noop,
-        setIsBlisCoinsEnabled: noop,
+        setIsxpandCoinsEnabled: noop,
         setSafetyMarkup: noop,
         convertAmount: identity,
         convertToFiscal: identity,

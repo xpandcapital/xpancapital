@@ -23,7 +23,7 @@ interface ShopContextType {
     cart: Product[];
     favorites: Product[];
     purchasedProducts: Product[];
-    blisCoins: number;
+    xpandCoins: number;
     isCartOpen: boolean;
     coinsEnabled: boolean;
     openCart: () => void;
@@ -32,8 +32,8 @@ interface ShopContextType {
     toggleFavorite: (product: Product) => void;
     removeFromCart: (id: string) => void;
     clearCart: () => void;
-    earnBlisCoins: (amount: number) => Promise<boolean>;
-    redeemBlisCoins: (amount: number) => Promise<boolean>;
+    earnxpandCoins: (amount: number) => Promise<boolean>;
+    redeemxpandCoins: (amount: number) => Promise<boolean>;
     redeemAndCheckout: (product: Product) => Promise<{ success: boolean; error?: string }>;
     getCartTotal: () => number;
     getCartCount: () => number;
@@ -47,7 +47,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     const [cart, setCart] = useState<Product[]>([]);
     const [favorites, setFavorites] = useState<Product[]>([]);
     const [purchasedProducts, setPurchasedProducts] = useState<Product[]>([]);
-    const [blisCoins, setBlisCoins] = useState(0);
+    const [xpandCoins, setxpandCoins] = useState(0);
     const [isLoaded, setIsLoaded] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [coinsEnabled, setCoinsEnabled] = useState(false); // false por defecto — evita flash al cargar
@@ -153,7 +153,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     // Load coins from user profile
     useEffect(() => {
         if (user) {
-            setBlisCoins(user.blis_coins || 0);
+            setxpandCoins(user.xpand_coins || 0);
             fetchPurchasedProducts();
         }
     }, [user, fetchPurchasedProducts]);
@@ -220,7 +220,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         });
     }, []);
 
-    const earnBlisCoins = useCallback(async (amount: number): Promise<boolean> => {
+    const earnxpandCoins = useCallback(async (amount: number): Promise<boolean> => {
         if (!user) return false;
 
         try {
@@ -237,7 +237,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
             const data = await response.json();
             if (data.success) {
-                setBlisCoins((prev) => prev + amount);
+                setxpandCoins((prev) => prev + amount);
                 return true;
             }
             return false;
@@ -247,8 +247,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         }
     }, [user]);
 
-    const redeemBlisCoins = useCallback(async (amount: number): Promise<boolean> => {
-        if (!user || blisCoins < amount) return false;
+    const redeemxpandCoins = useCallback(async (amount: number): Promise<boolean> => {
+        if (!user || xpandCoins < amount) return false;
 
         try {
             const response = await fetch("/api/coins/spend", {
@@ -264,7 +264,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
 
             const data = await response.json();
             if (data.success) {
-                setBlisCoins((prev) => prev - amount);
+                setxpandCoins((prev) => prev - amount);
                 return true;
             }
             return false;
@@ -272,13 +272,13 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             console.error("Error redeeming coins:", e);
             return false;
         }
-    }, [user, blisCoins]);
+    }, [user, xpandCoins]);
 
     const redeemAndCheckout = useCallback(async (product: Product): Promise<{ success: boolean; error?: string }> => {
         if (!user) return { success: false, error: 'Usuario no autenticado' };
 
         const coinPrice = product.precio_coins || Math.round((product.price || 0) * 10);
-        if (blisCoins < coinPrice) return { success: false, error: 'Saldo insuficiente de XPAND Coins' };
+        if (xpandCoins < coinPrice) return { success: false, error: 'Saldo insuficiente de XPAND Coins' };
 
         try {
             // 1. Llamar checkout con método coins - crea orden, asigna cursos, envía email
@@ -328,14 +328,14 @@ export function ShopProvider({ children }: { children: ReactNode }) {
             });
 
             // 3. Actualizar balance local
-            setBlisCoins((prev) => prev - coinPrice);
+            setxpandCoins((prev) => prev - coinPrice);
 
             return { success: true };
         } catch (e) {
             console.error("Error redeemAndCheckout:", e);
             return { success: false, error: 'Error interno' };
         }
-    }, [user, blisCoins]);
+    }, [user, xpandCoins]);
 
     const getCartTotal = useCallback(() => {
         return cart.reduce((total, item) => total + (item.price || item.precio_usd || 0), 0);
@@ -351,7 +351,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                 cart,
                 favorites,
                 purchasedProducts,
-                blisCoins,
+                xpandCoins,
                 isCartOpen,
                 openCart,
                 closeCart,
@@ -360,8 +360,8 @@ export function ShopProvider({ children }: { children: ReactNode }) {
                 toggleFavorite,
                 removeFromCart,
                 clearCart,
-                earnBlisCoins,
-                redeemBlisCoins,
+                earnxpandCoins,
+                redeemxpandCoins,
                 redeemAndCheckout,
                 getCartTotal,
                 getCartCount,

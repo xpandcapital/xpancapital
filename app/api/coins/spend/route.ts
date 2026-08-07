@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     // Verificar balance actual
     const { data: profile, error: fetchError } = await supabase
       .from('profiles')
-      .select('blis_coins')
+      .select('xpand_coins')
       .eq('id', user_id)
       .single()
 
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       }, { status: 404 })
     }
 
-    const currentCoins = profile?.blis_coins || 0
+    const currentCoins = profile?.xpand_coins || 0
 
     if (currentCoins < Math.abs(monto)) {
       return NextResponse.json({ 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     // Actualizar balance
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ blis_coins: currentCoins - Math.abs(monto) })
+      .update({ xpand_coins: currentCoins - Math.abs(monto) })
       .eq('id', user_id)
 
     if (updateError) {

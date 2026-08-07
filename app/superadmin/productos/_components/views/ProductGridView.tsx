@@ -20,7 +20,7 @@ interface ProductGridViewProps {
   onUpdateBulk: (id: string, field: string, value: string | number | boolean) => void
   categories: Category[]
   statuses: Status[]
-  isBlisCoinsEnabled: boolean
+  isxpandCoinsEnabled: boolean
 }
 
 export const ProductGridView = React.memo(function ProductGridView({
@@ -34,7 +34,7 @@ export const ProductGridView = React.memo(function ProductGridView({
   onUpdateBulk,
   categories,
   statuses,
-  isBlisCoinsEnabled
+  isxpandCoinsEnabled
 }: ProductGridViewProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
@@ -119,13 +119,13 @@ export const ProductGridView = React.memo(function ProductGridView({
 
                 {!isBulkEditing && (
                   <div className="flex items-center gap-2 mt-1.5">
-                    {product.bliscoins > 0 && isBlisCoinsEnabled ? (
+                    {product.xpandCoins > 0 && isxpandCoinsEnabled ? (
                       <div className="flex items-baseline gap-1.5">
                         <span className="text-gray-500 font-bold text-xs line-through opacity-50">
                           ${product.price.toFixed(2)}
                         </span>
                         <span className="text-amber-500 font-black text-base tracking-tighter leading-none">
-                          <span className="text-[9px]">B</span>{product.bliscoins}
+                          <span className="text-[9px]">B</span>{product.xpandCoins}
                         </span>
                       </div>
                     ) : (
@@ -152,8 +152,8 @@ export const ProductGridView = React.memo(function ProductGridView({
                     <span className="text-[10px] text-gray-500 uppercase font-black">Xpand Coins</span>
                     <input
                       type="number"
-                      value={product.bliscoins}
-                      onChange={(e) => onUpdateBulk(product.id, 'bliscoins', parseInt(e.target.value))}
+                      value={product.xpandCoins}
+                      onChange={(e) => onUpdateBulk(product.id, 'xpandCoins', parseInt(e.target.value))}
                       className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs font-bold text-amber-500 w-full outline-none"
                     />
                   </div>

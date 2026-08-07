@@ -24,15 +24,15 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('blis_coins')
+        .select('xpand_coins')
         .eq('id', user_id)
         .single()
 
-      const currentCoins = profile?.blis_coins || 0
+      const currentCoins = profile?.xpand_coins || 0
 
       const { error: updateProfileError } = await supabase
         .from('profiles')
-        .update({ blis_coins: currentCoins + monto })
+        .update({ xpand_coins: currentCoins + monto })
         .eq('id', user_id)
 
       if (updateProfileError) {
@@ -62,13 +62,13 @@ export async function POST(request: NextRequest) {
     // Obtener nuevo balance
     const { data: updatedProfile } = await supabase
       .from('profiles')
-      .select('blis_coins')
+      .select('xpand_coins')
       .eq('id', user_id)
       .single()
 
     return NextResponse.json({ 
       success: true, 
-      data: { balance: updatedProfile?.blis_coins || 0 } 
+      data: { balance: updatedProfile?.xpand_coins || 0 } 
     })
   } catch (error) {
     return NextResponse.json({ 

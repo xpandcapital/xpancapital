@@ -5,6 +5,6 @@ ALTER TABLE compras DROP CONSTRAINT IF EXISTS compras_metodo_pago_check;
 
 ALTER TABLE compras ADD CONSTRAINT compras_metodo_pago_check
   CHECK (metodo_pago IN (
-    'izipay', 'paypal', 'coins', 'bliscoins', 'transfer', 'transferencia',
+    'izipay', 'paypal', 'coins', 'xpandCoins', 'transfer', 'transferencia',
     'crypto_manual', 'whatsapp', 'efectivo', 'tarjeta', 'otro', 'cash', 'card', 'manual'
   ));

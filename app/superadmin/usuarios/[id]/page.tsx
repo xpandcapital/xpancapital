@@ -43,7 +43,7 @@ interface UserProfile {
     activo: boolean;
     creado_en: string;
     empresa_id: string;
-    blis_coins?: number;
+    xpand_coins?: number;
     telefono?: string;
     recibir_notificaciones_compras?: boolean;
 }

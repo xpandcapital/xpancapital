@@ -13,8 +13,8 @@ export interface POSProduct {
   price: number;
   originalPrice: number | undefined;
   discountPercentage: number;
-  bliscoins: number;
-  isBlisCoinsOnly: boolean;
+  xpandCoins: number;
+  isxpandCoinsOnly: boolean;
   stock: number;
   status: string;
   image: string;
@@ -74,8 +74,8 @@ interface POSReturnValue {
   repDniSearch: string;
   setRepDniSearch: (v: string) => void;
   isSearchingRep: boolean;
-  paymentMethod: 'cash' | 'card' | 'bliscoins' | 'transfer';
-  setPaymentMethod: (v: 'cash' | 'card' | 'bliscoins' | 'transfer') => void;
+  paymentMethod: 'cash' | 'card' | 'xpandCoins' | 'transfer';
+  setPaymentMethod: (v: 'cash' | 'card' | 'xpandCoins' | 'transfer') => void;
   receivedAmount: string;
   setReceivedAmount: (v: string) => void;
   isIssuingInvoice: boolean;
@@ -117,8 +117,8 @@ export function mapSupabaseToPosProduct(p: Producto): POSProduct {
         price: p.precio_usd || 0,
         originalPrice: p.precio_usd ? p.precio_usd * 1.3 : undefined,
         discountPercentage: 0,
-        bliscoins: p.precio_coins || 0,
-        isBlisCoinsOnly: p.metodo_pago === 'coins',
+        xpandCoins: p.precio_coins || 0,
+        isxpandCoinsOnly: p.metodo_pago === 'coins',
         stock: p.stock_ilimitado ? 999 : p.stock,
         status: p.stock_ilimitado || p.stock > 0 ? 'Disponible' : 'Agotado',
         image: p.imagen_principal || '/images/blog-1.jpg',
@@ -155,7 +155,7 @@ export function usePOS(): POSReturnValue | POSErrorReturn {
     const [repDniSearch, setRepDniSearch] = useState('');
     const [isSearchingRep, setIsSearchingRep] = useState(false);
 
-    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'bliscoins' | 'transfer'>('cash');
+    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'xpandCoins' | 'transfer'>('cash');
     const [receivedAmount, setReceivedAmount] = useState<string>('');
     const [isIssuingInvoice, setIsIssuingInvoice] = useState(false);
     const [invoiceResult, setInvoiceResult] = useState<{ success: boolean; msg: string; detail?: string } | null>(null);

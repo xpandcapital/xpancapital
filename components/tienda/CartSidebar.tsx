@@ -9,7 +9,7 @@ import { useShop } from "@/context/ShopContext";
 import { useAuth } from "@/hooks/useAuth";
 
 export function CartSidebar() {
-    const { cart, blisCoins, removeFromCart, getCartTotal, getCartCount, isCartOpen: isOpen, closeCart: onClose, coinsEnabled } = useShop();
+    const { cart, xpandCoins, removeFromCart, getCartTotal, getCartCount, isCartOpen: isOpen, closeCart: onClose, coinsEnabled } = useShop();
     const { user } = useAuth();
     const router = useRouter();
 

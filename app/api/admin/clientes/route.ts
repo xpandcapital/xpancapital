@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       const { data: profile, error } = await supabase
         .from('profiles')
         .select(`
-          id,empresa_id,email,nombre,apellido,avatar_url,telefono,rol,blis_coins,total_compras,total_gastado_usd,total_referidos,creado_en,
+          id,empresa_id,email,nombre,apellido,avatar_url,telefono,rol,xpand_coins,total_compras,total_gastado_usd,total_referidos,creado_en,
           pais,region,ciudad,
           tipo_cuenta,empresa_nombre,empresa_ruc,empresa_rep_legal,
           tipo_documento,numero_documento,fecha_nacimiento,
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('profiles')
       .select(`
-        id,empresa_id,email,nombre,apellido,avatar_url,telefono,rol,blis_coins,total_compras,total_gastado_usd,total_referidos,creado_en,
+        id,empresa_id,email,nombre,apellido,avatar_url,telefono,rol,xpand_coins,total_compras,total_gastado_usd,total_referidos,creado_en,
         pais,region,ciudad,
         tipo_cuenta,empresa_nombre,empresa_ruc,empresa_rep_legal,
         tipo_documento,numero_documento,fecha_nacimiento,

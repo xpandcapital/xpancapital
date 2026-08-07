@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export function MiembrosHeader() {
     const { user } = useAuth();
-    const { coinsEnabled, blisCoins } = useShop();
+    const { coinsEnabled, xpandCoins } = useShop();
     const isAdmin = user?.role ? ['superadmin', 'admin', 'editor'].includes(user.role) : false;
     const profileHref = isAdmin ? "/superadmin/perfil" : "/miembros/perfil";
 
@@ -29,7 +29,7 @@ export function MiembrosHeader() {
                 {coinsEnabled && (
                 <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
                     <Star className="w-4 h-4 text-emerald-500 fill-emerald-500" />
-                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">{blisCoins.toLocaleString()} XPANDCOINS</span>
+                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">{xpandCoins.toLocaleString()} XPANDCOINS</span>
                 </div>
                 )}
 

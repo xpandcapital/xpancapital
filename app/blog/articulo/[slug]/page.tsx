@@ -71,7 +71,7 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        const claimedArticles = JSON.parse(localStorage.getItem('blis_claimed_articles') || '[]');
+        const claimedArticles = JSON.parse(localStorage.getItem('xpand_claimed_articles') || '[]');
         if (claimedArticles.includes(article.id)) {
             claimedRef.current = true;
             onClose();
@@ -112,10 +112,10 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
             if (data.success) {
                 claimedRef.current = true;
                 onCoinsChange(article.rewardAmount);
-                const claimedArticles = JSON.parse(localStorage.getItem('blis_claimed_articles') || '[]');
+                const claimedArticles = JSON.parse(localStorage.getItem('xpand_claimed_articles') || '[]');
                 if (!claimedArticles.includes(article.id)) {
                     claimedArticles.push(article.id);
-                    localStorage.setItem('blis_claimed_articles', JSON.stringify(claimedArticles));
+                    localStorage.setItem('xpand_claimed_articles', JSON.stringify(claimedArticles));
                 }
                 onClose();
             }
@@ -226,7 +226,7 @@ function ArticleDetailPage() {
     // Load user coins from profile
     useEffect(() => {
         if (user) {
-            setUserCoins(user.blis_coins || 0);
+            setUserCoins(user.xpand_coins || 0);
         }
     }, [user]);
 
@@ -271,7 +271,7 @@ function ArticleDetailPage() {
                 setArticle(found);
 
                 // Check if already entered password for this article (localStorage)
-                const unlockedPasswords = JSON.parse(localStorage.getItem('blis_article_passwords') || '{}');
+                const unlockedPasswords = JSON.parse(localStorage.getItem('xpand_article_passwords') || '{}');
                 if (found.contrasena && unlockedPasswords[found.id] === found.contrasena) {
                     setPasswordEntered(true);
                 } else if (!found.contrasena) {
@@ -283,14 +283,14 @@ function ArticleDetailPage() {
                     setIsUnlocked(true);
                 } else {
                     // Premium articles: check if already unlocked (localStorage)
-                    const unlockedArticles = JSON.parse(localStorage.getItem('blis_unlocked_articles') || '[]');
+                    const unlockedArticles = JSON.parse(localStorage.getItem('xpand_unlocked_articles') || '[]');
                     if (unlockedArticles.includes(found.id)) {
                         setIsUnlocked(true);
                     }
                 }
 
                 // Check if already claimed reward
-                const claimedArticles = JSON.parse(localStorage.getItem('blis_claimed_articles') || '[]');
+                const claimedArticles = JSON.parse(localStorage.getItem('xpand_claimed_articles') || '[]');
                 if (claimedArticles.includes(found.id)) {
                     setClaimed(true);
                 }
@@ -348,9 +348,9 @@ function ArticleDetailPage() {
         if (passwordInput === article.contrasena) {
             setPasswordEntered(true);
             setPasswordError(false);
-            const unlockedPasswords = JSON.parse(localStorage.getItem('blis_article_passwords') || '{}');
+            const unlockedPasswords = JSON.parse(localStorage.getItem('xpand_article_passwords') || '{}');
             unlockedPasswords[article.id] = article.contrasena;
-            localStorage.setItem('blis_article_passwords', JSON.stringify(unlockedPasswords));
+            localStorage.setItem('xpand_article_passwords', JSON.stringify(unlockedPasswords));
         } else {
             setPasswordError(true);
         }
@@ -390,10 +390,10 @@ function ArticleDetailPage() {
                 setIsUnlocked(true);
 
                 // Save to localStorage
-                const unlockedArticles = JSON.parse(localStorage.getItem('blis_unlocked_articles') || '[]');
+                const unlockedArticles = JSON.parse(localStorage.getItem('xpand_unlocked_articles') || '[]');
                 if (!unlockedArticles.includes(article.id)) {
                     unlockedArticles.push(article.id);
-                    localStorage.setItem('blis_unlocked_articles', JSON.stringify(unlockedArticles));
+                    localStorage.setItem('xpand_unlocked_articles', JSON.stringify(unlockedArticles));
                 }
             } else {
                 console.error('Error unlocking:', spendData.error);

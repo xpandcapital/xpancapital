@@ -286,7 +286,7 @@ export interface HistorialVentaPOS {
   impuesto: number
   descuento: number
   total: number
-  metodo_pago: 'cash' | 'card' | 'bliscoins' | 'transfer'
+  metodo_pago: 'cash' | 'card' | 'xpandCoins' | 'transfer'
   estado: 'pendiente' | 'completada' | 'cancelada'
   notas?: string
   creado_en: string

@@ -28,7 +28,7 @@ function AdminProductsContent() {
   const { categories: contextCategories } = useCategories()
   const { statuses: contextStatuses } = useStatuses()
   const { skuPatterns } = useSku()
-  const { currencies, selectedCurrency, taxCurrency, activeCurrencyCodes, isMultiCurrencyEnabled, isBlisCoinsEnabled } = useCurrency()
+  const { currencies, selectedCurrency, taxCurrency, activeCurrencyCodes, isMultiCurrencyEnabled, isxpandCoinsEnabled } = useCurrency()
   const { settings: labelSettings, updateSettings: updateLabelSettings } = useLabel()
 
   const { products, isLoading, fetchProducts, createProduct, updateProduct, deleteProducts } = useProducts()
@@ -197,7 +197,7 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
         taxCurrency={taxCurrency}
         isMultiCurrencyEnabled={isMultiCurrencyEnabled}
         activeMultiCurrencies={currencies.filter(c => activeCurrencyCodes.includes(c.code))}
-        isBlisCoinsEnabled={isBlisCoinsEnabled}
+        isxpandCoinsEnabled={isxpandCoinsEnabled}
         settings={{
           enablePerishables: false,
           enableSerialization: false
@@ -280,7 +280,7 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
                     selectedCurrency={selectedCurrency}
                     isMultiCurrencyEnabled={isMultiCurrencyEnabled}
                     activeCurrencyCodes={activeCurrencyCodes}
-                    isBlisCoinsEnabled={isBlisCoinsEnabled}
+                    isxpandCoinsEnabled={isxpandCoinsEnabled}
                     skuPatterns={skuPatterns}
                     filteredCount={filteredProducts.length}
                   />
@@ -301,7 +301,7 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
                     categories={contextCategories}
                     statuses={contextStatuses}
                     selectedCurrency={selectedCurrency}
-                    isBlisCoinsEnabled={isBlisCoinsEnabled}
+                    isxpandCoinsEnabled={isxpandCoinsEnabled}
                     filteredCount={filteredProducts.length}
                   />
                 )}
@@ -317,7 +317,7 @@ const handleBulkUpdate = async (id: string, field: string, value: string | numbe
                     onUpdateBulk={handleBulkUpdate}
                     categories={contextCategories}
                     statuses={contextStatuses}
-                    isBlisCoinsEnabled={isBlisCoinsEnabled}
+                    isxpandCoinsEnabled={isxpandCoinsEnabled}
                   />
                 )}
 

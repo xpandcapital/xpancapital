@@ -13,12 +13,12 @@ export function CurrencyManager() {
         taxCurrency,
         activeCurrencyCodes,
         isMultiCurrencyEnabled,
-        isBlisCoinsEnabled,
+        isxpandCoinsEnabled,
         setSelectedCurrency,
         setTaxCurrency,
         toggleActiveCurrency,
         setIsMultiCurrencyEnabled,
-        setIsBlisCoinsEnabled,
+        setIsxpandCoinsEnabled,
         exchangeRates,
         safetyMarkup,
         lastUpdated,
@@ -213,11 +213,11 @@ export function CurrencyManager() {
                                                 <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Moneda de Recompensa</span>
                                             </div>
                                             <button
-                                                onClick={() => setIsBlisCoinsEnabled(!isBlisCoinsEnabled)}
-                                                className={`w-12 h-6 rounded-full relative transition-all duration-300 ${isBlisCoinsEnabled ? 'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]' : 'bg-white/10'}`}
+                                                onClick={() => setIsxpandCoinsEnabled(!isxpandCoinsEnabled)}
+                                                className={`w-12 h-6 rounded-full relative transition-all duration-300 ${isxpandCoinsEnabled ? 'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]' : 'bg-white/10'}`}
                                             >
                                                 <motion.div
-                                                    animate={{ x: isBlisCoinsEnabled ? 28 : 4 }}
+                                                    animate={{ x: isxpandCoinsEnabled ? 28 : 4 }}
                                                     className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg"
                                                 />
                                             </button>

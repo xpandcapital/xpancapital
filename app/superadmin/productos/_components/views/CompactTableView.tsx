@@ -22,7 +22,7 @@ interface CompactTableViewProps {
   categories: Category[]
   statuses: Status[]
   selectedCurrency: Currency
-  isBlisCoinsEnabled: boolean
+  isxpandCoinsEnabled: boolean
   filteredCount: number
 }
 
@@ -41,7 +41,7 @@ export function CompactTableView({
   categories,
   statuses,
   selectedCurrency,
-  isBlisCoinsEnabled,
+  isxpandCoinsEnabled,
   filteredCount
 }: CompactTableViewProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -99,7 +99,7 @@ export function CompactTableView({
           </th>
           <th className="px-4 py-3 w-16 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('currencyCode')}>Moneda</th>
           <th className="px-4 py-3 w-24 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('price')}>Precio</th>
-          {isBlisCoinsEnabled && <th className="px-4 py-3 w-28 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('bliscoins')}>Xpand Coins</th>}
+          {isxpandCoinsEnabled && <th className="px-4 py-3 w-28 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('xpandCoins')}>Xpand Coins</th>}
           <th className="px-4 py-3 w-20 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('stock')}>Stock</th>
           <th className="px-4 py-3 w-32 text-center cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('status')}>
             <div className="flex items-center justify-center gap-2">
@@ -174,16 +174,16 @@ export function CompactTableView({
                   </span>
                 )}
               </td>
-              {isBlisCoinsEnabled && <td className="px-4 py-2 align-middle">
+              {isxpandCoinsEnabled && <td className="px-4 py-2 align-middle">
                 {isBulkEditing ? (
                   <input
                     type="number"
-                    value={product.bliscoins}
-                    onChange={(e) => onUpdateBulk(product.id, 'bliscoins', parseInt(e.target.value))}
+                    value={product.xpandCoins}
+                    onChange={(e) => onUpdateBulk(product.id, 'xpandCoins', parseInt(e.target.value))}
                     className="bg-white/5 border border-white/10 rounded px-1.5 py-0.5 text-xs text-amber-500 w-full outline-none focus:border-amber-500"
                   />
                 ) : (
-                  <span className="text-xs font-black text-amber-500 uppercase tracking-tighter">{product.bliscoins || '-'}</span>
+                  <span className="text-xs font-black text-amber-500 uppercase tracking-tighter">{product.xpandCoins || '-'}</span>
                 )}
               </td>}
               <td className="px-4 py-2 align-middle">

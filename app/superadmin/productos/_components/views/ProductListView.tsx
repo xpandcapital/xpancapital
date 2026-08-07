@@ -22,7 +22,7 @@ interface ProductListViewProps {
   selectedCurrency: Currency
   isMultiCurrencyEnabled: boolean
   activeCurrencyCodes: string[]
-  isBlisCoinsEnabled: boolean
+  isxpandCoinsEnabled: boolean
   skuPatterns: Array<{ id: string; prefix: string }>
   filteredCount: number
 }
@@ -44,7 +44,7 @@ export function ProductListView({
   currencies,
   selectedCurrency,
   isMultiCurrencyEnabled,
-  isBlisCoinsEnabled,
+  isxpandCoinsEnabled,
   skuPatterns,
   filteredCount
 }: ProductListViewProps) {
@@ -75,7 +75,7 @@ export function ProductListView({
             currencies={currencies}
             selectedCurrency={selectedCurrency}
             isMultiCurrencyEnabled={isMultiCurrencyEnabled}
-            isBlisCoinsEnabled={isBlisCoinsEnabled}
+            isxpandCoinsEnabled={isxpandCoinsEnabled}
             skuPatterns={skuPatterns}
           />
         ))}

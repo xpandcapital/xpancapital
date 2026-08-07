@@ -54,7 +54,7 @@ export default function UserDashboard() {
             case 0: return stats.productosAdquiridos.toString()
             case 1: return `${stats.cursosCompletados} / ${stats.cursosInscritos}`
             case 2: return stats.cursoActivo ? `${stats.cursoActivo.progreso}%` : "—"
-            case 3: return stats.blisCoins.toLocaleString()
+            case 3: return stats.xpandCoins.toLocaleString()
             case 4: return `$${stats.totalInvertido.toLocaleString()} USD`
         }
     }

@@ -17,7 +17,7 @@ export function ProductTableHeader({
   sortConfig,
   onSort
 }: ProductTableHeaderProps) {
-  const { isBlisCoinsEnabled } = useCurrency();
+  const { isxpandCoinsEnabled } = useCurrency();
   const SortIndicator = ({ column }: { column: string }) => (
     <div className={`transition-all ${sortConfig.key === column ? 'opacity-100' : 'opacity-0 group-hover/th:opacity-50'}`}>
       {sortConfig.key === column && sortConfig.direction === 'desc' 
@@ -58,11 +58,11 @@ export function ProductTableHeader({
             <SortIndicator column="price" />
           </div>
         </th>
-        {isBlisCoinsEnabled && (
-        <th className="px-4 py-4 w-[100px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('bliscoins')}>
+        {isxpandCoinsEnabled && (
+        <th className="px-4 py-4 w-[100px] cursor-pointer hover:bg-white/[0.02] transition-colors group/th" onClick={() => onSort('xpandCoins')}>
           <div className="flex items-center justify-center gap-2">
             Xpand Coins
-            <SortIndicator column="bliscoins" />
+            <SortIndicator column="xpandCoins" />
           </div>
         </th>
         )}

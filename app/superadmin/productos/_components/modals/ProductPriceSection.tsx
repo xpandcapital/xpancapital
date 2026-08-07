@@ -3,23 +3,23 @@
 interface ProductPriceSectionProps {
   price: number
   originalPrice: number
-  bliscoins: number
+  xpandCoins: number
   currencySymbol: string
-  isBlisCoinsEnabled: boolean
+  isxpandCoinsEnabled: boolean
   onPriceChange: (price: number) => void
   onOriginalPriceChange: (price: number) => void
-  onBlisCoinsChange: (coins: number) => void
+  onxpandCoinsChange: (coins: number) => void
 }
 
 export function ProductPriceSection({
   price,
   originalPrice,
-  bliscoins,
+  xpandCoins,
   currencySymbol,
-  isBlisCoinsEnabled,
+  isxpandCoinsEnabled,
   onPriceChange,
   onOriginalPriceChange,
-  onBlisCoinsChange,
+  onxpandCoinsChange,
 }: ProductPriceSectionProps) {
   return (
     <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 md:p-8 space-y-6">
@@ -63,15 +63,15 @@ export function ProductPriceSection({
         </div>
       </div>
 
-      {isBlisCoinsEnabled && (
+      {isxpandCoinsEnabled && (
         <div className="space-y-2">
           <label className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Xpand Coins</label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 font-black">B</span>
             <input
               type="number"
-              value={bliscoins}
-              onChange={(e) => onBlisCoinsChange(parseInt(e.target.value) || 0)}
+              value={xpandCoins}
+              onChange={(e) => onxpandCoinsChange(parseInt(e.target.value) || 0)}
               className="w-full bg-amber-500/10 border border-amber-500/20 rounded-2xl pl-10 pr-4 py-3 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:border-amber-500 transition-all"
               placeholder="0"
             />

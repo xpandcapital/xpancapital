@@ -21,7 +21,7 @@ interface ProductTableRowProps {
   currencies: Currency[]
   selectedCurrency: Currency
   isMultiCurrencyEnabled: boolean
-  isBlisCoinsEnabled: boolean
+  isxpandCoinsEnabled: boolean
   skuPatterns: Array<{ id: string; prefix: string }>
 }
 
@@ -39,7 +39,7 @@ export function ProductTableRow({
   currencies,
   selectedCurrency,
   isMultiCurrencyEnabled,
-  isBlisCoinsEnabled,
+  isxpandCoinsEnabled,
   skuPatterns
 }: ProductTableRowProps) {
   const [copied, setCopied] = useState(false)
@@ -187,24 +187,24 @@ return (
 
       <td className="px-4 py-3 align-middle w-20">
         {isBulkEditing ? (
-          isBlisCoinsEnabled && (
+          isxpandCoinsEnabled && (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
                 <span className="text-[10px] font-black text-amber-500">B</span>
               </div>
               <input
                 type="number"
-                value={product.bliscoins}
-                onChange={(e) => onUpdateBulk(product.id, 'bliscoins', parseInt(e.target.value))}
+                value={product.xpandCoins}
+                onChange={(e) => onUpdateBulk(product.id, 'xpandCoins', parseInt(e.target.value))}
                 className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm font-black text-white outline-none focus:border-amber-500/50 transition-all"
                 placeholder="0"
               />
             </div>
           )
         ) : (
-          product.bliscoins > 0 && isBlisCoinsEnabled ? (
+          product.xpandCoins > 0 && isxpandCoinsEnabled ? (
             <span className="bg-amber-500/10 border border-emerald-500/0 px-2.5 py-1 rounded-lg text-[11px] font-black text-amber-500 whitespace-nowrap">
-              {product.bliscoins}
+              {product.xpandCoins}
             </span>
           ) : (
             <span className="text-gray-500 text-[9px] font-black uppercase tracking-tighter">-</span>

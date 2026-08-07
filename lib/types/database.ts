@@ -65,7 +65,7 @@ export interface EmpresaConfig {
   tienda_activa: boolean
   academia_activa: boolean
   referidos_activo: boolean
-  bliscoins_activo: boolean
+  xpandCoins_activo: boolean
   
   // Envíos
   envios_activo: boolean
@@ -172,7 +172,7 @@ export interface Profile {
   nivel?: NivelCliente
   
   // Xpand Coins
-  blis_coins: number
+  xpand_coins: number
   coins_totales_ganados: number
   coins_totales_gastados: number
   coins_expiran?: string

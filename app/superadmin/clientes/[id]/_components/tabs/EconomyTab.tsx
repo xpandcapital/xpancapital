@@ -30,7 +30,7 @@ export function EconomyTab({ client, transactions, onUpdate, onAdjustCoins }: Ec
     const handleTransferSim = () => {
         showToast('Simulando transferencia de 10 BC...', 'info');
         setTimeout(() => {
-            onUpdate({ blisCoins: client.blisCoins - 10 });
+            onUpdate({ xpandCoins: client.xpandCoins - 10 });
             showToast('Transferencia completada', 'success');
         }, 1500);
     };
@@ -41,7 +41,7 @@ export function EconomyTab({ client, transactions, onUpdate, onAdjustCoins }: Ec
                 <div className="p-10 bg-gradient-to-br from-zinc-900 to-black border border-white/5 rounded-[3rem] text-center space-y-4 shadow-3xl">
                     <div className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em]">Saldo Disponible</div>
                     <div className={`text-7xl font-black transition-all ${client.isAccountFrozen ? 'text-gray-600' : 'text-white'}`}>
-                        {client.blisCoins.toLocaleString()} <span className="text-3xl text-amber-500">BC</span>
+                        {client.xpandCoins.toLocaleString()} <span className="text-3xl text-amber-500">BC</span>
                     </div>
                     {client.isAccountFrozen && (
                         <div className="text-[9px] font-black text-rose-500 uppercase flex items-center justify-center gap-1">

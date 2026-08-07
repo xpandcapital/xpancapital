@@ -7,7 +7,7 @@ export interface DbProfile {
     avatar_url: string | null;
     telefono: string | null;
     rol: string;
-    blis_coins: number;
+    xpand_coins: number;
     total_compras: number;
     total_gastado_usd: number;
     total_referidos: number;
@@ -109,7 +109,7 @@ export interface Client {
     email: string;
     avatar: string;
     role: 'Cliente' | 'Admin' | 'Moderador' | 'Staff';
-    blisCoins: number;
+    xpandCoins: number;
     purchases: number;
     income: number;
     lastActive: string;

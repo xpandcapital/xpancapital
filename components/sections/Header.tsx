@@ -27,7 +27,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
     const { user, logout, loading, refreshUser } = useAuth()
-    const { cart, favorites, blisCoins, openCart, coinsEnabled } = useShop()
+    const { cart, favorites, xpandCoins, openCart, coinsEnabled } = useShop()
     const { templateData, siteConfig } = useLandingCMS()
     const isDashboard = pathname?.startsWith('/superadmin') || pathname?.startsWith('/miembros')
 
@@ -369,7 +369,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                 <div className="flex-shrink-0 w-20 h-10 rounded-full bg-white/5 animate-pulse" />
                              ) : user ? (
                                 <div className="flex items-center gap-6">
-                                    {/* BlisCoins */}
+                                    {/* xpandCoins */}
                                     {coinsEnabled && (
                                     <div className="hidden lg:flex items-center gap-2 px-3 xl:px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 max-w-[120px] xl:max-w-none">
                                         <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
@@ -380,7 +380,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                 <div className="w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_5px_white]" />
                                             </motion.div>
                                         </div>
-                                        <span className="text-[11px] font-black uppercase tracking-wider">{blisCoins.toLocaleString()} XPANDCOINS</span>
+                                        <span className="text-[11px] font-black uppercase tracking-wider">{xpandCoins.toLocaleString()} XPANDCOINS</span>
                                     </div>
                                     )}
 
@@ -619,7 +619,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                         {coinsEnabled && (
                                         <div className="flex-1 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center">
                                             <p className="text-[7px] font-bold uppercase tracking-widest opacity-60 leading-none mb-1">XPANDCOINS</p>
-                                            <p className="text-xs font-black">{user?.blis_coins?.toLocaleString() || '0'}</p>
+                                            <p className="text-xs font-black">{user?.xpand_coins?.toLocaleString() || '0'}</p>
                                         </div>
                                         )}
                                         <div className="flex-1 px-3 py-1.5 rounded-lg bg-blis-red/10 border border-blis-red/20 text-blis-red text-center">

@@ -138,8 +138,8 @@ export default function VentasAdminPage() {
                 telefono: formNueva.telefono,
                 producto_id: formNueva.producto_id,
                 metodo_pago: formNueva.metodo_pago,
-                monto_usd: formNueva.metodo_pago === "bliscoins" || formNueva.metodo_pago === "regalo" ? 0 : (formNueva.monto_usd || 0),
-                monto_coins: formNueva.metodo_pago === "bliscoins" ? (formNueva.monto_coins || 0) : 0,
+                monto_usd: formNueva.metodo_pago === "xpandCoins" || formNueva.metodo_pago === "regalo" ? 0 : (formNueva.monto_usd || 0),
+                monto_coins: formNueva.metodo_pago === "xpandCoins" ? (formNueva.monto_coins || 0) : 0,
                 fecha_compra: formNueva.fecha_compra,
             }),
         });
@@ -186,7 +186,7 @@ export default function VentasAdminPage() {
     };
 
     const metodoIcon = (metodo: string) => {
-        if (metodo === 'bliscoins' && coinsEnabled) return <Coins className="w-3 h-3 text-amber-400" />;
+        if (metodo === 'xpandCoins' && coinsEnabled) return <Coins className="w-3 h-3 text-amber-400" />;
         if (metodo === 'transfer' || metodo === 'transferencia') return <Banknote className="w-3 h-3" />;
         if (metodo === 'crypto_manual') return <Banknote className="w-3 h-3" />;
         return <CreditCard className="w-3 h-3" />;
@@ -498,7 +498,7 @@ export default function VentasAdminPage() {
                                     { value: 'transferencia', label: 'Transferencia' },
                                     { value: 'efectivo', label: 'Efectivo' },
                                     { value: 'tarjeta', label: 'Tarjeta' },
-                                    ...(coinsEnabled ? [{ value: 'bliscoins', label: 'XPANDCOINS' }] : []),
+                                    ...(coinsEnabled ? [{ value: 'xpandCoins', label: 'XPANDCOINS' }] : []),
                                     { value: 'otro', label: 'Otro' },
                                     { value: 'regalo', label: '🎁 Regalo' },
                                 ]}
@@ -511,7 +511,7 @@ export default function VentasAdminPage() {
                                 className="bg-white/5 border-white/10 text-white" />
                         </div>
                         {formNueva.metodo_pago !== "regalo" && (<>
-                            {formNueva.metodo_pago === "bliscoins" && coinsEnabled ? (
+                            {formNueva.metodo_pago === "xpandCoins" && coinsEnabled ? (
                                 <div>
                                     <label className="text-xs text-gray-400 uppercase font-bold block mb-2">Monto XPANDCOINS</label>
                                     <Input type="number" value={formNueva.monto_coins || ""} onChange={e => setFormNueva({ ...formNueva, monto_coins: parseInt(e.target.value) || 0 })}

@@ -13,7 +13,7 @@ export interface User {
   nombre?: string
   apellido?: string
   avatar_url?: string
-  blis_coins: number
+  xpand_coins: number
   nivel_cliente_id?: string
   empresa_id: string
   rol: string

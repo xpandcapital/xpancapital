@@ -21,7 +21,7 @@ export async function POST(
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('blis_coins, empresa_id')
+      .select('xpand_coins, empresa_id')
       .eq('id', userId)
       .single()
 
@@ -29,7 +29,7 @@ export async function POST(
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
     }
 
-    const newBalance = profile.blis_coins + amount
+    const newBalance = profile.xpand_coins + amount
     const tipo = amount > 0 ? 'admin_credito' : 'admin_debito'
 
     const { error: bovedaError } = await supabase
@@ -39,7 +39,7 @@ export async function POST(
         empresa_id: profile.empresa_id,
         tipo,
         monto: Math.abs(amount),
-        balance_antes: profile.blis_coins,
+        balance_antes: profile.xpand_coins,
         balance_despues: newBalance,
         descripcion: reason
       })
@@ -50,7 +50,7 @@ export async function POST(
 
     const { error: profileError } = await supabase
       .from('profiles')
-      .update({ blis_coins: newBalance })
+      .update({ xpand_coins: newBalance })
       .eq('id', userId)
 
     if (profileError) {

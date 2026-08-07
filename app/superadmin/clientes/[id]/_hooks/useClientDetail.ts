@@ -149,7 +149,7 @@ export function useClientDetail(clientId: string) {
             if (fields.isNewsletterSubscribed !== undefined) dbUpdate.recibir_newsletter = fields.isNewsletterSubscribed;
             if (fields.isPushEnabled !== undefined) dbUpdate.recibir_push = fields.isPushEnabled;
             if (fields.isAccountFrozen !== undefined) dbUpdate.cuenta_congelada = fields.isAccountFrozen;
-            if (fields.blisCoins !== undefined) dbUpdate.blis_coins = fields.blisCoins;
+            if (fields.xpandCoins !== undefined) dbUpdate.xpand_coins = fields.xpandCoins;
 
             if (Object.keys(dbUpdate).length > 0) {
                 await fetch('/api/admin/clientes', {
@@ -182,7 +182,7 @@ export function useClientDetail(clientId: string) {
             if (data.success) {
                 setClient(prev => prev ? {
                     ...prev,
-                    blisCoins: data.newBalance,
+                    xpandCoins: data.newBalance,
                     transactions: [data.transaction, ...(prev.transactions || [])]
                 } : null);
                 fetchTransactions();

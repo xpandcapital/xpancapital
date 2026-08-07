@@ -37,8 +37,8 @@ export function useProducts(): UseProductsReturn {
     originalPrice: (p.precio_comparacion as number) || (p.precio_usd as number) || 0,
     discountPercentage: (p.descuento_porcentaje as number) || 0,
     discountUntil: (p.descuento_hasta as string) || '',
-    bliscoins: (p.precio_coins as number) || 0,
-    isBlisCoinsOnly: (p.metodo_pago as string) === 'coins',
+    xpandCoins: (p.precio_coins as number) || 0,
+    isxpandCoinsOnly: (p.metodo_pago as string) === 'coins',
     stock: (p.stock_ilimitado as boolean) ? -1 : (p.stock as number) || 0,
     lowStockThreshold: (p.stock_bajo_nivel as number) || 10,
     status: (p.stock_ilimitado as boolean)

@@ -21,7 +21,7 @@ interface User {
   nombre?: string
   apellido?: string
   profilePic?: string | null
-  blis_coins?: number
+  xpand_coins?: number
   empresa_id?: string
   permisos_adicionales?: PermisosAdicionales | null
   ruta_inicio?: string | null
@@ -54,7 +54,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, nombre, apellido, avatar_url, blis_coins, rol, empresa_id, telefono, zona_horaria')
+      .select('id, email, nombre, apellido, avatar_url, xpand_coins, rol, empresa_id, telefono, zona_horaria')
       .eq('id', userId)
       .single()
 
@@ -89,7 +89,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
               nombre: nombre,
               apellido: '',
               role: rol as UserRole,
-              blis_coins: 0,
+              xpand_coins: 0,
               empresa_id: DEFAULT_EMPRESA_ID,
               permisos_adicionales: null,
               ruta_inicio: null,
@@ -108,7 +108,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
           nombre: p.nombre || '',
           apellido: p.apellido || '',
           profilePic: p.avatar_url,
-          blis_coins: p.blis_coins || 0,
+          xpand_coins: p.xpand_coins || 0,
           role: normalizedRol,
           phone: p.telefono || '',
           empresa_id: p.empresa_id || DEFAULT_EMPRESA_ID,
@@ -127,7 +127,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
       nombre?: string
       apellido?: string
       avatar_url?: string
-      blis_coins?: number
+      xpand_coins?: number
       rol?: string
       empresa_id?: string
       telefono?: string
@@ -148,7 +148,7 @@ async function fetchProfile(userId: string): Promise<User | null> {
       nombre: profile.nombre || '',
       apellido: profile.apellido || '',
       profilePic: profile.avatar_url,
-      blis_coins: profile.blis_coins || 0,
+      xpand_coins: profile.xpand_coins || 0,
       role: normalizedRol,
       phone: profile.telefono || '',
       empresa_id: profile.empresa_id || DEFAULT_EMPRESA_ID,
@@ -215,7 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return { ...prev, role: rol, empresa_id: session.user.app_metadata?.empresa_id || prev.empresa_id || DEFAULT_EMPRESA_ID }
               }
               // No hay cache — crear usuario básico del JWT
-              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || DEFAULT_EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
+              return { id: session.user.id, email: session.user.email || '', role: rol, xpand_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || DEFAULT_EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
             })
           }
         } catch (err) {
@@ -226,7 +226,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if (prev && prev.id === session.user.id) {
                 return { ...prev, role: rol }
               }
-              return { id: session.user.id, email: session.user.email || '', role: rol, blis_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || DEFAULT_EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
+              return { id: session.user.id, email: session.user.email || '', role: rol, xpand_coins: 0, empresa_id: session.user.app_metadata?.empresa_id || DEFAULT_EMPRESA_ID, permisos_adicionales: null, ruta_inicio: null }
             })
           }
         }
@@ -302,7 +302,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: data.user.id,
           email: data.user.email || email,
           role: rol,
-          blis_coins: 0,
+          xpand_coins: 0,
           empresa_id: data.user.app_metadata?.empresa_id || DEFAULT_EMPRESA_ID,
           permisos_adicionales: null,
           ruta_inicio: null,
