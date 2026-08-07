@@ -619,6 +619,17 @@ export default function EditarUsuarioPage() {
                                                             {course.estado === 'en_progreso' ? 'En progreso' : course.estado === 'completado' ? 'Completado' : course.estado === 'bloqueado' ? 'Bloqueado' : 'Sin iniciar'}
                                                         </span>
                                                         <span className="text-[9px] text-gray-600">{course.progreso}%</span>
+                                                        {course.nota_final != null && (
+                                                            <span className="text-[9px] text-amber-400 font-bold">{course.nota_final}% nota</span>
+                                                        )}
+                                                        {course.intento_aprobado != null && (
+                                                            <span className="text-[9px] text-emerald-400" title="Intento y ciclo de aprobación">
+                                                                C{course.ciclo_aprobado || 0}·I{course.intento_aprobado}
+                                                            </span>
+                                                        )}
+                                                        {course.estado !== 'bloqueado' && course.estado !== 'completado' && course.intento_examen > 0 && (
+                                                            <span className="text-[9px] text-gray-500">{course.intento_examen}/{course.max_intentos || 3} intentos</span>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>

@@ -91,8 +91,8 @@ export function ExamViewer({ preguntas, cursoId, userId, onResultado }: Props) {
               <p className={`text-xl font-black ${resultado.aprobado ? 'text-emerald-400' : 'text-amber-400'}`}>{resultado.nota}%</p>
             </div>
             <div className="bg-black/40 rounded-xl p-3 text-center">
-              <p className="text-[10px] text-gray-500 uppercase font-bold">Intento</p>
-              <p className="text-xl font-black text-white">{resultado.intento}/{resultado.max_intentos}</p>
+              <p className="text-[10px] text-gray-500 uppercase font-bold">Ciclo / Intento</p>
+              <p className="text-xl font-black text-white">C{resultado.ciclo || 0}·I{resultado.intento}/{resultado.max_intentos}</p>
             </div>
             <div className="bg-black/40 rounded-xl p-3 text-center">
               <p className="text-[10px] text-gray-500 uppercase font-bold">XP</p>

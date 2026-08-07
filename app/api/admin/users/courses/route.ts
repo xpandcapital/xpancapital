@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       advisorId = advisor.id
       const { data: equipoCursos } = await supabase
         .from('equipo_cursos')
-        .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en')
+        .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en, intento_examen, ciclo_examen, intento_aprobado, ciclo_aprobado')
         .eq('advisor_id', advisor.id)
         .neq('estado', 'bloqueado')
         .order('asignado_en', { ascending: false })
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     // Query 2: por user_id directo (asignaciones via compras/trigger)
     const { data: byUserId } = await supabase
       .from('equipo_cursos')
-      .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en')
+      .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en, intento_examen, ciclo_examen, intento_aprobado, ciclo_aprobado')
       .eq('user_id', userId)
       .neq('estado', 'bloqueado')
       .order('asignado_en', { ascending: false })

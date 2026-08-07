@@ -7,14 +7,18 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 function getSupabase() { return createClient(supabaseUrl, supabaseServiceKey) }
 
-// Puntos de gamificación según intento y ciclo
-function calcularPuntosExamen(puntosBase: number, ciclo: number, intento: number): number {
-  // Fórmula: base / (2^ciclo) * multiplicador de intento
-  // intento 1: 100%, intento 2: 50%, intento 3: 20%
-  const multiplicadorPorIntento: Record<number, number> = { 1: 1.0, 2: 0.5, 3: 0.2 }
-  const mult = multiplicadorPorIntento[intento] || 0.05
-  const divisorCiclo = Math.pow(2, ciclo)
-  return Math.round((puntosBase / divisorCiclo) * mult)
+// Puntos de gamificación — tabla fija por ciclo e intento
+const PUNTOS_EXAMEN: Record<number, Record<number, number>> = {
+  0: { 1: 500, 2: 450, 3: 400 },   // Ciclo original
+  1: { 1: 350, 2: 300, 3: 250 },   // 1er restablecimiento
+  2: { 1: 200, 2: 150, 3: 100 },   // 2do restablecimiento
+  3: { 1: 90,  2: 50,  3: 0 },     // 3er restablecimiento
+}
+
+function calcularPuntosExamen(_puntosBase: number, ciclo: number, intento: number): number {
+  const cicloData = PUNTOS_EXAMEN[Math.min(ciclo, 3)]
+  if (!cicloData) return 0
+  return cicloData[intento] ?? 0
 }
 
 export async function POST(request: NextRequest) {
@@ -120,6 +124,8 @@ export async function POST(request: NextRequest) {
     const maxIntentos = curso.max_intentos || 3
     const puntosGamificacion = aprobado ? calcularPuntosExamen(curso.puntos_certificado || 500, cicloActual, intentoActual) : 0
 
+    const aprobadoMetadata = aprobado ? { intento_aprobado: intentoActual, ciclo_aprobado: cicloActual } : {}
+
     if (aprobado) {
       bloqueado = false
       intentoActual = 0
@@ -139,12 +145,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (progresoExistente) {
-      await supabase.from('curso_progreso').update(progresoData).eq('id', progresoExistente.id)
+      await supabase.from('curso_progreso').update({
+        ...progresoData,
+        ...aprobadoMetadata,
+      }).eq('id', progresoExistente.id)
     } else {
       await supabase.from('curso_progreso').insert({
         user_id,
         curso_id,
         ...progresoData,
+        ...aprobadoMetadata,
         lecciones_completadas: [],
         examen_estado: aprobado ? 'aprobado' : (bloqueado ? 'bloqueado' : 'pendiente'),
       })
@@ -157,6 +167,7 @@ export async function POST(request: NextRequest) {
         ciclo_examen: cicloActual,
         estado: bloqueado ? 'bloqueado' : (aprobado ? 'completado' : equipoExistente.estado),
         nota_final: nota,
+        ...aprobadoMetadata,
         ...(aprobado ? { progreso: 100, completado_en: new Date().toISOString() } : {}),
       }).eq('id', equipoExistente.id)
     }
@@ -186,6 +197,7 @@ export async function POST(request: NextRequest) {
       aciertos,
       total: correctas.length,
       intento: intentoActual,
+      ciclo: cicloActual,
       max_intentos: maxIntentos,
       bloqueado,
       puntos_otorgados: puntosGamificacion,
@@ -210,7 +222,7 @@ export async function GET(request: NextRequest) {
 
     const { data: progreso } = await supabase
       .from('curso_progreso')
-      .select('intento_examen, ciclo_examen, examen_estado, nota_final, intentos')
+      .select('intento_examen, ciclo_examen, examen_estado, nota_final, intentos, intento_aprobado, ciclo_aprobado')
       .eq('user_id', user_id)
       .eq('curso_id', curso_id)
       .maybeSingle()
@@ -232,6 +244,8 @@ export async function GET(request: NextRequest) {
       success: true,
       intento_examen: progreso?.intento_examen || equipo?.intento_examen || 0,
       ciclo_examen: progreso?.ciclo_examen || equipo?.ciclo_examen || 0,
+      intento_aprobado: progreso?.intento_aprobado || equipo?.intento_aprobado || null,
+      ciclo_aprobado: progreso?.ciclo_aprobado || equipo?.ciclo_aprobado || null,
       examen_estado: progreso?.examen_estado || 'pendiente',
       bloqueado: equipo?.estado === 'bloqueado' || progreso?.examen_estado === 'bloqueado',
       nota_final: progreso?.nota_final || null,
