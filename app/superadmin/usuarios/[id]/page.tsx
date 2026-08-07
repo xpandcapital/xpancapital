@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
     ArrowLeft, Shield, CheckCircle2, X, Loader2, Pencil, Mail, User,
     ToggleLeft, Save, KeyRound, Eye, EyeOff, GraduationCap,
-    Plus, Trash2, Copy, Bell, CheckSquare, Square, MessageCircle
+    Plus, Trash2, Copy, Bell, CheckSquare, Square, MessageCircle, RefreshCw
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { useActionGuard } from '@/hooks/useActionGuard';
@@ -291,6 +291,26 @@ export default function EditarUsuarioPage() {
                 showToast(data.error || 'Error al bloquear curso', 'error');
             }
         } catch { showToast('Error al bloquear curso', 'error'); }
+        finally { setRemoving(null); }
+    };
+
+    const handleUnblockExam = async (cursoId: string) => {
+        if (!guard('equipo', 'editar')) return;
+        setRemoving(cursoId);
+        try {
+            const res = await fetch('/api/equipo-cursos', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, curso_id: cursoId, desbloquear: true }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.mensaje || 'Examen desbloqueado');
+                fetchCourses(userId);
+            } else {
+                showToast(data.error || 'Error al desbloquear', 'error');
+            }
+        } catch { showToast('Error al desbloquear examen', 'error'); }
         finally { setRemoving(null); }
     };
 
@@ -595,13 +615,18 @@ export default function EditarUsuarioPage() {
                                                 <div className="min-w-0">
                                                     <p className="text-white text-sm font-bold truncate">{course.cursos?.nombre || 'Curso'}</p>
                                                     <div className="flex items-center gap-2 mt-0.5">
-                                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-lg border ${ESTADO_COLORS[course.estado] || ESTADO_COLORS.asignado}`}>
-                                                            {course.estado === 'en_progreso' ? 'En progreso' : course.estado === 'completado' ? 'Completado' : 'Sin iniciar'}
+                                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-lg border ${course.estado === 'bloqueado' ? 'bg-red-500/10 text-red-400 border-red-500/20' : (ESTADO_COLORS[course.estado] || ESTADO_COLORS.asignado)}`}>
+                                                            {course.estado === 'en_progreso' ? 'En progreso' : course.estado === 'completado' ? 'Completado' : course.estado === 'bloqueado' ? 'Bloqueado' : 'Sin iniciar'}
                                                         </span>
                                                         <span className="text-[9px] text-gray-600">{course.progreso}%</span>
                                                     </div>
                                                 </div>
                                             </div>
+                                            {course.estado === 'bloqueado' && (
+                                                <button onClick={() => handleUnblockExam(course.curso_id)} disabled={removing === course.id} className="p-2 hover:bg-emerald-500/10 rounded-lg text-gray-500 hover:text-emerald-400 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50" title="Desbloquear examen">
+                                                    <RefreshCw className="w-4 h-4" />
+                                                </button>
+                                            )}
                                             <button onClick={() => handleRemoveCourse(course.id)} disabled={removing === course.id} className="p-2 hover:bg-red-500/10 rounded-lg text-gray-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50">
                                                 {removing === course.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                                             </button>

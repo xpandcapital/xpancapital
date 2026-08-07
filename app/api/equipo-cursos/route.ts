@@ -161,3 +161,61 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
+
+// PUT — desbloquear examen (incrementar ciclo, resetear intentos)
+export async function PUT(request: NextRequest) {
+  try {
+    const supabase = createClient()
+    const body = await request.json()
+    const { user_id, curso_id, desbloquear } = body
+
+    if (!user_id || !curso_id || !desbloquear) {
+      return NextResponse.json({ error: 'user_id, curso_id y desbloquear requeridos' }, { status: 400 })
+    }
+
+    // Obtener estado actual
+    const { data: equipo, error: fetchError } = await supabase
+      .from('equipo_cursos')
+      .select('id, ciclo_examen, intento_examen, estado')
+      .eq('user_id', user_id)
+      .eq('curso_id', curso_id)
+      .maybeSingle()
+
+    if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 500 })
+
+    const nuevoCiclo = (equipo?.ciclo_examen || 0) + 1
+    const updateData: Record<string, any> = {
+      ciclo_examen: nuevoCiclo,
+      intento_examen: 0,
+      estado: 'asignado',
+    }
+
+    if (equipo) {
+      await supabase.from('equipo_cursos').update(updateData).eq('id', equipo.id)
+    }
+
+    // También actualizar curso_progreso
+    const { data: progreso } = await supabase
+      .from('curso_progreso')
+      .select('id')
+      .eq('user_id', user_id)
+      .eq('curso_id', curso_id)
+      .maybeSingle()
+
+    if (progreso) {
+      await supabase.from('curso_progreso').update({
+        ciclo_examen: nuevoCiclo,
+        intento_examen: 0,
+        examen_estado: 'pendiente',
+      }).eq('id', progreso.id)
+    }
+
+    return NextResponse.json({
+      success: true,
+      ciclo: nuevoCiclo,
+      mensaje: `Examen desbloqueado. Ciclo ${nuevoCiclo + 1}, 3 nuevos intentos.`,
+    })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Error interno' }, { status: 500 })
+  }
+}
