@@ -77,7 +77,21 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
             onClose();
             return;
         }
+    }, [article.id, onClose]);
 
+    // Auto-reclamar al completar la lectura (sin clic)
+    useEffect(() => {
+        if (!user) return;
+        if (claimedRef.current) return;
+        if (timeLeft > 0) return;
+        const t = setTimeout(() => {
+            claimReward();
+        }, 300);
+        return () => clearTimeout(t);
+    }, [timeLeft, user]);
+
+    useEffect(() => {
+        if (claimedRef.current) return;
         intervalRef.current = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
@@ -95,6 +109,7 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
 
     const claimReward = async () => {
         if (claimedRef.current || isClaiming || !user) return;
+        claimedRef.current = true;
         setIsClaiming(true);
         try {
             const response = await fetch('/api/blog/lectura', {
@@ -110,7 +125,6 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
             });
             const data = await response.json();
             if (data.success) {
-                claimedRef.current = true;
                 onCoinsChange(article.rewardAmount);
                 const claimedArticles = JSON.parse(localStorage.getItem('xpand_claimed_articles') || '[]');
                 if (!claimedArticles.includes(article.id)) {
@@ -118,6 +132,8 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
                     localStorage.setItem('xpand_claimed_articles', JSON.stringify(claimedArticles));
                 }
                 onClose();
+            } else {
+                claimedRef.current = false;
             }
         } catch {} finally {
             setIsClaiming(false);
@@ -128,27 +144,23 @@ function RewardBanner({ article, user, userCoins, onCoinsChange, onClose }: {
 
     return (
         <div className="sticky top-28 z-30 w-full flex justify-center mb-12">
-            <button
-                onClick={claimReward}
-                disabled={timeLeft > 0 || isClaiming}
-                className={`px-8 py-4 rounded-[40px] flex items-center gap-4 backdrop-blur-xl border transition-all duration-300 ${
-                    timeLeft > 0
-                        ? 'bg-[#d5c108]/90 border-red-400/30 text-white'
-                        : 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)]'
-                }`}
-            >
+            <div className={`px-8 py-4 rounded-[40px] flex items-center gap-4 backdrop-blur-xl border transition-all duration-300 ${
+                timeLeft > 0
+                    ? 'bg-[#d5c108]/90 border-yellow-400/30 text-white'
+                    : 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.4)]'
+            }`}>
                 <div className="p-2 rounded-full bg-white/10">
                     <Coins className="w-5 h-5" />
                 </div>
                 <div className="flex flex-col items-start">
                     <span className="font-black tracking-widest uppercase text-[10px]">
-                        {timeLeft > 0 ? 'PROCESANDO LECTURA' : '¡RECLAMAR RECOMPENSA!'}
+                        {timeLeft > 0 ? 'PROCESANDO LECTURA' : isClaiming ? 'OTORGANDO...' : '¡RECOMPENSA GANADA!'}
                     </span>
                     <span className={`text-[14px] font-black ${timeLeft > 0 ? 'text-white/80' : 'text-black'}`}>
-                        {timeLeft > 0 ? `FALTAN ${timeLeft} SEG` : `+${article.rewardAmount} XPAND COINS`}
+                        {timeLeft > 0 ? `FALTAN ${timeLeft} SEG` : `HAS GANADO +${article.rewardAmount} XPAND COINS`}
                     </span>
                 </div>
-            </button>
+            </div>
         </div>
     );
 }
@@ -536,7 +548,7 @@ function ArticleDetailPage() {
                                     <div className="px-8 py-4 rounded-[40px] flex items-center gap-4 bg-emerald-500 text-black shadow-[0_0_30px_rgba(16,185,129,0.5)]">
                                         <CheckCircle2 className="w-5 h-5" />
                                         <span className="font-black tracking-widest uppercase text-[10px]">
-                                            +{article?.rewardAmount || 0} COINS GANADOS
+                                            HAS GANADO +{article?.rewardAmount || 0} XPAND COINS
                                         </span>
                                     </div>
                                 </div>
