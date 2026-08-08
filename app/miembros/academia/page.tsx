@@ -415,6 +415,16 @@ function AcademyContent() {
                             <div className="flex items-center justify-center h-96">
                                 <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
                             </div>
+                        ) : activeExam ? (
+                            <div className="max-w-2xl mx-auto p-4 space-y-4">
+                                <button onClick={() => setActiveExam(null)} className="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors">
+                                    <ArrowLeft className="w-4 h-4" /> Volver al temario
+                                </button>
+                                {(() => {
+                                    const examMod = modules.find(m => m.id === activeExam.moduleId)
+                                    return <ExamViewer preguntas={examMod?.questions || []} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) setActiveExam(null) }} />
+                                })()}
+                            </div>
                         ) : (
                             <div className="flex flex-col xl:flex-row gap-8">
                                 <div className="flex-1 space-y-6">
