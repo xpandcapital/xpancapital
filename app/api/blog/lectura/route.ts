@@ -65,6 +65,9 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Cantidad de coins a otorgar
+    const cantidad = coins_cantidad || 5
+
     // Crear nuevo registro de lectura
     const { data: lectura, error: lecturaError } = await supabase
       .from('blog_lecturas')
@@ -72,8 +75,8 @@ export async function POST(request: NextRequest) {
         user_id,
         post_id,
         tiempo_segundos: tiempo_segundos || 60,
-        completado: completado || true,
-        recompensa_otorgada: true
+        recompensa_otorgada: true,
+        coins_ganados: cantidad
       })
       .select()
       .single()
@@ -86,8 +89,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Otorgar coins al usuario
-    const cantidad = coins_cantidad ||5
-    
     const { data: profile } = await supabase
       .from('profiles')
       .select('xpand_coins')
@@ -173,16 +174,15 @@ export async function PUT(request: NextRequest) {
     // Check if record exists
     const { data: existing } = await supabase
       .from('blog_lecturas')
-      .select('id, completado, recompensa_otorgada')
+      .select('id, recompensa_otorgada')
       .eq('user_id', user_id)
       .eq('post_id', post_id)
       .single()
 
     let result
     if (existing) {
-      // Update only tiempo and optionally completado
+      // Update tiempo
       const updates: any = { tiempo_segundos }
-      if (completado !== undefined) updates.completado = completado
       
       result = await supabase
         .from('blog_lecturas')
@@ -198,7 +198,6 @@ export async function PUT(request: NextRequest) {
           user_id,
           post_id,
           tiempo_segundos,
-          completado: completado || false,
           recompensa_otorgada: false
         })
         .select()
