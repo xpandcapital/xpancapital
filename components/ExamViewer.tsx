@@ -15,16 +15,20 @@ interface Props {
   cursoId: string;
   userId: string | undefined;
   instrucciones?: string;
+  tipo?: 'modulo' | 'leccion';
+  moduloId?: string;
+  leccionId?: string;
+  bloqueadoPorSecuencia?: boolean;
   onResultado?: (resultado: any) => void;
 }
 
 const EXAM_TIMEOUT_SECONDS = 30 * 60; // 30 minutos
 
-function getStorageKey(cursoId: string, userId?: string) {
-  return `xpand_exam_${cursoId}_${userId || 'anon'}`;
+function getStorageKey(cursoId: string, userId?: string, moduloId?: string, leccionId?: string) {
+  return `xpand_exam_${cursoId}_${userId || 'anon'}_${moduloId || 'curso'}_${leccionId || ''}`;
 }
 
-export function ExamViewer({ preguntas, cursoId, userId, instrucciones, onResultado }: Props) {
+export function ExamViewer({ preguntas, cursoId, userId, instrucciones, tipo = 'modulo', moduloId, leccionId, bloqueadoPorSecuencia, onResultado }: Props) {
   const [started, setStarted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [respuestas, setRespuestas] = useState<Record<string, string>>({});
@@ -35,7 +39,7 @@ export function ExamViewer({ preguntas, cursoId, userId, instrucciones, onResult
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const submittedRef = useRef(false);
 
-  const storageKey = getStorageKey(cursoId, userId);
+  const storageKey = getStorageKey(cursoId, userId, moduloId, leccionId);
 
   // Cargar progreso guardado en localStorage (soporta refrescos)
   useEffect(() => {
@@ -78,6 +82,9 @@ export function ExamViewer({ preguntas, cursoId, userId, instrucciones, onResult
         body: JSON.stringify({
           curso_id: cursoId,
           user_id: userId,
+          tipo,
+          modulo_id: moduloId,
+          leccion_id: leccionId,
           respuestas: Object.entries(respuestasFinales).map(([id, respuesta_elegida]) => ({ id, respuesta_elegida })),
         }),
       });
@@ -96,7 +103,7 @@ export function ExamViewer({ preguntas, cursoId, userId, instrucciones, onResult
     } finally {
       setEnviando(false);
     }
-  }, [cursoId, userId, onResultado, storageKey]);
+  }, [cursoId, userId, onResultado, storageKey, tipo, moduloId, leccionId]);
 
   useEffect(() => {
     if (!started || resultado) return;
@@ -197,6 +204,24 @@ export function ExamViewer({ preguntas, cursoId, userId, instrucciones, onResult
     return (
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto p-6 space-y-6">
         <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-center space-y-4">
+          {bloqueadoPorSecuencia ? (
+            <>
+              <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-8 h-8 text-red-400" />
+              </div>
+              <h2 className="text-2xl font-black text-white">Examen Bloqueado</h2>
+              <p className="text-gray-400 text-sm">
+                {tipo === 'leccion'
+                  ? 'Debes completar las lecciones anteriores de este módulo antes de poder resolver este quiz.'
+                  : 'Debes completar todas las lecciones de este módulo antes de poder rendir el examen.'}
+              </p>
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-left text-xs text-red-300">
+                <p className="font-bold uppercase tracking-widest text-[10px] mb-1">¿Cómo desbloquear?</p>
+                <p className="leading-relaxed">Marca como completadas todas las lecciones del módulo. Una vez completadas, el examen quedará disponible automáticamente.</p>
+              </div>
+            </>
+          ) : (
+            <>
           <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto">
             <Timer className="w-8 h-8 text-amber-400" />
           </div>
@@ -222,6 +247,8 @@ export function ExamViewer({ preguntas, cursoId, userId, instrucciones, onResult
           >
             <Play className="w-5 h-5" /> Comenzar Examen
           </button>
+            </>
+          )}
         </div>
       </motion.div>
     );

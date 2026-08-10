@@ -423,7 +423,11 @@ function AcademyContent() {
                                 </button>
                                 {(() => {
                                     const examMod = modules.find(m => m.id === activeExam.moduleId)
-                                    return <ExamViewer preguntas={examMod?.questions || []} instrucciones={examMod?.examInstructions || ''} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) setActiveExam(null) }} />
+                                    const preguntas = examMod?.questions || []
+                                    const leccionesModulo = examMod?.lessons || []
+                                    const leccionesNoQuiz = leccionesModulo.filter((l: any) => l.type !== 'quiz')
+                                    const secuenciaCompleta = leccionesNoQuiz.every((l: any) => completedLessons.includes(l.id))
+                                    return <ExamViewer preguntas={preguntas} instrucciones={examMod?.examInstructions || ''} tipo="modulo" moduloId={activeExam.moduleId} bloqueadoPorSecuencia={!secuenciaCompleta} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) setActiveExam(null) }} />
                                 })()}
                             </div>
                         ) : (
@@ -489,7 +493,14 @@ function AcademyContent() {
                                         </div>
 
                                         {activeLesson?.type === 'quiz' && activeLesson.questions && activeLesson.questions.length > 0 ? (
-                                            <ExamViewer preguntas={activeLesson.questions} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) handleLessonComplete(activeLesson.id) }} />
+                                            (() => {
+                                                const quizMod = modules.find(m => m.id === activeModule)
+                                                const leccionesMod = quizMod?.lessons || []
+                                                const idxActual = leccionesMod.findIndex((l: any) => l.id === activeLesson.id)
+                                                const leccionesPrevias = leccionesMod.slice(0, idxActual)
+                                                const secuenciaOK = leccionesPrevias.every((l: any) => completedLessons.includes(l.id))
+                                                return <ExamViewer preguntas={activeLesson.questions} tipo="leccion" leccionId={activeLesson.id} moduloId={activeModule || undefined} bloqueadoPorSecuencia={!secuenciaOK} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) handleLessonComplete(activeLesson.id) }} />
+                                            })()
                                         ) : activeLesson?.content && (
                                             <div className="prose prose-invert max-w-none">
                                                 <div className="text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: activeLesson.content }} />
@@ -574,19 +585,23 @@ function AcademyContent() {
                                                                      </div>
                                                                  </button>
                                                                  )})}
-                                                            {/* Examen del Módulo - dentro del módulo expandido */}
-                                                            {module.isQuizEnabled && module.questions && module.questions.length > 0 && (
-                                                                <button onClick={() => { setActiveExam({ moduleId: module.id }); setActiveLesson(null); setActiveModule(module.id) }}
-                                                                    className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 border border-amber-500/30' : 'hover:bg-white/5 border border-transparent'}`}>
-                                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 text-amber-500' : 'bg-black/40 text-amber-500/60'}`}>
-                                                                        <ListChecks className="w-4 h-4" />
+                                                             {/* Examen del Módulo - dentro del módulo expandido */}
+                                                             {module.isQuizEnabled && module.questions && module.questions.length > 0 && (() => {
+                                                                const leccionesNoQuiz = (module.lessons || []).filter((l: any) => l.type !== 'quiz')
+                                                                const secuenciaOK = leccionesNoQuiz.every((l: any) => completedLessons.includes(l.id))
+                                                                return (
+                                                                <button onClick={() => { if (secuenciaOK) { setActiveExam({ moduleId: module.id }); setActiveLesson(null); setActiveModule(module.id) } }}
+                                                                    className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 border border-amber-500/30' : secuenciaOK ? 'hover:bg-white/5 border border-transparent' : 'opacity-50 border border-transparent cursor-not-allowed'}`}>
+                                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 text-amber-500' : secuenciaOK ? 'bg-black/40 text-amber-500/60' : 'bg-black/40 text-gray-600'}`}>
+                                                                        {secuenciaOK ? <ListChecks className="w-4 h-4" /> : <Lock className="w-3.5 h-3.5" />}
                                                                     </div>
                                                                     <div className="min-w-0 flex-1 text-left">
-                                                                        <h4 className={`text-xs font-bold truncate ${activeExam?.moduleId === module.id ? 'text-amber-400' : 'text-amber-500/70 group-hover:text-amber-400'}`}>Examen del Módulo</h4>
-                                                                        <span className="text-[9px] font-mono text-amber-600/60 block mt-0.5">{module.questions.length} preguntas</span>
+                                                                        <h4 className={`text-xs font-bold truncate ${activeExam?.moduleId === module.id ? 'text-amber-400' : secuenciaOK ? 'text-amber-500/70 group-hover:text-amber-400' : 'text-gray-600'}`}>Examen del Módulo</h4>
+                                                                        <span className="text-[9px] font-mono text-amber-600/60 block mt-0.5">{secuenciaOK ? `${module.questions.length} preguntas` : 'Completa las lecciones para desbloquear'}</span>
                                                                     </div>
                                                                 </button>
-                                                            )}
+                                                                )
+                                                             })()}
                                                         </div>
                                                     )}
                                             </div>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import {
     GraduationCap, Loader2, BookOpen, Play, FileText,
     CheckCircle2, ChevronDown, ChevronRight, MonitorPlay,
-    ListChecks, Circle, X, Award, ArrowLeft, ExternalLink
+    ListChecks, Circle, X, Award, ArrowLeft, ExternalLink, Lock
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -54,6 +54,13 @@ export default function CursoDetallePage() {
         document.title = curso?.nombre ? `${curso.nombre} | Xpand Capital` : "Cargando curso...";
     }, [curso?.nombre]);
 
+    // Inicializar lecciones completadas desde el progreso guardado
+    useEffect(() => {
+        if (curso?.progreso?.lecciones_completadas) {
+            setCompletedLessons(curso.progreso.lecciones_completadas)
+        }
+    }, [curso?.progreso?.lecciones_completadas]);
+
     useEffect(() => {
         const modulos = curso?.modulos as Module[] | undefined;
         if (modulos && modulos.length > 0 && !activeModule) {
@@ -68,6 +75,18 @@ export default function CursoDetallePage() {
     const handleLessonComplete = (lessonId: string) => {
         if (!completedLessons.includes(lessonId)) {
             setCompletedLessons(prev => [...prev, lessonId]);
+            if (curso?.id && user?.id) {
+                fetch('/api/cursos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        curso_id: curso.id,
+                        lesson_id: lessonId,
+                        completed: true
+                    })
+                });
+            }
         }
     };
 
@@ -207,20 +226,24 @@ export default function CursoDetallePage() {
                                     </div>
                                 )}
                                 {/* Examen del Módulo */}
-                                {isOpen && mod.isQuizEnabled && mod.questions && mod.questions.length > 0 && (
+                                {isOpen && mod.isQuizEnabled && mod.questions && mod.questions.length > 0 && (() => {
+                                    const leccionesNoQuiz = (mod.lessons || []).filter((l: any) => l.type !== 'quiz')
+                                    const secuenciaOK = leccionesNoQuiz.every((l: any) => completedLessons.includes(l.id))
+                                    return (
                                     <div className="pb-2">
                                         <button
-                                            onClick={() => { setActiveExam({ moduleId: mod.id }); setActiveLesson(null); setActiveModule(mod.id) }}
-                                            className={`w-full flex items-center gap-3 px-5 py-2.5 transition-all text-left group ${activeExam?.moduleId === mod.id ? 'bg-amber-500/10 border-l-2 border-l-amber-500' : 'hover:bg-white/[0.02] border-l-2 border-l-transparent'}`}
+                                            onClick={() => { if (secuenciaOK) { setActiveExam({ moduleId: mod.id }); setActiveLesson(null); setActiveModule(mod.id) } }}
+                                            className={`w-full flex items-center gap-3 px-5 py-2.5 transition-all text-left group ${activeExam?.moduleId === mod.id ? 'bg-amber-500/10 border-l-2 border-l-amber-500' : secuenciaOK ? 'hover:bg-white/[0.02] border-l-2 border-l-transparent' : 'opacity-50 cursor-not-allowed border-l-2 border-l-transparent'}`}
                                         >
-                                            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500"><ListChecks className="w-3.5 h-3.5" /></div>
+                                            <div className={`p-1.5 rounded-lg ${secuenciaOK ? 'bg-amber-500/10 text-amber-500' : 'bg-gray-500/10 text-gray-600'}`}>{secuenciaOK ? <ListChecks className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}</div>
                                             <div className="flex-1 min-w-0">
-                                                <p className={`text-xs truncate ${activeExam?.moduleId === mod.id ? 'text-amber-400 font-bold' : 'text-gray-400 group-hover:text-white'}`}>Examen del Módulo</p>
-                                                <p className="text-[9px] text-amber-500/60">{mod.questions.length} preguntas</p>
+                                                <p className={`text-xs truncate ${activeExam?.moduleId === mod.id ? 'text-amber-400 font-bold' : secuenciaOK ? 'text-gray-400 group-hover:text-white' : 'text-gray-600'}`}>Examen del Módulo</p>
+                                                <p className={`text-[9px] ${secuenciaOK ? 'text-amber-500/60' : 'text-gray-700'}`}>{secuenciaOK ? `${mod.questions.length} preguntas` : 'Completa las lecciones para desbloquear'}</p>
                                             </div>
                                         </button>
                                     </div>
-                                )}
+                                    )
+                                })()}
                             </div>
                         )
                     })}
@@ -258,12 +281,21 @@ export default function CursoDetallePage() {
                             {(() => {
                                 const examMod = modules.find(m => m.id === activeExam.moduleId)
                                 const preguntas = examMod?.questions || []
-                                return <ExamViewer preguntas={preguntas} instrucciones={examMod?.examInstructions || ''} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) setActiveExam(null) }} />
+                                const leccionesNoQuiz = (examMod?.lessons || []).filter((l: any) => l.type !== 'quiz')
+                                const secuenciaCompleta = leccionesNoQuiz.every((l: any) => completedLessons.includes(l.id))
+                                return <ExamViewer preguntas={preguntas} instrucciones={examMod?.examInstructions || ''} tipo="modulo" moduloId={activeExam.moduleId} bloqueadoPorSecuencia={!secuenciaCompleta} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) setActiveExam(null) }} />
                             })()}
                         </div>
                     ) : activeLesson?.type === 'quiz' && activeLesson.questions && activeLesson.questions.length > 0 ? (
                         <div className="p-6">
-                            <ExamViewer preguntas={activeLesson.questions} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) handleLessonComplete(activeLesson.id) }} />
+                            {(() => {
+                                const quizMod = modules.find(m => m.id === activeModule)
+                                const leccionesMod = quizMod?.lessons || []
+                                const idxActual = leccionesMod.findIndex((l: any) => l.id === activeLesson.id)
+                                const leccionesPrevias = leccionesMod.slice(0, idxActual)
+                                const secuenciaOK = leccionesPrevias.every((l: any) => completedLessons.includes(l.id))
+                                return <ExamViewer preguntas={activeLesson.questions} tipo="leccion" leccionId={activeLesson.id} moduloId={activeModule || undefined} bloqueadoPorSecuencia={!secuenciaOK} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) handleLessonComplete(activeLesson.id) }} />
+                            })()}
                         </div>
                     ) : activeLesson ? (
                         <div className="max-w-4xl mx-auto w-full">

@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabase()
     const body = await request.json()
-    const { curso_id, user_id, respuestas, tipo } = body
+    const { curso_id, user_id, respuestas, tipo, modulo_id, leccion_id } = body
 
     if (!curso_id || !user_id || !respuestas?.length) {
       return NextResponse.json({ error: 'curso_id, user_id y respuestas requeridos' }, { status: 400 })
@@ -43,38 +43,108 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Curso no encontrado' }, { status: 404 })
     }
 
-    // Extraer todas las preguntas y sus respuestas correctas
+    const modulos = Array.isArray(curso.modulos) ? curso.modulos : []
+
+    // Determinar el módulo objetivo (para exámenes de módulo) o el módulo de la lección (para quizzes de lección)
+    let modObjetivo: any = null
+    let leccionObjetivo: any = null
+
+    if (tipo === 'leccion' && leccion_id) {
+      for (const mod of modulos) {
+        const lec = (mod.lessons || []).find((l: any) => l.id === leccion_id)
+        if (lec) {
+          modObjetivo = mod
+          leccionObjetivo = lec
+          break
+        }
+      }
+      if (!leccionObjetivo) {
+        return NextResponse.json({ error: 'Lección no encontrada' }, { status: 404 })
+      }
+    } else {
+      // Examen de módulo
+      modObjetivo = modulos.find((m: any) => m.id === modulo_id)
+      if (!modObjetivo) {
+        return NextResponse.json({ error: 'Módulo no encontrado' }, { status: 404 })
+      }
+    }
+
+    // Verificar que las lecciones estén completadas (secuencia obligatoria)
+    const { data: progresoExistente } = await supabase
+      .from('curso_progreso')
+      .select('id, intentos, intento_examen, ciclo_examen, examen_estado, lecciones_completadas')
+      .eq('user_id', user_id)
+      .eq('curso_id', curso_id)
+      .maybeSingle()
+
+    const { data: equipoExistente } = await supabase
+      .from('equipo_cursos')
+      .select('id, intento_examen, ciclo_examen, estado, lecciones_completadas, user_id, advisor_id')
+      .eq('user_id', user_id)
+      .eq('curso_id', curso_id)
+      .maybeSingle()
+
+    let leccionesCompletadas: string[] = []
+    const rawCompleted = progresoExistente?.lecciones_completadas || equipoExistente?.lecciones_completadas || []
+    if (typeof rawCompleted === 'string') {
+      try { leccionesCompletadas = JSON.parse(rawCompleted) } catch { leccionesCompletadas = [] }
+    } else if (Array.isArray(rawCompleted)) {
+      leccionesCompletadas = rawCompleted
+    }
+
+    if (tipo === 'leccion' && leccionObjetivo) {
+      // Quiz de lección: verificar que las lecciones anteriores (del mismo módulo, en orden) estén completadas
+      const leccionesModulo = modObjetivo?.lessons || []
+      const idxActual = leccionesModulo.findIndex((l: any) => l.id === leccion_id)
+      const leccionesPrevias = leccionesModulo.slice(0, idxActual)
+      const faltan = leccionesPrevias.filter((l: any) => !leccionesCompletadas.includes(l.id))
+      if (faltan.length > 0) {
+        return NextResponse.json({
+          error: 'Debes completar las lecciones anteriores antes de este quiz',
+          bloqueado_por_secuencia: true,
+        }, { status: 403 })
+      }
+    } else {
+      // Examen de módulo: verificar que TODAS las lecciones del módulo estén completadas
+      const leccionesModulo = modObjetivo?.lessons || []
+      const leccionesConQuiz = leccionesModulo.filter((l: any) => l.type === 'quiz')
+      const leccionesRequeridas = leccionesModulo.filter((l: any) => l.type !== 'quiz')
+      const faltan = leccionesRequeridas.filter((l: any) => !leccionesCompletadas.includes(l.id))
+      if (faltan.length > 0) {
+        return NextResponse.json({
+          error: `Debes completar todas las lecciones del módulo antes del examen (faltan ${faltan.length})`,
+          bloqueado_por_secuencia: true,
+        }, { status: 403 })
+      }
+    }
+
+    // Extraer las preguntas SOLO del módulo/lección objetivo
     interface PreguntaCorrecta { id: string; respuesta: string }
     const correctas: PreguntaCorrecta[] = []
 
-    const modulos = Array.isArray(curso.modulos) ? curso.modulos : []
-    for (const mod of modulos) {
-      // Preguntas del examen del módulo
-      if (mod.questions && Array.isArray(mod.questions)) {
-        for (const q of mod.questions) {
+    if (tipo === 'leccion' && leccionObjetivo) {
+      if (leccionObjetivo.questions && Array.isArray(leccionObjetivo.questions)) {
+        for (const q of leccionObjetivo.questions) {
           if (q?.id && q?.options && Array.isArray(q.options)) {
             const correcta = q.options.find((o: any) => o.isCorrect)
             if (correcta) correctas.push({ id: q.id, respuesta: correcta.id })
           }
         }
       }
-      // Preguntas de lecciones tipo quiz
-      if (mod.lessons && Array.isArray(mod.lessons)) {
-        for (const lec of mod.lessons) {
-          if (lec?.questions && Array.isArray(lec.questions)) {
-            for (const q of lec.questions) {
-              if (q?.id && q?.options && Array.isArray(q.options)) {
-                const correcta = q.options.find((o: any) => o.isCorrect)
-                if (correcta) correctas.push({ id: q.id, respuesta: correcta.id })
-              }
-            }
+    } else {
+      // Examen de módulo: preguntas del módulo
+      if (modObjetivo.questions && Array.isArray(modObjetivo.questions)) {
+        for (const q of modObjetivo.questions) {
+          if (q?.id && q?.options && Array.isArray(q.options)) {
+            const correcta = q.options.find((o: any) => o.isCorrect)
+            if (correcta) correctas.push({ id: q.id, respuesta: correcta.id })
           }
         }
       }
     }
 
     if (correctas.length === 0) {
-      return NextResponse.json({ error: 'No hay preguntas configuradas para este curso' }, { status: 400 })
+      return NextResponse.json({ error: 'No hay preguntas configuradas para esta evaluación' }, { status: 400 })
     }
 
     // Calificar
@@ -89,22 +159,6 @@ export async function POST(request: NextRequest) {
     const nota = Math.round((aciertos / correctas.length) * 100)
     const notaAprobacion = curso.nota_aprobacion || 70
     const aprobado = nota >= notaAprobacion
-
-    // Buscar o crear progreso
-    const { data: progresoExistente } = await supabase
-      .from('curso_progreso')
-      .select('id, intentos, intento_examen, ciclo_examen, examen_estado, lecciones_completadas')
-      .eq('user_id', user_id)
-      .eq('curso_id', curso_id)
-      .maybeSingle()
-
-    // También buscar en equipo_cursos
-    const { data: equipoExistente } = await supabase
-      .from('equipo_cursos')
-      .select('id, intento_examen, ciclo_examen, estado, lecciones_completadas, user_id, advisor_id')
-      .eq('user_id', user_id)
-      .eq('curso_id', curso_id)
-      .maybeSingle()
 
     let intentoActual = 1
     let cicloActual = 0
