@@ -73,26 +73,6 @@ export function CorreoVisor({
   }
 
   if (!mensaje) {
-    // Si es modo compose (nuevo correo), mostrar el editor de respuesta aunque no haya mensaje seleccionado
-    if (respuestaOpen && respuestaModo === 'compose') {
-      return (
-        <div className="flex-1 flex flex-col min-h-0 bg-white overflow-hidden">
-          <CorreoRespuesta
-            open
-            modo="compose"
-            mensajeOriginal={null}
-            cuentaEmail={cuentaEmail}
-            cuentaNombre={cuentaNombre}
-            cuentaFirma={cuentaFirma}
-            cuentaPlantillaDefault={cuentaPlantillaDefault}
-            cuentaId={cuentaId}
-            activeFolder={activeFolder}
-            onClose={onRespuestaClose}
-            onEnviado={onRespuestaEnviada}
-          />
-        </div>
-      )
-    }
     return (
       <div className="flex-1 flex items-center justify-center text-gray-500">
         <div className="text-center">

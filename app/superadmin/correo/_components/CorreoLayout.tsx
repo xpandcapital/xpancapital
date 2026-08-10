@@ -351,6 +351,40 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
         </div>
       )}
       <CorreoConfigCuenta open={showConfigCuenta} cuenta={cuentaActiva} onClose={() => setShowConfigCuenta(false)} onGuardado={handleConfigGuardado} />
+
+      {/* Modal de Redactar (compose) */}
+      <AnimatePresence>
+        {respuestaOpen && respuestaModo === 'compose' && cuentaActiva && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-4 md:p-8 pt-16 md:pt-20 overflow-y-auto"
+            onClick={(e) => { if (e.target === e.currentTarget) { setRespuestaOpen(false); setRespuestaModo('reply') } }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 30, scale: 0.96 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="w-full max-w-3xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CorreoRespuesta
+                open
+                modo="compose"
+                mensajeOriginal={null}
+                cuentaEmail={cuentaActiva?.email || ''}
+                cuentaNombre={cuentaActiva?.nombre_mostrado || ''}
+                cuentaFirma={cuentaActiva?.firma || ''}
+                cuentaPlantillaDefault={cuentaActiva?.plantilla_default_id || ''}
+                cuentaId={cuentaActiva?.id || ''}
+                activeFolder={activeFolder}
+                onClose={() => { setRespuestaOpen(false); setRespuestaModo('reply') }}
+                onEnviado={onRespuestaEnviada}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
