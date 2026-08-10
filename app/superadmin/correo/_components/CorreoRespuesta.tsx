@@ -251,33 +251,6 @@ export function CorreoRespuesta({
             </div>
 
             {/* Plantilla opcional (solo en compose, colapsable) */}
-            {modo === 'compose' && (
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Plantilla (opcional)</label>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setShowIA(!showIA)} className="flex items-center gap-1 text-[10px] text-purple-400 hover:text-purple-300 transition-colors">
-                      <Sparkles className="w-3 h-3" /> IA
-                    </button>
-                    {templateId !== 'none' && (
-                      <button onClick={handlePreviewTemplate} className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-white transition-colors">
-                        <Eye className="w-3 h-3" /> Vista previa
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <SearchableSelect value={templateId} onChange={setTemplateId}
-                  options={[{ value: 'none', label: 'Sin plantilla (texto plano)' }, ...templates.map((t: any) => ({ value: t.id, label: t.nombre }))]}
-                  className="w-full"
-                />
-                {templateId !== 'none' && (
-                  <p className="text-[10px] text-gray-600 mt-1">
-                    Escribe tu respuesta. Se insertará donde esté {'{{respuesta-de-correo}}'} en la plantilla.
-                  </p>
-                )}
-              </div>
-            )}
-
             <CorreoRedactorIA
               visible={showIA}
               originalEmail={{
@@ -305,7 +278,7 @@ export function CorreoRespuesta({
             {/* Área de mensaje con toolbar */}
             <div>
               <label className={`block mb-1.5 font-bold uppercase tracking-wider ${modo === 'compose' ? 'text-[10px] text-gray-500' : 'text-[10px] text-gray-500'}`}>
-                {templateId !== 'none' ? 'Tu Respuesta' : 'Mensaje'}
+                {modo === 'compose' ? 'Mensaje' : (templateId !== 'none' ? 'Tu Respuesta' : 'Mensaje')}
               </label>
               {/* HTML Toolbar */}
               <div className={`flex items-center gap-0.5 p-1.5 border-b-0 rounded-t-xl ${modo === 'compose' ? 'bg-white/[0.05] border border-white/10' : 'bg-gray-50 border border-gray-200'}`}>
