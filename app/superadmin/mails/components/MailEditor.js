@@ -27,13 +27,6 @@ function ColToolBtn({ icon: Icon, label, onClick }) {
 export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId, selectedBlock, selectedBlockId, moveBlock, duplicateBlock, removeBlock, applyPalette, senders, addNetwork, settings, updateSetting, currentPalettes, handleUpdateContent, showMediaModal, setShowMediaModal, mediaCallbackRef, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, addBlockToSpecificColumn, demoData, applyDemoData, previewWithDemo, setPreviewWithDemo, generateHTML, theme, savedTemplates, currentTemplateId, onLoadTemplateFromEvent, templatesLoading }) {
   const BLOCK_ICONS = { text: Type, image: ImageIcon, button: ClickIcon, video: Video, divider: Minus, social: Share2, html: Code, header: Layout, footer: Settings };
   const handleOpenMedia = (callback) => { setShowMediaModal(true); mediaCallbackRef.current = callback; };
-  const [senderDropdownOpen, setSenderDropdownOpen] = useState(false);
-
-  // Saneo: si el senderId guardado no existe en los senders disponibles, tratarlo como vacío
-  const senderValido = (senders || []).some(s => s.id === settings.senderId);
-  const senderEfectivoId = senderValido ? settings.senderId : '';
-  const senderActual = (senders || []).find(s => s.id === senderEfectivoId) || null;
-  const senderDefault = (senders || []).find(s => s.is_default) || null;
 
   return (
     <aside className="w-80 bg-white dark:bg-[#111111] border-l border-gray-200 dark:border-[#222222] flex flex-col flex-shrink-0 z-10">
@@ -258,6 +251,14 @@ function FooterEditor({ selectedBlock, handleUpdateContent }) {
 }
 
 function GlobalSettings({ settings, updateSetting, currentPalettes, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, applyPalette, senders, savedTemplates, currentTemplateId, onLoadTemplateFromEvent, templatesLoading }) {
+  const [senderDropdownOpen, setSenderDropdownOpen] = useState(false);
+  
+  // Saneo: si el senderId guardado no existe en los senders disponibles, tratarlo como vacío
+  const senderValido = (senders || []).some(s => s.id === settings.senderId);
+  const senderEfectivoId = senderValido ? settings.senderId : '';
+  const senderActual = (senders || []).find(s => s.id === senderEfectivoId) || null;
+  const senderDefault = (senders || []).find(s => s.is_default) || null;
+  
   return (
     <div className="space-y-6">
       <PropertyGroup title="Evento del Sistema">
