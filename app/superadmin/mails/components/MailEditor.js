@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { MousePointerClick, Settings, Database, Copy, Sparkles, Type, Image as ImageIcon, Video, MousePointerClick as ClickIcon, Minus, Share2, Code, Layout, ArrowUp, ArrowDown, Trash2, Grid } from 'lucide-react';
+import { MousePointerClick, Settings, Database, Copy, Sparkles, Type, Image as ImageIcon, Video, MousePointerClick as ClickIcon, Minus, Share2, Code, Layout, ArrowUp, ArrowDown, Trash2, Grid, ChevronDown, Check, Mail } from 'lucide-react';
 import { SOCIAL_CONFIG, FONTS, FONT_WEIGHTS } from '../_types';
 import { PropertyGroup, PropertyInput, PropertyTextarea, PropertySelect, PropertyColor, PropertyAlignment, PropertyFileOrUrl, PropertyBackgroundImage, PropertyPadding } from './PropertyComponents';
 import EventSelector from './EventSelector';
@@ -27,6 +27,13 @@ function ColToolBtn({ icon: Icon, label, onClick }) {
 export default function MailEditor({ activeTab, setActiveTab, setSelectedBlockId, selectedBlock, selectedBlockId, moveBlock, duplicateBlock, removeBlock, applyPalette, senders, addNetwork, settings, updateSetting, currentPalettes, handleUpdateContent, showMediaModal, setShowMediaModal, mediaCallbackRef, isEditingPalette, editingPaletteId, paletteForm, setPaletteForm, toggleCreatePalette, startEditPalette, deletePalette, movePalette, savePalette, addBlockToSpecificColumn, demoData, applyDemoData, previewWithDemo, setPreviewWithDemo, generateHTML, theme, savedTemplates, currentTemplateId, onLoadTemplateFromEvent, templatesLoading }) {
   const BLOCK_ICONS = { text: Type, image: ImageIcon, button: ClickIcon, video: Video, divider: Minus, social: Share2, html: Code, header: Layout, footer: Settings };
   const handleOpenMedia = (callback) => { setShowMediaModal(true); mediaCallbackRef.current = callback; };
+  const [senderDropdownOpen, setSenderDropdownOpen] = useState(false);
+
+  // Saneo: si el senderId guardado no existe en los senders disponibles, tratarlo como vacío
+  const senderValido = (senders || []).some(s => s.id === settings.senderId);
+  const senderEfectivoId = senderValido ? settings.senderId : '';
+  const senderActual = (senders || []).find(s => s.id === senderEfectivoId) || null;
+  const senderDefault = (senders || []).find(s => s.is_default) || null;
 
   return (
     <aside className="w-80 bg-white dark:bg-[#111111] border-l border-gray-200 dark:border-[#222222] flex flex-col flex-shrink-0 z-10">
@@ -264,13 +271,85 @@ function GlobalSettings({ settings, updateSetting, currentPalettes, isEditingPal
         />
       </PropertyGroup>
       <PropertyGroup title="Remitente por defecto">
-        <select value={settings.senderId || ''} onChange={(e) => updateSetting('senderId', e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl p-2.5 text-sm text-white">
-          <option value="">Sin remitente asignado</option>
-          {(senders || []).map((s) => (
-            <option key={s.id} value={s.id}>{s.from_name} ({s.from_email}){s.is_default ? ' ★' : ''}</option>
-          ))}
-        </select>
+        <div className="relative mb-3">
+          <button
+            type="button"
+            onClick={() => setSenderDropdownOpen(!senderDropdownOpen)}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 border rounded-xl text-left transition-all ${
+              senderDropdownOpen
+                ? 'border-[#f5e100]/60 bg-white dark:bg-[#161616] ring-1 ring-[#f5e100]/30'
+                : 'border-gray-300 dark:border-[#333] bg-white dark:bg-[#0a0a0a] hover:border-gray-400 dark:hover:border-[#444]'
+            }`}
+          >
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${senderActual ? 'bg-[#f5e100]/15 text-[#f5e100]' : 'bg-white/5 text-gray-500'}`}>
+              <Mail size={15} />
+            </div>
+            <div className="flex-1 min-w-0">
+              {senderActual ? (
+                <>
+                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate flex items-center gap-1.5">
+                    {senderActual.from_name}
+                    {senderActual.is_default && <span className="text-[9px] bg-[#f5e100]/15 text-[#f5e100] px-1.5 py-0.5 rounded font-black uppercase tracking-widest">DEFAULT</span>}
+                  </p>
+                  <p className="text-[11px] text-gray-500 truncate">{senderActual.from_email}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-bold text-gray-500 dark:text-gray-400">Sin remitente asignado</p>
+                  <p className="text-[11px] text-gray-600">Selecciona un remitente</p>
+                </>
+              )}
+            </div>
+            <ChevronDown size={16} className={`shrink-0 text-gray-400 transition-transform ${senderDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {senderDropdownOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setSenderDropdownOpen(false)} />
+              <div className="absolute top-full mt-1 left-0 right-0 z-50 bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#333] rounded-xl shadow-2xl overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => { updateSetting('senderId', ''); setSenderDropdownOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-[#222] transition-colors ${!senderEfectivoId ? 'bg-[#f5e100]/5' : ''}`}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-gray-500"><Mail size={15} /></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Sin remitente asignado</p>
+                    <p className="text-[11px] text-gray-500">Usará el remitente global por defecto</p>
+                  </div>
+                  {!senderEfectivoId && <Check size={16} className="text-[#f5e100]" />}
+                </button>
+                {(senders || []).map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => { updateSetting('senderId', s.id); setSenderDropdownOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-[#222] transition-colors ${senderEfectivoId === s.id ? 'bg-[#f5e100]/5' : ''}`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${senderEfectivoId === s.id ? 'bg-[#f5e100]/15 text-[#f5e100]' : 'bg-white/5 text-gray-500'}`}>
+                      <Mail size={15} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-900 dark:text-white truncate flex items-center gap-1.5">
+                        {s.from_name}
+                        {s.is_default && <span className="text-[9px] bg-[#f5e100]/15 text-[#f5e100] px-1.5 py-0.5 rounded font-black uppercase tracking-widest">DEFAULT</span>}
+                      </p>
+                      <p className="text-[11px] text-gray-500 truncate">{s.from_email}</p>
+                    </div>
+                    {senderEfectivoId === s.id && <Check size={16} className="text-[#f5e100]" />}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
         <p className="text-[10px] text-gray-500 mt-1">Remitente que usará esta plantilla al enviarse automáticamente</p>
+        {senderDefault && (
+          <p className="text-[10px] text-gray-500 mt-1.5 flex items-start gap-1.5 bg-white/[0.03] border border-white/5 rounded-lg p-2">
+            <span className="text-[#f5e100] mt-0.5">✦</span>
+            <span>En envíos automáticos (compra, creación de usuario) se usará el remitente global: <b className="text-gray-300">{senderDefault.from_name}</b> ({senderDefault.from_email})</span>
+          </p>
+        )}
       </PropertyGroup>
       <PropertyGroup title="Asunto y Previsualización">
         <PropertyInput label="Asunto del Correo" value={settings.subject || ''} onChange={(v) => updateSetting('subject', v)} placeholder="Ej: ¡Oferta especial para ti!" />
