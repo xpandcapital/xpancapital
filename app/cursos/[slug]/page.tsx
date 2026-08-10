@@ -29,6 +29,7 @@ interface Module {
     lessons: Lesson[];
     questions?: { id: string; text: string; options: { id: string; text: string; isCorrect: boolean }[] }[];
     isQuizEnabled?: boolean;
+    examInstructions?: string;
 }
 
 const TYPE_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
@@ -257,7 +258,7 @@ export default function CursoDetallePage() {
                             {(() => {
                                 const examMod = modules.find(m => m.id === activeExam.moduleId)
                                 const preguntas = examMod?.questions || []
-                                return <ExamViewer preguntas={preguntas} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) setActiveExam(null) }} />
+                                return <ExamViewer preguntas={preguntas} instrucciones={examMod?.examInstructions || ''} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) setActiveExam(null) }} />
                             })()}
                         </div>
                     ) : activeLesson?.type === 'quiz' && activeLesson.questions && activeLesson.questions.length > 0 ? (

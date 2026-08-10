@@ -22,6 +22,7 @@ export interface Module {
   lessons: Lesson[]
   questions?: Question[]
   isQuizEnabled?: boolean
+  examInstructions?: string
   isOpen?: boolean
 }
 

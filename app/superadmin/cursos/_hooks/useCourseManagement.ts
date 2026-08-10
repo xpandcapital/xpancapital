@@ -130,7 +130,7 @@ export function useCourseManagement() {
       currentCourse?.puntosPorLeccion, currentCourse?.puntosCertificado,
       currentCourse?.xpandCoins, currentCourse?.sequentialProgress,
       currentCourse?.requireCompletion, currentCourse?.category,
-      currentCourse?.descripcion])
+      currentCourse?.descripcion, currentCourse?.modules?.map(m => `${m.id}:${m.isQuizEnabled}:${m.examInstructions || ''}:${m.questions?.length || 0}`).join('|')])
 
   const saveBorrador = useCallback(async (statusOverride?: 'Borrador' | 'Publicado') => {
     if (!currentCourse) return

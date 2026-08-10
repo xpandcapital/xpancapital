@@ -28,6 +28,7 @@ interface Module {
     lessons: Lesson[];
     questions?: { id: string; text: string; options: { id: string; text: string; isCorrect: boolean }[] }[];
     isQuizEnabled?: boolean;
+    examInstructions?: string;
 }
 
 interface CursoData {
@@ -422,7 +423,7 @@ function AcademyContent() {
                                 </button>
                                 {(() => {
                                     const examMod = modules.find(m => m.id === activeExam.moduleId)
-                                    return <ExamViewer preguntas={examMod?.questions || []} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) setActiveExam(null) }} />
+                                    return <ExamViewer preguntas={examMod?.questions || []} instrucciones={examMod?.examInstructions || ''} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) setActiveExam(null) }} />
                                 })()}
                             </div>
                         ) : (
@@ -546,7 +547,7 @@ function AcademyContent() {
                                                         )}
                                                     </button>
 
-                                                    {openModules.has(module.id) && (
+                                                     {openModules.has(module.id) && (
                                                         <div className="space-y-1 pl-2">
                                                              {(module.lessons || []).map((lesson, lessonIdx) => {
                                                                      const globalIdx = allLessons.findIndex(a => a.lesson.id === lesson.id);
@@ -573,23 +574,21 @@ function AcademyContent() {
                                                                      </div>
                                                                  </button>
                                                                  )})}
+                                                            {/* Examen del Módulo - dentro del módulo expandido */}
+                                                            {module.isQuizEnabled && module.questions && module.questions.length > 0 && (
+                                                                <button onClick={() => { setActiveExam({ moduleId: module.id }); setActiveLesson(null); setActiveModule(module.id) }}
+                                                                    className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 border border-amber-500/30' : 'hover:bg-white/5 border border-transparent'}`}>
+                                                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 text-amber-500' : 'bg-black/40 text-amber-500/60'}`}>
+                                                                        <ListChecks className="w-4 h-4" />
+                                                                    </div>
+                                                                    <div className="min-w-0 flex-1 text-left">
+                                                                        <h4 className={`text-xs font-bold truncate ${activeExam?.moduleId === module.id ? 'text-amber-400' : 'text-amber-500/70 group-hover:text-amber-400'}`}>Examen del Módulo</h4>
+                                                                        <span className="text-[9px] font-mono text-amber-600/60 block mt-0.5">{module.questions.length} preguntas</span>
+                                                                    </div>
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     )}
-                                                {/* Examen del Módulo */}
-                                                {module.isQuizEnabled && module.questions && module.questions.length > 0 && (
-                                                    <div className="pl-2 mb-2">
-                                                        <button onClick={() => { setActiveExam({ moduleId: module.id }); setActiveLesson(null); setActiveModule(module.id) }}
-                                                            className={`w-full flex items-center gap-4 p-3.5 rounded-xl transition-all group ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 border border-amber-500/30' : 'hover:bg-white/5 border border-transparent'}`}>
-                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${activeExam?.moduleId === module.id ? 'bg-amber-500/20 text-amber-500' : 'bg-black/40 text-amber-500/60'}`}>
-                                                                <ListChecks className="w-4 h-4" />
-                                                            </div>
-                                                            <div className="min-w-0 flex-1 text-left">
-                                                                <h4 className={`text-xs font-bold truncate ${activeExam?.moduleId === module.id ? 'text-amber-400' : 'text-amber-500/70 group-hover:text-amber-400'}`}>Examen del Módulo</h4>
-                                                                <span className="text-[9px] font-mono text-amber-600/60 block mt-0.5">{module.questions.length} preguntas</span>
-                                                            </div>
-                                                        </button>
-                                                    </div>
-                                                )}
                                             </div>
                                         ))}
                                     </div>

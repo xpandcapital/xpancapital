@@ -78,6 +78,19 @@ export function ModuleEditor({
           </div>
         </div>
 
+        {module.isQuizEnabled && (
+          <div className="space-y-2 px-4">
+            <label className="text-[10px] font-black text-gray-500 uppercase">Instrucciones del Examen (visible para el alumno)</label>
+            <textarea
+              value={module.examInstructions || ''}
+              onChange={(e) => onUpdate(module.id, { examInstructions: e.target.value })}
+              rows={3}
+              placeholder="Escribe instrucciones claras para el alumno, ej: 'Este examen evalúa los conceptos del módulo. Tienes 30 minutos y puedes elegir solo una respuesta por pregunta.'"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500/50 transition-all resize-none"
+            />
+          </div>
+        )}
+
         <div className="space-y-6">
           {(module.questions || []).map((q, qIdx) => (
             <div key={q.id} className="p-8 bg-white/[0.03] border border-white/5 rounded-[2rem] space-y-6 relative group/mq">
