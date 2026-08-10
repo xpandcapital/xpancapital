@@ -36,10 +36,34 @@ export function ExamViewer({ preguntas, cursoId, userId, instrucciones, tipo = '
   const [enviando, setEnviando] = useState(false);
   const [resultado, setResultado] = useState<any>(null);
   const [error, setError] = useState("");
+  const [secuenciaOK, setSecuenciaOK] = useState<boolean | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const submittedRef = useRef(false);
 
   const storageKey = getStorageKey(cursoId, userId, moduloId, leccionId);
+
+  // Verificar secuencia contra el backend (fuente de verdad) al montar
+  useEffect(() => {
+    if (!cursoId || !userId) return;
+    let activo = true;
+    const params = new URLSearchParams({ curso_id: cursoId, user_id: userId, tipo });
+    if (moduloId) params.append('modulo_id', moduloId);
+    if (leccionId) params.append('leccion_id', leccionId);
+    fetch(`/api/cursos/examen?${params.toString()}`)
+      .then(r => r.json())
+      .then(d => {
+        if (activo && d.success && typeof d.secuencia_ok === 'boolean') {
+          setSecuenciaOK(d.secuencia_ok);
+        } else if (activo) {
+          setSecuenciaOK(bloqueadoPorSecuencia !== true);
+        }
+      })
+      .catch(() => { if (activo) setSecuenciaOK(bloqueadoPorSecuencia !== true); });
+    return () => { activo = false; };
+  }, [cursoId, userId, tipo, moduloId, leccionId]);
+
+  // El bloqueo final usa la verificación del backend si ya llegó; si aún no llega, usa la prop
+  const bloqueado = secuenciaOK === null ? bloqueadoPorSecuencia === true : !secuenciaOK;
 
   // Cargar progreso guardado en localStorage (soporta refrescos)
   useEffect(() => {
@@ -204,7 +228,11 @@ export function ExamViewer({ preguntas, cursoId, userId, instrucciones, tipo = '
     return (
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto p-6 space-y-6">
         <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-center space-y-4">
-          {bloqueadoPorSecuencia ? (
+          {secuenciaOK === null && userId ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+            </div>
+          ) : bloqueado ? (
             <>
               <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
                 <AlertTriangle className="w-8 h-8 text-red-400" />

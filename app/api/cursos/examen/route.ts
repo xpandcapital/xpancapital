@@ -270,6 +270,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const curso_id = searchParams.get('curso_id')
     const user_id = searchParams.get('user_id')
+    const tipo = searchParams.get('tipo')
+    const modulo_id = searchParams.get('modulo_id')
+    const leccion_id = searchParams.get('leccion_id')
 
     if (!curso_id || !user_id) {
       return NextResponse.json({ error: 'curso_id y user_id requeridos' }, { status: 400 })
@@ -277,23 +280,58 @@ export async function GET(request: NextRequest) {
 
     const { data: progreso } = await supabase
       .from('curso_progreso')
-      .select('intento_examen, ciclo_examen, examen_estado, nota_final, intentos, intento_aprobado, ciclo_aprobado')
+      .select('intento_examen, ciclo_examen, examen_estado, nota_final, intentos, intento_aprobado, ciclo_aprobado, lecciones_completadas')
       .eq('user_id', user_id)
       .eq('curso_id', curso_id)
       .maybeSingle()
 
     const { data: curso } = await supabase
       .from('cursos')
-      .select('max_intentos, nota_aprobacion')
+      .select('max_intentos, nota_aprobacion, modulos')
       .eq('id', curso_id)
       .single()
 
     const { data: equipo } = await supabase
       .from('equipo_cursos')
-      .select('estado, intento_examen, ciclo_examen')
+      .select('estado, intento_examen, ciclo_examen, lecciones_completadas')
       .eq('user_id', user_id)
       .eq('curso_id', curso_id)
       .maybeSingle()
+
+    // Verificar secuencia de lecciones (fuente de verdad: BD)
+    let secuencia_ok = true
+    let faltan_lecciones: string[] = []
+    if (curso?.modulos && Array.isArray(curso.modulos) && (tipo === 'modulo' || tipo === 'leccion')) {
+      const modulos = curso.modulos
+      let modObjetivo: any = null
+      if (tipo === 'modulo' && modulo_id) {
+        modObjetivo = modulos.find((m: any) => m.id === modulo_id)
+      } else if (tipo === 'leccion' && leccion_id) {
+        for (const mod of modulos) {
+          const lec = (mod.lessons || []).find((l: any) => l.id === leccion_id)
+          if (lec) { modObjetivo = mod; break }
+        }
+      }
+
+      let leccionesCompletadas: string[] = []
+      const raw = progreso?.lecciones_completadas || equipo?.lecciones_completadas || []
+      if (typeof raw === 'string') { try { leccionesCompletadas = JSON.parse(raw) } catch { leccionesCompletadas = [] } }
+      else if (Array.isArray(raw)) leccionesCompletadas = raw
+
+      if (modObjetivo) {
+        const leccionesModulo = modObjetivo.lessons || []
+        if (tipo === 'leccion' && leccion_id) {
+          const idxActual = leccionesModulo.findIndex((l: any) => l.id === leccion_id)
+          const previas = leccionesModulo.slice(0, idxActual)
+          faltan_lecciones = previas.filter((l: any) => !leccionesCompletadas.includes(l.id))
+          secuencia_ok = faltan_lecciones.length === 0
+        } else {
+          const requeridas = leccionesModulo.filter((l: any) => l.type !== 'quiz')
+          faltan_lecciones = requeridas.filter((l: any) => !leccionesCompletadas.includes(l.id))
+          secuencia_ok = faltan_lecciones.length === 0
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -306,6 +344,8 @@ export async function GET(request: NextRequest) {
       nota_final: progreso?.nota_final || null,
       max_intentos: curso?.max_intentos || 3,
       nota_aprobacion: curso?.nota_aprobacion || 70,
+      secuencia_ok,
+      faltan_lecciones,
     })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
