@@ -185,7 +185,7 @@ export function CorreoRespuesta({
             : 'border-t border-gray-200 bg-white overflow-hidden'
           }
         >
-          <div className={modo === 'compose' ? 'p-5 md:p-8 space-y-4' : 'p-4 space-y-3 max-w-3xl mx-auto w-full'}>
+          <div className={modo === 'compose' ? 'p-5 md:p-8 space-y-4' : 'p-4 md:p-6 space-y-3 w-full'}>
             {/* Header */}
             <div className="flex items-center justify-between">
               <h3 className={modo === 'compose'
@@ -334,7 +334,7 @@ export function CorreoRespuesta({
                 className={`rounded-b-xl p-4 text-sm placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all resize-none ${
                   modo === 'compose'
                     ? 'w-full min-h-[400px] md:min-h-[500px] bg-white/[0.05] border border-white/10 border-t-0 text-white'
-                    : 'bg-white border border-gray-200 border-t-0 text-gray-900 min-h-[250px]'
+                    : 'bg-white border border-gray-200 border-t-0 text-gray-900 min-h-[300px] md:min-h-[400px]'
                 }`}
               />
               {/* Adjuntos */}
