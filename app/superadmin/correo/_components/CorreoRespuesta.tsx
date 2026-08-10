@@ -334,7 +334,7 @@ export function CorreoRespuesta({
                 className={`rounded-b-xl p-4 text-sm placeholder-gray-400 focus:outline-none focus:border-blis-red/50 transition-all resize-none ${
                   modo === 'compose'
                     ? 'w-full min-h-[400px] md:min-h-[500px] bg-white/[0.05] border border-white/10 border-t-0 text-white'
-                    : 'bg-white border border-gray-200 border-t-0 text-gray-900 min-h-[180px] md:min-h-[250px]'
+                    : 'w-full bg-white border border-gray-200 border-t-0 text-gray-900 min-h-[180px] md:min-h-[250px]'
                 }`}
               />
               {/* Adjuntos */}
