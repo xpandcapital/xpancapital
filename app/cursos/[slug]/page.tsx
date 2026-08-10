@@ -76,16 +76,28 @@ export default function CursoDetallePage() {
         if (!completedLessons.includes(lessonId)) {
             setCompletedLessons(prev => [...prev, lessonId]);
             if (curso?.id && user?.id) {
-                fetch('/api/cursos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: user.id,
-                        curso_id: curso.id,
-                        lesson_id: lessonId,
-                        completed: true
-                    })
-                });
+                if ((curso as any)?.equipo_curso_id) {
+                    fetch('/api/equipo-cursos/progress', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            equipo_curso_id: (curso as any).equipo_curso_id,
+                            leccion_id: lessonId,
+                            completado: true
+                        })
+                    });
+                } else {
+                    fetch('/api/cursos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: user.id,
+                            curso_id: curso.id,
+                            lesson_id: lessonId,
+                            completed: true
+                        })
+                    });
+                }
             }
         }
     };

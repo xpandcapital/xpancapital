@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     // Verificar que las lecciones estén completadas (secuencia obligatoria)
     const { data: progresoExistente } = await supabase
       .from('curso_progreso')
-      .select('id, intentos, intento_examen, ciclo_examen, examen_estado, lecciones_completadas')
+      .select('id, intentos, intento_examen, ciclo_examen, examen_estado')
       .eq('user_id', user_id)
       .eq('curso_id', curso_id)
       .maybeSingle()
@@ -210,7 +210,6 @@ export async function POST(request: NextRequest) {
         curso_id,
         ...progresoData,
         ...aprobadoMetadata,
-        lecciones_completadas: [],
         examen_estado: aprobado ? 'aprobado' : (bloqueado ? 'bloqueado' : 'pendiente'),
       })
     }
@@ -280,7 +279,7 @@ export async function GET(request: NextRequest) {
 
     const { data: progreso } = await supabase
       .from('curso_progreso')
-      .select('intento_examen, ciclo_examen, examen_estado, nota_final, intentos, intento_aprobado, ciclo_aprobado, lecciones_completadas')
+      .select('intento_examen, ciclo_examen, examen_estado, nota_final, intentos, intento_aprobado, ciclo_aprobado')
       .eq('user_id', user_id)
       .eq('curso_id', curso_id)
       .maybeSingle()

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         .eq('empresa_id', empresa_id).eq('activo', true),
       supabase.from('cursos').select('id, nombre, modulos')
         .eq('empresa_id', empresa_id).eq('activo', true),
-      supabase.from('curso_progreso').select('user_id, progreso, lecciones_completadas, examen_estado, nota_final, intentos, curso_id')
+      supabase.from('curso_progreso').select('user_id, progreso, examen_estado, nota_final, intentos, curso_id')
         .eq('empresa_id', empresa_id),
       supabase.from('certificados').select('*', { count: 'exact', head: true }),
       supabase.from('profiles').select('id, nombre, apellido, email, puntos_cursos, puntos_nivel')

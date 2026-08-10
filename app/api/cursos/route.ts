@@ -44,18 +44,40 @@ export async function GET(request: NextRequest) {
       }
 
       let progreso = null
+      let equipoCursoId = null
       if (userId) {
-        const { data: progressData } = await supabase
-          .from('curso_progreso')
+        // Buscar en equipo_cursos primero (fuente real de lecciones completadas)
+        const { data: equipoData } = await supabase
+          .from('equipo_cursos')
           .select('*')
           .eq('user_id', userId)
           .eq('curso_id', curso.id)
-          .single()
+          .maybeSingle()
 
-        progreso = progressData
+        if (equipoData) {
+          equipoCursoId = equipoData.id
+          // Usar equipo_cursos como fuente de progreso (tiene lecciones_completadas)
+          progreso = {
+            id: equipoData.id,
+            progreso: equipoData.progreso || 0,
+            lecciones_completadas: equipoData.lecciones_completadas || [],
+            nota_final: equipoData.nota_final || null,
+            intentos: 0,
+            examen_estado: equipoData.estado || 'pendiente',
+          }
+        } else {
+          const { data: progressData } = await supabase
+            .from('curso_progreso')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('curso_id', curso.id)
+            .maybeSingle()
+
+          progreso = progressData
+        }
       }
 
-      return NextResponse.json({ success: true, data: { ...curso, progreso } })
+      return NextResponse.json({ success: true, data: { ...curso, progreso, equipo_curso_id: equipoCursoId } })
     }
 
     const { data: cursos, error } = await supabase
@@ -271,7 +293,6 @@ export async function POST(request: NextRequest) {
         .from('curso_progreso')
         .update({
           progreso: progresoCalculado,
-          lecciones_completadas: leccionesActualizadas,
           actualizado_en: new Date().toISOString()
         })
         .eq('id', existingProgress.id)
@@ -280,6 +301,24 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+
+      // Persistir lecciones completadas en equipo_cursos (fuente real)
+      if (lesson_id) {
+        const { data: equipoCurso } = await supabase
+          .from('equipo_cursos')
+          .select('id, lecciones_completadas')
+          .eq('user_id', user_id)
+          .eq('curso_id', curso_id)
+          .maybeSingle()
+        if (equipoCurso) {
+          const previas: string[] = equipoCurso.lecciones_completadas || []
+          const nuevas = previas.includes(lesson_id) ? previas : [...previas, lesson_id]
+          await supabase.from('equipo_cursos').update({
+            lecciones_completadas: nuevas,
+            progreso: progresoCalculado,
+          }).eq('id', equipoCurso.id)
+        }
       }
 
       otorgarPuntos(user_id, curso_id, lesson_id, completed).catch(() => {})
@@ -293,7 +332,6 @@ export async function POST(request: NextRequest) {
         user_id,
         curso_id,
         progreso: progresoCalculado,
-        lecciones_completadas: leccionesActualizadas,
         examen_estado: 'pendiente'
       })
       .select()
