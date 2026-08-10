@@ -379,7 +379,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
                 cuentaId={cuentaActiva?.id || ''}
                 activeFolder={activeFolder}
                 onClose={() => { setRespuestaOpen(false); setRespuestaModo('reply') }}
-                onEnviado={onRespuestaEnviada}
+                onEnviado={() => { if (cuentaActiva) cargarMensajes(cuentaActiva.id, activeFolder, 1); setRespuestaOpen(false); setRespuestaModo('reply') }}
               />
             </motion.div>
           </motion.div>
