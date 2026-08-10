@@ -67,6 +67,30 @@ function AcademyContent() {
     const [loadingPurchased, setLoadingPurchased] = useState(false);
     const [autoStarted, setAutoStarted] = useState(false);
     const [activeExam, setActiveExam] = useState<{ moduleId: string } | null>(null);
+    const [examAprobado, setExamAprobado] = useState<Record<string, boolean>>({});
+
+    // Cargar estado de aprobación de exámenes de módulo
+    useEffect(() => {
+        if (!fullCurso?.id || !user?.id || !fullCurso?.modulos) return;
+        const modulos = fullCurso.modulos as Module[];
+        const modulosConExamen = modulos.filter(m => m.isQuizEnabled && m.questions && m.questions.length > 0);
+        if (modulosConExamen.length === 0) return;
+        let activo = true;
+        Promise.all(modulosConExamen.map(m =>
+            fetch(`/api/cursos/examen?curso_id=${fullCurso.id}&user_id=${user.id}&tipo=modulo&modulo_id=${m.id}`)
+                .then(r => r.json())
+                .catch(() => null)
+        )).then(results => {
+            if (!activo) return;
+            const mapa: Record<string, boolean> = {};
+            modulosConExamen.forEach((m, i) => {
+                const r = results[i];
+                mapa[m.id] = !!r?.examen_estado && r.examen_estado === 'aprobado';
+            });
+            setExamAprobado(mapa);
+        });
+        return () => { activo = false; };
+    }, [fullCurso?.id, user?.id, fullCurso?.modulos]);
 
     const fetchCursoCompleto = useCallback(async (slugOrId: string, useId: boolean = false) => {
         setLoadingCurso(true);
@@ -237,6 +261,45 @@ function AcademyContent() {
         if (lessonIdx === 0) return false;
         const prevLesson = allLessons[lessonIdx - 1];
         return !completedLessons.includes(prevLesson.lesson.id);
+    };
+
+    // Determina si la lección activa es la última de su módulo y ese módulo tiene examen pendiente
+    const esUltimaLeccionConExamen = () => {
+        if (!activeLesson || !activeModule) return false;
+        const mod = modules.find(m => m.id === activeModule);
+        if (!mod) return false;
+        const lecciones = mod.lessons || [];
+        if (lecciones.length === 0) return false;
+        const esUltima = lecciones[lecciones.length - 1].id === activeLesson.id;
+        const tieneExamen = !!(mod.isQuizEnabled && mod.questions && mod.questions.length > 0);
+        const aprobado = !!examAprobado[mod.id];
+        return esUltima && tieneExamen && !aprobado;
+    };
+
+    // Determina si un módulo está bloqueado porque el examen del módulo anterior no fue aprobado
+    const moduloBloqueadoPorExamen = (moduloId: string) => {
+        const idx = modules.findIndex(m => m.id === moduloId);
+        if (idx <= 0) return false;
+        const modAnterior = modules[idx - 1];
+        if (!modAnterior) return false;
+        const anteriorTieneExamen = !!(modAnterior.isQuizEnabled && modAnterior.questions && modAnterior.questions.length > 0);
+        if (!anteriorTieneExamen) return false;
+        return !examAprobado[modAnterior.id];
+    };
+
+    const irSiguiente = () => {
+        // Si es la última lección de un módulo con examen sin aprobar, ir al examen
+        if (esUltimaLeccionConExamen() && activeModule) {
+            setActiveExam({ moduleId: activeModule });
+            setActiveLesson(null);
+            return;
+        }
+        if (hasNext) {
+            const next = allLessons[currentIndex + 1];
+            setActiveLesson(next.lesson);
+            setActiveModule(next.moduleId);
+            setOpenModules(new Set([next.moduleId]));
+        }
     };
 
     if (loading || loadingPurchased) {
@@ -441,7 +504,7 @@ function AcademyContent() {
                                     const leccionesModulo = examMod?.lessons || []
                                     const leccionesNoQuiz = leccionesModulo.filter((l: any) => l.type !== 'quiz')
                                     const secuenciaCompleta = leccionesNoQuiz.every((l: any) => completedLessons.includes(l.id))
-                                    return <ExamViewer preguntas={preguntas} instrucciones={examMod?.examInstructions || ''} tipo="modulo" moduloId={activeExam.moduleId} bloqueadoPorSecuencia={!secuenciaCompleta} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) setActiveExam(null) }} />
+                                    return <ExamViewer preguntas={preguntas} instrucciones={examMod?.examInstructions || ''} tipo="modulo" moduloId={activeExam.moduleId} bloqueadoPorSecuencia={!secuenciaCompleta} cursoId={fullCurso?.id || ''} userId={user?.id} onResultado={(r: any) => { if (r.aprobado) { setExamAprobado(prev => ({ ...prev, [activeExam.moduleId]: true })); setActiveExam(null); } }} />
                                 })()}
                             </div>
                         ) : (
@@ -497,11 +560,11 @@ function AcademyContent() {
                                                     Anterior
                                                 </button>
                                                 <button
-                                                    onClick={() => { if (hasNext) { const next = allLessons[currentIndex + 1]; setActiveLesson(next.lesson); setActiveModule(next.moduleId); setOpenModules(new Set([next.moduleId])); } }}
-                                                    disabled={!hasNext}
+                                                    onClick={irSiguiente}
+                                                    disabled={!hasNext && !esUltimaLeccionConExamen()}
                                                     className="px-4 py-2.5 bg-blis-red rounded-xl text-white text-[10px] font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-blis-red/20"
                                                 >
-                                                    Siguiente
+                                                    {esUltimaLeccionConExamen() ? 'Ir al Examen' : 'Siguiente'}
                                                 </button>
                                             </div>
                                         </div>
@@ -576,7 +639,7 @@ function AcademyContent() {
                                                         <div className="space-y-1 pl-2">
                                                              {(module.lessons || []).map((lesson, lessonIdx) => {
                                                                      const globalIdx = allLessons.findIndex(a => a.lesson.id === lesson.id);
-                                                                     const locked = isLessonLocked(lesson.id, globalIdx);
+                                                                     const locked = isLessonLocked(lesson.id, globalIdx) || moduloBloqueadoPorExamen(module.id);
                                                                      return (
                                                                  <button
                                                                      key={lesson.id}

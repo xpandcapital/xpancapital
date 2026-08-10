@@ -49,6 +49,30 @@ export default function CursoDetallePage() {
     const [completedLessons, setCompletedLessons] = useState<string[]>([]);
     const [openModules, setOpenModules] = useState<Set<string>>(new Set());
     const [activeExam, setActiveExam] = useState<{ moduleId: string } | null>(null);
+    const [examAprobado, setExamAprobado] = useState<Record<string, boolean>>({});
+
+    // Cargar estado de aprobación de exámenes de módulo
+    useEffect(() => {
+        if (!curso?.id || !user?.id || !curso?.modulos) return;
+        const modulos = curso.modulos as Module[];
+        const modulosConExamen = modulos.filter(m => m.isQuizEnabled && m.questions && m.questions.length > 0);
+        if (modulosConExamen.length === 0) return;
+        let activo = true;
+        Promise.all(modulosConExamen.map(m =>
+            fetch(`/api/cursos/examen?curso_id=${curso.id}&user_id=${user.id}&tipo=modulo&modulo_id=${m.id}`)
+                .then(r => r.json())
+                .catch(() => null)
+        )).then(results => {
+            if (!activo) return;
+            const mapa: Record<string, boolean> = {};
+            modulosConExamen.forEach((m, i) => {
+                const r = results[i];
+                mapa[m.id] = !!r?.examen_estado && r.examen_estado === 'aprobado';
+            });
+            setExamAprobado(mapa);
+        });
+        return () => { activo = false; };
+    }, [curso?.id, user?.id, curso?.modulos]);
 
     useEffect(() => {
         document.title = curso?.nombre ? `${curso.nombre} | Xpand Capital` : "Cargando curso...";
@@ -111,6 +135,44 @@ export default function CursoDetallePage() {
         const total = getTotalLessons();
         if (total === 0) return 0;
         return Math.round((completedLessons.length / total) * 100);
+    };
+
+    // Determina si la lección activa es la última de su módulo y ese módulo tiene examen pendiente
+    const esUltimaLeccionConExamen = () => {
+        if (!activeLesson || !activeModule) return false;
+        const mod = modules.find(m => m.id === activeModule);
+        if (!mod) return false;
+        const lecciones = mod.lessons || [];
+        if (lecciones.length === 0) return false;
+        const esUltima = lecciones[lecciones.length - 1].id === activeLesson.id;
+        const tieneExamen = !!(mod.isQuizEnabled && mod.questions && mod.questions.length > 0);
+        const aprobado = !!examAprobado[mod.id];
+        return esUltima && tieneExamen && !aprobado;
+    };
+
+    // Determina si un módulo está bloqueado porque el examen del módulo anterior no fue aprobado
+    const moduloBloqueadoPorExamen = (moduloId: string) => {
+        const idx = modules.findIndex(m => m.id === moduloId);
+        if (idx <= 0) return false;
+        const modAnterior = modules[idx - 1];
+        if (!modAnterior) return false;
+        const anteriorTieneExamen = !!(modAnterior.isQuizEnabled && modAnterior.questions && modAnterior.questions.length > 0);
+        if (!anteriorTieneExamen) return false;
+        return !examAprobado[modAnterior.id];
+    };
+
+    const irSiguiente = () => {
+        // Si es la última lección de un módulo con examen sin aprobar, ir al examen
+        if (esUltimaLeccionConExamen() && activeModule) {
+            setActiveExam({ moduleId: activeModule });
+            setActiveLesson(null);
+            return;
+        }
+        if (hasNext) {
+            const next = allLessons[currentIndex + 1];
+            setActiveLesson(next.lesson);
+            setActiveModule(next.moduleId);
+        }
     };
 
     if (loading) {
@@ -213,23 +275,25 @@ export default function CursoDetallePage() {
                                             const isCompleted = completedLessons.includes(lesson.id)
                                             const typeConfig = TYPE_CONFIG[lesson.type] || TYPE_CONFIG.text
                                             const LessonIcon = typeConfig.icon
+                                            const bloqueadoPorExamen = moduloBloqueadoPorExamen(mod.id)
 
                                             return (
                                                 <button
                                                     key={lesson.id}
-                                                    onClick={() => { setActiveLesson(lesson); setActiveModule(mod.id); setActiveExam(null) }}
+                                                    onClick={() => { if (!bloqueadoPorExamen) { setActiveLesson(lesson); setActiveModule(mod.id); setActiveExam(null) } }}
+                                                    disabled={bloqueadoPorExamen}
                                                     className={`w-full flex items-center gap-3 px-5 py-2.5 transition-all text-left group ${
-                                                        isActive ? 'bg-blis-red/5 border-l-2 border-l-blis-red' : 'hover:bg-white/[0.02] border-l-2 border-l-transparent'
+                                                        isActive ? 'bg-blis-red/5 border-l-2 border-l-blis-red' : bloqueadoPorExamen ? 'opacity-40 cursor-not-allowed' : 'hover:bg-white/[0.02] border-l-2 border-l-transparent'
                                                     }`}
                                                 >
                                                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
                                                         isCompleted ? 'bg-emerald-500 border-emerald-500' : isActive ? 'border-blis-red bg-blis-red/10' : 'border-gray-700 bg-transparent group-hover:border-gray-500'
                                                     }`}>
-                                                        {isCompleted && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                                        {isCompleted ? <CheckCircle2 className="w-3 h-3 text-white" /> : bloqueadoPorExamen ? <Lock className="w-2.5 h-2.5 text-gray-700" /> : null}
                                                     </div>
                                                     <LessonIcon className={`w-3.5 h-3.5 shrink-0 ${isActive ? typeConfig.color : 'text-gray-600'}`} />
                                                     <div className="flex-1 min-w-0">
-                                                        <p className={`text-xs truncate ${isActive ? 'text-white font-bold' : 'text-gray-400 group-hover:text-white'}`}>{lesson.title}</p>
+                                                        <p className={`text-xs truncate ${isActive ? 'text-white font-bold' : bloqueadoPorExamen ? 'text-gray-600' : 'text-gray-400 group-hover:text-white'}`}>{lesson.title}</p>
                                                         <p className={`text-[9px] ${isActive ? 'text-blis-red/60' : 'text-gray-700'}`}>{typeConfig.label}</p>
                                                     </div>
                                                 </button>
@@ -295,7 +359,7 @@ export default function CursoDetallePage() {
                                 const preguntas = examMod?.questions || []
                                 const leccionesNoQuiz = (examMod?.lessons || []).filter((l: any) => l.type !== 'quiz')
                                 const secuenciaCompleta = leccionesNoQuiz.every((l: any) => completedLessons.includes(l.id))
-                                return <ExamViewer preguntas={preguntas} instrucciones={examMod?.examInstructions || ''} tipo="modulo" moduloId={activeExam.moduleId} bloqueadoPorSecuencia={!secuenciaCompleta} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) setActiveExam(null) }} />
+                                return <ExamViewer preguntas={preguntas} instrucciones={examMod?.examInstructions || ''} tipo="modulo" moduloId={activeExam.moduleId} bloqueadoPorSecuencia={!secuenciaCompleta} cursoId={curso?.id || ''} userId={user?.id} onResultado={(r) => { if (r.aprobado) { setExamAprobado(prev => ({ ...prev, [activeExam.moduleId]: true })); setActiveExam(null); } }} />
                             })()}
                         </div>
                     ) : activeLesson?.type === 'quiz' && activeLesson.questions && activeLesson.questions.length > 0 ? (
@@ -366,7 +430,7 @@ export default function CursoDetallePage() {
 
                                     <div className="flex items-center gap-2">
                                         <button onClick={() => { const i = allLessons.findIndex(item => item.lesson.id === activeLesson.id); if (i > 0) { setActiveLesson(allLessons[i-1].lesson); setActiveModule(allLessons[i-1].moduleId) }}} disabled={!hasPrev} className="px-4 py-2.5 bg-white/5 border border-white/5 rounded-xl text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed">Anterior</button>
-                                        <button onClick={() => { const i = allLessons.findIndex(item => item.lesson.id === activeLesson.id); if (i < allLessons.length - 1) { setActiveLesson(allLessons[i+1].lesson); setActiveModule(allLessons[i+1].moduleId) }}} disabled={!hasNext} className="px-4 py-2.5 bg-blis-red rounded-xl text-white text-[10px] font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-blis-red/20">Siguiente</button>
+                                        <button onClick={irSiguiente} disabled={!hasNext && !esUltimaLeccionConExamen()} className="px-4 py-2.5 bg-blis-red rounded-xl text-white text-[10px] font-bold uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-blis-red/20">{esUltimaLeccionConExamen() ? 'Ir al Examen' : 'Siguiente'}</button>
                                     </div>
                                 </div>
                             </div>
