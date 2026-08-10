@@ -102,8 +102,12 @@ export function useCorreoBandeja() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al cargar mensajes')
 
-      setMessages(data.messages)
-      setTotal(data.total)
+      // Solo sobreescribir mensajes si el servidor devolvió datos o si no hay caché previo
+      const tieneDataDelServidor = data.messages?.length > 0 || data.total > 0
+      if (tieneDataDelServidor || messagesRef.current.length === 0) {
+        setMessages(data.messages)
+      }
+      setTotal(tieneDataDelServidor ? data.total : messagesRef.current.length)
       setPage(p)
       setHasMore(data.hasMore)
 
