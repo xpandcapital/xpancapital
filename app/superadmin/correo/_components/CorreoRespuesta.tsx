@@ -185,7 +185,7 @@ export function CorreoRespuesta({
             : 'border-t border-gray-200 bg-white overflow-hidden'
           }
         >
-          <div className={modo === 'compose' ? 'p-5 md:p-8 space-y-4' : 'p-4 md:px-8 md:py-6 space-y-3 w-full'}>
+          <div className={modo === 'compose' ? 'p-5 md:p-8 space-y-4' : 'px-4 py-3 space-y-3 w-full'}>
             {/* Header */}
             <div className="flex items-center justify-between">
               <h3 className={modo === 'compose'
