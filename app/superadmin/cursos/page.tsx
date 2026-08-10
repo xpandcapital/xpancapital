@@ -48,6 +48,27 @@ export default function AdminCourses() {
     await handleDeleteCourse(courseId)
   }
 
+  const handleResetProgress = async (course: Course) => {
+    if (!guard('cursos', 'editar')) return
+    const incluirExamen = confirm('¿Limpiar también los intentos de examen? (Si cancelas, solo se limpian las lecciones completadas y el progreso)')
+    if (!confirm(`¿Limpiar el progreso de TODOS los alumnos del curso "${course.title}"? Esto reiniciará las lecciones completadas.`)) return
+    try {
+      const res = await fetch('/api/admin/cursos/reset-progreso', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ curso_id: course.id, incluir_examen: incluirExamen })
+      })
+      const data = await res.json()
+      if (data.success) {
+        alert(`Progreso limpiado en ${data.actualizados} registro(s)`)
+      } else {
+        alert('Error: ' + (data.error || 'No se pudo limpiar'))
+      }
+    } catch {
+      alert('Error de conexión')
+    }
+  }
+
   const handleSave = async (statusOverride?: 'Borrador' | 'Publicado') => {
     await saveBorrador(statusOverride)
     setShowToast(true)
@@ -109,6 +130,7 @@ export default function AdminCourses() {
       onCreateNew={handleCreate}
       onEdit={handleEdit}
       onDelete={handleDelete}
+      onResetProgress={handleResetProgress}
     />
   )
 }
