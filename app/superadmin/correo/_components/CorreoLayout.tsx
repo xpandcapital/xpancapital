@@ -217,7 +217,7 @@ export function CorreoLayout({ sidebarOpen, onToggleSidebar }: { sidebarOpen: bo
       <div className="flex-1 min-h-0 overflow-y-auto">
         <CorreoSidebar
           folders={folders} activeFolder={activeFolder} onFolderChange={handleFolderChange}
-          onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true); onToggleSidebar(false) }}
+          onRedactar={() => { setRespuestaModo('compose'); setRespuestaOpen(true); setMobileView('detail'); onToggleSidebar(false) }}
           onDesconectar={handleDesconectar} onSwitchCuenta={handleSwitchCuentaExt} onAgregarCuenta={handleAgregarCuenta}
           onConfigCuenta={handleConfigCuenta} moverCuentaArriba={moverCuentaArriba} moverCuentaAbajo={moverCuentaAbajo}
           onToggleSplit={() => {}} onToggleTheme={() => {}} onExportPDF={() => window.print()}
