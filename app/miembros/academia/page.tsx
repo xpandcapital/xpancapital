@@ -213,29 +213,17 @@ function AcademyContent() {
         if (!completedLessons.includes(lessonId)) {
             setCompletedLessons(prev => [...prev, lessonId]);
             if (fullCurso?.id && user?.id) {
-                if (fullCurso?.equipo_curso_id) {
-                    // Guardar en equipo_cursos (fuente real de lecciones completadas)
-                    fetch('/api/equipo-cursos/progress', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            equipo_curso_id: fullCurso.equipo_curso_id,
-                            leccion_id: lessonId,
-                            completado: true
-                        })
-                    });
-                } else {
-                    fetch('/api/cursos', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            user_id: user.id,
-                            curso_id: fullCurso.id,
-                            lesson_id: lessonId,
-                            completed: true
-                        })
-                    });
-                }
+                fetch('/api/equipo-cursos/progress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        equipo_curso_id: fullCurso?.equipo_curso_id || null,
+                        user_id: user.id,
+                        curso_id: fullCurso.id,
+                        leccion_id: lessonId,
+                        completado: true
+                    })
+                });
             }
         }
     }, [completedLessons, fullCurso?.id, fullCurso?.equipo_curso_id, user?.id]);

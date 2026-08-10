@@ -10,9 +10,10 @@ interface CourseListProps {
   onCreateNew: () => void
   onEdit: (course: Course) => void
   onDelete: (id: string) => void
+  onResetProgress?: (course: Course) => void
 }
 
-export function CourseList({ courses, loading, onCreateNew, onEdit, onDelete }: CourseListProps) {
+export function CourseList({ courses, loading, onCreateNew, onEdit, onDelete, onResetProgress }: CourseListProps) {
   return (
     <div className="max-w-[1600px] mx-auto space-y-8 pb-20 px-4 md:px-8 pt-8 md:pt-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
@@ -39,7 +40,7 @@ export function CourseList({ courses, loading, onCreateNew, onEdit, onDelete }: 
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {courses.map((course) => (
-            <CourseCard key={course.id} course={course} onEdit={onEdit} onDelete={onDelete} />
+            <CourseCard key={course.id} course={course} onEdit={onEdit} onDelete={onDelete} onResetProgress={onResetProgress} />
           ))}
         </div>
       )}

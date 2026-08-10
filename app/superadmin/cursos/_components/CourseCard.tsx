@@ -1,15 +1,16 @@
 'use client'
 
-import { Eye, Settings, Trash2, Layers, Video, GraduationCap, Users } from 'lucide-react'
+import { Eye, Settings, Trash2, Layers, Video, GraduationCap, Users, RotateCcw } from 'lucide-react'
 import type { Course } from '../_types'
 
 interface CourseCardProps {
   course: Course
   onEdit: (course: Course) => void
   onDelete: (id: string) => void
+  onResetProgress?: (course: Course) => void
 }
 
-export function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
+export function CourseCard({ course, onEdit, onDelete, onResetProgress }: CourseCardProps) {
   return (
     <div className="bg-zinc-950 border border-white/5 rounded-[2.5rem] p-6 space-y-5 hover:border-white/10 transition-all flex flex-col group relative overflow-hidden shadow-2xl">
       <div className="absolute top-0 right-0 w-32 h-32 bg-blis-red/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-blis-red/10 transition-colors" />
@@ -35,6 +36,9 @@ export function CourseCard({ course, onEdit, onDelete }: CourseCardProps) {
           <span className="text-xl font-black text-white tracking-tighter">${course.price} <span className="text-[10px] text-gray-500">USD</span></span>
         </div>
         <div className="flex gap-2">
+          {onResetProgress && (
+            <button onClick={() => onResetProgress(course)} title="Limpiar progreso de todos los alumnos" className="p-4 bg-white/5 rounded-2xl text-gray-400 hover:text-amber-400 hover:bg-amber-500/10 transition-all"><RotateCcw className="w-5 h-5" /></button>
+          )}
           <button onClick={() => onDelete(course.id)} className="p-4 bg-white/5 rounded-2xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all"><Trash2 className="w-5 h-5" /></button>
           <button onClick={() => onEdit(course)} className="p-4 bg-white/10 rounded-2xl text-white hover:bg-white/20 transition-all"><Settings className="w-5 h-5" /></button>
         </div>

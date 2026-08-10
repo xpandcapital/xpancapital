@@ -7,21 +7,54 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient()
     const body = await request.json()
-    const { equipo_curso_id, leccion_id, completado } = body
+    const { equipo_curso_id, leccion_id, completado, user_id, curso_id } = body
 
-    if (!equipo_curso_id || !leccion_id) {
-      return NextResponse.json({ error: 'equipo_curso_id y leccion_id son requeridos' }, { status: 400 })
+    if (!leccion_id) {
+      return NextResponse.json({ error: 'leccion_id es requerido' }, { status: 400 })
     }
 
-    const { data: equipoCurso, error: fetchError } = await supabase
+    // Resolver el equipo_curso: si no se pasa id, buscar/crear por user_id+curso_id
+    let equipoId = equipo_curso_id
+    let equipoCurso: any = null
+
+    if (!equipoId && user_id && curso_id) {
+      const { data: existente } = await supabase
+        .from('equipo_cursos')
+        .select('id')
+        .eq('user_id', user_id)
+        .eq('curso_id', curso_id)
+        .maybeSingle()
+
+      if (existente) {
+        equipoId = existente.id
+      } else {
+        // Crear registro si no existe
+        const { data: creado, error: crearErr } = await supabase
+          .from('equipo_cursos')
+          .insert({ user_id, curso_id, estado: 'asignado', lecciones_completadas: [], progreso: 0 })
+          .select('id')
+          .single()
+        if (crearErr && crearErr.code !== '23505') {
+          return NextResponse.json({ error: crearErr.message }, { status: 500 })
+        }
+        equipoId = creado?.id || equipoId
+      }
+    }
+
+    if (!equipoId) {
+      return NextResponse.json({ error: 'equipo_curso_id o user_id+curso_id requeridos' }, { status: 400 })
+    }
+
+    const { data: equipoCursoData, error: fetchError } = await supabase
       .from('equipo_cursos')
       .select('id, lecciones_completadas, curso_id, user_id')
-      .eq('id', equipo_curso_id)
+      .eq('id', equipoId)
       .single()
 
-    if (fetchError || !equipoCurso) {
+    if (fetchError || !equipoCursoData) {
       return NextResponse.json({ error: 'Registro no encontrado' }, { status: 404 })
     }
+    equipoCurso = equipoCursoData
 
     let rawCompleted = equipoCurso.lecciones_completadas
     if (typeof rawCompleted === 'string') {
@@ -65,7 +98,7 @@ export async function POST(request: NextRequest) {
         estado,
         ...(estado === 'completado' ? { nota_final: progreso, completado_en } : {}),
       })
-      .eq('id', equipo_curso_id)
+      .eq('id', equipoId)
       .select()
       .single()
 
@@ -95,7 +128,7 @@ export async function POST(request: NextRequest) {
           empresa_id: empresaId,
           tipo: 'leccion_completada',
           referencia_tipo: 'equipo_cursos',
-          referencia_id: equipo_curso_id,
+          referencia_id: equipoId,
           descripcion: 'Lección completada',
           puntos_override: ptsLeccion,
         }),
@@ -119,7 +152,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, data: { ...data, cursos: cursoInfo } })
+    return NextResponse.json({ success: true, data: { ...data, cursos: cursoInfo }, equipo_curso_id: equipoId })
   } catch (err: any) {
     console.error('[POST /api/equipo-cursos/progress]', err)
     return NextResponse.json({ error: err.message || 'Error interno' }, { status: 500 })
