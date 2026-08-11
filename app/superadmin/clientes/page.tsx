@@ -280,20 +280,22 @@ export default function AdminClientes() {
     const [isMounted, setIsMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [clients, setClients] = useState<Client[]>([]);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         setIsMounted(true);
-        fetchClients();
-    }, []);
+        fetchClients(page);
+    }, [page]);
 
-    const fetchClients = async () => {
+    const fetchClients = async (pageNum: number) => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/admin/clientes');
+            const res = await fetch(`/api/admin/clientes?page=${pageNum}&per_page=20`);
             const data = await res.json();
             if (data.success && data.data) {
-                const mappedClients = data.data.map(mapDbToClient);
-                setClients(mappedClients);
+                setClients(data.data.map(mapDbToClient));
+                setTotalPages(data.totalPages || 1);
             }
         } catch (error) {
             console.error('Error fetching clients:', error);
@@ -562,6 +564,28 @@ export default function AdminClientes() {
                                 </div>
                             ))
                         )}
+                    </div>
+                )}
+
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-6 pb-4">
+                        <button
+                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            disabled={page <= 1}
+                            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"
+                        >
+                            Anterior
+                        </button>
+                        <span className="text-sm text-gray-500 px-3">
+                            {page} de {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                            disabled={page >= totalPages}
+                            className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"
+                        >
+                            Siguiente
+                        </button>
                     </div>
                 )}
             </div>

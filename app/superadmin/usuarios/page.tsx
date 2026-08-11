@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { UserPlus, Shield, Download, Search, Filter, User, CheckCircle2, X, Loader2, Eye, EyeOff, Copy, KeyRound, Pencil, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
@@ -9,12 +9,14 @@ import { useActionGuard } from '@/hooks/useActionGuard';
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 const ROLE_OPTIONS = [
+    { value: 'Equipo', label: 'Equipo (sin clientes)' },
     { value: 'superadmin', label: 'Super Admin' },
     { value: 'admin', label: 'Admin' },
     { value: 'empleado', label: 'Empleado' },
     { value: 'editor', label: 'Editor' },
     { value: 'vendedor', label: 'Vendedor' },
     { value: 'cliente', label: 'Cliente' },
+    { value: 'Todos', label: 'Todos' },
 ];
 
 const ROLE_BADGES: Record<string, string> = {
@@ -39,6 +41,8 @@ interface UserProfile {
 
 export default function AdminUsers() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const esEquipo = searchParams.get('equipo') === 'true';
     const { showToast } = useToast();
     const { guard } = useActionGuard();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,7 +55,7 @@ export default function AdminUsers() {
     const [creatingUser, setCreatingUser] = useState(false);
     const [createdPassword, setCreatedPassword] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [roleFilter, setRoleFilter] = useState("Todos");
+    const [roleFilter, setRoleFilter] = useState(esEquipo ? "Equipo" : "Todos");
     const [statusFilter, setStatusFilter] = useState("Todos");
     const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
@@ -112,7 +116,7 @@ export default function AdminUsers() {
         const fullName = `${user.nombre} ${user.apellido}`.toLowerCase();
         const matchesSearch = fullName.includes(searchTerm.toLowerCase()) ||
             user.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesRole = roleFilter === "Todos" || user.rol === roleFilter;
+        const matchesRole = roleFilter === "Todos" || (roleFilter === "Equipo" ? (user.rol !== 'cliente' && user.rol !== 'usuario') : user.rol === roleFilter);
         const matchesStatus = statusFilter === "Todos" || 
             (statusFilter === "Activo" && isActivo(user)) || 
             (statusFilter === "Inactivo" && !isActivo(user));
@@ -176,10 +180,7 @@ export default function AdminUsers() {
                         <SearchableSelect
                             value={roleFilter}
                             onChange={(value) => setRoleFilter(value)}
-                            options={[
-                                { value: "Todos", label: "Todos los roles" },
-                                ...ROLE_OPTIONS,
-                            ]}
+                            options={ROLE_OPTIONS}
                             className="min-w-[160px]"
                             buttonClassName="bg-transparent text-sm text-white border-none focus:outline-none"
                         />

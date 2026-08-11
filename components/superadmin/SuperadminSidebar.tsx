@@ -111,7 +111,7 @@ const ALL_SECTIONS: Section[] = [
                 icon: Users,
                 label: "Personal",
                 subItems: [
-                    { icon: Users, label: "Equipo", href: "/superadmin/usuarios", permission: "equipo:ver" },
+                    { icon: Users, label: "Equipo", href: "/superadmin/usuarios?equipo=true", permission: "equipo:ver" },
                     { icon: UserPlus, label: "Postulantes", href: "/superadmin/postulantes", permission: "postulantes:ver" },
                     { icon: Briefcase, label: "Puestos", href: "/superadmin/postulantes/puestos", permission: "postulantes:ver" },
                     { icon: ClipboardList, label: "Preguntas", href: "/superadmin/postulantes/preguntas", permission: "postulantes:ver" },
