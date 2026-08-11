@@ -253,6 +253,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'ID es requerido' }, { status: 400 })
     }
 
+    // Proteger curso_id: no borrar si viene null/undefined/vacio
+    if (!updates.curso_id) delete updates.curso_id
+    // Proteger duracion_dias: solo actualizar si tiene valor explícito
+    if (updates.duracion_dias === undefined || updates.duracion_dias === null || updates.duracion_dias === '') delete updates.duracion_dias
+
     // ── Si cambia el slug, actualizar el short_link asociado ──────────────────
     if (updates.slug) {
       // Obtener el slug anterior
