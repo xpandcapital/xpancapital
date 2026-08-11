@@ -11,7 +11,8 @@ export async function POST(request: NextRequest) {
     console.log('[test-email] Iniciando prueba para:', email)
 
     const result = await sendTemplateEmail({
-      evento: 'transaccion_compra_completada_invitado',
+      evento: body.evento || 'transaccion_compra_completada_invitado',
+      empresa_id: body.empresa_id || undefined,
       to: email,
       subject: 'Prueba - Compra Exitosa',
       variables: {
