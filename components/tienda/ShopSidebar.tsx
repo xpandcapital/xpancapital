@@ -232,12 +232,8 @@ export function ShopSidebar() {
                         )}
                     </div>
                     <div className="flex-1 overflow-hidden">
-                        <p className="text-sm font-bold text-white truncate">
-                            {(() => {
-                                const hour = new Date().getHours()
-                                const greeting = hour < 12 ? 'Buen día' : hour < 19 ? 'Buenas tardes' : 'Buenas noches'
-                                return `${greeting}, ${user?.name?.split(' ')[0] || 'Usuario'}`
-                            })()}
+                        <p className="text-sm font-bold text-white truncate" suppressHydrationWarning>
+                            <Greeting user={user} />
                         </p>
                         <p className="text-xs flex items-center gap-1 font-mono text-emerald-400">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -248,5 +244,16 @@ export function ShopSidebar() {
             </div>
         </aside>
     );
+}
+
+function Greeting({ user }: { user: any }) {
+    const [greeting, setGreeting] = useState('');
+    useEffect(() => {
+        const hour = new Date().getHours();
+        const g = hour < 12 ? 'Buen día' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
+        setGreeting(`${g}, ${user?.name?.split(' ')[0] || 'Usuario'}`);
+    }, [user]);
+    if (!greeting) return <>Usuario</>;
+    return <>{greeting}</>;
 }
 
