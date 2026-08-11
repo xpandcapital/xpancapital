@@ -23,7 +23,7 @@ interface Venta {
     monto_coins: number;
     estado: string;
     creado_en: string;
-    cliente?: { id: string; nombre: string; email: string; avatar_url: string | null };
+    cliente?: { id: string; nombre: string; apellido?: string | null; email: string; avatar_url: string | null };
     producto?: { id: string; nombre: string; imagen_principal: string | null; tipo: string; curso_id?: string | null; curso?: { id: string; nombre: string } | null; categoria?: { nombre: string } | null };
 }
 
@@ -267,7 +267,7 @@ export default function VentasAdminPage() {
                                                 </div>
                                                 <div className="min-w-0">
                                                     <p className="text-sm font-bold text-white truncate">
-                                                        {venta.cliente?.nombre || (venta as any).metadata?.nombre_cliente || "Invitado"}
+                                                        {[venta.cliente?.nombre, venta.cliente?.apellido].filter(Boolean).join(' ') || (venta as any).metadata?.nombre_cliente || "Invitado"}
                                                     </p>
                                                     <p className="text-[10px] text-gray-500 truncate">
                                                         {venta.cliente?.email || (venta as any).metadata?.email_cliente || ""}
@@ -357,11 +357,10 @@ export default function VentasAdminPage() {
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold">
-                                                                {venta.cliente?.nombre?.[0] || (venta as any).metadata?.nombre_cliente?.[0] || "U"}
-                                                            </div>
+                                                                {venta.cliente?.nombre?.[0] || (venta as any).metadata?.nombre_cliente?.[0] || "U"}        </div>
                                                             <div>
                                                                 <p className="text-sm font-bold text-white">
-                                                                    {venta.cliente?.nombre || (venta as any).metadata?.nombre_cliente || "N/A"}
+                                                                    {[venta.cliente?.nombre, venta.cliente?.apellido].filter(Boolean).join(' ') || (venta as any).metadata?.nombre_cliente || "N/A"}
                                                                 </p>
                                                                 <p className="text-[10px] text-gray-500">
                                                                     {venta.cliente?.email || (venta as any).metadata?.email_cliente || ""}

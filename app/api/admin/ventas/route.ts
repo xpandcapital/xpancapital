@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       .from("compras")
       .select(`
         *,
-        cliente:profiles!user_id(id, nombre, email, avatar_url),
+        cliente:profiles!user_id(id, nombre, apellido, email, avatar_url),
         producto:productos!producto_id(id, nombre, imagen_principal, tipo, curso_id, categoria:producto_categorias(nombre), curso:cursos(id, nombre))
       `, { count: "exact" })
       .order("creado_en", { ascending: false })
@@ -312,6 +312,13 @@ export async function POST(request: NextRequest) {
         estado: "completado",
         creado_en: fecha_compra ? new Date(fecha_compra).toISOString() : new Date().toISOString(),
         fecha_vencimiento_acceso: fechaVencimiento,
+        metadata: {
+          nombre_cliente: [nombre, apellido].filter(Boolean).join(' '),
+          apellido_cliente: apellido || null,
+          email_cliente: email.toLowerCase(),
+          telefono_cliente: telefono || null,
+          es_registro_manual: true,
+        },
       })
       .select("*")
       .single();
