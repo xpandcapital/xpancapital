@@ -107,9 +107,11 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
         // Limpiar variables no reemplazadas
         html = html.replace(/\{\{[^}]+\}\}/g, '')
         console.log('[sendTemplateEmail] HTML contiene password_temporal placeholder:', html.includes('password_temporal'))
-      } catch (e) {
+      } catch (e: any) {
         console.error('[sendTemplateEmail] Error generando HTML:', e)
         html = buildFallbackHTML(variables)
+        // Inyectar diagnóstico visible en el email para debug
+        html = html.replace('</body>', `<div style="background:#fff3cd;border:2px solid #ffc107;padding:12px;margin:10px;font-family:monospace;font-size:11px;color:#333;"><strong>⚠ DEBUG: Error generando plantilla</strong><br>Evento: ${evento}<br>Error: ${e?.message || e}<br>Stack: ${(e?.stack || '').substring(0, 300)}</div></body>`)
       }
     } else {
       console.log(`[sendTemplateEmail] No hay template para evento "${evento}". template:`, !!template, 'settings:', !!template?.settings, 'blocks:', !!template?.blocks, 'empresa:', empresa_id)
