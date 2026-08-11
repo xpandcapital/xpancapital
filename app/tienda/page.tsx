@@ -8,7 +8,6 @@ import { ShopHeroSlider } from "@/components/tienda/ShopHeroSlider";
 import { ProductCategorySlider } from "@/components/tienda/ProductCategorySlider";
 import { ShopSidebar } from "@/components/tienda/ShopSidebar";
 import { LiveBuyerNotification } from "@/components/tienda/LiveBuyerNotification";
-import { CartSidebar } from "@/components/tienda/CartSidebar";
 
 import { mapProductoToProductDef, ProductDef } from "@/lib/types/shop";
 import { ProductSearch } from "@/components/tienda/ProductSearch";
@@ -68,7 +67,6 @@ export default function ShopPage() {
 
   return (
     <main className="min-h-screen text-white bg-black">
-      <CartSidebar />
 
       <div className="relative flex">
         <ShopSidebar />

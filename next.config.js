@@ -34,11 +34,15 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'xpancapital.org',
+        hostname: 'xpandcapital.org',
       },
       {
         protocol: 'https',
-        hostname: 'campus.xpancapital.org',
+        hostname: 'campus.xpandcapital.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
       },
     ],
   },
