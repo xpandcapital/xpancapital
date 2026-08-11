@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true })
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://xpancapital.org'
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'
 
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'recovery',

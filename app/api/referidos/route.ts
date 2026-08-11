@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         referralCode,
-        referralLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://xpancapital.org'}?ref=${referralCode}`,
+        referralLink: `${process.env.NEXT_PUBLIC_APP_URL || 'https://xpandcapital.org'}?ref=${referralCode}`,
         totalReferrals: profile.total_referidos || 0,
         totalEarned,
         referrals: referrals || [],

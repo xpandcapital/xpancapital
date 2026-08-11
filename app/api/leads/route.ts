@@ -6,7 +6,7 @@ import { logger } from '@/lib/utils/logger'
 import { verifyTurnstileToken } from '@/lib/bot-protection'
 import { cleanPhone } from '@/lib/phone'
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.xpancapital.org'
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://xpandcapital.org'
 
 async function notifyAsesorViaWhatsApp(asesorId: string, lead: Record<string, unknown>) {
   try {

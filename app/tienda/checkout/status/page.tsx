@@ -86,13 +86,12 @@ function CheckoutStatusContent() {
 
     if (!orderId) {
       // Sin orderId y sin parámetro de pago → probablemente entró por error o recarga
-      // Redirigir al checkout en vez de mostrar error confuso
       window.location.href = '/tienda/checkout'
       return;
     }
 
     let attempts = 0;
-    const maxAttempts = 30;
+    const maxAttempts = 5;
 
     const checkStatus = async () => {
       try {
@@ -103,9 +102,9 @@ function CheckoutStatusContent() {
           .eq("id", orderId)
           .maybeSingle();
 
-        if (!orden) {
-          setState("failed");
-          setErrorMsg("Orden no encontrada.");
+        if (!orden || orden.estado === "cancelado") {
+          // Orden no encontrada o cancelada → redirigir al checkout (no mostrar error confuso)
+          window.location.href = '/tienda/checkout'
           return;
         }
 

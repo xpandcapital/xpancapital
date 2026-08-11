@@ -89,7 +89,7 @@ async function sendWelcomeEmail(to: string, nombre: string, password: string, pr
 
             <!-- CTA -->
             <div style="text-align:center;margin-bottom:32px;">
-              <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://xpancapital.org'}/miembros"
+              <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'}/miembros"
                 style="display:inline-block;background:#16a34a;color:#fff;text-decoration:none;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:2px;padding:16px 40px;border-radius:12px;">
                 Acceder a Mis Productos →
               </a>
@@ -396,7 +396,7 @@ export async function POST(request: NextRequest) {
         const asesor = asesoresWhatsApp.find((a: any) => a.id === asesorId)
 
         if (asesor?.telefono) {
-          const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xpancapital.org'
+          const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'
           const E = (code: number) => String.fromCodePoint(code)
           const lines: string[] = []
           lines.push(`${E(0x1F6D2)}  *NUEVO PEDIDO - Xpand Capital*`)
