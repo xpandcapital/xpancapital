@@ -80,25 +80,9 @@ export default function UserDashboard() {
         isEnrolled: true
     }));
 
-    const purchasedCourses = compras
-        .filter(c => c.estado === 'completado')
-        .flatMap(c => (c.items || []).filter(item =>
-          item.producto?.curso_id  // Solo productos vinculados a un curso real
-        ).map(item => ({
-            id: item.producto?.id || c.id,
-            cursoId: item.producto?.curso_id || item.producto?.id || '',
-            title: item.producto?.nombre || 'Curso',
-            progress: 0,
-            image: item.producto?.imagen_principal || '',
-            lastAccessed: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }),
-            isEnrolled: false
-        })));
-
-    const enrolledIds = new Set(enrolledCourses.map(c => c.cursoId));
     const uniqueEnrolled = enrolledCourses.filter((c, i) => !enrolledCourses.slice(0, i).some(prev => prev.cursoId === c.cursoId));
-    const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.cursoId));
 
-    const allCourses = [...uniqueEnrolled, ...newPurchasedCourses].slice(0, 6);
+    const allCourses = uniqueEnrolled.slice(0, 6);
 
     const recentPurchases = compras
         .filter(c => c.estado === 'completado')
