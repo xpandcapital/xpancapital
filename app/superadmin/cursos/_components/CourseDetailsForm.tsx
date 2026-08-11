@@ -127,6 +127,21 @@ export function CourseDetailsForm({
                       </div>
 
                       <div className="space-y-2">
+                        <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Activo</label>
+                        <button
+                          onClick={() => onUpdate({ ...course, activo: !(course.activo ?? true) })}
+                          className={`w-full py-3 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${(course.activo ?? true) ? toggleActiveClass : toggleInactiveClass}`}
+                        >
+                          {(course.activo ?? true) ? 'Activo' : 'Inactivo'}
+                        </button>
+                        <p className="text-[8px] text-gray-500 leading-tight">
+                          {(course.activo ?? true)
+                            ? 'Visible y accesible para los usuarios'
+                            : 'Oculto para los usuarios'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
                         <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Progreso Secuencial</label>
                         <button
                           onClick={() => onUpdate({ ...course, sequentialProgress: !course.sequentialProgress })}

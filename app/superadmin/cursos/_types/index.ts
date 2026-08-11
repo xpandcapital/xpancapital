@@ -43,6 +43,7 @@ export interface Course {
   paraEquipo: boolean
   sequentialProgress: boolean
   requireCompletion: boolean
+  activo: boolean
   venderEnTienda: boolean
   productoId: string | null
   productoNombre?: string | null
