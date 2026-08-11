@@ -2,14 +2,13 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect, Suspense, useRef } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle2, Loader2, Clock, ArrowLeft, Package, ShoppingBag, Building2, Wallet, Phone, Copy } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/sections/Header";
 import { XpandFooter } from "@/components/sections/xpand/XpandFooter";
-import { getSupabase } from "@/lib/supabase";
 
 type PageState = "loading" | "pendiente" | "completado" | "error";
 
@@ -39,68 +38,44 @@ function PagoPendienteContent() {
   const [state, setState] = useState<PageState>(orderId ? "loading" : "error");
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
   const [metodoPago, setMetodoPago] = useState("");
-  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     if (!orderId) return;
 
-    const supabase = getSupabase();
-
     const loadInitial = async () => {
-      const { data: orden } = await supabase
-        .from("compras")
-        .select("estado, metadata, metodo_pago")
-        .eq("id", orderId)
-        .maybeSingle();
+      try {
+        const res = await fetch(`/api/compras/${orderId}`);
+        const data = await res.json();
 
-      if (!orden) {
+        if (!data.success || !data.orden) {
+          setState("error");
+          return;
+        }
+
+        const orden = data.orden;
+        const meta = orden.metadata || {};
+        setMetodoPago(orden.metodo_pago || "");
+        const pd = meta.payment_details || meta;
+        if (pd && meta.whatsapp_url) pd.whatsapp_url = meta.whatsapp_url;
+        setPaymentDetails(pd);
+
+        if (orden.estado === "completado") {
+          setState("completado");
+          return;
+        }
+
+        if (orden.estado === "cancelado") {
+          setState("error");
+          return;
+        }
+
+        setState("pendiente");
+      } catch {
         setState("error");
-        return;
       }
-
-      const meta = orden.metadata || {};
-      setMetodoPago(orden.metodo_pago || "");
-      const pd = meta.payment_details || meta;
-      if (pd && meta.whatsapp_url) pd.whatsapp_url = meta.whatsapp_url;
-      setPaymentDetails(pd);
-
-      if (orden.estado === "completado") {
-        setState("completado");
-        return;
-      }
-
-      if (orden.estado === "cancelado") {
-        setState("error");
-        return;
-      }
-
-      setState("pendiente");
     };
 
     loadInitial();
-
-    const channel = supabase
-      .channel(`order-pending-${orderId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "compras",
-          filter: `id=eq.${orderId}`,
-        },
-        (payload: any) => {
-          if (payload.new.estado === "completado") setState("completado");
-          if (payload.new.estado === "cancelado") setState("error");
-        }
-      )
-      .subscribe();
-
-    channelRef.current = channel;
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [orderId]);
 
   const getStep1Title = () => {
