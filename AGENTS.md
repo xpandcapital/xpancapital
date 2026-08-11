@@ -26,6 +26,10 @@ Esto aplica a:
 **❌ INCORRECTO:** `xpancapital.org`, `www.xpancapital.org`, `https://xpancapital.vercel.app`
 **✅ CORRECTO:** `xpandcapital.org`, `https://xpandcapital.org`
 
+## ⚠️ REGLA DE DESPLIEGUE — NO INSISTIR
+
+Cuando el usuario reporta un error después de un despliegue, **SIEMPRE asumir que el usuario YA esperó el deploy y está usando el usuario/cuenta correctos**. No sugerir "esperá el deploy", "limpiá caché", o "estás logueado con otro usuario" a menos que haya evidencia concreta de lo contrario. El usuario ya verificó esas cosas antes de reportar.
+
 ## 📁 Estructura del Proyecto
 
 ```
