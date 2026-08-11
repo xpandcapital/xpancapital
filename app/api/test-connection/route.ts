@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
                         amount: 100,
                         currency: 'USD',
                         orderId: `TEST-${Date.now()}`,
-                        customer: { email: 'test@xpancapital.org' },
+                        customer: { email: 'test@xpandcapital.org' },
                     }),
                     next: { revalidate: 0 }
                 });

@@ -134,7 +134,7 @@ export default function CreateBlogPostContent() {
     if (!post.slug) return;
     const checkShortLink = async () => {
       try {
-        const fullUrl = `https://www.xpancapital.org/blog/articulo/${post.slug}`;
+        const fullUrl = `https://www.xpandcapital.org/blog/articulo/${post.slug}`;
         const res = await fetch('/api/short-links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: fullUrl }) });
         const data = await res.json();
         if (data.success && data.codigo && !data.existente) {
@@ -344,7 +344,7 @@ export default function CreateBlogPostContent() {
     if (!saveSuccess?.slug) return;
     setGeneratingLink(true);
     try {
-      const fullUrl = `https://www.xpancapital.org/blog/articulo/${saveSuccess.slug}`;
+      const fullUrl = `https://www.xpandcapital.org/blog/articulo/${saveSuccess.slug}`;
       const res = await fetch('/api/short-links', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -352,7 +352,7 @@ export default function CreateBlogPostContent() {
       });
       const data = await res.json();
       if (data.success) {
-        setShortLink(`xpancapital.org/s/${data.codigo}`);
+        setShortLink(`xpandcapital.org/s/${data.codigo}`);
       }
     } catch {} finally {
       setGeneratingLink(false);
@@ -370,7 +370,7 @@ export default function CreateBlogPostContent() {
     if (!post.slug || !shortCode.trim()) return;
     setShortCodeSaving(true);
     try {
-      const fullUrl = `https://www.xpancapital.org/blog/articulo/${post.slug}`;
+      const fullUrl = `https://www.xpandcapital.org/blog/articulo/${post.slug}`;
       const res = await fetch('/api/short-links', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -392,7 +392,7 @@ export default function CreateBlogPostContent() {
   };
 
   const handleCopyShortCode = () => {
-    navigator.clipboard.writeText(`https://xpancapital.org/s/${shortCode}`);
+    navigator.clipboard.writeText(`https://xpandcapital.org/s/${shortCode}`);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
   };

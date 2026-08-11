@@ -6,7 +6,7 @@ import { decrypt } from '@/app/superadmin/correo/_lib/crypto'
 import { connectImap, appendToSent } from '@/app/superadmin/correo/_lib/imapClient'
 
 function generateMessageId(from: string): string {
-  const domain = from.split('@')[1] || 'xpancapital.org'
+  const domain = from.split('@')[1] || 'xpandcapital.org'
   const timestamp = Date.now()
   const random = Math.random().toString(36).substring(2, 11)
   return `<${timestamp}.${random}@${domain}>`

@@ -1235,7 +1235,7 @@ GEOBLOCK_SIMULATE_COUNTRY=PE
 |---------|-------------|--------|
 | Íconos SVG de marcas (118 íconos) | `github.com/glincker/thesvg` (`public/icons/`) | `scripts/download-brand-icon.ts` |
 | Plantillas de email (71) | Seed local | `scripts/seed-email-event-templates.ts` |
-| Libros (biblioteca) | WordPress API `campus.xpancapital.org` | `scripts/seed-books.ts` |
+| Libros (biblioteca) | WordPress API `campus.xpandcapital.org` | `scripts/seed-books.ts` |
 
 ## 9.6 Scripts Disponibles
 

@@ -111,7 +111,7 @@ const CATEGORY_ICONS: Record<string, string> = {
     "Desarrollo Personal": "✨",
 };
 
-// Data extracted from campus.xpancapital.org/libros/ (legacy fallback)
+// Data extracted from campus.xpandcapital.org/libros/ (legacy fallback)
 const EXTRACTED_BOOKS: EBook[] = [
     {
         id: "1",
@@ -119,7 +119,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Xpand Editorial",
         category: "Bienes Raíces",
         downloadLink: "https://drive.google.com/file/d/1pXfAqqEHSu-4OWmUBJQTVx2Hp72f2JId/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/Guia-profesional-inmobiliario-scaled.webp",
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/Guia-profesional-inmobiliario-scaled.webp",
         isFeatured: true
     },
     {
@@ -128,7 +128,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Ramón Campayo",
         category: "Idiomas",
         downloadLink: "https://drive.google.com/file/d/1IWScLAzOFcBaA4RDCS4T_umpuPvPIwC_/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/Aprende-aleman-en-7-dias.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/Aprende-aleman-en-7-dias.webp"
     },
     {
         id: "3",
@@ -136,7 +136,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Miguel Ruiz",
         category: "Espiritualidad",
         downloadLink: "https://drive.google.com/file/d/1EAaVzSqitk0ucHFXDAELx55evf751AEz/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/Los-cuatro-acuerdos.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/Los-cuatro-acuerdos.webp"
     },
     {
         id: "4",
@@ -144,7 +144,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Raimon Samsó",
         category: "Finanzas",
         downloadLink: "https://drive.google.com/file/d/1Z0FFSJX42soB-XkWb7EK4RiElY44UYnY/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/el-codigo-del-dinero.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/el-codigo-del-dinero.webp"
     },
     {
         id: "5",
@@ -152,7 +152,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Miguel Ruiz",
         category: "Espiritualidad",
         downloadLink: "https://drive.google.com/file/d/1pXfAqqEHSu-4OWmUBJQTVx2Hp72f2JId/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/meditaciones-toltecas.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/meditaciones-toltecas.webp"
     },
     {
         id: "6",
@@ -160,7 +160,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Miguel Ruiz Jr.",
         category: "Crecimiento Personal",
         downloadLink: "https://drive.google.com/file/d/1IWScLAzOFcBaA4RDCS4T_umpuPvPIwC_/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/La-maestria-del-ser.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/La-maestria-del-ser.webp"
     },
     {
         id: "7",
@@ -168,7 +168,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Napoleon Hill",
         category: "Finanzas",
         downloadLink: "https://drive.google.com/file/d/1Z0FFSJX42soB-XkWb7EK4RiElY44UYnY/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/Piense-y-hagase-rico.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/Piense-y-hagase-rico.webp"
     },
     {
         id: "8",
@@ -176,7 +176,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Og Mandino",
         category: "Ventas",
         downloadLink: "https://drive.google.com/file/d/1pXfAqqEHSu-4OWmUBJQTVx2Hp72f2JId/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/El-vendedor-mas-grande-del-mundo.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/El-vendedor-mas-grande-del-mundo.webp"
     },
     {
         id: "9",
@@ -184,7 +184,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Robert Kiyosaki",
         category: "Finanzas",
         downloadLink: "https://drive.google.com/file/d/1EAaVzSqitk0ucHFXDAELx55evf751AEz/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/Padre-Rico-Padre-Pobre.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/Padre-Rico-Padre-Pobre.webp"
     },
     {
         id: "10",
@@ -192,7 +192,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Grant Cardone",
         category: "Ventas",
         downloadLink: "https://drive.google.com/file/d/1IWScLAzOFcBaA4RDCS4T_umpuPvPIwC_/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/Vendes-o-vendes.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/Vendes-o-vendes.webp"
     },
     {
         id: "11",
@@ -200,7 +200,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Robert Kiyosaki",
         category: "Finanzas",
         downloadLink: "https://drive.google.com/file/d/1Z0FFSJX42soB-XkWb7EK4RiElY44UYnY/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/el-cuadrante-del-flujo-de-dinero.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/el-cuadrante-del-flujo-de-dinero.webp"
     },
     {
         id: "12",
@@ -208,7 +208,7 @@ const EXTRACTED_BOOKS: EBook[] = [
         author: "Timothy Ferriss",
         category: "Productividad",
         downloadLink: "https://drive.google.com/file/d/1pXfAqqEHSu-4OWmUBJQTVx2Hp72f2JId/view",
-        imgSrc: "https://campus.xpancapital.org/wp-content/uploads/2024/02/la-semana-laboral-de-4-horas.webp"
+        imgSrc: "https://campus.xpandcapital.org/wp-content/uploads/2024/02/la-semana-laboral-de-4-horas.webp"
     }
 ];
 

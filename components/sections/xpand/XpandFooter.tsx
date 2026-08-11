@@ -195,9 +195,9 @@ export function XpandFooter() {
             </h4>
             <ul className="space-y-4">
               <li>
-                <a href="mailto:info@xpancapital.org" className="flex items-start gap-3 text-white/35 text-sm hover:text-[#e8c600] transition-colors group">
+                <a href="mailto:info@xpandcapital.org" className="flex items-start gap-3 text-white/35 text-sm hover:text-[#e8c600] transition-colors group">
                   <Mail className="w-4 h-4 mt-0.5 shrink-0 text-[#e8c600]/40 group-hover:text-[#e8c600]" />
-                  <span>info@xpancapital.org</span>
+                  <span>info@xpandcapital.org</span>
                 </a>
               </li>
               <li>

@@ -13,7 +13,7 @@ const data: LegalPageData = {
     {
       title: "1. Responsable del Tratamiento",
       icon: "file",
-      content: `<p><strong>XPAND CORP S.A.C.</strong>, con domicilio en la ciudad de Arequipa, Perú, es el responsable del tratamiento de sus datos personales. Puede contactar a nuestro Delegado de Protección de Datos en: <strong>privacidad@xpancapital.org</strong></p>`,
+      content: `<p><strong>XPAND CORP S.A.C.</strong>, con domicilio en la ciudad de Arequipa, Perú, es el responsable del tratamiento de sus datos personales. Puede contactar a nuestro Delegado de Protección de Datos en: <strong>privacidad@xpandcapital.org</strong></p>`,
     },
     {
       title: "2. Datos que Recolectamos",
@@ -75,7 +75,7 @@ const data: LegalPageData = {
   <li><strong>Oposición:</strong> Oponerse al tratamiento para fines de marketing</li>
   <li><strong>Portabilidad:</strong> Recibir sus datos en un formato estructurado</li>
 </ul>
-<p>Para ejercer estos derechos, envíe un email a <strong>privacidad@xpancapital.org</strong>. Responderemos en un plazo máximo de 20 días hábiles.</p>`,
+<p>Para ejercer estos derechos, envíe un email a <strong>privacidad@xpandcapital.org</strong>. Responderemos en un plazo máximo de 20 días hábiles.</p>`,
     },
     {
       title: "7. Seguridad y Retención",

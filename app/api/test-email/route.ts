@@ -4,9 +4,9 @@ import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const email = body.email || 'test@xpancapital.org'
+    const email = body.email || 'test@xpandcapital.org'
     const passwordTemporal = body.password || 'TESTPASS123'
-    const imagen = body.imagen || 'https://www.xpancapital.org/images/placeholder-product.jpg'
+    const imagen = body.imagen || 'https://www.xpandcapital.org/images/placeholder-product.jpg'
 
     console.log('[test-email] Iniciando prueba para:', email)
 
@@ -19,13 +19,13 @@ export async function POST(request: NextRequest) {
         apellido: 'Perez',
         email,
         password_temporal: passwordTemporal,
-        enlace_crear_cuenta: 'https://www.xpancapital.org/login',
+        enlace_crear_cuenta: 'https://www.xpandcapital.org/login',
         productos: '<ul><li>Producto de prueba</li></ul>',
         total: '100.00',
         subtotal: '100.00',
         metodo_pago: 'transfer',
         fecha_compra: '22 de junio de 2026',
-        enlace_acceso: 'https://www.xpancapital.org/miembros',
+        enlace_acceso: 'https://www.xpandcapital.org/miembros',
         descuento_monto: '0.00',
         cupon: '',
       },

@@ -5,7 +5,7 @@ import { CheckSquare, Square, ChevronUp, ChevronDown, Edit2, Trash2, Barcode as 
 import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import type { Product, ProductSort, Category, Status, Currency } from '../../_types'
 
-const SITE_DOMAIN = 'xpancapital.org'
+const SITE_DOMAIN = 'xpandcapital.org'
 
 interface CompactTableViewProps {
   products: Product[]

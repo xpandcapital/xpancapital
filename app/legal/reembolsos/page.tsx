@@ -48,7 +48,7 @@ const data: LegalPageData = {
       icon: "check",
       content: `<p>Para solicitar un reembolso:</p>
 <ol>
-  <li>Envíe un email a <strong>soporte@xpancapital.org</strong> con el asunto "Solicitud de Reembolso — [Número de Orden]"</li>
+  <li>Envíe un email a <strong>soporte@xpandcapital.org</strong> con el asunto "Solicitud de Reembolso — [Número de Orden]"</li>
   <li>Incluya su número de orden, el producto adquirido y una descripción detallada del motivo</li>
   <li>Adjunte cualquier evidencia relevante (capturas de pantalla, recibos, etc.)</li>
   <li>Nuestro equipo revisará su solicitud en un plazo de <strong>5 días hábiles</strong></li>

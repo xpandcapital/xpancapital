@@ -4,7 +4,7 @@
  */
 
 async function main2() {
-  const WP_API = "https://campus.xpancapital.org/wp-json/wp/v2";
+  const WP_API = "https://campus.xpandcapital.org/wp-json/wp/v2";
   const { createClient } = await import("@supabase/supabase-js");
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

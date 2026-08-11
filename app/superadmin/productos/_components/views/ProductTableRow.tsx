@@ -5,7 +5,7 @@ import { CheckSquare, Square, Edit2, Trash2, Barcode as BarcodeIcon, Link2, Exte
 import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import type { Product, Category, Status, Currency } from '../../_types'
 
-const SITE_DOMAIN = 'xpancapital.org'
+const SITE_DOMAIN = 'xpandcapital.org'
 
 interface ProductTableRowProps {
   product: Product

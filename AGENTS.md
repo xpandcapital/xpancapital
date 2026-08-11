@@ -11,6 +11,21 @@
 
 **EXCEPCIÓN:** El código fuente (nombres de variables, funciones, textos de UI, etc.) se mantiene en el idioma original del proyecto.
 
+## ⚠️ DOMINIO OFICIAL — REGLA ABSOLUTA
+
+**EL DOMINIO DE PRODUCCIÓN ES `xpandcapital.org` (con "d": xpan-D-capital). NUNCA usar `xpancapital.org` (sin "d").**
+
+Esto aplica a:
+- Variables de entorno (`NEXT_PUBLIC_SITE_URL`)
+- Fallbacks en código (`|| 'https://xpandcapital.org'`)
+- URLs de subdominios (`campus.xpandcapital.org`, `cloud.xpandcapital.org`, `revista.xpandcapital.org`)
+- Emails (`info@xpandcapital.org`, `soporte@xpandcapital.org`)
+- Links en plantillas de email, short links, etc.
+- Comentarios, placeholders, valores por defecto
+
+**❌ INCORRECTO:** `xpancapital.org`, `www.xpancapital.org`, `https://xpancapital.vercel.app`
+**✅ CORRECTO:** `xpandcapital.org`, `https://xpandcapital.org`
+
 ## 📁 Estructura del Proyecto
 
 ```

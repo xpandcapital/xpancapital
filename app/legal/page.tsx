@@ -140,7 +140,7 @@ export default function LegalHubPage() {
         >
           <p className="text-sm text-gray-500 max-w-2xl mx-auto">
             XPAND CORP S.A.C. — Número de Partida Registral 11449191, Zona Registral N° XII, Arequipa, Perú.
-            Operaciones en Perú y Ecuador. La plataforma digital xpancapital.org se dedica exclusivamente a la
+            Operaciones en Perú y Ecuador. La plataforma digital xpandcapital.org se dedica exclusivamente a la
             comercialización de contenido educativo digital. Las transacciones inmobiliarias se gestionan
             únicamente por canales presenciales a través de nuestro Oficial de Cumplimiento.
           </p>

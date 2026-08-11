@@ -13,13 +13,13 @@ const data: LegalPageData = {
     {
       title: "1. Aceptación de los Términos",
       icon: "check",
-      content: `<p>Al acceder y utilizar el sitio web <strong>xpancapital.org</strong> (en adelante, "la Plataforma"), usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar la Plataforma.</p>
+      content: `<p>Al acceder y utilizar el sitio web <strong>xpandcapital.org</strong> (en adelante, "la Plataforma"), usted acepta estar sujeto a estos Términos y Condiciones. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar la Plataforma.</p>
 <p>Xpand Capital S.A.C. se reserva el derecho de modificar estos términos en cualquier momento. Los cambios entrarán en vigor inmediatamente después de su publicación. El uso continuado de la Plataforma constituye la aceptación de dichas modificaciones.</p>`,
     },
     {
       title: "2. Descripción del Servicio — Contenido Educativo Digital",
       icon: "book",
-      content: `<p><strong>Xpand Capital S.A.C.</strong>, a través de su plataforma digital xpancapital.org, se dedica <strong>exclusivamente a la comercialización de contenido educativo digital</strong>, incluyendo pero no limitado a:</p>
+      content: `<p><strong>Xpand Capital S.A.C.</strong>, a través de su plataforma digital xpandcapital.org, se dedica <strong>exclusivamente a la comercialización de contenido educativo digital</strong>, incluyendo pero no limitado a:</p>
 <ul>
   <li>Ebooks y guías prácticas para emprendedores</li>
   <li>Cursos en línea sobre inversión, desarrollo inmobiliario y negocios</li>
@@ -72,7 +72,7 @@ const data: LegalPageData = {
       icon: "file",
       content: `<p>Para cualquier consulta relacionada con estos Términos y Condiciones, puede contactarnos a través de:</p>
 <ul>
-  <li><strong>Email:</strong> info@xpancapital.org</li>
+  <li><strong>Email:</strong> info@xpandcapital.org</li>
   <li><strong>WhatsApp:</strong> +57 322 350 1170</li>
   <li><strong>Dirección:</strong> Colombia · Latam</li>
 </ul>`,

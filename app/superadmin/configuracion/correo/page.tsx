@@ -213,7 +213,7 @@ export default function CorreoServidoresPage() {
                     type="text"
                     value={form.dominio}
                     onChange={(e) => setForm(f => ({ ...f, dominio: e.target.value }))}
-                    placeholder="xpancapital.org"
+                    placeholder="xpandcapital.org"
                     className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-600
                       focus:outline-none focus:border-blis-red/30 transition-all"
                   />

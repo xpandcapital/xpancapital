@@ -20,7 +20,7 @@ const data: LegalPageData = {
   <li><strong>Zona Registral:</strong> N° XII - Oficina Registral Arequipa</li>
   <li><strong>Fecha de Constitución:</strong> 27 de julio de 2020</li>
   <li><strong>Domicilio Fiscal:</strong> Ciudad, provincia y departamento de Arequipa, República del Perú</li>
-  <li><strong>Email de Contacto:</strong> legal@xpancapital.org</li>
+  <li><strong>Email de Contacto:</strong> legal@xpandcapital.org</li>
 </ul>`,
     },
     {
@@ -39,7 +39,7 @@ const data: LegalPageData = {
       title: "3. Naturaleza de la Plataforma Digital",
       icon: "alert",
       content: `<p><strong>AVISO IMPORTANTE SOBRE EL USO DE LA PLATAFORMA:</strong></p>
-<p>XPAND CORP S.A.C., a través de su plataforma digital <strong>xpancapital.org</strong>, se dedica <strong>exclusivamente a la comercialización de contenido educativo digital</strong> (ebooks, cursos en línea, asesorías empresariales, herramientas y plantillas para emprendedores).</p>
+<p>XPAND CORP S.A.C., a través de su plataforma digital <strong>xpandcapital.org</strong>, se dedica <strong>exclusivamente a la comercialización de contenido educativo digital</strong> (ebooks, cursos en línea, asesorías empresariales, herramientas y plantillas para emprendedores).</p>
 
 <p><strong>Las actividades de intermediación y venta inmobiliaria se gestionan únicamente por canales offline y presenciales</strong>, conforme a lo requerido por las entidades reguladoras, a través de nuestro Oficial de Cumplimiento.</p>
 

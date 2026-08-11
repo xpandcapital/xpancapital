@@ -67,7 +67,7 @@ export function ShortLinkTool() {
   };
 
   const copyLink = (codigo: string) => {
-    navigator.clipboard.writeText(`https://xpancapital.org/s/${codigo}`);
+    navigator.clipboard.writeText(`https://xpandcapital.org/s/${codigo}`);
     setCopied(codigo);
     setTimeout(() => setCopied(null), 2000);
   };
@@ -174,7 +174,7 @@ export function ShortLinkTool() {
           </button>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-gray-600 text-[10px] font-mono">xpancapital.org/s/</span>
+          <span className="text-gray-600 text-[10px] font-mono">xpandcapital.org/s/</span>
           <input
             type="text"
             value={codigoInput}

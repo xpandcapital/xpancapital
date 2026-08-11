@@ -7,7 +7,7 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect"
 import Image from "next/image"
 import type { Product, Category, Status } from '../../_types'
 
-const SITE_DOMAIN = 'xpancapital.org'
+const SITE_DOMAIN = 'xpandcapital.org'
 
 interface ProductGridViewProps {
   products: Product[]
