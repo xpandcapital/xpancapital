@@ -83,9 +83,7 @@ export default function UserDashboard() {
     const purchasedCourses = compras
         .filter(c => c.estado === 'completado')
         .flatMap(c => (c.items || []).filter(item =>
-          item.product_type === 'servicio' ||
-          item.producto?.tipo === 'servicio' ||
-          item.producto?.curso_id  // Producto vinculado a curso aunque su tipo no sea 'servicio'
+          item.producto?.curso_id  // Solo productos vinculados a un curso real
         ).map(item => ({
             id: item.producto?.id || c.id,
             cursoId: item.producto?.curso_id || item.producto?.id || '',
@@ -104,21 +102,18 @@ export default function UserDashboard() {
     const recentPurchases = compras
         .filter(c => c.estado === 'completado')
         .slice(0, 4)
-        .flatMap(c => (c.items || []).map(item => {
+        .flatMap(c => (c.items || []).filter(item => !item.producto?.curso_id).map(item => {
             const tipo = item.producto?.tipo || item.product_type || 'digital';
-            const hasCursoId = !!item.producto?.curso_id;
-            const isService = tipo === 'servicio' || hasCursoId;
             const isDigital = tipo === 'digital';
-            const hasDownload = item.producto?.archivo_url || (isDigital && !hasCursoId);
+            const hasDownload = item.producto?.archivo_url || isDigital;
             return {
                 id: item.producto?.id || c.id,
-                cursoId: item.producto?.curso_id || null,
                 name: item.producto?.nombre || 'Producto',
-                category: item.producto?.categoria?.nombre || (isService ? 'Curso' : isDigital ? 'Ebook' : tipo === 'fisico' ? 'Kit' : tipo === 'suscripcion' ? 'Mentoría' : 'Producto'),
+                category: item.producto?.categoria?.nombre || (isDigital ? 'Ebook' : tipo === 'fisico' ? 'Kit' : tipo === 'suscripcion' ? 'Mentoría' : 'Producto'),
                 image: item.producto?.imagen_principal || '',
                 date: new Date(c.creado_en).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }),
-                isCourse: isService,
-                isDownloadable: hasDownload && !isService
+                isCourse: false,
+                isDownloadable: hasDownload
             };
         }));
 
@@ -226,61 +221,32 @@ export default function UserDashboard() {
                     </div>
                     <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible md:grid md:grid-cols-2 lg:grid-cols-4">
                         {recentPurchases.map((item, i) => (
-                            item.isCourse ? (
-                                <Link key={item.id || i} href={`/miembros/academia?iniciar=${item.cursoId || ''}`} className="group cursor-pointer shrink-0 w-48 md:w-auto bg-black/40 border border-blis-red/20 rounded-2xl overflow-hidden hover:border-blis-red/40 transition-all flex flex-col">
-                                    <div className="flex items-center gap-3 p-3 bg-zinc-900/50">
-                                        {item.image ? (
-                                            <div className="w-12 h-12 rounded-xl overflow-hidden relative flex-shrink-0">
-                                                <Image
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    fill
-                                                    className="object-cover"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
-                                                <BookOpen className="w-6 h-6 text-gray-600" />
-                                            </div>
-                                        )}
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-[10px] font-black text-blis-red uppercase tracking-widest mb-1">Curso</p>
-                                            <h4 className="text-white font-black text-xs uppercase tracking-tight leading-tight line-clamp-2">{item.name}</h4>
+                            <Link key={item.id || i} href={`/miembros/productos/${item.id}`} className="group cursor-pointer shrink-0 w-48 md:w-auto bg-black/40 border border-white/5 rounded-2xl overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
+                                <div className="flex items-center gap-3 p-3 bg-zinc-900/50">
+                                    {item.image ? (
+                                        <div className="w-12 h-12 rounded-xl overflow-hidden relative flex-shrink-0">
+                                            <Image
+                                                src={item.image}
+                                                alt={item.name}
+                                                fill
+                                                className="object-cover"
+                                            />
                                         </div>
-                                    </div>
-                                    <div className="px-3 py-2 flex items-center justify-between bg-zinc-900/30">
-                                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{item.date}</span>
-                                        <span className="text-[9px] text-emerald-500 font-black uppercase">→ Ir al Curso</span>
-                                    </div>
-                                </Link>
-                            ) : (
-                                <Link key={item.id || i} href={`/miembros/productos/${item.id}`} className="group cursor-pointer shrink-0 w-48 md:w-auto bg-black/40 border border-white/5 rounded-2xl overflow-hidden hover:border-blis-red/30 transition-all flex flex-col">
-                                    <div className="flex items-center gap-3 p-3 bg-zinc-900/50">
-                                        {item.image ? (
-                                            <div className="w-12 h-12 rounded-xl overflow-hidden relative flex-shrink-0">
-                                                <Image
-                                                    src={item.image}
-                                                    alt={item.name}
-                                                    fill
-                                                    className="object-cover"
-                                                />
-                                            </div>
-                                        ) : (
-                                            <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
-                                                <Package className="w-6 h-6 text-gray-600" />
-                                            </div>
-                                        )}
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-[10px] font-black text-blis-red uppercase tracking-widest mb-1">{item.category}</p>
-                                            <h4 className="text-white font-black text-xs uppercase tracking-tight leading-tight line-clamp-2">{item.name}</h4>
+                                    ) : (
+                                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
+                                            <Package className="w-6 h-6 text-gray-600" />
                                         </div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-black text-blis-red uppercase tracking-widest mb-1">{item.category}</p>
+                                        <h4 className="text-white font-black text-xs uppercase tracking-tight leading-tight line-clamp-2">{item.name}</h4>
                                     </div>
-                                    <div className="px-3 py-2 flex items-center justify-between bg-zinc-900/30">
-                                        <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{item.date}</span>
-                                        <span className="text-[9px] text-blis-red font-black uppercase">→ Ver</span>
-                                    </div>
-                                </Link>
-                            )
+                                </div>
+                                <div className="px-3 py-2 flex items-center justify-between bg-zinc-900/30">
+                                    <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{item.date}</span>
+                                    <span className="text-[9px] text-blis-red font-black uppercase">→ Ver</span>
+                                </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
