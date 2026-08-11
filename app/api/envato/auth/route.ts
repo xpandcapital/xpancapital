@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     }, { status: 400 });
   }
 
-  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/envato/callback`;
+  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'}/api/envato/callback`;
 
   const authUrl = `https://api.envato.com/authorization?` + new URLSearchParams({
     response_type: 'code',

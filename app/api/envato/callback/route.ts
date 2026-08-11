@@ -18,12 +18,12 @@ export async function GET(request: NextRequest) {
 
   if (error || !code) {
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/superadmin/mails?envato_error=${error || 'no_code'}`
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'}/superadmin/mails?envato_error=${error || 'no_code'}`
     );
   }
 
   const { clientId, clientSecret } = await getEnvatoOAuthCredentials();
-  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/envato/callback`;
+  const redirectUri = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'}/api/envato/callback`;
 
   // Intercambiar code por access_token
   const tokenRes = await fetch('https://api.envato.com/token', {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     const err = await tokenRes.text();
     console.error('Envato token error:', err);
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/superadmin/mails?envato_error=token_failed`
+      `${process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'}/superadmin/mails?envato_error=token_failed`
     );
   }
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
   // Redirigir de vuelta al editor con éxito
   return NextResponse.redirect(
-    `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/superadmin/mails?envato_connected=1`
+    `${process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'}/superadmin/mails?envato_connected=1`
   );
 }
 

@@ -203,7 +203,7 @@ async function registrarIntentoYCertificado(
       return
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://xpancapital.vercel.app'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'
     await fetch(`${appUrl}/api/gamificacion/otorgar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

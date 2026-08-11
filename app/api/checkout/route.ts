@@ -647,6 +647,31 @@ export async function POST(request: NextRequest) {
         productPrices: prodPrices,
         newUserPassword: isNewUser ? tempPassword : undefined,
       }).catch((err) => { console.error('[Checkout] Error en createUserAndNotify:', err) })
+
+      // También notificar a admins para compras completadas
+      if (orden) {
+        console.log('[Checkout] Compra completada - notificando a admins')
+        const prodInfo = productos.map((p: any) => ({
+          nombre: p.nombre || `Producto #${(p.producto_id || p.id || '').substring(0, 6)}`,
+          precio_unitario: p.precio_unitario || p.price || 0,
+          productType: p.productType || '',
+          imagen: p.imagen || '',
+          cantidad: p.cantidad || 1,
+        }))
+
+        notifyAdminNuevaCompra({
+          compraId: orden.id,
+          empresaId: empresa_id,
+          compradorNombre: nombre || email.split('@')[0],
+          compradorEmail: email.toLowerCase(),
+          compradorTelefono: tel || telefono || '',
+          productos: prodInfo,
+          montoUSD: monto_usd || 0,
+          metodoPago: metodo_pago || 'Manual',
+          moneda: 'USD',
+          siteUrl: request.nextUrl.origin,
+        }).catch((err) => { console.error('[Checkout] Error en notifyAdminNuevaCompra:', err) })
+      }
     } else if (orden) {
       console.log('[Checkout] Compra offline/pendiente - notificando a admins')
       const prodInfo = productos.map((p: any) => ({
