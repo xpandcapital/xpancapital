@@ -132,6 +132,7 @@ export async function POST(request: NextRequest) {
       meta_descripcion,
       meta_titulo,
       curso_id,
+      duracion_dias,
       precios_multimoneda,
       estado = 'borrador' // Estado inicial
     } = body
@@ -189,6 +190,7 @@ export async function POST(request: NextRequest) {
       meta_descripcion: meta_descripcion || null,
       meta_titulo: meta_titulo || null,
       curso_id: curso_id || null,
+      duracion_dias: duracion_dias || null,
       precios_multimoneda: precios_multimoneda || {}
     }
 
