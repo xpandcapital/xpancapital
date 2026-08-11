@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <rect width="800" height="450" fill="#0A0D11"/>
+  <rect x="300" y="175" width="200" height="100" rx="10" fill="#141820" stroke="#1F2937" stroke-width="1"/>
+  <text x="400" y="235" text-anchor="middle" fill="#374151" font-family="system-ui" font-size="12" font-weight="700">SIN IMAGEN</text>
+</svg>

@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
       originalPrice: undefined,
       rating: 4.8,
       sales: '+0',
-      image: p.imagen_principal || '/images/blog-1.jpg',
+      image: p.imagen_principal || '/images/placeholder.svg',
       images: Array.isArray(p.galeria) ? p.galeria : [],
       description: p.descripcion || '',
       content: p.contenido || '',

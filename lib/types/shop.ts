@@ -63,7 +63,7 @@ export function mapProductoToProductDef(producto: Producto): ProductDef {
     originalPrice: producto.precio_comparacion || (producto.precio_usd ? producto.precio_usd * 1.3 : undefined),
     rating: 4.8,
     sales: '+100',
-    image: producto.imagen_principal || '/images/blog-1.jpg',
+    image: producto.imagen_principal || '/images/placeholder.svg',
     images: producto.galeria || (producto.imagen_principal ? [producto.imagen_principal] : []),
     description: producto.descripcion || producto.contenido || '',
     content: producto.contenido || producto.descripcion || '',

@@ -121,7 +121,7 @@ export function mapSupabaseToPosProduct(p: Producto): POSProduct {
         isxpandCoinsOnly: p.metodo_pago === 'coins',
         stock: p.stock_ilimitado ? 999 : p.stock,
         status: p.stock_ilimitado || p.stock > 0 ? 'Disponible' : 'Agotado',
-        image: p.imagen_principal || '/images/blog-1.jpg',
+        image: p.imagen_principal || '/images/placeholder.svg',
         description: p.descripcion || '',
         currencyCode: 'USD',
         isPerishable: false
