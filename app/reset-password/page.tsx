@@ -4,14 +4,11 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, Suspense, useRef } from 'react'
 import { ShieldCheck, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { getSupabase } from '@/lib/supabase'
-import { createClient } from '@supabase/supabase-js'
 
 function ResetPasswordForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const supabase = getSupabase()
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -20,66 +17,57 @@ function ResetPasswordForm() {
   const [submitting, setSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [loadingSession, setLoadingSession] = useState(true)
-  const recoveryRef = useRef<any>(null)
+  const [sessionReady, setSessionReady] = useState(false)
+  const supabaseRef = useRef<ReturnType<typeof getSupabase>>(null)
 
   useEffect(() => {
+    const supabase = getSupabase()
+    supabaseRef.current = supabase
     if (!supabase) return
 
-    // Supabase procesa el hash automáticamente (onAuthStateChange).
-    // Si hay token en query string (code), intercambiar manualmente.
-    const code = searchParams.get('code')
+    let resolved = false
 
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
-          console.error('[ResetPassword] Error exchanging code:', error)
-          setError('El enlace de recuperación no es válido o ha expirado.')
-        }
+    // 1. Escuchar eventos de autenticación (PASSWORD_RECOVERY)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (resolved) return
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        // Supabase ya procesó el token, la sesión está lista
+        setSessionReady(true)
         setLoadingSession(false)
-      })
-      return
-    }
-
-    // Para tokens en hash: crear un cliente aislado para evitar lock con @supabase/ssr
-    // El cliente singleton compite por el lock del token. Usamos uno fresco.
-    let settled = false
-    const hash = typeof window !== 'undefined' ? window.location.hash.substring(1) : ''
-    const hasRecoveryTokens = hash.includes('access_token') && hash.includes('type=recovery')
-
-    if (hasRecoveryTokens) {
-      const hashParams = new URLSearchParams(hash)
-      const at = hashParams.get('access_token')
-      const rt = hashParams.get('refresh_token')
-      if (at && rt) {
-        const recoveryClient = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-        )
-        recoveryRef.current = recoveryClient
-        recoveryClient.auth.setSession({ access_token: at, refresh_token: rt }).then(({ error }) => {
-          if (error) {
-            console.error('[ResetPassword] Error setSession:', error)
-            setError('El enlace de recuperación no es válido o ha expirado.')
-          }
-          setLoadingSession(false)
-          settled = true
-        }).catch(() => {
-          setError('Error al procesar la sesión. Intenta de nuevo.')
-          setLoadingSession(false)
-          settled = true
-        })
-      } else {
-        setError('No se encontró un token de recuperación en la URL.')
-        setLoadingSession(false)
-        settled = true
+        resolved = true
       }
-    } else {
-      setError('No se encontró un token de recuperación en la URL.')
-      setLoadingSession(false)
-    }
+    })
 
-    return () => {}
-  }, [supabase]) // eslint-disable-line react-hooks/exhaustive-deps
+    // 2. Intentar restaurar sesión existente (por si Supabase ya la tiene en storage)
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (resolved) return
+      if (session?.user?.aud === 'authenticated') {
+        setSessionReady(true)
+        setLoadingSession(false)
+        resolved = true
+      } else if (!error && !session) {
+        // No hay sesión aún, dar un poco de tiempo para que onAuthStateChange dispare
+        setTimeout(() => {
+          if (resolved) return
+          supabase.auth.getSession().then(({ data: { session: s2 } }) => {
+            if (s2?.user?.aud === 'authenticated') {
+              setSessionReady(true)
+              setLoadingSession(false)
+              resolved = true
+            } else {
+              setError('El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo.')
+              setLoadingSession(false)
+              resolved = true
+            }
+          })
+        }, 2000)
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -95,7 +83,7 @@ function ResetPasswordForm() {
       return
     }
 
-    if (!supabase && !recoveryRef.current) {
+    if (!supabaseRef.current) {
       setError('Supabase no está configurado')
       return
     }
@@ -103,15 +91,15 @@ function ResetPasswordForm() {
     setSubmitting(true)
 
     try {
-      const authClient = recoveryRef.current?.auth || supabase.auth
-      const { error: updateError } = await authClient.updateUser({ password })
+      const { error: updateError } = await supabaseRef.current.auth.updateUser({ password })
 
       if (updateError) {
         setError(updateError.message)
+        setSubmitting(false)
         return
       }
 
-      setSuccess(true)
+    setSuccess(true)
       setTimeout(() => {
         router.push('/login')
       }, 3000)
