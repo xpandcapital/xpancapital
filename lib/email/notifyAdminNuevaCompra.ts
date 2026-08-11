@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import nodemailer from 'nodemailer'
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { createClient } from '@/lib/supabase/server'
-import { sendTemplateEmail } from '@/lib/email/sendTemplateEmail'
+import { generateHTML } from '@/lib/email/htmlGenerator'
 
 interface NotifyAdminParams {
   compraId: string
@@ -113,11 +113,10 @@ function buildFallbackHTML(
 </html>`
 }
 
-async function sendFallbackEmail(
+async function enviarEmailDirecto(
   supabase: ReturnType<typeof createClient>,
   empresaId: string,
   to: string,
-  adminName: string,
   subject: string,
   html: string,
   senderId?: string,
@@ -145,25 +144,15 @@ async function sendFallbackEmail(
     sender = fallback
   }
 
-  let host = ''
-  let port = 465
-  let user = ''
-  let pass = ''
-  let fromName = 'Xpand Capital'
-  let fromEmail = ''
-
-  if (sender?.provider === 'smtp' || !sender) {
-    host = (sender?.smtp_host || process.env.SMTP_HOST || '').trim()
-    port = parseInt(sender?.smtp_port || process.env.SMTP_PORT || '465')
-    user = (sender?.smtp_user || process.env.SMTP_USER || '').trim()
-    pass = (sender?.smtp_pass || process.env.SMTP_PASS || '').trim()
-    if (sender?.from_name) fromName = sender.from_name.trim()
-    if (sender?.from_email) fromEmail = sender.from_email.trim()
-  }
+  const host = (sender?.smtp_host || process.env.SMTP_HOST || '').trim()
+  const port = parseInt(sender?.smtp_port || process.env.SMTP_PORT || '465')
+  const user = (sender?.smtp_user || process.env.SMTP_USER || '').trim()
+  const pass = (sender?.smtp_pass || process.env.SMTP_PASS || '').trim()
+  const fromName = sender?.from_name?.trim() || 'Xpand Capital'
+  const fromEmail = sender?.from_email?.trim() || user
 
   if (!host || !user || !pass) {
-    console.error('[notifyAdminNuevaCompra] Fallback sin configuración SMTP disponible')
-    return false
+    throw new Error('Sin configuración SMTP disponible')
   }
 
   const transporter = nodemailer.createTransport({
@@ -174,14 +163,11 @@ async function sendFallbackEmail(
   })
 
   await transporter.sendMail({
-    from: `"${fromName}" <${fromEmail || user}>`,
+    from: `"${fromName}" <${fromEmail}>`,
     to,
     subject,
     html,
   })
-
-  console.log(`[notifyAdminNuevaCompra] Email de respaldo enviado a ${to}`)
-  return true
 }
 
 export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise<void> {
@@ -295,45 +281,71 @@ export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise
 
     const subject = `Compra pendiente: ${nombreComprador} — ${moneda} ${totalLimpio}`
 
-    // Leer senderId del template para pasarlo al fallback si es necesario
+    // Leer plantilla completa y sender
     const { data: templateRow } = await supabase
       .from('email_templates')
-      .select('settings')
+      .select('settings, blocks, nombre')
       .eq('empresa_id', empresaId)
       .eq('evento', 'admin_nueva_compra_revisar')
       .maybeSingle()
+
     const tSettings = (typeof templateRow?.settings === 'string' ? JSON.parse(templateRow.settings) : templateRow?.settings) || {}
     const templateSenderId = tSettings.senderId as string | undefined
+    const blocks = (typeof templateRow?.blocks === 'string' ? JSON.parse(templateRow.blocks) : templateRow?.blocks) || []
 
-    // 5. Enviar email a cada destinatario (primero intenta plantilla, luego fallback)
+    // Inyectar productos en bloques receipt
+    let finalBlocks = blocks
+    if (productsForReceipt.length > 0) {
+      const siteUrl = params.siteUrl || 'https://xpandcapital.org'
+      finalBlocks = blocks.map((block: any) => {
+        if (block.type === 'receipt' && block.content) {
+          return {
+            ...block,
+            content: {
+              ...block.content,
+              items: productsForReceipt.map(p => ({
+                nombre: p.nombre,
+                precio: p.precio,
+                imagen: p.imagen || '',
+                categoria: p.categoria || '',
+                cantidad: p.cantidad || 1,
+              })),
+            },
+          }
+        }
+        return block
+      })
+    }
+
+    // Generar HTML de la plantilla (o usar fallback si falla)
+    let emailHtml = ''
+    try {
+      if (tSettings && finalBlocks.length > 0) {
+        emailHtml = generateHTML(finalBlocks, tSettings)
+        for (const [key, value] of Object.entries(emailVars)) {
+          emailHtml = emailHtml.replace(new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g'), value)
+        }
+        emailHtml = emailHtml.replace(/\{\{[^}]+\}\}/g, '')
+        console.log('[notifyAdminNuevaCompra] HTML generado desde plantilla, length:', emailHtml.length)
+      }
+    } catch (e: any) {
+      console.error('[notifyAdminNuevaCompra] Error generando HTML:', e?.message)
+    }
+
+    if (!emailHtml) {
+      emailHtml = fallbackHTML
+      console.log('[notifyAdminNuevaCompra] Usando HTML de respaldo')
+    }
+
+    // 5. Enviar email a cada destinatario via SMTP directo
     for (const dest of destinatarios) {
       if (!dest.email) continue
-
-      const templateSent = await sendTemplateEmail({
-        evento: 'admin_nueva_compra_revisar',
-        empresa_id: empresaId,
-        to: dest.email,
-        subject: `[TPL] ${subject}`,
-        variables: {
-          ...emailVars,
-          nombre: dest.nombre || '',
-        },
-        products: productsForReceipt,
-      }).catch(err => {
-        console.error(`[notifyAdminNuevaCompra] Error en sendTemplateEmail para ${dest.email}:`, err)
-        return false
-      })
-
-      if (!templateSent) {
-        console.log(`[notifyAdminNuevaCompra] Plantilla falló para ${dest.email}, usando HTML de respaldo...`)
-        await sendFallbackEmail(
-          supabase, empresaId, dest.email, dest.nombre || '',
-          `[FALLBACK] ${subject}`, fallbackHTML, templateSenderId,
-        ).catch(err => {
-          console.error(`[notifyAdminNuevaCompra] Error en fallback para ${dest.email}:`, err)
-        })
-      } else {
-        console.log(`[notifyAdminNuevaCompra] Plantilla enviada a ${dest.email}`)
+      try {
+        let destHtml = emailHtml.replace(/\{\{nombre\}\}/g, dest.nombre || 'Admin')
+        await enviarEmailDirecto(supabase, empresaId, dest.email, subject, destHtml, templateSenderId)
+        console.log(`[notifyAdminNuevaCompra] Email enviado a ${dest.email}`)
+      } catch (err: any) {
+        console.error(`[notifyAdminNuevaCompra] Error enviando a ${dest.email}:`, err?.message)
       }
     }
 
