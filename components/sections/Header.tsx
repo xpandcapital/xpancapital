@@ -27,7 +27,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
     const { user, logout, loading, refreshUser } = useAuth()
-    const { cart, favorites, xpandCoins, openCart, coinsEnabled } = useShop()
+    const { cart, favorites, xpandCoins, openCart, removeFromCart, coinsEnabled } = useShop()
     const { templateData, siteConfig } = useLandingCMS()
     const isDashboard = pathname?.startsWith('/superadmin') || pathname?.startsWith('/miembros')
 
@@ -283,7 +283,7 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                             </div>
                                             <div className="max-h-72 overflow-y-auto p-3">
                                                 {cart.length > 0 ? cart.map((item, idx) => (
-                                                    <div key={idx} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors">
+                                                    <div key={idx} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item">
                                                         <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-white/5">
                                                             <img src={item.image} className="w-full h-full object-cover" alt="" />
                                                         </div>
@@ -291,6 +291,12 @@ export function Header({ searchProps, logoHorizontal, logoVertical }: HeaderProp
                                                             <p className="text-xs font-bold text-white truncate">{stripHtml(item.title)}</p>
                                                             <p className="text-sm font-black text-blis-red font-mono">${item.price}</p>
                                                         </div>
+                                                        <button
+                                                            onClick={() => removeFromCart(item.id)}
+                                                            className="w-6 h-6 rounded-full bg-white/5 hover:bg-red-500/20 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-all"
+                                                        >
+                                                            <X className="w-3 h-3 text-gray-500 hover:text-red-400" />
+                                                        </button>
                                                     </div>
                                                 )) : (
                                                     <div className="py-8 text-center">
