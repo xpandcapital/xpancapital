@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { Star, ShoppingCart, ShieldCheck } from "lucide-react";
 import Image from "next/image";
+import { useShop } from "@/context/ShopContext";
+import { useToast } from "@/components/ui/Toast";
 
 interface Product {
     id: string;
@@ -85,6 +87,9 @@ export function ProductGrid({ data = {} }: { data?: { products?: Product[] } }) 
 
 
 function ProductCard({ product, index }: { product: Product; index: number }) {
+    const { addToCart } = useShop();
+    const { showToast } = useToast();
+
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -162,6 +167,8 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
 
                         <div className="relative overflow-hidden rounded-xl">
                             <motion.button
+                                onClick={() => { addToCart({ id: product.id, title: product.title, category: product.category, price: product.price, image: product.image } as any); showToast('Agregado al carrito'); }}
+                                whileTap={{ scale: 0.9 }}
                                 variants={{
                                     initial: { y: 6, opacity: 0.7 },
                                     hover: { y: 0, opacity: 1 }

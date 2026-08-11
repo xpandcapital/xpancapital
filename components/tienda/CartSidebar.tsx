@@ -7,10 +7,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useShop } from "@/context/ShopContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/components/ui/Toast";
 
 export function CartSidebar() {
     const { cart, xpandCoins, removeFromCart, getCartTotal, getCartCount, isCartOpen: isOpen, closeCart: onClose, coinsEnabled } = useShop();
     const { user } = useAuth();
+    const { showToast } = useToast();
     const router = useRouter();
 
     const totalUSD = getCartTotal();
@@ -81,55 +83,59 @@ export function CartSidebar() {
                                     </button>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
-                                    {cart.map((item, index) => (
-                                        <motion.div
-                                            key={item.id}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.1 }}
-                                            className="flex gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5"
-                                        >
-                                            {/* Image */}
-                                            <div className="w-24 h-24 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 bg-zinc-900">
-                                                <img
-                                                    src={item.image}
-                                                    alt={item.title}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-
-                                            {/* Info */}
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-base font-bold text-white line-clamp-2 mb-1">
-                                                    {item.title}
-                                                </h4>
-                                                <p className="text-[11px] text-gray-500 uppercase tracking-widest mb-2">
-                                                    {item.category}
-                                                </p>
-                                                <div className="flex items-center gap-3">
-                                                    <span className="text-xl font-black text-white">
-                                                        ${(item.price || item.precio_usd || 0).toFixed(2)}
-                                                    </span>
-                                                    {coinsEnabled && (item.precio_coins || item.price) && (
-                                                        <span className="text-[10px] text-amber-500 font-bold flex items-center gap-1">
-                                                            <Coins className="w-3 h-3" />
-                                                            {item.precio_coins || Math.round((item.price || 0) * 10)} COINS
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Remove */}
-                                            <button
-                                                onClick={() => removeFromCart(item.id)}
-                                                className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-colors self-start"
+                                <AnimatePresence initial={false}>
+                                    <div className="space-y-4">
+                                        {cart.map((item, index) => (
+                                            <motion.div
+                                                key={item.id}
+                                                layout
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, x: 100, height: 0, marginBottom: 0 }}
+                                                transition={{ duration: 0.25, ease: 'easeOut' }}
+                                                className="flex gap-4 p-4 rounded-2xl bg-white/[0.02] border border-white/5"
                                             >
-                                                <Trash2 className="w-4 h-4 text-red-400" />
-                                            </button>
-                                        </motion.div>
-                                    ))}
-                                </div>
+                                                {/* Image */}
+                                                <div className="w-24 h-24 rounded-xl overflow-hidden border border-white/10 flex-shrink-0 bg-zinc-900">
+                                                    <img
+                                                        src={item.image}
+                                                        alt={item.title}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+
+                                                {/* Info */}
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="text-base font-bold text-white line-clamp-2 mb-1">
+                                                        {item.title}
+                                                    </h4>
+                                                    <p className="text-[11px] text-gray-500 uppercase tracking-widest mb-2">
+                                                        {item.category}
+                                                    </p>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-xl font-black text-white">
+                                                            ${(item.price || item.precio_usd || 0).toFixed(2)}
+                                                        </span>
+                                                        {coinsEnabled && (item.precio_coins || item.price) && (
+                                                            <span className="text-[10px] text-amber-500 font-bold flex items-center gap-1">
+                                                                <Coins className="w-3 h-3" />
+                                                                {item.precio_coins || Math.round((item.price || 0) * 10)} COINS
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Remove */}
+                                                <button
+                                                    onClick={() => { removeFromCart(item.id); showToast('Producto eliminado del carrito'); }}
+                                                    className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center hover:bg-red-500/20 transition-colors self-start"
+                                                >
+                                                    <Trash2 className="w-4 h-4 text-red-400" />
+                                                </button>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </AnimatePresence>
                             )}
                         </div>
 

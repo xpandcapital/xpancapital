@@ -61,7 +61,7 @@ function CheckoutLoading() {
 }
 
 function CheckoutContent() {
-    const { cart, xpandCoins, clearCart, getCartTotal, removeFromCart } = useShop();
+    const { cart, xpandCoins, clearCart, getCartTotal, removeFromCart, isLoaded } = useShop();
     const { user } = useAuth();
     const { showToast } = useToast();
     const router = useRouter();
@@ -146,7 +146,7 @@ function CheckoutContent() {
     // Redirigir si carrito vacío (excepto si estamos en flujo Izipay)
     useEffect(() => {
         const izipayFlow = sessionStorage.getItem('izipay_flow_active')
-        if (cart.length === 0 && !isComplete && !isRedirectingRef.current && !izipayFlow) {
+        if (isLoaded && cart.length === 0 && !isComplete && !isRedirectingRef.current && !izipayFlow) {
             router.push('/tienda')
         }
     }, [cart.length, isComplete, router]);
