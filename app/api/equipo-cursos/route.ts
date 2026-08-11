@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         .from('profiles')
         .select('email, nombre, empresa_id')
         .eq('id', user_id)
-        .single()
+        .maybeSingle()
 
       let advisorId = advisor_id
       if (!advisorId && profile?.email) {
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         .from('advisors')
         .select('id')
         .eq('email', email)
-        .single()
+        .maybeSingle()
 
       if (advisor) {
         advisor_id = advisor.id
@@ -131,15 +131,15 @@ export async function POST(request: NextRequest) {
           .select('*')
           .eq('advisor_id', advisor_id)
           .eq('curso_id', curso_id)
-          .single()
-        const { data: cursoInfo } = await supabase.from('cursos').select('id, nombre, imagen_principal, para_equipo, precio_usd').eq('id', curso_id).single()
+          .maybeSingle()
+        const { data: cursoInfo } = await supabase.from('cursos').select('id, nombre, imagen_principal, para_equipo, precio_usd').eq('id', curso_id).maybeSingle()
         return NextResponse.json({ success: true, data: { ...existing, cursos: cursoInfo } })
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     // Una sola query al curso (no duplicar en success + error)
-    const { data: cursoInfo } = await supabase.from('cursos').select('id, nombre, imagen_principal, para_equipo, precio_usd').eq('id', curso_id).single()
+    const { data: cursoInfo } = await supabase.from('cursos').select('id, nombre, imagen_principal, para_equipo, precio_usd').eq('id', curso_id).maybeSingle()
     return NextResponse.json({ success: true, data: { ...inserted, cursos: cursoInfo } })
   } catch (error) {
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })
