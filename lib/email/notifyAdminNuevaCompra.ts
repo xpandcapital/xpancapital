@@ -153,12 +153,12 @@ async function sendFallbackEmail(
   let fromEmail = ''
 
   if (sender?.provider === 'smtp' || !sender) {
-    host = sender?.smtp_host || process.env.SMTP_HOST || ''
+    host = (sender?.smtp_host || process.env.SMTP_HOST || '').trim()
     port = parseInt(sender?.smtp_port || process.env.SMTP_PORT || '465')
-    user = sender?.smtp_user || process.env.SMTP_USER || ''
-    pass = sender?.smtp_pass || process.env.SMTP_PASS || ''
-    if (sender?.from_name) fromName = sender.from_name
-    if (sender?.from_email) fromEmail = sender.from_email
+    user = (sender?.smtp_user || process.env.SMTP_USER || '').trim()
+    pass = (sender?.smtp_pass || process.env.SMTP_PASS || '').trim()
+    if (sender?.from_name) fromName = sender.from_name.trim()
+    if (sender?.from_email) fromEmail = sender.from_email.trim()
   }
 
   if (!host || !user || !pass) {

@@ -150,15 +150,18 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
     // 5. Enviar
     if (sender?.provider === 'smtp' || !sender) {
       const port = parseInt(sender?.smtp_port || process.env.SMTP_PORT || '465')
+      const transportHost = (sender?.smtp_host || process.env.SMTP_HOST || '').trim()
+      const transportUser = (sender?.smtp_user || process.env.SMTP_USER || '').trim()
+      const transportPass = (sender?.smtp_pass || process.env.SMTP_PASS || '').trim()
       const transporter = nodemailer.createTransport({
-        host: sender?.smtp_host || process.env.SMTP_HOST || '',
+        host: transportHost,
         port,
         secure: port === 465,
         connectionTimeout: 5000,
         socketTimeout: 5000,
         auth: {
-          user: sender?.smtp_user || process.env.SMTP_USER || '',
-          pass: sender?.smtp_pass || process.env.SMTP_PASS || '',
+          user: transportUser,
+          pass: transportPass,
         },
       })
 
