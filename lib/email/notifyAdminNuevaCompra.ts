@@ -313,7 +313,7 @@ export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise
         evento: 'admin_nueva_compra_revisar',
         empresa_id: empresaId,
         to: dest.email,
-        subject,
+        subject: `[TPL] ${subject}`,
         variables: {
           ...emailVars,
           nombre: dest.nombre || '',
@@ -328,7 +328,7 @@ export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise
         console.log(`[notifyAdminNuevaCompra] Plantilla falló para ${dest.email}, usando HTML de respaldo...`)
         await sendFallbackEmail(
           supabase, empresaId, dest.email, dest.nombre || '',
-          subject, fallbackHTML, templateSenderId,
+          `[FALLBACK] ${subject}`, fallbackHTML, templateSenderId,
         ).catch(err => {
           console.error(`[notifyAdminNuevaCompra] Error en fallback para ${dest.email}:`, err)
         })

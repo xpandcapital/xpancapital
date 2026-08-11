@@ -159,8 +159,6 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
         host: transportHost,
         port,
         secure: port === 465,
-        connectionTimeout: 5000,
-        socketTimeout: 5000,
         auth: {
           user: transportUser,
           pass: transportPass,
