@@ -94,10 +94,11 @@ export default function UserDashboard() {
             isEnrolled: false
         })));
 
-    const enrolledIds = new Set(enrolledCourses.map(c => c.id));
-    const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.id));
+    const enrolledIds = new Set(enrolledCourses.map(c => c.cursoId));
+    const uniqueEnrolled = enrolledCourses.filter((c, i) => !enrolledCourses.slice(0, i).some(prev => prev.cursoId === c.cursoId));
+    const newPurchasedCourses = purchasedCourses.filter(c => !enrolledIds.has(c.cursoId));
 
-    const allCourses = [...enrolledCourses, ...newPurchasedCourses].slice(0, 6);
+    const allCourses = [...uniqueEnrolled, ...newPurchasedCourses].slice(0, 6);
 
     const recentPurchases = compras
         .filter(c => c.estado === 'completado')

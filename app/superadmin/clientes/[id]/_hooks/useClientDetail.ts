@@ -242,8 +242,12 @@ export function useClientDetail(clientId: string) {
                 fetchAcademia()
                 return true
             }
+            console.error('[assignCourse] API error:', data)
             showToast(data.error || 'Error al asignar curso', 'error')
-        } catch { showToast('Error al asignar curso', 'error') }
+        } catch (e: any) {
+            console.error('[assignCourse] Exception:', e)
+            showToast('Error al asignar curso', 'error')
+        }
         return false
     }, [clientId, client?.email, fetchAcademia, showToast])
 
