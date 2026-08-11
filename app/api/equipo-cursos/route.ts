@@ -126,6 +126,10 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       if (error.code === '23505') {
+        // Ya existe (advisor_id, curso_id). Actualizar user_id si es necesario
+        if (user_id) {
+          await supabase.from('equipo_cursos').update({ user_id }).eq('advisor_id', advisor_id).eq('curso_id', curso_id)
+        }
         const { data: existing } = await supabase
           .from('equipo_cursos')
           .select('*')
