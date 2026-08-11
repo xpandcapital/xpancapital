@@ -27,7 +27,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true })
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'
+    const siteUrl = (() => {
+      const env = process.env.NEXT_PUBLIC_SITE_URL
+      if (env && !env.includes('localhost') && !env.includes('127.0.0.1')) return env
+      if (process.env.NEXT_PUBLIC_VERCEL_URL) return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
+      return 'https://xpandcapital.org'
+    })()
 
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'recovery',
