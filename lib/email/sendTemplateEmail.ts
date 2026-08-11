@@ -1,16 +1,7 @@
 import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 import { createClient } from '@/lib/supabase/server'
 import nodemailer from 'nodemailer'
-
-// Import dinámico para evitar error en client components
-let generateHTMLFn: any = null
-async function getGenerateHTML() {
-  if (!generateHTMLFn) {
-    const mod = await import('../../app/superadmin/mails/lib/htmlGenerator.js')
-    generateHTMLFn = mod.generateHTML
-  }
-  return generateHTMLFn
-}
+import { generateHTML } from './htmlGenerator'
 
 interface TemplateEmailParams {
   evento: string
@@ -104,7 +95,6 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
           })
         }
 
-        const generateHTML = await getGenerateHTML()
         html = generateHTML(blocks,
           typeof template.settings === 'string' ? JSON.parse(template.settings) : template.settings
         )

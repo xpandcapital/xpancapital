@@ -120,13 +120,30 @@ async function sendFallbackEmail(
   adminName: string,
   subject: string,
   html: string,
+  senderId?: string,
 ) {
-  const { data: sender } = await supabase
+  let senderQuery = supabase
     .from('email_senders')
     .select('*')
     .eq('empresa_id', empresaId)
-    .eq('is_default', true)
-    .maybeSingle()
+
+  if (senderId) {
+    senderQuery = senderQuery.eq('id', senderId)
+  } else {
+    senderQuery = senderQuery.eq('is_default', true)
+  }
+
+  let { data: sender } = await senderQuery.maybeSingle()
+
+  if (!sender && senderId) {
+    const { data: fallback } = await supabase
+      .from('email_senders')
+      .select('*')
+      .eq('empresa_id', empresaId)
+      .eq('is_default', true)
+      .maybeSingle()
+    sender = fallback
+  }
 
   let host = ''
   let port = 465
@@ -278,6 +295,16 @@ export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise
 
     const subject = `Compra pendiente: ${nombreComprador} — ${moneda} ${totalLimpio}`
 
+    // Leer senderId del template para pasarlo al fallback si es necesario
+    const { data: templateRow } = await supabase
+      .from('email_templates')
+      .select('settings')
+      .eq('empresa_id', empresaId)
+      .eq('evento', 'admin_nueva_compra_revisar')
+      .maybeSingle()
+    const tSettings = (typeof templateRow?.settings === 'string' ? JSON.parse(templateRow.settings) : templateRow?.settings) || {}
+    const templateSenderId = tSettings.senderId as string | undefined
+
     // 5. Enviar email a cada destinatario (primero intenta plantilla, luego fallback)
     for (const dest of destinatarios) {
       if (!dest.email) continue
@@ -301,7 +328,7 @@ export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise
         console.log(`[notifyAdminNuevaCompra] Plantilla falló para ${dest.email}, usando HTML de respaldo...`)
         await sendFallbackEmail(
           supabase, empresaId, dest.email, dest.nombre || '',
-          subject, fallbackHTML,
+          subject, fallbackHTML, templateSenderId,
         ).catch(err => {
           console.error(`[notifyAdminNuevaCompra] Error en fallback para ${dest.email}:`, err)
         })
