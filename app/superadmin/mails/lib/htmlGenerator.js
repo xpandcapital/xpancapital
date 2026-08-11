@@ -1,4 +1,4 @@
-import { SOCIAL_CONFIG } from '../_types';
+import { SOCIAL_CONFIG } from './socialConfig.js';
 
 const pad = (c) => ({
     pt: c.paddingTop ?? c.padding ?? 0,

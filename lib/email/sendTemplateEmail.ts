@@ -126,13 +126,33 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
       html = buildFallbackHTML(variables)
     }
 
-    // 4. Buscar sender configurado
-    const { data: sender } = await supabase
+    // 4. Buscar sender configurado — respeta senderId del template si existe
+    const tSettings = (typeof template?.settings === 'string' ? JSON.parse(template.settings) : template?.settings) || {}
+    const senderIdFromTemplate = tSettings.senderId as string | undefined
+
+    let senderQuery = supabase
       .from('email_senders')
       .select('*')
       .eq('empresa_id', empresa_id)
-      .eq('is_default', true)
-      .maybeSingle()
+
+    if (senderIdFromTemplate) {
+      senderQuery = senderQuery.eq('id', senderIdFromTemplate)
+    } else {
+      senderQuery = senderQuery.eq('is_default', true)
+    }
+
+    let { data: sender } = await senderQuery.maybeSingle()
+
+    // Fallback al default si no se encontró el senderId del template
+    if (!sender && senderIdFromTemplate) {
+      const { data: fallbackSender } = await supabase
+        .from('email_senders')
+        .select('*')
+        .eq('empresa_id', empresa_id)
+        .eq('is_default', true)
+        .maybeSingle()
+      sender = fallbackSender
+    }
 
     let fromName = 'Xpand Capital'
     let fromEmail = process.env.SMTP_USER || ''
