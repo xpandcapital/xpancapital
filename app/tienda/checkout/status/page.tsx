@@ -85,8 +85,9 @@ function CheckoutStatusContent() {
     if (izipaySuccess === "1" || wompiSuccess === "1") return;
 
     if (!orderId) {
-      setState("failed");
-      setErrorMsg("No se encontró la orden.");
+      // Sin orderId y sin parámetro de pago → probablemente entró por error o recarga
+      // Redirigir al checkout en vez de mostrar error confuso
+      window.location.href = '/tienda/checkout'
       return;
     }
 
