@@ -169,7 +169,7 @@ async function sendFallbackEmail(
 
 export async function notifyAdminNuevaCompra(params: NotifyAdminParams): Promise<void> {
   const supabase = createClient()
-  const siteUrl = params.siteUrl || 'https://www.xpancapital.org'
+  const siteUrl = params.siteUrl || 'https://xpandcapital.org'
   const empresaId = params.empresaId || DEFAULT_EMPRESA_ID
 
   try {

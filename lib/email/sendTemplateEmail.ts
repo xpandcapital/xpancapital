@@ -75,7 +75,7 @@ export async function sendTemplateEmail(params: TemplateEmailParams): Promise<bo
 
         // Inyectar productos en bloques receipt
         if (products && products.length > 0) {
-          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.xpancapital.org'
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'
           const placeholderImage = `https://placehold.co/100x100/181818/ffffff?text=Producto`
           const normalizeImage = (url?: string) => {
             if (!url) return placeholderImage
