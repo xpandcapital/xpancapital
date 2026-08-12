@@ -63,7 +63,7 @@ export default function VentasAdminPage() {
 
     const cargar = useCallback(async () => {
         setLoading(true);
-        const params = new URLSearchParams({ page: page.toString(), limit: "50" });
+        const params = new URLSearchParams({ page: page.toString(), limit: "20" });
         if (filtroEstado) params.set("estado", filtroEstado);
         if (search) params.set("search", search);
         const res = await fetch(`/api/admin/ventas?${params}&_t=${refreshKey}`);
@@ -433,11 +433,11 @@ export default function VentasAdminPage() {
                     </>
                 )}
 
-                {total > 50 && (
+                {total > 20 && (
                     <div className="flex justify-center gap-2 mt-6">
                         <Button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} variant="outline" className="border-white/10 text-gray-400">Anterior</Button>
-                        <span className="px-4 py-2 text-sm text-gray-400">Página {page} de {Math.ceil(total / 50)}</span>
-                        <Button onClick={() => setPage(p => p + 1)} disabled={page * 50 >= total} variant="outline" className="border-white/10 text-gray-400">Siguiente</Button>
+                        <span className="px-4 py-2 text-sm text-gray-400">Página {page} de {Math.ceil(total / 20)}</span>
+                        <Button onClick={() => setPage(p => p + 1)} disabled={page * 20 >= total} variant="outline" className="border-white/10 text-gray-400">Siguiente</Button>
                     </div>
                 )}
             </div>
