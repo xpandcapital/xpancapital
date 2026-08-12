@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import {
     DollarSign, Clock, CheckCircle2, AlertCircle, Loader2,
     Search, Trash2, Plus, ShoppingBag,
@@ -40,12 +41,15 @@ interface LogEntry {
 
 export default function VentasAdminPage() {
     const { coinsEnabled } = useShop();
+    const searchParams = useSearchParams();
+    const ventaIdParam = searchParams.get("id");
     const [ventas, setVentas] = useState<Venta[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filtroEstado, setFiltroEstado] = useState("");
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
+    const [ventaDestacada, setVentaDestacada] = useState<string | null>(null);
     const [modalNueva, setModalNueva] = useState(false);
     const [modalVerificar, setModalVerificar] = useState<Venta | null>(null);
     const [modalHistorial, setModalHistorial] = useState<string | null>(null);
@@ -73,6 +77,24 @@ export default function VentasAdminPage() {
     }, [page, filtroEstado, search, refreshKey]);
 
     useEffect(() => { cargar(); }, [cargar]);
+
+    // Resaltar venta específica desde notificación (?id=...)
+    useEffect(() => {
+        if (ventaIdParam) {
+            setVentaDestacada(ventaIdParam);
+            const timer = setTimeout(() => {
+                const el = document.getElementById(`venta-${ventaIdParam}`);
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    el.classList.add("ring-2", "ring-blis-red", "bg-blis-red/5");
+                    setTimeout(() => {
+                        el.classList.remove("ring-2", "ring-blis-red", "bg-blis-red/5");
+                    }, 4000);
+                }
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [ventaIdParam, ventas]);
 
     // Debounced search: resetea a página 1 al escribir
     useEffect(() => {
@@ -259,7 +281,7 @@ export default function VentasAdminPage() {
                             {ventas.map(venta => {
                                 const { fecha, hora } = formatFecha(venta.creado_en);
                                 return (
-                                    <div key={venta.id} className="bg-zinc-900/50 border border-white/10 rounded-2xl p-4 space-y-3">
+                                    <div key={venta.id} id={`venta-${venta.id}`} className={`bg-zinc-900/50 border rounded-2xl p-4 space-y-3 transition-all ${ventaDestacada === venta.id ? 'border-blis-red/60 bg-blis-red/5' : 'border-white/10'}`}>
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3 min-w-0">
                                                 <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold flex-shrink-0">
@@ -353,7 +375,7 @@ export default function VentasAdminPage() {
                                         {ventas.map(venta => {
                                             const { fecha, hora } = formatFecha(venta.creado_en);
                                             return (
-                                                <tr key={venta.id} className="hover:bg-white/[0.02] transition-colors">
+                                                <tr key={venta.id} id={`venta-${venta.id}`} className={`transition-colors ${ventaDestacada === venta.id ? 'bg-blis-red/5' : 'hover:bg-white/[0.02]'}`}>
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold">

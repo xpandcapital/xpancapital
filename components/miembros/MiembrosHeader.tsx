@@ -1,10 +1,11 @@
 "use client";
 
-import { Bell, Search, ShoppingCart, Star } from "lucide-react";
+import { Search, ShoppingCart, Star } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useShop } from "@/context/ShopContext";
 import Link from "next/link";
+import { NotificationBell } from "@/components/superadmin/NotificationBell";
 
 export function MiembrosHeader() {
     const { user } = useAuth();
@@ -39,10 +40,7 @@ export function MiembrosHeader() {
                         <span className="absolute top-1 right-1 w-2 h-2 bg-blis-red rounded-full shadow-[0_0_10px_rgba(213,193,8,1)]"></span>
                     </button>
 
-                    <button className="relative text-gray-400 hover:text-white transition-colors p-2">
-                        <Bell className="w-5 h-5" />
-                        <span className="absolute top-1 right-1 w-2 h-2 bg-blis-red rounded-full shadow-[0_0_10px_rgba(213,193,8,1)]"></span>
-                    </button>
+                    <NotificationBell />
                 </div>
 
                 <div className="flex items-center gap-3 pl-6 border-l border-white/10">

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import {
-  CalendarDays, Users, UserPlus, Settings, MapPin,
+  CalendarDays, Users, Settings, MapPin,
   Globe, Facebook, Twitter, Youtube, Instagram,
   Linkedin, Music, MessageCircle, Send, Github,
   ExternalLink
@@ -14,7 +14,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { ReactNode } from 'react'
 
 interface PerfilHeaderProps {
-  stats?: { seguidores: number; siguiendo: number }
+  stats?: { seguidores: number; eventos: number }
 }
 
 interface PerfilData {
@@ -23,6 +23,7 @@ interface PerfilData {
   avatar_url: string | null
   rol: string
   empresa_id: string
+  creado_en?: string
   biografia?: string | null
   website_url?: string | null
   facebook_url?: string | null
@@ -47,7 +48,7 @@ export function PerfilHeader({ stats }: PerfilHeaderProps) {
     const supabase = createClient()
     supabase
       .from('profiles')
-      .select('nombre, apellido, avatar_url, rol, empresa_id, biografia, website_url, facebook_url, instagram_url, twitter_url, youtube_url, linkedin_url, tiktok_url, whatsapp_url, telegram_url, discord_url, github_url')
+      .select('nombre, apellido, avatar_url, rol, empresa_id, creado_en, biografia, website_url, facebook_url, instagram_url, twitter_url, youtube_url, linkedin_url, tiktok_url, whatsapp_url, telegram_url, discord_url, github_url')
       .eq('id', userId)
       .single()
       .then(({ data }) => { if (data) setPerfil(data as PerfilData) })
@@ -59,6 +60,7 @@ export function PerfilHeader({ stats }: PerfilHeaderProps) {
   const username = `@${nombre.toLowerCase().replace(/\s+/g, '')}`
   const avatarUrl = perfil?.avatar_url || authUser?.profilePic || (authUser as any)?.avatar_url
   const rol = authUser?.role || ''
+  const miembroDesde = perfil?.creado_en ? new Date(perfil.creado_en).toLocaleDateString('es-PE', { month: 'long', year: 'numeric' }) : '2026'
 
   return (
     <div className="relative">
@@ -103,12 +105,11 @@ export function PerfilHeader({ stats }: PerfilHeaderProps) {
           {/* Name + Stats */}
           <div className="flex-1 text-center md:text-left pb-2">
             <h1 className="text-xl md:text-2xl font-black text-white">{nombreCompleto}</h1>
-            <p className="text-gray-500 text-sm">{username} · Miembro desde 2026</p>
+            <p className="text-gray-500 text-sm">{username} · Miembro desde {miembroDesde}</p>
 
             <div className="flex items-center justify-center md:justify-start gap-4 mt-3">
               <StatBadge icon={<Users className="w-3.5 h-3.5" />} value={stats?.seguidores ?? 0} label="seguidores" />
-              <StatBadge icon={<UserPlus className="w-3.5 h-3.5" />} value={stats?.siguiendo ?? 0} label="siguiendo" />
-              <StatBadge icon={<CalendarDays className="w-3.5 h-3.5" />} value={0} label="eventos" />
+              <StatBadge icon={<CalendarDays className="w-3.5 h-3.5" />} value={stats?.eventos ?? 0} label="eventos" />
             </div>
           </div>
 

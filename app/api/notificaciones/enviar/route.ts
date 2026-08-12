@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from '@supabase/supabase-js'
 import { getAuthUser, isAdmin } from "@/lib/supabase/api-auth";
 import { notifyUser } from '@/lib/notifications';
+import crypto from "crypto";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -58,7 +59,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, enviadas: 0 });
     }
 
-    // Insertar registros en notificaciones
+    // Generar identificador de lote para agrupar la notificación masiva
+    const loteId = crypto.randomUUID();
+
+    // Construir metadata de destinatarios para el registro resumen
+    const rolLabels: Record<string, string> = {
+      superadmin: "Super Admin",
+      admin: "Admin",
+      editor: "Editor",
+      empleado: "Empleado",
+      vendedor: "Vendedor",
+      cliente: "Cliente",
+      usuario: "Usuario",
+    };
+
+    let destinatarioLabel = "todos los miembros";
+    if (destinatario_tipo === "por_rol" && destinatario_roles?.length) {
+      destinatarioLabel = `rol: ${destinatario_roles.map((r: string) => rolLabels[r] || r).join(", ")}`;
+    } else if (destinatario_tipo === "miembro") {
+      destinatarioLabel = "miembro específico";
+    } else if (destinatario_tipo === "grupo") {
+      destinatarioLabel = "grupo personalizado";
+    }
+
+    // Insertar registros individuales para cada destinatario
     const records = targetUsers.map((u) => ({
       user_id: u.id,
       empresa_id: empresaId,
@@ -67,7 +91,27 @@ export async function POST(request: NextRequest) {
       mensaje: mensaje.trim(),
       link: link?.trim() || null,
       leida: false,
+      lote_id: loteId,
+      destinatario_tipo: destinatario_tipo || "todos",
+      destinatario_ids: destinatario_tipo === "por_rol" ? destinatario_roles || [] : destinatario_ids || [],
+      enviado_por: auth.userId,
     }));
+
+    // Insertar un registro resumen (user_id NULL) para el historial del admin
+    const resumenMensaje = `${titulo.trim()} — Enviado a ${targetUsers.length} usuario${targetUsers.length !== 1 ? "s" : ""} (${destinatarioLabel})`;
+    records.push({
+      user_id: null,
+      empresa_id: empresaId,
+      tipo: "sistema",
+      titulo: titulo.trim(),
+      mensaje: resumenMensaje,
+      link: link?.trim() || null,
+      leida: false,
+      lote_id: loteId,
+      destinatario_tipo: destinatario_tipo || "todos",
+      destinatario_ids: destinatario_tipo === "por_rol" ? destinatario_roles || [] : destinatario_ids || [],
+      enviado_por: auth.userId,
+    });
 
     const { error: insertError } = await supabaseAdmin
       .from("notificaciones")

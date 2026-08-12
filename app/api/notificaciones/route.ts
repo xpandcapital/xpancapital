@@ -68,6 +68,7 @@ export async function GET(request: NextRequest) {
       let query = supabaseAdmin
         .from('notificaciones')
         .select('*', { count: 'exact' })
+        .is('user_id', null)
         .order('creado_en', { ascending: false })
         .limit(limit)
 

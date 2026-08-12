@@ -17,6 +17,8 @@ export default function ComunidadPage() {
   const { user } = useAuth()
   const { posts, loading, loadingMore, error, hasMore, fetchPosts, eliminarPost, reaccionar, votar, inscribirEvento, cancelarInscripcion } = useComunidad()
   const [miembros, setMiembros] = useState<any[]>([])
+  const [totalMiembros, setTotalMiembros] = useState(0)
+  const [totalEventos, setTotalEventos] = useState(0)
   const [actualizaciones, setActualizaciones] = useState<any[]>([])
   const { top10, loading: rankingLoading } = useRanking(user?.empresa_id, user?.id)
 
@@ -48,9 +50,25 @@ export default function ComunidadPage() {
     if (!user?.empresa_id) return
     fetch(`/api/admin/users?empresa_id=${user.empresa_id}&limit=12`)
       .then(r => r.json())
-      .then(d => { if (d.success) setMiembros(d.data || []) })
+      .then(d => {
+        if (d.success) {
+          setMiembros(d.data || [])
+          setTotalMiembros(d.total || d.data?.length || 0)
+        }
+      })
       .catch(() => {})
   }, [user?.empresa_id])
+
+  // Contador real de eventos
+  useEffect(() => {
+    import("@/lib/supabase").then(({ getSupabase }) => {
+      const supabase = getSupabase()
+      if (!supabase) return
+      supabase.from("comunidad_eventos").select("id", { count: "exact", head: true }).then(({ count }) => {
+        setTotalEventos(count || 0)
+      })
+    })
+  }, [])
 
   // Generar actualizaciones desde los posts
   useEffect(() => {
@@ -68,7 +86,7 @@ export default function ComunidadPage() {
   return (
     <div className="min-h-screen">
       {/* Perfil Header */}
-      <PerfilHeader stats={{ seguidores: miembros.length, siguiendo: Math.min(miembros.length, 13) }} />
+      <PerfilHeader stats={{ seguidores: totalMiembros, eventos: totalEventos }} />
 
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] xl:grid-cols-[300px_1fr_300px] gap-4 md:gap-6">
