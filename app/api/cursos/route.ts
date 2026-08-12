@@ -132,8 +132,9 @@ export async function GET(request: NextRequest) {
         if (advisorRecord?.id) {
           const { data: advisorCourses } = await supabase
             .from('equipo_cursos')
-          .select('curso_id, progreso, lecciones_completadas')
+            .select('curso_id, progreso, lecciones_completadas')
             .eq('advisor_id', advisorRecord.id)
+            .is('user_id', null)
 
           enrolledByAdvisor = advisorCourses || []
         }

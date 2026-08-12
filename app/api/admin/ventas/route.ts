@@ -199,8 +199,37 @@ export async function DELETE(request: NextRequest) {
     if (!id) return NextResponse.json({ error: "ID requerido" }, { status: 400 });
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Resolver user_id, producto_id y curso_id antes de borrar para limpiar la asignación
+    let cursoId: string | null = null;
+    let compraUserId: string | null = null;
+    const { data: compra } = await supabase
+      .from("compras")
+      .select("user_id, producto_id")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (compra?.producto_id) {
+      const { data: producto } = await supabase
+        .from("productos")
+        .select("curso_id")
+        .eq("id", compra.producto_id)
+        .maybeSingle();
+      cursoId = producto?.curso_id || null;
+    }
+    compraUserId = compra?.user_id || null;
+
     const { error } = await supabase.from("compras").delete().eq("id", id);
     if (error) throw error;
+
+    // Limpiar asignación de curso asociada
+    if (compraUserId && cursoId) {
+      await supabase
+        .from("equipo_cursos")
+        .delete()
+        .eq("user_id", compraUserId)
+        .eq("curso_id", cursoId);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
