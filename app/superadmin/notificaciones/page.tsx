@@ -36,9 +36,13 @@ interface Notificacion {
 }
 
 const ROLES = [
+  { value: "superadmin", label: "Super Admin" },
   { value: "admin", label: "Admin" },
   { value: "editor", label: "Editor" },
   { value: "empleado", label: "Empleado" },
+  { value: "vendedor", label: "Vendedor" },
+  { value: "cliente", label: "Cliente" },
+  { value: "usuario", label: "Usuario" },
 ];
 
 const DESTINATARIO_TIPOS = [
