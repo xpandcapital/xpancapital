@@ -54,12 +54,6 @@ export async function POST(request: NextRequest) {
       await supabase.from('productos').update({ curso_id: data.id, tipo: 'servicio', categoria_id: categoriaId || undefined }).eq('id', courseData.link_producto_id)
       await supabase.from('productos').update({ curso_id: null }).eq('curso_id', data.id).neq('id', courseData.link_producto_id)
       producto_id = courseData.link_producto_id
-    } else if (courseData.vender_en_tienda === false && data) {
-      // Desvincular producto si existe
-      const { data: existingProduct } = await supabase.from('productos').select('id').eq('curso_id', data.id).maybeSingle()
-      if (existingProduct?.id) {
-        await supabase.from('productos').update({ activo: false, curso_id: null }).eq('id', existingProduct.id)
-      }
     }
 
     return NextResponse.json({ success: true, data, producto_id })
@@ -104,11 +98,6 @@ export async function PUT(request: NextRequest) {
       await supabase.from('productos').update({ curso_id: data.id, tipo: 'servicio', categoria_id: categoriaId || undefined }).eq('id', link_producto_id)
       await supabase.from('productos').update({ curso_id: null }).eq('curso_id', data.id).neq('id', link_producto_id)
       producto_id = link_producto_id
-    } else if (vender_en_tienda === false && data) {
-      const { data: existingProduct } = await supabase.from('productos').select('id').eq('curso_id', data.id).maybeSingle()
-      if (existingProduct?.id) {
-        await supabase.from('productos').update({ activo: false, curso_id: null }).eq('id', existingProduct.id)
-      }
     }
 
     return NextResponse.json({ success: true, data, producto_id })
