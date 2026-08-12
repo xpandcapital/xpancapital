@@ -174,64 +174,7 @@ export async function GET(request: NextRequest) {
           matriculado: true,
         }))
 
-      // Buscar cursos comprados via tienda (productos.curso_id)
-      // Q3a: compras con user_id directo
-      const { data: comprasUser } = await supabase
-        .from('compras')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('estado', 'completado')
-
-      // Q3b: compras sin user_id pero con email en metadata que coincide con el perfil
-      let comprasEmail: any[] = []
-      if (userProfile?.email) {
-        const { data: comprasByEmail } = await supabase
-          .from('compras')
-          .select('id')
-          .eq('estado', 'completado')
-          .is('user_id', null)
-          .eq('metadata->>email_cliente', userProfile.email.toLowerCase())
-
-        comprasEmail = comprasByEmail || []
-        // Actualizar user_id en compras huérfanas (batch, no N+1)
-        if (comprasEmail.length > 0) {
-          await supabase
-            .from('compras')
-            .update({ user_id: userId })
-            .in('id', comprasEmail.map(c => c.id))
-        }
-      }
-
-      const todasLasCompras = [...(comprasUser || []), ...comprasEmail]
-      const todosLosIds = todasLasCompras.map(c => c.id)
-
-      let purchased: any[] = []
-      if (todosLosIds.length) {
-        const { data: compraItems } = await supabase
-          .from('compra_items')
-          .select('producto_id')
-          .in('compra_id', todosLosIds)
-
-        const productoIds = compraItems?.map(ci => ci.producto_id).filter(Boolean) || []
-
-        const { data: linkedCursos } = await supabase
-          .from('productos')
-          .select('curso_id')
-          .in('id', productoIds)
-          .not('curso_id', 'is', null)
-
-        const cursoIds = linkedCursos?.map(p => p.curso_id) || []
-        const enrolledIds = new Set(filtered.map(c => c.id))
-        purchased = allCursos
-          .filter(c => !(c as any).para_equipo && cursoIds.includes(c.id) && !enrolledIds.has(c.id))
-          .map(c => ({
-            ...c,
-            progreso: { progreso: 0 },
-            matriculado: false,
-          }))
-      }
-
-      return NextResponse.json({ success: true, data: [...filtered, ...purchased] })
+      return NextResponse.json({ success: true, data: filtered })
     }
 
     // Listado público: excluir cursos solo-equipo
