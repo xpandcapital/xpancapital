@@ -270,7 +270,7 @@ export default function Dashboard() {
           {[
             { label: 'Productos Activos', val: productsCount, icon: Package, color: 'text-emerald-500', bg: 'bg-emerald-500/5', fmt: formatNumber },
             { label: 'Clientes', val: clientsCount, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/5', fmt: formatNumber },
-            { label: 'Visitas al Blog', val: blogViews, icon: Eye, color: 'text-amber-500', bg: 'bg-amber-500/5', fmt: formatNumber },
+            { label: 'Posts de Blog', val: blogViews, icon: Eye, color: 'text-amber-500', bg: 'bg-amber-500/5', fmt: formatNumber },
             { label: 'Ventas Totales', val: totalVentas, icon: DollarSign, color: 'text-blis-red', bg: 'bg-blis-red/5', fmt: formatCurrency },
           ].map((s, i) => (
             <div key={i} className="bg-[#050505] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl">

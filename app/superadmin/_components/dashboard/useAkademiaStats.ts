@@ -16,8 +16,6 @@ interface RankingItem {
   email: string;
   puntos_cursos: number;
   nivel: number;
-  progreso_promedio: number;
-  certificados: number;
 }
 
 interface CursoPopular {

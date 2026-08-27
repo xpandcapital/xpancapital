@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
         .eq('empresa_id', empresa_id).eq('activo', true),
       supabase.from('curso_progreso').select('user_id, progreso, examen_estado, nota_final, intentos, curso_id')
         .eq('empresa_id', empresa_id),
-      supabase.from('certificados').select('*', { count: 'exact', head: true }),
+      supabase.from('certificados').select('*', { count: 'exact', head: true }).eq('empresa_id', empresa_id),
       supabase.from('profiles').select('id, nombre, apellido, email, puntos_cursos, puntos_nivel')
         .eq('empresa_id', empresa_id)
         .not('rol', 'in', '("superadmin","admin")')
@@ -49,8 +49,9 @@ export async function GET(request: NextRequest) {
     // equipo_cursos puede no existir — se maneja con gracia
     let equipoCursos: any[] = []
     try {
+      const cursoIdsEmpresa = (cursos || []).map(c => c.id)
       const { data: eq } = await supabase.from('equipo_cursos').select('user_id, progreso, estado, curso_id')
-        .eq('empresa_id', empresa_id)
+        .in('curso_id', cursoIdsEmpresa)
       equipoCursos = eq || []
     } catch { /* tabla no existe */ }
 
@@ -130,8 +131,6 @@ export async function GET(request: NextRequest) {
       email: r.email,
       puntos_cursos: r.puntos_cursos || 0,
       nivel: r.puntos_nivel || 0,
-      progreso_promedio: 0,
-      certificados: 0,
     }))
 
     return NextResponse.json({
