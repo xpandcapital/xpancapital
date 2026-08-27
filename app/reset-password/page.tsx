@@ -23,74 +23,60 @@ function ResetPasswordForm() {
   useEffect(() => {
     const supabase = getSupabase()
     supabaseRef.current = supabase
-    if (!supabase) return
+    if (!supabase) {
+      setError('Supabase no está configurado')
+      setLoadingSession(false)
+      return
+    }
 
     let resolved = false
-
-    // 1. Escuchar eventos de autenticación (PASSWORD_RECOVERY)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const finish = (ok: boolean, err?: string) => {
       if (resolved) return
+      resolved = true
+      setSessionReady(ok)
+      if (err) setError(err)
+      setLoadingSession(false)
+    }
+
+    const INVALID_MSG = 'El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo.'
+
+    // 1. Escuchar eventos de autenticación (PASSWORD_RECOVERY / SIGNED_IN)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
-        // Supabase ya procesó el token, la sesión está lista
-        setSessionReady(true)
-        setLoadingSession(false)
-        resolved = true
+        finish(true)
       }
     })
+
+    const checkSession = () => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) finish(true)
+        else finish(false, INVALID_MSG)
+      }).catch(() => finish(false, INVALID_MSG))
+    }
 
     // 2. Recuperar tokens del hash (flujo implicit). @supabase/ssr fuerza PKCE y no
     //    procesa el access_token del hash, así que lo hacemos manual con setSession.
-    const hash = window.location.hash
-    if (hash && hash.includes('type=recovery')) {
-      const params = new URLSearchParams(hash.substring(1))
-      const access_token = params.get('access_token')
-      const refresh_token = params.get('refresh_token')
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    const access_token = params.get('access_token')
+    const refresh_token = params.get('refresh_token')
 
-      if (access_token && refresh_token) {
-        window.location.hash = ''
-        supabase.auth.setSession({ access_token, refresh_token }).then(({ error }) => {
-          if (resolved) return
-          if (!error) {
-            setSessionReady(true)
-          } else {
-            setError('El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo.')
-          }
-          setLoadingSession(false)
-          resolved = true
+    if (access_token && refresh_token) {
+      window.location.hash = ''
+      supabase.auth.setSession({ access_token, refresh_token })
+        .then(({ error }) => {
+          if (error) finish(false, INVALID_MSG)
+          else finish(true)
         })
-        return () => {
-          subscription.unsubscribe()
-        }
-      }
+        .catch(() => checkSession())
+    } else {
+      checkSession()
     }
 
-    // 3. Intentar restaurar sesión existente (por si Supabase ya la tiene en storage)
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (resolved) return
-      if (session?.user?.aud === 'authenticated') {
-        setSessionReady(true)
-        setLoadingSession(false)
-        resolved = true
-      } else if (!error && !session) {
-        // No hay sesión aún, dar un poco de tiempo para que onAuthStateChange dispare
-        setTimeout(() => {
-          if (resolved) return
-          supabase.auth.getSession().then(({ data: { session: s2 } }) => {
-            if (s2?.user?.aud === 'authenticated') {
-              setSessionReady(true)
-              setLoadingSession(false)
-              resolved = true
-            } else {
-              setError('El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo.')
-              setLoadingSession(false)
-              resolved = true
-            }
-          })
-        }, 2000)
-      }
-    })
+    // 3. Safety: jamás quedarse en spinner infinito
+    const safetyTimer = setTimeout(() => finish(false, INVALID_MSG), 8000)
 
     return () => {
+      clearTimeout(safetyTimer)
       subscription.unsubscribe()
     }
   }, [])
