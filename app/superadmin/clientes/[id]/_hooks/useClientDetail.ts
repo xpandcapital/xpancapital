@@ -197,14 +197,14 @@ export function useClientDetail(clientId: string) {
 
     const desbloquearCurso = useCallback(async (userId: string, cursoId: string) => {
       try {
-        const res = await fetch('/api/admin/certificados/intentos', {
+        const res = await fetch('/api/equipo-cursos', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ desbloquear: true, user_id: userId, curso_id: cursoId }),
         })
         const data = await res.json()
         if (data.success) {
-          showToast('Examen desbloqueado. Nuevo ciclo de intentos.', 'success')
+          showToast(data.mensaje || 'Examen desbloqueado. Nuevo ciclo de intentos.', 'success')
           fetchAcademia()
         } else {
           showToast(data.error || 'Error al desbloquear', 'error')

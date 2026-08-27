@@ -44,7 +44,6 @@ export async function GET(request: NextRequest) {
         .from('equipo_cursos')
         .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en, intento_examen, ciclo_examen, intento_aprobado, ciclo_aprobado')
         .eq('advisor_id', advisor.id)
-        .neq('estado', 'bloqueado')
         .order('asignado_en', { ascending: false })
 
       if (equipoCursos) {
@@ -58,10 +57,9 @@ export async function GET(request: NextRequest) {
     // Query 2: por user_id directo (asignaciones via compras/trigger)
     const { data: byUserId } = await supabase
       .from('equipo_cursos')
-      .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en, intento_examen, ciclo_examen, intento_aprobado, ciclo_aprobado')
-      .eq('user_id', userId)
-      .neq('estado', 'bloqueado')
-      .order('asignado_en', { ascending: false })
+        .select('id, advisor_id, curso_id, user_id, progreso, estado, lecciones_completadas, nota_final, asignado_en, completado_en, intento_examen, ciclo_examen, intento_aprobado, ciclo_aprobado')
+        .eq('user_id', userId)
+        .order('asignado_en', { ascending: false })
 
     if (byUserId) {
       for (const c of byUserId) {
@@ -74,7 +72,7 @@ export async function GET(request: NextRequest) {
 
     const { data: allCursos } = await supabase
       .from('cursos')
-      .select('id, nombre, imagen_principal, para_equipo, precio_usd, activo')
+      .select('id, nombre, imagen_principal, para_equipo, precio_usd, activo, max_intentos')
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
       .eq('activo', true)
 
@@ -109,7 +107,7 @@ export async function GET(request: NextRequest) {
 
     const cursosConInfo = assignedCourses.map(ac => {
       const info = allCursos?.find(c => c.id === ac.curso_id)
-      return { ...ac, cursos: info || null }
+      return { ...ac, max_intentos: info?.max_intentos || 3, cursos: info || null }
     })
 
     return NextResponse.json({

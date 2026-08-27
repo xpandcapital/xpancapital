@@ -217,7 +217,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       ciclo: nuevoCiclo,
-      mensaje: `Examen desbloqueado. Ciclo ${nuevoCiclo + 1}, 3 nuevos intentos.`,
+      mensaje: `Examen desbloqueado. Ciclo ${nuevoCiclo}, nuevos intentos disponibles.`,
     })
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Error interno' }, { status: 500 })
