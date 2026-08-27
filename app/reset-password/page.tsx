@@ -38,7 +38,33 @@ function ResetPasswordForm() {
       }
     })
 
-    // 2. Intentar restaurar sesión existente (por si Supabase ya la tiene en storage)
+    // 2. Recuperar tokens del hash (flujo implicit). @supabase/ssr fuerza PKCE y no
+    //    procesa el access_token del hash, así que lo hacemos manual con setSession.
+    const hash = window.location.hash
+    if (hash && hash.includes('type=recovery')) {
+      const params = new URLSearchParams(hash.substring(1))
+      const access_token = params.get('access_token')
+      const refresh_token = params.get('refresh_token')
+
+      if (access_token && refresh_token) {
+        window.location.hash = ''
+        supabase.auth.setSession({ access_token, refresh_token }).then(({ error }) => {
+          if (resolved) return
+          if (!error) {
+            setSessionReady(true)
+          } else {
+            setError('El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo.')
+          }
+          setLoadingSession(false)
+          resolved = true
+        })
+        return () => {
+          subscription.unsubscribe()
+        }
+      }
+    }
+
+    // 3. Intentar restaurar sesión existente (por si Supabase ya la tiene en storage)
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (resolved) return
       if (session?.user?.aud === 'authenticated') {

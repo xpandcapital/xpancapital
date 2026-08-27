@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={cn("scroll-smooth", "font-sans", geist.variable)} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `if(window.location.hash.includes("type=recovery"))window.location.replace("/reset-password"+window.location.hash)` }} />
+        <script dangerouslySetInnerHTML={{ __html: `if(window.location.hash.includes("type=recovery")&&!window.location.pathname.startsWith("/reset-password"))window.location.replace("/reset-password"+window.location.hash)` }} />
       </head>
       <body className={`${montserrat.variable} font-sans antialiased bg-[#050505] text-white`}>
         <LayoutShell>{children}</LayoutShell>
