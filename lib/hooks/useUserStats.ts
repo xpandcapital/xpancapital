@@ -14,7 +14,7 @@ export interface UserStats {
   cursoActivo: CursoActivo | null
   xpandCoins: number
   totalInvertido: number
-  plusvaliaEstimada: number
+  totalCompras: number
 }
 
 export function useUserStats() {
@@ -72,7 +72,6 @@ export function useUserStats() {
       } : null
 
       const xpandCoins = profileData?.data?.xpand_coins || 0
-      const plusvaliaEstimada = totalInvertido * 10
 
       const userStats: UserStats = {
         productosAdquiridos,
@@ -81,7 +80,7 @@ export function useUserStats() {
         cursoActivo,
         xpandCoins,
         totalInvertido,
-        plusvaliaEstimada
+        totalCompras: completedPurchases.length
       }
 
       setStats(userStats)

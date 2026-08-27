@@ -62,7 +62,7 @@ export default function UserDashboard() {
     const widgetSub = (i: number) => {
         if (!stats) return ""
         if (i === 2 && stats.cursoActivo) return stats.cursoActivo.nombre
-        if (i === 4) return `+valía ×10: $${stats.plusvaliaEstimada.toLocaleString()} USD`
+        if (i === 4) return `${stats.totalCompras} ${stats.totalCompras === 1 ? 'compra' : 'compras'} completadas`
         return ""
     }
 
@@ -407,19 +407,7 @@ export default function UserDashboard() {
                         </div>
                     </div>
 
-                    {/* Pro Insight Card */}
-                    <div className="bg-gradient-to-br from-blis-red to-red-900 p-8 rounded-[2rem] shadow-[0_20px_40px_rgba(213,193,8,0.2)] text-white relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-20 transform translate-x-4 -translate-y-4 group-hover:translate-x-2 group-hover:-translate-y-2 transition-transform">
-                            <Star className="w-24 h-24 stroke-[2px]" />
-                        </div>
-                        <h3 className="text-2xl font-black uppercase tracking-tighter mb-4 relative z-10">¿Sabías que...?</h3>
-                        <p className="text-white/80 text-sm font-medium mb-8 leading-relaxed relative z-10">
-                            Los inversores que utilizan el <b>Arsenal de Licitaciones</b> junto con el curso de <b>Captación</b> han reportado una tasa de cierre un 40% mayor este trimestre.
-                        </p>
-                        <a href="/miembros/productos" className="w-full bg-white text-black font-black uppercase tracking-widest text-[10px] py-4 rounded-xl shadow-xl hover:scale-105 transition-transform relative z-10 inline-block text-center">
-                            Explorar Licitaciones
-                        </a>
-                    </div>
+
                 </div>
             </div>
         </div>

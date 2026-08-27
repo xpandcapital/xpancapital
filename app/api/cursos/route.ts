@@ -166,9 +166,9 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      // Solo cursos públicos (para_equipo=false) que estén matriculados
+      // Solo cursos matriculados (comprados o asignados por equipo)
       const filtered = allCursos
-        .filter(c => !(c as any).para_equipo && enrolledMap.has(c.id))
+        .filter(c => enrolledMap.has(c.id))
         .map(c => ({
           ...c,
           progreso: { progreso: enrolledMap.get(c.id) || 0 },
