@@ -83,7 +83,7 @@ export function AkademiaStats({ stats }: { stats: AkademiaStatsData }) {
         <StatCard icon={Users} label="Total Alumnos" value={stats.totalAlumnos} color="text-blue-400" bg="bg-blue-500/5" />
         <StatCard icon={GraduationCap} label="Iniciaron Curso" value={stats.alumnosIniciados} color="text-emerald-400" bg="bg-emerald-500/5" sub={`${stats.alumnosNoIniciados} sin iniciar`} />
         <StatCard icon={BookOpen} label="Cursos Disponibles" value={stats.totalCursos} color="text-amber-400" bg="bg-amber-500/5" sub={`${stats.totalModulos} módulos · ${stats.totalLecciones} lecciones`} />
-        <StatCard icon={Award} label="Tasa Aprobación" value={`${stats.tasaAprobacion}%`} color="text-purple-400" bg="bg-purple-500/5" sub={`${stats.examenesAprobados} de ${stats.examenesRealizados}`} />
+        <StatCard icon={Award} label="Tasa Aprobación" value={`${stats.tasaAprobacion}%`} color="text-purple-400" bg="bg-purple-500/5" sub={`${stats.examenesAprobados} aprob · ${stats.examenesReprobados} reprob · ${stats.examenesPendientes} pend`} />
       </div>
 
       {/* Fila 2 — Distribución y KPIs secundarios */}

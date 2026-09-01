@@ -393,6 +393,7 @@ export default function ProfilePage() {
     // Redes sociales y biografía
     const [biografia, setBiografia] = useState('');
     const [socials, setSocials] = useState<Record<string, string>>({});
+    const [diasRestantes, setDiasRestantes] = useState<number | null>(null);
     useEffect(() => {
         if (!user?.id) return
         fetch('/api/profile', { headers: { 'x-blis-user-id': user.id, 'x-blis-empresa-id': user.empresa_id || '', 'x-blis-user-rol': user.role } })
@@ -401,6 +402,7 @@ export default function ProfilePage() {
                 if (d.success && d.data) {
                     setBiografia(d.data.biografia || '')
                     setWhatsappPhone(d.data.whatsapp || '')
+                    setDiasRestantes(typeof d.data.dias_restantes === 'number' ? d.data.dias_restantes : null)
                     const s: Record<string, string> = {}
                     const fields = ['website_url','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','whatsapp_url','telegram_url','discord_url','github_url']
                     fields.forEach(f => { if (d.data[f]) s[f] = d.data[f] })
@@ -589,6 +591,11 @@ export default function ProfilePage() {
                         <div className="bg-white/5 border border-white/5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-500">
                             {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Miembro'}
                         </div>
+                        {diasRestantes !== null && (
+                            <div className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest border ${diasRestantes <= 7 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+                                {diasRestantes} {diasRestantes === 1 ? 'día' : 'días'} de acceso
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

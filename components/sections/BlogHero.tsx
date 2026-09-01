@@ -15,7 +15,7 @@ interface BlogHeroProps {
 
 export function BlogHero({ data = {} }: BlogHeroProps) {
   const {
-    title = "BlisBlog",
+    title = "XpandBlog",
     subtitle = "Inteligencia de Mercado & Revista Digital",
   } = data;
 

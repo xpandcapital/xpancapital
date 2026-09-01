@@ -106,7 +106,7 @@ export default function ComunidadPage() {
             {/* === COLUMNA IZQUIERDA === */}
             <div className="hidden lg:flex flex-col gap-4">
               {/* Miembros */}
-              <MiembrosSeguidos miembros={miembros} total={miembros.length} />
+              <MiembrosSeguidos miembros={miembros} />
 
               {/* Ranking */}
               <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">

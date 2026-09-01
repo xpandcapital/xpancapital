@@ -74,6 +74,8 @@ export async function GET(request: NextRequest) {
     const progresoPorUsuario: Record<string, number> = {}
     let examenesRealizados = 0
     let examenesAprobados = 0
+    let examenesReprobados = 0
+    let examenesPendientes = 0
 
     for (const p of progresos || []) {
       if (p.progreso > 0) {
@@ -82,9 +84,14 @@ export async function GET(request: NextRequest) {
           progresoPorUsuario[p.user_id] = p.progreso
         }
       }
-      if (p.examen_estado) {
+      if (p.examen_estado === 'aprobado') {
         examenesRealizados++
-        if (p.examen_estado === 'aprobado') examenesAprobados++
+        examenesAprobados++
+      } else if (p.examen_estado === 'reprobado' || p.examen_estado === 'bloqueado') {
+        examenesRealizados++
+        examenesReprobados++
+      } else if (p.examen_estado === 'pendiente') {
+        examenesPendientes++
       }
       if (cursoInscritos[p.curso_id]) {
         cursoInscritos[p.curso_id].inscritos++
@@ -144,6 +151,8 @@ export async function GET(request: NextRequest) {
         totalLecciones,
         examenesRealizados,
         examenesAprobados,
+        examenesReprobados,
+        examenesPendientes,
         tasaAprobacion,
         certificadosEmitidos: certificadosEmitidos || 0,
         distribucionProgreso,

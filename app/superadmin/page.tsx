@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  DollarSign, Package, Users, Eye, Contact, Briefcase,
+  DollarSign, Package, Users, Eye, Contact,
   ShoppingCart, FileText, TrendingUp, RefreshCw, Clock, AlertTriangle
 } from 'lucide-react';
 import {
@@ -99,8 +99,6 @@ export default function Dashboard() {
   const [productsCount, setProductsCount] = useState(0);
   const [clientsCount, setClientsCount] = useState(0);
   const [blogViews, setBlogViews] = useState(0);
-  const [leadsCount, setLeadsCount] = useState(0);
-  const [projectsCount, setProjectsCount] = useState(0);
   const [compras, setCompras] = useState<any[]>([]);
   const [topProducts, setTopProducts] = useState<{ nombre: string; ventas: number }[]>([]);
   const [lastLeads, setLastLeads] = useState<any[]>([]);
@@ -129,8 +127,6 @@ export default function Dashboard() {
       setProductsCount(d.prodCount || 0);
       setClientsCount(d.cliCount || 0);
       setBlogViews(d.blogCount || 0);
-      setLeadsCount(d.leadsCount || 0);
-      setProjectsCount(d.projectsCount || 0);
       setCompras(d.compras || []);
       setLastLeads(d.lastLeads || []);
       setLastCompras(d.lastCompras || []);
@@ -165,18 +161,11 @@ export default function Dashboard() {
   useEffect(() => {
     const comprasChannel = supabase
       .channel('dashboard-compras')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'compras' }, (payload) => {
-        const monto = (payload.new as any)?.monto_usd || 0
-        setCompras(prev => [payload.new as any, ...prev].slice(0, 50))
-        setLastCompras(prev => [payload.new as any, ...prev].slice(0, 5))
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'compras' }, () => {
+        fetchData()
       })
-      .subscribe()
-
-    const leadsChannel = supabase
-      .channel('dashboard-leads')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads', filter: `empresa_id=eq.${DEFAULT_EMPRESA_ID}` }, (payload) => {
-        setLeadsCount(prev => prev + 1)
-        setLastLeads(prev => [payload.new as any, ...prev].slice(0, 5))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'compras' }, () => {
+        fetchData()
       })
       .subscribe()
 
@@ -195,12 +184,11 @@ export default function Dashboard() {
 
     return () => {
       supabase.removeChannel(comprasChannel)
-      supabase.removeChannel(leadsChannel)
       supabase.removeChannel(blogChannel)
     }
   }, []);
 
-  const totalVentas = useMemo(() => compras.reduce((s, c) => s + (Number(c.monto_usd) || 0), 0), [compras]);
+  const totalVentas = useMemo(() => compras.filter(c => c.estado === 'completado').reduce((s, c) => s + (Number(c.monto_usd) || 0), 0), [compras]);
 
   const monthlySales = useMemo(() => {
     const now = new Date();
@@ -278,23 +266,6 @@ export default function Dashboard() {
               <s.icon className={`${s.color} mb-4 relative z-10`} size={24} />
               <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest relative z-10">{s.label}</p>
               <h4 className="text-3xl font-black text-white mt-1 relative z-10">{s.fmt(s.val)}</h4>
-            </div>
-          ))}
-        </div>
-
-        {/* Second Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            { label: 'Leads', val: leadsCount, icon: Contact, color: 'text-purple-500', bg: 'bg-purple-500/5', fmt: formatNumber },
-            { label: 'Proyectos Activos', val: projectsCount, icon: Briefcase, color: 'text-cyan-500', bg: 'bg-cyan-500/5', fmt: formatNumber },
-          ].map((s, i) => (
-            <div key={i} className="bg-[#050505] border border-white/5 p-6 rounded-3xl relative overflow-hidden shadow-2xl flex items-center gap-5">
-              <div className={`absolute top-0 right-0 w-24 h-24 ${s.bg} blur-3xl rounded-full -translate-y-1/2 translate-x-1/2`} />
-              <div className={`p-4 ${s.bg} rounded-2xl relative z-10`}><s.icon className={s.color} size={28} /></div>
-              <div className="relative z-10">
-                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">{s.label}</p>
-                <h4 className="text-4xl font-black text-white mt-1">{s.fmt(s.val)}</h4>
-              </div>
             </div>
           ))}
         </div>

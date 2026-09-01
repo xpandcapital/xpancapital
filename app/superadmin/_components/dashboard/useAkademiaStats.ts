@@ -32,6 +32,8 @@ interface AkademiaStatsData {
   totalLecciones: number;
   examenesRealizados: number;
   examenesAprobados: number;
+  examenesReprobados: number;
+  examenesPendientes: number;
   tasaAprobacion: number;
   certificadosEmitidos: number;
   distribucionProgreso: DistribucionProgreso;

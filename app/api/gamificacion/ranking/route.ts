@@ -38,19 +38,29 @@ export async function GET(request: NextRequest) {
 
     const nivelMap = new Map((niveles || []).map(n => [n.nivel, { nombre: n.nombre, color: n.color }]))
 
-    const fullRanking = (ranking || []).map((entry: any, idx: number) => ({
-      posicion: idx + 1,
-      user_id: entry.id,
-      nombre: entry.nombre || 'Anónimo',
-      apellido: entry.apellido,
-      avatar_url: entry.avatar_url,
-      puntos: entry[ordenColumna] || entry.puntos,
-      nivel: entry.puntos_nivel,
-      nivelNombre: nivelMap.get(entry.puntos_nivel)?.nombre || `Nivel ${entry.puntos_nivel}`,
-      puntos_cursos: entry.puntos_cursos,
-      puntos_comunidad: entry.puntos_comunidad,
-      puntos_blog: entry.puntos_blog,
-    }))
+    let lastRank = 0
+    const fullRanking = (ranking || []).map((entry: any, idx: number, arr: any[]) => {
+      const puntos = entry[ordenColumna] || entry.puntos
+      const prev = idx > 0 ? arr[idx - 1] : null
+      const isTie = prev
+        && prev.puntos_nivel === entry.puntos_nivel
+        && (prev[ordenColumna] || prev.puntos) === puntos
+      const posicion = isTie ? lastRank : idx + 1
+      lastRank = posicion
+      return {
+        posicion,
+        user_id: entry.id,
+        nombre: entry.nombre || 'Anónimo',
+        apellido: entry.apellido,
+        avatar_url: entry.avatar_url,
+        puntos,
+        nivel: entry.puntos_nivel,
+        nivelNombre: nivelMap.get(entry.puntos_nivel)?.nombre || `Nivel ${entry.puntos_nivel}`,
+        puntos_cursos: entry.puntos_cursos,
+        puntos_comunidad: entry.puntos_comunidad,
+        puntos_blog: entry.puntos_blog,
+      }
+    })
 
     let ownEntry = null
     let vecinos: typeof fullRanking = []

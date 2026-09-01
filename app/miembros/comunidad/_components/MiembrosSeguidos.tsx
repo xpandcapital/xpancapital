@@ -13,10 +13,9 @@ interface MiembroCard {
 
 interface MiembrosSeguidosProps {
   miembros: MiembroCard[]
-  total: number
 }
 
-export function MiembrosSeguidos({ miembros, total }: MiembrosSeguidosProps) {
+export function MiembrosSeguidos({ miembros }: MiembrosSeguidosProps) {
   return (
     <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
       <div className="p-4 border-b border-white/[0.04] flex items-center justify-between">
@@ -24,7 +23,6 @@ export function MiembrosSeguidos({ miembros, total }: MiembrosSeguidosProps) {
           <Users className="w-3.5 h-3.5 text-gray-500" />
           Miembros
         </h3>
-        <span className="text-[10px] text-gray-500 bg-white/[0.03] px-2 py-0.5 rounded-full">{total}</span>
       </div>
       <div className="p-4">
         <div className="grid grid-cols-3 gap-3">

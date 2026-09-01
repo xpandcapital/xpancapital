@@ -29,7 +29,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 400 })
     }
 
-    return NextResponse.json({ success: true, data })
+    // Días restantes de acceso (compra activa)
+    let diasRestantes: number | null = null
+    let fechaVencimiento: string | null = null
+    const { data: compra } = await supabase
+      .from('compras')
+      .select('fecha_vencimiento_acceso')
+      .eq('user_id', user.userId)
+      .eq('estado', 'completado')
+      .order('creado_en', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (compra?.fecha_vencimiento_acceso) {
+      const venc = new Date(compra.fecha_vencimiento_acceso).getTime()
+      diasRestantes = Math.max(0, Math.ceil((venc - Date.now()) / 86400000))
+      fechaVencimiento = compra.fecha_vencimiento_acceso
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: Object.assign({}, data || {}, { dias_restantes: diasRestantes, fecha_vencimiento_acceso: fechaVencimiento })
+    })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Error del servidor' }, { status: 500 })
   }

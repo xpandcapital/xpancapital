@@ -335,6 +335,18 @@ export async function POST(request: NextRequest) {
       productosCount: productos?.length
     });
 
+    let fechaVencimiento = null;
+    if (primerProductoId) {
+      const { data: prod } = await supabase
+        .from('productos')
+        .select('duracion_dias')
+        .eq('id', primerProductoId)
+        .maybeSingle();
+      if (prod?.duracion_dias) {
+        fechaVencimiento = new Date(Date.now() + prod.duracion_dias * 86400000).toISOString();
+      }
+    }
+
     const { data: orden, error: ordenError } = await supabase
       .from('compras')
       .insert({
@@ -347,6 +359,7 @@ export async function POST(request: NextRequest) {
         estado: estadoFinal,
         metadata: metadataBase,
         creado_en: new Date().toISOString(),
+        fecha_vencimiento_acceso: fechaVencimiento,
       })
       .select()
       .single();
