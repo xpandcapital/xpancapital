@@ -276,7 +276,7 @@ export async function POST(request: NextRequest) {
 
     const enriched = await enrichPosts(supabase, [post], user.userId)
 
-    // Notificar a los miembros de la empresa (excepto el autor)
+    // Notificar a todos los miembros de la empresa (incluido el autor)
     try {
       const autorNombre = enriched[0]?.autor
         ? `${enriched[0].autor.nombre || ''} ${enriched[0].autor.apellido || ''}`.trim() || 'Alguien'
@@ -285,7 +285,6 @@ export async function POST(request: NextRequest) {
         .from('profiles')
         .select('id')
         .eq('empresa_id', user.empresaId)
-        .neq('id', user.userId)
       const notificaciones = (miembros || []).map((m: any) => ({
         user_id: m.id,
         empresa_id: user.empresaId,

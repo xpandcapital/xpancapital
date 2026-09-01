@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest } from 'next/server'
+import { DEFAULT_EMPRESA_ID } from '@/lib/empresa'
 
 export interface AuthUser {
   userId: string
@@ -20,10 +21,10 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
   const headerRol = request.headers.get('x-blis-user-rol')
   const headerEmail = request.headers.get('x-blis-user-email')
 
-  if (headerUserId && headerEmpresaId) {
+  if (headerUserId) {
     return {
       userId: headerUserId,
-      empresaId: headerEmpresaId,
+      empresaId: headerEmpresaId || DEFAULT_EMPRESA_ID,
       rol: headerRol || 'usuario',
       email: headerEmail || undefined,
     }
@@ -51,13 +52,11 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
       .eq('id', authUser.id)
       .single()
 
-    if (!profile?.empresa_id) return null
-
     return {
       userId: authUser.id,
-      empresaId: profile.empresa_id,
-      rol: profile.rol || 'usuario',
-      email: profile.email || authUser.email,
+      empresaId: profile?.empresa_id || DEFAULT_EMPRESA_ID,
+      rol: profile?.rol || 'usuario',
+      email: profile?.email || authUser.email,
     }
   } catch (error) {
     console.error('[api-auth] Error:', error)

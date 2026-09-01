@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Heart, PartyPopper, ThumbsUp, Lightbulb, Frown, MessageCircle, Trash2, ChevronDown } from 'lucide-react'
+import { Heart, PartyPopper, ThumbsUp, Lightbulb, Frown, MessageCircle, Trash2, ChevronDown, Send, Loader2 } from 'lucide-react'
 import type { ComunidadPost, ReaccionTipo, ComunidadComentario } from '../_types'
 import { EncuestaCard } from './EncuestaCard'
 import { EventoCard } from './EventoCard'
@@ -233,6 +233,7 @@ function ComentariosPreview({ postId, total }: { postId: string; total: number }
   const [expanded, setExpanded] = useState(false)
   const [texto, setTexto] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const isAdmin = ['superadmin', 'admin'].includes(user?.role || '')
 
   useEffect(() => { fetchComentarios() }, [fetchComentarios])
@@ -240,8 +241,15 @@ function ComentariosPreview({ postId, total }: { postId: string; total: number }
   const handleEnviar = async () => {
     if (!texto.trim() || enviando) return
     setEnviando(true)
-    try { await crearComentario(texto); setTexto('') }
-    finally { setEnviando(false) }
+    setError(null)
+    try {
+      await crearComentario(texto)
+      setTexto('')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo publicar el comentario')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   const preview = expanded ? comentarios : comentarios.slice(0, 3)
@@ -314,7 +322,19 @@ function ComentariosPreview({ postId, total }: { postId: string; total: number }
           placeholder="Escribe un comentario..."
           className="flex-1 bg-transparent text-xs text-white placeholder-gray-600 focus:outline-none"
         />
+        <button
+          type="button"
+          onClick={handleEnviar}
+          disabled={!texto.trim() || enviando}
+          className="px-3 py-2 rounded-lg bg-blis-red/20 text-blis-red hover:bg-blis-red/30 disabled:opacity-40 flex-shrink-0"
+          aria-label="Enviar comentario"
+        >
+          {enviando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+        </button>
       </div>
+      {error && (
+        <p className="px-4 pb-2 text-[11px] text-red-400">{error}</p>
+      )}
     </div>
   )
 }
