@@ -316,17 +316,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Calcular fecha de vencimiento si el producto tiene duración
+    // Calcular fecha de vencimiento y monto del producto
     let fechaVencimiento = null;
+    let montoFinal = monto_usd || 0;
     if (producto_id) {
       const { data: prod } = await supabase
         .from("productos")
-        .select("duracion_dias")
+        .select("duracion_dias, precio_usd")
         .eq("id", producto_id)
         .single();
       if (prod?.duracion_dias) {
         const inicio = fecha_compra ? new Date(fecha_compra) : new Date();
         fechaVencimiento = new Date(inicio.getTime() + prod.duracion_dias * 86400000).toISOString();
+      }
+      if (!monto_usd && prod?.precio_usd) {
+        montoFinal = Number(prod.precio_usd) || 0;
       }
     }
 
@@ -336,7 +340,7 @@ export async function POST(request: NextRequest) {
         user_id: userId,
         producto_id,
         metodo_pago: metodo_pago || "transferencia",
-        monto_usd: monto_usd || 0,
+        monto_usd: montoFinal,
         monto_coins: monto_coins || 0,
         estado: "completado",
         creado_en: fecha_compra ? new Date(fecha_compra).toISOString() : new Date().toISOString(),
@@ -363,7 +367,7 @@ export async function POST(request: NextRequest) {
       compra_id: data.id,
       producto_id,
       cantidad: 1,
-      precio_unitario: monto_usd || 0,
+      precio_unitario: montoFinal,
     });
 
     // Asignar cursos si el producto tiene curso vinculado
