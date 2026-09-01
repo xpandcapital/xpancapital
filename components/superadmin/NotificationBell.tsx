@@ -39,6 +39,7 @@ const TIPO_ICONOS: Record<string, React.ComponentType<{ className?: string }>> =
   compras: ShoppingCart,
   cursos: GraduationCap,
   mensaje: MessageSquare,
+  comunidad: MessageSquare,
 };
 
 const TIPO_COLORES: Record<string, string> = {
@@ -56,6 +57,7 @@ const TIPO_COLORES: Record<string, string> = {
   compras: "text-amber-400 bg-amber-400/10",
   cursos: "text-blue-400 bg-blue-400/10",
   mensaje: "text-rose-400 bg-rose-400/10",
+  comunidad: "text-rose-400 bg-rose-400/10",
 };
 
 function tiempoRelativo(fecha: string): string {
@@ -165,7 +167,7 @@ export function NotificationBell() {
     }
 
     try {
-      const res = await fetch("/api/notificaciones" + (isAdmin ? "?admin=true" : ""));
+      const res = await fetch("/api/notificaciones");
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
