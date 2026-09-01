@@ -63,6 +63,41 @@ function ProgressDistribution({ dist }: { dist: AkademiaStatsData["distribucionP
   );
 }
 
+function TasaAprobacionCard({ stats }: { stats: AkademiaStatsData }) {
+  const rendidos = stats.examenesAprobados + stats.examenesReprobados;
+  const aprobPct = rendidos > 0 ? (stats.examenesAprobados / rendidos) * 100 : 0;
+  const reprobPct = rendidos > 0 ? (stats.examenesReprobados / rendidos) * 100 : 0;
+
+  return (
+    <div className="bg-[#050505] border border-white/5 p-5 rounded-3xl relative overflow-hidden shadow-2xl hover:border-white/10 transition-all group">
+      <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-110 transition-transform" />
+      <Award className="text-purple-400 mb-3 relative z-10" size={22} />
+      <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest relative z-10">Tasa Aprobación</p>
+      <h4 className="text-3xl font-black text-white mt-1 relative z-10">{stats.tasaAprobacion}%</h4>
+
+      <div className="mt-3 relative z-10">
+        {rendidos > 0 ? (
+          <>
+            <div className="flex h-2.5 rounded-full overflow-hidden bg-white/5">
+              <div className="bg-emerald-500" style={{ width: `${aprobPct}%` }} />
+              <div className="bg-rose-500" style={{ width: `${reprobPct}%` }} />
+            </div>
+            <div className="flex justify-between gap-2 text-[9px] font-bold mt-1.5">
+              <span className="text-emerald-400">{stats.examenesAprobados} aprobaron</span>
+              <span className="text-rose-400">{stats.examenesReprobados} desaprobaron</span>
+            </div>
+          </>
+        ) : (
+          <p className="text-[9px] text-gray-500">Sin exámenes rendidos aún</p>
+        )}
+        {stats.examenesPendientes > 0 && (
+          <p className="text-[9px] text-gray-500 mt-1">{stats.examenesPendientes} pendientes por rendir</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function AkademiaStats({ stats }: { stats: AkademiaStatsData }) {
   return (
     <div className="space-y-6">
@@ -83,7 +118,7 @@ export function AkademiaStats({ stats }: { stats: AkademiaStatsData }) {
         <StatCard icon={Users} label="Total Alumnos" value={stats.totalAlumnos} color="text-blue-400" bg="bg-blue-500/5" />
         <StatCard icon={GraduationCap} label="Iniciaron Curso" value={stats.alumnosIniciados} color="text-emerald-400" bg="bg-emerald-500/5" sub={`${stats.alumnosNoIniciados} sin iniciar`} />
         <StatCard icon={BookOpen} label="Cursos Disponibles" value={stats.totalCursos} color="text-amber-400" bg="bg-amber-500/5" sub={`${stats.totalModulos} módulos · ${stats.totalLecciones} lecciones`} />
-        <StatCard icon={Award} label="Tasa Aprobación" value={`${stats.tasaAprobacion}%`} color="text-purple-400" bg="bg-purple-500/5" sub={`${stats.examenesAprobados} aprob · ${stats.examenesReprobados} reprob · ${stats.examenesPendientes} pend`} />
+        <TasaAprobacionCard stats={stats} />
       </div>
 
       {/* Fila 2 — Distribución y KPIs secundarios */}
