@@ -43,16 +43,20 @@ export default function LeadsPage() {
   const [campanas, setCampanas] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [resumen, setResumen] = useState({ nuevo: 0, contactado: 0, calificado: 0, cliente: 0, perdido: 0 });
 
   useEffect(() => {
-    fetchLeads();
+    fetchLeads(1);
     fetchCampanas();
   }, []);
 
-  const fetchLeads = async () => {
+  const fetchLeads = async (pageNum: number) => {
     setLoading(true);
+    setPage(pageNum);
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ page: pageNum.toString(), limit: "20" });
       if (estadoFilter) params.append('estado', estadoFilter);
       if (campanaFilter) params.append('campana_id', campanaFilter);
       if (search) params.append('search', search);
@@ -62,6 +66,8 @@ export default function LeadsPage() {
       
       if (data.success) {
         setLeads(data.data || []);
+        setTotalPages(data.pagination?.totalPages || 1);
+        setResumen(data.resumen || { nuevo: 0, contactado: 0, calificado: 0, cliente: 0, perdido: 0 });
       } else {
         showToast("Error al cargar leads", "error");
       }
@@ -134,18 +140,6 @@ export default function LeadsPage() {
     return ESTADOS.find(e => e.value === estado)?.color || 'bg-gray-500/20 text-gray-400';
   };
 
-  const filteredLeads = leads.filter(l => {
-    if (search) {
-      const s = search.toLowerCase();
-      if (!l.nombre.toLowerCase().includes(s) && 
-          !(l.email?.toLowerCase().includes(s)) && 
-          !(l.telefono?.includes(s))) {
-        return false;
-      }
-    }
-    return true;
-  });
-
   const openLeadDetail = (lead: Lead) => {
     setSelectedLead(lead);
     setShowModal(true);
@@ -180,7 +174,7 @@ export default function LeadsPage() {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre, email o teléfono..."
                 className="w-full"
-                onKeyDown={(e) => e.key === 'Enter' && fetchLeads()}
+                onKeyDown={(e) => e.key === 'Enter' && fetchLeads(1)}
               />
             </div>
           </div>
@@ -202,7 +196,7 @@ export default function LeadsPage() {
           />
 
           <button
-            onClick={fetchLeads}
+            onClick={() => fetchLeads(1)}
             className="px-4 py-3 bg-blis-red text-white rounded-xl font-bold hover:bg-blis-red/80 transition-colors"
           >
             Filtrar
@@ -212,7 +206,7 @@ export default function LeadsPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           {ESTADOS.map(e => {
-            const count = leads.filter(l => l.estado === e.value).length;
+            const count = (resumen as any)[e.value] || 0;
             return (
               <div key={e.value} className="bg-zinc-900/50 border border-white/10 rounded-xl p-4">
                 <span className={`text-xs px-2 py-0.5 rounded-full ${e.color}`}>{e.label}</span>
@@ -245,7 +239,7 @@ export default function LeadsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredLeads.map((lead) => (
+                  {leads.map((lead) => (
                     <tr key={lead.id} className="border-b border-white/5 hover:bg-white/5">
                       <td className="p-4">
                         <div className="flex items-center gap-3">
@@ -309,10 +303,30 @@ export default function LeadsPage() {
               </table>
             </div>
 
-            {filteredLeads.length === 0 && (
+            {leads.length === 0 && (
               <div className="text-center py-12">
                 <User className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                 <p className="text-gray-400">No hay leads que coincidan con los filtros</p>
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-3 p-4 border-t border-white/10">
+                <button
+                  onClick={() => fetchLeads(Math.max(1, page - 1))}
+                  disabled={page <= 1}
+                  className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"
+                >
+                  Anterior
+                </button>
+                <span className="text-sm text-gray-500">Página {page} de {totalPages}</span>
+                <button
+                  onClick={() => fetchLeads(Math.min(totalPages, page + 1))}
+                  disabled={page >= totalPages}
+                  className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-gray-400 hover:text-white hover:bg-white/10 disabled:opacity-30 transition-all"
+                >
+                  Siguiente
+                </button>
               </div>
             )}
           </div>

@@ -363,9 +363,24 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
+    // Resumen global por estado (sin paginación)
+    const { data: resumenData } = await supabase
+      .from('leads')
+      .select('estado')
+      .eq('empresa_id', DEFAULT_EMPRESA_ID)
+
+    const resumen = {
+      nuevo: (resumenData || []).filter((l: any) => l.estado === 'nuevo').length,
+      contactado: (resumenData || []).filter((l: any) => l.estado === 'contactado').length,
+      calificado: (resumenData || []).filter((l: any) => l.estado === 'calificado').length,
+      cliente: (resumenData || []).filter((l: any) => l.estado === 'cliente').length,
+      perdido: (resumenData || []).filter((l: any) => l.estado === 'perdido').length,
+    }
+
     return NextResponse.json({ 
       success: true, 
       data,
+      resumen,
       pagination: {
         page,
         limit,

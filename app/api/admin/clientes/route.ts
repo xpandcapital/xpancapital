@@ -132,12 +132,25 @@ export async function GET(request: NextRequest) {
       })
     )
     
+    // Resumen global (todos los socios, sin paginación)
+    const { data: resumenData } = await supabase
+      .from('profiles')
+      .select('xpand_coins, total_gastado_usd')
+      .eq('empresa_id', DEFAULT_EMPRESA_ID)
+
+    const resumen = {
+      total_socios: count || 0,
+      boveda_global: (resumenData || []).reduce((s: number, p: any) => s + (Number(p.xpand_coins) || 0), 0),
+      recaudacion_total: (resumenData || []).reduce((s: number, p: any) => s + (Number(p.total_gastado_usd) || 0), 0),
+    }
+
     return NextResponse.json({
       success: true,
       data: clientsWithAddresses,total: count,
       totalPages: Math.ceil((count || 0) / perPage),
       page,
-      perPage
+      perPage,
+      resumen
     })
   } catch (error) {
     console.error('[Admin Clientes] Error general:', error instanceof Error ? error.message : error)

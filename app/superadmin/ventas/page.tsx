@@ -49,6 +49,7 @@ export default function VentasAdminPage() {
     const [filtroEstado, setFiltroEstado] = useState("");
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
+    const [resumen, setResumen] = useState({ monto_total: 0, completadas: 0, pendientes: 0 });
     const [ventaDestacada, setVentaDestacada] = useState<string | null>(null);
     const [modalNueva, setModalNueva] = useState(false);
     const [modalVerificar, setModalVerificar] = useState<Venta | null>(null);
@@ -72,7 +73,7 @@ export default function VentasAdminPage() {
         if (search) params.set("search", search);
         const res = await fetch(`/api/admin/ventas?${params}&_t=${refreshKey}`);
         const d = await res.json();
-        if (d.success) { setVentas(d.ventas || []); setTotal(d.total || 0); }
+        if (d.success) { setVentas(d.ventas || []); setTotal(d.total || 0); setResumen(d.resumen || { monto_total: 0, completadas: 0, pendientes: 0 }); }
         setLoading(false);
     }, [page, filtroEstado, search, refreshKey]);
 
@@ -187,8 +188,6 @@ export default function VentasAdminPage() {
 
     const handleSearch = () => { setPage(1); cargar(); };
 
-    const montoTotal = ventas.reduce((sum, v) => sum + (v.monto_usd || 0), 0);
-
     const estadoBadge = (estado: string) => {
         const map: Record<string, { color: string; label: string; icon: any }> = {
             completado: { color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", label: "Completado", icon: CheckCircle2 },
@@ -239,9 +238,9 @@ export default function VentasAdminPage() {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     {[
                         { label: "Total Ventas", value: total, icon: ShoppingBag, color: "text-white" },
-                        { label: "Completadas", value: ventas.filter(v => v.estado === "completado").length, icon: CheckCircle2, color: "text-emerald-400" },
-                        { label: "Pendientes", value: ventas.filter(v => v.estado === "pendiente").length, icon: Clock, color: "text-amber-400" },
-                        { label: "Monto Total", value: `$${montoTotal.toLocaleString()}`, icon: DollarSign, color: "text-blis-red", isText: true },
+                        { label: "Completadas", value: resumen.completadas, icon: CheckCircle2, color: "text-emerald-400" },
+                        { label: "Pendientes", value: resumen.pendientes, icon: Clock, color: "text-amber-400" },
+                        { label: "Monto Total", value: `$${resumen.monto_total.toLocaleString()}`, icon: DollarSign, color: "text-blis-red", isText: true },
                     ].map(stat => (
                         <div key={stat.label} className="bg-zinc-900/50 border border-white/10 rounded-2xl p-4">
                             <div className="flex items-center justify-between">

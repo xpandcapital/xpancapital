@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -282,20 +282,20 @@ export default function AdminClientes() {
     const [clients, setClients] = useState<Client[]>([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [resumen, setResumen] = useState({ total_socios: 0, boveda_global: 0, recaudacion_total: 0 });
 
-    useEffect(() => {
-        setIsMounted(true);
-        fetchClients(page);
-    }, [page]);
-
-    const fetchClients = async (pageNum: number) => {
+    const fetchClients = useCallback(async (pageNum: number, searchValue: string, statusValue: string) => {
         setIsLoading(true);
         try {
-            const res = await fetch(`/api/admin/clientes?page=${pageNum}&per_page=20`);
+            const params = new URLSearchParams({ page: pageNum.toString(), per_page: "20" });
+            if (searchValue) params.set("search", searchValue);
+            if (statusValue && statusValue !== "Todos") params.set("status", statusValue);
+            const res = await fetch(`/api/admin/clientes?${params}`);
             const data = await res.json();
             if (data.success && data.data) {
                 setClients(data.data.map(mapDbToClient));
                 setTotalPages(data.totalPages || 1);
+                setResumen(data.resumen || { total_socios: 0, boveda_global: 0, recaudacion_total: 0 });
             }
         } catch (error) {
             console.error('Error fetching clients:', error);
@@ -303,7 +303,18 @@ export default function AdminClientes() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [showToast]);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchClients(page, searchTerm, activityFilter);
+        }, searchTerm ? 400 : 0);
+        return () => clearTimeout(timer);
+    }, [page, searchTerm, activityFilter, fetchClients]);
 
     const formatCurrency = (amount: number) => {
         if (!isMounted) return amount.toString();
@@ -326,11 +337,6 @@ export default function AdminClientes() {
         }
     };
 
-    const filteredClients = clients.filter(c => {
-        const fullName = `${c.firstName} ${c.lastName}`.toLowerCase();
-        return (fullName.includes(searchTerm.toLowerCase()) || c.email.toLowerCase().includes(searchTerm.toLowerCase())) && (activityFilter === "Todos" || c.status === activityFilter);
-    });
-
     return (
         <div className="space-y-6 w-full mx-auto pb-20 px-4 md:px-8 pt-8 text-white">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-10">
@@ -349,9 +355,9 @@ export default function AdminClientes() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {[
-                    { label: 'Total Socios', val: clients.length, icon: Users, color: 'text-white' },
-                    { label: 'Boveda Global', val: clients.reduce((acc, c) => acc + c.xpandCoins, 0), icon: Coins, color: 'text-amber-500', unit: 'BC' },
-                    { label: 'Recaudacion Mes', val: clients.reduce((acc, c) => acc + c.income, 0), icon: TrendingUp, color: 'text-emerald-500', unit: '$' },
+                    { label: 'Total Socios', val: resumen.total_socios, icon: Users, color: 'text-white' },
+                    { label: 'Boveda Global', val: resumen.boveda_global.toLocaleString(), icon: Coins, color: 'text-amber-500', unit: 'BC' },
+                    { label: 'Recaudacion Total', val: resumen.recaudacion_total.toLocaleString(), icon: TrendingUp, color: 'text-emerald-500', unit: '$' },
                     { label: 'Churn Risk Avg', val: 'Low', icon: Brain, color: 'text-indigo-500' }
                 ].map((kpi, i) => (
                     <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }} className="p-8 bg-zinc-950 border border-white/5 rounded-[2.5rem] shadow-4xl group hover:border-white/20 transition-all flex items-center justify-between">
@@ -368,7 +374,7 @@ export default function AdminClientes() {
                 <div className="p-8 border-b border-white/5 flex flex-col lg:flex-row gap-8 items-center justify-between">
                     <div className="relative flex-1 max-w-md">
                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-600" />
-                        <input type="text" placeholder="Buscar socio..." className="w-full bg-black/50 border-2 border-white/5 rounded-2xl pl-14 pr-6 py-4 text-xs outline-none focus:border-blis-red transition-all" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                        <input type="text" placeholder="Buscar socio..." className="w-full bg-black/50 border-2 border-white/5 rounded-2xl pl-14 pr-6 py-4 text-xs outline-none focus:border-blis-red transition-all" value={searchTerm} onChange={e => { setSearchTerm(e.target.value); setPage(1); }} />
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="bg-black/40 p-1.5 rounded-2xl border border-white/10 flex gap-2">
@@ -383,7 +389,7 @@ export default function AdminClientes() {
                                 { value: "Socio", label: "Socio Activo" },
                                 { value: "Verificado", label: "Verificados" }
                             ]}
-                            onChange={setActivityFilter}
+                            onChange={(v) => { setActivityFilter(v); setPage(1); }}
                             icon={Filter}
                             className="w-48"
                         />
@@ -441,7 +447,7 @@ export default function AdminClientes() {
                                 <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
                                 <span className="ml-3 text-gray-500">Cargando socios...</span>
                             </div>
-                        ) : filteredClients.length === 0 ? (
+                        ) : clients.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-20 text-gray-500">
                                 <Users className="w-12 h-12 mb-4 opacity-30" />
                                 <span className="text-sm font-black uppercase">No se encontraron socios</span>
@@ -461,7 +467,7 @@ export default function AdminClientes() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
-                                    {filteredClients.map(c => (
+                                    {clients.map(c => (
                                         <tr key={c.id} className="group hover:bg-white/[0.01] transition-all cursor-pointer" onClick={() => router.push(`/superadmin/clientes/${c.id}`)}>
                                             <td className="px-4 md:px-8 py-4 md:py-6">
                                                 <div className="flex items-center gap-4">
@@ -528,13 +534,13 @@ export default function AdminClientes() {
                                 <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
                                 <span className="ml-3 text-gray-500">Cargando socios...</span>
                             </div>
-                        ) : filteredClients.length === 0 ? (
+                        ) : clients.length === 0 ? (
                             <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-500">
                                 <Users className="w-12 h-12 mb-4 opacity-30" />
                                 <span className="text-sm font-black uppercase">No se encontraron socios</span>
                             </div>
                         ) : (
-                            filteredClients.map(c => (
+                            clients.map(c => (
                                 <div key={c.id} onClick={() => router.push(`/superadmin/clientes/${c.id}`)} className="relative p-8 bg-zinc-900 border border-white/5 rounded-[3rem] hover:border-blis-red/50 transition-all cursor-pointer group flex flex-col items-center text-center space-y-4 shadow-3xl hover:shadow-blis-red/5">
                                     <div className="absolute top-4 right-4 flex gap-1">
                                         <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id, `${c.firstName} ${c.lastName}`); }} className="p-1.5 bg-red-500/10 text-red-500 border border-red-500/10 rounded-lg hover:bg-red-500 hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>

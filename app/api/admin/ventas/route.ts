@@ -53,7 +53,24 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, ventas: data, total: count, page, limit });
+    // Resumen global (todas las ventas, sin paginación)
+    const [
+      { count: completadas },
+      { count: pendientes },
+      { data: montoData },
+    ] = await Promise.all([
+      supabase.from("compras").select("*", { count: "exact", head: true }).eq("estado", "completado"),
+      supabase.from("compras").select("*", { count: "exact", head: true }).eq("estado", "pendiente"),
+      supabase.from("compras").select("monto_usd").eq("estado", "completado"),
+    ]);
+
+    const resumen = {
+      monto_total: (montoData || []).reduce((s: number, c: any) => s + (Number(c.monto_usd) || 0), 0),
+      completadas: completadas || 0,
+      pendientes: pendientes || 0,
+    };
+
+    return NextResponse.json({ success: true, ventas: data, total: count, page, limit, resumen });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
