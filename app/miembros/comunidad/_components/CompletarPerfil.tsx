@@ -1,24 +1,33 @@
 "use client"
 
 import { motion } from 'framer-motion'
-import { Award, Star, UserCheck, BookOpen } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Award, Star, UserCheck, BookOpen, Phone, MapPin, Camera } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
+import { getProfileCompleteness } from '@/lib/profile-completeness'
 
-interface TareaPerfil {
-  icon: typeof Award
-  label: string
-  completado: number
-  total: number
+const ICONOS: Record<string, typeof Award> = {
+  avatar: Camera,
+  nombre: UserCheck,
+  telefono: Phone,
+  ubicacion: MapPin,
+  biografia: BookOpen,
+  sociales: Star,
 }
 
 export function CompletarPerfil() {
-  const pct = 73
+  const { user } = useAuth()
+  const [profile, setProfile] = useState<Record<string, any> | null>(null)
 
-  const tareas: TareaPerfil[] = [
-    { icon: UserCheck, label: 'Completar datos personales', completado: 1, total: 1 },
-    { icon: Award, label: 'Subir foto de perfil', completado: 1, total: 1 },
-    { icon: Star, label: 'Agregar redes sociales', completado: 2, total: 3 },
-    { icon: BookOpen, label: 'Completar biografía', completado: 5, total: 6 },
-  ]
+  useEffect(() => {
+    if (!user?.id) return
+    fetch('/api/profile')
+      .then(r => r.json())
+      .then(d => { if (d.success && d.data) setProfile(d.data) })
+      .catch(() => {})
+  }, [user?.id])
+
+  const { pct, tasks } = getProfileCompleteness(profile)
 
   return (
     <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl overflow-hidden">
@@ -36,9 +45,9 @@ export function CompletarPerfil() {
               <motion.circle
                 cx="50" cy="50" r="42" fill="none" stroke="rgb(190 11 36)" strokeWidth="8"
                 strokeLinecap="round"
-                  strokeDasharray={`${((pct / 100) * 264).toFixed(0)} 264`}
-                  initial={{ strokeDashoffset: 264 }}
-                  animate={{ strokeDashoffset: (264 - (pct / 100) * 264).toFixed(0) }}
+                strokeDasharray={`${((pct / 100) * 264).toFixed(0)} 264`}
+                initial={{ strokeDashoffset: 264 }}
+                animate={{ strokeDashoffset: (264 - (pct / 100) * 264).toFixed(0) }}
                 transition={{ duration: 1.5, ease: 'easeOut' }}
               />
             </svg>
@@ -53,25 +62,25 @@ export function CompletarPerfil() {
 
         {/* Tasks */}
         <div className="space-y-2">
-          {tareas.map((t, i) => {
-            const done = t.completado >= t.total
+          {tasks.map((t) => {
+            const Icon = ICONOS[t.key] || Award
             return (
-              <div key={i} className="flex items-center gap-2.5 text-xs">
+              <div key={t.key} className="flex items-center gap-2.5 text-xs">
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  done ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/[0.03] text-gray-600'
+                  t.done ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/[0.03] text-gray-600'
                 }`}>
-                  {done ? (
+                  {t.done ? (
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    <t.icon className="w-3 h-3" />
+                    <Icon className="w-3 h-3" />
                   )}
                 </div>
-                <span className={`flex-1 min-w-0 truncate ${done ? 'text-gray-500' : 'text-gray-400'}`}>{t.label}</span>
-                <span className={`text-[10px] ${done ? 'text-emerald-400' : 'text-gray-600'} tabular-nums`}>
-                  {t.completado}/{t.total}
-                </span>
+                <span className={`flex-1 min-w-0 truncate ${t.done ? 'text-gray-500' : 'text-gray-400'}`}>{t.label}</span>
+                {t.done ? (
+                  <span className="text-[10px] text-emerald-400">✓</span>
+                ) : null}
               </div>
             )
           })}

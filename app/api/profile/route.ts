@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const { data, error } = await supabase
       .from('profiles')
-      .select('nombre, apellido, avatar_url, biografia, ' + SOCIAL_FIELDS.join(', ') + ', telefono')
+      .select('nombre, apellido, avatar_url, biografia, pais, ciudad, ' + SOCIAL_FIELDS.join(', ') + ', telefono')
       .eq('id', user.userId)
       .single()
 

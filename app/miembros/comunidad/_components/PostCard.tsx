@@ -247,8 +247,6 @@ function ComentariosPreview({ postId, total }: { postId: string; total: number }
   const preview = expanded ? comentarios : comentarios.slice(0, 3)
   const remaining = Math.max(0, total - 3)
 
-  if (total === 0 && !loading) return null
-
   return (
     <div className="border-t border-white/[0.04]">
       {loading ? (

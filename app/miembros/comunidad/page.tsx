@@ -83,6 +83,19 @@ export default function ComunidadPage() {
     setActualizaciones(acts)
   }, [posts])
 
+  // Deep-link a una publicación específica (?post=ID)
+  useEffect(() => {
+    if (loading) return
+    const postId = new URLSearchParams(window.location.search).get('post')
+    if (!postId) return
+    const el = document.getElementById(`post-${postId}`)
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el.classList.add('ring-2', 'ring-blis-red/60')
+    const t = setTimeout(() => el.classList.remove('ring-2', 'ring-blis-red/60'), 3000)
+    return () => clearTimeout(t)
+  }, [loading, posts])
+
   return (
     <div className="min-h-screen">
       {/* Perfil Header */}
@@ -117,7 +130,7 @@ export default function ComunidadPage() {
                   </div>
                 ) : (
                   <div className="divide-y divide-white/[0.03]">
-                    {top10.slice(0, 6).map((entry) => (
+                    {top10.slice(0, 10).map((entry) => (
                       <div key={entry.user_id} className="px-4 py-3 flex items-center gap-3 hover:bg-white/[0.02] transition-colors">
                         <span className={`text-xs font-bold w-5 ${entry.posicion <= 3 ? 'text-yellow-400' : 'text-gray-500'}`}>
                           {entry.posicion}
@@ -188,6 +201,7 @@ export default function ComunidadPage() {
                     {posts.map((post) => (
                       <motion.div
                         key={post.id}
+                        id={`post-${post.id}`}
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-40px" }}

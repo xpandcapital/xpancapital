@@ -294,6 +294,8 @@ export default function AdminProfile() {
     const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]);
     const [notifications, setNotifications] = useState(true);
     const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+    const [biografia, setBiografia] = useState('');
+    const [socials, setSocials] = useState<Record<string, string>>({});
 
     const [notificacionesTipos, setNotificacionesTipos] = useState<Record<string, boolean>>({
         blog: true,
@@ -344,6 +346,23 @@ export default function AdminProfile() {
         };
         loadTipos();
     }, [user?.id, tiposCargados]);
+
+    // Cargar biografía y redes sociales
+    useEffect(() => {
+        if (!user?.id) return
+        fetch('/api/profile')
+            .then(r => r.json())
+            .then(d => {
+                if (d.success && d.data) {
+                    setBiografia(d.data.biografia || '')
+                    const s: Record<string, string> = {}
+                    const fields = ['website_url', 'facebook_url', 'instagram_url', 'twitter_url', 'linkedin_url']
+                    fields.forEach(f => { if (d.data[f]) s[f] = d.data[f] })
+                    setSocials(s)
+                }
+            })
+            .catch(() => {})
+    }, [user?.id])
 
     const handleToggleTipo = async (key: string, enabled: boolean) => {
         const nuevos = { ...notificacionesTipos, [key]: enabled };
@@ -416,6 +435,15 @@ export default function AdminProfile() {
         try {
             const fullPhone = phone ? `${selectedCountry.code} ${phone}` : '';
             await updateProfile({ name: `${name} ${lastName}`.trim(), email, phone: fullPhone, profilePic });
+            // Guardar biografía y redes sociales
+            const socialData: Record<string, string | null> = { biografia }
+            const fields = ['website_url', 'facebook_url', 'instagram_url', 'twitter_url', 'linkedin_url']
+            fields.forEach(f => { socialData[f] = socials[f] || null })
+            fetch('/api/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(socialData)
+            }).catch(() => {})
             showToast("Perfil actualizado correctamente", "success");
         } catch (error) {
             showToast("Error al actualizar perfil", "error");
@@ -576,6 +604,29 @@ export default function AdminProfile() {
                                         document.body
                                     )}
                                     <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="123 456 7890" className="flex-1 bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blis-red transition-all text-sm font-bold" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-3">Biografía</label>
+                                <textarea value={biografia} onChange={e => setBiografia(e.target.value)} rows={3} placeholder="Cuéntanos sobre ti..." className="w-full bg-black/50 border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-blis-red transition-all text-sm font-bold resize-none" />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-black text-gray-500 uppercase tracking-widest mb-3">Redes Sociales</label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {[
+                                        { key: 'website_url', label: 'Sitio Web', placeholder: 'https://...' },
+                                        { key: 'facebook_url', label: 'Facebook', placeholder: 'https://facebook.com/...' },
+                                        { key: 'instagram_url', label: 'Instagram', placeholder: 'https://instagram.com/...' },
+                                        { key: 'twitter_url', label: 'Twitter / X', placeholder: 'https://x.com/...' },
+                                        { key: 'linkedin_url', label: 'LinkedIn', placeholder: 'https://linkedin.com/in/...' },
+                                    ].map(s => (
+                                        <div key={s.key}>
+                                            <label className="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1.5">{s.label}</label>
+                                            <input type="url" value={socials[s.key] || ''} onChange={e => setSocials(prev => ({ ...prev, [s.key]: e.target.value }))} placeholder={s.placeholder} className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blis-red transition-all font-bold" />
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>

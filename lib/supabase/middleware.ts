@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { ROLE_DEFAULTS } from '@/lib/auth/permissions'
 import type { UserRole } from '@/lib/auth/permissions'
+import { getProfileCompleteness, PROFILE_MIN_PCT } from '@/lib/profile-completeness'
 
 const SECTION_ROUTES: Record<string, string[]> = {
   'dashboard:ver': ['/superadmin'],
@@ -125,6 +126,7 @@ export async function updateSession(request: NextRequest) {
   let user: any = null
   let profileRol: string | null = null
   let profileEmpresaId: string | null = null
+  let profileFull: any = null
 
   try {
     const supabase = createServerClient(
@@ -155,14 +157,33 @@ export async function updateSession(request: NextRequest) {
     if (user?.id) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('rol, empresa_id')
+        .select('rol, empresa_id, avatar_url, nombre, apellido, telefono, pais, ciudad, biografia, website_url, facebook_url, instagram_url, twitter_url, youtube_url, linkedin_url, tiktok_url, whatsapp_url, telegram_url, discord_url, github_url')
         .eq('id', user.id)
         .single()
+      profileFull = profile
       if (profile?.rol) profileRol = profile.rol
       if (profile?.empresa_id) profileEmpresaId = profile.empresa_id
     }
   } catch (error) {
     console.error('[Middleware] Error al verificar sesión:', error)
+  }
+
+  // Gating: perfil mínimo para usar /miembros (excepto /miembros/perfil)
+  if (user?.id && isMiembros && !pathname.startsWith('/miembros/perfil')) {
+    const rol = profileRol || user.app_metadata?.rol || 'usuario'
+    const staffRoles = ['superadmin', 'admin', 'editor', 'empleado']
+    if (!staffRoles.includes(rol)) {
+      const { pct } = getProfileCompleteness(profileFull)
+      if (pct < PROFILE_MIN_PCT) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/miembros/perfil'
+        const redirectResponse = NextResponse.redirect(url)
+        supabaseResponse.cookies.getAll().forEach(cookie => {
+          redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+        })
+        return redirectResponse
+      }
+    }
   }
 
   // 1. No autenticado → redirigir a login
