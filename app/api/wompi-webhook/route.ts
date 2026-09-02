@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const { data: compras, error } = await supabase
       .from('compras')
       .select('*')
-      .filter('metadata->>wompi_reference', 'eq', transaction.reference)
+      .ilike('metadata->>wompi_reference', transaction.reference)
       .eq('estado', 'pendiente')
       .limit(1)
 

@@ -176,12 +176,6 @@ interface OrderItem { id: string; name: string; quantity: number; price: number;
 interface Order { id: string; date: string; total: number; status: 'Pagado' | 'Pendiente' | 'Cancelado'; items: number; type: 'Venta' | 'Cotizacion'; products?: OrderItem[]; }
 
 function mapDbToClient(profile: DbProfile): Client {
-    const tierMap: Record<string, string> = {
-        'platinum': 'Platinum Member',
-        'gold': 'Gold Member',
-        'silver': 'Silver Member',
-        'bronze': 'Bronze Member'
-    };
     const docTypeMap: Record<string, 'DNI' | 'RUC' | 'Cedula' | 'Pasaporte'> = {
         'DNI': 'DNI', 'RUC': 'RUC', 'Cedula': 'Cedula', 'Pasaporte': 'Pasaporte',
         'CE': 'Pasaporte', 'RUT': 'RUC', 'CURP': 'Pasaporte', 'RFC': 'RUC',
@@ -215,7 +209,7 @@ function mapDbToClient(profile: DbProfile): Client {
         joined: new Date(profile.creado_en).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }),
         birthday: profile.fecha_nacimiento || '',
         phone: profile.telefono || '',
-        tier: profile.nivel_id ? (tierMap[profile.nivel_id] || 'Bronze Member') : 'Bronze Member',
+        tier: '',
         country: profile.pais || 'PE',
         region: profile.region || '',
         documentType: docType,
@@ -457,7 +451,6 @@ export default function AdminClientes() {
                                 <thead className="bg-zinc-900 font-black text-[10px] text-gray-500 uppercase tracking-[0.4em]">
                                     <tr>
                                         <th className="px-4 md:px-8 py-4 md:py-6">Socio & Perfil</th>
-                                        <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Nivel / Tier</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Estado Ops</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Plan</th>
                                         <th className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">Boveda (BC)</th>
@@ -480,14 +473,6 @@ export default function AdminClientes() {
                                                         <span className="text-[10px] text-gray-600 font-black uppercase tracking-tight">{c.email}</span>
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">
-                                                <span className={`text-[9px] font-black uppercase px-4 py-1.5 rounded-full border ${
-                                                    c.tier.includes('Platinum') ? 'bg-neutral-900 border-neutral-700 text-neutral-300' :
-                                                    c.tier.includes('Gold') ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
-                                                    c.tier.includes('Silver') ? 'bg-zinc-300/10 border-zinc-300/20 text-zinc-400' :
-                                                    'bg-white/5 border-white/10 text-gray-500'
-                                                }`}>{c.tier}</span>
                                             </td>
                                             <td className="px-3 md:px-6 py-4 md:py-6 text-center hidden md:table-cell">
                                                 <span className={`text-[9px] font-black uppercase px-4 py-1.5 rounded-full border ${
@@ -544,11 +529,6 @@ export default function AdminClientes() {
                                 <div key={c.id} onClick={() => router.push(`/superadmin/clientes/${c.id}`)} className="relative p-8 bg-zinc-900 border border-white/5 rounded-[3rem] hover:border-blis-red/50 transition-all cursor-pointer group flex flex-col items-center text-center space-y-4 shadow-3xl hover:shadow-blis-red/5">
                                     <div className="absolute top-4 right-4 flex gap-1">
                                         <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id, `${c.firstName} ${c.lastName}`); }} className="p-1.5 bg-red-500/10 text-red-500 border border-red-500/10 rounded-lg hover:bg-red-500 hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
-                                        <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-lg border ${
-                                            c.tier.includes('Gold') ? 'bg-amber-500/10 border-amber-500/20 text-amber-500' :
-                                            c.tier.includes('Platinum') ? 'bg-neutral-800 border-neutral-700 text-neutral-300' :
-                                            'bg-white/5 border-white/10 text-gray-500'
-                                        }`}>{c.tier.replace(' Member', '')}</span>
                                     </div>
                                     <div className="relative">
                                         <div className="w-20 h-20 rounded-[2rem] bg-zinc-950 border-2 border-white/10 flex items-center justify-center text-4xl font-black text-blis-red transition-transform group-hover:scale-110 shadow-2xl">{c.avatar}</div>

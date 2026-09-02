@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       .or(`user_id.is.null,is_global.eq.true`)
 
     const privateKey = decryptApiKey(keys?.find((k: any) => k.key_name === 'wompi_private_key')?.key_value || '')
-    const environment = process.env.WOMPI_ENV || 'sandbox'
+    const environment = process.env.WOMPI_ENV || 'production'
 
     let wompiRes: any = null
 
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       if (reference) {
         try {
           const baseUrl = environment === 'production'
-            ? 'https://api.wompi.co/v1'
+            ? 'https://production.wompi.co/v1'
             : 'https://sandbox.wompi.co/v1'
           const searchRes = await fetch(
             `${baseUrl}/transactions?reference=${reference}`,

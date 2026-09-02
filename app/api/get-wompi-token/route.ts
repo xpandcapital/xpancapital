@@ -68,13 +68,27 @@ export async function POST(request: NextRequest) {
 
     const productoPrincipal = productos[0]
 
+    // Calcular fecha de vencimiento según duración del producto
+    let fechaVencimiento = null
+    if (productoPrincipal?.producto_id) {
+      const { data: prod } = await supabase
+        .from('productos')
+        .select('duracion_dias')
+        .eq('id', productoPrincipal.producto_id)
+        .maybeSingle()
+      if (prod?.duracion_dias) {
+        fechaVencimiento = new Date(Date.now() + prod.duracion_dias * 86400000).toISOString()
+      }
+    }
+
     const { data: compra, error: compraError } = await supabase
       .from('compras').insert({
         empresa_id: DEFAULT_EMPRESA_ID,
         user_id: user_id || null,
-        producto_id: productoPrincipal?.id || null,
+        producto_id: productoPrincipal?.producto_id || null,
         metodo_pago: 'wompi', monto_usd: total_usd, moneda: 'USD', estado: 'pendiente',
         tipo_cambio: tasaCambio,
+        fecha_vencimiento_acceso: fechaVencimiento,
         metadata: { productos, email_cliente: email, nombre_cliente: [nombre, apellido].filter(Boolean).join(' '), tiene_fisicos: !!tiene_fisicos, direccion_envio: direccion_envio || null },
       }).select('id').single()
 
@@ -82,7 +96,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Error creando orden: ${compraError.message}` }, { status: 500 })
     }
 
-    const items = productos.map((p: any) => ({ compra_id: compra.id, producto_id: p.id, cantidad: p.cantidad || 1, precio_unitario: p.price, product_type: p.productType || 'digital' }))
+    const items = productos.map((p: any) => ({ compra_id: compra.id, producto_id: p.producto_id, cantidad: p.cantidad || 1, precio_unitario: p.precio_unitario || 0, product_type: p.productType || 'digital' }))
     await supabase.from('compra_items').insert(items)
 
     const reference = compra.id.slice(0, 12)
@@ -91,7 +105,7 @@ export async function POST(request: NextRequest) {
       metadata: { productos, email_cliente: email, nombre_cliente: [nombre, apellido].filter(Boolean).join(' '), tiene_fisicos: !!tiene_fisicos, direccion_envio: direccion_envio || null, wompi_reference: reference }
     }).eq('id', compra.id)
 
-    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://xpancapital.vercel.app'}/tienda/checkout/status?wompi_success=1&order_id=${compra.id}&total=${total_usd}`
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://xpandcapital.org'}/tienda/checkout/status?wompi_success=1&order_id=${compra.id}&total=${total_usd}`
 
     // Generar firma de integridad Wompi
     let signature = ''
