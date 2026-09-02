@@ -360,13 +360,13 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {[
             {
-              title: 'Últimas Compras', icon: ShoppingCart, color: 'text-emerald-500',
-              data: lastCompras, empty: 'Sin compras recientes',
+              title: 'Últimas Ventas Pagadas', icon: ShoppingCart, color: 'text-emerald-500',
+              data: lastCompras, empty: 'Sin ventas pagadas',
               render: (item: any) => (
                 <div key={item.id}>
                   <p className="text-sm font-bold text-white">{formatCurrency(item.monto_usd || 0)}</p>
                   <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
-                    {item.id?.slice(0, 8)}... • {item.estado || 'pendiente'}
+                    {item.creado_en ? new Date(item.creado_en).toLocaleDateString('es-PE') : ''}
                   </p>
                 </div>
               )

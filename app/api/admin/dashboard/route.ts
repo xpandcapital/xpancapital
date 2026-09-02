@@ -20,7 +20,7 @@ export async function GET() {
       supabase.from("projects").select("id").eq("empresa_id", empresaId).eq("is_active", true),
       supabase.from("compras").select("id, monto_usd, estado, creado_en, user_id").eq("estado", "completado").order("creado_en", { ascending: false }).limit(100),
       supabase.from("leads").select("id, nombre, email, creado_en, estado").eq("empresa_id", empresaId).order("creado_en", { ascending: false }).limit(5),
-      supabase.from("compras").select("id, monto_usd, estado, creado_en, user_id").order("creado_en", { ascending: false }).limit(5),
+      supabase.from("compras").select("id, monto_usd, estado, creado_en, user_id").eq("estado", "completado").order("creado_en", { ascending: false }).limit(5),
       supabase.from("blog_posts").select("id, titulo, creado_en, estado").eq("empresa_id", empresaId).order("creado_en", { ascending: false }).limit(5),
     ])
 
