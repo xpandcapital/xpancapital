@@ -60,6 +60,7 @@ export default function VentasAdminPage() {
     const [guardando, setGuardando] = useState(false);
     const [successData, setSuccessData] = useState<{email: string, password: string} | null>(null);
     const [ventaError, setVentaError] = useState<string | null>(null);
+    const [selected, setSelected] = useState<Set<string>>(new Set());
     
     const [formNueva, setFormNueva] = useState({ nombre: "", apellido: "", user_email: "", telefono: "", producto_id: "", metodo_pago: "transferencia", monto_usd: 0, monto_coins: 0, fecha_compra: new Date().toISOString().split('T')[0] });
     const [clientes, setClientes] = useState<any[]>([]);
@@ -143,6 +144,27 @@ export default function VentasAdminPage() {
         if (!confirm("¿Eliminar esta venta permanentemente?")) return;
         await fetch(`/api/admin/ventas?id=${id}`, { method: "DELETE" });
         setVentas(prev => prev.filter(v => v.id !== id));
+    };
+
+    const toggleSelect = (id: string) => {
+        setSelected(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
+    const eliminarSeleccionados = async () => {
+        if (selected.size === 0) return;
+        if (!confirm(`¿Eliminar ${selected.size} venta(s) permanentemente?`)) return;
+        setGuardando(true);
+        for (const id of Array.from(selected)) {
+            await fetch(`/api/admin/ventas?id=${id}`, { method: "DELETE" });
+        }
+        setSelected(new Set());
+        setGuardando(false);
+        cargar();
     };
 
     const registrarVentaOffline = async () => {
@@ -230,9 +252,16 @@ export default function VentasAdminPage() {
                         <h1 className="text-3xl font-black uppercase tracking-tighter">Ventas</h1>
                         <p className="text-gray-400 text-sm mt-1">{total} transacciones registradas</p>
                     </div>
-                    <Button onClick={() => setModalNueva(true)} className="bg-emerald-600 hover:bg-emerald-600/90 text-white font-black uppercase tracking-wider text-xs">
-                        <Plus className="w-4 h-4 mr-2" /> Registrar Venta
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        {selected.size > 0 && (
+                            <Button onClick={eliminarSeleccionados} disabled={guardando} className="bg-red-600 hover:bg-red-600/90 text-white font-black uppercase tracking-wider text-xs">
+                                <Trash2 className="w-4 h-4 mr-2" /> Eliminar ({selected.size})
+                            </Button>
+                        )}
+                        <Button onClick={() => setModalNueva(true)} className="bg-emerald-600 hover:bg-emerald-600/90 text-white font-black uppercase tracking-wider text-xs">
+                            <Plus className="w-4 h-4 mr-2" /> Registrar Venta
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -283,6 +312,7 @@ export default function VentasAdminPage() {
                                     <div key={venta.id} id={`venta-${venta.id}`} className={`bg-zinc-900/50 border rounded-2xl p-4 space-y-3 transition-all ${ventaDestacada === venta.id ? 'border-blis-red/60 bg-blis-red/5' : 'border-white/10'}`}>
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3 min-w-0">
+                                                <input type="checkbox" checked={selected.has(venta.id)} onChange={() => toggleSelect(venta.id)} className="w-4 h-4 accent-blis-red cursor-pointer shrink-0" />
                                                 <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold flex-shrink-0">
                                                     {venta.cliente?.nombre?.[0] || (venta as any).metadata?.nombre_cliente?.[0] || "U"}
                                                 </div>
@@ -361,6 +391,7 @@ export default function VentasAdminPage() {
                                 <table className="w-full">
                                     <thead className="bg-white/[0.02] text-gray-500 font-bold uppercase tracking-widest text-[10px]">
                                         <tr>
+                                            <th className="p-4 w-10"></th>
                                             <th className="p-4">Cliente</th>
                                             <th className="p-4">Producto</th>
                                             <th className="p-4">Método</th>
@@ -375,6 +406,9 @@ export default function VentasAdminPage() {
                                             const { fecha, hora } = formatFecha(venta.creado_en);
                                             return (
                                                 <tr key={venta.id} id={`venta-${venta.id}`} className={`transition-colors ${ventaDestacada === venta.id ? 'bg-blis-red/5' : 'hover:bg-white/[0.02]'}`}>
+                                                    <td className="p-4 w-10">
+                                                        <input type="checkbox" checked={selected.has(venta.id)} onChange={() => toggleSelect(venta.id)} className="w-4 h-4 accent-blis-red cursor-pointer" />
+                                                    </td>
                                                     <td className="p-4">
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-xs font-bold">
