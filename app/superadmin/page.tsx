@@ -362,14 +362,19 @@ export default function Dashboard() {
             {
               title: 'Últimas Ventas Pagadas', icon: ShoppingCart, color: 'text-emerald-500',
               data: lastCompras, empty: 'Sin ventas pagadas',
-              render: (item: any) => (
-                <div key={item.id}>
-                  <p className="text-sm font-bold text-white">{formatCurrency(item.monto_usd || 0)}</p>
-                  <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
-                    {item.creado_en ? new Date(item.creado_en).toLocaleDateString('es-PE') : ''}
-                  </p>
-                </div>
-              )
+              render: (item: any) => {
+                const nombre = item.cliente?.nombre
+                  ? `${item.cliente.nombre} ${item.cliente.apellido || ''}`.trim()
+                  : item.metadata?.nombre_cliente || 'Cliente'
+                return (
+                  <div key={item.id}>
+                    <p className="text-sm font-bold text-white truncate">{nombre}</p>
+                    <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
+                      {item.creado_en ? new Date(item.creado_en).toLocaleDateString('es-PE') : ''} • {formatCurrency(item.monto_usd || 0)}
+                    </p>
+                  </div>
+                )
+              }
             },
             {
               title: 'Últimos Posts', icon: FileText, color: 'text-amber-500',
