@@ -194,7 +194,7 @@ function mapDbToClient(profile: DbProfile): Client {
         firstName: profile.nombre || '',
         lastName: profile.apellido || '',
         email: profile.email,
-        avatar: (profile.nombre?.charAt(0) || profile.email.charAt(0)).toUpperCase(),
+        avatar: profile.avatar_url || '',
         role: roleMap[profile.rol] || 'Cliente',
         xpandCoins: profile.xpand_coins || 0,
         purchases: profile.total_compras || 0,
@@ -491,7 +491,7 @@ export default function AdminClientes() {
                                             <td className="px-4 md:px-8 py-4 md:py-6">
                                                 <div className="flex items-center gap-4">
                                                     <div className="relative group">
-                                                        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border-2 border-white/5 flex items-center justify-center text-blis-red text-lg font-black shadow-xl group-hover:scale-105 transition-transform">{c.avatar}</div>
+                                                        <div className="w-12 h-12 rounded-2xl bg-zinc-900 border-2 border-white/5 flex items-center justify-center overflow-hidden text-blis-red text-lg font-black shadow-xl group-hover:scale-105 transition-transform">{c.avatar ? <img src={c.avatar} alt="" className="w-full h-full object-cover" /> : c.firstName.charAt(0).toUpperCase()}</div>
                                                         <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-black ${c.isAccountFrozen ? 'bg-rose-500' : 'bg-emerald-500'}`} title={c.isAccountFrozen ? 'Cuenta Congelada' : 'Cuenta Activa'} />
                                                     </div>
                                                     <div className="flex flex-col">
@@ -557,7 +557,7 @@ export default function AdminClientes() {
                                         <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id, `${c.firstName} ${c.lastName}`); }} className="p-1.5 bg-red-500/10 text-red-500 border border-red-500/10 rounded-lg hover:bg-red-500 hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
                                     </div>
                                     <div className="relative">
-                                        <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-white/10 flex items-center justify-center text-2xl font-black text-blis-red transition-transform group-hover:scale-110 shadow-2xl">{c.avatar}</div>
+                                        <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-white/10 flex items-center justify-center overflow-hidden text-2xl font-black text-blis-red transition-transform group-hover:scale-110 shadow-2xl">{c.avatar ? <img src={c.avatar} alt="" className="w-full h-full object-cover" /> : c.firstName.charAt(0).toUpperCase()}</div>
                                         <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-zinc-900 ${c.isAccountFrozen ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                                     </div>
                                     <div className="space-y-1">

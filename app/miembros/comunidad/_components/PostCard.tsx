@@ -272,7 +272,7 @@ function ComentariosPreview({ postId, total }: { postId: string; total: number }
               </div>
               <div className="flex-1 min-w-0">
                 <div className="bg-white/[0.03] rounded-xl px-3 py-2">
-                  <p className="text-[11px] font-semibold text-white">{c.autor?.nombre}</p>
+                      <p className="text-[11px] font-semibold text-white">{c.autor ? `${c.autor.nombre || ''} ${c.autor.apellido || ''}`.trim() || 'Usuario' : 'Usuario'}</p>
                   <p className="text-xs text-gray-300 mt-0.5">{c.contenido}</p>
                 </div>
                 <div className="flex items-center gap-2 mt-1 ml-1">
