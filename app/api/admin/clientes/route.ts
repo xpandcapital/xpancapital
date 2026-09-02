@@ -90,6 +90,8 @@ export async function GET(request: NextRequest) {
       query = query.eq('verificado', true)
     } else if (status === 'Premium') {
       query = query.eq('ha_comprado', true)
+    } else if (status === 'Socio') {
+      query = query.eq('verificado', false).eq('ha_comprado', false)
     }
     
     const { data: profiles, error, count } = await query
