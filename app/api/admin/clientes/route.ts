@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || ''
     const status = searchParams.get('status') || ''
     const tier = searchParams.get('tier') || ''
+    const sort = searchParams.get('sort') || 'nombre_asc'
 
     if (id) {
       const { data: profile, error } = await supabase
@@ -79,7 +80,6 @@ export async function GET(request: NextRequest) {
         puntos_cursos,puntos_comunidad,puntos_blog
       `, { count: 'exact' })
       .eq('empresa_id', DEFAULT_EMPRESA_ID)
-      .order('creado_en', { ascending: false })
       .range((page - 1) * perPage, page * perPage - 1)
     
     if (search) {
@@ -92,6 +92,21 @@ export async function GET(request: NextRequest) {
       query = query.eq('ha_comprado', true)
     } else if (status === 'Socio') {
       query = query.eq('verificado', false).eq('ha_comprado', false)
+    }
+    
+    // Orden (por defecto nombre A-Z)
+    if (sort === 'nombre_desc') {
+      query = query.order('nombre', { ascending: false })
+    } else if (sort === 'recientes') {
+      query = query.order('creado_en', { ascending: false })
+    } else if (sort === 'antiguos') {
+      query = query.order('creado_en', { ascending: true })
+    } else if (sort === 'compras_desc') {
+      query = query.order('total_compras', { ascending: false })
+    } else if (sort === 'gastado_desc') {
+      query = query.order('total_gastado_usd', { ascending: false })
+    } else {
+      query = query.order('nombre', { ascending: true })
     }
     
     const { data: profiles, error, count } = await query

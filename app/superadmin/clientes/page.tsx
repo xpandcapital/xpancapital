@@ -270,20 +270,32 @@ export default function AdminClientes() {
     const [searchTerm, setSearchTerm] = useState("");
     const [activityFilter, setActivityFilter] = useState("Todos");
     const [isRankingView, setIsRankingView] = useState(false);
-    const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+    const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
+        if (typeof window !== 'undefined') {
+            return (localStorage.getItem('clientes_view_mode') as 'list' | 'grid') || 'list'
+        }
+        return 'list'
+    });
+    const [sort, setSort] = useState('nombre_asc');
     const [isMounted, setIsMounted] = useState(false);
+
+    const changeViewMode = (mode: 'list' | 'grid') => {
+        setViewMode(mode);
+        localStorage.setItem('clientes_view_mode', mode);
+    };
     const [isLoading, setIsLoading] = useState(true);
     const [clients, setClients] = useState<Client[]>([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [resumen, setResumen] = useState({ total_socios: 0, boveda_global: 0, recaudacion_total: 0 });
 
-    const fetchClients = useCallback(async (pageNum: number, searchValue: string, statusValue: string) => {
+    const fetchClients = useCallback(async (pageNum: number, searchValue: string, statusValue: string, sortValue: string) => {
         setIsLoading(true);
         try {
             const params = new URLSearchParams({ page: pageNum.toString(), per_page: "20" });
             if (searchValue) params.set("search", searchValue);
             if (statusValue && statusValue !== "Todos") params.set("status", statusValue);
+            if (sortValue) params.set("sort", sortValue);
             const res = await fetch(`/api/admin/clientes?${params}`);
             const data = await res.json();
             if (data.success && data.data) {
@@ -305,10 +317,10 @@ export default function AdminClientes() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            fetchClients(page, searchTerm, activityFilter);
+            fetchClients(page, searchTerm, activityFilter, sort);
         }, searchTerm ? 400 : 0);
         return () => clearTimeout(timer);
-    }, [page, searchTerm, activityFilter, fetchClients]);
+    }, [page, searchTerm, activityFilter, sort, fetchClients]);
 
     const formatCurrency = (amount: number) => {
         if (!isMounted) return amount.toString();
@@ -372,8 +384,8 @@ export default function AdminClientes() {
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="bg-black/40 p-1.5 rounded-2xl border border-white/10 flex gap-2">
-                            <button onClick={() => setViewMode('list')} className={`p-2.5 rounded-xl ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-gray-600'}`}><LayoutList className="w-4.5 h-4.5" /></button>
-                            <button onClick={() => setViewMode('grid')} className={`p-2.5 rounded-xl ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-gray-600'}`}><LayoutGrid className="w-4.5 h-4.5" /></button>
+                            <button onClick={() => changeViewMode('list')} className={`p-2.5 rounded-xl ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-gray-600'}`}><LayoutList className="w-4.5 h-4.5" /></button>
+                            <button onClick={() => changeViewMode('grid')} className={`p-2.5 rounded-xl ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-gray-600'}`}><LayoutGrid className="w-4.5 h-4.5" /></button>
                         </div>
                         <CustomSelect
                             value={activityFilter}
@@ -386,6 +398,20 @@ export default function AdminClientes() {
                             onChange={(v) => { setActivityFilter(v); setPage(1); }}
                             icon={Filter}
                             className="w-48"
+                        />
+                        <CustomSelect
+                            value={sort}
+                            options={[
+                                { value: "nombre_asc", label: "Nombre A-Z" },
+                                { value: "nombre_desc", label: "Nombre Z-A" },
+                                { value: "recientes", label: "Más recientes" },
+                                { value: "antiguos", label: "Más antiguos" },
+                                { value: "compras_desc", label: "Más compras" },
+                                { value: "gastado_desc", label: "Mayor gasto" }
+                            ]}
+                            onChange={(v) => { setSort(v); setPage(1); }}
+                            icon={TrendingUp}
+                            className="w-44"
                         />
                     </div>
                 </div>
@@ -513,7 +539,7 @@ export default function AdminClientes() {
                         )}
                     </div>
                 ) : (
-                    <div className="p-4 md:p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                    <div className="p-4 md:p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
                         {isLoading ? (
                             <div className="col-span-full flex items-center justify-center py-20">
                                 <Loader2 className="w-8 h-8 animate-spin text-blis-red" />
@@ -526,22 +552,22 @@ export default function AdminClientes() {
                             </div>
                         ) : (
                             clients.map(c => (
-                                <div key={c.id} onClick={() => router.push(`/superadmin/clientes/${c.id}`)} className="relative p-8 bg-zinc-900 border border-white/5 rounded-[3rem] hover:border-blis-red/50 transition-all cursor-pointer group flex flex-col items-center text-center space-y-4 shadow-3xl hover:shadow-blis-red/5">
+                                <div key={c.id} onClick={() => router.push(`/superadmin/clientes/${c.id}`)} className="relative p-4 bg-zinc-900 border border-white/5 rounded-2xl hover:border-blis-red/50 transition-all cursor-pointer group flex flex-col items-center text-center space-y-2 shadow-3xl hover:shadow-blis-red/5">
                                     <div className="absolute top-4 right-4 flex gap-1">
                                         <button onClick={(e) => { e.stopPropagation(); handleDelete(c.id, `${c.firstName} ${c.lastName}`); }} className="p-1.5 bg-red-500/10 text-red-500 border border-red-500/10 rounded-lg hover:bg-red-500 hover:text-white transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100" title="Eliminar"><Trash2 className="w-3.5 h-3.5" /></button>
                                     </div>
                                     <div className="relative">
-                                        <div className="w-20 h-20 rounded-[2rem] bg-zinc-950 border-2 border-white/10 flex items-center justify-center text-4xl font-black text-blis-red transition-transform group-hover:scale-110 shadow-2xl">{c.avatar}</div>
-                                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-4 border-zinc-900 ${c.isAccountFrozen ? 'bg-rose-500' : 'bg-emerald-500'}`} />
+                                        <div className="w-14 h-14 rounded-2xl bg-zinc-950 border-2 border-white/10 flex items-center justify-center text-2xl font-black text-blis-red transition-transform group-hover:scale-110 shadow-2xl">{c.avatar}</div>
+                                        <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-zinc-900 ${c.isAccountFrozen ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                                     </div>
                                     <div className="space-y-1">
-                                        <h3 className="font-black text-lg text-white group-hover:text-blis-red transition-colors">{c.firstName} {c.lastName}</h3>
-                                        <p className="text-[10px] text-gray-600 font-bold uppercase tracking-widest">{c.email}</p>
+                                        <h3 className="font-black text-sm text-white group-hover:text-blis-red transition-colors truncate w-full">{c.firstName} {c.lastName}</h3>
+                                        <p className="text-[9px] text-gray-600 font-bold uppercase tracking-widest truncate w-full">{c.email}</p>
                                     </div>
                                     <div className="flex flex-col gap-2 pt-2 w-full">
-                                        <div className="text-emerald-500 font-black text-lg">{formatCurrency(c.xpandCoins)} <span className="text-[10px]">BC</span></div>
-                                        <div className="text-white font-bold text-sm">{c.puntos.toLocaleString()} <span className="text-[10px] text-gray-500">pts Nv.{c.puntosNivel}</span></div>
-                                        <span className={`text-[9px] font-black uppercase px-3 py-1.5 rounded-xl border self-center ${
+                                        <div className="text-emerald-500 font-black text-sm">{formatCurrency(c.xpandCoins)} <span className="text-[9px]">BC</span></div>
+                                        <div className="text-white font-bold text-xs">{c.puntos.toLocaleString()} <span className="text-[9px] text-gray-500">pts Nv.{c.puntosNivel}</span></div>
+                                        <span className={`text-[8px] font-black uppercase px-2 py-1 rounded-lg border self-center ${
                                             c.status === 'Verificado' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' :
                                             c.status === 'Premium' ? 'bg-blis-red/10 border-blis-red/20 text-blis-red' :
                                             'bg-white/5 border-white/10 text-gray-400'
