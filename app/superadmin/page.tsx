@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  DollarSign, Package, Users, Eye, Contact,
+  DollarSign, Package, Users, Eye,
   ShoppingCart, FileText, TrendingUp, RefreshCw, Clock, AlertTriangle
 } from 'lucide-react';
 import {
@@ -101,7 +101,6 @@ export default function Dashboard() {
   const [blogViews, setBlogViews] = useState(0);
   const [compras, setCompras] = useState<any[]>([]);
   const [topProducts, setTopProducts] = useState<{ nombre: string; ventas: number }[]>([]);
-  const [lastLeads, setLastLeads] = useState<any[]>([]);
   const [lastCompras, setLastCompras] = useState<any[]>([]);
   const [lastPosts, setLastPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,7 +127,6 @@ export default function Dashboard() {
       setClientsCount(d.cliCount || 0);
       setBlogViews(d.blogCount || 0);
       setCompras(d.compras || []);
-      setLastLeads(d.lastLeads || []);
       setLastCompras(d.lastCompras || []);
       setLastPosts(d.lastPosts || []);
 
@@ -359,20 +357,8 @@ export default function Dashboard() {
         </div>
 
         {/* Activity Feed */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {[
-            {
-              title: 'Últimos Leads', icon: Contact, color: 'text-purple-500',
-              data: lastLeads, empty: 'Sin leads recientes',
-              render: (item: any) => (
-                <div key={item.id}>
-                  <p className="text-sm font-bold text-white">{item.nombre}</p>
-                  <p className="text-[10px] text-zinc-600 font-black uppercase mt-0.5">
-                    {item.email || 'Sin email'} • {item.estado || 'nuevo'}
-                  </p>
-                </div>
-              )
-            },
             {
               title: 'Últimas Compras', icon: ShoppingCart, color: 'text-emerald-500',
               data: lastCompras, empty: 'Sin compras recientes',
