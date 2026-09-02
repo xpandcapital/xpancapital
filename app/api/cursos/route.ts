@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
     // Obtener total de lecciones del curso
     const { data: curso } = await supabase
       .from('cursos')
-      .select('modulos')
+      .select('modulos, empresa_id')
       .eq('id', curso_id)
       .single()
 
@@ -275,6 +275,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id,
         curso_id,
+        empresa_id: curso?.empresa_id || DEFAULT_EMPRESA_ID,
         progreso: progresoCalculado,
         examen_estado: 'pendiente'
       })

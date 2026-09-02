@@ -208,6 +208,7 @@ export async function POST(request: NextRequest) {
       await supabase.from('curso_progreso').insert({
         user_id,
         curso_id,
+        empresa_id: curso.empresa_id || DEFAULT_EMPRESA_ID,
         ...progresoData,
         ...aprobadoMetadata,
         examen_estado: aprobado ? 'aprobado' : (bloqueado ? 'bloqueado' : 'pendiente'),

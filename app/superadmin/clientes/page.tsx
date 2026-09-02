@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
     Users, Search, Filter,
-    Coins, TrendingUp, Brain, Trophy, GraduationCap,
+    Coins, TrendingUp, Trophy, GraduationCap,
     ShoppingCart, LayoutGrid, LayoutList, Shield,
     Edit3, Smartphone, ChevronRight, Loader2,
     Trash2
@@ -359,12 +359,11 @@ export default function AdminClientes() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 {[
                     { label: 'Total Socios', val: resumen.total_socios, icon: Users, color: 'text-white' },
                     { label: 'Boveda Global', val: resumen.boveda_global.toLocaleString(), icon: Coins, color: 'text-amber-500', unit: 'BC' },
-                    { label: 'Recaudacion Total', val: resumen.recaudacion_total.toLocaleString(), icon: TrendingUp, color: 'text-emerald-500', unit: '$' },
-                    { label: 'Churn Risk Avg', val: 'Low', icon: Brain, color: 'text-indigo-500' }
+                    { label: 'Recaudacion Total', val: resumen.recaudacion_total.toLocaleString(), icon: TrendingUp, color: 'text-emerald-500', unit: '$' }
                 ].map((kpi, i) => (
                     <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }} className="p-8 bg-zinc-950 border border-white/5 rounded-[2.5rem] shadow-4xl group hover:border-white/20 transition-all flex items-center justify-between">
                         <div className="space-y-1">
