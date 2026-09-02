@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
       .from('profiles')
       .select(`id, nombre, apellido, avatar_url, puntos, puntos_nivel, puntos_cursos, puntos_comunidad, puntos_blog`)
       .eq('empresa_id', empresaId)
+      .not('rol', 'in', '("superadmin","admin","editor","empleado")')
       .gt(ordenColumna, 0)
       .order('puntos_nivel', { ascending: false })
       .order(ordenColumna, { ascending: false })

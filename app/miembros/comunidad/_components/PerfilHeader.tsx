@@ -70,6 +70,12 @@ export function PerfilHeader({ stats }: PerfilHeaderProps) {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blis-red/20 via-transparent to-transparent" />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:48px_48px]" />
         </div>
+        {/* Marca de portada Xpand Capital */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <span className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white/[0.08] select-none drop-shadow-[0_0_30px_rgba(213,193,8,0.18)]">
+            Xpand Capital
+          </span>
+        </div>
         <div className="absolute top-3 right-3 md:top-4 md:right-4">
           <Link
             href="/miembros/perfil"
