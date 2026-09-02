@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       const isTie = prev
         && prev.puntos_nivel === entry.puntos_nivel
         && (prev[ordenColumna] || prev.puntos) === puntos
-      const posicion = isTie ? lastRank : idx + 1
+      const posicion = isTie ? lastRank : lastRank + 1
       lastRank = posicion
       return {
         posicion,

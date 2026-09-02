@@ -65,14 +65,30 @@ export function PerfilHeader({ stats }: PerfilHeaderProps) {
   return (
     <div className="relative">
       {/* Cover */}
-      <div className="h-40 md:h-52 rounded-2xl overflow-hidden relative bg-gradient-to-br from-zinc-900 via-zinc-900 to-blis-red/20">
+      <div className="h-48 md:h-64 rounded-2xl overflow-hidden relative bg-gradient-to-br from-zinc-900 via-zinc-950 to-blis-red/30">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blis-red/20 via-transparent to-transparent" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:48px_48px]" />
+          {/* Orbes con glow animados */}
+          <motion.div
+            className="absolute -top-12 -left-12 w-64 h-64 rounded-full bg-blis-red/30 blur-[100px]"
+            animate={{ opacity: [0.25, 0.55, 0.25], scale: [1, 1.2, 1] }}
+            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute -bottom-16 right-0 w-72 h-72 rounded-full bg-amber-500/20 blur-[110px]"
+            animate={{ opacity: [0.15, 0.4, 0.15], x: [0, -25, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-blis-red/10 blur-[120px]"
+            animate={{ opacity: [0.1, 0.3, 0.1], scale: [1, 1.1, 1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          {/* Grid tecnológico */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff04_1px,transparent_1px),linear-gradient(to_bottom,#ffffff04_1px,transparent_1px)] bg-[size:40px_40px]" />
         </div>
         {/* Marca de portada Xpand Capital */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white/[0.08] select-none drop-shadow-[0_0_30px_rgba(213,193,8,0.18)]">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-4">
+          <span className="text-3xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter text-white/[0.10] select-none drop-shadow-[0_0_45px_rgba(213,193,8,0.28)]">
             Xpand Capital
           </span>
         </div>
