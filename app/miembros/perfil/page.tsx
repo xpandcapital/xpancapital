@@ -457,8 +457,8 @@ export default function ProfilePage() {
     const handleUpdate = () => {
         const fullPhone = phone ? `${selectedCountry.code}${phone.replace(/\s+/g, '')}` : '';
         updateProfile({ nombre: name, apellido: lastName, profilePic, phone: fullPhone });
-        // Guardar teléfono, biografía y redes sociales vía API
-        const socialData: Record<string, string | null> = { biografia, telefono: fullPhone }
+        // Guardar nombre, apellido, email, teléfono, biografía y redes sociales vía API
+        const socialData: Record<string, string | null> = { nombre: name, apellido: lastName, email, biografia, telefono: fullPhone }
         const fields = ['website_url','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','whatsapp_url','telegram_url','discord_url','github_url']
         fields.forEach(f => { socialData[f] = socials[f] || null })
         fetch('/api/profile', {
@@ -506,12 +506,17 @@ export default function ProfilePage() {
   const saveWhatsappPhone = async () => {
     setSavingWhatsapp(true);
     try {
-      await fetch('/api/profile', {
-        method: 'PUT',
+      const res = await fetch('/api/profile', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ whatsapp: whatsappPhone }),
       });
-      showToast("Número de WhatsApp guardado", "success");
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast("Número de WhatsApp guardado", "success");
+      } else {
+        showToast(data.error || "Error al guardar", "error");
+      }
     } catch {
       showToast("Error al guardar", "error");
     }

@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const { data, error } = await supabase
       .from('profiles')
-      .select('nombre, apellido, avatar_url, biografia, pais, ciudad, ' + SOCIAL_FIELDS.join(', ') + ', telefono')
+      .select('nombre, apellido, email, avatar_url, biografia, pais, ciudad, ' + SOCIAL_FIELDS.join(', ') + ', telefono')
       .eq('id', user.userId)
       .single()
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { profilePic, nombre, apellido, telefono, biografia } = body
+    const { profilePic, nombre, apellido, telefono, biografia, email, whatsapp } = body
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const updates: Record<string, unknown> = {}
@@ -72,6 +72,8 @@ export async function POST(request: NextRequest) {
     if (apellido !== undefined) updates.apellido = apellido
     if (telefono !== undefined) updates.telefono = telefono
     if (biografia !== undefined) updates.biografia = biografia
+    if (email !== undefined) updates.email = email
+    if (whatsapp !== undefined) updates.whatsapp = whatsapp
 
     // Redes sociales
     for (const field of SOCIAL_FIELDS) {
