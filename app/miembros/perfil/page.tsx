@@ -457,8 +457,8 @@ export default function ProfilePage() {
     const handleUpdate = () => {
         const fullPhone = phone ? `${selectedCountry.code}${phone.replace(/\s+/g, '')}` : '';
         updateProfile({ nombre: name, apellido: lastName, profilePic, phone: fullPhone });
-        // Guardar biografía y redes sociales vía API
-        const socialData: Record<string, string | null> = { biografia }
+        // Guardar teléfono, biografía y redes sociales vía API
+        const socialData: Record<string, string | null> = { biografia, telefono: fullPhone }
         const fields = ['website_url','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','whatsapp_url','telegram_url','discord_url','github_url']
         fields.forEach(f => { socialData[f] = socials[f] || null })
         fetch('/api/profile', {

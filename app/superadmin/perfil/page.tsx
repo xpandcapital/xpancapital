@@ -435,8 +435,8 @@ export default function AdminProfile() {
         try {
             const fullPhone = phone ? `${selectedCountry.code} ${phone}` : '';
             await updateProfile({ name: `${name} ${lastName}`.trim(), email, phone: fullPhone, profilePic });
-            // Guardar biografía y redes sociales
-            const socialData: Record<string, string | null> = { biografia }
+            // Guardar teléfono, biografía y redes sociales
+            const socialData: Record<string, string | null> = { biografia, telefono: fullPhone }
             const fields = ['website_url', 'facebook_url', 'instagram_url', 'twitter_url', 'linkedin_url']
             fields.forEach(f => { socialData[f] = socials[f] || null })
             fetch('/api/profile', {
