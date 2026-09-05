@@ -434,17 +434,22 @@ export default function AdminProfile() {
     const handleUpdate = async () => {
         try {
             const fullPhone = phone ? `${selectedCountry.code} ${phone}` : '';
-            await updateProfile({ name: `${name} ${lastName}`.trim(), email, phone: fullPhone, profilePic });
-            // Guardar nombre, apellido, email, teléfono, biografía y redes sociales
-            const socialData: Record<string, string | null> = { nombre: name, apellido: lastName, email, biografia, telefono: fullPhone }
+            updateProfile({ name: `${name} ${lastName}`.trim(), email, phone: fullPhone, profilePic });
+            // Guardar todos los datos vía API (service role)
+            const payload: Record<string, string | null> = { nombre: name, apellido: lastName, email, biografia, telefono: fullPhone, profilePic }
             const fields = ['website_url', 'facebook_url', 'instagram_url', 'twitter_url', 'linkedin_url']
-            fields.forEach(f => { socialData[f] = socials[f] || null })
-            fetch('/api/profile', {
+            fields.forEach(f => { payload[f] = socials[f] || null })
+            const res = await fetch('/api/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(socialData)
-            }).catch(() => {})
-            showToast("Perfil actualizado correctamente", "success");
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showToast("Perfil actualizado correctamente", "success");
+            } else {
+                showToast(data.error || "Error al actualizar perfil", "error");
+            }
         } catch (error) {
             showToast("Error al actualizar perfil", "error");
         }

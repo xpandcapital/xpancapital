@@ -375,74 +375,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (data: { name?: string; profilePic?: string | null; email?: string; phone?: string; nombre?: string; apellido?: string }) => {
     if (!user) return
-    const previousUser = user
 
     const displayName = data.nombre !== undefined && data.apellido !== undefined
       ? `${data.nombre} ${data.apellido}`.trim()
       : data.name
     const updatedUser = { ...user, ...data, name: displayName, nombre: data.nombre ?? user?.nombre, apellido: data.apellido ?? user?.apellido }
     setUser(updatedUser)
-
-    try {
-      const supabase = getSupabaseClient()
-      if (supabase) {
-        const updateData: Record<string, unknown> = {}
-        if (data.nombre !== undefined || data.apellido !== undefined) {
-          updateData.nombre = data.nombre || ''
-          updateData.apellido = data.apellido || ''
-        } else if (data.name !== undefined) {
-          const parts = data.name.trim().split(' ')
-          updateData.nombre = parts[0] || ''
-          updateData.apellido = parts.slice(1).join(' ') || ''
-        }
-        if (data.profilePic !== undefined) {
-          if (data.profilePic && typeof data.profilePic === 'string' && data.profilePic.startsWith('data:image')) {
-            try {
-              // Subir vía API server-side (tiene service role, evita RLS de Storage)
-              const res = await fetch('/api/profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ profilePic: data.profilePic })
-              })
-              const json = await res.json()
-              if (json.success && json.data?.avatar_url) {
-                setUser(prev => prev ? { ...prev, profilePic: json.data.avatar_url } : prev)
-              } else {
-                console.warn('[Auth] Avatar upload via API failed:', json.error)
-              }
-              // No guardar avatar_url en updateData — la API ya lo guardó en BD
-            } catch (uploadErr) {
-              console.warn('[Auth] Error uploading avatar:', uploadErr)
-            }
-          } else if (data.profilePic === null) {
-            updateData.avatar_url = null
-          } else {
-            // Es una URL existente (ya estaba en Storage)
-            updateData.avatar_url = data.profilePic
-          }
-        }
-        if (data.phone !== undefined) updateData.telefono = data.phone
-
-        if (Object.keys(updateData).length > 0) {
-          const { error } = await supabase
-            .from('profiles')
-            .update(updateData)
-            .eq('id', user.id)
-
-          if (error) {
-            console.error('[Auth] Error guardando perfil en BD:', error)
-            // Revertir al estado anterior si falló el guardado
-            setUser(previousUser)
-          }
-          // No llamamos refreshUser() aquí — el estado local ya es correcto
-          // y refreshUser() causaría un race condition sobreescribiendo los datos
-        }
-      }
-    } catch (err) {
-      console.error('[Auth] Error guardando perfil:', err)
-      // Revertir al estado anterior si falló
-      setUser(previousUser)
-    }
   }
 
   const refreshUser = async () => {

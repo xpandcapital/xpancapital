@@ -454,19 +454,28 @@ export default function ProfilePage() {
         }
     }, [user]);
 
-    const handleUpdate = () => {
+    const handleUpdate = async () => {
         const fullPhone = phone ? `${selectedCountry.code}${phone.replace(/\s+/g, '')}` : '';
         updateProfile({ nombre: name, apellido: lastName, profilePic, phone: fullPhone });
-        // Guardar nombre, apellido, email, teléfono, biografía y redes sociales vía API
-        const socialData: Record<string, string | null> = { nombre: name, apellido: lastName, email, biografia, telefono: fullPhone }
+        // Guardar todos los datos vía API (service role)
+        const payload: Record<string, string | null> = { nombre: name, apellido: lastName, email, biografia, telefono: fullPhone, profilePic }
         const fields = ['website_url','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','whatsapp_url','telegram_url','discord_url','github_url']
-        fields.forEach(f => { socialData[f] = socials[f] || null })
-        fetch('/api/profile', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(socialData)
-        }).catch(() => {})
-        showToast("¡Éxito! Tus datos han sido actualizados en la base de datos de Xpand Capital.", "success");
+        fields.forEach(f => { payload[f] = socials[f] || null })
+        try {
+            const res = await fetch('/api/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            const data = await res.json()
+            if (res.ok && data.success) {
+                showToast("¡Éxito! Tus datos han sido actualizados en la base de datos de Xpand Capital.", "success");
+            } else {
+                showToast(data.error || "Error al actualizar", "error");
+            }
+        } catch {
+            showToast("Error al actualizar", "error");
+        }
     };
 
     const handleChangePassword = async () => {
