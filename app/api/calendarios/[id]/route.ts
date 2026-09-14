@@ -1,11 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function PUT(request: NextRequest) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = createClient()
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
+    const { id } = await params
     if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
     const body = await request.json()
@@ -23,11 +22,10 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const supabase = createClient()
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
+    const { id } = await params
     if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
     const { error } = await supabase.from('calendarios').delete().eq('id', id)

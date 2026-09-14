@@ -64,10 +64,10 @@ export function useFormularios(): UseFormulariosReturn {
 
   const update = useCallback(async (id: string, data: Partial<Formulario>): Promise<void> => {
     try {
-      const res = await fetch('/api/formularios', {
+      const res = await fetch(`/api/formularios/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, ...data })
+        body: JSON.stringify(data)
       })
       const result = await res.json()
       if (!result.success) {
@@ -81,7 +81,7 @@ export function useFormularios(): UseFormulariosReturn {
 
   const remove = useCallback(async (id: string): Promise<void> => {
     try {
-      const res = await fetch(`/api/formularios?id=${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/formularios/${id}`, { method: 'DELETE' })
       const result = await res.json()
       if (!result.success) {
         throw new Error(result.error || 'Error al eliminar formulario')

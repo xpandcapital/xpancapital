@@ -95,10 +95,10 @@ export default function NotificacionesPage() {
 
   const fetchMiembros = async () => {
     try {
-      const response = await fetch("/api/admin/empresa/usuarios");
+      const response = await fetch("/api/admin/contactos?limit=100");
       const data = await response.json();
       if (data.success) {
-        setMiembros(data.users || []);
+        setMiembros(data.contactos || []);
       }
     } catch {
       // Silencioso

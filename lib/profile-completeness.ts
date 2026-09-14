@@ -41,3 +41,28 @@ export function getProfileCompleteness(profile: Record<string, unknown> | null |
 
   return { pct, completed, total, tasks }
 }
+
+/** Roles de staff exentos del gating de perfil. */
+export const STAFF_ROLES = ['superadmin', 'admin', 'editor', 'empleado'] as const
+
+export function isStaffRole(rol?: string | null): boolean {
+  return typeof rol === 'string' && (STAFF_ROLES as readonly string[]).includes(rol)
+}
+
+export interface ProfileGateInput {
+  rol?: string | null
+  /** true solo si la lectura del perfil fue fiable (sin error/timeout). */
+  profileLoaded: boolean
+  profile?: Record<string, unknown> | null
+}
+
+/**
+ * Decide si el usuario debe ser redirigido a completar su perfil en /miembros.
+ * - Fail-open: si no se pudo leer el perfil (profileLoaded=false) NO bloquea.
+ * - El staff (superadmin/admin/editor/empleado) siempre está exento.
+ */
+export function requiresProfileCompletion({ rol, profileLoaded, profile }: ProfileGateInput): boolean {
+  if (!profileLoaded) return false
+  if (isStaffRole(rol)) return false
+  return getProfileCompleteness(profile).pct < PROFILE_MIN_PCT
+}

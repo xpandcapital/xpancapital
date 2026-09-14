@@ -915,7 +915,7 @@ export default function ProfilePage() {
                     </h2>
                     <div className="bg-zinc-950/30 border border-white/5 p-8 rounded-[2.5rem] space-y-6 shadow-xl">
                         <PushNotificationToggle />
-                        <div className="w-full flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl text-left">
+                        <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 bg-white/5 border border-white/5 rounded-2xl text-left">
                             <div className="flex items-center gap-4">
                                 <MessageSquare className="w-5 h-5 text-gray-500" />
                                 <div>
@@ -924,7 +924,7 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <input type="text" value={whatsappPhone} onChange={e => setWhatsappPhone(e.target.value)} placeholder="+51 999 999 999" className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white w-40 text-center" />
+                                <input type="text" value={whatsappPhone} onChange={e => setWhatsappPhone(e.target.value)} placeholder="+51 999 999 999" className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white w-full sm:w-40 text-center" />
                                 <button onClick={saveWhatsappPhone} disabled={savingWhatsapp} className="px-3 py-1.5 bg-blis-red text-white font-bold uppercase tracking-widest text-[10px] rounded-xl hover:bg-blis-red/90 transition-all disabled:opacity-50">
                                     {savingWhatsapp ? "..." : "Guardar"}
                                 </button>

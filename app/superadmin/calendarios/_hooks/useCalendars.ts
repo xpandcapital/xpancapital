@@ -55,10 +55,10 @@ export function useCalendars() {
 
   const update = useCallback(async (id: string, fields: Partial<Calendario>) => {
     try {
-      const res = await fetch('/api/calendarios', {
+      const res = await fetch(`/api/calendarios/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, ...fields }),
+        body: JSON.stringify(fields),
       })
       const data = await res.json()
       if (data.success && data.data) {
@@ -74,7 +74,7 @@ export function useCalendars() {
 
   const remove = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/calendarios?id=${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/calendarios/${id}`, { method: 'DELETE' })
       const data = await res.json()
       if (data.success) {
         setCalendars(prev => prev.filter(c => c.id !== id))

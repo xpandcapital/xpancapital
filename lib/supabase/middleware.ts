@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { ROLE_DEFAULTS } from '@/lib/auth/permissions'
 import type { UserRole } from '@/lib/auth/permissions'
-import { getProfileCompleteness, PROFILE_MIN_PCT } from '@/lib/profile-completeness'
+import { requiresProfileCompletion } from '@/lib/profile-completeness'
 
 const SECTION_ROUTES: Record<string, string[]> = {
   'dashboard:ver': ['/superadmin'],
@@ -179,22 +179,18 @@ export async function updateSession(request: NextRequest) {
 
   // Gating: perfil mínimo para usar /miembros (excepto /miembros/perfil)
   // Fail-open: si no se pudo leer el perfil (error/timeout), NO se bloquea.
-  if (user?.id && isMiembros && !pathname.startsWith('/miembros/perfil') && profileLoaded) {
+  if (user?.id && isMiembros && !pathname.startsWith('/miembros/perfil')) {
     const rol = profileRol || user.app_metadata?.rol || 'usuario'
-    const staffRoles = ['superadmin', 'admin', 'editor', 'empleado']
-    if (!staffRoles.includes(rol)) {
-      const { pct } = getProfileCompleteness(profileFull)
-      if (pct < PROFILE_MIN_PCT) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/miembros/perfil'
-        // Explicar al usuario por qué fue redirigido.
-        url.searchParams.set('completar', '1')
-        const redirectResponse = NextResponse.redirect(url)
-        supabaseResponse.cookies.getAll().forEach(cookie => {
-          redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
-        })
-        return redirectResponse
-      }
+    if (requiresProfileCompletion({ rol, profileLoaded, profile: profileFull })) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/miembros/perfil'
+      // Explicar al usuario por qué fue redirigido.
+      url.searchParams.set('completar', '1')
+      const redirectResponse = NextResponse.redirect(url)
+      supabaseResponse.cookies.getAll().forEach(cookie => {
+        redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+      })
+      return redirectResponse
     }
   }
 

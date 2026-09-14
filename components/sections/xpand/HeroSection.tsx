@@ -124,8 +124,8 @@ export function HeroSection() {
             className="relative text-center mb-6 md:mb-12"
             style={{ fontFamily: "var(--font-montserrat)" }}
           >
-            <span className="relative glitch-text block md:inline text-[clamp(3.2rem,10vw,12rem)] md:text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#e8c600" }}>XPAND</span>
-            <span className="relative glitch-text block md:inline text-[clamp(3.2rem,10vw,12rem)] md:text-[clamp(5.3rem,18vw,12rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
+            <span className="relative glitch-text block md:inline text-[clamp(3.2rem,10vw,12rem)] md:text-[clamp(3.5rem,11.5vw,10.5rem)] font-black tracking-tighter leading-[0.85]" data-text="XPAND" style={{ color: "#e8c600" }}>XPAND</span>
+            <span className="relative glitch-text block md:inline text-[clamp(3.2rem,10vw,12rem)] md:text-[clamp(3.5rem,11.5vw,10.5rem)] font-black tracking-tighter leading-[0.85] md:ml-4" data-text="CAPITAL" style={{ color: "rgba(255,255,255,0.9)" }}>CAPITAL</span>
           </motion.h1>
 
           <motion.p custom={2} variants={fadeUp}
