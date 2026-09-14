@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles, ShoppingCart, GraduationCap, FileText, UserPlus, Settings, MessageSquare } from "lucide-react";
+import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles, ShoppingCart, GraduationCap, FileText, UserPlus, Settings, MessageSquare, MapPin, AlertCircle } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isAdminRole } from "@/lib/auth/permissions";
+import { getProfileCompleteness, PROFILE_MIN_PCT } from "@/lib/profile-completeness";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
 import { useCoins } from "@/lib/hooks/useCoins";
@@ -360,7 +361,7 @@ function PushNotificationToggle() {
 }
 
 export default function ProfilePage() {
-    const { user, updateProfile } = useAuth();
+    const { user, updateProfile, refreshUser } = useAuth();
     const router = useRouter();
     const { showToast } = useToast();
     const { balance, transactions, loading: coinsLoading, fetchBalance, fetchTransactions } = useCoins(user?.id);
@@ -393,7 +394,17 @@ export default function ProfilePage() {
     // Redes sociales y biografía
     const [biografia, setBiografia] = useState('');
     const [socials, setSocials] = useState<Record<string, string>>({});
+    const [pais, setPais] = useState('');
+    const [ciudad, setCiudad] = useState('');
+    const [showCompletionBanner, setShowCompletionBanner] = useState(false);
     const [diasRestantes, setDiasRestantes] = useState<number | null>(null);
+
+    // Detectar si el usuario llegó redirigido por perfil incompleto (?completar=1)
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('completar') === '1') setShowCompletionBanner(true);
+    }, []);
     useEffect(() => {
         if (!user?.id) return
         fetch('/api/profile', { headers: { 'x-blis-user-id': user.id, 'x-blis-empresa-id': user.empresa_id || '', 'x-blis-user-rol': user.role } })
@@ -401,6 +412,8 @@ export default function ProfilePage() {
             .then(d => {
                 if (d.success && d.data) {
                     setBiografia(d.data.biografia || '')
+                    setPais(d.data.pais || '')
+                    setCiudad(d.data.ciudad || '')
                     setWhatsappPhone(d.data.whatsapp || '')
                     setDiasRestantes(typeof d.data.dias_restantes === 'number' ? d.data.dias_restantes : null)
                     const s: Record<string, string> = {}
@@ -458,7 +471,7 @@ export default function ProfilePage() {
         const fullPhone = phone ? `${selectedCountry.code}${phone.replace(/\s+/g, '')}` : '';
         updateProfile({ nombre: name, apellido: lastName, profilePic, phone: fullPhone });
         // Guardar todos los datos vía API (service role)
-        const payload: Record<string, string | null> = { nombre: name, apellido: lastName, email, biografia, telefono: fullPhone, profilePic }
+        const payload: Record<string, string | null> = { nombre: name, apellido: lastName, email, biografia, telefono: fullPhone, profilePic, pais, ciudad }
         const fields = ['website_url','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','whatsapp_url','telegram_url','discord_url','github_url']
         fields.forEach(f => { payload[f] = socials[f] || null })
         try {
@@ -469,7 +482,21 @@ export default function ProfilePage() {
             })
             const data = await res.json()
             if (res.ok && data.success) {
-                showToast("¡Éxito! Tus datos han sido actualizados en la base de datos de Xpand Capital.", "success");
+                // Usar la URL real del avatar subido (evita guardar base64 gigante en caché)
+                const avatarUrl = data.data?.avatar_url || profilePic
+                if (data.data?.avatar_url) setProfilePic(data.data.avatar_url)
+                await refreshUser()
+                const result = getProfileCompleteness({
+                    avatar_url: avatarUrl,
+                    nombre: name, apellido: lastName, telefono: fullPhone,
+                    pais, ciudad, biografia, ...socials,
+                })
+                if (result.pct >= PROFILE_MIN_PCT) {
+                    showToast("¡Perfil completo! Ya podés acceder a la comunidad.", "success");
+                } else {
+                    const faltan = result.tasks.filter(t => !t.done).map(t => t.label).join(', ')
+                    showToast(`Datos guardados (${result.pct}%). Para desbloquear el acceso te falta: ${faltan}`, "warning");
+                }
             } else {
                 showToast(data.error || "Error al actualizar", "error");
             }
@@ -549,6 +576,19 @@ export default function ProfilePage() {
         updateProfile({ profilePic: croppedBase64 });
     };
 
+    // Completitud del perfil en vivo (mismas reglas que usa el middleware)
+    const completeness = getProfileCompleteness({
+        avatar_url: profilePic,
+        nombre: name,
+        apellido: lastName,
+        telefono: phone ? `${selectedCountry.code}${phone}` : '',
+        pais,
+        ciudad,
+        biografia,
+        ...socials,
+    });
+    const isProfileComplete = completeness.pct >= PROFILE_MIN_PCT;
+
     return (
         <div className="max-w-4xl mx-auto space-y-12 pb-20 px-4 md:px-8 pt-8 md:pt-8 w-full">
             {/* Header Profile Card */}
@@ -613,6 +653,44 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+
+            {(showCompletionBanner || !isProfileComplete) && (
+                <div className={`rounded-[2rem] border p-6 sm:p-8 space-y-5 ${isProfileComplete ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-start gap-4">
+                            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${isProfileComplete ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                                {isProfileComplete ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                            </div>
+                            <div>
+                                <h2 className="text-sm font-black text-white uppercase tracking-widest">
+                                    {isProfileComplete ? 'Perfil completo' : `Tu perfil está al ${completeness.pct}%`}
+                                </h2>
+                                <p className="text-xs text-gray-400 mt-1 max-w-xl leading-relaxed">
+                                    {isProfileComplete
+                                        ? 'Ya cumplís el mínimo requerido. Podés acceder a todas las secciones de la comunidad.'
+                                        : 'Para desbloquear la comunidad, cursos y demás secciones de miembros necesitás completar tu perfil. Te falta:'}
+                                </p>
+                            </div>
+                        </div>
+                        {isProfileComplete && (
+                            <Link href="/miembros/comunidad" className="shrink-0 px-5 py-3 bg-emerald-500 text-black font-black uppercase tracking-widest text-[10px] rounded-2xl hover:bg-emerald-400 transition-all text-center">
+                                Ir a la comunidad
+                            </Link>
+                        )}
+                    </div>
+
+                    {!isProfileComplete && (
+                        <div className="flex flex-wrap gap-2">
+                            {completeness.tasks.map(t => (
+                                <span key={t.key} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border ${t.done ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-gray-400 border-white/10'}`}>
+                                    {t.done ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                    {t.label}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Account Settings */}
@@ -738,6 +816,43 @@ export default function ProfilePage() {
                                         value={phone}
                                         onChange={(e) => setPhone(e.target.value)}
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-blis-red transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Ubicación */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2">País</label>
+                                <div className="relative group">
+                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blis-red transition-colors" />
+                                    <select
+                                        value={pais}
+                                        onChange={(e) => setPais(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-blis-red transition-all appearance-none"
+                                    >
+                                        <option value="">Seleccionar...</option>
+                                        <option value="PE">Perú</option>
+                                        <option value="MX">México</option>
+                                        <option value="CO">Colombia</option>
+                                        <option value="CL">Chile</option>
+                                        <option value="AR">Argentina</option>
+                                        <option value="EC">Ecuador</option>
+                                        <option value="US">Estados Unidos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2">Ciudad</label>
+                                <div className="relative group">
+                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blis-red transition-colors" />
+                                    <input
+                                        type="text"
+                                        value={ciudad}
+                                        onChange={(e) => setCiudad(e.target.value)}
+                                        placeholder="Lima"
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-blis-red transition-all placeholder-gray-600"
                                     />
                                 </div>
                             </div>

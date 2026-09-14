@@ -127,6 +127,9 @@ export async function updateSession(request: NextRequest) {
   let profileRol: string | null = null
   let profileEmpresaId: string | null = null
   let profileFull: any = null
+  // Marca si la lectura del perfil fue fiable (sin error de red/timeout).
+  // Si la lectura falla, NO se debe bloquear al usuario (fail-open).
+  let profileLoaded = false
 
   try {
     const supabase = createServerClient(
@@ -155,12 +158,18 @@ export async function updateSession(request: NextRequest) {
     user = authUser
 
     if (user?.id) {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('rol, empresa_id, avatar_url, nombre, apellido, telefono, pais, ciudad, biografia, website_url, facebook_url, instagram_url, twitter_url, youtube_url, linkedin_url, tiktok_url, whatsapp_url, telegram_url, discord_url, github_url')
         .eq('id', user.id)
-        .single()
-      profileFull = profile
+        .maybeSingle()
+      if (profileError) {
+        // Timeout/error de red (ej. 504). No tratar como perfil vacío.
+        console.error('[Middleware] No se pudo leer el perfil:', profileError.message)
+      } else {
+        profileLoaded = true
+        profileFull = profile
+      }
       if (profile?.rol) profileRol = profile.rol
       if (profile?.empresa_id) profileEmpresaId = profile.empresa_id
     }
@@ -169,7 +178,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Gating: perfil mínimo para usar /miembros (excepto /miembros/perfil)
-  if (user?.id && isMiembros && !pathname.startsWith('/miembros/perfil')) {
+  // Fail-open: si no se pudo leer el perfil (error/timeout), NO se bloquea.
+  if (user?.id && isMiembros && !pathname.startsWith('/miembros/perfil') && profileLoaded) {
     const rol = profileRol || user.app_metadata?.rol || 'usuario'
     const staffRoles = ['superadmin', 'admin', 'editor', 'empleado']
     if (!staffRoles.includes(rol)) {
@@ -177,6 +187,8 @@ export async function updateSession(request: NextRequest) {
       if (pct < PROFILE_MIN_PCT) {
         const url = request.nextUrl.clone()
         url.pathname = '/miembros/perfil'
+        // Explicar al usuario por qué fue redirigido.
+        url.searchParams.set('completar', '1')
         const redirectResponse = NextResponse.redirect(url)
         supabaseResponse.cookies.getAll().forEach(cookie => {
           redirectResponse.cookies.set(cookie.name, cookie.value, cookie)

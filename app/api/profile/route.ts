@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { profilePic, nombre, apellido, telefono, biografia, email, whatsapp } = body
+    const { profilePic, nombre, apellido, telefono, biografia, email, whatsapp, pais, ciudad } = body
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const updates: Record<string, unknown> = {}
@@ -74,6 +74,8 @@ export async function POST(request: NextRequest) {
     if (biografia !== undefined) updates.biografia = biografia
     if (email !== undefined) updates.email = email
     if (whatsapp !== undefined) updates.whatsapp = whatsapp
+    if (pais !== undefined) updates.pais = pais === '' ? null : pais
+    if (ciudad !== undefined) updates.ciudad = ciudad === '' ? null : ciudad
 
     // Redes sociales
     for (const field of SOCIAL_FIELDS) {
