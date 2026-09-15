@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles, ShoppingCart, GraduationCap, FileText, UserPlus, Settings, MessageSquare, MapPin, AlertCircle, CalendarDays } from "lucide-react";
+import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles, ShoppingCart, GraduationCap, FileText, UserPlus, Settings, MessageSquare, MapPin, AlertCircle, CalendarDays, Loader2 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isAdminRole } from "@/lib/auth/permissions";
@@ -438,6 +438,7 @@ export default function ProfilePage() {
     const [closingSessions, setClosingSessions] = useState(false);
   const [whatsappPhone, setWhatsappPhone] = useState('');
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+  const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         if (!user?.id) return;
@@ -474,6 +475,8 @@ export default function ProfilePage() {
             showToast("La fecha de nacimiento es obligatoria", "error");
             return;
         }
+        if (saving) return;
+        setSaving(true);
         const fullPhone = phone ? `${selectedCountry.code}${phone.replace(/\s+/g, '')}` : '';
         updateProfile({ nombre: name, apellido: lastName, profilePic, phone: fullPhone });
         // Guardar todos los datos vía API (service role)
@@ -498,7 +501,8 @@ export default function ProfilePage() {
                     pais, ciudad, biografia, fecha_nacimiento: fechaNacimiento, ...socials,
                 })
                 if (fechaNacimiento.trim().length > 0 && result.pct >= PROFILE_MIN_PCT) {
-                    showToast("¡Perfil completo! Ya podés acceder a la comunidad.", "success");
+                    showToast("¡Perfil completo! Te llevamos a tus cursos...", "success");
+                    router.replace('/miembros/academia');
                 } else {
                     const faltan = result.tasks.filter(t => !t.done).map(t => t.label).join(', ')
                     showToast(`Datos guardados (${result.pct}%). Para desbloquear el acceso te falta: ${faltan}`, "warning");
@@ -508,6 +512,8 @@ export default function ProfilePage() {
             }
         } catch {
             showToast("Error al actualizar", "error");
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -923,9 +929,16 @@ export default function ProfilePage() {
 
                         <button
                             onClick={handleUpdate}
-                            className="w-full py-5 bg-white text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-blis-red hover:text-white transition-all shadow-xl"
+                            disabled={saving}
+                            className="w-full py-5 bg-white text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-blis-red hover:text-white transition-all shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            Actualizar Datos
+                            {saving ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" /> Guardando...
+                                </>
+                            ) : (
+                                "Actualizar Datos"
+                            )}
                         </button>
                     </div>
                 </div>
