@@ -10,6 +10,7 @@ const FULL_PROFILE = {
   avatar_url: 'https://x/a.jpg',
   nombre: 'Ana',
   apellido: 'Pérez',
+  fecha_nacimiento: '1990-05-12',
   telefono: '+51999999999',
   pais: 'PE',
   ciudad: 'Lima',
@@ -19,17 +20,22 @@ const FULL_PROFILE = {
 }
 
 describe('getProfileCompleteness', () => {
-  it('devuelve 0% con perfil nulo', () => {
+  it('devuelve 0% con perfil nulo y 7 tareas', () => {
     const r = getProfileCompleteness(null)
     expect(r.pct).toBe(0)
     expect(r.completed).toBe(0)
-    expect(r.total).toBe(6)
+    expect(r.total).toBe(7)
   })
 
   it('devuelve 100% con perfil completo', () => {
     const r = getProfileCompleteness(FULL_PROFILE)
     expect(r.pct).toBe(100)
     expect(r.tasks.every(t => t.done)).toBe(true)
+  })
+
+  it('incluye la tarea de fecha de nacimiento', () => {
+    const r = getProfileCompleteness({ ...FULL_PROFILE, fecha_nacimiento: '' })
+    expect(r.tasks.find(t => t.key === 'fecha_nacimiento')?.done).toBe(false)
   })
 
   it('cuenta ubicación si hay país O ciudad', () => {
@@ -73,14 +79,23 @@ describe('isStaffRole', () => {
 })
 
 describe('requiresProfileCompletion (regresión del gating)', () => {
-  it('umbral: 4/6 (67%) bloquea y 5/6 (83%) permite', () => {
-    const four = { avatar_url: 'x', nombre: 'A', apellido: 'B', telefono: '1', pais: 'PE' }
-    expect(getProfileCompleteness(four).pct).toBe(67)
-    expect(requiresProfileCompletion({ rol: 'cliente', profileLoaded: true, profile: four })).toBe(true)
+  it('umbral: 5/7 (71%) bloquea y 6/7 (86%) permite (con fecha)', () => {
+    const cinco = { nombre: 'A', apellido: 'B', fecha_nacimiento: '1990-01-01', telefono: '1', pais: 'PE', biografia: 'bio' }
+    expect(getProfileCompleteness(cinco).pct).toBe(71)
+    expect(requiresProfileCompletion({ rol: 'cliente', profileLoaded: true, profile: cinco })).toBe(true)
 
-    const five = { ...four, biografia: 'bio' }
-    expect(getProfileCompleteness(five).pct).toBe(83)
-    expect(requiresProfileCompletion({ rol: 'cliente', profileLoaded: true, profile: five })).toBe(false)
+    const seis = { ...cinco, avatar_url: 'x' }
+    expect(getProfileCompleteness(seis).pct).toBe(86)
+    expect(requiresProfileCompletion({ rol: 'cliente', profileLoaded: true, profile: seis })).toBe(false)
+  })
+
+  it('la fecha de nacimiento es OBLIGATORIA aunque el % sea alto', () => {
+    const sinFecha = {
+      avatar_url: 'x', nombre: 'A', apellido: 'B', telefono: '1', pais: 'PE',
+      biografia: 'bio', website_url: 'a', instagram_url: 'b',
+    }
+    expect(getProfileCompleteness(sinFecha).pct).toBe(86)
+    expect(requiresProfileCompletion({ rol: 'cliente', profileLoaded: true, profile: sinFecha })).toBe(true)
   })
 
   it('fail-open: si no se pudo leer el perfil, NO bloquea', () => {

@@ -160,7 +160,7 @@ export async function updateSession(request: NextRequest) {
     if (user?.id) {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('rol, empresa_id, avatar_url, nombre, apellido, telefono, pais, ciudad, biografia, website_url, facebook_url, instagram_url, twitter_url, youtube_url, linkedin_url, tiktok_url, whatsapp_url, telegram_url, discord_url, github_url')
+        .select('rol, empresa_id, avatar_url, nombre, apellido, fecha_nacimiento, telefono, pais, ciudad, biografia, website_url, facebook_url, instagram_url, twitter_url, youtube_url, linkedin_url, tiktok_url, whatsapp_url, telegram_url, discord_url, github_url')
         .eq('id', user.id)
         .maybeSingle()
       if (profileError) {

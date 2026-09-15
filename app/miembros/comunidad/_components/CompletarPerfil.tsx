@@ -2,13 +2,14 @@
 
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { Award, Star, UserCheck, BookOpen, Phone, MapPin, Camera } from 'lucide-react'
+import { Award, Star, UserCheck, BookOpen, Phone, MapPin, Camera, Calendar } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { getProfileCompleteness } from '@/lib/profile-completeness'
 
 const ICONOS: Record<string, typeof Award> = {
   avatar: Camera,
   nombre: UserCheck,
+  fecha_nacimiento: Calendar,
   telefono: Phone,
   ubicacion: MapPin,
   biografia: BookOpen,

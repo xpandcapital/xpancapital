@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles, ShoppingCart, GraduationCap, FileText, UserPlus, Settings, MessageSquare, MapPin, AlertCircle } from "lucide-react";
+import { User, Mail, Phone, Shield, Camera, Lock, Bell, CheckCircle2, ChevronDown, Trash2, X, RotateCcw, ZoomIn, ZoomOut, Check, Search, RotateCw, FlipHorizontal, Coins, TrendingUp, TrendingDown, Clock, BookOpen, Sparkles, ShoppingCart, GraduationCap, FileText, UserPlus, Settings, MessageSquare, MapPin, AlertCircle, CalendarDays } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { isAdminRole } from "@/lib/auth/permissions";
@@ -396,6 +396,7 @@ export default function ProfilePage() {
     const [socials, setSocials] = useState<Record<string, string>>({});
     const [pais, setPais] = useState('');
     const [ciudad, setCiudad] = useState('');
+    const [fechaNacimiento, setFechaNacimiento] = useState('');
     const [showCompletionBanner, setShowCompletionBanner] = useState(false);
     const [diasRestantes, setDiasRestantes] = useState<number | null>(null);
 
@@ -414,6 +415,7 @@ export default function ProfilePage() {
                     setBiografia(d.data.biografia || '')
                     setPais(d.data.pais || '')
                     setCiudad(d.data.ciudad || '')
+                    setFechaNacimiento(d.data.fecha_nacimiento || '')
                     setWhatsappPhone(d.data.whatsapp || '')
                     setDiasRestantes(typeof d.data.dias_restantes === 'number' ? d.data.dias_restantes : null)
                     const s: Record<string, string> = {}
@@ -468,10 +470,14 @@ export default function ProfilePage() {
     }, [user]);
 
     const handleUpdate = async () => {
+        if (!fechaNacimiento) {
+            showToast("La fecha de nacimiento es obligatoria", "error");
+            return;
+        }
         const fullPhone = phone ? `${selectedCountry.code}${phone.replace(/\s+/g, '')}` : '';
         updateProfile({ nombre: name, apellido: lastName, profilePic, phone: fullPhone });
         // Guardar todos los datos vía API (service role)
-        const payload: Record<string, string | null> = { nombre: name, apellido: lastName, email, biografia, telefono: fullPhone, profilePic, pais, ciudad }
+        const payload: Record<string, string | null> = { nombre: name, apellido: lastName, email, biografia, telefono: fullPhone, profilePic, pais, ciudad, fecha_nacimiento: fechaNacimiento }
         const fields = ['website_url','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','whatsapp_url','telegram_url','discord_url','github_url']
         fields.forEach(f => { payload[f] = socials[f] || null })
         try {
@@ -489,7 +495,7 @@ export default function ProfilePage() {
                 const result = getProfileCompleteness({
                     avatar_url: avatarUrl,
                     nombre: name, apellido: lastName, telefono: fullPhone,
-                    pais, ciudad, biografia, ...socials,
+                    pais, ciudad, biografia, fecha_nacimiento: fechaNacimiento, ...socials,
                 })
                 if (result.pct >= PROFILE_MIN_PCT) {
                     showToast("¡Perfil completo! Ya podés acceder a la comunidad.", "success");
@@ -585,6 +591,7 @@ export default function ProfilePage() {
         pais,
         ciudad,
         biografia,
+        fecha_nacimiento: fechaNacimiento,
         ...socials,
     });
     const isProfileComplete = completeness.pct >= PROFILE_MIN_PCT;
@@ -855,6 +862,21 @@ export default function ProfilePage() {
                                         className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-blis-red transition-all placeholder-gray-600"
                                     />
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Fecha de nacimiento */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] ml-2">Fecha de Nacimiento <span className="text-blis-red">*</span></label>
+                            <div className="relative group">
+                                <CalendarDays className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blis-red transition-colors" />
+                                <input
+                                    type="date"
+                                    value={fechaNacimiento}
+                                    onChange={(e) => setFechaNacimiento(e.target.value)}
+                                    required
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm font-bold text-white focus:outline-none focus:border-blis-red transition-all [color-scheme:dark]"
+                                />
                             </div>
                         </div>
 

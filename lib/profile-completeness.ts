@@ -29,6 +29,7 @@ export function getProfileCompleteness(profile: Record<string, unknown> | null |
   const tasks: ProfileTask[] = [
     { key: 'avatar', label: 'Foto de perfil', done: hasValue(p.avatar_url) },
     { key: 'nombre', label: 'Nombre completo', done: hasValue(p.nombre) && hasValue(p.apellido) },
+    { key: 'fecha_nacimiento', label: 'Fecha de nacimiento', done: hasValue(p.fecha_nacimiento) },
     { key: 'telefono', label: 'Teléfono', done: hasValue(p.telefono) },
     { key: 'ubicacion', label: 'País / Ciudad', done: hasValue(p.pais) || hasValue(p.ciudad) },
     { key: 'biografia', label: 'Biografía', done: hasValue(p.biografia) },
@@ -64,5 +65,8 @@ export interface ProfileGateInput {
 export function requiresProfileCompletion({ rol, profileLoaded, profile }: ProfileGateInput): boolean {
   if (!profileLoaded) return false
   if (isStaffRole(rol)) return false
+  const p = (profile || {}) as Record<string, unknown>
+  // La fecha de nacimiento es obligatoria para clientes (saludo de cumpleaños)
+  if (!hasValue(p.fecha_nacimiento)) return true
   return getProfileCompleteness(profile).pct < PROFILE_MIN_PCT
 }

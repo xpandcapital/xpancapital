@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const { data, error } = await supabase
       .from('profiles')
-      .select('nombre, apellido, email, avatar_url, biografia, pais, ciudad, ' + SOCIAL_FIELDS.join(', ') + ', telefono')
+      .select('nombre, apellido, email, avatar_url, biografia, pais, ciudad, fecha_nacimiento, ' + SOCIAL_FIELDS.join(', ') + ', telefono')
       .eq('id', user.userId)
       .single()
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { profilePic, nombre, apellido, telefono, biografia, email, whatsapp, pais, ciudad } = body
+    const { profilePic, nombre, apellido, telefono, biografia, email, whatsapp, pais, ciudad, fecha_nacimiento } = body
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const updates: Record<string, unknown> = {}
@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
     if (whatsapp !== undefined) updates.whatsapp = whatsapp
     if (pais !== undefined) updates.pais = pais === '' ? null : pais
     if (ciudad !== undefined) updates.ciudad = ciudad === '' ? null : ciudad
+    if (fecha_nacimiento !== undefined) updates.fecha_nacimiento = fecha_nacimiento === '' ? null : fecha_nacimiento
 
     // Redes sociales
     for (const field of SOCIAL_FIELDS) {
