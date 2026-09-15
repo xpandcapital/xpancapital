@@ -497,7 +497,7 @@ export default function ProfilePage() {
                     nombre: name, apellido: lastName, telefono: fullPhone,
                     pais, ciudad, biografia, fecha_nacimiento: fechaNacimiento, ...socials,
                 })
-                if (result.pct >= PROFILE_MIN_PCT) {
+                if (fechaNacimiento.trim().length > 0 && result.pct >= PROFILE_MIN_PCT) {
                     showToast("¡Perfil completo! Ya podés acceder a la comunidad.", "success");
                 } else {
                     const faltan = result.tasks.filter(t => !t.done).map(t => t.label).join(', ')
@@ -594,7 +594,7 @@ export default function ProfilePage() {
         fecha_nacimiento: fechaNacimiento,
         ...socials,
     });
-    const isProfileComplete = completeness.pct >= PROFILE_MIN_PCT;
+    const isProfileComplete = fechaNacimiento.trim().length > 0 && completeness.pct >= PROFILE_MIN_PCT;
 
     return (
         <div className="max-w-4xl mx-auto space-y-12 pb-20 px-4 md:px-8 pt-8 md:pt-8 w-full">
