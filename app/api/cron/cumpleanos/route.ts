@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const authHeader = (request.headers.get('authorization') || '').trim()
     const cronSecret = (process.env.CRON_SECRET || '').trim()
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
+      return NextResponse.json({ success: false, error: 'No autorizado', configured: !!cronSecret, headerPresent: !!authHeader }, { status: 401 })
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
