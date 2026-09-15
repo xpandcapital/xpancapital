@@ -10,8 +10,9 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 // con estilos configurada en /superadmin/correo (evento: empleado_cumpleanos).
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization')
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const authHeader = (request.headers.get('authorization') || '').trim()
+    const cronSecret = (process.env.CRON_SECRET || '').trim()
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
