@@ -9,6 +9,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://xpand-supabase.blis-corp.com
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc5MDY4OTkyMCwiZXhwIjo0OTQ2MzYzNTIwLCJyb2xlIjoiYW5vbiJ9.VLFjSqBTDJ0arSabUvnlAqZSeuUuGGbZ-Zm5j6RL2VI
     steps:
       - uses: actions/checkout@v4
       - id: repo
@@ -24,5 +27,8 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ steps.repo.outputs.name }}:latest
+          build-args: |
+            NEXT_PUBLIC_SUPABASE_URL=${{ env.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ env.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
